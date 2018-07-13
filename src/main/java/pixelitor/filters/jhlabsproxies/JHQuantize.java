@@ -23,7 +23,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 
@@ -43,7 +42,7 @@ public class JHQuantize extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         // enable serpentine only if dither is checked
-        Utils.setupEnableOtherIf(dither, serpentine, checked -> checked);
+        dither.setupEnableOtherIf(serpentine, checked -> checked);
 
         setParamSet(new ParamSet(
                 numberOfColors,

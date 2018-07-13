@@ -43,7 +43,12 @@ public class JHWood extends ParametrizedFilter {
     private final RangeParam fibres = new RangeParam("Fibres", 0, 10, 100);
     private final RangeParam gain = new RangeParam("Gain", 0, 80, 100);
 
-    private final GradientParam gradient = new GradientParam("Colors", new Color(229, 196, 148), new Color(152, 123, 81));
+    private final GradientParam gradient = new GradientParam("Colors",
+            new float[]{0.0f, 0.5f, 1.0f},
+            new Color[]{
+                    new Color(229, 196, 148),
+                    new Color(190, 160, 115),
+                    new Color(152, 123, 81)});
 
     private WoodFilter filter;
 

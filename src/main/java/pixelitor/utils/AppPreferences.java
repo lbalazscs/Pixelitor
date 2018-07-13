@@ -109,7 +109,7 @@ public final class AppPreferences {
     private static void loadNewImageSize() {
         int defaultWidth = 600;
         int defaultHeight = 400;
-        Dimension desktopSize = ImageArea.INSTANCE.getSize();
+        Dimension desktopSize = ImageArea.getSize();
         if (desktopSize != null) {
             defaultWidth = Math.max(600, desktopSize.width - 30);
             defaultHeight = Math.max(400, desktopSize.height - 50);
@@ -311,7 +311,7 @@ public final class AppPreferences {
     }
 
     private static void saveDesktopMode() {
-        mainNode.put(UI_KEY, ImageArea.INSTANCE.getMode().toString());
+        mainNode.put(UI_KEY, ImageArea.getMode().toString());
     }
 
     /**
@@ -423,11 +423,11 @@ public final class AppPreferences {
             GridBagHelper gbh = new GridBagHelper(this);
 
             JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
-            uiChooser.setSelectedItem(ImageArea.INSTANCE.getMode());
+            uiChooser.setSelectedItem(ImageArea.getMode());
             gbh.addLabelWithControl("Images In: ", uiChooser);
             uiChooser.addActionListener(e -> {
                 ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
-                ImageArea.INSTANCE.changeUI(mode);
+                ImageArea.changeUI(mode);
             });
 
             undoLevelsTF = new JTextField(3);

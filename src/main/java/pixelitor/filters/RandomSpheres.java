@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
@@ -27,7 +26,6 @@ import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.filters.painters.EffectConfiguratorPanel;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -67,10 +65,6 @@ public class RandomSpheres extends ParametrizedFilter {
             new Value("Sample Image", COLORS_SAMPLE_IMAGE),
             new Value("Use FG, BG Colors", COLORS_FG_BG),
     });
-//    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new IntChoiceParam.Value[]{
-//            new IntChoiceParam.Value("Spheres", TYPE_SPHERES),
-//            new IntChoiceParam.Value("Bubbles", TYPE_BUBBLES)
-//    });
     private final BooleanParam addHighLightsCB = new BooleanParam("Add Highlights", true);
     private final AngleParam highlightAngleSelector = new AngleParam("Light Direction (Azimuth) - Degrees", 0);
 
@@ -81,10 +75,14 @@ public class RandomSpheres extends ParametrizedFilter {
     public RandomSpheres() {
         super(ShowOriginal.YES);
 
+        addHighLightsCB.setupDisableOtherIf(
+                highlightAngleSelector, checked -> !checked);
+        addHighLightsCB.setupDisableOtherIf(
+                highlightElevationSelector, checked -> !checked);
+
         setParamSet(new ParamSet(
                 radius.withAdjustedRange(0.1),
                 density,
-//                typeParam,
                 opacity,
                 colorSource,
                 addHighLightsCB,
@@ -106,6 +104,7 @@ public class RandomSpheres extends ParametrizedFilter {
 
         Graphics2D g = dest.createGraphics();
         g.setComposite(AlphaComposite.SrcOver.derive(opacity.getValueAsPercentage()));
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         int colorSrc = colorSource.getValue();
 
@@ -117,7 +116,6 @@ public class RandomSpheres extends ParametrizedFilter {
         int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
         int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
 
-
         Color[] colors = null;
         Color c = null;
 
@@ -126,16 +124,15 @@ public class RandomSpheres extends ParametrizedFilter {
             c = colors[0];
         }
 
-//        int type = typeParam.getValue();
-        int type = TYPE_SPHERES;
-
         boolean addHighlights = addHighLightsCB.isChecked();
 
         for (int i = 0; i < numCircles; i++) {
             int x = rand.nextInt(width);
             int y = rand.nextInt(height);
 
-            int srcColor = src.getRGB(x, y);  // TODO could be faster
+            // could be faster, but the main bottleneck is
+            // the highlights generation anyway
+            int srcColor = src.getRGB(x, y);
             int alpha = (srcColor >>> 24) & 0xFF;
             if (alpha == 0) {
                 continue;
@@ -149,7 +146,7 @@ public class RandomSpheres extends ParametrizedFilter {
             }
 
             // setup paint
-            if (addHighlights && (type == TYPE_SPHERES)) {
+            if (addHighlights) {
                 float[] fractions = {0.0f, 1.0f};
                 Paint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, r, fractions, colors, NO_CYCLE);
 
@@ -158,25 +155,13 @@ public class RandomSpheres extends ParametrizedFilter {
                 g.setColor(c);
             }
 
-            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
             float drawX = x - r;
             float drawY = y - r;
-            // render the sphere
-            if (type == TYPE_SPHERES) {
-                Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
-                g.fill(circle);
-            } else if (type == TYPE_BUBBLES) {
-                Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
-                g.draw(circle);
 
-                InnerGlowPathEffect innerGlow = new InnerGlowPathEffect(1.0f);
-                innerGlow.setBrushColor(c);
-                int effectWidth = (int) diameter / 7;
-                innerGlow.setEffectWidth(effectWidth);
-                innerGlow.setBrushSteps(EffectConfiguratorPanel.calculateBrushSteps(effectWidth));
-                innerGlow.apply(g, circle, 0, 0);
-            }
+            // render the spheres
+            Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
+            g.fill(circle);
+
             pt.unitDone();
         }
         pt.finish();

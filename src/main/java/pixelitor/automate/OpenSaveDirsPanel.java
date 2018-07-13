@@ -52,7 +52,7 @@ class OpenSaveDirsPanel extends ValidatedForm {
                 outputChooser.getNameTF(), outputChooser.getBrowseButton());
 
         outputFormatSelector = new OutputFormatSelector();
-        gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector);
+        gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
     }
 
     private OutputFormat getSelectedFormat() {

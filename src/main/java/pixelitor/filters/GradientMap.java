@@ -25,16 +25,14 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-
 /**
- * Gradient map
+ * The "Gradient Map" filter.
  */
 public class GradientMap extends ParametrizedFilter {
     public static final String NAME = "Gradient Map";
 
-    private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
+    private final GradientParam gradient =
+            GradientParam.createBlackToWhite("Colors");
 
     public GradientMap() {
         super(ShowOriginal.YES);
@@ -57,16 +55,21 @@ public class GradientMap extends ParametrizedFilter {
         for (int i = 0; i < destData.length; i++) {
             int rgb = srcData[i];
 
-//            int a = (rgb >>> 24) & 0xFF;
+            int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            int average = (r + g + b) / 3;
+//            int average = (r + g + b) / 3;
+            int lum = (r + r + b + g + g + g) / 6;
 
-            // TODO take transparency into account
-            destData[i] = gradientLookup[average];
-
+            int gr = gradientLookup[lum];
+            if (a == 0xFF) {
+                destData[i] = gr;
+            } else {
+                int mask = (a << 24) | 0xFF_FF_FF;
+                destData[i] = mask & gr;
+            }
         }
 
         return dest;

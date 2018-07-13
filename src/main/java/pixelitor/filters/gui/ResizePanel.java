@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Resize;
 import pixelitor.gui.ImageComponents;
@@ -58,9 +59,9 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private String errorMessage;
     private static final int NR_OF_COLUMNS = 5;
 
-    private ResizePanel(Composition comp) {
-        oldWidth = comp.getCanvasImWidth();
-        oldHeight = comp.getCanvasImHeight();
+    private ResizePanel(Canvas canvas) {
+        oldWidth = canvas.getImWidth();
+        oldHeight = canvas.getImHeight();
 
         origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;
@@ -255,7 +256,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     }
 
     public static void showInDialog(Composition comp) {
-        ResizePanel p = new ResizePanel(comp);
+        ResizePanel p = new ResizePanel(comp.getCanvas());
         OKCancelDialog d = new OKCancelDialog(p, "Resize") {
             @Override
             protected void okAction() {

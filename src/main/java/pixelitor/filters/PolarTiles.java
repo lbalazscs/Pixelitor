@@ -26,7 +26,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.PolarTilesFilter;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 
@@ -55,7 +54,7 @@ public class PolarTiles extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         ReseedNoiseFilterAction reseedRandomness = new ReseedNoiseFilterAction("", "Reseed Randomness");
-        Utils.setupEnableOtherIfNotZero(randomness, reseedRandomness);
+        randomness.setupEnableOtherIfNotZero(reseedRandomness);
         setParamSet(new ParamSet(
                 center,
                 numAngDivisions,

@@ -22,7 +22,6 @@ import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -123,10 +122,10 @@ public class StrokeSettingsPanel extends JPanel {
 
         shapeTypeParam.selectAndSetAsDefault(KIWI);
 
-        Utils.setupEnableOtherIf(strokeTypeParam, shapeTypeParam,
+        strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
                 strokeType -> strokeType == SHAPE);
 
-        Utils.setupDisableOtherIf(strokeTypeParam, dashedParam,
+        strokeTypeParam.setupDisableOtherIf(dashedParam,
                 strokeType -> strokeType != BASIC
                         && strokeType != ZIGZAG
                         && strokeType != SHAPE);

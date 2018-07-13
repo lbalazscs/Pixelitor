@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Canvas;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PPoint;
@@ -159,11 +160,11 @@ public enum Symmetry {
     private static double compCenterX;
     private static double compCenterY;
 
-    public static void setCompositionSize(int w, int h) {
-        compWidth = w;
-        compHeight = h;
-        compCenterX = w / 2.0;
-        compCenterY = h / 2.0;
+    public static void setCanvas(Canvas canvas) {
+        compWidth = canvas.getImWidth();
+        compHeight = canvas.getImHeight();
+        compCenterX = compWidth / 2.0;
+        compCenterY = compHeight / 2.0;
     }
 
     private final String guiName;

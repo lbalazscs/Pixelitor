@@ -22,8 +22,7 @@ package pixelitor.filters.gui;
  */
 public interface ParamAdjustmentListener {
     // a static listener instance that doesn't do anything
-    ParamAdjustmentListener EMPTY = () -> {
-    };
+    ParamAdjustmentListener EMPTY = () -> {};
 
     void paramAdjusted();
 }

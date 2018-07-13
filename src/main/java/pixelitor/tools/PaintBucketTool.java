@@ -33,7 +33,6 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -107,20 +106,17 @@ public class PaintBucketTool extends Tool {
             return;
         }
 
-        AffineTransform translationTransform = null;
-        if (tx != 0 || ty != 0) {
-            translationTransform = AffineTransform.getTranslateInstance(-tx, -ty);
+        BufferedImage backupForUndo = ImageUtils.copyImage(image);
+        boolean thereIsSelection = comp.hasSelection();
+        BufferedImage workingImage;
+        if (thereIsSelection) {
+            workingImage = ImageUtils.copyImage(image);
+        } else {
+            workingImage = image;
         }
 
-        // will be needed for the undo
-        BufferedImage original = ImageUtils.copyImage(image);
-
-        // TODO can we skip this, and work directly on
-        // the image is there is no selection?
-        BufferedImage workingCopy = ImageUtils.copyImage(image);
-
         String fill = (String) fillComboBox.getSelectedItem();
-        int rgbAtMouse = workingCopy.getRGB(x, y);
+        int rgbAtMouse = workingImage.getRGB(x, y);
         int newRGB;
         switch (fill) {
             case FILL_FOREGROUND:
@@ -144,11 +140,11 @@ public class PaintBucketTool extends Tool {
         int tolerance = toleranceParam.getValue();
         switch (action) {
             case ACTION_LOCAL:
-                replacedArea = scanlineFloodFill(workingCopy,
+                replacedArea = scanlineFloodFill(workingImage,
                         x, y, tolerance, rgbAtMouse, newRGB);
                 break;
             case ACTION_GLOBAL:
-                globalReplaceColor(workingCopy,
+                globalReplaceColor(workingImage,
                         tolerance, rgbAtMouse, newRGB);
                 replacedArea = new Rectangle(0, 0, imgWidth, imgHeight);
                 break;
@@ -158,20 +154,28 @@ public class PaintBucketTool extends Tool {
 
         if (replacedArea != null) { // something was replaced
             ToolAffectedArea affectedArea = new ToolAffectedArea(replacedArea,
-                    original, dr, true, getName());
+                    backupForUndo, dr, true, getName());
             affectedArea.addToHistory();
 
-            Graphics2D g = image.createGraphics();
-            comp.applySelectionClipping(g, translationTransform);
-            g.setComposite(AlphaComposite.Src);
-            g.drawImage(workingCopy, 0, 0, null);
-            g.dispose();
+            if (thereIsSelection) {
+                Graphics2D g = image.createGraphics();
 
+                // the selection is relative to the canvas,
+                // so go to the canvas start
+                g.translate(-tx, -ty);
+                comp.applySelectionClipping(g);
+                g.translate(tx, ty); // go back
+
+                // makes "fill with transparency" possible
+                g.setComposite(AlphaComposite.Src);
+
+                g.drawImage(workingImage, 0, 0, null);
+                g.dispose();
+                workingImage.flush();
+            }
             comp.imageChanged();
             dr.updateIconImage();
         }
-
-        workingCopy.flush();
     }
 
     /**

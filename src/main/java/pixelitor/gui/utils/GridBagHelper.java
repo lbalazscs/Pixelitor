@@ -72,9 +72,9 @@ public class GridBagHelper {
         addNextControl(c2);
     }
 
-    public void addLabelWithControlNoFill(String labelText, Component c) {
+    public void addLabelWithControlNoStretch(String labelText, Component c) {
         addLabel(labelText, 0, autoIncrementedGridY);
-        addControlNoFill(c);
+        addControlNoStretch(c);
         autoIncrementedGridY++;
     }
 
@@ -109,9 +109,10 @@ public class GridBagHelper {
     }
 
     /**
-     * Adds the specified control to the right of the last label without stretching
+     * Adds the specified control to the right of the
+     * last label without stretching
      */
-    public void addControlNoFill(Component c) {
+    public void addControlNoStretch(Component c) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         nextControlConstraint.fill = NONE;

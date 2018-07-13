@@ -21,13 +21,10 @@ import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
 import pixelitor.utils.RandomUtils;
-import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +36,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel<IntChoiceParam.Value> {
+public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Value> {
     private final List<Value> choicesList = new ArrayList<>();
 
     private Value defaultChoice;
@@ -61,14 +58,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public JComponent createGUI() {
-        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
-        paramGUI = gui;
-        setParamGUIEnabledState();
-        return gui;
-    }
-
-    @Override
     public boolean isSetToDefault() {
         return defaultChoice.equals(currentChoice);
     }
@@ -76,11 +65,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     @Override
     public void reset(boolean trigger) {
         setSelectedItem(defaultChoice, trigger);
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override
@@ -248,7 +232,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         icp.withAction(reseedNoise);
 
         // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
-        Utils.setupEnableOtherIf(icp, reseedNoise,
+        icp.setupEnableOtherIf(reseedNoise,
                 selected -> selected.getValue() == WaveType.NOISE);
 
         return icp;
@@ -289,25 +273,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
                 ((ListDataListener) listeners[i + 1]).contentsChanged(e);
             }
         }
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
-    public boolean canBeAnimated() {
-        return false;
-    }
-
-    @Override
-    public ParamState copyState() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setState(ParamState state) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -26,10 +26,12 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.IntTextField;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
@@ -70,15 +72,14 @@ public class AutoPaint {
 
     public static void showDialog(Drawable dr) {
         ConfigPanel configPanel = new ConfigPanel();
-        JDialog d = new OKCancelDialog(configPanel, "Auto Paint") {
-            @Override
-            protected void okAction() {
-                close();
-                Settings settings = configPanel.getSettings();
-                paintStrokes(dr, settings);
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .validatedForm(configPanel)
+                .title("Auto Paint")
+                .okAction(() -> {
+                    Settings settings = configPanel.getSettings();
+                    paintStrokes(dr, settings);
+                })
+                .show();
     }
 
     private static void paintStrokes(Drawable dr, Settings settings) {
@@ -92,7 +93,7 @@ public class AutoPaint {
         MessageHandler msgHandler = Messages.getMessageHandler();
         msgHandler.startProgress(msg, settings.getNumStrokes());
 
-        BufferedImage backupImage = dr.getImageOrSubImageIfSelected(true, true);
+        BufferedImage backupImage = dr.getSelectedSubImage(true, true);
         History.setIgnoreEdits(true);
 
         try {
@@ -179,7 +180,7 @@ public class AutoPaint {
     /**
      * The GUI of the "Auto Paint" dialog
      */
-    public static class ConfigPanel extends JPanel {
+    public static class ConfigPanel extends ValidatedForm {
 
         private static final String COL_FOREGROUND = "Foreground";
         private static final String COL_INTERPOLATED = "Foreground-Background Mix";
@@ -190,10 +191,10 @@ public class AutoPaint {
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
 
-        private final IntTextField numStrokesTF;
+        private final JTextField numStrokesTF;
         private static int defaultNumStrokes = 100;
 
-        private final IntTextField lengthTF;
+        private final JTextField lengthTF;
         private static int defaultLength = 100;
 
         private final JComboBox<String> colorsCB;
@@ -214,12 +215,14 @@ public class AutoPaint {
             toolSelector.setName("toolSelector");
             gbh.addLabelWithControl("Tool:", toolSelector);
 
-            numStrokesTF = new IntTextField(String.valueOf(defaultNumStrokes));
+            numStrokesTF = new JTextField(String.valueOf(defaultNumStrokes));
             numStrokesTF.setName("numStrokesTF");
-            gbh.addLabelWithControl("Number of Strokes:", numStrokesTF);
+            gbh.addLabelWithControl("Number of Strokes:",
+                    TextFieldValidator.createIntOnlyLayerFor(numStrokesTF));
 
-            lengthTF = new IntTextField(String.valueOf(defaultLength));
-            gbh.addLabelWithControl("Stroke Length Average:", lengthTF);
+            lengthTF = new JTextField(String.valueOf(defaultLength));
+            gbh.addLabelWithControl("Stroke Length Average:",
+                    TextFieldValidator.createIntOnlyLayerFor(lengthTF));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
             gbh.addLabelWithControl("Stroke Length Variability:",
@@ -249,10 +252,11 @@ public class AutoPaint {
         }
 
         public Settings getSettings() {
-            int numStrokes = numStrokesTF.getIntValue();
+            int numStrokes;
+            numStrokes = getNumStrokes();
             defaultNumStrokes = numStrokes;
 
-            int strokeLength = lengthTF.getIntValue();
+            int strokeLength = getStrokeLength();
             defaultLength = strokeLength;
 
             Tool tool = (Tool) toolSelector.getSelectedItem();
@@ -269,6 +273,30 @@ public class AutoPaint {
 
             return new Settings(tool, numStrokes, strokeLength,
                     randomColors, lengthRandomnessPercentage, interpolatedColors);
+        }
+
+        private int getNumStrokes() {
+            return Integer.parseInt(numStrokesTF.getText().trim());
+        }
+
+        private int getStrokeLength() {
+            return Integer.parseInt(lengthTF.getText().trim());
+        }
+
+        @Override
+        public ValidationResult checkValidity() {
+            ValidationResult retVal = ValidationResult.ok();
+            try {
+                getNumStrokes();
+            } catch (NumberFormatException e) {
+                retVal = ValidationResult.error("\"Number of Strokes\" must be an integer.");
+            }
+            try {
+                getStrokeLength();
+            } catch (NumberFormatException e) {
+                retVal = retVal.addError("\"Stroke Length Average\" must be an integer.");
+            }
+            return retVal;
         }
     }
 

@@ -1135,8 +1135,10 @@ public class AssertJSwingTest {
         runMenuCommand("Hide All");
         runMenuCommand("Show Hidden");
 
-        runMenuCommand("Cascade");
-        runMenuCommand("Tile");
+        if (ImageArea.getMode() == FRAMES) {
+            runMenuCommand("Cascade");
+            runMenuCommand("Tile");
+        }
 
         assert checkConsistency();
     }
@@ -1746,9 +1748,14 @@ public class AssertJSwingTest {
         assert thereIsNoSelection();
 
         int extraX = getExtraX();
-        moveTo(extraX + 200, 200);
-        dragTo(extraX + 400, 400);
-        assert thereIsSelection();
+        int fromX = extraX + 200;
+        int fromY = 200;
+        moveTo(fromX, fromY);
+        int toX = extraX + 400;
+        int toY = 400;
+        dragTo(toX, toY);
+        assert thereIsSelection() : String.format(
+                "fromX = %d, fromY = %d, toX = %d, toY = %d%n", fromX, fromY, toX, toY);
 
         keyboardNudge();
         assert thereIsSelection();
@@ -2129,14 +2136,14 @@ public class AssertJSwingTest {
 
     private int getExtraX() {
         int extraX = 0;
-        if (ImageArea.INSTANCE.getMode() == TABS) {
+        if (ImageArea.getMode() == TABS) {
             extraX = (int) ImageComponents.getActiveIC().getCanvasStartX();
         }
         return extraX;
     }
 
     private int getRandomX() {
-        if (ImageArea.INSTANCE.getMode() == FRAMES) {
+        if (ImageArea.getMode() == FRAMES) {
             return 200 + random.nextInt(400);
         } else {
             return 400 + random.nextInt(500);

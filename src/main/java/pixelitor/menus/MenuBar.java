@@ -41,9 +41,9 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageArea.Mode;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
@@ -121,7 +121,6 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
@@ -1106,18 +1105,25 @@ public class MenuBar extends JMenuBar {
     private static JMenu createArrangeWindowsSubmenu() {
         PMenu sub = new PMenu("Arrange Windows");
 
-        sub.addAction(new MenuAction("Cascade") {
+        MenuAction cascadeAction = new MenuAction("Cascade") {
             @Override
             public void onClick() {
-                ImageArea.INSTANCE.cascadeWindows();
+                ImageArea.cascadeWindows();
             }
-        });
+        };
+        sub.addAction(cascadeAction);
 
-        sub.addAction(new MenuAction("Tile") {
+        MenuAction tileAction = new MenuAction("Tile") {
             @Override
             public void onClick() {
-                ImageArea.INSTANCE.tileWindows();
+                ImageArea.tileWindows();
             }
+        };
+        sub.addAction(tileAction);
+
+        ImageArea.addUIChangeListener(mode -> {
+            cascadeAction.setEnabled(mode == FRAMES);
+            tileAction.setEnabled(mode == FRAMES);
         });
 
         return sub;
@@ -1240,12 +1246,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAlwaysEnabledAction(new MenuAction("Change UI") {
             @Override
             public void onClick() {
-                Mode mode = ImageArea.INSTANCE.getMode();
-                if (mode == TABS) {
-                    ImageArea.INSTANCE.changeUI(FRAMES);
-                } else {
-                    ImageArea.INSTANCE.changeUI(TABS);
-                }
+                ImageArea.changeUI();
             }
         }, CTRL_K);
 
@@ -1305,6 +1306,13 @@ public class MenuBar extends JMenuBar {
             public void onClick() {
                 ImageComponents.onActiveDrawable(
                         Drawable::debugImages);
+            }
+        });
+
+        sub.addAction(new MenuAction("debug mouse to sys.out") {
+            @Override
+            public void onClick() {
+                GlobalKeyboardWatch.registerDebugMouseWatching(false);
             }
         });
 

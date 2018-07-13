@@ -580,7 +580,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         updateCanvasLocation();
 
         // one can zoom an inactive image with the mouse wheel,
-        // but the tools are interested only active image
+        // but the tools are interacting only with the active image
         if (ImageComponents.isActive(this)) {
             Tools.icSizeChanged(this);
         }

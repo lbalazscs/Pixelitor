@@ -62,7 +62,7 @@ public class PixelitorWindow extends JFrame {
 
         setupFrameIcons();
 
-        GlobalKeyboardWatch.initTab();
+        GlobalKeyboardWatch.init();
         GlobalKeyboardWatch.addBrushSizeActions();
         GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
 
@@ -88,7 +88,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void addImagesArea() {
-        add(ImageArea.INSTANCE.getUI(), BorderLayout.CENTER);
+        add(ImageArea.getUI(), BorderLayout.CENTER);
     }
 
     public void removeImagesArea(JComponent c) {

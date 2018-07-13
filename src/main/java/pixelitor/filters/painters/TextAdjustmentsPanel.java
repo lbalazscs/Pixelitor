@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
@@ -102,31 +103,15 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     }
 
     private void createGUI(TextSettings settings) {
-        // TODO a GridBagLayout would handle the extra space better
-        Box verticalBox = Box.createVerticalBox();
-        verticalBox.add(createTextPanel(settings));
-        verticalBox.add(createFontPanel(settings));
+        setLayout(new VerticalLayout());
 
-        AreaEffects areaEffects = null;
-        boolean hasWatermark = false;
-        if (settings != null) {
-            areaEffects = settings.getAreaEffects();
-            hasWatermark = settings.isWatermark();
-        }
-        effectsPanel = new EffectsPanel(this, areaEffects);
-        effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+        add(createTextPanel(settings));
+        add(createFontPanel(settings));
 
-        verticalBox.add(effectsPanel);
+        createEffectsPanel(settings);
+        add(effectsPanel);
 
-        watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
-        watermarkCB.addActionListener(this);
-
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        bottomPanel.add(watermarkCB);
-
-        verticalBox.add(bottomPanel);
-
-        add(verticalBox);
+        add(createWatermarkPanel(settings));
     }
 
     private JPanel createTextPanel(TextSettings settings) {
@@ -317,6 +302,28 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         }
 
         return font.deriveFont(map);
+    }
+
+    private void createEffectsPanel(TextSettings settings) {
+        AreaEffects areaEffects = null;
+        if (settings != null) {
+            areaEffects = settings.getAreaEffects();
+        }
+        effectsPanel = new EffectsPanel(this, areaEffects);
+        effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+    }
+
+    private JPanel createWatermarkPanel(TextSettings settings) {
+        boolean hasWatermark = false;
+        if (settings != null) {
+            hasWatermark = settings.isWatermark();
+        }
+        watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
+        watermarkCB.addActionListener(this);
+
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        p.add(watermarkCB);
+        return p;
     }
 
     @Override

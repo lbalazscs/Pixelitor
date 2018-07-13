@@ -32,9 +32,6 @@ import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-
 /**
  * Cells filter based on the JHLabs CellularFilter
  */
@@ -45,7 +42,8 @@ public class JHCells extends ParametrizedFilter {
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
 
-    private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
+    private final GradientParam gradient =
+            GradientParam.createBlackToWhite("Colors");
 
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);

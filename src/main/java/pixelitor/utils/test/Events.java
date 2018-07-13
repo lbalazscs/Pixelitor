@@ -58,6 +58,10 @@ public class Events {
         post(new PixelitorEvent("[LISTENER] " + type, comp, layer));
     }
 
+    public static void postMouseEvent(String msg) {
+        post(new PixelitorEvent("[MOUSE] " + msg, null, null));
+    }
+
     public static void postAssertJEvent(String type) {
         postAssertJEvent(type, null, null);
     }
@@ -102,6 +106,12 @@ public class Events {
         Composition comp = ImageComponents.getActiveCompOrNull();
         eventList.stream()
                 .filter(e -> e.isComp(comp))
+                .forEach(System.out::println);
+    }
+
+    public static void dumpMouse() {
+        eventList.stream()
+                .filter(e -> e.toString().startsWith("[MOUSE]"))
                 .forEach(System.out::println);
     }
 

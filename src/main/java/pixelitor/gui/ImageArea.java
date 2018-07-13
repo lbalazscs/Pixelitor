@@ -23,8 +23,12 @@ import pixelitor.utils.AppPreferences;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * Represents the area of the app where the edited images are.
@@ -55,20 +59,25 @@ public class ImageArea {
         }
     }
 
-    private Mode mode;
+    private static Mode mode;
+    private static final List<Consumer<Mode>> uiChangeListeners = new ArrayList<>();
 
-    public static final ImageArea INSTANCE = new ImageArea();
+//    public static final ImageArea INSTANCE = new ImageArea();
 
-    private ImageAreaUI ui;
+    private static ImageAreaUI ui;
 
-    private ImageArea() {
+    static {
         mode = AppPreferences.loadDesktopMode();
 
         setUI();
         setupKeysAndDnD();
     }
 
-    private void setUI() {
+    private ImageArea() {
+        // static utility methods, do not instantiate
+    }
+
+    private static void setUI() {
         if (mode == FRAMES) {
             ui = new FramesUI();
         } else {
@@ -76,26 +85,34 @@ public class ImageArea {
         }
     }
 
-    private void setupKeysAndDnD() {
+    private static void setupKeysAndDnD() {
         JComponent component = (JComponent) ui;
         GlobalKeyboardWatch.setAlwaysVisibleComponent(component);
         GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
         new DropTarget(component, new DropListener());
     }
 
-    public JComponent getUI() {
+    public static JComponent getUI() {
         return (JComponent) ui;
     }
 
-    public Mode getMode() {
+    public static Mode getMode() {
         return mode;
     }
 
-    public void changeUI(Mode mode) {
-        if (mode == this.mode) {
+    public static void changeUI() {
+        if (mode == TABS) {
+            changeUI(FRAMES);
+        } else {
+            changeUI(TABS);
+        }
+    }
+
+    public static void changeUI(Mode mode) {
+        if (mode == ImageArea.mode) {
             return;
         }
-        this.mode = mode;
+        ImageArea.mode = mode;
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         pw.removeImagesArea(getUI());
@@ -110,38 +127,46 @@ public class ImageArea {
         if (mode == FRAMES) {
             // make sure they start in the top-left
             // corner when they are re-added
-            FramesUI.cascadeIndex = 0;
+            FramesUI.resetCascadeIndex();
         }
-        ImageComponents.forAllImages(this::addNewIC);
+        ImageComponents.forAllImages(ImageArea::addNewIC);
+
+        uiChangeListeners.forEach(listener -> listener.accept(mode));
     }
 
-    public void activateIC(ImageComponent ic) {
+    public static void addUIChangeListener(Consumer<Mode> listener) {
+        uiChangeListeners.add(listener);
+    }
+
+    public static void activateIC(ImageComponent ic) {
         ui.activateIC(ic);
     }
 
-    public void addNewIC(ImageComponent ic) {
+    public static void addNewIC(ImageComponent ic) {
         ui.addNewIC(ic);
     }
 
-    public Dimension getSize() {
+    public static Dimension getSize() {
         return ui.getSize();
     }
 
-    public void cascadeWindows() {
+    public static void cascadeWindows() {
         if (mode == FRAMES) {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.cascadeWindows();
         } else {
-            // TODO
+            // the "Cascade Windows" menu should be grayed out
+            throw new IllegalStateException();
         }
     }
 
-    public void tileWindows() {
+    public static void tileWindows() {
         if (mode == FRAMES) {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.tileWindows();
         } else {
-            // TODO
+            // the "Tile Windows" menu should be grayed out
+            throw new IllegalStateException();
         }
     }
 }

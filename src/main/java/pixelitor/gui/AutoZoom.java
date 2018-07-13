@@ -85,7 +85,7 @@ public enum AutoZoom {
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
 
-        Dimension desktopSize = ImageArea.INSTANCE.getSize();
+        Dimension desktopSize = ImageArea.getSize();
         double desktopWidth = desktopSize.getWidth();
         double desktopHeight = desktopSize.getHeight();
 

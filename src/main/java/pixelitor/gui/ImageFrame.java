@@ -102,7 +102,7 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
         int locX = loc.x;
         int locY = loc.y;
 
-        Dimension desktopSize = ImageArea.INSTANCE.getSize();
+        Dimension desktopSize = ImageArea.getSize();
         int maxWidth = Math.max(0, desktopSize.width - 20 - locX);
         int maxHeight = Math.max(0, desktopSize.height - 40 - locY);
 

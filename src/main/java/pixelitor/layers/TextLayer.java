@@ -186,7 +186,7 @@ public class TextLayer extends ContentLayer {
     public BufferedImage createRasterizedImage() {
         BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
         Graphics2D g = img.createGraphics();
-        applyLayer(g, true, img);
+        applyLayer(g, img, true);
         g.dispose();
         return img;
     }
@@ -198,14 +198,14 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
+    public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
         if (settings == null) {
             // the layer was just created, nothing to paint yet
             return imageSoFar;
         }
 
         // the text will be painted normally
-        return super.applyLayer(g, firstVisibleLayer, imageSoFar);
+        return super.applyLayer(g, imageSoFar, firstVisibleLayer);
     }
 
     @Override

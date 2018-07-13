@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -37,7 +36,6 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 
-import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -66,21 +64,6 @@ import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
 
 /**
  * An image layer.
- * <p>
- * Filters without dialog are run as ChangeReason.FILTER_WITHOUT_DIALOG on the EDT.
- * The filter asks getFilterSource() in the NORMAL state, and
- * (if there is no selection) the image (not a copy!) is returned as the filter source.
- * The filter transforms the image, and calls filterWithoutDialogFinished
- * with the transformed image.
- * <p>
- * Filters with dialog are executed as {@link ChangeReason.PREVIEW} on the EDT.
- * startPreviewing() is called when a new dialog appears,
- * right before creating the adjustment panel.
- * Before running a filter with dialog, startNewPreviewFromDialog() is called
- * (does nothing in the current implementation), then the filter is executed,
- * and each execution is followed by changePreviewImage().
- * At the end, depending on the user action, dialogAccepted()
- * or dialogCanceled() is called.
  */
 public class ImageLayer extends ContentLayer implements Drawable {
     public enum State {
@@ -90,14 +73,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
         NORMAL {
         },
         /**
-         * The layer is in previewing mode when a filter with dialog is opened
-         * Filters that work normally without a dialog can still work with a
-         * dialog when invoked from places like the the "Random Filter"
+         * The layer is in previewing mode when a filter with dialog is opened.
          */
         PREVIEW {
         },
         /**
-         * The layer is in previewing mode, but "Show Original" is pressed in the dialog
+         * The layer is in previewing mode, but "Show Original"
+         * is checked in the dialog
          */
         SHOW_ORIGINAL {
         }
@@ -301,7 +283,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     /**
      * Replaces the image with history and icon update
      */
-    @Override
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage oldImage = image;
         setImage(newImage);
@@ -312,7 +293,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Initializes a preview session
+     * Initializes a preview session. This is called when
+     * a new dialog appears, right before creating the adjustment panel.
      */
     @Override
     public void startPreviewing() {
@@ -352,7 +334,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this, getImageOrSubImageIfSelected(true, true),
+            ImageEdit edit = new ImageEdit(filterName, comp, this, getSelectedSubImage(true, true),
                     false, true);
             History.addEdit(edit);
         }
@@ -395,9 +377,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         stopPreviewing();
     }
 
-    /**
-     * @return true if the image has to be repainted
-     */
     @Override
     public void changePreviewImage(BufferedImage img, String filterName, ChangeReason cr) {
         // typically we should be in PREVIEW mode
@@ -496,13 +475,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    // returns the image bounds relative to the canvas
-    @Override
+    /**
+     * Returns the image bounds relative to the canvas
+     */
     public Rectangle getImageBounds() {
-        return new Rectangle(translationX, translationY, image.getWidth(), image.getHeight());
+        return new Rectangle(
+                translationX, translationY,
+                image.getWidth(), image.getHeight());
     }
 
-    @Override
     public boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasImBounds();
         Rectangle imageBounds = getImageBounds();
@@ -513,7 +494,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     /**
      * Enlarges the image so that it covers the canvas completely.
      */
-    @Override
     public void enlargeImage(Rectangle canvasBounds) {
         try {
             Rectangle current = getImageBounds();
@@ -547,7 +527,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         Rectangle selBounds = selection.getShapeBounds();
-        return image.getSubimage(selBounds.x, selBounds.y, selBounds.width, selBounds.height);
+        return image.getSubimage(
+                selBounds.x, selBounds.y,
+                selBounds.width, selBounds.height);
     }
 
     @Override
@@ -638,23 +620,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void mergeDownOn(ImageLayer bellowImageLayer) {
-        int aX = getTX();
-        int aY = getTY();
-        BufferedImage bellowImage = bellowImageLayer.getImage();
-        int bX = bellowImageLayer.getTX();
-        int bY = bellowImageLayer.getTY();
-        BufferedImage ourImage = getMaskedImage();
-        Graphics2D g = bellowImage.createGraphics();
-        int x = aX - bX;
-        int y = aY - bY;
-        Composite composite = blendingMode.getComposite(opacity);
-        g.setComposite(composite);
-        g.drawImage(ourImage, x, y, null);
-        g.dispose();
-    }
-
-    @Override
     public TmpDrawingLayer createTmpDrawingLayer(Composite c) {
         tmpDrawingLayer = new TmpDrawingLayer(this, c);
         return tmpDrawingLayer;
@@ -674,7 +639,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         tmpDrawingLayer = null;
     }
 
-    @Override
     public BufferedImage createCanvasSizedTmpImage() {
         int width = canvas.getImWidth();
         int height = canvas.getImHeight();
@@ -691,6 +655,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         int x = -getTX();
         int y = -getTY();
+
+        assert x >= 0 : "x = " + x;
+        assert y >= 0 : "y = " + y;
 
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
@@ -722,16 +689,17 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public BufferedImage getFilterSourceImage() {
         if (filterSourceImage == null) {
-            filterSourceImage = getImageOrSubImageIfSelected(false, true);
+            filterSourceImage = getSelectedSubImage(false, true);
         }
         return filterSourceImage;
     }
 
     /**
-     * If there is a selection, then the filters work on a subimage determined by the selection bounds.
+     * Returns the subimage determined by the selection bounds,
+     * or the image if there is no selection.
      */
     @Override
-    public BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
+    public BufferedImage getSelectedSubImage(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
         Selection selection = comp.getSelection();
         if (selection == null) { // no selection => return full image
             if (copyIfNoSelection) {
@@ -741,43 +709,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         // there is selection
-        return getSelectionSizedPartFrom(image, selection, copyAndTranslateIfSelected);
-    }
-
-    @Override
-    public BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy) {
-        assert selection != null;
-
-        Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
-
-        bounds.translate(-getTX(), -getTY()); // now relative to the image
-
-        // the intersection of the selection with the image
-        bounds = SwingUtilities.computeIntersection(
-                0, 0, src.getWidth(), src.getHeight(), // image bounds
-                bounds);
-
-        if (bounds.isEmpty()) { // the selection is outside the image
-            // this should not happen, because the selection should be
-            // always within the canvas
-            if (Build.CURRENT.isDevelopment()) {
-                throw new IllegalStateException();
-            }
-            // it is questionable to return everything when
-            // logically nothing should be returned
-            if (copy) {
-                return ImageUtils.copyImage(src);
-            } else {
-                return src;
-            }
-        }
-
-        if (copy) {
-            return ImageUtils.getCopyOfSubimage(src, bounds);
-        } else {
-            // return a subimage with shared pixels
-            return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
-        }
+        return ImageUtils.getSelectionSizedPartFrom(image,
+                selection, copyAndTranslateIfSelected,
+                getTX(), getTY());
     }
 
     @Override
@@ -797,7 +731,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setTranslation(0, 0);
     }
 
-    @Override
+    /**
+     * Returns true if something was changed
+     */
     public boolean cropToCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
@@ -892,7 +828,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    @Override
+    /**
+     * Returns true if the layer image is bigger than the canvas
+     */
     public boolean isBigLayer() {
         Rectangle canvasBounds = canvas.getImBounds();
         Rectangle layerBounds = getImageBounds();
@@ -938,7 +876,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // mess with the clipping of the original
             Graphics2D gCopy = (Graphics2D) g.create();
             gCopy.drawImage(visibleImage, getTX(), getTY(), null);
-            comp.applySelectionClipping(gCopy, null);
+            comp.applySelectionClipping(gCopy);
             Tools.SHAPES.paintOverLayer(gCopy, comp);
             gCopy.dispose();
         } else {
@@ -953,7 +891,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             Graphics2D tmpG = tmp.createGraphics();
             tmpG.drawImage(visibleImage, getTX(), getTY(), null);
 
-            comp.applySelectionClipping(tmpG, null);
+            comp.applySelectionClipping(tmpG);
             Tools.SHAPES.paintOverLayer(tmpG, comp);
             tmpG.dispose();
 
@@ -1046,7 +984,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         getUI().updateLayerIconImage(this);
     }
 
-    @Override
     public BufferedImage applyLayerMask(boolean addToHistory) {
         // the image reference will not be replaced
         BufferedImage oldImage = ImageUtils.copyImage(image);
@@ -1076,7 +1013,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return edit;
     }
 
-    @Override
     @VisibleForTesting
     public BufferedImage getPreviewImage() {
         return previewImage;

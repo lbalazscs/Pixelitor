@@ -217,7 +217,7 @@ public abstract class AbstractBrushTool extends Tool {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initializeGraphics(g);
         if (respectSelection) {
-            comp.applySelectionClipping(g, null);
+            comp.applySelectionClipping(g);
         }
 
         brush.setTarget(comp, g);

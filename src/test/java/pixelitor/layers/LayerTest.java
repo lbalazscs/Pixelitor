@@ -203,14 +203,6 @@ public class LayerTest {
     }
 
     @Test
-    public void test_mergeDownOn() {
-        ImageLayer lower = TestHelper.createImageLayer("lower", comp);
-
-        layer.mergeDownOn(lower);
-        iconUpdates.check(0, 0);
-    }
-
-    @Test
     public void test_makeActive() {
         Layer layer2 = comp.getLayer(1);
         assertThat(layer2.isActive()).isFalse();

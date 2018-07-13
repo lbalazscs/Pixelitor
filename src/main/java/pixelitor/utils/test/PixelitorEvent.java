@@ -27,7 +27,6 @@ import java.awt.Rectangle;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
 
 /**
  * An event that occurred inside Pixelitor.
@@ -56,10 +55,10 @@ public class PixelitorEvent {
 
         if (comp == null) {
             assert layer == null;
-            Optional<Composition> opt = ImageComponents.getActiveComp();
-            if (opt.isPresent()) {
-                this.comp = opt.get();
-                this.layer = this.comp.getActiveLayer();
+            Composition activeComp = ImageComponents.getActiveCompOrNull();
+            if (activeComp != null) {
+                this.comp = activeComp;
+                this.layer = activeComp.getActiveLayer();
             } else {
                 this.comp = null;
                 this.layer = null;

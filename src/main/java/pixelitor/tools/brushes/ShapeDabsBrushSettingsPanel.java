@@ -48,18 +48,18 @@ public class ShapeDabsBrushSettingsPanel extends JPanel {
 
     protected void addAngleSettingsSelector() {
         angleJitter = new RangeParam("", 0, 0, 180, true, NONE);
-        gbh.addLabelWithControlNoFill("  Angle Jitter (degrees):", angleJitter.createGUI());
+        gbh.addLabelWithControlNoStretch("  Angle Jitter (degrees):", angleJitter.createGUI());
         angleJitter.setAdjustmentListener(this::changeAngleSettings);
 
         angleAware = new BooleanParam("", true);
-        gbh.addLabelWithControlNoFill("Angle Follows Movement:", angleAware.createGUI());
+        gbh.addLabelWithControlNoStretch("Angle Follows Movement:", angleAware.createGUI());
         angleAware.setAdjustmentListener(this::changeAngleSettings);
     }
 
     protected void addSpacingSelector(DabsBrushSettings settings) {
         RangeParam spacingSelector = new RangeParam("", 1, (int) Math.round(DEFAULT_SPACING_RATIO * 100), 1000,
                 true, NONE);
-        gbh.addLabelWithControlNoFill("Spacing (radius %):", spacingSelector.createGUI());
+        gbh.addLabelWithControlNoStretch("Spacing (radius %):", spacingSelector.createGUI());
         spacingSelector.setAdjustmentListener(
                 () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getValueAsPercentage())));
     }
@@ -74,7 +74,7 @@ public class ShapeDabsBrushSettingsPanel extends JPanel {
                     settings.setShapeType(shapeType);
                 });
 
-        gbh.addLabelWithControlNoFill("Shape:", shapeTypeCB);
+        gbh.addLabelWithControlNoStretch("Shape:", shapeTypeCB);
     }
 
     private void changeAngleSettings() {

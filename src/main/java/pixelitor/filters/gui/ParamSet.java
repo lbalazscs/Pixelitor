@@ -71,10 +71,14 @@ public class ParamSet {
         // if the filter has only one parameter...
         boolean addRandomizeAndResetAll = paramList.size() > 1;
 
-        // ...except if that parameter is grouped
         if (!addRandomizeAndResetAll) {
             FilterParam param = paramList.get(0);
+            // ...except if that single parameter is grouped...
             if (param instanceof GroupedRangeParam) {
+                addRandomizeAndResetAll = true;
+            }
+            // ...or it is a gradient param
+            if (param instanceof GradientParam) {
                 addRandomizeAndResetAll = true;
             }
         }

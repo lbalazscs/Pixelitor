@@ -98,7 +98,7 @@ public class GradientHandles {
         } else { // in random tests they can be different
             if (Build.CURRENT.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
-                        + ImageArea.INSTANCE.getMode());
+                        + ImageArea.getMode());
             }
         }
     }

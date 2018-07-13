@@ -20,20 +20,7 @@ package pixelitor;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.DeleteLayerEdit;
-import pixelitor.history.DeselectEdit;
-import pixelitor.history.History;
-import pixelitor.history.ImageAndMaskEdit;
-import pixelitor.history.ImageEdit;
-import pixelitor.history.LayerOrderChangeEdit;
-import pixelitor.history.LayerSelectionChangeEdit;
-import pixelitor.history.LinkedEdit;
-import pixelitor.history.NewLayerEdit;
-import pixelitor.history.NewSelectionEdit;
-import pixelitor.history.NotUndoableEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.history.TranslationEdit;
+import pixelitor.history.*;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
@@ -54,7 +41,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -66,7 +52,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -88,7 +73,7 @@ public class Composition implements Serializable {
     private Layer activeLayer;
     private String name; // the file name or something like "Untitled 1"
 
-    private Canvas canvas;
+    private final Canvas canvas;
 
     //
     // the following variables are all transient, their state is not saved in PXC!
@@ -217,10 +202,6 @@ public class Composition implements Serializable {
 
     public Canvas getCanvas() {
         return canvas;
-    }
-
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
     }
 
     public Rectangle getCanvasImBounds() {
@@ -362,28 +343,37 @@ public class Composition implements Serializable {
         if (activeIndex > 0 && activeLayer.isVisible()) {
             Layer bellow = layerList.get(activeIndex - 1);
             if (bellow instanceof ImageLayer && bellow.isVisible()) {
-                mergeActiveLayerToImageLayer(updateGUI, activeIndex, (ImageLayer) bellow);
+                mergeActiveLayerToImageLayer(activeIndex, (ImageLayer) bellow, updateGUI);
             }
         }
     }
 
-    private void mergeActiveLayerToImageLayer(boolean updateGUI, int activeIndex, ImageLayer target) {
-        // TODO for adjustment effects it is not necessary to copy
-        BufferedImage backupImage = ImageUtils.copyImage(target.getImage());
+    private void mergeActiveLayerToImageLayer(int activeIndex,
+                                              ImageLayer imageLayer,
+                                              boolean updateGUI) {
+        MaskViewMode maskViewModeBefore = ic.getMaskViewMode();
+        BufferedImage imageBefore = ImageUtils.copyImage(imageLayer.getImage());
 
-        activeLayer.mergeDownOn(target);
-        target.updateIconImage();
+        // apply the effect of the merged layer to the image of the image layer
+        BufferedImage bellowImage = imageLayer.getImage();
+        Graphics2D g = bellowImage.createGraphics();
+        g.translate(-imageLayer.getTX(), -imageLayer.getTY());
+        BufferedImage result = activeLayer.applyLayer(g, bellowImage, false);
+        if (result != null) {  // this was an adjustment
+            imageLayer.setImage(result);
+        }
+        g.dispose();
+
+        imageLayer.updateIconImage();
+
+        // keep the reference because after deleting the
+        // active merged layer, another layer will become active
         Layer mergedLayer = activeLayer;
 
         deleteActiveLayer(updateGUI, false);
 
-        // TODO the MaskViewMode should be restored like in TextLayerRasterizeEdit
-        PixelitorEdit edit = new LinkedEdit("Merge Down", this,
-                new ImageEdit("", this, target, backupImage, true, false),
-                new DeleteLayerEdit(this, mergedLayer, activeIndex)
-        );
-
-        History.addEdit(edit);
+        History.addEdit(new MergeDownEdit(this, mergedLayer,
+                imageLayer, imageBefore, maskViewModeBefore, activeIndex));
     }
 
     private void deleteLayer(int layerIndex) {
@@ -683,9 +673,15 @@ public class Composition implements Serializable {
 
     public BufferedImage calculateCompositeImage() {
         // TODO why is this not working
-//        if(getNrLayers() == 1) {
-//            ImageLayer layer = (ImageLayer) getLayer(0); // must be
-//            return layer.getImage();
+//        if(layerList.size() == 1) {
+//            Layer firstLayer = layerList.get(0);
+//            if(firstLayer instanceof ImageLayer) {
+//                ImageLayer layer = (ImageLayer) firstLayer;
+//                if(!layer.isBigLayer()) {
+//                    return layer.getImage();
+//                }
+//                return layer.getCanvasSizedSubImage();
+//            }
 //        }
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
@@ -697,8 +693,8 @@ public class Composition implements Serializable {
         boolean firstVisibleLayer = true;
         for (Layer layer : layerList) {
             if (layer.isVisible()) {
-                BufferedImage result = layer.applyLayer(g, firstVisibleLayer, imageSoFar);
-                if (result != null) { // this was an adjustment layer
+                BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
+                if (result != null) { // adjustment layer or watermarking text layer
                     imageSoFar = result;
                     if (g != null) {
                         g.dispose();
@@ -887,17 +883,15 @@ public class Composition implements Serializable {
         return (selection != null || builtSelection != null);
     }
 
-    public void applySelectionClipping(Graphics2D g2, AffineTransform at) {
+    /**
+     * Sets the clip area on the given graphics according to the selection.
+     * It is assumed that the graphics is relative to the canvas:
+     * if it is coming from the image of an ImageLayer, then it must be
+     * translated before calling this.
+     */
+    public void applySelectionClipping(Graphics2D g2) {
         if (selection != null) {
-            Shape shape;
-            if (at != null) {
-                Path2D.Float pathShape = new Path2D.Float(selection.getShape());
-                // TODO why not simply at.transform the original?
-                pathShape.transform(at);
-                shape = pathShape;
-            } else { // relative to the composition
-                shape = selection.getShape();
-            }
+            Shape shape = selection.getShape();
             g2.setClip(shape);
         }
     }
@@ -1113,14 +1107,5 @@ public class Composition implements Serializable {
                 + ", canvas=" + canvas
                 + ", selection=" + selection
                 + ", dirty=" + dirty + '}';
-    }
-
-    /**
-     * Includes only the layer names and which layer is active
-     */
-    public String toLayerNamesString() {
-        return layerList.stream()
-                .map((layer) -> layer == activeLayer ? "ACTIVE " + layer.getName() : layer.getName())
-                .collect(Collectors.joining(", ", "[", "]"));
     }
 }

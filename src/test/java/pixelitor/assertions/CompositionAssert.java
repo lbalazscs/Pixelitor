@@ -41,6 +41,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
      */
     public CompositionAssert(Composition actual) {
         super(actual, CompositionAssert.class);
+        actual.checkInvariant();
     }
 
     /**

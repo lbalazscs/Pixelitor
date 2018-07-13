@@ -34,7 +34,7 @@ public class TransformBoxTest {
     private View view;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         view = TestHelper.createMockICWithoutComp();
     }
 

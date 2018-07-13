@@ -19,9 +19,6 @@ package pixelitor.utils;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.FilterSetting;
-import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -30,8 +27,6 @@ import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -401,77 +396,6 @@ public final class Utils {
         long m = (seconds / 60) % 60;
         long h = (seconds / (60 * 60)) % 24;
         return String.format("%d:%02d:%02d", h, m, s);
-    }
-
-    public static <T> void setupDisableOtherIf(ComboBoxModel<T> current, FilterSetting other, Predicate<T> condition) {
-        current.addListDataListener(new ListDataListener() {
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-            }
-
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-            }
-
-            @Override
-            public void contentsChanged(ListDataEvent e) {
-                if (condition.test((T) current.getSelectedItem())) {
-                    other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-                } else {
-                    other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
-                }
-            }
-        });
-    }
-
-    public static <T> void setupEnableOtherIf(ComboBoxModel<T> current, FilterSetting other, Predicate<T> condition) {
-        other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-        current.addListDataListener(new ListDataListener() {
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-            }
-
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-            }
-
-            @Override
-            public void contentsChanged(ListDataEvent e) {
-                if (condition.test((T) current.getSelectedItem())) {
-                    other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
-                } else {
-                    other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-                }
-            }
-        });
-    }
-
-    public static <T> void setupEnableOtherIfNotZero(RangeParam current, FilterSetting other) {
-        other.setEnabled(current.getValue() != 0, FilterSetting.EnabledReason.APP_LOGIC);
-        current.addChangeListener(e ->
-                other.setEnabled(current.getValue() != 0,
-                        FilterSetting.EnabledReason.APP_LOGIC));
-    }
-
-    public static void setupDisableOtherIf(BooleanParam current, FilterSetting other, Predicate<Boolean> condition) {
-        current.addChangeListener(e -> {
-            if (condition.test(current.isChecked())) {
-                other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-            } else {
-                other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
-            }
-        });
-    }
-
-    public static void setupEnableOtherIf(BooleanParam current, FilterSetting other, Predicate<Boolean> condition) {
-        other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-        current.addChangeListener(e -> {
-            if (condition.test(current.isChecked())) {
-                other.setEnabled(true, FilterSetting.EnabledReason.APP_LOGIC);
-            } else {
-                other.setEnabled(false, FilterSetting.EnabledReason.APP_LOGIC);
-            }
-        });
     }
 
     /**

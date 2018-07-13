@@ -19,12 +19,15 @@ package pixelitor.gui;
 
 import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -62,9 +65,10 @@ public class GlobalKeyboardWatch {
         // do not instantiate: only static utility methods
     }
 
-    public static void initTab() {
+    public static void init() {
         // we want to use the tab key as "hide all", but
-        // tab is the focus traversal key, it must be handled before it gets consumed
+        // tab is the focus traversal key, it must be
+        // handled before it gets consumed
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             int id = e.getID();
             if (id == KeyEvent.KEY_PRESSED) {
@@ -203,40 +207,69 @@ public class GlobalKeyboardWatch {
                         "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
     }
 
-    public static void registerDebugMouseWatching() {
+    public static void registerDebugMouseWatching(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            MouseEvent m = (MouseEvent) event;
-            String compClass = m.getComponent().getClass().getName();
-            if (m.getID() == MouseEvent.MOUSE_CLICKED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED"
-                        + " x = " + m.getX() + ", y = " + m.getY()
-                        + ", click count = " + m.getClickCount()
-                        + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_DRAGGED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED"
-                        + " x = " + m.getX() + ", y = " + m.getY()
-                        + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_PRESSED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED"
-                        + " x = " + m.getX() + ", y = " + m.getY()
-                        + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_RELEASED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED"
-                        + " x = " + m.getX() + ", y = " + m.getY()
-                        + ", comp class = " + compClass);
+            MouseEvent e = (MouseEvent) event;
+            String componentDescr = getComponentDescription(e);
+            String msg = null;
+            if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+                msg = "CLICKED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", click count = " + e.getClickCount()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+                msg = "DRAGGED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
+                msg = "PRESSED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
+                msg = "RELEASED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
+                msg = "WHEEL"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
             }
-        }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+            if (msg != null) {
+                if (e.isShiftDown()) {
+                    msg = "shift! " + msg;
+                }
+                if (e.isAltDown()) {
+                    msg = "alt! " + msg;
+                }
+                if (e.isControlDown()) {
+                    msg = "ctrl! " + msg;
+                }
+                if (e.isPopupTrigger()) {
+                    msg = "popup! " + msg;
+                }
+                if (postEvents) {
+                    Events.postMouseEvent(msg);
+                } else {
+                    System.out.println(msg);
+                }
+            }
+        }, AWTEvent.MOUSE_EVENT_MASK
+                | AWTEvent.MOUSE_MOTION_EVENT_MASK
+                | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
-    // TODO this kind of global listening might be better
-//    public static void registerMouseWheelWatching() {
-//        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-//            @Override
-//            public void eventDispatched(AWTEvent e) {
-//            }
-//        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-//    }
+    private static String getComponentDescription(MouseEvent e) {
+        Component c = e.getComponent();
+        String descr = c.getClass().getSimpleName();
+        if (c instanceof ImageComponent) {
+            descr += "(name = " + c.getName() + ")";
+        } else if (c instanceof ToolButton) {
+            ToolButton b = (ToolButton) c;
+            descr += "(name = " + b.getTool().getName() + ")";
+        }
 
+        return descr;
+    }
 
     public static void setKeyListener(KeyListener keyListener) {
         GlobalKeyboardWatch.keyListener = keyListener;

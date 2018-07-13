@@ -24,6 +24,7 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.WHITE;
@@ -42,7 +43,9 @@ public class JHGlint extends ParametrizedFilter {
     private final RangeParam blur = new RangeParam("Blur", 0, 1, 20);
 //    private BooleanParam glintOnly = new BooleanParam("Glint Only", false);
 
-    private final GradientParam colors = new GradientParam("Colors", WHITE, WHITE);
+    private final GradientParam colors = new GradientParam("Colors",
+            new float[]{0.0f, 0.5f, 1.0f},
+            new Color[]{WHITE, WHITE, WHITE});
 
     private GlintFilter filter;
 

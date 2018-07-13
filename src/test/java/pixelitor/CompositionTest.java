@@ -154,6 +154,7 @@ public class CompositionTest {
         assertThat(comp)
                 .isDirty()
                 .numLayersIs(3)
+                .layerNamesAre("layer 1", "layer A", "layer 2")
                 .secondLayerIsActive()
                 .activeLayerNameIs("layer A");
 
@@ -163,6 +164,7 @@ public class CompositionTest {
 
         assertThat(comp)
                 .numLayersIs(4)
+                .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
                 .thirdLayerIsActive()
                 .activeLayerNameIs("layer B");
 
@@ -172,6 +174,7 @@ public class CompositionTest {
 
         assertThat(comp)
                 .numLayersIs(5)
+                .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
                 .firstLayerIsActive()
                 .activeLayerNameIs("layer C");
 
@@ -181,6 +184,7 @@ public class CompositionTest {
 
         assertThat(comp)
                 .numLayersIs(6)
+                .layerNamesAre("layer C", "layer 1", "layer D", "layer A", "layer B", "layer 2")
                 .thirdLayerIsActive()
                 .activeLayerNameIs("layer D");
         History.assertNumEditsIs(4);
@@ -189,48 +193,56 @@ public class CompositionTest {
         History.undo();
         assertThat(comp)
                 .numLayersIs(5)
+                .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
                 .firstLayerIsActive()
                 .activeLayerNameIs("layer C");
 
         History.undo();
         assertThat(comp)
                 .numLayersIs(4)
+                .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
                 .thirdLayerIsActive()
                 .activeLayerNameIs("layer B");
 
         History.undo();
         assertThat(comp)
                 .numLayersIs(3)
+                .layerNamesAre("layer 1", "layer A", "layer 2")
                 .secondLayerIsActive()
                 .activeLayerNameIs("layer A");
 
         History.undo();
         assertThat(comp)
                 .numLayersIs(2)
+                .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive()
                 .activeLayerNameIs("layer 2");
 
         History.redo();
         assertThat(comp)
                 .numLayersIs(3)
+                .layerNamesAre("layer 1", "layer A", "layer 2")
                 .secondLayerIsActive()
                 .activeLayerNameIs("layer A");
 
         History.redo();
         assertThat(comp)
                 .numLayersIs(4)
+                .layerNamesAre("layer 1", "layer A", "layer B", "layer 2")
                 .thirdLayerIsActive()
                 .activeLayerNameIs("layer B");
 
         History.redo();
         assertThat(comp)
                 .numLayersIs(5)
+                .layerNamesAre("layer C", "layer 1", "layer A", "layer B", "layer 2")
                 .firstLayerIsActive()
                 .activeLayerNameIs("layer C");
 
         History.redo();
         assertThat(comp)
                 .numLayersIs(6)
+                .layerNamesAre("layer C", "layer 1", "layer D", "layer A", "layer B", "layer 2")
                 .thirdLayerIsActive()
                 .activeLayerNameIs("layer D");
     }
@@ -327,46 +339,91 @@ public class CompositionTest {
 
     @Test
     public void testMovingActiveLayer() {
+        // check initial state
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
         comp.moveActiveLayerUp();
-
-        // nothing changed!
+        // nothing changes as the active layer is already at the top
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
         comp.moveActiveLayerDown();
-
         assertThat(comp)
                 .isDirty()
                 .layerNamesAre("layer 2", "layer 1")
                 .firstLayerIsActive();
 
-        comp.moveActiveLayerUp();
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
 
+        History.redo();
+        assertThat(comp)
+                .layerNamesAre("layer 2", "layer 1")
+                .firstLayerIsActive();
+
+        comp.moveActiveLayerUp();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
+
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 2", "layer 1")
+                .firstLayerIsActive();
+
+        History.redo();
         assertThat(comp)
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
         comp.moveActiveLayerToBottom();
+        assertThat(comp)
+                .layerNamesAre("layer 2", "layer 1")
+                .firstLayerIsActive();
 
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
+
+        History.redo();
         assertThat(comp)
                 .layerNamesAre("layer 2", "layer 1")
                 .firstLayerIsActive();
 
         comp.moveActiveLayerToTop();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
 
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 2", "layer 1")
+                .firstLayerIsActive();
+
+        History.redo();
         assertThat(comp)
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
         comp.changeLayerOrder(0, 1, true);
+        assertThat(comp)
+                .layerNamesAre("layer 2", "layer 1")
+                .firstLayerIsActive();
 
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
+
+        History.redo();
         assertThat(comp)
                 .layerNamesAre("layer 2", "layer 1")
                 .firstLayerIsActive();
@@ -374,20 +431,39 @@ public class CompositionTest {
 
     @Test
     public void testMoveLayerSelection() {
+        // initial state
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
-        comp.moveLayerSelectionDown();
-
+        comp.moveLayerSelectionDown(); // make the first layer active
         assertThat(comp)
                 .isDirty()
                 .layerNamesAre("layer 1", "layer 2")
                 .firstLayerIsActive();
 
-        comp.moveLayerSelectionUp();
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
 
+        History.redo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .firstLayerIsActive();
+
+        comp.moveLayerSelectionUp(); // make the second layer active
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .secondLayerIsActive();
+
+        History.undo();
+        assertThat(comp)
+                .layerNamesAre("layer 1", "layer 2")
+                .firstLayerIsActive();
+
+        History.redo();
         assertThat(comp)
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
@@ -420,10 +496,10 @@ public class CompositionTest {
                 .secondLayerIsActive();
 
         comp.deleteActiveLayer(false, true);
-
         assertThat(comp)
                 .isDirty()
-                .layerNamesAre("layer 1");
+                .layerNamesAre("layer 1")
+                .firstLayerIsActive();
         History.assertNumEditsIs(1);
         History.assertLastEditNameIs("Delete Layer");
 
@@ -434,7 +510,8 @@ public class CompositionTest {
 
         History.redo();
         assertThat(comp)
-                .layerNamesAre("layer 1");
+                .layerNamesAre("layer 1")
+                .firstLayerIsActive();
     }
 
     @Test

@@ -26,7 +26,6 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -65,7 +64,7 @@ public class JHSmear extends ParametrizedFilter {
         ));
 
         // disable angle if the shape is not lines
-        Utils.setupDisableOtherIf(shape, angle,
+        shape.setupDisableOtherIf(angle,
                 selected -> selected.getValue() != SmearFilter.LINES);
     }
 

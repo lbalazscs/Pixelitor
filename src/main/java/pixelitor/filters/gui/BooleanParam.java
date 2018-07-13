@@ -24,6 +24,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -74,6 +75,36 @@ public class BooleanParam extends AbstractFilterParam {
     public static BooleanParam forHPSharpening() {
         return new BooleanParam("High-Pass Sharpening",
                 false, IGNORE_RANDOMIZE);
+    }
+
+    /**
+     * Sets up the automatic enabling of another {@link FilterSetting}
+     * depending on the checked state of this one.
+     */
+    public void setupEnableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
+        // disable by default
+        other.setEnabled(false, EnabledReason.APP_LOGIC);
+        addChangeListener(e -> {
+            if (condition.test(isChecked())) {
+                other.setEnabled(true, EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(false, EnabledReason.APP_LOGIC);
+            }
+        });
+    }
+
+    /**
+     * Sets up the automatic disabling of another {@link FilterSetting}
+     * depending on the checked state of this one.
+     */
+    public void setupDisableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
+        addChangeListener(e -> {
+            if (condition.test(isChecked())) {
+                other.setEnabled(false, EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(true, EnabledReason.APP_LOGIC);
+            }
+        });
     }
 
     @Override

@@ -325,8 +325,8 @@ public class ChannelMixer extends ParametrizedFilter {
                     {bfr, bfg, bfb}
             }, null);
             Raster srcRaster = src.getRaster();
-            Raster destRaster = dest.getRaster();
-            bandCombineOp.filter(srcRaster, (WritableRaster) destRaster);
+            WritableRaster destRaster = dest.getRaster();
+            bandCombineOp.filter(srcRaster, destRaster);
         }
 
         return dest;

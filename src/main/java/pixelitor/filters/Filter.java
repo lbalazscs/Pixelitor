@@ -64,8 +64,10 @@ public abstract class Filter implements Serializable {
     }
 
     /**
-     * The normal starting point, used when called in the menu
-     * Overwritten for filters with GUI
+     * The normal starting point, used when called from the menu.
+     * Overwritten for filters with GUI.
+     * Filters that work normally without a dialog can still have a
+     * dialog when invoked from places like "Random Filter"
      */
     public void startOn(Drawable dr) {
         startOn(dr, FILTER_WITHOUT_DIALOG);

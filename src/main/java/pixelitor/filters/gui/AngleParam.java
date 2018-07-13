@@ -156,7 +156,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public RangeParam createRangeParam() {
-        return new RangeParam(AngleParam.this.getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
+        return new RangeParam(getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
             // override reset so that the clicking on the default button resets this object
             // this is good because this object has greater precision than the RangeParam
             @Override

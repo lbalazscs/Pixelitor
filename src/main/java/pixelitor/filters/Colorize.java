@@ -85,17 +85,19 @@ public class Colorize extends ParametrizedFilter {
         for (int i = 0; i < length; i++) {
             int rgb = srcData[i];
             int a = rgb & 0xFF000000;
-            int lum = LuminanceLookup.getLuminosity(rgb);
+            float lum = LuminanceLookup.from(rgb);
             if (briShift > 0) {
-                lum = (int) ((float) lum * (1.0f - briShift));
+                lum = lum * (1.0f - briShift);
                 lum += 255 - (1.0f - briShift) * 255.0f;
             } else if (briShift < 0) {
-                lum = (int) ((float) lum * (briShift + 1.0f));
+                lum = lum * (briShift + 1.0f);
             }
 
-            int destRed = redLookup[lum];
-            int destGreen = greenLookup[lum];
-            int destBlue = blueLookup[lum];
+            int lumIndex = (int) lum;
+
+            int destRed = redLookup[lumIndex];
+            int destGreen = greenLookup[lumIndex];
+            int destBlue = blueLookup[lumIndex];
 
             if (opacity < 1.0f) {
                 int r = (rgb >>> 16) & 0xFF;

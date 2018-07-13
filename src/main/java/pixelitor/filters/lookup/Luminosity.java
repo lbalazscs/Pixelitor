@@ -39,7 +39,7 @@ public class Luminosity extends Filter {
             if (alpha == 0) {
                 destData[i] = 0;
             } else {
-                int lum = LuminanceLookup.getLuminosity(rgb);
+                int lum = (int) LuminanceLookup.from(rgb);
                 destData[i] = alpha | (lum << 16) | (lum << 8) | lum;
             }
         }

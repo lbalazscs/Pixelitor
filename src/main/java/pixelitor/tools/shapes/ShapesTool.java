@@ -138,23 +138,6 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void ongoingDrag(PMouseEvent e) {
-        // hack to prevent AssertionError when dragging started
-        // from negative coordinates bug
-        // TODO investigate
-//        ShapesAction action = actionModel.getSelectedItem();
-//        if (action.drawsEffects() && effectsPanel != null) {
-//            AreaEffects effects = effectsPanel.getEffects();
-//            if (effects.hasAny()) {
-//                if (userDrag.getImStartX() < 0) {
-//                    return;
-//                }
-//                if (userDrag.getImStartY() < 0) {
-//                    return;
-//                }
-//            }
-//        }
-        // end hack
-
         drawing = true;
         userDrag.setStartFromCenter(e.isAltDown());
 
@@ -293,7 +276,7 @@ public class ShapesTool extends DragTool {
 
         Composition comp = dr.getComp();
 
-        comp.applySelectionClipping(g2, null);
+        comp.applySelectionClipping(g2);
 
         paintShape(g2, shape, comp);
         g2.dispose();

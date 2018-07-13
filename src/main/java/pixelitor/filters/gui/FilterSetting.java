@@ -20,14 +20,15 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 
 /**
- * The model of something that appears in a filter GUI
+ * The model of something that appears in a filter GUI.
+ * If that something is a button, then the {@link FilterAction}
+ * sub-interface is used, otherwise the {@link FilterParam}
  */
 public interface FilterSetting {
     String getName();
 
     /**
-     * Usually we want to specify the model in the code, and the
-     * corresponding GUI should be created automatically
+     * Creates the GUI component corresponding to this model.
      *
      * If this is an instance of {@link FilterParam},
      * then the returned JComponent must also be
@@ -37,7 +38,8 @@ public interface FilterSetting {
 
     /**
      * Should return either 1 or 2.
-     * If 2 is returned, then a label based on the name is added.
+     * If 2 is returned, then a label based on the name is added
+     * to the GUI.
      */
     int getNumGridBagCols();
 

@@ -30,7 +30,6 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.RandomUtils;
 import pixelitor.utils.ReseedSupport;
-import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -86,7 +85,7 @@ public class Starburst extends ParametrizedFilter {
 
         // enable the "Reseed Colors" button only if
         // the "Use Random Colors for Rays" checkbox is checked
-        Utils.setupEnableOtherIf(randomColors, reseedColorsAction, checked -> checked);
+        randomColors.setupEnableOtherIf(reseedColorsAction, checked -> checked);
     }
 
     @Override

@@ -62,7 +62,7 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
-                wizardPage.getPanel(Wizard.this, dr),
+                wizardPage.getPanel(this, dr),
                 dialogParent,
                 title,
                 "Next", "Cancel") {

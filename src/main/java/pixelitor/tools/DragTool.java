@@ -45,7 +45,7 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        userDrag = new UserDrag(this);
+        userDrag = new UserDrag();
         userDrag.setStart(e);
 
         dragStarted(e);

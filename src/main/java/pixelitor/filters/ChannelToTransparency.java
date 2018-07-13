@@ -65,7 +65,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
-                        return LuminanceLookup.getLuminosity(rgb);
+                        return (int) LuminanceLookup.from(rgb);
                     }
                 };
                 break;

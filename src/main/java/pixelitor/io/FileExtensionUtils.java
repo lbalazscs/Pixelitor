@@ -37,7 +37,7 @@ public class FileExtensionUtils {
             return null;
         }
         return fileName
-                .substring(lastIndex + 1, fileName.length())
+                .substring(lastIndex + 1)
                 .toLowerCase();
     }
 

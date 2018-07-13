@@ -85,8 +85,12 @@ public class AreaEffects implements Serializable {
         }
     }
 
+    /**
+     * Returns the extra thickness caused by the effect
+     */
     public int getMaxEffectThickness() {
-        // TODO what about the inner glow?
+        // inner glow is not considered here, because
+        // it doesn't cause extra thickness
         int max = 0;
         if (glowEffect != null) {
             int effectWidth = glowEffect.getEffectWidth();

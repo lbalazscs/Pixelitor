@@ -51,6 +51,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * OpenRaster file format support.
  * Only image layers are saved as the format does not cover other layer types.
@@ -102,12 +104,12 @@ public class OpenRaster {
 
         // write the stack.xml file
         zos.putNextEntry(new ZipEntry("stack.xml"));
-        zos.write(stackXML.getBytes("UTF-8"));
+        zos.write(stackXML.getBytes(UTF_8));
         zos.closeEntry();
 
         // write the mimetype
         zos.putNextEntry(new ZipEntry("mimetype"));
-        zos.write("image/openraster".getBytes("UTF-8"));
+        zos.write("image/openraster".getBytes(UTF_8));
         zos.closeEntry();
         zos.close();
 

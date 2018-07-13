@@ -17,8 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.Build;
-import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.DragTool;
@@ -35,8 +33,6 @@ import java.awt.geom.Point2D;
  * Only the start and end points are relevant.
  */
 public class UserDrag {
-    private final DragTool tool;
-
     private boolean dragging;
 
     // The coordinates in the component (mouse) space.
@@ -44,12 +40,6 @@ public class UserDrag {
     private int coEndX;
     private int coStartY;
     private int coEndY;
-
-    // The coordinates in image space
-    private double imStartX;
-    private double imStartY;
-//    private double imEndX;
-//    private double imEndY;
 
     private int prevCoEndX;
     private int prevCoEndY;
@@ -59,8 +49,7 @@ public class UserDrag {
     private boolean constrainPoints = false;
     private boolean startFromCenter = false;
 
-    public UserDrag(DragTool tool) {
-        this.tool = tool;
+    public UserDrag() {
     }
 
     public void setStart(PMouseEvent e) {
@@ -71,27 +60,13 @@ public class UserDrag {
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
-
-        imStartX = e.getImX();
-        imStartY = e.getImY();
     }
 
     public void setEnd(PMouseEvent e) {
-        assert ic != null;
-
-        if (this.ic != e.getIC()) { // TODO happens in random tests
-            if (Build.CURRENT.isDevelopment()) {
-                System.out.println("\nUserDrag::setEnd: " +
-                        "another ic x = " + e.getCoX() + ", y = " + e
-                        .getCoY() + ", tool name = " + tool.getName());
-                boolean thisIsActive = ImageComponents.isActive(this.ic);
-                boolean thatIsActive = ImageComponents.isActive(e.getIC());
-                System.out.println("UserDrag::setEnd: "
-                        + "thisIsActive = " + thisIsActive
-                        + ", thatIsActive = " + thatIsActive
-                        + ", ui = " + ImageArea.INSTANCE.getMode());
-            }
-            return;
+        if (this.ic != e.getIC()) {
+            // in some exceptional situations it can happen that the
+            // ic changes without a mousePressed event, so simulate one
+            setStart(e);
         }
 
         coEndX = e.getCoX();
@@ -104,18 +79,6 @@ public class UserDrag {
         }
 
         dragging = true;
-//        imEndX = ic.componentXToImageSpace(coEndX);
-//        imEndY = ic.componentYToImageSpace(coEndY);
-    }
-
-    // returns the start x coordinate in image space
-    public double getImStartX() {
-        return imStartX;
-    }
-
-    // returns the start y coordinate in image space
-    public double getImStartY() {
-        return imStartY;
     }
 
     // returns the start x coordinate in component space
@@ -143,6 +106,8 @@ public class UserDrag {
     }
 
     public ImDrag toImDrag() {
+        double imStartX = ic.componentXToImageSpace(coStartX);
+        double imStartY = ic.componentYToImageSpace(coStartY);
         double imEndX = ic.componentXToImageSpace(coEndX);
         double imEndY = ic.componentYToImageSpace(coEndY);
 
@@ -170,9 +135,6 @@ public class UserDrag {
 
         coStartX += dx;
         coStartY += dy;
-
-        imStartX = ic.componentXToImageSpace(coStartX);
-        imStartY = ic.componentYToImageSpace(coStartY);
     }
 
     public void setStartFromCenter(boolean startFromCenter) {
@@ -194,17 +156,4 @@ public class UserDrag {
     public PRectangle toPosPRect() {
         return PRectangle.positiveFromCo(toCoRect(), ic);
     }
-
-    //    public Rectangle getAffectedStrokedRect(int thickness) {
-//        Rectangle r = createPositiveRect();
-//        if (thickness == 0) {
-//            return r;
-//        }
-//
-//        int halfThickness = thickness / 2 + 1;
-//        int sizeEnlargement = thickness + 2;
-//
-//        r.setBounds(r.x - halfThickness, r.y - halfThickness, r.width + sizeEnlargement, r.height + sizeEnlargement);
-//        return r;
-//    }
 }

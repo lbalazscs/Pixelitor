@@ -91,8 +91,8 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
         gbh = new GridBagHelper(this);
         gbh.addLabelWithControl("Enabled:", enabledCB);
-        gbh.addLabelWithControlNoFill("Color:", colorSwatch);
-        gbh.addLabelWithControlNoFill("Opacity:", opacitySlider);
+        gbh.addLabelWithControlNoStretch("Color:", colorSwatch);
+        gbh.addLabelWithControl("Opacity:", opacitySlider);
     }
 
     private void showColorDialog() {

@@ -164,7 +164,8 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setOpacity(float newOpacity, boolean updateGUI, boolean addToHistory, boolean updateImage) {
+    public void setOpacity(float newOpacity, boolean updateGUI,
+                           boolean addToHistory, boolean updateImage) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
@@ -184,7 +185,8 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setBlendingMode(BlendingMode mode, boolean updateGUI, boolean addToHistory, boolean updateImage) {
+    public void setBlendingMode(BlendingMode mode, boolean updateGUI,
+                                boolean addToHistory, boolean updateImage) {
         History.addEdit(addToHistory, () -> new LayerBlendingEdit(this, blendingMode));
 
         this.blendingMode = mode;
@@ -220,17 +222,6 @@ public abstract class Layer implements Serializable {
 
     public void setComp(Composition comp) {
         this.comp = comp;
-    }
-
-    public void mergeDownOn(ImageLayer bellow) {
-        BufferedImage bellowImage = bellow.getImage();
-        Graphics2D g = bellowImage.createGraphics();
-        g.translate(-bellow.getTX(), -bellow.getTY());
-        BufferedImage result = applyLayer(g, false, bellowImage);
-        if(result != null) {  // this was an adjustment
-            bellow.setImage(result);
-        }
-        g.dispose();
     }
 
     public void makeActive(boolean addToHistory) {
@@ -272,7 +263,8 @@ public abstract class Layer implements Serializable {
         addImageAsMask(bwMask, deselect, editName, false);
     }
 
-    public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName, boolean inheritTranslation) {
+    public void addImageAsMask(BufferedImage bwMask, boolean deselect,
+                               String editName, boolean inheritTranslation) {
         assert mask == null;
 
         mask = new LayerMask(comp, bwMask, this, inheritTranslation);
@@ -341,20 +333,24 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * Applies the effect of this layer on the given Graphics2D or on the given BufferedImage.
-     * Adjustment layers and watermarked text layers change a BufferedImage, while other layers
-     * just paint on the graphics.
-     * If the BufferedImage is changed, the method returns the new image and null otherwise.
+     * Applies the effect of this layer on the given Graphics2D
+     * or on the given BufferedImage.
+     * Adjustment layers and watermarked text layers change the
+     * BufferedImage, while other layers just paint on the Graphics2D.
+     * If the BufferedImage is changed, this method returns the new image
+     * and null otherwise.
      */
-    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        if (isAdjustment) { // adjustment layer or watermarked text layers
+    public BufferedImage applyLayer(Graphics2D g,
+                                    BufferedImage imageSoFar,
+                                    boolean firstVisibleLayer) {
+        if (isAdjustment) { // adjustment layer or watermarked text layer
             return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         } else {
             if (!useMask()) {
                 setupDrawingComposite(g, firstVisibleLayer);
                 paintLayerOnGraphics(g, firstVisibleLayer);
             } else {
-                paintLayerOnGraphicsWithMask(firstVisibleLayer, g);
+                paintLayerOnGraphicsWithMask(g, firstVisibleLayer);
             }
         }
         return null;
@@ -370,16 +366,18 @@ public abstract class Layer implements Serializable {
      * The returned image is canvas-sized, and the masks and the
      * translations are taken into account
      */
-    private void paintLayerOnGraphicsWithMask(boolean firstVisibleLayer, Graphics2D g) {
+    private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
 //        Canvas canvas = comp.getCanvas();
 
         // 1. create the masked image
         // TODO the masked image should be cached
-        BufferedImage maskedImage = new BufferedImage(canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB);
+        BufferedImage maskedImage = new BufferedImage(
+                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
-        mig.drawImage(mask.getTransparencyImage(), mask.getTX(), mask.getTY(), null);
+        mig.drawImage(mask.getTransparencyImage(),
+                mask.getTX(), mask.getTY(), null);
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
@@ -391,7 +389,8 @@ public abstract class Layer implements Serializable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar, boolean isFirstVisibleLayer) {
+    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
+                                                          boolean isFirstVisibleLayer) {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }

@@ -51,10 +51,9 @@ public class DebugNode extends DefaultMutableTreeNode {
         sb.append(name).append(" {");
 
         while (childrenEnum.hasMoreElements()) {
-            Object o = childrenEnum.nextElement();
             indent(sb, getLevel() + 1);
 
-            DefaultMutableTreeNode t = (DefaultMutableTreeNode) o;
+            DefaultMutableTreeNode t = childrenEnum.nextElement();
 
             String info;
             if (t instanceof DebugNode) {

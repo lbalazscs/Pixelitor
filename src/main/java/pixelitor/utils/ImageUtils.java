@@ -28,6 +28,7 @@ import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.selection.Selection;
 import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
@@ -1073,6 +1074,34 @@ public class ImageUtils {
             g.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.draw(shape);
+        }
+    }
+
+    public static BufferedImage getSelectionSizedPartFrom(BufferedImage src,
+                                                          Selection selection,
+                                                          boolean copy, int tx, int ty) {
+        assert selection != null;
+
+        Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
+
+        bounds.translate(-tx, -ty); // now relative to the image
+
+        // the intersection of the selection with the image
+        bounds = SwingUtilities.computeIntersection(
+                0, 0, src.getWidth(), src.getHeight(), // image bounds
+                bounds);
+
+        if (bounds.isEmpty()) { // the selection is outside the image
+            // this should not happen, because the selection should be
+            // always within the canvas
+            throw new IllegalStateException();
+        }
+
+        if (copy) {
+            return getCopyOfSubimage(src, bounds);
+        } else {
+            // return a subimage with shared pixels
+            return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
         }
     }
 }

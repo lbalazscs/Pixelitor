@@ -30,7 +30,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
     private static final int CASCADE_VERTICAL_SHIFT = 25;
 
-    public static int cascadeIndex = 0;
+    private static int cascadeIndex = 0;
 
     public FramesUI() {
     }
@@ -133,5 +133,9 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
                 }
             }
         }
+    }
+
+    public static void resetCascadeIndex() {
+        cascadeIndex = 0;
     }
 }

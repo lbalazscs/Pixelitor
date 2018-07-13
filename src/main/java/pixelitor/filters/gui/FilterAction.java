@@ -111,8 +111,9 @@ public class FilterAction implements FilterSetting {
     }
 
     /**
-     * A button that runs first its ActionListener,
-     * and after then its ParamAdjustmentListener
+     * A button that runs first its ActionListener (to do its
+     * specific job), and after then its ParamAdjustmentListener
+     * (typically to trigger a filter preview)
      */
     private static class OrderedExecutionButton extends JButton {
         private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {

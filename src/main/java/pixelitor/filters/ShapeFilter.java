@@ -29,7 +29,6 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -95,7 +94,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         ));
 
         // disable effects if foreground is set to transparent
-        Utils.setupDisableOtherIf(foreground, effectsParam,
+        foreground.setupDisableOtherIf(effectsParam,
                 selectedValue -> selectedValue.getValue() == FG_TRANSPARENT);
     }
 

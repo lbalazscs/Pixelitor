@@ -24,8 +24,6 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.*;
-
 /**
  * A transition filter based on the com.bric.image.transition classes
  */
@@ -83,19 +81,8 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
         BufferedImage frameB = ImageUtils.createImageWithSameCM(src);
 
         Graphics2D g2 = dest.createGraphics();
-
-        // TODO are they worth it?
-        // they increase te processing time, but do not seem to have any effect
-        g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
-        g2.setRenderingHint(KEY_RENDERING, VALUE_RENDER_QUALITY);
-        g2.setRenderingHint(KEY_DITHERING, VALUE_DITHER_ENABLE);
-        g2.setRenderingHint(KEY_ALPHA_INTERPOLATION, VALUE_ALPHA_INTERPOLATION_QUALITY);
-        g2.setRenderingHint(KEY_COLOR_RENDERING, VALUE_COLOR_RENDER_QUALITY);
-        g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
-
         Transition transition;
+
         switch (type) {
             case BARS_HORIZONTAL:
                 transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, false);

@@ -104,8 +104,6 @@ import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
-import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * An automatic test using java.awt.Robot, which performs
@@ -153,6 +151,7 @@ public class RandomGUITest {
         PixelitorWindow.getInstance().setAlwaysOnTop(true);
 
         new PixelitorEventListener().register();
+        GlobalKeyboardWatch.registerDebugMouseWatching(true);
 
         numPastedImages = 0;
 
@@ -610,8 +609,7 @@ public class RandomGUITest {
     private static void repeat() {
         log("repeat (dispatch Ctrl-F)");
 
-        PixelitorWindow pw = PixelitorWindow.getInstance();
-        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F'));
+        dispatchKey(KeyEvent.VK_F, 'F', KeyEvent.CTRL_MASK);
     }
 
     private static void randomUndoRedo() {
@@ -666,23 +664,21 @@ public class RandomGUITest {
     }
 
     private static void arrangeWindows() {
+        if (ImageArea.getMode() == ImageArea.Mode.TABS) {
+            return;
+        }
         double r = Math.random();
         if (r < 0.8) {
             log("arrange windows - tile");
-            ImageArea.INSTANCE.tileWindows();
+            ImageArea.tileWindows();
         } else {
             log("arrange windows - cascade");
-            ImageArea.INSTANCE.cascadeWindows();
+            ImageArea.cascadeWindows();
         }
     }
 
     private static void changeImageArea() {
-        ImageArea.Mode current = ImageArea.INSTANCE.getMode();
-        if (current == FRAMES) {
-            ImageArea.INSTANCE.changeUI(TABS);
-        } else {
-            ImageArea.INSTANCE.changeUI(FRAMES);
-        }
+        ImageArea.changeUI();
     }
 
     private static void deselect() {
@@ -929,11 +925,6 @@ public class RandomGUITest {
         }
     }
 
-    private static void randomException() {
-//        logRobotEvent("random exception");
-//        throw new IllegalStateException("test");
-    }
-
     private static void randomNewTextLayer() {
         log("new text layer");
         Composition comp = ImageComponents.getActiveCompOrNull();
@@ -965,7 +956,6 @@ public class RandomGUITest {
         if (!layer.hasMask()) {
             return;
         }
-        PixelitorWindow pw = PixelitorWindow.getInstance();
         double d = rand.nextDouble();
         int keyCode;
         char keyChar;
@@ -983,7 +973,7 @@ public class RandomGUITest {
             log("Ctrl-3");
         }
 
-        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, keyCode, keyChar));
+        dispatchKey(keyCode, keyChar, KeyEvent.CTRL_MASK);
     }
 
     // (add, delete, apply, link)
@@ -1043,6 +1033,12 @@ public class RandomGUITest {
                 pressKey(r, KeyEvent.VK_F5);
             }
         }
+    }
+
+    private static void dispatchKey(int keyCode, char keyChar, int mask) {
+        PixelitorWindow pw = PixelitorWindow.getInstance();
+        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED,
+                System.currentTimeMillis(), mask, keyCode, keyChar));
     }
 
     private static void setupWeightedCaller(Robot r) {

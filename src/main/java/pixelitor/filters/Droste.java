@@ -27,9 +27,8 @@ import pixelitor.filters.impl.DrosteFilter;
 import java.awt.image.BufferedImage;
 
 /**
- * Droste based on DrosteFilter
- *
- * the "Droste effect" - not finished
+ * Droste filter based on {@link DrosteFilter}.
+ * This is not finished, actually not even really started.
  */
 public class Droste extends ParametrizedFilter {
     public static final String NAME = "Droste";

@@ -20,9 +20,10 @@ package pixelitor;
 import pixelitor.colors.FillType;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
@@ -83,7 +84,7 @@ public final class NewImage {
         NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
         new DialogBuilder()
                 .title("New Image")
-                .form(p)
+                .validatedForm(p)
                 .okAction(() -> {
                     int selectedWidth = p.getSelectedWidth();
                     int selectedHeight = p.getSelectedHeight();
@@ -95,22 +96,6 @@ public final class NewImage {
 
                     lastNew.width = selectedWidth;
                     lastNew.height = selectedHeight;
-                })
-                .validator(d -> {
-                    boolean couldParse = true;
-                    try {
-                        p.getSelectedWidth();
-                        p.getSelectedHeight();
-                    } catch (NumberFormatException e) {
-                        couldParse = false;
-                    }
-                    if (couldParse) {
-                        return true;
-                    } else {
-                        Dialogs.showErrorDialog(d, "Error",
-                                "The width and height must be integers.");
-                        return false;
-                    }
                 })
                 .show();
     }
@@ -131,7 +116,7 @@ public final class NewImage {
     /**
      * The GUI of the "New Image" dialog
      */
-    private static class NewImagePanel extends JPanel {
+    private static class NewImagePanel extends ValidatedForm {
         private final JTextField widthTF;
         private final JTextField heightTF;
 
@@ -171,6 +156,22 @@ public final class NewImage {
 
         private FillType getSelectedBackground() {
             return (FillType) backgroundSelector.getSelectedItem();
+        }
+
+        @Override
+        public ValidationResult checkValidity() {
+            ValidationResult retVal = ValidationResult.ok();
+            try {
+                getSelectedWidth();
+            } catch (NumberFormatException e) {
+                retVal = retVal.addError("The width must be an integer.");
+            }
+            try {
+                getSelectedHeight();
+            } catch (NumberFormatException e) {
+                retVal = retVal.addError("The height must be an integer.");
+            }
+            return retVal;
         }
     }
 }

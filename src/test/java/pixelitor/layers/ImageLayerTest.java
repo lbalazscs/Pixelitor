@@ -29,7 +29,6 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
-import pixelitor.selection.Selection;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.utils.ImageUtils;
@@ -46,7 +45,6 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
@@ -312,35 +310,21 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getImageOrSubImageIfSelected() {
-        BufferedImage imageTT = layer.getImageOrSubImageIfSelected(true, true);
+    public void test_getSelectedSubImage() {
+        BufferedImage imageTT = layer.getSelectedSubImage(true, true);
         assertThat(imageTT).isNotNull();
 
-        BufferedImage imageTF = layer.getImageOrSubImageIfSelected(true, false);
+        BufferedImage imageTF = layer.getSelectedSubImage(true, false);
         assertThat(imageTF).isNotNull();
 
-        BufferedImage imageFT = layer.getImageOrSubImageIfSelected(false, true);
+        BufferedImage imageFT = layer.getSelectedSubImage(false, true);
         assertThat(imageFT).isNotNull();
 
-        BufferedImage imageFF = layer.getImageOrSubImageIfSelected(false, false);
+        BufferedImage imageFF = layer.getSelectedSubImage(false, false);
         assertThat(imageFF).isNotNull();
 
         iconUpdates.check(0, 0);
         // TODO
-    }
-
-    @Test
-    public void test_getSelectionSizedPartFrom() {
-        Selection selection = mock(Selection.class);
-        when(selection.getShapeBounds()).thenReturn(new Rectangle(2, 2, 10, 10));
-
-        BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, true);
-        assertThat(imageT).isNotNull();
-
-        BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, false);
-        assertThat(imageF).isNotNull();
-
-        iconUpdates.check(0, 0);
     }
 
     @Test

@@ -77,7 +77,7 @@ public class Gradient {
             width = tmpDrawingLayer.getWidth();
             height = tmpDrawingLayer.getHeight();
         }
-        dr.getComp().applySelectionClipping(g, null);
+        dr.getComp().applySelectionClipping(g);
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 

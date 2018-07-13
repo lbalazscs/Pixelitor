@@ -53,7 +53,7 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
             outputFormatSelector = new OutputFormatSelector();
 
-            gbh.addLabelWithControlNoFill("Output Format:", outputFormatSelector);
+            gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
         } else {
             setLayout(new BorderLayout());
             add(new JLabel(label), BorderLayout.WEST);

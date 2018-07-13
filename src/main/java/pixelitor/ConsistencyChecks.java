@@ -67,7 +67,7 @@ public final class ConsistencyChecks {
         }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(dr);
         if (edit.isPresent()) {
-            BufferedImage current = dr.getImageOrSubImageIfSelected(false, true);
+            BufferedImage current = dr.getSelectedSubImage(false, true);
 
             FadeableEdit fadeableEdit = edit.get();
             BufferedImage previous = fadeableEdit.getBackupImage();

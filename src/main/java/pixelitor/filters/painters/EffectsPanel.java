@@ -29,7 +29,6 @@ import pixelitor.filters.gui.Resettable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 
@@ -81,8 +80,6 @@ public class EffectsPanel extends JPanel implements Resettable {
         addTab(INNER_GLOW_TAB_NAME, innerGlowConfigurator);
         addTab(NEON_BORDER_TAB_NAME, neonBorderConfigurator);
         addTab(DROP_SHADOW_TAB_NAME, dropShadowConfigurator);
-
-        tabs.setPreferredSize(new Dimension(530, 350)); // A width if 520 is enough on windows. TODO: calculate
 
         add(tabs, BorderLayout.CENTER);
     }

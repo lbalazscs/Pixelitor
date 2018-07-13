@@ -26,25 +26,34 @@ import pixelitor.utils.RandomUtils;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 
+import static java.awt.Color.BLACK;
+import static java.awt.Color.GRAY;
+import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * Represents a gradient. (Note that unlike other filter parameter implementations,
- * this is not really a model for the GradientSlider GUI component,
- * the actual value is stored only inside the GradientSlider)
+ * Represents a gradient.
+ * Unlike other filter parameter implementations, this is not
+ * a GUI-free model, the actual value is stored inside the GradientSlider.
  */
 public class GradientParam extends AbstractFilterParam {
     private static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
     private GradientSlider gradientSlider;
+    private GUI gui;
     private final float[] defaultThumbPositions;
     private final Color[] defaultColors;
     private boolean trigger = true; // whether the running of the filter should be triggered
 
     public GradientParam(String name, Color firstColor, Color secondColor) {
-        this(name, new float[]{0.0f, 1.0f}, new Color[]{firstColor, secondColor});
+        this(name, new float[]{0.0f, 0.5f, 1.0f},
+                new Color[]{
+                        firstColor,
+                        ColorUtils.calcRGBAverage(firstColor, secondColor),
+                        secondColor});
     }
 
     public GradientParam(String name, float[] defaultThumbPositions, Color[] defaultColors) {
@@ -60,16 +69,23 @@ public class GradientParam extends AbstractFilterParam {
         createGradientSlider(defaultThumbPositions, defaultColors);
     }
 
+    public static GradientParam createBlackToWhite(String name) {
+        return new GradientParam(name,
+                new float[]{0.0f, 0.5f, 1.0f},
+                new Color[]{BLACK, GRAY, WHITE});
+    }
+
     private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(GradientSlider.HORIZONTAL, defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(evt -> {
             if(shouldStartFilter(evt)) {
+                if (gui != null) {
+                    gui.updateDefaultButtonIcon();
+                }
                 adjustmentListener.paramAdjusted();
             }
         });
         gradientSlider.putClientProperty(GRADIENT_SLIDER_USE_BEVEL, "true");
-
-        // if there other controls in the dialog, they will determine the horizontal size
         gradientSlider.setPreferredSize(new Dimension(250, 30));
     }
 
@@ -94,8 +110,8 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        // TODO why not add a default button?
-        return gradientSlider;
+        gui = new GUI(gradientSlider, this);
+        return gui;
     }
 
     public Colormap getValue() {
@@ -126,6 +142,9 @@ public class GradientParam extends AbstractFilterParam {
             trigger = false;
             gradientSlider.setValues(defaultThumbPositions, randomColors);
             trigger = true;
+            if (gui != null) {
+                gui.updateDefaultButtonIcon();
+            }
         }
     }
 
@@ -177,6 +196,9 @@ public class GradientParam extends AbstractFilterParam {
             this.trigger = false;
             gradientSlider.setValues(defaultThumbPositions, defaultColors);
             this.trigger = true;
+        }
+        if (gui != null) {
+            gui.updateDefaultButtonIcon();
         }
     }
 
@@ -258,5 +280,32 @@ public class GradientParam extends AbstractFilterParam {
     public String toString() {
         return String.format("%s[name = '%s']",
                 getClass().getSimpleName(), getName());
+    }
+
+    static class GUI extends JPanel {
+        private final GradientSlider slider;
+        private final DefaultButton defaultButton;
+
+        public GUI(GradientSlider slider, GradientParam gradientParam) {
+            super(new FlowLayout());
+            this.slider = slider;
+            add(slider);
+            defaultButton = new DefaultButton(gradientParam);
+            add(defaultButton);
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            slider.setEnabled(enabled);
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return slider.isEnabled();
+        }
+
+        public void updateDefaultButtonIcon() {
+            defaultButton.updateIcon();
+        }
     }
 }

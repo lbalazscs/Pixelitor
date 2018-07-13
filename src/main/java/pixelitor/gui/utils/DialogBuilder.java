@@ -101,6 +101,19 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder validatedForm(ValidatedForm validatedForm) {
+        this.form = validatedForm;
+        return validator(d -> {
+            ValidationResult validationResult = validatedForm.checkValidity();
+            if (validationResult.isOK()) {
+                return true; // valid, let the dialog close
+            } else {
+                validationResult.showErrorDialog(d);
+                return false;
+            }
+        });
+    }
+
     public DialogBuilder notModal() {
         this.modal = false;
         return this;
@@ -141,6 +154,12 @@ public class DialogBuilder {
         return this;
     }
 
+    /**
+     * The dialog will close only if the given predicate evaluates to true.
+     * The predicate must show an error dialog if it is returning false.
+     * The argument of the predicate is the dialog which is built here,
+     * and can be used as the owner of the error dialog.
+     */
     public DialogBuilder validator(Predicate<JDialog> a) {
         this.validator = a;
         return this;

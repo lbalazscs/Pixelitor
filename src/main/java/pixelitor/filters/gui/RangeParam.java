@@ -99,6 +99,19 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return sliderSpinner;
     }
 
+    /**
+     * Sets up the automatic enabling of another {@link FilterSetting}
+     * when the value of this one is not zero.
+     * Typically used when this is a randomness slider, and the other
+     * is a "reseed randomness" button.
+     */
+    public void setupEnableOtherIfNotZero(FilterSetting other) {
+        other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC);
+        addChangeListener(e ->
+                other.setEnabled(getValue() != 0,
+                        EnabledReason.APP_LOGIC));
+    }
+
     @Override
     public boolean isSetToDefault() {
         return (getValue() == defaultValue);

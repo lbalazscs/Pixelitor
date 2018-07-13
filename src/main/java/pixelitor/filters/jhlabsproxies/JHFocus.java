@@ -71,9 +71,9 @@ public class JHFocus extends ParametrizedFilter {
             return src;
         }
 
-        // TODO copied from JHBoxBlur, but is it necessary?
         if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
-            // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+            // otherwise we can get ArrayIndexOutOfBoundsException
+            // in VariableBlurFilter.blur
             return src;
         }
 
@@ -93,7 +93,6 @@ public class JHFocus extends ParametrizedFilter {
 
         filter.setInverted(invert.isChecked());
 
-        // TODO unlike BoxBlurFilter, VariableBlurFilter supports only integer radii
         filter.setHRadius(blurRadius.getValueAsFloat(0));
         filter.setVRadius(blurRadius.getValueAsFloat(1));
 

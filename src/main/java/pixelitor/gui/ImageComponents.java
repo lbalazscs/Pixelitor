@@ -207,7 +207,7 @@ public class ImageComponents {
                 throw new IllegalStateException("cannot activate null imageComponent");
             }
             // activate is always false in unit tests
-            ImageArea.INSTANCE.activateIC(ic);
+            ImageArea.activateIC(ic);
             ic.onActivation();
         }
     }
@@ -237,6 +237,7 @@ public class ImageComponents {
 
         PixelitorWindow.getInstance()
                 .setTitle(Build.getPixelitorWindowFixTitle());
+        FramesUI.resetCascadeIndex();
     }
 
     /**
@@ -323,6 +324,7 @@ public class ImageComponents {
                 "The image '%s' was reloaded from the file %s.",
                 comp.getName(), file.getAbsolutePath());
         Messages.showInStatusBar(msg);
+        ImageComponents.repaintActive();
     }
 
     public static void duplicateActive() {
@@ -410,7 +412,7 @@ public class ImageComponents {
             setActiveIC(ic, false);
             comp.addAllLayersToGUI();
 
-            ImageArea.INSTANCE.addNewIC(ic);
+            ImageArea.addNewIC(ic);
         } catch (Exception e) {
             Messages.showException(e);
         }

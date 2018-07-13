@@ -27,7 +27,6 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -56,7 +55,7 @@ public class JHSparkle extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         FilterAction reseed = ReseedSupport.createAction("", "Reseed Randomness");
-        Utils.setupEnableOtherIfNotZero(randomness, reseed);
+        randomness.setupEnableOtherIfNotZero(reseed);
         setParamSet(new ParamSet(
                 center,
                 lightOnly,

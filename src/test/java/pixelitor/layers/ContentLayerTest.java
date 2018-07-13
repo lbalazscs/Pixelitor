@@ -163,8 +163,8 @@ public class ContentLayerTest {
         Graphics2D g2 = TestHelper.createGraphics();
         BufferedImage image = TestHelper.createImage();
 
-        layer.applyLayer(g2, true, image);
-        layer.applyLayer(g2, false, image);
+        layer.applyLayer(g2, image, true);
+        layer.applyLayer(g2, image, false);
         iconUpdates.check(0, 0);
     }
 

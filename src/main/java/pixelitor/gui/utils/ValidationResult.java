@@ -20,7 +20,8 @@ package pixelitor.gui.utils;
 import java.awt.Component;
 
 /**
- * Represents the result of a validation
+ * Represents the result of a validation.
+ * Note that this is an immutable object.
  */
 public class ValidationResult {
     private final boolean valid;
@@ -93,6 +94,15 @@ public class ValidationResult {
             } else {
                 return this;
             }
+        }
+    }
+
+    public ValidationResult addError(String msg) {
+        if (valid) {
+            assert this == okInstance;
+            return new ValidationResult(false, msg);
+        } else {
+            return new ValidationResult(false, this.errorMsg + "\n" + msg);
         }
     }
 
