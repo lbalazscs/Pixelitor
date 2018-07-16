@@ -22,18 +22,18 @@ import java.net.URL;
 /**
  * Icon-related static utility methods
  */
-public final class IconUtils {
-    private static final Icon westArrowIcon = loadIcon("west_arrow.gif");
-    private static final Icon diceIcon = loadIcon("dice.png");
-    private static final Icon dice2Icon = loadIcon("dice2.png");
-    private static final Icon northArrowIcon = loadIcon("north_arrow.gif");
-    private static final Icon southArrowIcon = loadIcon("south_arrow.gif");
-    private static final Icon textLayerIcon = loadIcon("text_layer_icon.png");
-    private static final Icon adjLayerIcon = loadIcon("adj_layer_icon.png");
-    private static final Icon undoIcon = loadIcon("undo.png");
-    private static final Icon redoIcon = loadIcon("redo.png");
+public final class Icons {
+    private static final Icon westArrowIcon = load("west_arrow.gif");
+    private static final Icon diceIcon = load("dice.png");
+    private static final Icon dice2Icon = load("dice2.png");
+    private static final Icon northArrowIcon = load("north_arrow.gif");
+    private static final Icon southArrowIcon = load("south_arrow.gif");
+    private static final Icon textLayerIcon = load("text_layer_icon.png");
+    private static final Icon adjLayerIcon = load("adj_layer_icon.png");
+    private static final Icon undoIcon = load("undo.png");
+    private static final Icon redoIcon = load("redo.png");
 
-    private IconUtils() {
+    private Icons() {
         // should not be instantiated
     }
 
@@ -45,11 +45,11 @@ public final class IconUtils {
         return diceIcon;
     }
 
-    public static Icon getDice2Icon() {
+    public static Icon getTwoDicesIcon() {
         return dice2Icon;
     }
 
-    public static Icon loadIcon(String iconFileName) {
+    public static Icon load(String iconFileName) {
         assert iconFileName != null;
 
         URL imgURL = ImageUtils.resourcePathToURL(iconFileName);

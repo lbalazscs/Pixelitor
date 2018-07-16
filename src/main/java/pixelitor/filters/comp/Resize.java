@@ -17,7 +17,7 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
@@ -47,8 +47,9 @@ public class Resize implements CompAction {
 
     @Override
     public void process(Composition comp) {
-        int canvasCurrWidth = comp.getCanvasImWidth();
-        int canvasCurrHeight = comp.getCanvasImHeight();
+        Canvas canvas = comp.getCanvas();
+        int canvasCurrWidth = canvas.getImWidth();
+        int canvasCurrHeight = canvas.getImHeight();
 
         if ((canvasCurrWidth == canvasTargetWidth) && (canvasCurrHeight == canvasTargetHeight)) {
             return;
@@ -77,16 +78,14 @@ public class Resize implements CompAction {
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
 
-        comp.getCanvas().changeImSize(canvasTargetWidth, canvasTargetHeight);
+        canvas.changeImSize(canvasTargetWidth, canvasTargetHeight);
 
-        // Only after the shared canvas size was updated
-        // The icon image should change if the proportions were
+        // Only after the shared canvas size was updated.
+        // The icon image could change if the proportions were
         // changed or if it was resized to a very small size
         comp.updateAllIconImages();
 
         comp.imageChanged(REPAINT, true);
-
-        AppLogic.activeCompSizeChanged(comp);
 
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");

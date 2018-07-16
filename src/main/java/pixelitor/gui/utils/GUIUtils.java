@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.Pixelitor;
 import pixelitor.filters.gui.FilterParam;
+import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -34,6 +35,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.util.Random;
 
 /**
  * Static GUI-related utility methods
@@ -106,8 +108,8 @@ public final class GUIUtils {
                 .cancelText("Close")
                 .okAction(() -> Utils.copyStringToClipboard(text))
                 .title(title)
-                .form(form)
-                .parent(PixelitorWindow.getInstance())
+                .content(form)
+                .owner(PixelitorWindow.getInstance())
                 .show();
     }
 
@@ -158,6 +160,32 @@ public final class GUIUtils {
         if (d != null && d.isVisible()) {
             d.setVisible(false);
             d.dispose();
+        }
+    }
+
+    public static void randomizeGUIWidgetsOn(JPanel panel) {
+        int count = panel.getComponentCount();
+        Random rand = new Random();
+
+        for (int i = 0; i < count; i++) {
+            Component child = panel.getComponent(i);
+            //noinspection ChainOfInstanceofChecks
+            if (child instanceof JComboBox) {
+                @SuppressWarnings("rawtypes")
+                JComboBox box = (JComboBox) child;
+
+                int itemCount = box.getItemCount();
+                box.setSelectedIndex(rand.nextInt(itemCount));
+            } else if (child instanceof JCheckBox) {
+                JCheckBox box = (JCheckBox) child;
+                box.setSelected(rand.nextBoolean());
+            } else if (child instanceof SliderSpinner) {
+                SliderSpinner spinner = (SliderSpinner) child;
+                spinner.getModel().randomize();
+            } else if (child instanceof BlendingModePanel) {
+                BlendingModePanel bmp = (BlendingModePanel) child;
+                bmp.randomize();
+            }
         }
     }
 }

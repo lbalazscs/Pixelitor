@@ -18,11 +18,13 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.painters.TextSettings;
@@ -53,12 +55,17 @@ public class TextLayerTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
-        comp.addLayerNoGUI(layer);
+        comp.addLayerInInitMode(layer);
 
         LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);

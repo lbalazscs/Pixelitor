@@ -17,7 +17,6 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
@@ -57,7 +56,8 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     public void process(Composition comp) {
         MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
 
-        comp.transformSelection(() -> createCanvasTX(comp.getCanvas()));
+        Canvas canvas = comp.getCanvas();
+        comp.transformSelection(() -> createCanvasTX(canvas));
 
         comp.forEachLayer(layer -> {
             if (layer instanceof ContentLayer) {
@@ -75,7 +75,6 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
         if (changesCanvasDimensions) {
             changeCanvas(comp);
-            AppLogic.activeCompSizeChanged(comp);
         }
 
         // Only after the shared canvas size was updated

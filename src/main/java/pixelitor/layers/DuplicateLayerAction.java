@@ -21,19 +21,21 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that duplicates a layer
+ * An Action that duplicates the active layer of the active composition
  */
-public class DuplicateLayerAction extends AbstractAction implements ActiveImageChangeListener {
+public class DuplicateLayerAction extends AbstractAction
+        implements ActiveImageChangeListener {
+
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
     private DuplicateLayerAction() {
-        super("Duplicate Layer", IconUtils.loadIcon("duplicate_layer.png"));
+        super("Duplicate Layer", Icons.load("duplicate_layer.png"));
         putValue(SHORT_DESCRIPTION, "Duplicates the active layer.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
@@ -51,12 +53,7 @@ public class DuplicateLayerAction extends AbstractAction implements ActiveImageC
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
     }
 }

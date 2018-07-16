@@ -21,9 +21,10 @@ import pixelitor.MessageHandler;
 import pixelitor.gui.utils.Dialogs;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 
 /**
- * The MessageHandler that is normally used in non-testing code
+ * The MessageHandler that is normally used (in non-testing code)
  */
 public class GUIMessageHandler implements MessageHandler {
     public GUIMessageHandler() {
@@ -76,6 +77,11 @@ public class GUIMessageHandler implements MessageHandler {
     @Override
     public void showException(Throwable e) {
         Dialogs.showExceptionDialog(e);
+    }
+
+    @Override
+    public void showExceptionOnEDT(Throwable e) {
+        EventQueue.invokeLater(() -> Dialogs.showExceptionDialog(e));
     }
 
     @Override

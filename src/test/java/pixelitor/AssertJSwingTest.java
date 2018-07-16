@@ -37,6 +37,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Directories;
+import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
@@ -130,12 +131,12 @@ public class AssertJSwingTest {
         AssertJSwingTest test = new AssertJSwingTest();
         test.setUp();
 
-        boolean testOneMethodSlowly = false; // TODO should be property
+        boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            test.testSelectionToolAndMenus();
+            test.testCopyPaste();
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -170,7 +171,7 @@ public class AssertJSwingTest {
         if (ImageComponents.getNumOpenImages() > 0) {
             closeAll();
         }
-        openFile("a.jpg");
+        openFileWithDialog("a.jpg");
 
         pw.toggleButton("Shapes Tool Button").click();
         // make sure that action is set to fill
@@ -700,13 +701,60 @@ public class AssertJSwingTest {
     }
 
     private void testPreferences() {
+        log(1, "testing the preferences dialog");
+
         runMenuCommand("Preferences...");
         DialogFixture d = findDialogByTitle("Preferences");
+
+        // Test "Images In"
+        JComboBoxFixture uiChooser = d.comboBox("uiChooser");
+        if (ImageArea.getMode() == FRAMES) {
+            uiChooser.requireSelection("Internal Windows");
+            uiChooser.selectItem("Tabs");
+            uiChooser.selectItem("Internal Windows");
+        } else {
+            uiChooser.requireSelection("Tabs");
+            uiChooser.selectItem("Internal Windows");
+            uiChooser.selectItem("Tabs");
+        }
+
+        // Test "Layer/Mask Thumb Sizes"
+        JComboBoxFixture thumbSizeCB = d.comboBox("thumbSizeCB");
+        thumbSizeCB.selectItem(3);
+        thumbSizeCB.selectItem(0);
+
+        // Test "Undo/Redo Levels"
+        JTextComponentFixture undoLevelsTF = d.textBox("undoLevelsTF");
+        boolean undoWas5 = false;
+        if (undoLevelsTF.text().equals("5")) {
+            undoWas5 = true;
+        }
+        undoLevelsTF.deleteText().enterText("n");
+
+        // try to accept the dialog
         d.button("ok").click();
+
+        expectAndCloseErrorDialog();
+
+        // correct the error
+        if (undoWas5) {
+            undoLevelsTF.deleteText().enterText("6");
+        } else {
+            undoLevelsTF.deleteText().enterText("5");
+        }
+
+        // try again
+        d.button("ok").click();
+
+        // this time the preferences dialog should close
+        d.requireNotVisible();
     }
 
     private void testImageMenu() {
         log(0, "testing the image menu");
+
+        assert numOpenImagesIs(1);
+        assert numLayersIs(1);
 
         testDuplicateImage();
 
@@ -782,17 +830,29 @@ public class AssertJSwingTest {
     }
 
     private void testCopyPaste() {
+        log(1, "testing copy-paste");
+
+        assert numOpenImagesIs(1);
+        assert numLayersIs(1);
+
         runMenuCommand("Copy Layer");
         runMenuCommand("Paste as New Layer");
 
+        assert numLayersIs(2);
+
         runMenuCommand("Copy Composite");
         runMenuCommand("Paste as New Image");
+        assert numOpenImagesIs(2);
 
         // close the pasted image
         runMenuCommand("Close");
+        assert numOpenImagesIs(1);
 
-        // close the pasted layer
+        // delete the pasted layer
+        assert numLayersIs(2);
+        assert DeleteActiveLayerAction.INSTANCE.isEnabled();
         runMenuCommand("Delete Layer");
+        assert numLayersIs(1);
 
         testingMode.set(this);
     }
@@ -816,17 +876,30 @@ public class AssertJSwingTest {
         testCloseAll();
 
         // open an image for the next test
-        openFile("a.jpg");
+        openFileWithDialog("a.jpg");
     }
 
     private void testNewImage() {
         log(1, "testing new image");
 
         findMenuItemByText("New Image...").click();
-        DialogFixture newImageDialog = findDialogByTitle("New Image");
-        newImageDialog.textBox("widthTF").deleteText().enterText("611");
-        newImageDialog.textBox("heightTF").deleteText().enterText("411");
-        newImageDialog.button("ok").click();
+        DialogFixture d = findDialogByTitle("New Image");
+        d.textBox("widthTF").deleteText().enterText("611");
+        d.textBox("heightTF").deleteText().enterText("e");
+
+        // try to accept the dialog
+        d.button("ok").click();
+
+        expectAndCloseErrorDialog();
+
+        // correct the error
+        d.textBox("heightTF").deleteText().enterText("411");
+
+        // try again
+        d.button("ok").click();
+
+        // this time the dialog should close
+        d.requireNotVisible();
 
         testingMode.set(this);
     }
@@ -838,7 +911,7 @@ public class AssertJSwingTest {
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
 
-        openFile("b.jpg");
+        openFileWithDialog("b.jpg");
 
         assert checkConsistency();
     }
@@ -1117,6 +1190,9 @@ public class AssertJSwingTest {
     private void testViewMenu() {
         log(0, "testing the view menu");
 
+        assert numOpenImagesIs(1);
+        assert numLayersIs(1);
+
         testZoomCommands();
 
         testHistory();
@@ -1219,6 +1295,9 @@ public class AssertJSwingTest {
 
     private void testFilters() {
         log(0, "testing the filters");
+
+        assert numOpenImagesIs(1);
+        assert numLayersIs(1);
 
         testColorBalance();
         testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -2482,12 +2561,20 @@ public class AssertJSwingTest {
                 .releaseKey(VK_4).releaseKey(VK_CONTROL);
     }
 
-    private void openFile(String fileName) {
+    private void expectAndCloseErrorDialog() {
+        DialogFixture errorDialog = findDialogByTitle("Error");
+        findButtonByText(errorDialog, "OK").click();
+    }
+
+    private void openFileWithDialog(String fileName) {
         JFileChooserFixture openDialog;
         findMenuItemByText("Open...").click();
         openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.selectFile(new File(inputDir, fileName));
         openDialog.approve();
+
+        // wait a bit to make sure that the async open completed
+        Utils.sleep(5, SECONDS);
 
         testingMode.set(this);
     }
@@ -2567,7 +2654,9 @@ public class AssertJSwingTest {
             for (int i = 0; i < indentLevel; i++) {
                 System.out.print("    ");
             }
-            System.out.println(getCurrentTime() + ": " + msg + " (" + testingMode.toString() + ")");
+            System.out.println(getCurrentTime() + ": " + msg
+                    + " (" + testingMode.toString() + ", "
+                    + ImageArea.getMode() + ")");
         }
     }
 

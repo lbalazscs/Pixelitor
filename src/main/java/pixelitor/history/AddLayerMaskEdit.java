@@ -45,7 +45,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         // has to be saved here, because when the constructor is
-        // called, we do not know yet the mode before the undo
+        // called, we don't know yet the mode before the undo
         newMode = comp.getIC().getMaskViewMode();
 
         layer.deleteMask(false);
@@ -55,10 +55,10 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.addMask(layerMask);
+        layer.addConfiguredMask(layerMask);
 
         assert newMode != null;
-        newMode.activate(comp, layer);
+        newMode.activate(comp, layer, "add mask redone");
     }
 
     @Override

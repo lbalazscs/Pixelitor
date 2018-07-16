@@ -17,29 +17,31 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.Layers;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that deletes the active layer
+ * An Action that deletes the active layer from the active composition.
  */
-public class DeleteActiveLayerAction extends AbstractAction implements ActiveImageChangeListener, GlobalLayerChangeListener {
+public class DeleteActiveLayerAction extends AbstractAction
+        implements ActiveImageChangeListener, GlobalLayerChangeListener {
+
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
-        super("Delete Layer", IconUtils.loadIcon("delete_layer.gif"));
+        super("Delete Layer", Icons.load("delete_layer.gif"));
         putValue(SHORT_DESCRIPTION, "Deletes the active layer.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
-        AppLogic.addLayerChangeListener(this);
+        Layers.addLayerChangeListener(this);
     }
 
     @Override
@@ -54,16 +56,7 @@ public class DeleteActiveLayerAction extends AbstractAction implements ActiveIma
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        if (comp.getNumLayers() <= 1) {
-            setEnabled(false);
-        } else {
-            setEnabled(true);
-        }
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         if (newIC.getComp().getNumLayers() <= 1) { // no more deletion is possible
             setEnabled(false);
         } else {

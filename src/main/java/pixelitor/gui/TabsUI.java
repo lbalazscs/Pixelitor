@@ -35,7 +35,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 /**
- * An user interface where the edited images are in tabs
+ * A user interface ({@link ImageAreaUI} implementation)
+ * where the edited images are in tabs
  */
 public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private boolean userInitiated = true;
@@ -76,7 +77,6 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         setTabComponentAt(myIndex, new TabTitleRenderer(ic.getName(), this, tab));
         setSelectedIndex(myIndex);
         tab.onActivation();
-        ImageComponents.newImageOpened(ic.getComp());
     }
 
     public static void warnAndCloseTab(ImageTab tab) {
@@ -86,10 +86,16 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         }
     }
 
-    public void closeTab(ImageTab imageTab) {
-        remove(indexOfComponent(imageTab));
-        ImageComponent ic = imageTab.getIC();
+    public void closeTab(ImageTab tab) {
+        remove(indexOfComponent(tab));
+        ImageComponent ic = tab.getIC();
         ImageComponents.imageClosed(ic);
+    }
+
+    public void selectTab(ImageTab tab) {
+        // expect that this call is not needed
+        // since new tabs are already selected
+        assert getSelectedIndex() == indexOfComponent(tab);
     }
 
     static class TabTitleRenderer extends JPanel {

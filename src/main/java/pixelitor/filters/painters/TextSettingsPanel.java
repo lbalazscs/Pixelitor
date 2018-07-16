@@ -27,6 +27,7 @@ import pixelitor.filters.gui.ColorParamGUI;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
@@ -56,7 +57,8 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 /**
  * Customization panel for the text filter and for text layers
  */
-public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentListener, ActionListener {
+public class TextSettingsPanel extends FilterGUI
+        implements ParamAdjustmentListener, ActionListener {
     private TextLayer textLayer;
 
     private JTextField textTF;
@@ -78,10 +80,11 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     private static String lastText = "";
 
     private Map<TextAttribute, Object> map;
-    private AdvancedTextSettingsDialog advancedSettingsDialog;
+    private JDialog advancedSettingsDialog;
+    private AdvancedTextSettingsPanel advancedSettingsPanel;
 
     // called for image layers
-    public TextAdjustmentsPanel(TextFilter textFilter, Drawable dr) {
+    public TextSettingsPanel(TextFilter textFilter, Drawable dr) {
         super(textFilter, dr);
         createGUI(null);
 
@@ -92,7 +95,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     }
 
     // called for text layers
-    public TextAdjustmentsPanel(TextLayer textLayer) {
+    public TextSettingsPanel(TextLayer textLayer) {
         super(null, null);
         this.textLayer = textLayer;
         createGUI(textLayer.getSettings());
@@ -162,10 +165,14 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
     private void createTextTF(TextSettings settings) {
         String defaultText;
         if (settings == null) {
-            if (filter == null) { // text layer mode
-                defaultText = "Pixelitor"; // no last text remembering when creating new text layers
-            } else {
+            if (filter != null) { // filter mode
+                // Remember the last text in filter mode.
+                // This was a requested feature when we didn't have text layers,
+                // probably it is not so useful now
                 defaultText = lastText;
+            } else { // text layer mode
+                // no last text remembering when creating new text layers
+                defaultText = "Pixelitor";
             }
         } else {
             defaultText = settings.getText();
@@ -250,8 +257,16 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
 
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
+            advancedSettingsPanel = new AdvancedTextSettingsPanel(
+                    this, map);
             JDialog owner = GUIUtils.getDialogAncestor(this);
-            advancedSettingsDialog = new AdvancedTextSettingsDialog(owner, this, map);
+            advancedSettingsDialog = new DialogBuilder()
+                    .owner(owner)
+                    .content(advancedSettingsPanel)
+                    .title("Advanced Text Settings")
+                    .noCancelButton()
+                    .okText("Close")
+                    .build();
         }
         advancedSettingsDialog.setVisible(true);
     }
@@ -285,7 +300,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
         map = new HashMap<>();
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsDialog.updateFontAttributesMap(map);
+            advancedSettingsPanel.updateFontAttributesMap(map);
         } else if (oldMap != null) {
             // no dialog, copy manually the advanced settings
             TextAttribute[] advancedSettings = {
@@ -351,7 +366,7 @@ public class TextAdjustmentsPanel extends FilterGUI implements ParamAdjustmentLi
                 double distance = offset.distance(0, 0);
                 double angle = Math.atan2(offset.getY(), offset.getX());
                 angle -= textRotationAngle;
-                Point2D adjustedOffset = Utils.calculateOffset(distance, angle);
+                Point2D adjustedOffset = Utils.offsetFromPolar(distance, angle);
                 dropShadowEffect.setOffset(adjustedOffset);
             }
         }

@@ -57,7 +57,6 @@ public class FileChoosers {
         }
     }
 
-
     private FileChoosers() {
     }
 
@@ -110,7 +109,7 @@ public class FileChoosers {
             Directories.setLastOpenDir(selectedFile.getParentFile());
 
             if (FileExtensionUtils.hasSupportedInputExt(fileName)) {
-                OpenSaveManager.openFile(selectedFile);
+                OpenSaveManager.openFileAsync(selectedFile);
             } else { // unsupported extension
                 handleUnsupportedExtensionWhileOpening(fileName);
             }
@@ -160,7 +159,7 @@ public class FileChoosers {
 
             String extension = saveChooser.getExtension();
             OutputFormat outputFormat = OutputFormat.fromExtension(extension);
-            outputFormat.saveComp(comp, selectedFile, true);
+            comp.saveAsync(selectedFile, outputFormat, true);
             return true;
         }
 

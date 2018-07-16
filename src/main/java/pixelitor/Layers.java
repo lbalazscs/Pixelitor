@@ -17,34 +17,26 @@
 
 package pixelitor;
 
-import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.ImageComponent;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.tools.Symmetry;
-import pixelitor.utils.AppPreferences;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Static methods to support global application logic
+ * Static methods related to layer listeners
  */
-public class AppLogic {
+public class Layers {
     /**
      * Global listeners which always act on the active layer of the active composition
      */
     private static final Collection<GlobalLayerChangeListener> layerChangeListeners = new ArrayList<>();
     private static final Collection<GlobalLayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
 
-    private AppLogic() {
-    }
-
-    public static void activeCompSizeChanged(Composition comp) {
-        Symmetry.setCanvas(comp.getCanvas());
+    private Layers() {
     }
 
     public static void addLayerChangeListener(GlobalLayerChangeListener listener) {
@@ -80,8 +72,14 @@ public class AppLogic {
             listener.activeLayerChanged(newActiveLayer);
         }
 
-        // always go to normal mask-viewing mode on the new layer
-        MaskViewMode.NORMAL.activate(newActiveLayer);
+        ImageComponent ic = newActiveLayer.getComp().getIC();
+        if (ic == null) {
+            // can happen at when adding a new image:
+            // the active layer changes, but there is no ic yet
+            return;
+        }
+        // always go to normal mask-viewing mode on the activated layer
+        MaskViewMode.NORMAL.activate(ic, newActiveLayer, "active layer changed");
     }
 
     public static void layerOrderChanged(Composition comp) {
@@ -90,17 +88,5 @@ public class AppLogic {
         }
     }
 
-    public static void exitApp(PixelitorWindow pw) {
-        if (ImageComponents.thereAreUnsavedChanges()) {
-            String msg = "There are unsaved changes. Are you sure you want to exit?";
-            if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
-                pw.setVisible(false);
-                AppPreferences.savePrefsAndExit();
-            }
-        } else {
-            pw.setVisible(false);
-            AppPreferences.savePrefsAndExit();
-        }
-    }
 }
 

@@ -35,7 +35,8 @@ import static java.awt.RenderingHints.VALUE_STROKE_PURE;
  * An abstract superclass for angle selectors ({@link AngleUI})
  * and elevation angle selectors ({@link ElevationAngleUI})
  */
-public abstract class AbstractAngleUI extends JComponent implements MouseListener, MouseMotionListener {
+public abstract class AbstractAngleUI extends JComponent
+        implements MouseListener, MouseMotionListener {
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
@@ -99,7 +100,7 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         }
         double angle = Math.atan2(y - cy, x - cx);
         repaint();
-        model.setValueInRadians(angle, trigger);
+        model.setValue(angle, trigger);
     }
 
     @Override

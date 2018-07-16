@@ -37,8 +37,13 @@ import javax.swing.*;
  * The selection tool
  */
 public class SelectionTool extends DragTool {
-    private static final String HELP_TEXT = "<b>click and drag</b> to select an area. Hold <b>SPACE</b> down to move the entire selection. <b>Shift-drag</b> adds to an existing selection, <b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
-    private static final String POLY_HELP_TEXT = "<html>Polygonal selection: <b>click</b> to add points, <b>double-click</b> (or <b>right-click</b>) to finish the selection.";
+    private static final String HELP_TEXT = "<b>click and drag</b> to select an area. " +
+            "Hold <b>SPACE</b> down to move the entire selection. " +
+            "<b>Shift-drag</b> adds to an existing selection, " +
+            "<b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
+    private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +
+            "<b>click</b> to add points, " +
+            "<b>double-click</b> (or <b>right-click</b>) to finish the selection.";
 
     private JComboBox<SelectionType> typeCombo;
     private JComboBox<SelectionInteraction> interactionCombo;
@@ -51,8 +56,8 @@ public class SelectionTool extends DragTool {
 
     SelectionTool() {
         super('m', "Selection", "selection_tool_icon.png",
-                HELP_TEXT,
-                Cursors.DEFAULT, false, true, false, ClipStrategy.INTERNAL_FRAME);
+                HELP_TEXT, Cursors.DEFAULT, false,
+                true, false, ClipStrategy.INTERNAL_FRAME);
         spaceDragStartPoint = true;
     }
 
@@ -79,9 +84,7 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addButton(SelectionActions.getTraceWithBrush());
         settingsPanel.addButton(SelectionActions.getTraceWithEraser());
-
-// TODO why doesn't this work?
-//        settingsPanel.addButton(SelectionActions.getTraceWithSmudge());
+        settingsPanel.addButton(SelectionActions.getTraceWithSmudge());
         
         settingsPanel.addButton(SelectionActions.getCrop());
 
@@ -106,6 +109,10 @@ public class SelectionTool extends DragTool {
     public void ongoingDrag(PMouseEvent e) {
         if (polygonal) {
             return; // ignore dragging
+        }
+        if (selectionBuilder == null) {
+            // the image was changed so start again
+            dragStarted(e);
         }
 
         boolean altDown = e.isAltDown();
@@ -138,7 +145,8 @@ public class SelectionTool extends DragTool {
                 setupInteractionWithKeyModifiers(e);
                 SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
                 SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
-                selectionBuilder = new SelectionBuilder(selectionType, selectionInteraction, comp);
+                selectionBuilder = new SelectionBuilder(selectionType,
+                        selectionInteraction, comp);
                 selectionBuilder.updateSelection(e);
                 restoreInteraction();
             } else {
@@ -234,11 +242,6 @@ public class SelectionTool extends DragTool {
     @Override
     public void noOpenImageAnymore() {
         // ignore
-    }
-
-    @Override
-    public void newImageOpened(Composition comp) {
-        stopBuildingSelection();
     }
 
     @Override

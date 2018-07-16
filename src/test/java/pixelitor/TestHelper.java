@@ -24,7 +24,6 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
@@ -37,7 +36,6 @@ import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Messages;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
@@ -65,31 +63,14 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 public class TestHelper {
     private static final int TEST_WIDTH = 20;
     private static final int TEST_HEIGHT = 10;
-    private static boolean initialized = false;
 
     // all coordinates and distances must be even here because of the resize test
     private static final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
 
-    static {
-        initTesting();
-    }
-
     private TestHelper() {
     }
 
-    /**
-     * Initialize some static methods that must be done only once
-     */
-    public static void initTesting() {
-        if (!initialized) {
-            setupMockFgBgSelector();
-            Messages.setMessageHandler(new TestMessageHandler());
-            History.setUndoLevels(10);
-            initialized = true;
-        }
-    }
-
-    private static void setupMockFgBgSelector() {
+    public static void setupMockFgBgSelector() {
         FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
@@ -99,7 +80,6 @@ public class TestHelper {
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
         ImageLayer layer = new ImageLayer(comp, image, layerName, null);
-//        comp.addLayerNoGUI(layer);
 
         return layer;
     }
@@ -146,18 +126,15 @@ public class TestHelper {
         ImageLayer layer1 = createImageLayer("layer 1", c);
         ImageLayer layer2 = createImageLayer("layer 2", c);
 
-        c.addLayerNoGUI(layer1);
-        c.addLayerNoGUI(layer2);
+        c.addLayerInInitMode(layer1);
+        c.addLayerInInitMode(layer2);
 
         if (addMasks) {
             layer1.addMask(REVEAL_ALL);
             layer2.addMask(REVEAL_ALL);
         }
 
-        // TODO it should not be necessary to call
-        // separately for both layers
-        NORMAL.activate(layer1);
-        NORMAL.activate(layer2);
+        NORMAL.activate(layer2, "test");
 
         assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);

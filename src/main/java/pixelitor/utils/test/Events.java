@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Events happening inside the app - used for debugging.
  * The goal is to reproduce what exactly happened before
- * az unexpected problem occurred.
+ * an unexpected problem occurred.
  */
 public class Events {
     private static final boolean VERBOSE = false;
@@ -84,8 +84,9 @@ public class Events {
         post(new PixelitorEvent("    [REDO " + editName + "]", null, null));
     }
 
-    public static void postMaskViewActivate(MaskViewMode mode, ImageComponent ic, Layer layer) {
-        post(new PixelitorEvent("[MASK VIEW " + mode.toString() + "]", ic.getComp(), layer));
+    public static void postMaskViewActivate(MaskViewMode mode, ImageComponent ic, Layer layer, String reason) {
+        post(new PixelitorEvent("[MASK VIEW " + mode.toString()
+                + " (" + reason + ")]", ic.getComp(), layer));
     }
 
     /**

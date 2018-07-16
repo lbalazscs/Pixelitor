@@ -18,7 +18,9 @@
 package pixelitor;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -28,10 +30,17 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 
 import static org.junit.Assert.assertSame;
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class CompositionTest {
     private Composition comp;
+
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
 
     @Before
     public void setUp() {
@@ -47,7 +56,6 @@ public class CompositionTest {
                 .firstLayerHasMask()
                 .secondLayerHasMask();
 
-        History.setUndoLevels(15);
         History.clear();
     }
 
@@ -136,7 +144,7 @@ public class CompositionTest {
                 .numLayersIs(2);
 
         ImageLayer newLayer = TestHelper.createImageLayer("layer 3", comp);
-        comp.addLayerNoGUI(newLayer);
+        comp.addLayerInInitMode(newLayer);
 
         assertThat(comp)
                 .isNotDirty()  // still not dirty!
@@ -148,8 +156,10 @@ public class CompositionTest {
     @Test
     public void testAddLayer() {
         // add bellow active
-        comp.addLayer(TestHelper.createImageLayer("layer A", comp),
-                true, "New Test Layer", true, true);
+        new LayerAdder(comp)
+                .withHistory("New Test Layer")
+                .atPosition(BELLOW_ACTIVE)
+                .add(TestHelper.createImageLayer("layer A", comp));
 
         assertThat(comp)
                 .isDirty()
@@ -159,8 +169,10 @@ public class CompositionTest {
                 .activeLayerNameIs("layer A");
 
         // add above active
-        comp.addLayer(TestHelper.createImageLayer("layer B", comp),
-                true, "New Test Layer", true, false);
+        new LayerAdder(comp)
+                .withHistory("New Test Layer")
+                .atPosition(ABOVE_ACTIVE)
+                .add(TestHelper.createImageLayer("layer B", comp));
 
         assertThat(comp)
                 .numLayersIs(4)
@@ -169,8 +181,10 @@ public class CompositionTest {
                 .activeLayerNameIs("layer B");
 
         // add to position 0
-        comp.addLayer(TestHelper.createImageLayer("layer C", comp),
-                true, "New Test Layer", true, 0);
+        new LayerAdder(comp)
+                .withHistory("New Test Layer")
+                .atIndex(0)
+                .add(TestHelper.createImageLayer("layer C", comp));
 
         assertThat(comp)
                 .numLayersIs(5)
@@ -179,8 +193,10 @@ public class CompositionTest {
                 .activeLayerNameIs("layer C");
 
         // add to position 2
-        comp.addLayer(TestHelper.createImageLayer("layer D", comp),
-                true, "New Test Layer", true, 2);
+        new LayerAdder(comp)
+                .withHistory("New Test Layer")
+                .atIndex(2)
+                .add(TestHelper.createImageLayer("layer D", comp));
 
         assertThat(comp)
                 .numLayersIs(6)
@@ -594,14 +610,14 @@ public class CompositionTest {
         Layer layer1 = comp.getLayer(0);
         Layer layer2 = comp.getLayer(1);
 
-        assertThat(comp.isActiveLayer(layer1)).isFalse();
-        assertThat(comp.isActiveLayer(layer2)).isTrue();
+        assertThat(comp.isActive(layer1)).isFalse();
+        assertThat(comp.isActive(layer2)).isTrue();
         comp.checkInvariant();
 
         comp.setActiveLayer(layer1, true);
 
-        assertThat(comp.isActiveLayer(layer1)).isTrue();
-        assertThat(comp.isActiveLayer(layer2)).isFalse();
+        assertThat(comp.isActive(layer1)).isTrue();
+        assertThat(comp.isActive(layer2)).isFalse();
         comp.checkInvariant();
     }
 

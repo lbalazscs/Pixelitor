@@ -65,7 +65,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new TextAdjustmentsPanel(this, dr);
+        return new TextSettingsPanel(this, dr);
     }
 
     @Override

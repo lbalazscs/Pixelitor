@@ -45,4 +45,6 @@ public interface MessageHandler {
     void showException(Throwable e);
 
     void showException(Throwable e, Thread t);
+
+    void showExceptionOnEDT(Throwable e);
 }

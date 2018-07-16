@@ -41,17 +41,13 @@ import static pixelitor.menus.MenuBar.CTRL_4;
 
 /**
  * Determines whether the layer or its mask is visible/edited.
- * Every ImageComponent has an associated mask view mode, but
- * the layers don't.
  */
 public enum MaskViewMode {
-
     NORMAL("Show and Edit Layer", false, false, false, AllowedLayerType.ANY, CTRL_1) {
     }, SHOW_MASK("Show and Edit Mask", true, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
     }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
     }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_4) {
     };
-
 
     private final String guiName;
     private final boolean showRuby;
@@ -69,24 +65,30 @@ public enum MaskViewMode {
         this.keyStroke = keyStroke;
     }
 
-    public void addToMenu(PMenu sub) {
+    /**
+     * Adds a menu item that acts on the active layer of the active image
+     */
+    public void addToMainMenu(PMenu sub) {
         Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
                 ImageComponents.onActiveIC(ic -> {
                     Layer activeLayer = ic.getComp().getActiveLayer();
-                    activate(ic, activeLayer);
+                    activate(ic, activeLayer, "main menu");
                 });
             }
         };
         sub.addActionWithKey(action, keyStroke);
     }
 
-    public void addToMenu(JMenu menu, Layer layer) {
+    /**
+     * Adds a menu item that acts on the given layer and its image
+     */
+    public void addToPopupMenu(JMenu menu, Layer layer) {
         AbstractAction action = new AbstractAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                activate(layer);
+                activate(layer, "popup menu");
             }
         };
         JMenuItem item = new JMenuItem(action);
@@ -94,21 +96,19 @@ public enum MaskViewMode {
         menu.add(item);
     }
 
-    public void activate(Layer activeLayer) {
+    public void activate(Layer activeLayer, String reason) {
         ImageComponent ic = activeLayer.getComp().getIC();
-        activate(ic, activeLayer);
+        activate(ic, activeLayer, reason);
     }
 
-    public void activate(Composition comp, Layer activeLayer) {
-        activate(comp.getIC(), activeLayer);
+    public void activate(Composition comp, Layer activeLayer, String reason) {
+        activate(comp.getIC(), activeLayer, reason);
     }
 
-    public void activate(ImageComponent ic, Layer layer) {
-        if (ic == null) { // can happen at startup
-            return;
-        }
+    public void activate(ImageComponent ic, Layer layer, String reason) {
+        assert ic != null;
         if (Build.CURRENT != Build.FINAL) {
-            Events.postMaskViewActivate(this, ic, layer);
+            Events.postMaskViewActivate(this, ic, layer, reason);
         }
 
         boolean change = ic.setMaskViewMode(this);

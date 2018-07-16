@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
 
 /**
@@ -29,9 +30,9 @@ public abstract class FilterWithGUI extends Filter {
 
     /**
      * Creates a new {@link FilterGUI} for this GUI filter.
-     * The panel must be created at the moment of this call (cannot be cached)
-     * Creating a {@link FilterGUI} should also automatically run the first
-     * preview run of this filter based on the default settings
+     * The panel must be created at the moment of this call (cannot be cached).
+     * Creating a {@link FilterGUI} should also automatically calculate
+     * the first preview of this filter based on the default settings.
      */
     public abstract FilterGUI createGUI(Drawable dr);
 
@@ -42,7 +43,13 @@ public abstract class FilterWithGUI extends Filter {
         dr.startPreviewing();
 
         FilterGUI gui = createGUI(dr);
-        FilterDialog dialog = new FilterDialog(gui, this, dr);
-        dialog.setVisible(true);
+        new DialogBuilder()
+                .title(getName())
+                .name("filterDialog")
+                .content(gui)
+                .withScrollbars()
+                .okAction(() -> dr.onDialogAccepted(getName()))
+                .cancelAction(dr::onDialogCanceled)
+                .show();
     }
 }

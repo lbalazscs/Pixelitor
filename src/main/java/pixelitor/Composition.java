@@ -21,6 +21,7 @@ import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.*;
+import pixelitor.io.OutputFormat;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
@@ -28,6 +29,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
@@ -37,6 +39,7 @@ import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -50,12 +53,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.Composition.LayerAdder.Position.TOP;
 import static pixelitor.io.FileExtensionUtils.stripExtension;
 import static pixelitor.utils.Utils.createCopyName;
 
@@ -63,7 +69,7 @@ import static pixelitor.utils.Utils.createCopyName;
  * An image composition consisting of multiple layers
  */
 public class Composition implements Serializable {
-    // serialization is used for save in the pxc format
+    // serialization is used for saving in the pxc format
     private static final long serialVersionUID = 1L;
 
     // a counter for the names of new layers
@@ -97,7 +103,9 @@ public class Composition implements Serializable {
      * Creates a single-layered composition from the given image
      */
     public static Composition fromImage(BufferedImage img, File file, String name) {
-        assert img != null;
+        if (img == null) {
+            return null;
+        }
 
         img = ImageUtils.toSysCompatibleImage(img);
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
@@ -184,9 +192,6 @@ public class Composition implements Serializable {
         }
     }
 
-    /**
-     * Called when deserialized and when duplicated
-     */
     public void setIC(ImageComponent ic) {
         this.ic = ic;
         canvas.setIC(ic);
@@ -247,70 +252,27 @@ public class Composition implements Serializable {
     private void addBaseLayer(BufferedImage baseLayerImage) {
         ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null, null);
 
-        addLayerNoGUI(newLayer);
-        activeLayer = newLayer;
+        addLayerInInitMode(newLayer);
     }
 
     /**
-     * Adds a layer to the top without updating any GUI
+     * "Init mode" means that this is part of the composition construction,
+     * the layer is not added as a result of a user interaction
      */
-    public void addLayerNoGUI(Layer newLayer) {
-        layerList.add(newLayer); // adds it to top, ignoring the active layer position
-        setActiveLayer(newLayer, false);
-
-        // doesn't set the dirty flag because
-        // this method is used when adding the base layer
+    public void addLayerInInitMode(Layer newLayer) {
+        new LayerAdder(this).compInitMode().add(newLayer);
     }
 
     public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
         ImageLayer newLayer = new ImageLayer(this, name);
-        addLayer(newLayer, true, "New Empty Layer", false, bellowActive);
+        new LayerAdder(this)
+                .withHistory("New Empty Layer")
+                .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
+                .noRefresh()
+                .add(newLayer);
+
         newLayer.updateIconImage();
         return newLayer;
-    }
-
-    public void addLayer(Layer newLayer, boolean addToHistory, String historyName,
-                         boolean updateHistogram, boolean bellowActive) {
-        int newLayerIndex = calcIndexOfNewLayer(bellowActive);
-
-        addLayer(newLayer, addToHistory, historyName, updateHistogram, newLayerIndex);
-    }
-
-    private int calcIndexOfNewLayer(boolean bellowActive) {
-        int activeLayerIndex = layerList.indexOf(activeLayer);
-        int newLayerIndex;
-        if (activeLayerIndex == -1) { // no active layer yet
-            assert layerList.isEmpty();
-            newLayerIndex = 0;
-        } else {
-            if (bellowActive) {
-                newLayerIndex = activeLayerIndex;
-            } else {
-                newLayerIndex = activeLayerIndex + 1;
-            }
-        }
-        return newLayerIndex;
-    }
-
-    /**
-     * Adds the specified layer at the specified layer position
-     */
-    public void addLayer(Layer newLayer, boolean addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
-        Layer activeLayerBefore = activeLayer;
-        MaskViewMode oldViewMode = ic.getMaskViewMode();
-
-        layerList.add(newLayerIndex, newLayer);
-        setActiveLayer(newLayer, false);
-        ic.addLayerToGUI(newLayer, newLayerIndex);
-
-        History.addEdit(addToHistory, () -> new NewLayerEdit(historyName, this, newLayer, activeLayerBefore, oldViewMode));
-
-        if (updateHistogram) {
-            imageChanged(); // if the histogram is updated, a repaint is also necessary
-        } else {
-            imageChanged(INVALIDATE_CACHE);
-        }
-        assert checkInvariant();
     }
 
     public void addAllLayersToGUI() {
@@ -332,7 +294,9 @@ public class Composition implements Serializable {
 
     public void duplicateActiveLayer() {
         Layer duplicate = activeLayer.duplicate(false);
-        addLayer(duplicate, true, "Duplicate Layer", true, false);
+        new LayerAdder(this)
+                .withHistory("Duplicate Layer")
+                .add(duplicate);
         assert checkInvariant();
     }
 
@@ -376,9 +340,9 @@ public class Composition implements Serializable {
                 imageLayer, imageBefore, maskViewModeBefore, activeIndex));
     }
 
-    private void deleteLayer(int layerIndex) {
+    private void deleteLayer(int layerIndex, boolean addToHistory) {
         Layer layer = layerList.get(layerIndex);
-        deleteLayer(layer, true, true);
+        deleteLayer(layer, addToHistory, true);
     }
 
     public void deleteActiveLayer(boolean updateGUI, boolean addToHistory) {
@@ -409,7 +373,7 @@ public class Composition implements Serializable {
             ic.deleteLayerButton(button);
 
             if (isActiveComp()) {
-                AppLogic.numLayersChanged(this, layerList.size());
+                Layers.numLayersChanged(this, layerList.size());
             }
 
             imageChanged();
@@ -417,25 +381,26 @@ public class Composition implements Serializable {
     }
 
     public void setActiveLayer(Layer newActiveLayer, boolean addToHistory) {
-        if (activeLayer != newActiveLayer) {
-            assert layerList.contains(newActiveLayer)
-                    : String.format("new active layer '%s' (%s) not in the layer list of '%s'",
-                    newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
-
-            Layer oldLayer = activeLayer;
-            activeLayer = newActiveLayer;
-
-            // notify UI
-            activeLayer.activateUI();
-            AppLogic.activeLayerChanged(newActiveLayer);
-
-            // notify history
-            History.addEdit(addToHistory, () -> new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer));
-            assert checkInvariant();
+        if (activeLayer == newActiveLayer) {
+            return;
         }
+        assert layerList.contains(newActiveLayer)
+                : String.format("new active layer '%s' (%s) not in the layer list of '%s'",
+                newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
+
+        Layer oldLayer = activeLayer;
+        activeLayer = newActiveLayer;
+
+        // notify UI
+        activeLayer.activateUI();
+        Layers.activeLayerChanged(newActiveLayer);
+
+        History.addEdit(addToHistory, () -> new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer));
+
+        assert checkInvariant();
     }
 
-    public boolean isActiveLayer(Layer layer) {
+    public boolean isActive(Layer layer) {
         return layer == activeLayer;
     }
 
@@ -583,13 +548,16 @@ public class Composition implements Serializable {
         BufferedImage bi = getCompositeImage();
 
         Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
-        addLayer(flattenedLayer, false, null, false, numLayers); // add to the top
+        new LayerAdder(this)
+                .atIndex(numLayers) // add to the top
+                .noRefresh()
+                .add(flattenedLayer);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
-            deleteLayer(i);
+            deleteLayer(i, false);
         }
         if (updateGUI) {
-            AppLogic.numLayersChanged(this, 1);
+            Layers.numLayersChanged(this, 1);
         }
         if (addToHistory) {
             History.addEdit(new NotUndoableEdit("Flatten Image", this));
@@ -642,7 +610,7 @@ public class Composition implements Serializable {
 
         ic.changeLayerButtonOrder(oldIndex, newIndex);
         imageChanged();
-        AppLogic.layerOrderChanged(this);
+        Layers.layerOrderChanged(this);
 
         History.addEdit(addToHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
     }
@@ -718,8 +686,10 @@ public class Composition implements Serializable {
 
     public void updateRegion(PPoint start, PPoint end, int thickness) {
         compositeImageUpToDate = false;
-        ic.updateRegion(start, end, thickness);
-        ic.updateNavigator(false);
+        if (ic != null) { // during reload image it can be null
+            ic.updateRegion(start, end, thickness);
+            ic.updateNavigator(false);
+        }
     }
 
     public void dispose() {
@@ -731,7 +701,12 @@ public class Composition implements Serializable {
 
     public void addNewLayerFromComposite(String newLayerName) {
         ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName, null);
-        addLayer(newLayer, true, "New Layer from Composite", false, false);
+
+        new LayerAdder(this)
+                .withHistory("New Layer from Composite")
+                .noRefresh()
+                .atIndex(layerList.size())
+                .add(newLayer);
     }
 
     public ImageComponent getIC() {
@@ -1026,7 +1001,7 @@ public class Composition implements Serializable {
                 selection.die();
                 selection = null;
             } else {
-                // the intersection needs to be translated
+                // the intersection has to be translated
                 // into the coordinate system of the new, cropped image
                 double txx = -cropRect.getX();
                 double txy = -cropRect.getY();
@@ -1075,6 +1050,40 @@ public class Composition implements Serializable {
         return count;
     }
 
+    public CompletableFuture<Void> saveAsync(File file,
+                                             OutputFormat outputFormat,
+                                             boolean addToRecentMenus) {
+        System.out.println("Composition::saveAsync: CALLED, file = " + file.getAbsolutePath());
+
+        Runnable saveTask = outputFormat.getSaveTask(this, file);
+        return saveAsync(saveTask, file, addToRecentMenus);
+    }
+
+    public CompletableFuture<Void> saveAsync(Runnable saveTask,
+                                             File file,
+                                             boolean addToRecentMenus) {
+        return CompletableFuture
+                .runAsync(saveTask,
+                        ThreadPool.getExecutor())
+                .thenAcceptAsync(v -> afterSaveActions(file, addToRecentMenus),
+                        EventQueue::invokeLater)
+                .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    private void afterSaveActions(File file, boolean addToRecentMenus) {
+        assert EventQueue.isDispatchThread();
+
+        // perhaps for a multilayered image this should be
+        // set only if it was saved in a layered format
+        setDirty(false);
+
+        setFile(file);
+        if (addToRecentMenus) {
+            RecentFilesMenu.getInstance().addFile(file);
+        }
+        Messages.showFileSavedMessage(file);
+    }
+
     public enum ImageChangeActions {
         INVALIDATE_CACHE(false, false) {
         }, REPAINT(true, false) {
@@ -1107,5 +1116,100 @@ public class Composition implements Serializable {
                 + ", canvas=" + canvas
                 + ", selection=" + selection
                 + ", dirty=" + dirty + '}';
+    }
+
+    public static class LayerAdder {
+        private final Composition comp;
+        private String historyName; // null if the add should not be added to history
+        private int newLayerIndex = -1;
+        private boolean refresh = true;
+
+        public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
+
+        private Position position = TOP;
+        private boolean compInit = false;
+
+        public LayerAdder(Composition comp) {
+            this.comp = comp;
+        }
+
+        public LayerAdder withHistory(String historyName) {
+            this.historyName = historyName;
+            return this;
+        }
+
+        public LayerAdder atPosition(Position position) {
+            this.position = position;
+            return this;
+        }
+
+        /**
+         * Used during composition initialization
+         */
+        public LayerAdder compInitMode() {
+            compInit = true;
+            return this;
+        }
+
+        /**
+         * Used when the composite image does not change
+         */
+        public LayerAdder noRefresh() {
+            refresh = false;
+            return this;
+        }
+
+        private void calcIndexBasedOnRelPosition() {
+            int activeLayerIndex = comp.getActiveLayerIndex();
+            if (activeLayerIndex == -1) { // no active layer yet
+                assert comp.layerList.isEmpty();
+                newLayerIndex = 0;
+            } else {
+                if (position == BELLOW_ACTIVE) {
+                    newLayerIndex = activeLayerIndex;
+                } else if (position == ABOVE_ACTIVE) {
+                    newLayerIndex = activeLayerIndex + 1;
+                } else {
+                    throw new IllegalStateException("position = " + position);
+                }
+            }
+        }
+
+        public LayerAdder atIndex(int newLayerIndex) {
+            this.newLayerIndex = newLayerIndex;
+            return this;
+        }
+
+        public void add(Layer newLayer) {
+            Layer activeLayerBefore = null;
+            MaskViewMode oldViewMode = null;
+            if (historyName != null) {
+                activeLayerBefore = comp.activeLayer;
+                oldViewMode = comp.ic.getMaskViewMode();
+            }
+
+            if (newLayerIndex == -1) { // no index was explicitly set
+                if (position == TOP) {
+                    newLayerIndex = comp.layerList.size();
+                } else {
+                    calcIndexBasedOnRelPosition();
+                }
+            }
+            comp.layerList.add(newLayerIndex, newLayer);
+            comp.setActiveLayer(newLayer, false);
+            if (!compInit) {
+                comp.setDirty(true);
+                comp.ic.addLayerToGUI(newLayer, newLayerIndex);
+
+                if (refresh) {
+                    comp.imageChanged();
+                }
+            }
+            if (historyName != null) {
+                History.addEdit(new NewLayerEdit(historyName,
+                        comp, newLayer, activeLayerBefore, oldViewMode));
+            }
+            assert comp.checkInvariant();
+        }
     }
 }

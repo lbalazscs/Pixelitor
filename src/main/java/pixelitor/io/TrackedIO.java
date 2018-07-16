@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
 
 /**
@@ -81,6 +82,14 @@ public class TrackedIO {
             writer.write(img);
         } finally {
             writer.dispose();
+        }
+    }
+
+    public static BufferedImage uncheckedRead(File file) {
+        try {
+            return read(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

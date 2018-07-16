@@ -17,9 +17,9 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.Layers;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.GlobalLayerChangeListener;
@@ -28,9 +28,8 @@ import pixelitor.layers.Layer;
 import pixelitor.utils.ActiveImageChangeListener;
 
 /**
- * This class is used for tracking what happens
- * in long-running automatic tests.
- * It listens to changes and generates events
+ * Used for tracking what happens in long-running automatic tests.
+ * Listens to changes and generates events.
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
         GlobalLayerMaskChangeListener, ActiveImageChangeListener {
@@ -42,8 +41,8 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     public void register() {
-        AppLogic.addLayerChangeListener(this);
-        AppLogic.addLayerMaskChangeListener(this);
+        Layers.addLayerChangeListener(this);
+        Layers.addLayerMaskChangeListener(this);
         ImageComponents.addActiveImageChangeListener(this);
     }
 
@@ -80,14 +79,10 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        Events.postListenerEvent("newImageOpened", comp, null);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+        String oldICName = oldIC == null ? "null" : oldIC.getName();
         Events.postListenerEvent(String.format("activeImageHasChanged %s => %s",
-                        oldIC.getName(), newIC.getName()),
+                oldICName, newIC.getName()),
                 newIC.getComp(), null);
     }
 }

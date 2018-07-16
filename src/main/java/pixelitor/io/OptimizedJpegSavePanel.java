@@ -18,8 +18,8 @@
 package pixelitor.io;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.ImagePanel;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.io.JpegOutput.ImageWithSize;
 import pixelitor.tools.HandToolSupport;
@@ -164,18 +164,18 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     public static void showInDialog(BufferedImage image, JFrame frame) {
         BufferedImage rgbImage = ImageUtils.convertToRGB(image, false);
-
         OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
-        OKCancelDialog d = new OKCancelDialog(p, frame, "Save Optimized JPEG", "Save", "Cancel", false) {
-            @Override
-            protected void okAction() {
-                close();
-                JpegSettings settings = p.getSelectedSettings();
-                OpenSaveManager.saveJpegWithQuality(settings);
-            }
-        };
-        d.setVisible(true);
-    }
 
+        new DialogBuilder()
+                .content(p)
+                .owner(frame)
+                .title("Save Optimized JPEG")
+                .okText("Save")
+                .okAction(() -> {
+                    JpegSettings settings = p.getSelectedSettings();
+                    OpenSaveManager.saveJpegWithQuality(settings);
+                })
+                .show();
+    }
 }
 

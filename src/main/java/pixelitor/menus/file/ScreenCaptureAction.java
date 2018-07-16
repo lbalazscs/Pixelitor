@@ -20,8 +20,8 @@ package pixelitor.menus.file;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 
@@ -48,14 +48,11 @@ public class ScreenCaptureAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        OKCancelDialog d = new OKCancelDialog(getSettingsPanel(), "Screen Capture") {
-            @Override
-            protected void okAction() {
-                capture();
-                close();
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .content(getSettingsPanel())
+                .title("Screen Capture")
+                .okAction(this::capture)
+                .show();
     }
 
     private JPanel getSettingsPanel() {

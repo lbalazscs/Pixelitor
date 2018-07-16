@@ -120,10 +120,10 @@ public final class AppPreferences {
     }
 
     private static void saveNewImageSize() {
-        Dimension lastNew = NewImage.getLastNew();
-        if (lastNew != null) {
-            mainNode.putInt(NEW_IMAGE_WIDTH, lastNew.width);
-            mainNode.putInt(NEW_IMAGE_HEIGHT, lastNew.height);
+        Dimension lastSize = NewImage.getLastSize();
+        if (lastSize != null) {
+            mainNode.putInt(NEW_IMAGE_WIDTH, lastSize.width);
+            mainNode.putInt(NEW_IMAGE_HEIGHT, lastSize.height);
         }
     }
 
@@ -424,6 +424,7 @@ public final class AppPreferences {
 
             JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
             uiChooser.setSelectedItem(ImageArea.getMode());
+            uiChooser.setName("uiChooser");
             gbh.addLabelWithControl("Images In: ", uiChooser);
             uiChooser.addActionListener(e -> {
                 ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
@@ -431,6 +432,7 @@ public final class AppPreferences {
             });
 
             undoLevelsTF = new JTextField(3);
+            undoLevelsTF.setName("undoLevelsTF");
             undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
             gbh.addLabelWithControl("Undo/Redo Levels: ",
                     TextFieldValidator.createIntOnlyLayerFor(undoLevelsTF));
@@ -442,6 +444,7 @@ public final class AppPreferences {
                     new Value("96x96 pixels", 96),
             };
             thumbSizeCB = new JComboBox<>(thumbSizes);
+            thumbSizeCB.setName("thumbSizeCB");
 
             int currentSize = LayerButtonLayout.getThumbSize();
             thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
@@ -485,7 +488,7 @@ public final class AppPreferences {
             };
 
             new DialogBuilder()
-                    .form(panel)
+                    .content(panel)
                     .noCancelButton()
                     .title("Preferences")
                     .okText("Close")

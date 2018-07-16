@@ -61,7 +61,7 @@ public interface Drawable {
 
     BufferedImage getFilterSourceImage();
 
-    BufferedImage getSelectedSubImage(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected);
+    BufferedImage getSelectedSubImage(boolean copyIfNoSelection);
 
     void setShowOriginal(boolean b);
 

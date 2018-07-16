@@ -47,8 +47,8 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void setSelected(boolean b) {
-        // TODO
+    public void select() {
+        tabsUI.selectTab(this);
     }
 
     @Override
@@ -63,8 +63,7 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     public void onActivation() {
-        ImageComponents.userChangedActiveImage(ic);
-        ic.onActivation();
+        ImageComponents.imageActivated(ic);
     }
 
     public ImageComponent getIC() {

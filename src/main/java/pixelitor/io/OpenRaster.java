@@ -42,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -59,9 +60,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public class OpenRaster {
 
-    public static final String MERGED_IMAGE_NAME = "mergedimage.png";
+    private static final String MERGED_IMAGE_NAME = "mergedimage.png";
 
     private OpenRaster() {
+    }
+
+    public static void uncheckedWrite(Composition comp, File outFile, boolean addMergedImage) {
+        try {
+            write(comp, outFile, addMergedImage);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static void write(Composition comp, File outFile, boolean addMergedImage) throws IOException {
@@ -94,7 +103,6 @@ public class OpenRaster {
         if(addMergedImage) {
             zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
             ProgressTracker subTaskTracker = new SubtaskProgressTracker(workRatio, pt);
-//            ImageIO.write(comp.getCompositeImage(), "PNG", zos);
             BufferedImage img = comp.getCompositeImage();
             TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
             zos.closeEntry();
@@ -130,7 +138,6 @@ public class OpenRaster {
         zos.putNextEntry(entry);
         BufferedImage image = layer.getImage();
 
-//        ImageIO.write(image, "PNG", zos);
         TrackedIO.writeToStream(image, zos, "PNG", pt);
 
         zos.closeEntry();
@@ -138,8 +145,6 @@ public class OpenRaster {
     }
 
     public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
-        boolean DEBUG = System.getProperty("openraster.debug", "false").equals("true");
-
         ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
 
         String stackXML = null;
@@ -172,12 +177,8 @@ public class OpenRaster {
                     if ("png".equalsIgnoreCase(extension)) {
                         ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
                         InputStream stream = zipFile.getInputStream(entry);
-//                        BufferedImage image = ImageIO.read(stream);
                         BufferedImage image = TrackedIO.readFromStream(stream, spt);
                         images.put(name, image);
-                        if (DEBUG) {
-                            System.out.println(String.format("OpenRaster::readOpenRaster: found png image in zip file at the path '%s'", name));
-                        }
                     }
                 }
             }
@@ -185,10 +186,6 @@ public class OpenRaster {
 
         if(stackXML == null) {
             throw new IllegalStateException("No stack.xml found.");
-        }
-
-        if(DEBUG) {
-            System.out.println(String.format("OpenRaster::readOpenRaster: stackXML = '%s'", stackXML));
         }
 
         Element doc = loadXMLFromString(stackXML).getDocumentElement();
@@ -222,13 +219,6 @@ public class OpenRaster {
             BufferedImage image = images.get(layerImageSource);
             image = ImageUtils.toSysCompatibleImage(image);
 
-            if(DEBUG) {
-                int imgWidth = image.getWidth();
-                int imgHeight = image.getHeight();
-                System.out.println("OpenRaster::readOpenRaster: imgWidth = " + imgWidth + ", imgHeight = " + imgHeight);
-//                Utils.debugImage(image, layerImageSource);
-            }
-
             if(layerVisibility == null || layerVisibility.isEmpty()) {
                 //workaround: paint.net exported files use "visible" attribute instead of "visibility"
                 layerVisibility = layerVisible;
@@ -239,10 +229,6 @@ public class OpenRaster {
             layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
-            if(DEBUG) {
-                System.out.println("OpenRaster::readOpenRaster: blendingMode = " + blendingMode);
-            }
-
             layer.setBlendingMode(blendingMode, false, false, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
             layer.setOpacity(opacity, false, false, false);
@@ -251,11 +237,7 @@ public class OpenRaster {
             // TODO assuming that there is no layer mask
             layer.setTranslation(tX, tY);
 
-            if(DEBUG) {
-                System.out.println(String.format("OpenRaster::readOpenRaster: opacity = %.2f, tX = %d, tY = %d", opacity, tX, tY));
-            }
-
-            comp.addLayerNoGUI(layer);
+            comp.addLayerInInitMode(layer);
         }
         comp.setActiveLayer(comp.getLayer(0), false);
 

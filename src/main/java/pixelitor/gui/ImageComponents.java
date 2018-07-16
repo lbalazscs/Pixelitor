@@ -17,10 +17,10 @@
 
 package pixelitor.gui;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
+import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.comp.Crop;
+import pixelitor.Layers;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.OpenSaveManager;
@@ -38,13 +38,14 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
 
 import java.awt.Cursor;
-import java.awt.geom.Rectangle2D;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -60,10 +61,6 @@ public class ImageComponents {
     private ImageComponents() {
     }
 
-    public static void addIC(ImageComponent ic) {
-        icList.add(ic);
-    }
-
     public static boolean thereAreUnsavedChanges() {
         return icList.stream()
                 .anyMatch(ImageComponent::isDirty);
@@ -75,8 +72,13 @@ public class ImageComponents {
 
     private static void setAnImageAsActiveIfNoneIs() {
         if (!icList.isEmpty()) {
-            boolean activeFound = icList.stream()
-                    .anyMatch(ic -> ic == activeIC);
+            boolean activeFound = false;
+            for (ImageComponent ic : icList) {
+                if (ic == activeIC) {
+                    activeFound = true;
+                    break;
+                }
+            }
 
             if (!activeFound) {
                 setActiveIC(icList.get(0), true);
@@ -160,38 +162,6 @@ public class ImageComponents {
         return null;
     }
 
-    /**
-     * Crops the active image based on the crop tool
-     */
-    public static void toolCropActiveImage(boolean allowGrowing) {
-        try {
-            onActiveComp(comp -> {
-                Rectangle2D cropRect = Tools.CROP.getCropRect().getIm();
-                new Crop(cropRect, false, allowGrowing).process(comp);
-            });
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
-    }
-
-    /**
-     * Crops the active image based on the selection bounds
-     */
-    public static void selectionCropActiveImage() {
-        try {
-            Composition comp = getActiveCompOrNull();
-            if (comp != null) {
-                //noinspection CodeBlock2Expr
-                comp.onSelection(sel -> {
-                    new Crop(sel.getShapeBounds(), true, true)
-                            .process(comp);
-                });
-            }
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
-    }
-
     public static void imageClosed(ImageComponent ic) {
         icList.remove(ic);
         if (icList.isEmpty()) {
@@ -201,15 +171,13 @@ public class ImageComponents {
     }
 
     public static void setActiveIC(ImageComponent ic, boolean activate) {
-        activeIC = ic;
         if (activate) {
             if (ic == null) {
-                throw new IllegalStateException("cannot activate null imageComponent");
+                throw new IllegalStateException("cannot activate null ic");
             }
-            // activate is always false in unit tests
             ImageArea.activateIC(ic);
-            ic.onActivation();
         }
+        activeIC = ic;
     }
 
     /**
@@ -243,29 +211,31 @@ public class ImageComponents {
     /**
      * Another image became active
      */
-    public static void userChangedActiveImage(ImageComponent ic) {
-        ImageComponent oldIC = activeIC;
-
-        setActiveIC(ic, false);
-        for (ActiveImageChangeListener listener : activeICChangeListeners) {
-            listener.activeImageHasChanged(oldIC, ic);
+    public static void imageActivated(ImageComponent ic) {
+        if (ic == activeIC) {
+            return;
         }
 
+        ImageComponent oldIC = activeIC;
+
         Composition comp = ic.getComp();
+        setActiveIC(ic, false);
+        ic.activateUI(true);
+
+        for (ActiveImageChangeListener listener : activeICChangeListeners) {
+            listener.activeImageChanged(oldIC, ic);
+        }
+
         Layer layer = comp.getActiveLayer();
-        AppLogic.activeLayerChanged(layer);
+        Layers.activeLayerChanged(layer);
 
         SelectionActions.setEnabled(comp.hasSelection(), comp);
         ZoomMenu.zoomChanged(ic.getZoomLevel());
 
-        AppLogic.activeCompSizeChanged(comp);
+        Canvas.activeCanvasImSizeChanged(comp.getCanvas());
         String title = comp.getName()
                 + " - " + Build.getPixelitorWindowFixTitle();
         PixelitorWindow.getInstance().setTitle(title);
-    }
-
-    public static void newImageOpened(Composition comp) {
-        activeICChangeListeners.forEach((imageSwitchListener) -> imageSwitchListener.newImageOpened(comp));
     }
 
     public static void repaintActive() {
@@ -290,7 +260,7 @@ public class ImageComponents {
         return ic == activeIC;
     }
 
-    public static void reloadActiveFromFile() {
+    public static void reloadActiveFromFileAsync() {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
         if (file == null) {
@@ -310,21 +280,19 @@ public class ImageComponents {
             return;
         }
 
-        Composition newComp = OpenSaveManager.createCompositionFromFile(file);
+        CompletableFuture<Composition> cf = OpenSaveManager.loadCompFromFileAsync(file);
+        cf.thenAcceptAsync(newComp -> {
+            PixelitorEdit edit = activeIC.replaceComp(newComp, true, MaskViewMode.NORMAL);
 
-        PixelitorEdit edit = activeIC.replaceComp(newComp, true, MaskViewMode.NORMAL);
+            assert edit != null;
+            History.addEdit(edit);
 
-        // needs to be called before addEdit because of the consistency checks
-        newImageOpened(newComp);
-
-        assert edit != null;
-        History.addEdit(edit);
-
-        String msg = String.format(
-                "The image '%s' was reloaded from the file %s.",
-                comp.getName(), file.getAbsolutePath());
-        Messages.showInStatusBar(msg);
-        ImageComponents.repaintActive();
+            String msg = String.format(
+                    "The image '%s' was reloaded from the file %s.",
+                    comp.getName(), file.getAbsolutePath());
+            Messages.showInStatusBar(msg);
+            ImageComponents.repaintActive();
+        }, EventQueue::invokeLater);
     }
 
     public static void duplicateActive() {
@@ -407,12 +375,12 @@ public class ImageComponents {
             assert comp.getIC() == null : "already has ic";
 
             ImageComponent ic = new ImageComponent(comp);
-            ic.setCursor(Tools.getCurrent().getStartingCursor());
-            ImageComponents.addIC(ic);
-            setActiveIC(ic, false);
             comp.addAllLayersToGUI();
-
+            ic.setCursor(Tools.getCurrent().getStartingCursor());
+            icList.add(ic);
+            MaskViewMode.NORMAL.activate(ic, comp.getActiveLayer(), "image added");
             ImageArea.addNewIC(ic);
+            setActiveIC(ic, false);
         } catch (Exception e) {
             Messages.showException(e);
         }

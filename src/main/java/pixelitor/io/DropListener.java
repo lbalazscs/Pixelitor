@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Manages external files dropped on the JDesktopPane
+ * Manages external files dropped on the image area
  */
 public class DropListener extends DropTargetAdapter {
     public DropListener() {
@@ -93,10 +93,10 @@ public class DropListener extends DropTargetAdapter {
                         "Do you want to open all image files inside it?", file.getName());
 
                 if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                    OpenSaveManager.openAllImagesInDir(file);
+                    OpenSaveManager.openAllImagesInDirAsync(file);
                 }
             } else if (file.isFile()) {
-                OpenSaveManager.openFile(file);
+                OpenSaveManager.openFileAsync(file);
             }
         }
     }

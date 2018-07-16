@@ -17,12 +17,12 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
+import pixelitor.Layers;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -34,18 +34,23 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 
 /**
- * An Action that adds a new layer mask.
+ * An Action that adds a new layer mask
+ * to the active layer of the active composition.
  */
-public class AddLayerMaskAction extends AbstractAction implements ActiveImageChangeListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+public class AddLayerMaskAction extends AbstractAction
+        implements ActiveImageChangeListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+    
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
-        super("Add Layer Mask", IconUtils.loadIcon("add_layer_mask.png"));
-        putValue(Action.SHORT_DESCRIPTION, "<html>Adds a layer mask to the active layer. <br><b>Ctrl-click</b> to add an inverted layer mask.");
+        super("Add Layer Mask", Icons.load("add_layer_mask.png"));
+        putValue(Action.SHORT_DESCRIPTION,
+                "<html>Adds a layer mask to the active layer. " +
+                        "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
-        AppLogic.addLayerChangeListener(this);
-        AppLogic.addLayerMaskChangeListener(this);
+        Layers.addLayerChangeListener(this);
+        Layers.addLayerMaskChangeListener(this);
     }
 
     @Override
@@ -79,12 +84,7 @@ public class AddLayerMaskAction extends AbstractAction implements ActiveImageCha
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        setEnabled(!comp.getActiveLayer().hasMask());
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         boolean hasMask = newIC.getComp().getActiveLayer().hasMask();
         setEnabled(!hasMask);
     }

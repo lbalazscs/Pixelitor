@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
@@ -90,8 +91,8 @@ public class MultiLayerEditTest {
     }
 
     @BeforeClass
-    public static void initTests() {
-        History.setUndoLevels(10);
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Before

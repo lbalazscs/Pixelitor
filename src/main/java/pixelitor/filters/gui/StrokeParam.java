@@ -18,8 +18,8 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.OKDialog;
 import pixelitor.tools.shapes.BasicStrokeCap;
 import pixelitor.tools.shapes.BasicStrokeJoin;
 import pixelitor.tools.shapes.ShapeType;
@@ -30,6 +30,7 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.Window;
 import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -62,7 +63,7 @@ public class StrokeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
         paramGUI = new ConfigureParamGUI(owner -> {
-            JDialog dialog = createSettingsDialogForFilter(owner);
+            JDialog dialog = createSettingsDialog(owner);
             GUIUtils.centerOnScreen(dialog);
             return dialog;
         }, defaultButton);
@@ -88,6 +89,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeCapParam.setAdjustmentListener(decoratedListener);
         strokeJoinParam.setAdjustmentListener(decoratedListener);
 
+        // decorated twice
         shapeTypeParam.setAdjustmentListener(() -> {
             ShapeType selectedItem = shapeTypeParam.getSelected();
             StrokeType.SHAPE.setShapeType(selectedItem);
@@ -106,17 +108,20 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeTypeParam.getSelected();
     }
 
-    public JDialog createSettingsDialogForShapesTool() {
-        JFrame owner = PixelitorWindow.getInstance();
-        JPanel p = createStrokeSettingsPanel();
-        return new OKDialog(owner, p, "Stroke Settings", "Close");
+    public JDialog createSettingsDialog() {
+        return createSettingsDialog(PixelitorWindow.getInstance());
     }
 
-    private JDialog createSettingsDialogForFilter(JDialog owner) {
-        JPanel p = createStrokeSettingsPanel();
-        OKDialog d = new OKDialog(owner, "Stroke Settings", "Close");
-        d.setupGUI(p);
-        return d;
+    private JDialog createSettingsDialog(Window owner) {
+        return new DialogBuilder()
+                .owner(owner)
+                .title("Stroke Settings")
+                .notModal()
+                .content(createStrokeSettingsPanel())
+                .withScrollbars()
+                .noCancelButton()
+                .okText("Close")
+                .build();
     }
 
     private JPanel createStrokeSettingsPanel() {
@@ -178,14 +183,14 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public void reset(boolean trigger) {
         for (FilterParam param : allParams) {
+            // trigger only once, later
             param.reset(false);
         }
         if (trigger) {
             adjustmentListener.paramAdjusted();
+            // the default button state is updated
+            // in the decorated adjustment listener
         } else {
-            // this class updates the default button state
-            // simply by putting a decorator on the adjustment
-            // listeners, no this needs to be called here manually
             updateDefaultButtonState();
         }
     }

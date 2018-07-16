@@ -98,11 +98,7 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         updateFromCompIfShown(newIC.getComp());
     }
 

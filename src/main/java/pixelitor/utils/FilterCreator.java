@@ -17,9 +17,9 @@
 
 package pixelitor.utils;
 
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -134,17 +134,24 @@ public class FilterCreator extends JPanel {
 
     public static void showInDialog(Frame owner) {
         FilterCreator filterCreator = new FilterCreator();
-        OKCancelDialog d = new OKCancelDialog(filterCreator, owner, "Filter Creator", "Show Source", "Close") {
-            @Override
-            protected void okAction() {
-                String s = filterCreator.createFilterSource();
-                JTextArea ta = new JTextArea(s);
-                JScrollPane sp = new JScrollPane(ta);
-                sp.setPreferredSize(new Dimension(sp.getPreferredSize().width + 50, 500));
-                GUIUtils.showClipboardTextDialog(sp, "Source", s);
-            }
-        };
-        d.setVisible(true);
+
+        new DialogBuilder()
+                .content(filterCreator)
+                .owner(owner)
+                .title("Filter Creator")
+                .okText("Show Source")
+                .validator(d -> {
+                    String s = filterCreator.createFilterSource();
+                    JTextArea ta = new JTextArea(s);
+                    JScrollPane sp = new JScrollPane(ta);
+                    sp.setPreferredSize(new Dimension(sp.getPreferredSize().width + 50, 500));
+                    GUIUtils.showClipboardTextDialog(sp, "Source", s);
+
+                    // the OK button should never close it,
+                    // and the okAction will never be executed
+                    return false;
+                })
+                .show();
     }
 
     public static class ParamPanel extends JPanel {

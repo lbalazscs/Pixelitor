@@ -30,7 +30,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
@@ -73,7 +73,7 @@ public class AutoPaint {
     public static void showDialog(Drawable dr) {
         ConfigPanel configPanel = new ConfigPanel();
         new DialogBuilder()
-                .validatedForm(configPanel)
+                .validatedContent(configPanel)
                 .title("Auto Paint")
                 .okAction(() -> {
                     Settings settings = configPanel.getSettings();
@@ -93,7 +93,7 @@ public class AutoPaint {
         MessageHandler msgHandler = Messages.getMessageHandler();
         msgHandler.startProgress(msg, settings.getNumStrokes());
 
-        BufferedImage backupImage = dr.getSelectedSubImage(true, true);
+        BufferedImage backupImage = dr.getSelectedSubImage(true);
         History.setIgnoreEdits(true);
 
         try {
@@ -180,7 +180,7 @@ public class AutoPaint {
     /**
      * The GUI of the "Auto Paint" dialog
      */
-    public static class ConfigPanel extends ValidatedForm {
+    public static class ConfigPanel extends ValidatedPanel {
 
         private static final String COL_FOREGROUND = "Foreground";
         private static final String COL_INTERPOLATED = "Foreground-Background Mix";
@@ -252,8 +252,7 @@ public class AutoPaint {
         }
 
         public Settings getSettings() {
-            int numStrokes;
-            numStrokes = getNumStrokes();
+            int numStrokes = getNumStrokes();
             defaultNumStrokes = numStrokes;
 
             int strokeLength = getStrokeLength();
@@ -289,7 +288,7 @@ public class AutoPaint {
             try {
                 getNumStrokes();
             } catch (NumberFormatException e) {
-                retVal = ValidationResult.error("\"Number of Strokes\" must be an integer.");
+                retVal = retVal.addError("\"Number of Strokes\" must be an integer.");
             }
             try {
                 getStrokeLength();

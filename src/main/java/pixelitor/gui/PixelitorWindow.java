@@ -17,8 +17,8 @@
 
 package pixelitor.gui;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
+import pixelitor.Pixelitor;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
@@ -76,7 +76,7 @@ public class PixelitorWindow extends JFrame {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent we) {
-                        AppLogic.exitApp(PixelitorWindow.this);
+                        Pixelitor.exitApp(PixelitorWindow.this);
                     }
                 }
         );
@@ -218,7 +218,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * This method iconifies a frame; the maximized bits are not affected.
+     * Iconifies a frame; the maximized bits are not affected.
      */
     public void iconify() {
         int state = getExtendedState();
@@ -231,7 +231,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * This method deiconifies a frame; the maximized bits are not affected.
+     * Deiconifies a frame; the maximized bits are not affected.
      */
     public void deiconify() {
         int state = getExtendedState();

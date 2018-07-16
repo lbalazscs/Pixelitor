@@ -41,10 +41,10 @@ public class LayerMaskActions {
 
             JMenu showMenu = new JMenu("Show/Edit");
             menu.add(showMenu);
-            MaskViewMode.NORMAL.addToMenu(showMenu, layer);
-            MaskViewMode.SHOW_MASK.addToMenu(showMenu, layer);
-            MaskViewMode.EDIT_MASK.addToMenu(showMenu, layer);
-            MaskViewMode.RUBYLITH.addToMenu(showMenu, layer);
+            MaskViewMode.NORMAL.addToPopupMenu(showMenu, layer);
+            MaskViewMode.SHOW_MASK.addToPopupMenu(showMenu, layer);
+            MaskViewMode.EDIT_MASK.addToPopupMenu(showMenu, layer);
+            MaskViewMode.RUBYLITH.addToPopupMenu(showMenu, layer);
             menu.addSeparator();
 
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));

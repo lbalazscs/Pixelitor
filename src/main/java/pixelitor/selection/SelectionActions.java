@@ -18,12 +18,12 @@
 package pixelitor.selection;
 
 import pixelitor.Composition;
+import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideAction;
@@ -43,14 +43,15 @@ import java.awt.event.ActionEvent;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 
 /**
- * Static methods for managing the selection actions
+ * Static methods for managing the actions that should be enabled
+ * only when there is a selection on the active composition.
  */
 public final class SelectionActions {
 
     private static final Action crop = new AbstractAction("Crop") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.selectionCropActiveImage();
+            Crop.selectionCropActiveImage();
         }
     };
 
@@ -72,7 +73,7 @@ public final class SelectionActions {
 
     private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
-//    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
+    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
 
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
@@ -87,7 +88,6 @@ public final class SelectionActions {
         }
     };
 
-
     private static final Action modify = new MenuAction("Modify Selection...") {
         @Override
         public void onClick() {
@@ -98,23 +98,32 @@ public final class SelectionActions {
             gbh.addLabelWithControl("Amount", amount.createGUI());
             gbh.addLabelWithControl("Type", type.createGUI());
 
-            OKCancelDialog d = new OKCancelDialog(p, PixelitorWindow.getInstance(),
-                    "Modify Selection", "Change!", "Close") {
-                @Override
-                protected void okAction() {
-                    Selection selection = getActiveCompOrNull().getSelection();
-                    SelectionModifyType selectionModifyType = type.getSelected();
-                    if (selection != null) {
-                        selection.modify(selectionModifyType, amount.getValue());
-                    } else {
-                        // TODO - we modified it so much that it disappeared
-                        // at least the change button should be disabled
-                    }
-                }
-            };
-            d.setVisible(true);
+            new DialogBuilder()
+                    .content(p)
+                    .title("Modify Selection")
+                    .okText("Change!")
+                    .cancelText("Close")
+                    .validator(d -> {
+                        modifySelection(type, amount);
+
+                        // always return false so that
+                        // the Change button does not close it
+                        return false;
+                    })
+                    .show();
         }
     };
+
+    private static void modifySelection(EnumParam<SelectionModifyType> type, RangeParam amount) {
+        Selection selection = getActiveCompOrNull().getSelection();
+        SelectionModifyType selectionModifyType = type.getSelected();
+        if (selection != null) {
+            selection.modify(selectionModifyType, amount.getValue());
+        } else {
+            // TODO - we modified it so much that it disappeared
+            // at least the change button should be disabled
+        }
+    }
 
     static {
         setEnabled(false, null);
@@ -144,6 +153,7 @@ public final class SelectionActions {
         crop.setEnabled(b);
         traceWithBrush.setEnabled(b);
         traceWithEraser.setEnabled(b);
+        traceWithSmudge.setEnabled(b);
         deselect.setEnabled(b);
         invert.setEnabled(b);
         showHide.setEnabled(b);
@@ -167,9 +177,9 @@ public final class SelectionActions {
         return traceWithEraser;
     }
 
-//    public static Action getTraceWithSmudge() {
-//        return traceWithSmudge;
-//    }
+    public static Action getTraceWithSmudge() {
+        return traceWithSmudge;
+    }
 
     public static Action getDeselect() {
         return deselect;

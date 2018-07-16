@@ -55,7 +55,7 @@ public class ImageEdit extends FadeableEdit {
 
     public static ImageEdit createEmbedded(Drawable dr) {
         // If there is a selection, only the bounds of the selected area is saved.
-        BufferedImage copy = dr.getSelectedSubImage(true, true);
+        BufferedImage copy = dr.getSelectedSubImage(true);
 
         ImageEdit edit = new ImageEdit("", dr.getComp(),
                 dr, copy,
@@ -106,7 +106,7 @@ public class ImageEdit extends FadeableEdit {
         if (ignoreSelection) {
             tmp = dr.getImage();
         } else {
-            tmp = dr.getSelectedSubImage(false, true);
+            tmp = dr.getSelectedSubImage(false);
         }
         dr.changeImageUndoRedo(backupImage, ignoreSelection);
 
@@ -161,5 +161,4 @@ public class ImageEdit extends FadeableEdit {
 
         return node;
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,13 @@ import javax.swing.*;
 import java.awt.LayoutManager;
 
 /**
- * A form with validity check
+ * A panel with validity check
  */
-public abstract class ValidatedForm extends JPanel {
-    protected ValidatedForm() {
+public abstract class ValidatedPanel extends JPanel {
+    protected ValidatedPanel() {
     }
 
-    protected ValidatedForm(LayoutManager layoutManager) {
+    protected ValidatedPanel(LayoutManager layoutManager) {
         super(layoutManager);
     }
 

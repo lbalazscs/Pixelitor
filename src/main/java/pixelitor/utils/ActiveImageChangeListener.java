@@ -17,7 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 
 /**
@@ -25,18 +24,13 @@ import pixelitor.gui.ImageComponent;
  */
 public interface ActiveImageChangeListener {
     /**
+     * Called when the active image changes either because the user
+     * switches to another image or because a new image was opened.
+     */
+    void activeImageChanged(ImageComponent oldIC, ImageComponent newIC);
+
+    /**
      * Called when the user has closed all the images
      */
     void noOpenImageAnymore();
-
-    /**
-     * Called when the user has opened a new image,
-     * and also when the composition was reloaded.
-     */
-    void newImageOpened(Composition comp);
-
-    /**
-     * Called when the used switches to another image
-     */
-    void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC);
 }

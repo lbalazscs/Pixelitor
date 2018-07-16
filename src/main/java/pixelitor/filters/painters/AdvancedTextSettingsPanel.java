@@ -19,33 +19,26 @@ package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKDialog;
 
 import javax.swing.*;
-import java.awt.Dialog;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
 /**
- * Advanced font attribute settings
+ * GUI for the advanced font attribute settings
  */
-public class AdvancedTextSettingsDialog extends OKDialog {
+public class AdvancedTextSettingsPanel extends JPanel {
     private final JCheckBox underlineCB;
     private final JCheckBox strikeThroughCB;
     private final JCheckBox kerningCB;
     private final JCheckBox ligaturesCB;
     private final RangeParam trackingParam;
 
-    public AdvancedTextSettingsDialog(Dialog owner, ActionListener actionListener, Map<TextAttribute, Object> map) {
-        super(owner, "Advanced Text Settings", "Close");
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(p);
-
-//        if (TextAttribute.UNDERLINE_ON.equals(attributes.get(TextAttribute.UNDERLINE))) {
-//            defaultUnderline = true;
-//        }
+    public AdvancedTextSettingsPanel(ActionListener actionListener, Map<TextAttribute, Object> map) {
+        super(new GridBagLayout());
+        GridBagHelper gbh = new GridBagHelper(this);
 
         boolean defaultStrikethrough = false;
         boolean defaultKerning = false;
@@ -91,13 +84,11 @@ public class AdvancedTextSettingsDialog extends OKDialog {
         ligaturesCB.addActionListener(actionListener);
         gbh.addLabelWithControl("Ligatures:", ligaturesCB);
 
-        trackingParam = new RangeParam("", -10, 0, 30);
+        trackingParam = new RangeParam("", -20, 0, 70);
         trackingParam.setValue(defaultTracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
         JComponent trackingGUI = trackingParam.createGUI();
         gbh.addLabelWithControl("Tracking (Letter-spacing):", trackingGUI);
-
-        setupGUI(p);
     }
 
     public void updateFontAttributesMap(Map<TextAttribute, Object> map) {

@@ -31,7 +31,7 @@ import java.awt.geom.Point2D;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
- * A GUI for configuring the "drop shadow" effect
+ * A GUI for configuring the "drop shadow" shape effect
  */
 public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final AngleParam angleParam;
@@ -73,7 +73,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         double distance = distanceParam.getValueAsDouble();
         double angle = angleParam.getValueInRadians();
 
-        return Utils.calculateOffset(distance, angle);
+        return Utils.offsetFromPolar(distance, angle);
     }
 
 

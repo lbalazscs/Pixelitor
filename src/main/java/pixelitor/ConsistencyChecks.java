@@ -33,7 +33,6 @@ import java.util.Optional;
 /**
  * Runtime assertions (a kind of "design by contract")
  * that run only in developer mode.
- * They are run by the Build setting or by the assertions
  */
 public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
@@ -67,7 +66,7 @@ public final class ConsistencyChecks {
         }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(dr);
         if (edit.isPresent()) {
-            BufferedImage current = dr.getSelectedSubImage(false, true);
+            BufferedImage current = dr.getSelectedSubImage(false);
 
             FadeableEdit fadeableEdit = edit.get();
             BufferedImage previous = fadeableEdit.getBackupImage();
@@ -98,8 +97,6 @@ public final class ConsistencyChecks {
                         + "\nhistory composition = " + historyCompName
                         + "\nactive composition = " + activeCompName
                         + "\n"
-
-
                 );
             }
 

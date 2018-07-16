@@ -122,7 +122,7 @@ public class ShapesTool extends DragTool {
         }
 
         effectsDialog = new DialogBuilder()
-                .form(effectsPanel)
+                .content(effectsPanel)
                 .title("Effects")
                 .notModal()
                 .okText("Close")
@@ -225,7 +225,7 @@ public class ShapesTool extends DragTool {
 
     private void initAndShowStrokeSettingsDialog() {
         if (strokeSettingsDialog == null) {
-            strokeSettingsDialog = strokeParam.createSettingsDialogForShapesTool();
+            strokeSettingsDialog = strokeParam.createSettingsDialog();
         }
 
         GUIUtils.showDialog(strokeSettingsDialog);

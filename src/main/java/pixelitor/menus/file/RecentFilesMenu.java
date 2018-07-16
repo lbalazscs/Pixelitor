@@ -26,6 +26,9 @@ import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+/**
+ * The "File/Recent Files" menu
+ */
 public final class RecentFilesMenu extends JMenu {
     public static final int MAX_RECENT_FILES = 10;
 
@@ -40,7 +43,7 @@ public final class RecentFilesMenu extends JMenu {
             RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
             File f = mi.getRecentFile().getFile();
             if (f.exists()) {
-                OpenSaveManager.openFile(f);
+                OpenSaveManager.openFileAsync(f);
             } else {
                 // the file was deleted since Pixelitor started
                 Messages.showError("Problem",

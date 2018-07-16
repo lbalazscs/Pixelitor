@@ -20,7 +20,6 @@ package pixelitor.gui;
 import com.bric.swing.ColorPicker;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
-import pixelitor.Composition;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomLevel;
@@ -50,16 +49,17 @@ import java.awt.geom.AffineTransform;
 /**
  * The navigator component that allows the user to pan a zoomed-in image.
  */
-public class Navigator extends JComponent implements MouseListener, MouseMotionListener, ActiveImageChangeListener {
-    private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
-    private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
+public class Navigator extends JComponent
+        implements MouseListener, MouseMotionListener, ActiveImageChangeListener {
+
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
+    private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
+    private static final CheckerboardPainter checkerBoardPainter
+            = ImageUtils.createCheckerboardPainter();
 
     private ImageComponent ic; // can be null if all images are closed
-
     private boolean dragging = false;
     private double imgScalingRatio;
-
     private Rectangle viewBoxRect;
     private Point dragStartPoint;
     private Point origRectLoc; // the view box rectangle location before starting the drag
@@ -181,14 +181,13 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
 
         dialog = new DialogBuilder()
                 .title("Navigator")
-                .parent(pw)
-                .form(navigator)
+                .owner(pw)
+                .content(navigator)
                 .notModal()
                 .noOKButton()
                 .noCancelButton()
                 .noGlobalKeyChange()
                 .cancelAction(navigator::dispose) // when it is closed with X
-//                .dialogFactory(dialogFactory)
                 .show();
     }
 
@@ -427,12 +426,7 @@ public class Navigator extends JComponent implements MouseListener, MouseMotionL
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        // not necessary to implement, since activeImageHasChanged is also called
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         recalculateSize(newIC, true, true, false);
     }
 

@@ -19,6 +19,7 @@ package pixelitor.tools.crop;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -132,14 +133,16 @@ public class CropTool extends DragTool {
         settingsPanel.addSeparator();
 
         // add crop width spinner
-        wSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_WIDTH, 1));
+        wSizeSpinner = new JSpinner(new SpinnerNumberModel(
+                0, 0, Canvas.MAX_WIDTH, 1));
         wSizeSpinner.addChangeListener(whChangeListener);
         wSizeSpinner.setToolTipText("Width of the cropped image (px)");
         settingsPanel.add(widthLabel);
         settingsPanel.add(wSizeSpinner);
 
         // add crop height spinner
-        hSizeSpinner = new JSpinner(new SpinnerNumberModel(0, 0, Canvas.MAX_HEIGHT, 1));
+        hSizeSpinner = new JSpinner(new SpinnerNumberModel(
+                0, 0, Canvas.MAX_HEIGHT, 1));
         hSizeSpinner.addChangeListener(whChangeListener);
         hSizeSpinner.setToolTipText("Height of the cropped image (px)");
         settingsPanel.add(heightLabel);
@@ -409,8 +412,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        ImageComponents.toolCropActiveImage(allowGrowingCB.isSelected());
-        ImageComponents.repaintActive();
+        Crop.toolCropActiveImage(allowGrowingCB.isSelected());
         resetStateToInitial();
     }
 

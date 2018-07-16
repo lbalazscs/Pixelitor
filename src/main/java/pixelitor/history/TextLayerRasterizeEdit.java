@@ -18,12 +18,15 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 
 /**
  * A PixelitorEdit that represents the rasterization of a text layer
@@ -48,12 +51,15 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.addLayer(before, false, null, false, false);
+        new LayerAdder(comp)
+                .atPosition(ABOVE_ACTIVE)
+                .noRefresh()
+                .add(before);
         comp.deleteLayer(after, false, true);
 
         // restore the original mask view mode of the text layer
         if (before.hasMask()) {
-            maskViewMode.activate(before);
+            maskViewMode.activate(before, "rasterize undone");
         }
     }
 
@@ -61,7 +67,10 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(after, false, null, false, false);
+        new LayerAdder(comp)
+                .atPosition(ABOVE_ACTIVE)
+                .noRefresh()
+                .add(after);
         comp.deleteLayer(before, false, true);
     }
 

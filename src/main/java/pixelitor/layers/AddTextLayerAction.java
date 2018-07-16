@@ -17,25 +17,26 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that adds a new text layer.
+ * An Action that adds a new text layer to the active composition.
  */
-public class AddTextLayerAction extends AbstractAction implements ActiveImageChangeListener {
+public class AddTextLayerAction extends AbstractAction
+        implements ActiveImageChangeListener {
+
     public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
 
     private AddTextLayerAction() {
-        super("Add Text Layer", IconUtils.loadIcon("add_text_layer.png"));
+        super("Add Text Layer", Icons.load("add_text_layer.png"));
         putValue(SHORT_DESCRIPTION, "Adds a new text layer.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
@@ -54,12 +55,7 @@ public class AddTextLayerAction extends AbstractAction implements ActiveImageCha
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
     }
 }

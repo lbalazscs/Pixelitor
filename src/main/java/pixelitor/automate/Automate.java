@@ -20,9 +20,7 @@ package pixelitor.automate;
 import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.ValidatedDialog;
 import pixelitor.io.Directories;
 import pixelitor.io.FileExtensionUtils;
 import pixelitor.io.OpenSaveManager;
@@ -33,12 +31,12 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * Utility class with static methods to support batch processing
+ * Utility class with static methods for batch processing
  */
 public class Automate {
     private static final String OVERWRITE_YES = "Yes";
@@ -57,7 +55,6 @@ public class Automate {
      * with the given {@link CompAction}
      */
     public static void processEachFile(CompAction action,
-                                       boolean closeImagesAfterDone,
                                        String dialogTitle) {
         File lastOpenDir = requireNonNull(Directories.getLastOpenDir());
         if (!lastOpenDir.exists()) {
@@ -92,18 +89,15 @@ public class Automate {
 
                     System.out.println("Processing " + file.getName());
 
-                    // do it in two separate EDT tasks so that
-                    // it is visible what is happening
-                    Runnable edtOpenFile = () -> OpenSaveManager.openFile(file);
-                    Runnable edtProcess = () -> processFile(file, action, lastSaveDir, closeImagesAfterDone);
-                    try {
-                        EventQueue.invokeAndWait(edtOpenFile);
-                        // the second task runs only after all the
-                        // EDT painting from the first one is finished
-                        EventQueue.invokeAndWait(edtProcess);
-                    } catch (InterruptedException | InvocationTargetException e) {
-                        Messages.showException(e);
-                    }
+                    OpenSaveManager.openFileAsync(file)
+                            .thenApplyAsync(
+                                    comp -> Automate.process(comp, action),
+                                    EventQueue::invokeLater)
+                            .thenComposeAsync(
+                                    comp -> saveAndClose(comp, lastSaveDir),
+                                    EventQueue::invokeLater)
+                            .exceptionally(Messages::showExceptionOnEDT)
+                            .join();
 
                     if (stopProcessing) {
                         break;
@@ -117,13 +111,11 @@ public class Automate {
         worker.execute();
     }
 
-    private static void processFile(File file,
-                                    CompAction action,
-                                    File lastSaveDir,
-                                    boolean closeImagesAfterDone) {
+    private static Composition process(Composition comp,
+                                       CompAction action) {
         assert EventQueue.isDispatchThread();
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        System.out.println("Automate::processFile: CALLED, comp = " + comp.getName());
 
         ImageComponent ic = comp.getIC();
 
@@ -131,12 +123,19 @@ public class Automate {
         action.process(comp);
         ic.paintImmediately(ic.getBounds());
 
+        return comp;
+    }
+
+    private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
         OutputFormat outputFormat = OutputFormat.getLastUsed();
-
-        String inputFileName = file.getName();
+        String inputFileName = comp.getFile().getName();
         String outFileName = FileExtensionUtils.replaceExt(inputFileName, outputFormat.toString());
-
+        ImageComponent ic = comp.getIC();
         File outputFile = new File(lastSaveDir, outFileName);
+        CompletableFuture<Void> retVal = null;
+
+        // so that it doesn't ask to save again after we just saved it
+        comp.setDirty(false);
 
         if (outputFile.exists() && (!overwriteAll)) {
             JOptionPane pane = new JOptionPane(String.format("File %s already exists. Overwrite?", outputFile),
@@ -158,48 +157,30 @@ public class Automate {
 
             switch (answer) {
                 case OVERWRITE_YES:
-                    outputFormat.saveComp(comp, outputFile, false);
+                    retVal = comp.saveAsync(outputFile, outputFormat, false);
                     break;
                 case OVERWRITE_YES_ALL:
-                    outputFormat.saveComp(comp, outputFile, false);
+                    retVal = comp.saveAsync(outputFile, outputFormat, false);
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    if (closeImagesAfterDone) {
-                        OpenSaveManager.warnAndCloseImage(ic);
-                    }
+                    OpenSaveManager.warnAndCloseImage(ic);
                     stopProcessing = true;
-                    return;
+                    return CompletableFuture.completedFuture(null);
             }
         } else { // the file does not exist or overwrite all was pressed previously
             ic.paintImmediately(ic.getBounds());
-            outputFormat.saveComp(comp, outputFile, false);
+            retVal = comp.saveAsync(outputFile, outputFormat, false);
         }
-        if (closeImagesAfterDone) {
-            OpenSaveManager.warnAndCloseImage(ic);
-        }
+        OpenSaveManager.warnAndCloseImage(ic);
         stopProcessing = false;
-    }
-
-    /**
-     * Lets the user select the input and output directory properties of the application.
-     *
-     * @param allowToBeTheSame
-     * @param dialogTitle
-     * @return true if a selection was made, false if the operation was cancelled
-     */
-    public static boolean selectInputAndOutputDir(boolean allowToBeTheSame, String dialogTitle) {
-        OpenSaveDirsPanel p = new OpenSaveDirsPanel(allowToBeTheSame);
-        ValidatedDialog chooser = new ValidatedDialog(p, PixelitorWindow.getInstance(), dialogTitle);
-        chooser.setVisible(true);
-        if (!chooser.isOkPressed()) {
-            return false;
+        if (retVal != null) {
+            return retVal;
+        } else {
+            return CompletableFuture.completedFuture(null);
         }
-        p.saveValues();
-
-        return true;
     }
 }

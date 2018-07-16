@@ -22,13 +22,13 @@ import pixelitor.Composition;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.toolhandlers.ToolHandlerChain;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
@@ -156,7 +156,7 @@ public abstract class Tool implements KeyListener {
     }
 
     public void randomize() {
-        Utils.randomizeGUIWidgetsOn(settingsPanel);
+        GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
     public void setClipFor(Graphics2D g, ImageComponent ic) {
@@ -233,12 +233,9 @@ public abstract class Tool implements KeyListener {
 
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
         assert Tools.currentTool == this;
-        oldIC.repaint();
-        resetStateToInitial();
-    }
-
-    public void newImageOpened(Composition comp) {
-        assert Tools.currentTool == this;
+        if (oldIC != null) {
+            oldIC.repaint();
+        }
         resetStateToInitial();
     }
 

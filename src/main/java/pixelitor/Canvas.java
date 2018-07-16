@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.Symmetry;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -26,11 +27,8 @@ import java.awt.geom.Area;
 import java.io.Serializable;
 
 /**
- * The painting canvas represents the size of the composition.
+ * The canvas represents the size of the composition.
  * A layer can be bigger than the canvas if it is partially hidden.
- *
- * If a Composition is deserialized, then the Canvas is also deserialized,
- * and later associated with the (transient!) ImageComponent
  */
 public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
@@ -74,6 +72,8 @@ public class Canvas implements Serializable {
 
         // also update the component space values
         recalcCoSize();
+
+        Canvas.activeCanvasImSizeChanged(this);
     }
 
     /**
@@ -116,14 +116,14 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the width in component space
+     * Returns the (zoomed) width in component space
      */
     public int getCoWidth() {
         return zoomedWidth;
     }
 
     /**
-     * Returns the height in component space
+     * Returns the (zoomed) height in component space
      */
     public int getCoHeight() {
         return zoomedHeight;
@@ -150,6 +150,10 @@ public class Canvas implements Serializable {
         Area result = new Area(shape);
         result.intersect(compBounds);
         return result;
+    }
+
+    public static void activeCanvasImSizeChanged(Canvas canvas) {
+        Symmetry.setCanvas(canvas);
     }
 
     @Override

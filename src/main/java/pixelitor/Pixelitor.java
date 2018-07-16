@@ -22,7 +22,6 @@ import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.gui.GUIMessageHandler;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
@@ -36,12 +35,12 @@ import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.plaf.MenuBarUI;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.awt.geom.Rectangle2D;
@@ -105,14 +104,9 @@ public class Pixelitor {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
         setLookAndFeel();
-        Messages.setMessageHandler(new GUIMessageHandler());
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
-
-//        if (JVM.isMac) {
-//            setupMacMenuBar(pw);
-//        }
 
         if (args.length > 0) {
             openFilesGivenAsCLArguments(args);
@@ -129,22 +123,6 @@ public class Pixelitor {
         afterStartTestActions(pw);
     }
 
-    // used to work but in newer Macs it doesn't
-    private static void setupMacMenuBar(PixelitorWindow pw) {
-        JMenuBar menuBar = pw.getJMenuBar();
-        try {
-            // this property is respected only by the Aqua look-and-feel...
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            // ...so set the look-and-feel for the menu only to Aqua
-
-            //noinspection ClassNewInstance
-            menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI")
-                    .newInstance());
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
     private static void setLookAndFeel() {
         try {
             String lfClass = getLFClassName();
@@ -158,10 +136,27 @@ public class Pixelitor {
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {
-                OpenSaveManager.openFile(f);
+                OpenSaveManager.openFileAsync(f);
             } else {
                 Messages.showError("File not found", "The file \"" + f.getAbsolutePath() + "\" does not exist");
             }
+        }
+    }
+
+    public static String getLFClassName() {
+        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+    }
+
+    public static void exitApp(PixelitorWindow pw) {
+        if (ImageComponents.thereAreUnsavedChanges()) {
+            String msg = "There are unsaved changes. Are you sure you want to exit?";
+            if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
+                pw.setVisible(false);
+                AppPreferences.savePrefsAndExit();
+            }
+        } else {
+            pw.setVisible(false);
+            AppPreferences.savePrefsAndExit();
         }
     }
 
@@ -218,7 +213,7 @@ public class Pixelitor {
         ImageComponent ic = ImageComponents.getActiveIC();
         Layer layer = ic.getComp()
                 .getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(ic, layer);
+        MaskViewMode.SHOW_MASK.activate(ic, layer, "after-start test");
     }
 
     private static void clickTool(Tool tool) {
@@ -240,23 +235,17 @@ public class Pixelitor {
             //noinspection InfiniteLoopStatement
             while (true) {
                 Utils.sleep(1, TimeUnit.SECONDS);
-                // this will run on a background thread
-                // and keeps putting this EDT task on the EDT
-                Runnable switchTask = () -> {
+                Runnable changeToolOnEDTTask = () -> {
                     Tool newTool = Tools.getRandomTool();
                     clickTool(newTool);
                 };
                 try {
-                    SwingUtilities.invokeAndWait(switchTask);
+                    SwingUtilities.invokeAndWait(changeToolOnEDTTask);
                 } catch (InterruptedException | InvocationTargetException e) {
                     e.printStackTrace();
                 }
             }
         };
         new Thread(backgroundTask).start();
-    }
-
-    public static String getLFClassName() {
-        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
     }
 }

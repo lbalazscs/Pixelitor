@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import pixelitor.Canvas;
 import pixelitor.io.OpenSaveManager;
+import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -27,11 +28,13 @@ import javax.swing.event.InternalFrameListener;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.beans.PropertyVetoException;
 
 /**
  * An {@link ImageWindow} used in the "internal frames" UI.
  */
-public class ImageFrame extends JInternalFrame implements ImageWindow, InternalFrameListener {
+public class ImageFrame extends JInternalFrame
+        implements ImageWindow, InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
@@ -55,8 +58,10 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
 
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-        ImageComponents.userChangedActiveImage(ic);
-        ic.onActivation();
+        // We can get here as the result of a user click or as part
+        // of a programmatic activation, but it shouldn't matter as all
+        // activation takes place in the following method
+        ImageComponents.imageActivated(ic);
     }
 
     @Override
@@ -87,6 +92,15 @@ public class ImageFrame extends JInternalFrame implements ImageWindow, InternalF
 
     @Override
     public void internalFrameOpened(InternalFrameEvent e) {
+    }
+
+    @Override
+    public void select() {
+        try {
+            setSelected(true);
+        } catch (PropertyVetoException e) {
+            Messages.showException(e);
+        }
     }
 
     public void setToNaturalSize() {

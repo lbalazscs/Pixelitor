@@ -17,13 +17,14 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 
 import java.awt.geom.Rectangle2D;
@@ -64,9 +65,8 @@ public class Crop implements CompAction {
             assert comp.hasSelection();
             comp.deselect(false);
         } else {
-            // if this is a crop started from the crop tool
-            // we still could have a selection that needs to be
-            // cropped
+            // if this crop was started from the crop tool, there
+            // still could be a selection that needs to be cropped
             comp.cropSelection(imCropRect);
         }
 
@@ -89,15 +89,47 @@ public class Crop implements CompAction {
         if (!ic.isMock()) { // not in a test
             ic.revalidate();
 
-            // otherwise if before the crop the internal frame started
+            // if before the crop the internal frame started
             // at large negative coordinates, after the crop it
-            // could become unreachable
+            // could become unreachable, so move it
             ic.ensurePositiveLocation();
         }
         comp.imageChanged(FULL, true);
 
-        AppLogic.activeCompSizeChanged(comp);
         Messages.showInStatusBar("Image cropped to "
                 + newWidth + " x " + newHeight + " pixels.");
+    }
+
+    /**
+     * Crops the active image based on the crop tool
+     */
+    public static void toolCropActiveImage(boolean allowGrowing) {
+        try {
+            ImageComponents.onActiveComp(comp -> {
+                Rectangle2D cropRect = Tools.CROP.getCropRect().getIm();
+                new Crop(cropRect, false, allowGrowing).process(comp);
+                comp.repaint();
+            });
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    /**
+     * Crops the active image based on the selection bounds
+     */
+    public static void selectionCropActiveImage() {
+        try {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            if (comp != null) {
+                //noinspection CodeBlock2Expr
+                comp.onSelection(sel -> {
+                    new Crop(sel.getShapeBounds(), true, true)
+                            .process(comp);
+                });
+            }
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
     }
 }

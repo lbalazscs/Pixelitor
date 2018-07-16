@@ -31,6 +31,11 @@ import java.awt.event.WindowEvent;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.FlowLayout.CENTER;
+import static java.awt.FlowLayout.RIGHT;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
@@ -46,8 +51,8 @@ public class DialogBuilder {
     private boolean addCancelButton = true;
     private JComponent form;
     private boolean addScrollBars;
-    private JFrame frameParent;
-    private JDialog dialogParent;
+    private JFrame frameOwner;
+    private JDialog dialogOwner;
     private String title;
     private boolean reconfigureGlobalKeyWatch = true;
     private boolean modal = true;
@@ -64,6 +69,7 @@ public class DialogBuilder {
     private boolean validateWhenCanceled = false;
 
     private Supplier<JDialog> dialogFactory;
+    private String name;
 
     public DialogBuilder() {
     }
@@ -73,11 +79,11 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder parent(Window window) {
+    public DialogBuilder owner(Window window) {
         if (window instanceof JFrame) {
-            frameParent = (JFrame) window;
+            frameOwner = (JFrame) window;
         } else if (window instanceof JDialog) {
-            dialogParent = (JDialog) window;
+            dialogOwner = (JDialog) window;
         } else {
             throw new IllegalStateException(window == null
                     ? "null window"
@@ -86,25 +92,46 @@ public class DialogBuilder {
         return this;
     }
 
+    /**
+     * Sets the name property of the dialog (for AssertJ-Swing tests)
+     */
+    public DialogBuilder name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    /**
+     * Sets an alternative text for the "OK" button
+     */
     public DialogBuilder okText(String s) {
         this.okText = s;
         return this;
     }
 
+    /**
+     * Sets an alternative text for the "Cancel" button
+     */
     public DialogBuilder cancelText(String s) {
         this.cancelText = s;
         return this;
     }
 
-    public DialogBuilder form(JComponent form) {
+    /**
+     * Uses the given component as the contents of the dialog.
+     */
+    public DialogBuilder content(JComponent form) {
         this.form = form;
         return this;
     }
 
-    public DialogBuilder validatedForm(ValidatedForm validatedForm) {
-        this.form = validatedForm;
+    /**
+     * Uses the given component as the contents of the dialog, and also
+     * sets up validation based on it.
+     */
+    public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
+        this.form = validatedPanel;
         return validator(d -> {
-            ValidationResult validationResult = validatedForm.checkValidity();
+            ValidationResult validationResult = validatedPanel.checkValidity();
             if (validationResult.isOK()) {
                 return true; // valid, let the dialog close
             } else {
@@ -124,8 +151,8 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder withScrollbars(boolean b) {
-        this.addScrollBars = b;
+    public DialogBuilder withScrollbars() {
+        this.addScrollBars = true;
         return this;
     }
 
@@ -144,24 +171,25 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder okAction(Runnable a) {
-        this.okAction = a;
+    public DialogBuilder okAction(Runnable r) {
+        this.okAction = r;
         return this;
     }
 
-    public DialogBuilder cancelAction(Runnable a) {
-        this.cancelAction = a;
+    public DialogBuilder cancelAction(Runnable r) {
+        this.cancelAction = r;
         return this;
     }
 
     /**
-     * The dialog will close only if the given predicate evaluates to true.
+     * When OK is pressed (and when canceled, if validateWhenCanceled is set),
+     * the dialog will close only if the given predicate evaluates to true.
      * The predicate must show an error dialog if it is returning false.
      * The argument of the predicate is the dialog which is built here,
-     * and can be used as the owner of the error dialog.
+     * and should be used as the owner of the error dialog.
      */
-    public DialogBuilder validator(Predicate<JDialog> a) {
-        this.validator = a;
+    public DialogBuilder validator(Predicate<JDialog> p) {
+        this.validator = p;
         return this;
     }
 
@@ -170,7 +198,19 @@ public class DialogBuilder {
         return this;
     }
 
+    /**
+     * Builds the dialog and also shows it.
+     */
     public JDialog show() {
+        JDialog d = build();
+        GUIUtils.showDialog(d);
+        return d;
+    }
+
+    /**
+     * Builds the dialog without showing it.
+     */
+    public JDialog build() {
         assert form != null : "no form";
 
         setupDefaults();
@@ -179,10 +219,10 @@ public class DialogBuilder {
         if (dialogFactory != null) {
             d = dialogFactory.get();
         } else {
-            if (frameParent != null) {
-                d = new JDialog(frameParent);
-            } else if (dialogParent != null) {
-                d = new JDialog(dialogParent);
+            if (frameOwner != null) {
+                d = new JDialog(frameOwner);
+            } else if (dialogOwner != null) {
+                d = new JDialog(dialogOwner);
             } else {
                 PixelitorWindow pw = PixelitorWindow.getInstance();
                 d = new JDialog(pw);
@@ -192,9 +232,15 @@ public class DialogBuilder {
         d.setTitle(title);
         d.setModal(modal);
 
+        if (name != null) {
+            d.setName(name);
+        }
+
         d.setLayout(new BorderLayout());
         if (addScrollBars) {
-            JScrollPane scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            JScrollPane scrollPane = new JScrollPane(form,
+                    VERTICAL_SCROLLBAR_AS_NEEDED,
+                    HORIZONTAL_SCROLLBAR_NEVER);
             d.add(scrollPane, BorderLayout.CENTER);
         } else {
             d.add(form, BorderLayout.CENTER);
@@ -230,17 +276,17 @@ public class DialogBuilder {
         JPanel southPanel = null;
         if (addOKButton || addCancelButton) {
             southPanel = new JPanel();
-            d.add(southPanel, BorderLayout.SOUTH);
+            d.add(southPanel, SOUTH);
         }
 
         if (addOKButton) {
             if (addCancelButton) { // add both
                 if (JVM.isMac) {
-                    southPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+                    southPanel.setLayout(new FlowLayout(RIGHT, 5, 5));
                     southPanel.add(cancelButton);
                     southPanel.add(okButton);
                 } else {
-                    southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+                    southPanel.setLayout(new FlowLayout(CENTER, 5, 5));
                     southPanel.add(okButton);
                     southPanel.add(cancelButton);
                 }
@@ -271,7 +317,6 @@ public class DialogBuilder {
 
 
         d.pack();
-        GUIUtils.showDialog(d);
         return d;
     }
 

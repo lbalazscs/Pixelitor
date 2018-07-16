@@ -19,7 +19,7 @@ package pixelitor.tools.gui;
 
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -44,7 +44,7 @@ public class ToolButton extends JToggleButton implements ActionListener {
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        Icon icon = IconUtils.loadIcon(tool.getIconFileName());
+        Icon icon = Icons.load(tool.getIconFileName());
         setIcon(icon);
 
         assert icon.getIconWidth() == 30;

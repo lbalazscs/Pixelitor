@@ -83,7 +83,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
             ((BatchFilterWizard) wizard).setFilter(filter);
 
-            openSaveDirsPanel.saveValues();
+            openSaveDirsPanel.rememberValues();
         }
     }, FILTER_GUI {
         @Override

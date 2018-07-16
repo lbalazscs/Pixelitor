@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -32,8 +32,8 @@ import java.awt.event.MouseEvent;
  * that shows a slider in a popup window
  */
 public class DropDownSlider extends JComponent {
-    private static final Icon downIconEnabled = IconUtils.loadIcon("dropdown_enabled.gif");
-    private static final Icon downIconDisabled = IconUtils.loadIcon("dropdown_disabled.gif");
+    private static final Icon downIconEnabled = Icons.load("dropdown_enabled.gif");
+    private static final Icon downIconDisabled = Icons.load("dropdown_disabled.gif");
 
     private final IntTextField textField;
     private JButton dropDownButton;

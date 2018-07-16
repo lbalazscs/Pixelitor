@@ -18,11 +18,13 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -73,6 +75,11 @@ public class ImageLayerTest {
                 {WithMask.NO, WithTranslation.YES},
                 {WithMask.YES, WithTranslation.YES},
         });
+    }
+
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Before
@@ -311,16 +318,16 @@ public class ImageLayerTest {
 
     @Test
     public void test_getSelectedSubImage() {
-        BufferedImage imageTT = layer.getSelectedSubImage(true, true);
+        BufferedImage imageTT = layer.getSelectedSubImage(true);
         assertThat(imageTT).isNotNull();
 
-        BufferedImage imageTF = layer.getSelectedSubImage(true, false);
+        BufferedImage imageTF = layer.getSelectedSubImage(true);
         assertThat(imageTF).isNotNull();
 
-        BufferedImage imageFT = layer.getSelectedSubImage(false, true);
+        BufferedImage imageFT = layer.getSelectedSubImage(false);
         assertThat(imageFT).isNotNull();
 
-        BufferedImage imageFF = layer.getSelectedSubImage(false, false);
+        BufferedImage imageFF = layer.getSelectedSubImage(false);
         assertThat(imageFF).isNotNull();
 
         iconUpdates.check(0, 0);

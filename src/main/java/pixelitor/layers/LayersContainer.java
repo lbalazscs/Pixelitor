@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
@@ -27,7 +26,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 
 /**
- * The part of the GUI that manages the layers of an image.
+ * The part of the GUI that manages the layers of a composition.
  */
 public class LayersContainer extends JPanel implements ActiveImageChangeListener {
     private LayersPanel layersPanel;
@@ -76,6 +75,9 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
     }
 
     private void setLayersPanel(LayersPanel newLayersPanel) {
+        if (layersPanel == newLayersPanel) {
+            return;
+        }
         if (layersPanel != null) {
             scrollPane.remove(layersPanel);
         }
@@ -89,11 +91,7 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         // the layers pane of the imageComponent is set in
         // ImageComponent.onActivation()
     }
@@ -102,12 +100,8 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         return (INSTANCE.getParent() != null);
     }
 
-    /**
-     * Each image has its own LayersPanel object, and when a new image is activated, this
-     * method is called
-     */
-    public static void showLayersPanel(LayersPanel p) {
-        INSTANCE.setLayersPanel(p);
+    public static void showLayersFor(ImageComponent ic) {
+        INSTANCE.setLayersPanel(ic.getLayersPanel());
     }
 }
 

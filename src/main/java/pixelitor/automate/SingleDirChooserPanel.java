@@ -17,11 +17,10 @@
 
 package pixelitor.automate;
 
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.BrowseFilesSupport;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedDialog;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
@@ -37,11 +36,12 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel that can be used to select a single directory
  * and optionally an output format
  */
-public class SingleDirChooserPanel extends ValidatedForm {
+public class SingleDirChooserPanel extends ValidatedPanel {
     private final BrowseFilesSupport dirChooser;
     private OutputFormatSelector outputFormatSelector;
 
-    private SingleDirChooserPanel(String label, String initialPath, String fileChooserTitle, boolean addOutputChooser) {
+    private SingleDirChooserPanel(String label, String initialPath,
+                                  String fileChooserTitle, boolean addOutputChooser) {
         dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
@@ -72,37 +72,51 @@ public class SingleDirChooserPanel extends ValidatedForm {
 
     @Override
     public ValidationResult checkValidity() {
-        // TODO
-        return ValidationResult.ok();
+        File selectedDir = getSelectedDir();
+        boolean exists = selectedDir.exists();
+        boolean isDir = selectedDir.isDirectory();
+        if (exists && isDir) {
+            return ValidationResult.ok();
+        } else {
+            if (exists) {
+                return ValidationResult.error(
+                        "The selected path "
+                        + selectedDir.getAbsolutePath()
+                        + " is not a folder.");
+            } else {
+                return ValidationResult.error(
+                        "The selected folder "
+                        + selectedDir.getAbsolutePath()
+                        + " does not exist.");
+            }
+        }
     }
 
     /**
      * Lets the user select the output directory property of the application.
-     *
-     * @param addOutputChooser
-     * @return true if a selection was made, false if the operation was cancelled
+     * Returns true if a selection was made, false if the operation was cancelled.
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
-        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:", Directories.getLastSaveDir()
-                .getAbsolutePath(), "Select Output Folder", addOutputChooser);
+        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:",
+                Directories.getLastSaveDir().getAbsolutePath(),
+                "Select Output Folder", addOutputChooser);
 
-        ValidatedDialog chooser = new ValidatedDialog(chooserPanel, PixelitorWindow.getInstance(), "Select Output Folder");
-        chooser.setVisible(true);
+        boolean[] selectionWasMade = {false};
+        new DialogBuilder()
+                .validatedContent(chooserPanel)
+                .title("Select Output Folder")
+                .okAction(() -> {
+                    File dir = chooserPanel.getSelectedDir();
+                    Directories.setLastSaveDir(dir);
+                    selectionWasMade[0] = true;
+                })
+                .show();
 
         if (addOutputChooser) {
             OutputFormat outputFormat = chooserPanel.getSelectedFormat();
             OutputFormat.setLastUsed(outputFormat);
         }
 
-        if (!chooser.isOkPressed()) {
-            return false;
-        }
-        File dir = chooserPanel.getSelectedDir();
-        if (dir.exists() && dir.isDirectory()) {
-            Directories.setLastSaveDir(dir);
-            return true;
-        }
-
-        return false;
+        return selectionWasMade[0];
     }
 }

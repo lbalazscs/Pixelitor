@@ -18,10 +18,10 @@
 package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.Layers;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.DeselectEdit;
@@ -39,7 +39,6 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
 import pixelitor.utils.debug.ImageComponentNode;
 import pixelitor.utils.test.Assertions;
 
@@ -57,7 +56,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.beans.PropertyVetoException;
 
 import static java.awt.Color.BLACK;
 
@@ -133,16 +131,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         comp.setIC(this);
         canvas = newComp.getCanvas();
 
-        // keep the zoom level, but reinitialize the
-        // internal frame size
-        setZoom(zoomLevel, null);
-
         // refresh the layer buttons
         layersPanel = new LayersPanel();
         comp.addAllLayersToGUI();
-        LayersContainer.showLayersPanel(layersPanel);
+        LayersContainer.showLayersFor(this);
 
-        newMaskViewMode.activate(this, comp.getActiveLayer());
+        newMaskViewMode.activate(this, comp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
 
         return edit;
@@ -188,12 +182,12 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public void mouseEntered(MouseEvent e) {
-//        mouseEntered is never used in the tools
+        // not used in the tools
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-//        mouseExited is never used in the tools
+        // not used in the tools
     }
 
     @Override
@@ -227,20 +221,21 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     public void close() {
         if (imageWindow != null) {
-            // this will also cause the calling of AppLogic.imageClosed via
-            // InternalImageFrame.internalFrameClosed
+            // this will also cause the calling of ImageComponents.imageClosed via
+            // ImageFrame.internalFrameClosed
             imageWindow.dispose();
         }
         comp.dispose();
     }
 
-    public void onActivation() {
-        try {
-            getImageWindow().setSelected(true);
-        } catch (PropertyVetoException e) {
-            Messages.showException(e);
+    public void activateUI(boolean selectWindow) {
+        if (selectWindow) {
+            // it might be necessary to programmatically select a window:
+            // for example if in the frames UI a window is closed,
+            // another one is set to be the active one
+            getImageWindow().select();
         }
-        LayersContainer.showLayersPanel(layersPanel);
+        LayersContainer.showLayersFor(this);
     }
 
     public double getViewScale() {
@@ -385,8 +380,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     /**
-     * Makes sure that not the whole area is repainted, only the canvas and that only
-     * inside the visible area of scrollbars
+     * Makes sure that not the whole area is repainted, only the canvas,
+     * and only inside the visible area of scrollbars
      */
     private static Rectangle setVisibleCanvasClip(Graphics g, double canvasStartX, double canvasStartY, int maxWidth, int maxHeight) {
         // if there are scollbars, this is the visible area
@@ -403,7 +398,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     /**
-     * Repaints only a region of the image, called from the brush tools
+     * Repaints only a region of the image
      */
     public void updateRegion(PPoint start, PPoint end, int thickness) {
         int startX = start.getCoX();
@@ -577,6 +572,11 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);
+
+        onSizeChanged();
+    }
+
+    private void onSizeChanged() {
         updateCanvasLocation();
 
         // one can zoom an inactive image with the mouse wheel,
@@ -599,7 +599,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
             setSize(Math.max(myWidth, canvasCoWidth),
                     Math.max(myHeight, canvasCoHeight));
 
-            // setSize will call us again after setting the size
+            // setSize will call this method again after setting the size
             return;
         }
 
@@ -717,7 +717,7 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {
-            AppLogic.numLayersChanged(comp, comp.getNumLayers());
+            Layers.numLayersChanged(comp, comp.getNumLayers());
         }
     }
 

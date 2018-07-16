@@ -16,9 +16,9 @@
  */
 package pixelitor.tools.gui;
 
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.CardLayout;
@@ -50,7 +50,7 @@ public final class ToolSettingsPanelContainer extends JPanel {
         int count = getComponentCount();
         for (int i = 0; i < count; i++) {
             ToolSettingsPanel tsp = (ToolSettingsPanel) getComponent(i);
-            Utils.randomizeGUIWidgetsOn(tsp);
+            GUIUtils.randomizeGUIWidgetsOn(tsp);
         }
     }
 }

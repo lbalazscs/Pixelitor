@@ -57,7 +57,7 @@ public class AdjustmentLayer extends Layer {
         AdjustmentLayer d = new AdjustmentLayer(comp, duplicateName, filter);
 
         if (hasMask()) {
-            d.addMask(mask.duplicate(d));
+            d.addConfiguredMask(mask.duplicate(d));
         }
 
         return d;

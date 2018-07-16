@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.Layers;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.AddLayerMaskEdit;
@@ -81,8 +81,7 @@ public abstract class Layer implements Serializable {
     /**
      * Whether the edited image is the layer image or
      * the layer mask image.
-     * This flag is logically independent from the showLayerMask
-     * flag in the image component.
+     * Related to {@link MaskViewMode}.
      */
     private transient boolean maskEditing = false;
 
@@ -106,8 +105,8 @@ public abstract class Layer implements Serializable {
         in.defaultReadObject();
         layerChangeListeners = new ArrayList<>();
 
-        // We create a layer button only for real layers.
-        // For layer masks, we share the button of the real layer.
+        // Creates a layer button only for real layers, because
+        // layer masks use the button of the real layer.
         if (parent == null) { // not mask
             ui = new LayerButton(this);
 
@@ -203,7 +202,8 @@ public abstract class Layer implements Serializable {
         String previousName = name;
         this.name = newName;
 
-        if (name.equals(previousName)) { // important because this might be called twice for a single rename
+        // important because this might be called twice for a single rename
+        if (name.equals(previousName)) {
             return;
         }
 
@@ -229,7 +229,7 @@ public abstract class Layer implements Serializable {
     }
 
     boolean isActive() {
-        return comp.isActiveLayer(this);
+        return comp.isActive(this);
     }
 
     public boolean hasMask() {
@@ -276,7 +276,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged();
 
-        AppLogic.maskAddedTo(this);
+        Layers.maskAddedTo(this);
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
@@ -289,7 +289,7 @@ public abstract class Layer implements Serializable {
         }
 
         History.addEdit(edit);
-        MaskViewMode.EDIT_MASK.activate(comp, this);
+        MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
     }
 
     public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
@@ -304,14 +304,14 @@ public abstract class Layer implements Serializable {
      * Adds a mask that is already configured to be used
      * with this layer
      */
-    public void addMask(LayerMask mask) {
+    public void addConfiguredMask(LayerMask mask) {
         assert mask != null;
         assert mask.getParent() == this;
 
         this.mask = mask;
         comp.imageChanged();
         ui.addMaskIconLabel();
-        AppLogic.maskAddedTo(this);
+        Layers.maskAddedTo(this);
         mask.updateIconImage();
     }
 
@@ -326,10 +326,10 @@ public abstract class Layer implements Serializable {
 
         History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
 
-        AppLogic.maskDeletedFrom(this);
+        Layers.maskDeletedFrom(this);
         ui.deleteMaskIconLabel();
 
-        MaskViewMode.NORMAL.activate(ic, this);
+        MaskViewMode.NORMAL.activate(ic, this, "mask deleted");
     }
 
     /**

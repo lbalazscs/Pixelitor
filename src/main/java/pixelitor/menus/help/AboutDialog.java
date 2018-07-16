@@ -19,7 +19,7 @@ package pixelitor.menus.help;
 
 import pixelitor.Build;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.OKDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
@@ -27,27 +27,29 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.net.URL;
 
-public class AboutDialog extends OKDialog {
+/**
+ * The "About" dialog of the app.
+ */
+public class AboutDialog {
     private static Box box;
     public static final String HOME_PAGE = "http://pixelitor.sourceforge.net";
-
-    private AboutDialog(JFrame owner, JComponent form) {
-        super(owner, form, "About Pixelitor");
-    }
 
     public static void showDialog(PixelitorWindow pw) {
         createAboutBox();
 
         JTabbedPane tabbedPane = new JTabbedPane();
-//        tabbedPane.add("About", new JScrollPane(box));
-//        tabbedPane.add("Credits", new JScrollPane(createCreditsPanel()));
-//        tabbedPane.add("System Info", new JScrollPane(new SystemInfoPanel()));
 
         tabbedPane.add("About", box);
         tabbedPane.add("Credits", createCreditsPanel());
         tabbedPane.add("System Info", new SystemInfoPanel());
 
-        new AboutDialog(pw, tabbedPane);
+        new DialogBuilder()
+                .owner(pw)
+                .title("About Pixelitor")
+                .content(tabbedPane)
+                .withScrollbars()
+                .noCancelButton()
+                .show();
     }
 
     private static JPanel createCreditsPanel() {

@@ -89,7 +89,7 @@ public class SplashImageCreator {
                 ic.paintImmediately(ic.getBounds());
                 File f = new File(lastSaveDir, fileName);
 
-                outputFormat.saveComp(comp, f, false);
+                comp.saveAsync(f, outputFormat, false).join();
 
                 ic.close();
                 ValueNoise.reseed();

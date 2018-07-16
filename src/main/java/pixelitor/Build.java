@@ -17,6 +17,8 @@
 
 package pixelitor;
 
+import pixelitor.utils.Utils;
+
 import javax.swing.*;
 
 /**
@@ -29,6 +31,7 @@ public enum Build {
     };
 
     private final boolean development;
+    private static boolean testing = false;
 
     Build(boolean development) {
         this.development = development;
@@ -62,5 +65,14 @@ public enum Build {
         }
 
         return fixTitle;
+    }
+
+    public static synchronized boolean isTesting() {
+        return testing;
+    }
+
+    public static void setTestingMode() {
+        testing = true;
+        Utils.checkThatAssertionsAreEnabled();
     }
 }

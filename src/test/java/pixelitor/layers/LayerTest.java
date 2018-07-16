@@ -18,11 +18,13 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -66,6 +68,11 @@ public class LayerTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
@@ -75,10 +82,10 @@ public class LayerTest {
         LayerButton ui = spy(layer.getUI());
         layer.setUI(ui);
 
-        comp.addLayerNoGUI(layer);
+        comp.addLayerInInitMode(layer);
 
         ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
-        comp.addLayerNoGUI(layer2);
+        comp.addLayerInInitMode(layer2);
 
         withMask.setupFor(layer);
         LayerMask mask = null;

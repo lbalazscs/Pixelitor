@@ -21,7 +21,7 @@ import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.VisibleForTesting;
 
@@ -33,11 +33,12 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 /**
- * The thing in the "Layers" part of the GUI that represents a layer in a composition
+ * The selectable and draggable component representing
+ * a layer in the "Layers" part of the GUI.
  */
 public class LayerButton extends JToggleButton {
-    private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
-    private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
+    private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
+    private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
     private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
 
     private static final String uiClassID = "LayerButtonUI";
@@ -124,11 +125,11 @@ public class LayerButton extends JToggleButton {
         initLayerNameEditor(layer);
 
         if (layer instanceof TextLayer) {
-            Icon textLayerIcon = IconUtils.getTextLayerIcon();
+            Icon textLayerIcon = Icons.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
             layerIconLabel.setToolTipText("<html><b>Double-click</b> to edit the text layer.");
         } else if (layer instanceof AdjustmentLayer) {
-            Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
+            Icon adjLayerIcon = Icons.getAdjLayerIcon();
             layerIconLabel = new JLabel(adjLayerIcon);
         } else {
             layerIconLabel = new JLabel("", null, CENTER);
@@ -139,7 +140,7 @@ public class LayerButton extends JToggleButton {
             public void mouseClicked(MouseEvent e) {
                 int clickCount = e.getClickCount();
                 if (clickCount == 1) {
-                    MaskViewMode.NORMAL.activate(layer);
+                    MaskViewMode.NORMAL.activate(layer, "layer icon clicked");
                 } else {
                     if (layer instanceof TextLayer) {
                         ((TextLayer) layer).edit(PixelitorWindow.getInstance());
@@ -323,7 +324,9 @@ public class LayerButton extends JToggleButton {
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel
-                .setToolTipText("<html><b>Shift-click</b> to disable/enable,<br><b>Alt-click</b> to show mask/layer,<br><b>Right-click</b> for more options");
+                .setToolTipText("<html><b>Shift-click</b> to disable/enable," +
+                        "<br><b>Alt-click</b> to show mask/layer," +
+                        "<br><b>Right-click</b> for more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel, "maskIcon");
@@ -337,22 +340,24 @@ public class LayerButton extends JToggleButton {
                 boolean altClick = e.isAltDown();
                 boolean shiftClick = e.isShiftDown();
                 if (altClick && shiftClick) {
+                    String reason = "mask icon shift-alt-clicked";
                     // shift-alt-click switches to RUBYLITH except when
                     // it is already RUBYLITH
                     ImageComponent ic = layer.getComp().getIC();
                     if (ic.getMaskViewMode() == MaskViewMode.RUBYLITH) {
-                        MaskViewMode.EDIT_MASK.activate(ic, layer);
+                        MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
                     } else {
-                        MaskViewMode.RUBYLITH.activate(ic, layer);
+                        MaskViewMode.RUBYLITH.activate(ic, layer, reason);
                     }
                 } else if (altClick) {
+                    String reason = "mask icon alt-clicked";
                     // alt-click switches to SHOW_MASK except when it
                     // already is in SHOW_MASK
                     ImageComponent ic = layer.getComp().getIC();
                     if (ic.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
-                        MaskViewMode.EDIT_MASK.activate(ic, layer);
+                        MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
                     } else {
-                        MaskViewMode.SHOW_MASK.activate(ic, layer);
+                        MaskViewMode.SHOW_MASK.activate(ic, layer, reason);
                     }
                 } else if (shiftClick) {
                     // shift-click disables except when it is already disabled
@@ -362,7 +367,7 @@ public class LayerButton extends JToggleButton {
 
                     // don't change SHOW_MASK into EDIT_MASK
                     if (ic.getMaskViewMode() == MaskViewMode.NORMAL) {
-                        MaskViewMode.EDIT_MASK.activate(layer);
+                        MaskViewMode.EDIT_MASK.activate(layer, "mask icon clicked");
                     }
                 }
             }

@@ -18,11 +18,9 @@
 package pixelitor.gui;
 
 import javax.swing.*;
-import java.beans.PropertyVetoException;
 
 /**
- * A component that contains an {@link ImageComponent}
- * (not directly, but inside a JScrollPane).
+ * A component that contains an {@link ImageComponent} inside a JScrollPane.
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
  * Some of the methods make sense only for internal frames, not for tabs.
  */
@@ -36,8 +34,11 @@ public interface ImageWindow {
 
     void dispose();
 
-    void setSelected(boolean b) throws PropertyVetoException;
+    void select();
 
+    /**
+     * Used only for internal frames.
+     */
     void setTitle(String title);
 
     /**

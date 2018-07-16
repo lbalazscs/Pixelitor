@@ -21,9 +21,10 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Resize;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -41,7 +42,7 @@ import java.text.ParseException;
 /**
  * The GUI for the resize dialog
  */
-public class ResizePanel extends JPanel implements KeyListener, ItemListener {
+public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 
     private final JCheckBox constrainProportionsCB;
@@ -151,7 +152,6 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                 heightTF.setText(doubleFormatter.format(newHeightInPercent));
             }
         }
-//        updateFilter();
     }
 
     @Override
@@ -231,20 +231,18 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                 }
             }
         }
-//        updateFilter();
     }
 
-    private boolean validData() {
+    @Override
+    public ValidationResult checkValidity() {
         if (getNewWidth() == 0 || getNewHeight() == 0) {
-            validData = false;
-            errorMessage = "Width and height cannot be 0";
+            return ValidationResult.error("Width and height cannot be 0");
         }
-
-        return validData;
-    }
-
-    private String getErrorMessage() {
-        return errorMessage;
+        if (validData) {
+            return ValidationResult.ok();
+        } else {
+            return ValidationResult.error(errorMessage);
+        }
     }
 
     private int getNewWidth() {
@@ -257,18 +255,12 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
 
     public static void showInDialog(Composition comp) {
         ResizePanel p = new ResizePanel(comp.getCanvas());
-        OKCancelDialog d = new OKCancelDialog(p, "Resize") {
-            @Override
-            protected void okAction() {
-                if (!p.validData()) {
-                    Dialogs.showErrorDialog(this, "Error", p.getErrorMessage());
-                    return;
-                }
-                new Resize(p.getNewWidth(), p.getNewHeight(), false).process(comp);
-                close();
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .validatedContent(p)
+                .title("Resize")
+                .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
+                        .process(comp))
+                .show();
     }
 
     public static void resizeActiveImage() {

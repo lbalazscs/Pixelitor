@@ -60,12 +60,7 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, A
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        onNewComp(comp);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         Composition comp = newIC.getComp();
         onNewComp(comp);
     }

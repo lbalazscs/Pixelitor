@@ -136,7 +136,7 @@ public class PartialImageEdit extends FadeableEdit {
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             previousImage = ImageUtils.getSelectionSizedPartFrom(
-                    previousImage, selection, true, dr.getTX(), dr.getTY());
+                    previousImage, selection, dr.getTX(), dr.getTY());
         }
 
         return previousImage;

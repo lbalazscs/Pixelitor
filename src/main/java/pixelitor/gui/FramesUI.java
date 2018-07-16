@@ -24,7 +24,8 @@ import java.beans.PropertyVetoException;
 import java.util.List;
 
 /**
- * An user interface where the edited images are in internal frames
+ * A user interface ({@link ImageAreaUI} implementation)
+ * where the edited images are in internal frames
  */
 public class FramesUI extends JDesktopPane implements ImageAreaUI {
     private static final int CASCADE_HORIZONTAL_SHIFT = 15;
@@ -39,7 +40,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     public void activateIC(ImageComponent ic) {
         ImageFrame frame = (ImageFrame) ic.getImageWindow();
         assert frame != null;
-        getDesktopManager().activateFrame(frame);
+        activateFrame(frame);
     }
 
     @Override
@@ -57,15 +58,18 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         ic.setImageWindow(frame);
 
         this.add(frame);
+        activateFrame(frame);
+
+        cascadeIndex++;
+    }
+
+    private void activateFrame(ImageFrame frame) {
         try {
             frame.setSelected(true);
-            this.getDesktopManager().activateFrame(frame);
-            ImageComponents.newImageOpened(ic.getComp());
         } catch (PropertyVetoException e) {
             Messages.showException(e);
         }
-
-        cascadeIndex++;
+        this.getDesktopManager().activateFrame(frame);
     }
 
     public void cascadeWindows() {

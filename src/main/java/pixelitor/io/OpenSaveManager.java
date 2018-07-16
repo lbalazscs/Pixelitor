@@ -17,8 +17,8 @@
 
 package pixelitor.io;
 
-import org.xml.sax.SAXException;
 import pixelitor.Composition;
+import pixelitor.ThreadPool;
 import pixelitor.automate.SingleDirChooserPanel;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
@@ -33,13 +33,15 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import javax.xml.parsers.ParserConfigurationException;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Utility class with static methods related to opening and saving files.
@@ -50,46 +52,50 @@ public class OpenSaveManager {
     private OpenSaveManager() {
     }
 
-    public static void openFile(File file) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-
-        Runnable r = () -> {
-            Composition comp = createCompositionFromFile(file);
-            if(comp != null) { // there was no decoding problem
+    public static CompletableFuture<Composition> openFileAsync(File file) {
+        CompletableFuture<Composition> cf =
+                loadCompFromFileAsync(file);
+        cf.thenAcceptAsync(comp -> {
+            if (comp != null) { // there was no decoding problem
                 ImageComponents.addAsNewImage(comp);
                 RecentFilesMenu.getInstance().addFile(file);
+                Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
             }
-        };
-        Utils.runWithBusyCursor(r);
+        }, EventQueue::invokeLater);
+        return cf;
     }
 
-    public static Composition createCompositionFromFile(File file) {
-        Composition comp;
+    public static CompletableFuture<Composition> loadCompFromFileAsync(File file) {
+        CompletableFuture<Composition> cf;
+
         String ext = FileExtensionUtils.getExt(file.getName());
         if ("pxc".equals(ext)) {
-            comp = openLayered(file, "pxc");
+            cf = loadLayered(file, "pxc");
         } else if ("ora".equals(ext)) {
-            comp = openLayered(file, "ora");
+            cf = loadLayered(file, "ora");
         } else {
-            comp = openSimpleFile(file);
+            cf = loadSimpleFile(file);
         }
 
-        if (comp != null) {
-            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
-        }
-        return comp;
+        return cf.exceptionally(Messages::showExceptionOnEDT);
     }
 
-    // opens an a file with a single-layer image format
-    private static Composition openSimpleFile(File file) {
-        BufferedImage img = null;
-        try {
-//            img = ImageIO.read(file);
-            img = TrackedIO.read(file);
-        } catch (IOException ex) {
-            Messages.showException(ex);
+    // loads an a file with a single-layer image format
+    private static CompletableFuture<Composition> loadSimpleFile(File file) {
+        return CompletableFuture.supplyAsync(
+                () -> TrackedIO.uncheckedRead(file), ThreadPool.getExecutor())
+                .handle((img, e) -> handleDecodingError(file, img))
+                .thenApply(img -> Composition.fromImage(img, file, null));
+    }
+
+    private static BufferedImage handleDecodingError(File file, BufferedImage img) {
+        if (img != null) {
+            return img;
         }
-        if (img == null) {
+
+        // if we have a null image here, it means a decoding error,
+        // even if no exception was thrown
+        EventQueue.invokeLater(() -> {
             String message = String.format("Could not load \"%s\" as an image file.", file.getName());
 
             String ext = FileExtensionUtils.getExt(file.getName());
@@ -97,36 +103,32 @@ public class OpenSaveManager {
                 message += "\nNote that TIFF files are supported only when Pixelitor is running on Java 9+.";
                 message += "\nCurrently it is running on Java 8.";
             }
-
             Messages.showError("Error", message);
-            return null;
-        }
-
-        return Composition.fromImage(img, file, null);
+        });
+        return null;
     }
 
-    private static Composition openLayered(File selectedFile, String type) {
-        Composition comp = null;
-        try {
-            switch (type) {
-                case "pxc":
-                    comp = PXCFormat.read(selectedFile);
-                    break;
-                case "ora":
-                    comp = OpenRaster.read(selectedFile);
-                    break;
-                default:
-                    throw new IllegalStateException("type = " + type);
-            }
-        } catch (NotPxcFormatException | ParserConfigurationException | IOException | SAXException e) {
-            Messages.showException(e);
+    private static CompletableFuture<Composition> loadLayered(File selectedFile, String type) {
+        Callable<Composition> loadTask;
+        switch (type) {
+            case "pxc":
+                loadTask = () -> PXCFormat.read(selectedFile);
+                break;
+            case "ora":
+                loadTask = () -> OpenRaster.read(selectedFile);
+                break;
+            default:
+                throw new IllegalStateException("type = " + type);
         }
-        return comp;
+
+        return CompletableFuture.supplyAsync(
+                Utils.toSupplier(loadTask),
+                ThreadPool.getExecutor());
     }
 
-    public static boolean save(boolean saveAs) {
+    public static void save(boolean saveAs) {
         Composition comp = ImageComponents.getActiveCompOrNull();
-        return save(comp, saveAs);
+        save(comp, saveAs);
     }
 
     /**
@@ -139,7 +141,7 @@ public class OpenSaveManager {
         } else {
             File file = comp.getFile();
             OutputFormat outputFormat = OutputFormat.fromFile(file);
-            outputFormat.saveComp(comp, file, true);
+            comp.saveAsync(file, outputFormat, true);
             return true;
         }
     }
@@ -149,25 +151,22 @@ public class OpenSaveManager {
         Objects.requireNonNull(image);
         Objects.requireNonNull(format);
 
-        Runnable r = () -> {
-            try {
-                if (format == OutputFormat.JPG) {
-                    JpegOutput.writeJPG(image, selectedFile, jpegSettings);
-                } else {
-//                    ImageIO.write(image, format.toString(), selectedFile);
-                    TrackedIO.write(image, format.toString(), selectedFile);
-                }
-            } catch (IOException e) {
-                if (e.getMessage().contains("another process")) {
-                    String msg = String.format("Cannot save to\n%s\nbecause this file is being used by another program.",
-                            selectedFile.getAbsolutePath());
-                    Messages.showError("Cannot save", msg);
-                } else {
-                    Messages.showException(e);
-                }
+        try {
+            if (format == OutputFormat.JPG) {
+                JpegOutput.writeJPG(image, selectedFile, jpegSettings);
+            } else {
+                TrackedIO.write(image, format.toString(), selectedFile);
             }
-        };
-        Utils.runWithBusyCursor(r);
+        } catch (IOException e) {
+            if (e.getMessage().contains("another process")) {
+                String msg = String
+                        .format("Cannot save to\n%s\nbecause this file is being used by another program.",
+                                selectedFile.getAbsolutePath());
+                Messages.showError("Cannot save", msg);
+            } else {
+                Messages.showException(e);
+            }
+        }
     }
 
     public static void warnAndCloseImage(ImageComponent ic) {
@@ -214,11 +213,12 @@ public class OpenSaveManager {
         }
     }
 
-    public static void openAllImagesInDir(File dir) {
+    public static void openAllImagesInDirAsync(File dir) {
         File[] files = FileExtensionUtils.listSupportedInputFilesIn(dir);
         if (files != null) {
             for (File file : files) {
-                openFile(file);
+                // TODO make sure only one file is read at a time
+                openFileAsync(file);
             }
         }
     }
@@ -277,12 +277,11 @@ public class OpenSaveManager {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {
                 File f = new File(saveDir, "all_formats." + outputFormat.toString());
-                outputFormat.saveComp(comp, f, false);
+                comp.saveAsync(f, outputFormat, false).join();
             }
         }
     }
 
-    // called by the "Save All Images to Folder..." menu
     public static void saveAllImagesToDir() {
         boolean cancelled = !SingleDirChooserPanel.selectOutputDir(true);
         if (cancelled) {
@@ -306,10 +305,11 @@ public class OpenSaveManager {
 
                     ImageComponent ic = imageComponents.get(i);
                     Composition comp = ic.getComp();
-                    String fileName = String.format("%04d_%s.%s", i, Utils.toFileName(comp.getName()), outputFormat.toString());
+                    String fileName = String
+                            .format("%04d_%s.%s", i, Utils.toFileName(comp.getName()), outputFormat.toString());
                     File f = new File(saveDir, fileName);
                     progressMonitor.setNote("Saving " + fileName);
-                    outputFormat.saveComp(comp, f, false);
+                    comp.saveAsync(f, outputFormat, false).join();
                 }
                 progressMonitor.close();
                 return null;
@@ -329,17 +329,6 @@ public class OpenSaveManager {
             FileChoosers.setDefaultSaveExtensions();
             jpegSettings = JpegSettings.DEFAULTS;
         }
-    }
-
-    public static void afterSaveActions(Composition comp, File file, boolean addToRecentMenus) {
-        // TODO for a multilayered image this should be set only if it was saved in a layered format?
-        comp.setDirty(false);
-
-        comp.setFile(file);
-        if(addToRecentMenus) {
-            RecentFilesMenu.getInstance().addFile(file);
-        }
-        Messages.showFileSavedMessage(file);
     }
 }
 

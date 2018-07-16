@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.crop.CropTool;
@@ -60,29 +59,21 @@ public class Tools {
     static {
         ImageComponents.addActiveImageChangeListener(new ActiveImageChangeListener() {
             @Override
+            public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+                currentTool.activeImageHasChanged(oldIC, newIC);
+            }
+
+            @Override
             public void noOpenImageAnymore() {
                 currentTool.noOpenImageAnymore();
-            }
-
-            @Override
-            public void newImageOpened(Composition comp) {
-                currentTool.newImageOpened(comp);
-            }
-
-            @Override
-            public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-                currentTool.activeImageHasChanged(oldIC, newIC);
             }
         });
     }
 
-    /**
-     * All the subclass tools in an array.
-     */
-    private static final Tool[] allTools =
-            {MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
-                    SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
-                    PEN, SHAPES, HAND, ZOOM};
+    private static final Tool[] allTools = {
+            MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
+            SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
+            PEN, SHAPES, HAND, ZOOM};
 
     public static void setDefaultTool() {
         changeTo(BRUSH);

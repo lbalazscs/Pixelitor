@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
 import java.awt.Rectangle;
@@ -92,7 +92,7 @@ public class ParamSet {
     private void addRandomizeAction() {
         FilterAction randomizeAction = new FilterAction("Randomize Settings",
                 e -> randomize(),
-                IconUtils.getDiceIcon(),
+                Icons.getDiceIcon(),
                 "Randomize the settings for this filter.",
                 "randomize");
         actionList.add(randomizeAction);
@@ -101,7 +101,7 @@ public class ParamSet {
     private void addResetAllAction() {
         FilterAction resetAllAction = new FilterAction("Reset All",
                 e -> reset(),
-                IconUtils.getWestArrowIcon(),
+                Icons.getWestArrowIcon(),
                 "Reset all settings to their default values.",
                 "resetAll");
         actionList.add(resetAllAction);

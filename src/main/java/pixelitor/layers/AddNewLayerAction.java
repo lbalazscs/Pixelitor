@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -29,14 +29,16 @@ import java.awt.event.ActionEvent;
 import static java.awt.event.ActionEvent.CTRL_MASK;
 
 /**
- * An Action that adds a new layer
+ * An Action that adds a new layer to the active composition
  */
 public class AddNewLayerAction extends AbstractAction implements ActiveImageChangeListener {
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
 
     private AddNewLayerAction() {
-        super("Add New Layer", IconUtils.loadIcon("add_layer.gif"));
-        putValue(SHORT_DESCRIPTION, "<html>Adds a new transparent image layer.<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
+        super("Add New Layer", Icons.load("add_layer.gif"));
+        putValue(SHORT_DESCRIPTION,
+                "<html>Adds a new transparent image layer." +
+                        "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
     }
@@ -54,12 +56,7 @@ public class AddNewLayerAction extends AbstractAction implements ActiveImageChan
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
     }
 }

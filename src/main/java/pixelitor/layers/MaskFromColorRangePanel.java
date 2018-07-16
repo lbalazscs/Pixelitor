@@ -47,7 +47,7 @@ import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
 
 /**
- * Mask from Color Range
+ * The GUI for "Mask from Color Range"
  */
 public class MaskFromColorRangePanel extends JPanel {
     public static final String NAME = "Mask from Color Range";
@@ -250,7 +250,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
         new DialogBuilder()
                 .title(NAME)
-                .form(form)
+                .content(form)
                 .okText(okText)
                 .okAction(() -> {
                     BufferedImage maskImage = form.getMaskImage();

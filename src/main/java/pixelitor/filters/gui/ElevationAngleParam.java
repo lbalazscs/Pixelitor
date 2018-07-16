@@ -40,16 +40,17 @@ public class ElevationAngleParam extends AngleParam {
     }
 
     @Override
-    public void setValueInRadians(double r, boolean trigger) {
+    public void setValue(double r, boolean trigger) {
         if (r > 1.5 * Math.PI) {
-            // values between 1.5*PI and 2*PI are coming when the user drags the slider, they are OK
+            // values between 1.5*PI and 2*PI are coming
+            // when the user drags the slider, they are OK
         } else if (r > 0) {
             r = 0;
         } else if (r < -Math.PI / 2) {
             r = -Math.PI / 2;
         }
 
-        super.setValueInRadians(r, trigger);
+        super.setValue(r, trigger);
     }
 
     @Override

@@ -28,12 +28,13 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.Messages;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,8 +43,8 @@ import static org.junit.Assert.assertSame;
 
 public class CompositionCreationTest {
     @BeforeClass
-    public static void setup() {
-        Messages.setMessageHandler(new TestMessageHandler());
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Test
@@ -57,7 +58,16 @@ public class CompositionCreationTest {
     }
 
     private static void testSingleLayerRead(File f) {
-        Composition comp = OpenSaveManager.createCompositionFromFile(f);
+        CompletableFuture<Composition> cf = OpenSaveManager.loadCompFromFileAsync(f);
+        checkLoadFuture(cf);
+
+        Composition comp;
+        try {
+            comp = cf.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(1);
         assertThat(comp.getCanvasImWidth()).isEqualTo(10);
@@ -65,8 +75,25 @@ public class CompositionCreationTest {
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
+    private static void checkLoadFuture(CompletableFuture<Composition> cf) {
+        assertThat(cf)
+                .isNotCancelled()
+                .isNotCompletedExceptionally();
+        // usually isNotDone is also true, but since these are very
+        // small files, the reading could be finished by now
+    }
+
     private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        Composition comp = OpenSaveManager.createCompositionFromFile(f);
+        CompletableFuture<Composition> cf = OpenSaveManager.loadCompFromFileAsync(f);
+        checkLoadFuture(cf);
+
+        Composition comp;
+        try {
+            comp = cf.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(2);
         assertThat(comp.getCanvasImWidth()).isEqualTo(10);

@@ -17,7 +17,6 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
@@ -51,9 +50,9 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         ZoomLevel[] values = ZoomLevel.values();
 
         zoomSlider = new JSlider(0, values.length - 1);
-        // normally the JSlider vertical size would be 21,
-        // but let's save 4 pixels so that the status bar height
-        // does not increase because of this control
+
+        // Make sure that the status bar height does not increase because of this control.
+        // Normally the JSlider vertical size in Nimbus would be 21.
         zoomSlider.setPreferredSize(new Dimension(200, PREFERRED_HEIGHT));
 
         zoomDisplay = new JLabel("100%");
@@ -107,17 +106,7 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         b.setToolTipText(tooltip);
         b.setPreferredSize(buttonSize);
 
-//        b.setBorder(null);
         b.setBorder(BorderFactory.createEmptyBorder());
-
-//        b.setBorderPainted(false);
-//        b.setMargin(new Insets(0,0,0,0));
-//        b.setMaximumSize(buttonSize);
-//        b.putClientProperty("JComponent.sizeVariant", "large");
-
-//        UIDefaults def = new UIDefaults();
-//        def.put("Button.contentMargins", new Insets(2,8,2,8));
-//        b.putClientProperty("Nimbus.Overrides", def);
 
         add(b);
         return b;
@@ -146,13 +135,7 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        ZoomLevel zoomLevel = comp.getIC().getZoomLevel();
-        setToNewZoom(zoomLevel);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setToNewZoom(newIC.getZoomLevel());
     }
 

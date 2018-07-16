@@ -20,6 +20,7 @@ package pixelitor.utils.test;
 import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Fade;
@@ -99,6 +100,7 @@ import java.util.concurrent.TimeUnit;
 
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -931,7 +933,10 @@ public class RandomGUITest {
         TextLayer textLayer = new TextLayer(comp);
         TextSettings randomSettings = TextSettings.createRandomSettings(rand);
         textLayer.setSettings(randomSettings);
-        comp.addLayer(textLayer, true, "New Random Text Layer", true, false);
+        new LayerAdder(comp)
+                .withHistory("New Random Text Layer")
+                .atPosition(ABOVE_ACTIVE)
+                .add(textLayer);
         textLayer.setName(randomSettings.getText(), true);
     }
 
@@ -948,7 +953,10 @@ public class RandomGUITest {
         log("new adj layer");
         Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, true, "New Random Adj Layer", true, false);
+        new LayerAdder(comp)
+                .withHistory("New Random Adj Layer")
+                .atPosition(ABOVE_ACTIVE)
+                .add(adjustmentLayer);
     }
 
     private static void randomSetLayerMaskEditMode() {

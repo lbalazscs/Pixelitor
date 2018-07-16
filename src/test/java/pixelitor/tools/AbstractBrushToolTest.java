@@ -19,11 +19,13 @@ package pixelitor.tools;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
@@ -73,6 +75,12 @@ public class AbstractBrushToolTest {
                 {CLONE},
                 {SMUDGE},
         });
+    }
+
+    @BeforeClass
+    public static void setupClass() {
+        TestHelper.setupMockFgBgSelector();
+        Build.setTestingMode();
     }
 
     @Before

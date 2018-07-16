@@ -26,6 +26,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
+/**
+ * Represents a "merge down" operation
+ */
 public class MergeDownEdit extends PixelitorEdit {
     private final ImageEdit imageEdit;
     private final DeleteLayerEdit deleteLayerEdit;
@@ -62,7 +65,7 @@ public class MergeDownEdit extends PixelitorEdit {
 
         // restore the original mask view mode of the merged layer
         if (layer.hasMask()) {
-            maskViewMode.activate(layer);
+            maskViewMode.activate(layer, "merge down undone");
         }
     }
 

@@ -16,7 +16,6 @@
  */
 package pixelitor.menus;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
@@ -39,12 +38,7 @@ public class OpenImageEnabledMenuItem extends JMenuItem implements ActiveImageCh
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-
     }
 }

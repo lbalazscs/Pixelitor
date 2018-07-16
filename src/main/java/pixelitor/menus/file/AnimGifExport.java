@@ -20,7 +20,7 @@ package pixelitor.menus.file;
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimation;
 import pixelitor.utils.Messages;
@@ -33,7 +33,7 @@ public class AnimGifExport {
     private AnimGifExport() {
     }
 
-    public static void start(JFrame dialogParent) {
+    public static void start(JFrame dialogOwner) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
@@ -43,14 +43,13 @@ public class AnimGifExport {
         }
 
         ExportPanel p = new ExportPanel(comp.getNumLayers());
-        OKCancelDialog d = new OKCancelDialog(p, dialogParent, "Export Animated GIF", "Export", "Cancel", false) {
-            @Override
-            protected void okAction() {
-                close();
-                export(comp, p.getDelayMillis(), p.isPingPong());
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .title("Export Animated GIF")
+                .owner(dialogOwner)
+                .content(p)
+                .okText("Export")
+                .okAction(() -> export(comp, p.getDelayMillis(), p.isPingPong()))
+                .show();
     }
 
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {

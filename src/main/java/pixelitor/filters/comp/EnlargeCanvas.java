@@ -21,7 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
@@ -102,16 +102,16 @@ public class EnlargeCanvas implements CompAction {
     }
 
     private static void showInDialog() {
-        EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
-        OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
-            @Override
-            protected void okAction() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                new EnlargeCanvas(panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).process(comp);
-                close();
-            }
-        };
-        d.setVisible(true);
+        EnlargeCanvasPanel p = new EnlargeCanvasPanel();
+        new DialogBuilder()
+                .title("Enlarge Canvas")
+                .content(p)
+                .okAction(() -> {
+                    Composition comp = ImageComponents.getActiveCompOrNull();
+                    new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
+                            .process(comp);
+                })
+                .show();
     }
 
     static class EnlargeCanvasPanel extends JPanel {

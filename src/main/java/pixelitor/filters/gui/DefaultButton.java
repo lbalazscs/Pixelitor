@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -27,7 +27,7 @@ import java.awt.Dimension;
  * Resettable is not set to its default value
  */
 public class DefaultButton extends JButton {
-    private static final Icon WEST_ARROW_ICON = IconUtils.getWestArrowIcon();
+    private static final Icon WEST_ARROW_ICON = Icons.getWestArrowIcon();
     private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
     private final Resettable resettable;
 

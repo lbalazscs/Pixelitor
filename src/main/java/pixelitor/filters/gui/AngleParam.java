@@ -29,11 +29,12 @@ import java.awt.Rectangle;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for selecting an angle
+ * A filter parameter for selecting an angle.
  */
 public class AngleParam extends AbstractFilterParam {
-    private double angleInRadians; // as returned form Math.atan2, this is between -PI and PI
-    private double defaultInRadians = 0.0;
+    // as returned form Math.atan2, this is between -PI and PI
+    private double angle;
+    private double defaultVal = 0.0;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
@@ -41,9 +42,9 @@ public class AngleParam extends AbstractFilterParam {
     public AngleParam(String name, double defaultValue) {
         super(name, ALLOW_RANDOMIZE);
 
-        setValueInRadians(defaultValue, false);
+        setValue(defaultValue, false);
 
-        defaultInRadians = defaultValue;
+        defaultVal = defaultValue;
     }
 
     @Override
@@ -61,12 +62,12 @@ public class AngleParam extends AbstractFilterParam {
             degrees = 360 - degrees;
         }
         double r = Math.toRadians(degrees);
-        setValueInRadians(r, trigger);
+        setValue(r, trigger);
     }
 
-    public void setValueInRadians(double r, boolean trigger) {
-        if (angleInRadians != r) {
-            angleInRadians = r;
+    public void setValue(double r, boolean trigger) {
+        if (angle != r) {
+            angle = r;
             fireStateChanged();
         }
         if (trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
@@ -78,11 +79,11 @@ public class AngleParam extends AbstractFilterParam {
 
     @SuppressWarnings("unused")
     public int getValueInNonIntuitiveDegrees() {
-        return (int) Math.toDegrees(angleInRadians);
+        return (int) Math.toDegrees(angle);
     }
 
     public int getValueInDegrees() {
-        int degrees = (int) Math.toDegrees(angleInRadians);
+        int degrees = (int) Math.toDegrees(angle);
         if (degrees <= 0) {
             degrees = -degrees;
         } else {
@@ -95,19 +96,19 @@ public class AngleParam extends AbstractFilterParam {
      * Returns the "Math.atan2" radians: the value between -PI and PI
      */
     public double getValueInRadians() {
-        return angleInRadians;
+        return angle;
     }
 
     /**
      * Returns the value in the range of 0 and 2*PI, and in the intuitive direction
      */
     public double getValueInIntuitiveRadians() {
-        return Utils.transformAtan2AngleToIntuitive(angleInRadians);
+        return Utils.atan2AngleToIntuitive(angle);
     }
 
     @Override
     public boolean isSetToDefault() {
-        return (angleInRadians == defaultInRadians);
+        return (angle == defaultVal);
     }
 
     @Override
@@ -138,13 +139,13 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        setValueInRadians(defaultInRadians, trigger);
+        setValue(defaultVal, trigger);
     }
 
     @Override
     public void randomize() {
         double random = Math.random();
-        setValueInRadians((random * 2 * Math.PI - Math.PI), false);
+        setValue((random * 2 * Math.PI - Math.PI), false);
     }
 
     public AbstractAngleUI getAngleSelectorUI() {
@@ -161,7 +162,7 @@ public class AngleParam extends AbstractFilterParam {
             // this is good because this object has greater precision than the RangeParam
             @Override
             public void reset(boolean trigger) {
-                if (angleInRadians != defaultInRadians) {
+                if (angle != defaultVal) {
                     AngleParam.this.reset(trigger);
                 }
             }
@@ -206,7 +207,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', angleInRadians = %.2f]",
-                getClass().getSimpleName(), getName(), angleInRadians);
+        return String.format("%s[name = '%s', angle = %.2f]",
+                getClass().getSimpleName(), getName(), angle);
     }
 }

@@ -17,7 +17,6 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.Composition;
 import pixelitor.filters.Fade;
 import pixelitor.filters.FilterAction;
 import pixelitor.gui.ImageComponent;
@@ -64,12 +63,10 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Act
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(false);
-    }
 
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        setEnabled(History.canFade());
+// the following should be very slightly better, but goes into a complex territory:
+//        setEnabled(History.canFade());
     }
 }

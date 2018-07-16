@@ -25,7 +25,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
@@ -40,7 +40,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * Static methods for managing history and undo/redo for all open images
+ * Static methods for managing history and undo/redo
  */
 public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
@@ -49,11 +49,16 @@ public class History {
     private static boolean ignoreEdits = false;
 
     static {
-        setUndoLevels(AppPreferences.loadUndoLevels());
+        if (Build.isTesting()) {
+            // make sure we have enough undo for the tests
+            setUndoLevels(15);
+        } else {
+            setUndoLevels(AppPreferences.loadUndoLevels());
+        }
     }
 
     public static final Action UNDO_ACTION = new MenuAction("Undo",
-            IconUtils.getUndoIcon(), AllowedLayerType.ANY) {
+            Icons.getUndoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.undo();
@@ -61,7 +66,7 @@ public class History {
     };
 
     public static final Action REDO_ACTION = new MenuAction("Redo",
-            IconUtils.getRedoIcon(), AllowedLayerType.ANY) {
+            Icons.getRedoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.redo();
@@ -71,14 +76,12 @@ public class History {
     private History() {
     }
 
-    /**
-     * This is used to notify the menu items
-     */
     public static void notifyMenus(PixelitorEdit edit) {
         undoableEditSupport.postEdit(edit);
     }
 
-    public static void addEdit(boolean addToHistory, Supplier<PixelitorEdit> supplier) {
+    public static void addEdit(boolean addToHistory,
+                               Supplier<PixelitorEdit> supplier) {
         if (addToHistory) {
             addEdit(supplier.get());
         }
@@ -97,7 +100,8 @@ public class History {
             undoManager.discardAllEdits();
         }
 
-        numUndoneEdits = 0; // reset BEFORE posting, so that the fade menu item can become enabled
+        // reset BEFORE posting, so that the fade menu item can become enabled
+        numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
@@ -120,10 +124,13 @@ public class History {
         }
 
         try {
-            numUndoneEdits++; // increase it before calling undoManager.undo() so that the result of undo is not fadeable
+            // increase it before calling undoManager.undo()
+            // so that the result of undo is not fadeable
+            numUndoneEdits++;
             undoManager.undo();
         } catch (CannotUndoException e) {
-            Messages.showInfo("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
+            Messages.showInfo("No undo available",
+                    "No undo available, probably because the undo image was discarded in order to save memory");
         }
     }
 
@@ -185,7 +192,7 @@ public class History {
 
     /**
      * If the last edit in the history is a FadeableEdit for the given
-     * image layer, return it, otherwise return empty Optional
+     * image layer, return it, otherwise return an empty Optional
      */
     public static Optional<FadeableEdit> getPreviousEditForFade(Drawable dr) {
         if (numUndoneEdits > 0 || dr == null) {
@@ -239,7 +246,7 @@ public class History {
         undoManager.showHistory();
     }
 
-    // for debugging only
+    @VisibleForTesting
     public static PixelitorEdit getLastEdit() {
         return undoManager.getLastEdit();
     }

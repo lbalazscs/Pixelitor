@@ -22,7 +22,7 @@ import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.utils.Messages;
@@ -42,7 +42,7 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 /**
  * The settings for the tweening animation output
  */
-public class OutputSettingsPanel extends ValidatedForm implements TextFieldValidator {
+public class OutputSettingsPanel extends ValidatedPanel implements TextFieldValidator {
     private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;

@@ -19,7 +19,7 @@ package pixelitor.automate;
 
 import pixelitor.gui.utils.BrowseFilesSupport;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
@@ -33,15 +33,15 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel for selecting an opening directory,
  * a saving directory, and a saving format
  */
-class OpenSaveDirsPanel extends ValidatedForm {
+class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport inputChooser = new BrowseFilesSupport(Directories.getLastOpenDirPath(), "Select Input Folder", DIRECTORY);
     private final BrowseFilesSupport outputChooser = new BrowseFilesSupport(Directories.getLastSaveDirPath(), "Select Output Folder", DIRECTORY);
-    private final boolean allowToBeTheSame;
+    private final boolean allowSameDirs;
 
     private final OutputFormatSelector outputFormatSelector;
 
-    OpenSaveDirsPanel(boolean allowToBeTheSame) {
-        this.allowToBeTheSame = allowToBeTheSame;
+    OpenSaveDirsPanel(boolean allowSameDirs) {
+        this.allowSameDirs = allowSameDirs;
         setLayout(new GridBagLayout());
         GridBagHelper gbh = new GridBagHelper(this);
 
@@ -68,19 +68,20 @@ class OpenSaveDirsPanel extends ValidatedForm {
         File selectedOutDir = outputChooser.getSelectedFile();
 
         ValidationResult v = ValidationResult.ok()
-                .andTrue(selectedInputDir.exists(),
+                .addErrorIfNot(selectedInputDir.exists(),
                         "The selected input folder " + selectedInputDir.getAbsolutePath() + " does not exist.")
-                .andTrue(selectedOutDir.exists(),
+                .addErrorIfNot(selectedOutDir.exists(),
                         "The selected output folder " + selectedInputDir.getAbsolutePath() + " does not exist.");
 
-        if (!allowToBeTheSame && selectedInputDir.equals(selectedOutDir)) {
-            ValidationResult err = ValidationResult.error("The input and output folders must be different.");
+        if (!allowSameDirs && selectedInputDir.equals(selectedOutDir)) {
+            ValidationResult err = ValidationResult.error(
+                    "The input and output folders must be different.");
             return v.and(err);
         }
         return v;
     }
 
-    public void saveValues() {
+    public void rememberValues() {
         File in = inputChooser.getSelectedFile();
         if (in.exists() && in.isDirectory()) {
             Directories.setLastOpenDir(in);

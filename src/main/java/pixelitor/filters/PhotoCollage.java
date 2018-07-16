@@ -109,15 +109,18 @@ public class PhotoCollage extends ParametrizedFilter {
         Rectangle imageRect = new Rectangle(fullImageRect);
         imageRect.grow(-margin, -margin);
 
-        Paint imagePaint = new TexturePaint(src, new Rectangle2D.Float(0, 0, src.getWidth(), src.getHeight()));
+        Paint imagePaint = new TexturePaint(src,
+                new Rectangle2D.Float(0, 0, src.getWidth(), src.getHeight()));
 
-        // the shadow image must be larger than the image size so that there is room for soft shadows
+        // the shadow image must be larger than the image size
+        // so that there is room for soft shadows
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
 
         int shadowImgWidth = xSize + 2 * softShadowRoom;
         int shadowImgHeight = ySize + 2 * softShadowRoom;
-        BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(shadowImgWidth, shadowImgHeight);
+        BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
+                shadowImgWidth, shadowImgHeight);
 
         Graphics2D gShadow = shadowImage.createGraphics();
         gShadow.setColor(BLACK);
@@ -128,12 +131,15 @@ public class PhotoCollage extends ParametrizedFilter {
                     .filter(shadowImage, shadowImage);
         }
 
-        Point2D offset = Utils.calculateOffset(shadowDistance.getValue(), shadowAngleParam.getValueInRadians());
+        Point2D offset = Utils.offsetFromPolar(
+                shadowDistance.getValue(),
+                shadowAngleParam.getValueInRadians());
         int shadowOffsetX = (int) offset.getX();
         int shadowOffsetY = (int) offset.getY();
 
         // multiply makes sense only if the shadow color is not black
-        Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER, shadowOpacityParam.getValueAsPercentage());
+        Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
+                shadowOpacityParam.getValueAsPercentage());
 
         for (int i = 0; i < numImages; i++) {
             // Calculate the transform of the image

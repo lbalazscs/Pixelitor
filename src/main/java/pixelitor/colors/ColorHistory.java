@@ -102,8 +102,8 @@ public class ColorHistory {
 
         new DialogBuilder()
                 .title(dialogTitle)
-                .parent(window)
-                .form(form)
+                .owner(window)
+                .content(form)
                 .notModal()
                 .noOKButton()
                 .noCancelButton()

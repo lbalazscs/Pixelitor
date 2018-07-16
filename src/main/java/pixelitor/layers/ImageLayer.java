@@ -101,7 +101,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private transient TmpDrawingLayer tmpDrawingLayer;
 
     /**
-     * The image content of this image layer
+     * The regular image content of this image layer
      */
     protected transient BufferedImage image = null;
 
@@ -214,7 +214,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         d.setBlendingMode(blendingMode, false, false, false);
 
         if (hasMask()) {
-            d.addMask(mask.duplicate(d));
+            d.addConfiguredMask(mask.duplicate(d));
         }
 
         return d;
@@ -237,8 +237,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * If there is no selection, returns the newImage
-     * If there is a selection, copies newImage into src
+     * If there is no selection, returns the newImg
+     * If there is a selection, copies newImg into src
      * according to the selection, and returns src
      */
     private BufferedImage replaceSelectedPart(BufferedImage src, BufferedImage newImg) {
@@ -293,7 +293,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Initializes a preview session. This is called when
+     * Initializes a preview session. Called when
      * a new dialog appears, right before creating the adjustment panel.
      */
     @Override
@@ -303,7 +303,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (comp.hasSelection()) {
             // if we have a selection, then the preview image reference cannot be simply
             // the image reference, because when we draw into the preview image, we would
-            // also draw on the real image, and after cancel we would still have the changed version.
+            // also draw on the real image, and after cancel we would still have the
+            // changed version.
             previewImage = ImageUtils.copyImage(image);
         } else {
             // if there is no selection, then there is no problem, because
@@ -334,7 +335,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this, getSelectedSubImage(true, true),
+            ImageEdit edit = new ImageEdit(filterName, comp, this, getSelectedSubImage(true),
                     false, true);
             History.addEdit(edit);
         }
@@ -363,16 +364,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void tweenCalculatingStarted() {
-// it should run on EDT, except in unit tests
-//        assert SwingUtilities.isEventDispatchThread();
         assert state == NORMAL;
         startPreviewing();
     }
 
     @Override
     public void tweenCalculatingEnded() {
-// it should run on EDT, except in unit tests
-//        assert SwingUtilities.isEventDispatchThread();
         assert state == PREVIEW;
         stopPreviewing();
     }
@@ -605,7 +602,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         setTranslation(-newTXAbs, -newTYAbs);
 
-//        setImageWithSelection(dest);
         setImage(dest);
     }
 
@@ -689,7 +685,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public BufferedImage getFilterSourceImage() {
         if (filterSourceImage == null) {
-            filterSourceImage = getSelectedSubImage(false, true);
+            filterSourceImage = getSelectedSubImage(false);
         }
         return filterSourceImage;
     }
@@ -699,7 +695,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * or the image if there is no selection.
      */
     @Override
-    public BufferedImage getSelectedSubImage(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected) {
+    public BufferedImage getSelectedSubImage(boolean copyIfNoSelection) {
         Selection selection = comp.getSelection();
         if (selection == null) { // no selection => return full image
             if (copyIfNoSelection) {
@@ -710,7 +706,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         // there is selection
         return ImageUtils.getSelectionSizedPartFrom(image,
-                selection, copyAndTranslateIfSelected,
+                selection,
                 getTX(), getTY());
     }
 
@@ -979,11 +975,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void updateIconImage() {
-//        Thread.dumpStack();
-
         getUI().updateLayerIconImage(this);
     }
 
+    /**
+     * Deletes the layer mask, but its effect is transferred
+     * to the transparency of the layer
+     */
     public BufferedImage applyLayerMask(boolean addToHistory) {
         // the image reference will not be replaced
         BufferedImage oldImage = ImageUtils.copyImage(image);

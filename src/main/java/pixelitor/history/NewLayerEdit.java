@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
@@ -26,19 +27,20 @@ import javax.swing.undo.CannotUndoException;
 
 /**
  * A PixelitorEdit that represents the creation of a new layer
- * (either as a new empty layer or via layer duplication)
  */
 public class NewLayerEdit extends PixelitorEdit {
     private Layer activeLayerBefore;
     private Layer newLayer;
     private final int newLayerIndex;
-    private final MaskViewMode oldViewMode;
+    private final MaskViewMode viewModeBefore;
 
-    public NewLayerEdit(String historyName, Composition comp, Layer newLayer, Layer activeLayerBefore, MaskViewMode oldViewMode) {
+    public NewLayerEdit(String historyName, Composition comp,
+                        Layer newLayer, Layer activeLayerBefore,
+                        MaskViewMode viewModeBefore) {
         super(historyName, comp);
 
         this.activeLayerBefore = activeLayerBefore;
-        this.oldViewMode = oldViewMode;
+        this.viewModeBefore = viewModeBefore;
         this.newLayer = newLayer;
         this.newLayerIndex = comp.getLayerIndex(newLayer);
     }
@@ -50,14 +52,16 @@ public class NewLayerEdit extends PixelitorEdit {
         comp.deleteLayer(newLayer, false, true);
         comp.setActiveLayer(activeLayerBefore, false);
 
-        oldViewMode.activate(comp, activeLayerBefore);
+        viewModeBefore.activate(comp, activeLayerBefore, getName() + " undone");
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.addLayer(newLayer, false, null, true, newLayerIndex);
+        new LayerAdder(comp)
+                .atIndex(newLayerIndex)
+                .add(newLayer);
     }
 
     @Override

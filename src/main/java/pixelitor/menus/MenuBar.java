@@ -18,10 +18,10 @@
 package pixelitor.menus;
 
 import com.bric.util.JVM;
-import pixelitor.AppLogic;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.NewImage;
+import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
@@ -294,7 +294,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Reload") {
             @Override
             public void onClick() {
-                ImageComponents.reloadActiveFromFile();
+                ImageComponents.reloadActiveFromFileAsync();
             }
         }, F12);
 
@@ -313,7 +313,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addAlwaysEnabledAction(new MenuAction(exitName) {
             @Override
             public void onClick() {
-                AppLogic.exitApp(pw);
+                Pixelitor.exitApp(pw);
             }
         });
 
@@ -544,17 +544,18 @@ public class MenuBar extends JMenuBar {
 
                 ((ImageLayer) layer).applyLayerMask(true);
 
-                // TODO actually this should not be necessary
+                // not necessary, as the result looks the same, but still
+                // useful because eventual problems would be spotted early
                 layer.getComp().imageChanged();
             }
         });
 
         sub.addSeparator();
 
-        MaskViewMode.NORMAL.addToMenu(sub);
-        MaskViewMode.SHOW_MASK.addToMenu(sub);
-        MaskViewMode.EDIT_MASK.addToMenu(sub);
-        MaskViewMode.RUBYLITH.addToMenu(sub);
+        MaskViewMode.NORMAL.addToMainMenu(sub);
+        MaskViewMode.SHOW_MASK.addToMainMenu(sub);
+        MaskViewMode.EDIT_MASK.addToMainMenu(sub);
+        MaskViewMode.RUBYLITH.addToMainMenu(sub);
 
         return sub;
     }

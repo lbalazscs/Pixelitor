@@ -25,6 +25,7 @@ import pixelitor.tools.custom.KiwiShape;
 import pixelitor.tools.custom.RabbitShape;
 import pixelitor.tools.custom.RandomStarShape;
 import pixelitor.tools.util.ImDrag;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Shape;
@@ -169,7 +170,7 @@ public enum ShapeType {
         @Override
         public Shape getShape(ImDrag imDrag) {
             if (unitArrow == null) {
-                unitArrow = Utils.createUnitArrow();
+                unitArrow = Shapes.createUnitArrow();
             }
 
             setCoordinates(imDrag);
@@ -182,7 +183,7 @@ public enum ShapeType {
             AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
             transform.scale(distance, distance); // originally it had a length of 1.0
             double angleInRadians = imDrag.getDrawAngle();
-            double angle = Utils.transformAtan2AngleToIntuitive(angleInRadians);
+            double angle = Utils.atan2AngleToIntuitive(angleInRadians);
             angle += Math.PI / 2;
             transform.rotate(angle);
             return transform.createTransformedShape(unitArrow);

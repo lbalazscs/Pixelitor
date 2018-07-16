@@ -22,10 +22,9 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKDialog;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.BrushAffectedArea;
 import pixelitor.tools.brushes.CloneBrush;
@@ -106,7 +105,13 @@ public class CloneTool extends BlendingModeBrushTool {
             gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
             gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
             gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
-            transformDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Clone Transform", "Close");
+            transformDialog = new DialogBuilder()
+                    .title("Clone Transform")
+                    .content(p)
+                    .notModal()
+                    .okText("Close")
+                    .noCancelButton()
+                    .show();
         });
     }
 
@@ -138,7 +143,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void startNewCloningStroke(double x, double y, boolean notWithLine) {
-        state = CLONING; // must be a new stroke after the source setting
+        state = CLONING;
 
         float scaleAbs = scaleParam.getValueAsPercentage();
         Mirror mirror = mirrorParam.getSelected();

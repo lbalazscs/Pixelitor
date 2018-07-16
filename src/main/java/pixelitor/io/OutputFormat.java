@@ -18,67 +18,51 @@ package pixelitor.io;
 
 import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * The output file format
  */
 public enum OutputFormat {
-    JPG {
+    JPG(false, false) {
+    }, PNG(false, true) {
+    }, TIFF(false, true) {
+    }, GIF(false, false) { // the format supports alpha, but the default encoder has bugs
+    }, BMP(false, false) {
+    }, PXC(true, true) {
         @Override
-        public void doSaveComposition(Composition comp, File file) {
-            BufferedImage img = comp.getCompositeImage();
-            BufferedImage finalImage = ImageUtils.convertToRGB(img, false); // no alpha support, convert first to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, this);
+        public Runnable getSaveTask(Composition comp, File file) {
+            return () -> PXCFormat.write(comp, file);
         }
-    }, PNG {
+    }, ORA(true, true) {
         @Override
-        public void doSaveComposition(Composition comp, File file) {
-            BufferedImage finalImage = comp.getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, this);
-        }
-    }, TIFF {
-        @Override
-        public void doSaveComposition(Composition comp, File file) {
-            BufferedImage finalImage = comp
-                    .getCompositeImage(); // the format supports alpha, no need to convert ARGB to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, this);
-        }
-    }, GIF {
-        @Override
-        public void doSaveComposition(Composition comp, File file) {
-            BufferedImage img = comp.getCompositeImage();
-            // the format supports alpha, but the default encoder has bugs
-            BufferedImage finalImage = ImageUtils.convertToRGB(img, false);
-
-            OpenSaveManager.saveImageToFile(file, finalImage, this);
-        }
-    }, BMP {
-        @Override
-        public void doSaveComposition(Composition comp, File file) {
-            BufferedImage compositeImage = comp.getCompositeImage();
-            BufferedImage finalImage = ImageUtils.convertToRGB(compositeImage, false); // no alpha support, convert first to RGB
-            OpenSaveManager.saveImageToFile(file, finalImage, this);
-        }
-    }, PXC {
-        @Override
-        public void doSaveComposition(Composition comp, File file) {
-            PXCFormat.write(comp, file);
-        }
-    }, ORA {
-        @Override
-        void doSaveComposition(Composition comp, File file) {
-            try {
-                OpenRaster.write(comp, file, false);
-            } catch (IOException e) {
-                Messages.showException(e);
-            }
+        public Runnable getSaveTask(Composition comp, File file) {
+            return () -> OpenRaster.uncheckedWrite(comp, file, false);
         }
     };
+
+    private final boolean layered;
+    private final boolean hasAlpha;
+
+    OutputFormat(boolean layered, boolean hasAlpha) {
+        this.layered = layered;
+        this.hasAlpha = hasAlpha;
+    }
+
+    public Runnable getSaveTask(Composition comp, File file) {
+        assert !layered; // overwritten for layered formats
+
+        return () -> {
+            BufferedImage img = comp.getCompositeImage();
+            if (!hasAlpha) {
+                // no alpha support, convert first to RGB
+                img = ImageUtils.convertToRGB(img, false);
+            }
+            OpenSaveManager.saveImageToFile(file, img, this);
+        };
+    }
 
     @Override
     public String toString() {
@@ -114,13 +98,6 @@ public enum OutputFormat {
                 throw new IllegalArgumentException("extension = " + extension);
         }
     }
-
-    public void saveComp(Composition comp, File file, boolean addToRecentMenus) {
-        doSaveComposition(comp, file);
-        OpenSaveManager.afterSaveActions(comp, file, addToRecentMenus);
-    }
-
-    abstract void doSaveComposition(Composition comp, File file);
 
     private static OutputFormat lastOutputFormat = JPG;
 

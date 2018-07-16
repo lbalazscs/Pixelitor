@@ -97,7 +97,7 @@ public class FilterTests {
                         Composition comp = dr.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
-                        outputFormat.saveComp(comp, f, false);
+                        comp.saveAsync(f, outputFormat, false).join();
 
                         if (History.canUndo()) {
                             History.undo();

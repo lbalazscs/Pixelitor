@@ -635,7 +635,7 @@ public class ImageUtils {
     }
 
     /**
-     * In contrast to BufferedImage.getSubimage, this method creates a copy of the data
+     * Unlike BufferedImage.getSubimage, this method creates a copy of the data
      */
     public static BufferedImage getCopyOfSubimage(BufferedImage src, Rectangle bounds) {
         assert src != null;
@@ -1079,7 +1079,7 @@ public class ImageUtils {
 
     public static BufferedImage getSelectionSizedPartFrom(BufferedImage src,
                                                           Selection selection,
-                                                          boolean copy, int tx, int ty) {
+                                                          int tx, int ty) {
         assert selection != null;
 
         Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
@@ -1097,11 +1097,6 @@ public class ImageUtils {
             throw new IllegalStateException();
         }
 
-        if (copy) {
-            return getCopyOfSubimage(src, bounds);
-        } else {
-            // return a subimage with shared pixels
-            return src.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
-        }
+        return getCopyOfSubimage(src, bounds);
     }
 }

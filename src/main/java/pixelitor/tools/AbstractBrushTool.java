@@ -23,9 +23,8 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.OKDialog;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
@@ -53,7 +52,7 @@ import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * Abstract superclass for all the brush-like tools.
+ * Abstract superclass for all brush-like tools.
  */
 public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
@@ -130,7 +129,13 @@ public abstract class AbstractBrushTool extends Tool {
                 e -> {
                     BrushType brushType = getBrushType();
                     JPanel p = brushType.getConfigPanel(this);
-                    settingsDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
+                    settingsDialog = new DialogBuilder()
+                            .content(p)
+                            .title("Brush Settings")
+                            .notModal()
+                            .withScrollbars()
+                            .noCancelButton()
+                            .show();
                 });
 
         brushSettingsButton.setEnabled(false);
@@ -284,11 +289,6 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void noOpenImageAnymore() {
 
-    }
-
-    @Override
-    public void newImageOpened(Composition comp) {
-        resetState();
     }
 
     @Override

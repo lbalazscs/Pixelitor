@@ -19,9 +19,9 @@ package pixelitor.automate;
 
 import pixelitor.filters.comp.CompAction;
 import pixelitor.filters.comp.Resize;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.IntTextField;
-import pixelitor.gui.utils.ValidatedDialog;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 
 import javax.swing.*;
@@ -35,61 +35,67 @@ public class BatchResize {
 
     public static void start() {
         BatchResizePanel p = new BatchResizePanel();
-        ValidatedDialog chooser = new ValidatedDialog(p, "Batch Resize");
-        chooser.setVisible(true);
-        if (!chooser.isOkPressed()) {
-            return;
-        }
+        new DialogBuilder()
+                .validatedContent(p)
+                .title("Batch Resize")
+                .okAction(() -> dialogAccepted(p))
+                .show();
+    }
+
+    private static void dialogAccepted(BatchResizePanel p) {
         p.saveValues();
 
         int maxWidth = p.getNewWidth();
         int maxHeight = p.getNewHeight();
 
         CompAction resizeAction = new Resize(maxWidth, maxHeight, true);
-        Automate.processEachFile(resizeAction, true, "Batch Resize...");
+        Automate.processEachFile(resizeAction, "Batch Resize...");
     }
 
     /**
-     * The GUI of the batch resize dialog
+     * The GUI for batch resize
      */
-    static class BatchResizePanel extends ValidatedForm {
-        private final OpenSaveDirsPanel openSaveDirsPanel = new OpenSaveDirsPanel(false);
+    static class BatchResizePanel extends ValidatedPanel {
+        private final OpenSaveDirsPanel openSaveDirsPanel;
         private final IntTextField widthTF;
         private final IntTextField heightTF;
 
         private BatchResizePanel() {
-            JPanel dimensionsPanel = new JPanel();
-            dimensionsPanel.add(new JLabel("Max Width:"));
+            JPanel sizePanel = new JPanel();
+
+            sizePanel.add(new JLabel("Max Width:"));
             widthTF = new IntTextField(5);
             widthTF.setName("widthTF");
             widthTF.setText("300");
-            dimensionsPanel.add(widthTF);
-            dimensionsPanel.add(new JLabel("Max Height:"));
+            sizePanel.add(widthTF);
+
+            sizePanel.add(new JLabel("Max Height:"));
             heightTF = new IntTextField(5);
             heightTF.setName("heightTF");
             heightTF.setText("300");
-            dimensionsPanel.add(heightTF);
+            sizePanel.add(heightTF);
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            add(dimensionsPanel);
+            add(sizePanel);
+            openSaveDirsPanel = new OpenSaveDirsPanel(false);
             add(openSaveDirsPanel);
         }
 
         @Override
         public ValidationResult checkValidity() {
             return openSaveDirsPanel.checkValidity()
-                    .andFalse(widthTF.getText()
+                    .addErrorIf(widthTF.getText()
                                     .trim()
                                     .isEmpty(),
                             "The 'width' field is empty")
-                    .andFalse(heightTF.getText()
+                    .addErrorIf(heightTF.getText()
                                     .trim()
                                     .isEmpty(),
                             "The 'height' field is empty");
         }
 
         private void saveValues() {
-            openSaveDirsPanel.saveValues();
+            openSaveDirsPanel.rememberValues();
         }
 
         private int getNewWidth() {

@@ -20,14 +20,15 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
-import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TranslatedTextPainter;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
@@ -85,27 +86,25 @@ public class TextLayer extends ContentLayer {
         MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
 
         // don't add it yet to history, only after the user chooses to press OK
-        comp.addLayer(textLayer, false, null, true, false);
+        new LayerAdder(comp).add(textLayer);
 
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
-            @Override
-            protected void okAction() {
-                close();
-                textLayer.updateLayerName();
+        TextSettingsPanel p = new TextSettingsPanel(textLayer);
+        new DialogBuilder()
+                .content(p)
+                .owner(pw)
+                .title("Create Text Layer")
+                .okAction(() -> {
+                    textLayer.updateLayerName();
 
-                // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit("New Text Layer", comp, textLayer, activeLayerBefore, oldViewMode);
-                History.addEdit(newLayerEdit);
-            }
-
-            @Override
-            protected void cancelAction() {
-                close();
-                comp.deleteLayer(textLayer, false, true);
-            }
-        };
-        d.setVisible(true);
+                    // now it is safe to add it to the history
+                    NewLayerEdit newLayerEdit = new NewLayerEdit(
+                            "New Text Layer", comp, textLayer,
+                            activeLayerBefore, oldViewMode);
+                    History.addEdit(newLayerEdit);
+                })
+                .cancelAction(() -> comp.deleteLayer(textLayer,
+                        false, true))
+                .show();
     }
 
     public void edit(PixelitorWindow pw) {
@@ -114,24 +113,15 @@ public class TextLayer extends ContentLayer {
         }
 
         TextSettings oldSettings = getSettings();
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(this);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
-            @Override
-            protected void okAction() {
-                close();
+        TextSettingsPanel p = new TextSettingsPanel(this);
 
-                commitSettings(oldSettings);
-            }
-
-            @Override
-            protected void cancelAction() {
-                close();
-
-                setSettings(oldSettings);
-                comp.imageChanged();
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .content(p)
+                .owner(pw)
+                .title("Edit Text Layer")
+                .okAction(() -> commitSettings(oldSettings))
+                .cancelAction(() -> resetOldSettings(oldSettings))
+                .show();
     }
 
     public void commitSettings(TextSettings oldSettings) {
@@ -142,6 +132,11 @@ public class TextLayer extends ContentLayer {
                 oldSettings
         );
         History.addEdit(edit);
+    }
+
+    private void resetOldSettings(TextSettings oldSettings) {
+        setSettings(oldSettings);
+        comp.imageChanged();
     }
 
     @Override
@@ -158,7 +153,7 @@ public class TextLayer extends ContentLayer {
         d.setSettings(new TextSettings(settings));
 
         if (hasMask()) {
-            d.addMask(mask.duplicate(d));
+            d.addConfiguredMask(mask.duplicate(d));
         }
 
         return d;
@@ -177,7 +172,9 @@ public class TextLayer extends ContentLayer {
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);
 
-        comp.addLayer(newImageLayer, false, null, false, false);
+        new LayerAdder(comp)
+                .noRefresh()
+                .add(newImageLayer);
         comp.deleteLayer(this, false, true);
 
         return newImageLayer;

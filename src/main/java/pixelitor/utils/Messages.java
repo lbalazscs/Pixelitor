@@ -17,18 +17,31 @@
 
 package pixelitor.utils;
 
+import pixelitor.Build;
 import pixelitor.MessageHandler;
+import pixelitor.gui.GUIMessageHandler;
 
 import java.io.File;
 
+/**
+ * Static methods for status bar and dialog messages
+ */
 public class Messages {
     private static MessageHandler msgHandler;
 
-    private Messages() { // should not be instantiated
+    static {
+        try {
+            if (Build.isTesting()) {
+                msgHandler = new TestMessageHandler();
+            } else {
+                msgHandler = new GUIMessageHandler();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void setMessageHandler(MessageHandler messageHandler) {
-        Messages.msgHandler = messageHandler;
+    private Messages() { // should not be instantiated
     }
 
     public static void showInfo(String title, String message) {
@@ -37,6 +50,13 @@ public class Messages {
 
     public static void showError(String title, String message) {
         msgHandler.showError(title, message);
+    }
+
+    public static <T> T showExceptionOnEDT(Throwable e) {
+        msgHandler.showExceptionOnEDT(e);
+        // returns a null which can be a null of the desired type...:
+        // this way it fits into CompletableFuture.exceptionally
+        return null;
     }
 
     public static void showException(Throwable e) {

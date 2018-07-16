@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppLogic;
 import pixelitor.Composition;
+import pixelitor.Layers;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -38,7 +38,7 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ActiveI
         super(false);
 
         ImageComponents.addActiveImageChangeListener(this);
-        AppLogic.addLayerChangeListener(this);
+        Layers.addLayerChangeListener(this);
 
         opacityDDSlider.addActionListener(e -> {
             if (userInteractionChange) {
@@ -75,16 +75,8 @@ public class LayerBlendingModePanel extends BlendingModePanel implements ActiveI
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        setEnabled(true);
-
-//        Layer layer = comp.getActiveLayer();
-//        activeLayerChanged(layer);
     }
 
     @Override

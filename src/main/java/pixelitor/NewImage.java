@@ -22,7 +22,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
@@ -38,12 +38,12 @@ import java.awt.image.BufferedImage;
 import static pixelitor.colors.FillType.TRANSPARENT;
 
 /**
- * Static utility methods related to creating new images
+ * Static methods for creating new images
  */
 public final class NewImage {
     private static int untitledCount = 1;
 
-    private static Dimension lastNew;
+    private static Dimension lastSize;
 
     private NewImage() {
     }
@@ -76,15 +76,15 @@ public final class NewImage {
     private static void showInDialog() {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        if (lastNew == null) {
+        if (lastSize == null) {
             //noinspection NonThreadSafeLazyInitialization
-            lastNew = AppPreferences.getNewImageSize();
+            lastSize = AppPreferences.getNewImageSize();
         }
 
-        NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
+        NewImagePanel p = new NewImagePanel(lastSize.width, lastSize.height);
         new DialogBuilder()
                 .title("New Image")
-                .validatedForm(p)
+                .validatedContent(p)
                 .okAction(() -> {
                     int selectedWidth = p.getSelectedWidth();
                     int selectedHeight = p.getSelectedHeight();
@@ -94,8 +94,8 @@ public final class NewImage {
                     addNewImage(bg, selectedWidth, selectedHeight, title);
                     untitledCount++;
 
-                    lastNew.width = selectedWidth;
-                    lastNew.height = selectedHeight;
+                    lastSize.width = selectedWidth;
+                    lastSize.height = selectedHeight;
                 })
                 .show();
     }
@@ -109,14 +109,14 @@ public final class NewImage {
         };
     }
 
-    public static Dimension getLastNew() {
-        return lastNew;
+    public static Dimension getLastSize() {
+        return lastSize;
     }
 
     /**
      * The GUI of the "New Image" dialog
      */
-    private static class NewImagePanel extends ValidatedForm {
+    private static class NewImagePanel extends ValidatedPanel {
         private final JTextField widthTF;
         private final JTextField heightTF;
 

@@ -22,7 +22,7 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.ValidatedForm;
+import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
@@ -81,7 +81,7 @@ public class TweenWizard extends Wizard {
     @Override
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
-            ValidatedForm settings = (ValidatedForm) currentPage.getPanel(this, dr);
+            ValidatedPanel settings = (ValidatedPanel) currentPage.getPanel(this, dr);
             ValidationResult validity = settings.checkValidity();
             if (!validity.isOK()) {
                 validity.showErrorDialog(dialogParent);

@@ -17,13 +17,12 @@
 
 package pixelitor.utils;
 
+import net.jafama.FastMath;
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -31,6 +30,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Toolkit;
@@ -40,7 +40,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -55,11 +54,12 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 
@@ -107,32 +107,6 @@ public final class Utils {
         return s.replaceAll("[^A-Za-z0-9_]", "_");
     }
 
-    public static void randomizeGUIWidgetsOn(JPanel panel) {
-        int count = panel.getComponentCount();
-        Random rand = new Random();
-
-        for (int i = 0; i < count; i++) {
-            Component child = panel.getComponent(i);
-            //noinspection ChainOfInstanceofChecks
-            if (child instanceof JComboBox) {
-                @SuppressWarnings("rawtypes")
-                JComboBox box = (JComboBox) child;
-
-                int itemCount = box.getItemCount();
-                box.setSelectedIndex(rand.nextInt(itemCount));
-            } else if (child instanceof JCheckBox) {
-                JCheckBox box = (JCheckBox) child;
-                box.setSelected(rand.nextBoolean());
-            } else if (child instanceof SliderSpinner) {
-                SliderSpinner spinner = (SliderSpinner) child;
-                spinner.getModel().randomize();
-            } else if (child instanceof BlendingModePanel) {
-                BlendingModePanel bmp = (BlendingModePanel) child;
-                bmp.randomize();
-            }
-        }
-    }
-
     public static String float2String(float f) {
         if (f == 0.0f) {
             return "";
@@ -154,7 +128,7 @@ public final class Utils {
         } catch (ParseException e) {
             NumberFormat englishFormat = NumberFormat.getInstance(Locale.ENGLISH);
             try {
-                // second chance: english
+                // second chance: English
                 number = englishFormat.parse(trimmed);
             } catch (ParseException e1) {
                 throw new NotANumberException(s);
@@ -224,7 +198,7 @@ public final class Utils {
         return pm;
     }
 
-    public static double transformAtan2AngleToIntuitive(double angleInRadians) {
+    public static double atan2AngleToIntuitive(double angleInRadians) {
         double angle;
         if (angleInRadians <= 0) {
             angle = -angleInRadians;
@@ -234,11 +208,11 @@ public final class Utils {
         return angle;
     }
 
-    public static Point2D calculateOffset(double distance, double angle) {
-        double offsetX = distance * Math.cos(angle);
-        double offsetY = distance * Math.sin(angle);
+    public static Point2D offsetFromPolar(double distance, double angle) {
+        double offsetX = distance * FastMath.cos(angle);
+        double offsetY = distance * FastMath.sin(angle);
 
-        return new Point2D.Double(offsetX, offsetY);
+        return new Point.Double(offsetX, offsetY);
     }
 
     public static float parseFloat(String input, float defaultValue) {
@@ -323,36 +297,22 @@ public final class Utils {
             throw new IllegalStateException("numBands = " + numBands);
         }
 
-        Raster correctlyTranslated = raster.createChild(raster.getMinX(), raster.getMinY(), raster.getWidth(), raster.getHeight(), 0, 0, null);
-        BufferedImage debugImage = new BufferedImage(colorModel, (WritableRaster) correctlyTranslated, true, null);
+        Raster correctlyTranslated = raster.createChild(
+                raster.getMinX(), raster.getMinY(),
+                raster.getWidth(), raster.getHeight(),
+                0, 0, null);
+        BufferedImage debugImage = new BufferedImage(colorModel,
+                (WritableRaster) correctlyTranslated, true, null);
         debugImage(debugImage, name);
     }
 
     public static void debugRasterWithEmptySpace(Raster raster) {
-        BufferedImage debugImage = new BufferedImage(raster.getMinX() + raster.getWidth(), raster.getMinY() + raster.getHeight(), TYPE_4BYTE_ABGR_PRE);
+        BufferedImage debugImage = new BufferedImage(
+                raster.getMinX() + raster.getWidth(),
+                raster.getMinY() + raster.getHeight(),
+                TYPE_4BYTE_ABGR_PRE);
         debugImage.setData(raster);
         debugImage(debugImage);
-    }
-
-    @SuppressWarnings("SuspiciousNameCombination")
-    public static GeneralPath createUnitArrow() {
-        float arrowWidth = 0.3f;
-        float arrowHeadWidth = 0.7f;
-        float arrowHeadStart = 0.6f;
-
-        float halfArrowWidth = arrowWidth / 2.0f;
-        float halfArrowHeadWidth = arrowHeadWidth / 2;
-
-        GeneralPath unitArrow = new GeneralPath();
-        unitArrow.moveTo(0.0f, -halfArrowWidth);
-        unitArrow.lineTo(0.0f, halfArrowWidth);
-        unitArrow.lineTo(arrowHeadStart, halfArrowWidth);
-        unitArrow.lineTo(arrowHeadStart, halfArrowHeadWidth);
-        unitArrow.lineTo(1.0f, 0.0f);
-        unitArrow.lineTo(arrowHeadStart, -halfArrowHeadWidth);
-        unitArrow.lineTo(arrowHeadStart, -halfArrowWidth);
-        unitArrow.closePath();
-        return unitArrow;
     }
 
     public static void checkThatAssertionsAreEnabled() {
@@ -529,6 +489,22 @@ public final class Utils {
             }
         }
         return new Point2D.Double(endX, endY);
+    }
+
+    /**
+     * Transforms a Callable into a Supplier by wrapping
+     * the checked exceptions in runtime exceptions
+     */
+    public static <T> Supplier<T> toSupplier(Callable<T> callable) {
+        return () -> {
+            try {
+                return callable.call();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 }
 

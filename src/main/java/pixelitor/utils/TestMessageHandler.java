@@ -15,7 +15,9 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.utils;
+
+import pixelitor.MessageHandler;
 
 /**
  * A non-GUI message handler for tests
@@ -63,6 +65,12 @@ public class TestMessageHandler implements MessageHandler {
 
     @Override
     public void showException(Throwable e, Thread t) {
+        throw new AssertionError(e);
+    }
+
+    @Override
+    public void showExceptionOnEDT(Throwable e) {
+        // still on this thread
         throw new AssertionError(e);
     }
 }
