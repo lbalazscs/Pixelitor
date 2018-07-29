@@ -17,8 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.MessageHandler;
-
 /**
  * A non-GUI message handler for tests
  */
@@ -28,15 +26,8 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void startProgress(String msg, int max) {
-    }
-
-    @Override
-    public void updateProgress(int value) {
-    }
-
-    @Override
-    public void stopProgress() {
+    public ProgressHandler startProgress(String msg, int max) {
+        return ProgressHandler.EMPTY;
     }
 
     @Override

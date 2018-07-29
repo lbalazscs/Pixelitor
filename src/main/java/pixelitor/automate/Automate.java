@@ -22,9 +22,10 @@ import pixelitor.filters.comp.CompAction;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Directories;
-import pixelitor.io.FileExtensionUtils;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.FileUtils;
+import pixelitor.io.OpenSave;
 import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -66,7 +67,7 @@ public class Automate {
             throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
         }
 
-        File[] inputFiles = FileExtensionUtils.listSupportedInputFilesIn(lastOpenDir);
+        File[] inputFiles = FileUtils.listSupportedInputFilesIn(lastOpenDir);
         if (inputFiles.length == 0) {
             Messages.showInfo("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
             return;
@@ -89,7 +90,7 @@ public class Automate {
 
                     System.out.println("Processing " + file.getName());
 
-                    OpenSaveManager.openFileAsync(file)
+                    OpenSave.openFileAsync(file)
                             .thenApplyAsync(
                                     comp -> Automate.process(comp, action),
                                     EventQueue::invokeLater)
@@ -129,7 +130,7 @@ public class Automate {
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
         OutputFormat outputFormat = OutputFormat.getLastUsed();
         String inputFileName = comp.getFile().getName();
-        String outFileName = FileExtensionUtils.replaceExt(inputFileName, outputFormat.toString());
+        String outFileName = FileUtils.replaceExt(inputFileName, outputFormat.toString());
         ImageComponent ic = comp.getIC();
         File outputFile = new File(lastSaveDir, outFileName);
         CompletableFuture<Void> retVal = null;
@@ -137,6 +138,7 @@ public class Automate {
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
+        SaveSettings saveSettings = new SaveSettings(outputFormat, outputFile);
         if (outputFile.exists() && (!overwriteAll)) {
             JOptionPane pane = new JOptionPane(String.format("File %s already exists. Overwrite?", outputFile),
                     JOptionPane.WARNING_MESSAGE);
@@ -157,25 +159,25 @@ public class Automate {
 
             switch (answer) {
                 case OVERWRITE_YES:
-                    retVal = comp.saveAsync(outputFile, outputFormat, false);
+                    retVal = comp.saveAsync(saveSettings, false);
                     break;
                 case OVERWRITE_YES_ALL:
-                    retVal = comp.saveAsync(outputFile, outputFormat, false);
+                    retVal = comp.saveAsync(saveSettings, false);
                     overwriteAll = true;
                     break;
                 case OVERWRITE_NO:
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    OpenSaveManager.warnAndCloseImage(ic);
+                    OpenSave.warnAndCloseImage(ic);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
             }
         } else { // the file does not exist or overwrite all was pressed previously
             ic.paintImmediately(ic.getBounds());
-            retVal = comp.saveAsync(outputFile, outputFormat, false);
+            retVal = comp.saveAsync(saveSettings, false);
         }
-        OpenSaveManager.warnAndCloseImage(ic);
+        OpenSave.warnAndCloseImage(ic);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;

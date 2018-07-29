@@ -15,31 +15,32 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.gui;
-
-import javax.swing.*;
+package pixelitor.utils;
 
 /**
- * A component that contains an {@link ImageComponent} inside a JScrollPane.
- * It can be either a JInternalFrame or a tab in a JTabbedPane.
- * Some of the methods make sense only for internal frames, not for tabs.
+ * Abstracts away messages sent through the GUI
+ * in order to enable GUI-independent testing.
  */
-public interface ImageWindow {
-    /**
-     * Sets the size of the internal frame.
-     */
-    void setSize(int width, int height);
+public interface MessageHandler {
+    // *** status bar messages ***
 
-    JScrollPane getScrollPane();
+    void showInStatusBar(String msg);
 
-    void dispose();
+    ProgressHandler startProgress(String msg, int max);
 
-    void select();
+    // *** dialog messages ***
 
-    void updateTitle(ImageComponent ic);
+    void showInfo(String title, String msg);
 
-    /**
-     * Important only for the cropping with internal frames.
-     */
-    void ensurePositiveLocation();
+    void showError(String title, String msg);
+
+    void showNotImageLayerError();
+
+    void showNotDrawableError();
+
+    void showException(Throwable e);
+
+    void showException(Throwable e, Thread t);
+
+    void showExceptionOnEDT(Throwable e);
 }

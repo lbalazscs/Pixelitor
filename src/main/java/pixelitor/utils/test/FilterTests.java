@@ -18,7 +18,7 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.automate.SingleDirChooserPanel;
+import pixelitor.automate.SingleDirChooser;
 import pixelitor.filters.Canny;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
@@ -33,6 +33,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
@@ -55,7 +56,7 @@ public class FilterTests {
     }
 
     public static void saveTheResultOfEachFilter(Drawable dr) {
-        boolean canceled = !SingleDirChooserPanel.selectOutputDir(true);
+        boolean canceled = !SingleDirChooser.selectOutputDir(true);
         if (canceled) {
             return;
         }
@@ -97,7 +98,8 @@ public class FilterTests {
                         Composition comp = dr.getComp();
                         String fileName = "test_" + Utils.toFileName(filter.getName()) + '.' + outputFormat.toString();
                         File f = new File(selectedDir, fileName);
-                        comp.saveAsync(f, outputFormat, false).join();
+                        SaveSettings saveSettings = new SaveSettings(outputFormat, f);
+                        comp.saveAsync(saveSettings, false).join();
 
                         if (History.canUndo()) {
                             History.undo();

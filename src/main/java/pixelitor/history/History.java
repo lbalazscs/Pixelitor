@@ -185,7 +185,21 @@ public class History {
     public static String getLastEditName() {
         PixelitorEdit lastEdit = undoManager.getLastEdit();
         if (lastEdit != null) {
-            return lastEdit.getPresentationName();
+            return lastEdit.getName();
+        }
+        return "";
+    }
+
+    @VisibleForTesting
+    public static PixelitorEdit getLastEdit() {
+        return undoManager.getLastEdit();
+    }
+
+    @VisibleForTesting
+    public static String getEditToBeUndoneName() {
+        PixelitorEdit edit = undoManager.getEditToBeUndone();
+        if (edit != null) {
+            return edit.getName();
         }
         return "";
     }
@@ -247,11 +261,6 @@ public class History {
     }
 
     @VisibleForTesting
-    public static PixelitorEdit getLastEdit() {
-        return undoManager.getLastEdit();
-    }
-
-    @VisibleForTesting
     public static void clear() {
         undoManager.discardAllEdits();
         assertNumEditsIs(0);
@@ -274,6 +283,26 @@ public class History {
             throw new AssertionError(String.format(
                     "Expected '%s' as the last edit name, but found '%s'",
                     expected, lastEditName));
+        }
+    }
+
+    @VisibleForTesting
+    public static void assertEditToBeUndoneNameIs(String expected) {
+        String name = undoManager.getEditToBeUndone().getName();
+        if (!name.equals(expected)) {
+            throw new AssertionError(String.format(
+                    "Expected '%s' as the edit to be undone name, but found '%s'",
+                    expected, name));
+        }
+    }
+
+    @VisibleForTesting
+    public static void assertEditToBeRedoneNameIs(String expected) {
+        String name = undoManager.getEditToBeRedone().getName();
+        if (!name.equals(expected)) {
+            throw new AssertionError(String.format(
+                    "Expected '%s' as the edit to be redone name, but found '%s'",
+                    expected, name));
         }
     }
 

@@ -173,8 +173,10 @@ public class OpenRaster {
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
                     // no need for that
                 } else {
-                    String extension = FileExtensionUtils.getExt(name);
-                    if ("png".equalsIgnoreCase(extension)) {
+                    boolean hasPNGExt = FileUtils.getExt(name)
+                            .filter(s -> s.equalsIgnoreCase("png"))
+                            .isPresent();
+                    if (hasPNGExt) {
                         ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
                         InputStream stream = zipFile.getInputStream(entry);
                         BufferedImage image = TrackedIO.readFromStream(stream, spt);

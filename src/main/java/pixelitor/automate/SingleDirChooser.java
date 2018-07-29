@@ -36,12 +36,12 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  * A panel that can be used to select a single directory
  * and optionally an output format
  */
-public class SingleDirChooserPanel extends ValidatedPanel {
+public class SingleDirChooser extends ValidatedPanel {
     private final BrowseFilesSupport dirChooser;
     private OutputFormatSelector outputFormatSelector;
 
-    private SingleDirChooserPanel(String label, String initialPath,
-                                  String fileChooserTitle, boolean addOutputChooser) {
+    private SingleDirChooser(String label, String initialPath,
+                             String fileChooserTitle, boolean addOutputChooser) {
         dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
@@ -97,7 +97,7 @@ public class SingleDirChooserPanel extends ValidatedPanel {
      * Returns true if a selection was made, false if the operation was cancelled.
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
-        SingleDirChooserPanel chooserPanel = new SingleDirChooserPanel("Output Folder:",
+        SingleDirChooser chooserPanel = new SingleDirChooser("Output Folder:",
                 Directories.getLastSaveDir().getAbsolutePath(),
                 "Select Output Folder", addOutputChooser);
 

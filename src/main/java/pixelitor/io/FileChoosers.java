@@ -95,7 +95,7 @@ public class FileChoosers {
         }
     }
 
-    public static void open() {
+    public static void openAsync() {
         initOpenChooser();
 
         GlobalKeyboardWatch.setDialogActive(true);
@@ -108,8 +108,8 @@ public class FileChoosers {
 
             Directories.setLastOpenDir(selectedFile.getParentFile());
 
-            if (FileExtensionUtils.hasSupportedInputExt(fileName)) {
-                OpenSaveManager.openFileAsync(selectedFile);
+            if (FileUtils.hasSupportedInputExt(fileName)) {
+                OpenSave.openFileAsync(selectedFile);
             } else { // unsupported extension
                 handleUnsupportedExtensionWhileOpening(fileName);
             }
@@ -119,9 +119,9 @@ public class FileChoosers {
     }
 
     private static void handleUnsupportedExtensionWhileOpening(String fileName) {
-        String extension = FileExtensionUtils.getExt(fileName);
+        String extension = FileUtils.getExt(fileName).orElse("");
         String msg = "Could not open " + fileName + ", because ";
-        if (extension == null) {
+        if (extension.isEmpty()) {
             msg += "it has no extension.";
         } else {
             msg += "files of type " + extension + " are not supported.";
@@ -129,8 +129,8 @@ public class FileChoosers {
         Messages.showError("Error", msg);
     }
 
-    public static boolean showSaveChooserAndSaveComp(Composition comp) {
-        String defaultFileName = FileExtensionUtils.stripExtension(comp.getName());
+    public static boolean showSaveChooserAndSaveComp(Composition comp, SaveSettings settings) {
+        String defaultFileName = FileUtils.stripExtension(comp.getName());
         saveChooser.setSelectedFile(new File(defaultFileName));
 
         File customSaveDir = null;
@@ -159,7 +159,9 @@ public class FileChoosers {
 
             String extension = saveChooser.getExtension();
             OutputFormat outputFormat = OutputFormat.fromExtension(extension);
-            comp.saveAsync(selectedFile, outputFormat, true);
+            settings.setOutputFormat(outputFormat);
+            settings.setFile(selectedFile);
+            comp.saveAsync(settings, true);
             return true;
         }
 
@@ -172,16 +174,13 @@ public class FileChoosers {
     public static boolean saveWithChooser(Composition comp) {
         initSaveChooser();
 
-        String defaultExt = FileExtensionUtils.getExt(comp.getName());
+        String defaultExt = FileUtils.getExt(comp.getName()).orElse("jpg");
         saveChooser.setFileFilter(getFileFilterForExtension(defaultExt));
 
-        return showSaveChooserAndSaveComp(comp);
+        return showSaveChooserAndSaveComp(comp, new SaveSettings());
     }
 
     private static FileFilter getFileFilterForExtension(String ext) {
-        if(ext == null) {
-            return jpegFilter; // default
-        }
         ext = ext.toLowerCase();
         switch (ext) {
             case "jpg":

@@ -15,36 +15,22 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.utils;
 
-/**
- * Abstracts away messages sent through the GUI
- * in order to enable GUI-independent testing.
- */
-public interface MessageHandler {
-    // *** status bar messages ***
-
-    void showInStatusBar(String msg);
-
-    void startProgress(String msg, int max);
-
+public interface ProgressHandler {
     void updateProgress(int value);
 
     void stopProgress();
 
-    // *** dialog messages ***
+    ProgressHandler EMPTY = new ProgressHandler() {
+        @Override
+        public void updateProgress(int value) {
+            // do nothing
+        }
 
-    void showInfo(String title, String msg);
-
-    void showError(String title, String msg);
-
-    void showNotImageLayerError();
-
-    void showNotDrawableError();
-
-    void showException(Throwable e);
-
-    void showException(Throwable e, Thread t);
-
-    void showExceptionOnEDT(Throwable e);
+        @Override
+        public void stopProgress() {
+            // do nothing
+        }
+    };
 }

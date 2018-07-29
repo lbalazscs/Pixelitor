@@ -15,31 +15,35 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.gui;
+package pixelitor.io;
 
-import javax.swing.*;
+import java.io.File;
 
-/**
- * A component that contains an {@link ImageComponent} inside a JScrollPane.
- * It can be either a JInternalFrame or a tab in a JTabbedPane.
- * Some of the methods make sense only for internal frames, not for tabs.
- */
-public interface ImageWindow {
-    /**
-     * Sets the size of the internal frame.
-     */
-    void setSize(int width, int height);
+public class SaveSettings {
+    private File file; // the output file
+    private OutputFormat outputFormat;
 
-    JScrollPane getScrollPane();
+    public SaveSettings() {
+    }
 
-    void dispose();
+    public SaveSettings(OutputFormat outputFormat, File file) {
+        this.file = file;
+        this.outputFormat = outputFormat;
+    }
 
-    void select();
+    public void setFile(File file) {
+        this.file = file;
+    }
 
-    void updateTitle(ImageComponent ic);
+    public File getFile() {
+        return file;
+    }
 
-    /**
-     * Important only for the cropping with internal frames.
-     */
-    void ensurePositiveLocation();
+    public void setOutputFormat(OutputFormat outputFormat) {
+        this.outputFormat = outputFormat;
+    }
+
+    public OutputFormat getOutputFormat() {
+        return outputFormat;
+    }
 }

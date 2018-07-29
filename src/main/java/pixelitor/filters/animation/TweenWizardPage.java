@@ -137,7 +137,7 @@ public enum TweenWizardPage implements WizardPage {
             getAnimation(wizard).copyFinalStateFromCurrent();
         }
     }, OUTPUT_SETTINGS {
-        OutputSettingsPanel outputSettingsPanel;
+        TweenOutputSettingsPanel outputSettingsPanel;
 
         @Override
         public String getHeaderText(Wizard wizard) {
@@ -154,7 +154,7 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public JComponent getPanel(Wizard wizard, Drawable dr) {
             if (outputSettingsPanel == null) {
-                outputSettingsPanel = new OutputSettingsPanel();
+                outputSettingsPanel = new TweenOutputSettingsPanel();
             }
             return outputSettingsPanel;
         }

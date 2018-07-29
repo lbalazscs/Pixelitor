@@ -77,6 +77,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return name;
     }
 
+    // same as the presentation name, but shorter method name...
     public String getName() {
         return name;
     }

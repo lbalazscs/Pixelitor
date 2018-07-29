@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.io.FileExtensionUtils;
+import pixelitor.io.FileUtils;
 import pixelitor.io.TrackedIO;
 import pixelitor.utils.JProgressBarTracker;
 import pixelitor.utils.Messages;
@@ -75,7 +75,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         }
 
         String filePath = file.getAbsolutePath();
-        if (FileExtensionUtils.hasSupportedInputExt(file)) {
+        if (FileUtils.hasSupportedInputExt(file)) {
             createThumbImage(file, filePath);
             repaint();
         }

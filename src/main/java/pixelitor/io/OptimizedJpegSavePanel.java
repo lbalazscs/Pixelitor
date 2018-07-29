@@ -173,7 +173,7 @@ public class OptimizedJpegSavePanel extends JPanel {
                 .okText("Save")
                 .okAction(() -> {
                     JpegSettings settings = p.getSelectedSettings();
-                    OpenSaveManager.saveJpegWithQuality(settings);
+                    OpenSave.saveJpegWithQuality(settings);
                 })
                 .show();
     }

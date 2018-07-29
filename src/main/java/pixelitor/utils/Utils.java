@@ -49,6 +49,8 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -140,6 +142,18 @@ public final class Utils {
     public static void throwTestException() {
         if (Build.CURRENT != Build.FINAL) {
             throw new IllegalStateException("Test");
+        }
+    }
+
+    public static void throwTestIOException() throws IOException {
+        if (Build.CURRENT != Build.FINAL) {
+            throw new IOException("Test");
+        }
+    }
+
+    public static void throwTestError() {
+        if (Build.CURRENT != Build.FINAL) {
+            throw new AssertionError("Test");
         }
     }
 
@@ -501,6 +515,8 @@ public final class Utils {
                 return callable.call();
             } catch (RuntimeException e) {
                 throw e;
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

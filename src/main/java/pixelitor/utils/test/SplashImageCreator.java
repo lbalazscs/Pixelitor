@@ -22,9 +22,8 @@ import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.MessageHandler;
 import pixelitor.NewImage;
-import pixelitor.automate.SingleDirChooserPanel;
+import pixelitor.automate.SingleDirChooser;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
@@ -36,13 +35,16 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponents;
 import pixelitor.io.Directories;
 import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.ImDrag;
+import pixelitor.utils.MessageHandler;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressHandler;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -65,7 +67,7 @@ public class SplashImageCreator {
     }
 
     public static void saveManySplashImages() {
-        boolean okPressed = SingleDirChooserPanel.selectOutputDir(true);
+        boolean okPressed = SingleDirChooser.selectOutputDir(true);
         if (!okPressed) {
             return;
         }
@@ -73,7 +75,7 @@ public class SplashImageCreator {
 
         MessageHandler msgHandler = Messages.getMessageHandler();
         String msg = String.format("Save %d Splash Images: ", numCreatedImages);
-        msgHandler.startProgress(msg, numCreatedImages);
+        ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
         File lastSaveDir = Directories.getLastSaveDir();
 
         for (int i = 0; i < numCreatedImages; i++) {
@@ -81,7 +83,7 @@ public class SplashImageCreator {
 
             String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
 
-            msgHandler.updateProgress(i);
+            progressHandler.updateProgress(i);
 
             createSplashImage();
 
@@ -89,13 +91,14 @@ public class SplashImageCreator {
                 ic.paintImmediately(ic.getBounds());
                 File f = new File(lastSaveDir, fileName);
 
-                comp.saveAsync(f, outputFormat, false).join();
+                SaveSettings saveSettings = new SaveSettings(outputFormat, f);
+                comp.saveAsync(saveSettings, false).join();
 
                 ic.close();
                 ValueNoise.reseed();
             });
         }
-        msgHandler.stopProgress();
+        progressHandler.stopProgress();
         msgHandler.showInStatusBar(String.format("Finished saving splash images to %s", lastSaveDir));
     }
 

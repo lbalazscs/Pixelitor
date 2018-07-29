@@ -23,6 +23,7 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.utils.debug.Ansi;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -71,17 +72,22 @@ public class Events {
     }
 
     public static void postAddToHistoryEvent(PixelitorEdit edit) {
-        post(new PixelitorEvent("    [ADD TO HIST] " + edit.getDebugName(), null, null));
+        post(new PixelitorEvent(Ansi.cyan("    [ADD TO HIST]")
+                + edit.getDebugName(), null, null));
     }
 
     public static void postUndoEvent(PixelitorEdit editToBeUndone) {
         String editName = editToBeUndone.getDebugName();
-        post(new PixelitorEvent("    [UNDO " + editName + "]", null, null));
+        post(new PixelitorEvent("    ["
+                + Ansi.red("UNDO ")
+                + editName + "]", null, null));
     }
 
     public static void postRedoEvent(PixelitorEdit editToBeRedone) {
         String editName = editToBeRedone.getDebugName();
-        post(new PixelitorEvent("    [REDO " + editName + "]", null, null));
+        post(new PixelitorEvent("    ["
+                + Ansi.green("REDO ")
+                + editName + "]", null, null));
     }
 
     public static void postMaskViewActivate(MaskViewMode mode, ImageComponent ic, Layer layer, String reason) {

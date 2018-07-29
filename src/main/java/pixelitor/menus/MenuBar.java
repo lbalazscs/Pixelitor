@@ -53,7 +53,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.OpenSave;
 import pixelitor.io.OptimizedJpegSavePanel;
 import pixelitor.layers.AddAdjLayerAction;
 import pixelitor.layers.AddNewLayerAction;
@@ -217,7 +217,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.buildAction(new MenuAction("Open...") {
             @Override
             public void onClick() {
-                FileChoosers.open();
+                FileChoosers.openAsync();
             }
         }).alwaysEnabled().withKey(CTRL_O).add();
 
@@ -230,14 +230,14 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Save") {
             @Override
             public void onClick() {
-                OpenSaveManager.save(false);
+                OpenSave.save(false);
             }
         }, CTRL_S);
 
         fileMenu.addActionWithKey(new MenuAction("Save As...") {
             @Override
             public void onClick() {
-                OpenSaveManager.save(true);
+                OpenSave.save(true);
             }
         }, CTRL_SHIFT_S);
 
@@ -278,7 +278,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Close") {
             @Override
             public void onClick() {
-                OpenSaveManager.warnAndCloseImage(ImageComponents.getActiveIC());
+                OpenSave.warnAndCloseImage(ImageComponents.getActiveIC());
             }
         }, CTRL_W);
 
@@ -286,7 +286,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Close All") {
             @Override
             public void onClick() {
-                OpenSaveManager.warnAndCloseAllImages();
+                OpenSave.warnAndCloseAllImages();
             }
         }, CTRL_ALT_W);
 
@@ -340,7 +340,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Export Layers to PNG...") {
             @Override
             public void onClick() {
-                OpenSaveManager.exportLayersToPNG();
+                OpenSave.exportLayersToPNGAsync();
             }
         });
 
@@ -1298,7 +1298,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Save All Images to Folder...") {
             @Override
             public void onClick() {
-                OpenSaveManager.saveAllImagesToDir();
+                OpenSave.saveAllImagesToDir();
             }
         });
 
@@ -1379,7 +1379,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Save Current Image in All Formats...") {
             @Override
             public void onClick() {
-                OpenSaveManager.saveCurrentImageInAllFormats();
+                OpenSave.saveCurrentImageInAllFormats();
             }
         });
 

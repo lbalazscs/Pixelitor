@@ -318,17 +318,11 @@ public class ImageLayerTest {
 
     @Test
     public void test_getSelectedSubImage() {
-        BufferedImage imageTT = layer.getSelectedSubImage(true);
-        assertThat(imageTT).isNotNull();
+        BufferedImage imageT = layer.getSelectedSubImage(true);
+        assertThat(imageT).isNotNull();
 
-        BufferedImage imageTF = layer.getSelectedSubImage(true);
-        assertThat(imageTF).isNotNull();
-
-        BufferedImage imageFT = layer.getSelectedSubImage(false);
-        assertThat(imageFT).isNotNull();
-
-        BufferedImage imageFF = layer.getSelectedSubImage(false);
-        assertThat(imageFF).isNotNull();
+        BufferedImage imageF = layer.getSelectedSubImage(false);
+        assertThat(imageF).isNotNull();
 
         iconUpdates.check(0, 0);
         // TODO

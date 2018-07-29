@@ -23,7 +23,8 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.IOThread;
+import pixelitor.io.OpenSave;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -49,6 +50,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Static methods for maintaining the list of open ImageComponent objects
@@ -178,6 +181,9 @@ public class ImageComponents {
             ImageArea.activateIC(ic);
         }
         activeIC = ic;
+//        System.out.println("ImageComponents::setActiveIC: new active ic is "
+//                + Ansi.yellow(activeIC == null ? "null" : activeIC.getName())
+//                + ", set on " + Thread.currentThread().getName());
     }
 
     /**
@@ -270,6 +276,7 @@ public class ImageComponents {
             Messages.showError("No file", msg);
             return;
         }
+
         if (!file.exists()) {
             String msg = String.format(
                     "The image '%s' cannot be reloaded because the file\n" +
@@ -280,9 +287,14 @@ public class ImageComponents {
             return;
         }
 
-        CompletableFuture<Composition> cf = OpenSaveManager.loadCompFromFileAsync(file);
+        if (IOThread.isProcessing(file)) {
+            return;
+        }
+
+        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(file);
         cf.thenAcceptAsync(newComp -> {
-            PixelitorEdit edit = activeIC.replaceComp(newComp, true, MaskViewMode.NORMAL);
+            PixelitorEdit edit = activeIC.replaceComp(newComp, true,
+                    MaskViewMode.NORMAL);
 
             assert edit != null;
             History.addEdit(edit);
@@ -292,7 +304,8 @@ public class ImageComponents {
                     comp.getName(), file.getAbsolutePath());
             Messages.showInStatusBar(msg);
             ImageComponents.repaintActive();
-        }, EventQueue::invokeLater);
+        }, EventQueue::invokeLater)
+                .whenComplete((v, e) -> IOThread.processingFinishedFor(file));
     }
 
     public static void duplicateActive() {
@@ -391,5 +404,32 @@ public class ImageComponents {
         if (ic != activeIC) {
             setActiveIC(ic, true);
         }
+    }
+
+    public static void assertNumOpenImagesIs(int expected) {
+        int numOpenImages = getNumOpenImages();
+        if (numOpenImages == expected) {
+            return;
+        }
+
+        throw new AssertionError(String.format(
+                "Expected %d images, found %d (%s)",
+                expected, numOpenImages, getOpenImageNamesAsString()));
+    }
+
+    public static void assertNumOpenImagesIsAtLeast(int expected) {
+        int numOpenImages = getNumOpenImages();
+        if (numOpenImages >= expected) {
+            return;
+        }
+        throw new AssertionError(String.format(
+                "Expected at least %d images, found %d (%s)",
+                expected, numOpenImages, getOpenImageNamesAsString()));
+    }
+
+    private static String getOpenImageNamesAsString() {
+        return icList.stream()
+                .map(ImageComponent::getName)
+                .collect(joining(", ", "[", "]"));
     }
 }

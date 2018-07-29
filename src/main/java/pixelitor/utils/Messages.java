@@ -18,7 +18,6 @@
 package pixelitor.utils;
 
 import pixelitor.Build;
-import pixelitor.MessageHandler;
 import pixelitor.gui.GUIMessageHandler;
 
 import java.io.File;

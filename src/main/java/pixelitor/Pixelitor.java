@@ -26,7 +26,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.OpenSave;
 import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.layers.Layer;
@@ -136,7 +136,7 @@ public class Pixelitor {
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {
-                OpenSaveManager.openFileAsync(f);
+                OpenSave.openFileAsync(f);
             } else {
                 Messages.showError("File not found", "The file \"" + f.getAbsolutePath() + "\" does not exist");
             }

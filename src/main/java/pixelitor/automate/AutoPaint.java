@@ -20,7 +20,6 @@ package pixelitor.automate;
 import net.jafama.FastMath;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.MessageHandler;
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
@@ -40,7 +39,9 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.MessageHandler;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -91,19 +92,19 @@ public class AutoPaint {
         String msg = String.format("Auto Paint with %s Tool: ", settings.getTool());
 
         MessageHandler msgHandler = Messages.getMessageHandler();
-        msgHandler.startProgress(msg, settings.getNumStrokes());
+        ProgressHandler progressHandler = msgHandler.startProgress(msg, settings.getNumStrokes());
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
         History.setIgnoreEdits(true);
 
         try {
-            runStrokes(settings, dr, msgHandler);
+            runStrokes(settings, dr, progressHandler);
         } finally {
             History.setIgnoreEdits(false);
             ImageEdit edit = new ImageEdit("Auto Paint", dr.getComp(),
                     dr, backupImage, false, false);
             History.addEdit(edit);
-            msgHandler.stopProgress();
+            progressHandler.stopProgress();
             msgHandler.showInStatusBar(msg + "finished.");
 
             // if colors were changed, restore the original
@@ -116,7 +117,7 @@ public class AutoPaint {
 
     private static void runStrokes(Settings settings,
                                    Drawable dr,
-                                   MessageHandler msgHandler) {
+                                   ProgressHandler progressHandler) {
         Random random = new Random();
 
         Composition comp = dr.getComp();
@@ -125,7 +126,7 @@ public class AutoPaint {
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
-            msgHandler.updateProgress(i);
+            progressHandler.updateProgress(i);
 
             paintSingleStroke(dr, settings, comp, random);
             ic.paintImmediately(ic.getBounds());

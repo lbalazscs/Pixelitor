@@ -93,10 +93,10 @@ public class DropListener extends DropTargetAdapter {
                         "Do you want to open all image files inside it?", file.getName());
 
                 if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                    OpenSaveManager.openAllImagesInDirAsync(file);
+                    OpenSave.openAllImagesInDir(file);
                 }
             } else if (file.isFile()) {
-                OpenSaveManager.openFileAsync(file);
+                OpenSave.openFileAsync(file);
             }
         }
     }

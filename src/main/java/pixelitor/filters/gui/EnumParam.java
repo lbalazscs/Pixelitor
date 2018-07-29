@@ -30,7 +30,6 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     private final EnumComboBoxModel<E> delegateModel;
     private final E[] enumConstants;
     private E defaultValue;
-    private FilterAction action;
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
@@ -104,20 +103,6 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     // no need for casting with this one
     public E getSelected() {
         return delegateModel.getSelectedItem();
-    }
-
-    @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        super.setAdjustmentListener(listener);
-        if (action != null) {
-            action.setAdjustmentListener(listener);
-        }
-    }
-
-    @Override
-    public EnumParam withAction(FilterAction action) {
-        this.action = action;
-        return this;
     }
 
     @Override

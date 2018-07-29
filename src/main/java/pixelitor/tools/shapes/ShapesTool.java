@@ -224,9 +224,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void initAndShowStrokeSettingsDialog() {
-        if (strokeSettingsDialog == null) {
-            strokeSettingsDialog = strokeParam.createSettingsDialog();
-        }
+        strokeSettingsDialog = strokeParam.createSettingsDialog();
 
         GUIUtils.showDialog(strokeSettingsDialog);
     }

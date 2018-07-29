@@ -18,7 +18,7 @@
 package pixelitor.gui.utils;
 
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.FileExtensionUtils;
+import pixelitor.io.FileUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -111,8 +111,10 @@ public class BrowseFilesSupport {
             String fileName = selectedFile.toString();
 
             if (mode == FILE) {
-                String extension = FileExtensionUtils.getExt(selectedFile.getName());
-                if (extension == null) { // the user entered no extension
+                boolean theUserEnteredNoExtension = !FileUtils
+                        .getExt(selectedFile.getName())
+                        .isPresent();
+                if (theUserEnteredNoExtension) {
                     if (fileFilter != null) {
                         fileName = fileName + '.' + fileFilter.getExtensions()[0];
                     }

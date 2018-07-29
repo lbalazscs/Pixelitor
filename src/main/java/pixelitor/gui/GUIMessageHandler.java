@@ -17,8 +17,9 @@
 
 package pixelitor.gui;
 
-import pixelitor.MessageHandler;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.utils.MessageHandler;
+import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.EventQueue;
@@ -38,20 +39,10 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void startProgress(String msg, int max) {
+    public ProgressHandler startProgress(String msg, int max) {
         assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
 
-        StatusBar.INSTANCE.startProgress(msg, max);
-    }
-
-    @Override
-    public void updateProgress(int value) {
-        StatusBar.INSTANCE.updateProgress(value);
-    }
-
-    @Override
-    public void stopProgress() {
-        StatusBar.INSTANCE.stopProgress();
+        return StatusBar.INSTANCE.startProgress(msg, max);
     }
 
     @Override
@@ -81,7 +72,7 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showExceptionOnEDT(Throwable e) {
-        EventQueue.invokeLater(() -> Dialogs.showExceptionDialog(e));
+        EventQueue.invokeLater(() -> showException(e));
     }
 
     @Override

@@ -21,7 +21,9 @@ import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.history.*;
+import pixelitor.io.IOThread;
 import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
@@ -62,7 +64,7 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.TOP;
-import static pixelitor.io.FileExtensionUtils.stripExtension;
+import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.utils.Utils.createCopyName;
 
 /**
@@ -1050,21 +1052,30 @@ public class Composition implements Serializable {
         return count;
     }
 
-    public CompletableFuture<Void> saveAsync(File file,
-                                             OutputFormat outputFormat,
+    public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
+        OutputFormat outputFormat = saveSettings.getOutputFormat();
+        File file = saveSettings.getFile();
+
         System.out.println("Composition::saveAsync: CALLED, file = " + file.getAbsolutePath());
 
-        Runnable saveTask = outputFormat.getSaveTask(this, file);
+
+        Runnable saveTask = outputFormat.getSaveTask(this, saveSettings);
         return saveAsync(saveTask, file, addToRecentMenus);
     }
 
     public CompletableFuture<Void> saveAsync(Runnable saveTask,
                                              File file,
                                              boolean addToRecentMenus) {
+        assert EventQueue.isDispatchThread();
+
+        // set to not dirty already at the beginning of the saving process,
+        // so that subsequent closing does not trigger another, parallel save
+        setDirty(false);
+
         return CompletableFuture
                 .runAsync(saveTask,
-                        ThreadPool.getExecutor())
+                        IOThread.getExecutor())
                 .thenAcceptAsync(v -> afterSaveActions(file, addToRecentMenus),
                         EventQueue::invokeLater)
                 .exceptionally(Messages::showExceptionOnEDT);
@@ -1072,10 +1083,6 @@ public class Composition implements Serializable {
 
     private void afterSaveActions(File file, boolean addToRecentMenus) {
         assert EventQueue.isDispatchThread();
-
-        // perhaps for a multilayered image this should be
-        // set only if it was saved in a layered format
-        setDirty(false);
 
         setFile(file);
         if (addToRecentMenus) {

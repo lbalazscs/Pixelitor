@@ -243,13 +243,13 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateTitle() {
-        if (imageWindow instanceof ImageFrame) {
-            String frameTitle = createFrameTitle();
-            imageWindow.setTitle(frameTitle);
+        if (imageWindow != null) {
+            imageWindow.updateTitle(this);
         }
     }
 
-    public String createFrameTitle() {
+    // used only for the frames ui
+    public String createTitleWithZoom() {
         return comp.getName() + " - " + zoomLevel.toString();
     }
 

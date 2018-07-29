@@ -33,13 +33,13 @@ public enum OutputFormat {
     }, BMP(false, false) {
     }, PXC(true, true) {
         @Override
-        public Runnable getSaveTask(Composition comp, File file) {
-            return () -> PXCFormat.write(comp, file);
+        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+            return () -> PXCFormat.write(comp, settings.getFile());
         }
     }, ORA(true, true) {
         @Override
-        public Runnable getSaveTask(Composition comp, File file) {
-            return () -> OpenRaster.uncheckedWrite(comp, file, false);
+        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+            return () -> OpenRaster.uncheckedWrite(comp, settings.getFile(), false);
         }
     };
 
@@ -51,7 +51,7 @@ public enum OutputFormat {
         this.hasAlpha = hasAlpha;
     }
 
-    public Runnable getSaveTask(Composition comp, File file) {
+    public Runnable getSaveTask(Composition comp, SaveSettings settings) {
         assert !layered; // overwritten for layered formats
 
         return () -> {
@@ -60,7 +60,7 @@ public enum OutputFormat {
                 // no alpha support, convert first to RGB
                 img = ImageUtils.convertToRGB(img, false);
             }
-            OpenSaveManager.saveImageToFile(file, img, this);
+            OpenSave.saveImageToFile(img, settings);
         };
     }
 
@@ -71,7 +71,7 @@ public enum OutputFormat {
 
     public static OutputFormat fromFile(File file) {
         String fileName = file.getName();
-        String extension = FileExtensionUtils.getExt(fileName);
+        String extension = FileUtils.getExt(fileName).orElse("");
         return fromExtension(extension);
     }
 

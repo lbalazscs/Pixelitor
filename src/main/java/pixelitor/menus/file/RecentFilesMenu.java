@@ -17,7 +17,7 @@
 
 package pixelitor.menus.file;
 
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.OpenSave;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
@@ -43,7 +43,7 @@ public final class RecentFilesMenu extends JMenu {
             RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
             File f = mi.getRecentFile().getFile();
             if (f.exists()) {
-                OpenSaveManager.openFileAsync(f);
+                OpenSave.openFileAsync(f);
             } else {
                 // the file was deleted since Pixelitor started
                 Messages.showError("Problem",

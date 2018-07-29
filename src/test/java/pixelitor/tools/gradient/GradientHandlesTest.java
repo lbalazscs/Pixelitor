@@ -64,8 +64,8 @@ public class GradientHandlesTest {
         int dy = 10;
 
         middle.mousePressed(dragStartX, dragStartY);
-        middle.mouseDragged(dragStartX + dx / 4, dragStartY + dy / 4);
-        middle.mouseDragged(dragStartX + dx / 2, dragStartY + dy / 2);
+        middle.mouseDragged(dragStartX + dx / 4.0, dragStartY + dy / 4.0);
+        middle.mouseDragged(dragStartX + dx / 2.0, dragStartY + dy / 2.0);
         middle.mouseReleased(dragStartX + dx, dragStartY + dy);
 
         assertThat(start)
@@ -87,8 +87,8 @@ public class GradientHandlesTest {
         int dy = 10;
 
         end.mousePressed(dragStartX, dragStartY);
-        end.mouseDragged(dragStartX + dx / 4, dragStartY + dy / 4);
-        end.mouseDragged(dragStartX + dx / 2, dragStartY + dy / 2);
+        end.mouseDragged(dragStartX + dx / 4.0, dragStartY + dy / 4.0);
+        end.mouseDragged(dragStartX + dx / 2.0, dragStartY + dy / 2.0);
         end.mouseReleased(dragStartX + dx, dragStartY + dy);
 
         assertThat(end)
@@ -98,7 +98,7 @@ public class GradientHandlesTest {
                 .isAt(START_X_FOR_START, START_Y_FOR_START)
                 .isAtIm(START_X_FOR_START, START_Y_FOR_START);
         assertThat(middle)
-                .isAt(START_X_FOR_MIDDLE + dx / 2, START_Y_FOR_MIDDLE + dy / 2)
+                .isAt(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0)
                 .isAtIm(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
     }
 

@@ -34,6 +34,10 @@ public class AboutDialog {
     private static Box box;
     public static final String HOME_PAGE = "http://pixelitor.sourceforge.net";
 
+    private AboutDialog() {
+        // should not be instantiated
+    }
+
     public static void showDialog(PixelitorWindow pw) {
         createAboutBox();
 

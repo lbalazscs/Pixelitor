@@ -159,14 +159,6 @@ public class Assertions {
         return comp.getNumLayers() == expected;
     }
 
-    public static boolean numOpenImagesIs(int expected) {
-        return ImageComponents.getNumOpenImages() == expected;
-    }
-
-    public static boolean numOpenImagesIsAtLeast(int expected) {
-        return ImageComponents.getNumOpenImages() >= expected;
-    }
-
     public static boolean callingClassIs(String name) {
         // it checks the caller of the caller
         String callingClassName = new Exception().getStackTrace()[2].getClassName();

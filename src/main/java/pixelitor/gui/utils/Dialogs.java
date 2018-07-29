@@ -33,10 +33,13 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 import javax.swing.*;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -149,12 +152,20 @@ public class Dialogs {
     }
 
     public static void showExceptionDialog(Throwable e, Thread thread) {
+        assert EventQueue.isDispatchThread();
+
         String threadName = thread.getName();
         System.err.printf("Exception in the thread '%s'%n", threadName);
         e.printStackTrace();
         showMoreDevelopmentInfo();
 
-        if(e instanceof InvocationTargetException) {
+        if (e instanceof CompletionException) {
+            e = e.getCause();
+        }
+        if (e instanceof UncheckedIOException) {
+            e = e.getCause();
+        }
+        if (e instanceof InvocationTargetException) {
             e = e.getCause();
         }
 

@@ -52,9 +52,12 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void setTitle(String title) {
-        // the title for tabs should not be updated
-        throw new UnsupportedOperationException("tabs");
+    public void updateTitle(ImageComponent ic) {
+        int myIndex = tabsUI.indexOfComponent(this);
+        if(myIndex != -1) {
+            TabsUI.TabTitleRenderer tabComponent = (TabsUI.TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
+            tabComponent.setTitle(ic.getName());
+        }
     }
 
     @Override

@@ -42,7 +42,7 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 /**
  * The settings for the tweening animation output
  */
-public class OutputSettingsPanel extends ValidatedPanel implements TextFieldValidator {
+public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFieldValidator {
     private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
@@ -54,7 +54,7 @@ public class OutputSettingsPanel extends ValidatedPanel implements TextFieldVali
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(Directories.getLastSaveDir().getAbsolutePath());
     private JTextField fileNameTF;
 
-    public OutputSettingsPanel() {
+    public TweenOutputSettingsPanel() {
         super(new GridBagLayout());
 
         numSecondsTF.setName("numSecondsTF");

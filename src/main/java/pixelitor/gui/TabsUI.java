@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.OpenSave;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -82,7 +82,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     public static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
-            OpenSaveManager.warnAndCloseImage(tab.getIC());
+            OpenSave.warnAndCloseImage(tab.getIC());
         }
     }
 
@@ -99,21 +99,29 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     static class TabTitleRenderer extends JPanel {
+        private final JLabel titleLabel;
+
         public TabTitleRenderer(String title, TabsUI pane, ImageTab tab) {
             super(new GridBagLayout());
             setOpaque(false);
-            JLabel label = new JLabel(title);
-            label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+            titleLabel = new JLabel(title);
+            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
 
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = 0;
             gbc.weightx = 1;
-            add(label, gbc);
+            add(titleLabel, gbc);
 
             gbc.gridx++;
             gbc.weightx = 0;
             add(new CloseTabButton(pane, tab), gbc);
+        }
+
+        public void setTitle(String newTitle) {
+            if (!titleLabel.getText().equals(newTitle)) {
+                titleLabel.setText(newTitle);
+            }
         }
     }
 

@@ -17,28 +17,32 @@
 package pixelitor.io;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
- * Utility class with static methods related to file extensions
+ * Utility class with static methods related to files
  */
-public class FileExtensionUtils {
-    private static final String[] SUPPORTED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff"};
+public class FileUtils {
+    private static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<>(Arrays.asList(
+            "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff"));
 
-    private FileExtensionUtils() {
+    private FileUtils() {
     }
 
     /**
-     * Returns the extension of the given file name in lower case
-     * or null if no extension found
+     * Returns the extension of the given file name
+     * or empty Optional if no extension found
      */
-    public static String getExt(String fileName) {
+    public static Optional<String> getExt(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
-            return null;
+            return Optional.empty();
         }
-        return fileName
-                .substring(lastIndex + 1)
-                .toLowerCase();
+        return Optional.of(fileName
+                .substring(lastIndex + 1));
     }
 
     public static String stripExtension(String fileName) {
@@ -64,27 +68,19 @@ public class FileExtensionUtils {
     }
 
     private static boolean hasSupportedExt(String fileName) {
-        String extension = getExt(fileName);
-        if (extension == null) {
-            return false;
-        }
-        extension = extension.toLowerCase();
-        for (String supported : SUPPORTED_EXTENSIONS) {
-            if (extension.equals(supported)) {
-                return true;
-            }
-        }
-        return false;
+        return getExt(fileName)
+                .map(String::toLowerCase)
+                .filter(SUPPORTED_EXTENSIONS::contains)
+                .isPresent();
     }
 
     public static File[] listSupportedInputFilesIn(File dir) {
-        java.io.FileFilter imageFilter = FileExtensionUtils::hasSupportedInputExt;
+        java.io.FileFilter imageFilter = FileUtils::hasSupportedInputExt;
         return dir.listFiles(imageFilter);
     }
 
     public static String replaceExt(String fileName, String newExt) {
-        String inputExt = getExt(fileName);
-        if (inputExt == null) {
+        if (!getExt(fileName).isPresent()) {
             return fileName + '.' + newExt;
         }
         String woExt = stripExtension(fileName);

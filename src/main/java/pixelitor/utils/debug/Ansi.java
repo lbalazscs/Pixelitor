@@ -33,4 +33,28 @@ public class Ansi {
 
     private Ansi() {
     }
+
+    public static String red(String s) {
+        return RED + s + RESET;
+    }
+
+    public static String green(String s) {
+        return GREEN + s + RESET;
+    }
+
+    public static String blue(String s) {
+        return BLUE + s + RESET;
+    }
+
+    public static String yellow(String s) {
+        return YELLOW + s + RESET;
+    }
+
+    public static String purple(String s) {
+        return PURPLE + s + RESET;
+    }
+
+    public static String cyan(String s) {
+        return CYAN + s + RESET;
+    }
 }

@@ -37,6 +37,14 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getMethodName().equals("showException")) {
+                e.printStackTrace();
+                return; // avoid infinite loop
+            }
+        }
+
         Messages.showException(e, t);
     }
 }
