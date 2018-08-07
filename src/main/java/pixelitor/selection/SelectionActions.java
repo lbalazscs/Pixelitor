@@ -36,6 +36,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -71,9 +72,12 @@ public final class SelectionActions {
 
     private static final ShowHideAction showHide = new ShowHideSelectionAction();
 
-    private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
-    private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
-    private static final Action traceWithSmudge = new TraceAction("Stroke with Current Smudge", Tools.SMUDGE);
+    private static final Action traceWithBrush = new TraceAction(
+            "Stroke with Current Brush", Tools.BRUSH);
+    private static final Action traceWithEraser = new TraceAction(
+            "Stroke with Current Eraser", Tools.ERASER);
+    private static final Action traceWithSmudge = new TraceAction(
+            "Stroke with Current Smudge", Tools.SMUDGE);
 
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
@@ -91,15 +95,16 @@ public final class SelectionActions {
     private static final Action modify = new MenuAction("Modify Selection...") {
         @Override
         public void onClick() {
-            JPanel p = new JPanel(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(p);
+            JPanel panel = new JPanel(new GridBagLayout());
+            GridBagHelper gbh = new GridBagHelper(panel);
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
-            EnumParam<SelectionModifyType> type = new EnumParam<>("Type", SelectionModifyType.class);
+            EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
+
             gbh.addLabelWithControl("Amount", amount.createGUI());
             gbh.addLabelWithControl("Type", type.createGUI());
 
             new DialogBuilder()
-                    .content(p)
+                    .content(panel)
                     .title("Modify Selection")
                     .okText("Change!")
                     .cancelText("Close")
@@ -114,7 +119,8 @@ public final class SelectionActions {
         }
     };
 
-    private static void modifySelection(EnumParam<SelectionModifyType> type, RangeParam amount) {
+    private static void modifySelection(EnumParam<SelectionModifyType> type,
+                                        RangeParam amount) {
         Selection selection = getActiveCompOrNull().getSelection();
         SelectionModifyType selectionModifyType = type.getSelected();
         if (selection != null) {
@@ -137,7 +143,8 @@ public final class SelectionActions {
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert comp == null || ImageComponents.getActiveCompOrNull() == comp;
 
         if (RandomGUITest.isRunning()) {
             if (comp != null) {

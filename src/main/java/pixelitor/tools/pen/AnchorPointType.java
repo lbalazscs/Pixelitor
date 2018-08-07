@@ -48,7 +48,7 @@ public enum AnchorPointType {
                                        AnchorPoint anchor,
                                        ControlPoint other) {
             // keep the distance, but adjust the angle to the new angle
-            double dist = other.getRememberedDistanceFromAnchor();
+            double dist = other.getRememberedDistFromAnchor();
             double newAngle = Math.PI + Math.atan2(y - anchor.y, x - anchor.x);
 
             double newX = anchor.x + dist * Math.cos(newAngle);

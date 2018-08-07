@@ -26,6 +26,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -70,8 +71,10 @@ public class AngleParam extends AbstractFilterParam {
             angle = r;
             fireStateChanged();
         }
-        if (trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
-            if (adjustmentListener != null) { // it is null when used in shape tools effects
+        if (trigger) {
+            // trigger even if this angle was already set,
+            // because we had drag events, and now we have mouse up
+            if (adjustmentListener != null) { // can be null when used in tools
                 adjustmentListener.paramAdjusted();
             }
         }
@@ -158,8 +161,8 @@ public class AngleParam extends AbstractFilterParam {
 
     public RangeParam createRangeParam() {
         return new RangeParam(getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
-            // override reset so that the clicking on the default button resets this object
-            // this is good because this object has greater precision than the RangeParam
+            // override reset so that the clicking on the default button resets
+            // this object because this has greater precision than the RangeParam
             @Override
             public void reset(boolean trigger) {
                 if (angle != defaultVal) {
@@ -207,7 +210,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', angle = %.2f]",
+        return format("%s[name = '%s', angle = %.2f]",
                 getClass().getSimpleName(), getName(), angle);
     }
 }

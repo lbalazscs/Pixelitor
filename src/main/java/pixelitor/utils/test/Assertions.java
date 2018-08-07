@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 
 /**
  * Static, boolean-returning methods that
@@ -163,5 +164,19 @@ public class Assertions {
         // it checks the caller of the caller
         String callingClassName = new Exception().getStackTrace()[2].getClassName();
         return callingClassName.contains(name);
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    public static boolean checkRasterMinimum(BufferedImage newImage) {
+        if (RandomGUITest.isRunning()) {
+            WritableRaster raster = newImage.getRaster();
+            if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
+                throw new
+                        IllegalArgumentException("Raster " + raster +
+                        " has minX or minY not equal to zero: "
+                        + raster.getMinX() + ' ' + raster.getMinY());
+            }
+        }
+        return true;
     }
 }

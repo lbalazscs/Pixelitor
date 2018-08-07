@@ -69,8 +69,9 @@ public class CloneTool extends BlendingModeBrushTool {
     private final EnumParam<Mirror> mirrorParam = new EnumParam<>("", Mirror.class);
 
     protected CloneTool() {
-        super('s', "Clone Stamp", "clone_tool_icon.png",
-                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, then <b>drag</b> to paint.",
+        super("Clone Stamp", 's', "clone_tool_icon.png",
+                "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
+                        "then <b>drag</b> to paint.",
                 Cursors.CROSSHAIR);
     }
 
@@ -91,28 +92,30 @@ public class CloneTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
 
-        settingsPanel.addCheckBox("Sample All Layers", false, "sampleAllLayersCB",
-                selected -> sampleAllLayers = selected);
+        settingsPanel.addCheckBox("Sample All Layers", false,
+                "sampleAllLayersCB", selected -> sampleAllLayers = selected);
 
         settingsPanel.addSeparator();
-        settingsPanel.addButton("Transform...", e -> {
-            if (RandomGUITest.isRunning()) {
-                return;
-            }
+        settingsPanel.addButton("Transform...", e -> transformButtonPressed());
+    }
 
-            JPanel p = new JPanel(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(p);
-            gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
-            gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
-            gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
-            transformDialog = new DialogBuilder()
-                    .title("Clone Transform")
-                    .content(p)
-                    .notModal()
-                    .okText("Close")
-                    .noCancelButton()
-                    .show();
-        });
+    private void transformButtonPressed() {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
+        JPanel p = new JPanel(new GridBagLayout());
+        GridBagHelper gbh = new GridBagHelper(p);
+        gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
+        gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
+        gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
+        transformDialog = new DialogBuilder()
+                .title("Clone Transform")
+                .content(p)
+                .notModal()
+                .okText("Close")
+                .noCancelButton()
+                .show();
     }
 
     @Override
@@ -152,14 +155,16 @@ public class CloneTool extends BlendingModeBrushTool {
                 mirror.getScaleY(scaleAbs));
         cloneBrush.setRotate(rotationParam.getValueInRadians());
 
-        if (notWithLine) {  // when drawing with line, the destination should not change for mouse press
+        // when drawing with line, a mouse press should not change the destination
+        if (notWithLine) {
             cloneBrush.setCloningDestPoint(x, y);
         }
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        if (state == CLONING) { // make sure that the first source-setting stroke does not clone
+        // make sure that the first source-setting stroke does not clone
+        if (state == CLONING) {
             super.mouseDragged(e);
         }
     }
@@ -170,7 +175,8 @@ public class CloneTool extends BlendingModeBrushTool {
             // just act as if this was an alt-click
             setCloningSource(ic, x, y);
         } else {
-            String msg = "<html>Define a source point first with <b>Alt-Click</b> or with <b>right-click</b>.";
+            String msg = "<html>Define a source point first with " +
+                    "<b>Alt-Click</b> or with <b>right-click</b>.";
             if (JVM.isLinux) {
                 msg += "<br><br>(For <b>Alt-Click</b> you might need to disable " +
                         "<br><b>Alt-Click</b> for window dragging in the window manager)";

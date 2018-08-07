@@ -33,6 +33,10 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 
+import static pixelitor.selection.SelectionInteraction.ADD;
+import static pixelitor.selection.SelectionInteraction.INTERSECT;
+import static pixelitor.selection.SelectionInteraction.SUBTRACT;
+
 /**
  * The selection tool
  */
@@ -55,7 +59,7 @@ public class SelectionTool extends DragTool {
     private boolean polygonal = false;
 
     SelectionTool() {
-        super('m', "Selection", "selection_tool_icon.png",
+        super("Selection", 'm', "selection_tool_icon.png",
                 HELP_TEXT, Cursors.DEFAULT, false,
                 true, false, ClipStrategy.INTERNAL_FRAME);
         spaceDragStartPoint = true;
@@ -64,21 +68,14 @@ public class SelectionTool extends DragTool {
     @Override
     public void initSettingsPanel() {
         typeCombo = new JComboBox<>(SelectionType.values());
-        typeCombo.addActionListener(e -> {
-            stopBuildingSelection();
-            polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
-            if (polygonal) {
-                Messages.showInStatusBar(POLY_HELP_TEXT);
-            } else {
-                Messages.showInStatusBar("<html>Selection Tool: " + HELP_TEXT);
-            }
-        });
+        typeCombo.addActionListener(e -> selectionTypeChanged());
         settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
 
         settingsPanel.addSeparator();
 
         interactionCombo = new JComboBox<>(SelectionInteraction.values());
-        settingsPanel.addWithLabel("New Selection:", interactionCombo, "selectionInteractionCombo");
+        settingsPanel.addWithLabel("New Selection:",
+                interactionCombo, "selectionInteractionCombo");
 
         settingsPanel.addSeparator();
 
@@ -91,6 +88,16 @@ public class SelectionTool extends DragTool {
         settingsPanel.addButton(SelectionActions.getConvertToPath());
     }
 
+    private void selectionTypeChanged() {
+        stopBuildingSelection();
+        polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
+        if (polygonal) {
+            Messages.showInStatusBar(POLY_HELP_TEXT);
+        } else {
+            Messages.showInStatusBar("<html>Selection Tool: " + HELP_TEXT);
+        }
+    }
+
     @Override
     public void dragStarted(PMouseEvent e) {
         if (polygonal) {
@@ -99,10 +106,8 @@ public class SelectionTool extends DragTool {
 
         setupInteractionWithKeyModifiers(e);
 
-        SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
-        SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
-        Composition comp = e.getComp();
-        selectionBuilder = new SelectionBuilder(selectionType, selectionInteraction, comp);
+        selectionBuilder = new SelectionBuilder(getSelectionType(),
+                getCurrentInteraction(), e.getComp());
     }
 
     @Override
@@ -122,7 +127,6 @@ public class SelectionTool extends DragTool {
         }
 
         userDrag.setStartFromCenter(startFromCenter);
-
         selectionBuilder.updateSelection(userDrag.toImDrag());
     }
 
@@ -143,10 +147,8 @@ public class SelectionTool extends DragTool {
         if (polygonal) {
             if (selectionBuilder == null) {
                 setupInteractionWithKeyModifiers(e);
-                SelectionType selectionType = (SelectionType) typeCombo.getSelectedItem();
-                SelectionInteraction selectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
-                selectionBuilder = new SelectionBuilder(selectionType,
-                        selectionInteraction, comp);
+                selectionBuilder = new SelectionBuilder(getSelectionType(),
+                        getCurrentInteraction(), comp);
                 selectionBuilder.updateSelection(e);
                 restoreInteraction();
             } else {
@@ -219,22 +221,22 @@ public class SelectionTool extends DragTool {
         altMeansSubtract = altDown;
 
         if (shiftDown || altDown) {
-            originalSelectionInteraction = (SelectionInteraction) interactionCombo.getSelectedItem();
+            originalSelectionInteraction = getCurrentInteraction();
             if (shiftDown) {
                 if (altDown) {
-                    interactionCombo.setSelectedItem(SelectionInteraction.INTERSECT);
+                    setCurrentInteraction(INTERSECT);
                 } else {
-                    interactionCombo.setSelectedItem(SelectionInteraction.ADD);
+                    setCurrentInteraction(ADD);
                 }
             } else if (altDown) {
-                interactionCombo.setSelectedItem(SelectionInteraction.SUBTRACT);
+                setCurrentInteraction(SUBTRACT);
             }
         }
     }
 
     private void restoreInteraction() {
         if (originalSelectionInteraction != null) {
-            interactionCombo.setSelectedItem(originalSelectionInteraction);
+            setCurrentInteraction(originalSelectionInteraction);
             originalSelectionInteraction = null;
         }
     }
@@ -254,6 +256,18 @@ public class SelectionTool extends DragTool {
             selectionBuilder.cancelIfNotFinished();
             selectionBuilder = null;
         }
+    }
+
+    private SelectionType getSelectionType() {
+        return (SelectionType) typeCombo.getSelectedItem();
+    }
+
+    private SelectionInteraction getCurrentInteraction() {
+        return (SelectionInteraction) interactionCombo.getSelectedItem();
+    }
+
+    private void setCurrentInteraction(SelectionInteraction intersect) {
+        interactionCombo.setSelectedItem(intersect);
     }
 
     @Override

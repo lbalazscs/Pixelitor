@@ -22,6 +22,7 @@ import pixelitor.utils.RandomUtils;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -112,7 +113,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', text = '%s']",
+        return format("%s[name = '%s', text = '%s']",
                 getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
     }
 

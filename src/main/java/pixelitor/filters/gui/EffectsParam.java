@@ -24,6 +24,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -61,7 +62,7 @@ public class EffectsParam extends AbstractFilterParam {
             setParamGUIEnabledState();
             return configureParamGUI;
         } else {
-            effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+            effectsPanel.setBorder(createTitledBorder("Effects"));
             return effectsPanel;
         }
     }

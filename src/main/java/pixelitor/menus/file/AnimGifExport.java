@@ -29,6 +29,10 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.io.File;
 
+import static java.lang.Integer.parseInt;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static pixelitor.io.FileChoosers.gifFilter;
+
 public class AnimGifExport {
     private AnimGifExport() {
     }
@@ -53,7 +57,7 @@ public class AnimGifExport {
     }
 
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
+        File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
         if (file != null) {
             LayerAnimation animation = new LayerAnimation(activeComp,
                     delayMillis, pingPong);
@@ -67,7 +71,7 @@ public class AnimGifExport {
         private final JCheckBox pingPongCB;
 
         public ExportPanel(int nrLayers) {
-            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            setBorder(createEmptyBorder(10, 10, 10, 10));
             setLayout(new VerticalLayout(10));
 
             add(new JLabel(" Animation frames are based on the layers of the image. "));
@@ -90,7 +94,7 @@ public class AnimGifExport {
         }
 
         private int getDelayMillis() {
-            return Integer.parseInt(delayTF.getText());
+            return parseInt(delayTF.getText().trim());
         }
 
         private boolean isPingPong() {

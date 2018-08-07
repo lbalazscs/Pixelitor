@@ -18,7 +18,6 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -38,11 +37,13 @@ import java.io.ObjectOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static pixelitor.utils.ImageUtils.getPixelsAsArray;
+
 /**
  * PXC file format support.
  */
 public class PXCFormat {
-
     private static final int CURRENT_PXC_VERSION_NUMBER = 0x03;
 
     // tracks the reading-writing of the whole file
@@ -55,7 +56,8 @@ public class PXCFormat {
 
     public static Composition read(File file) throws NotPxcFormatException {
         long fileSize = file.length();
-        mainPT = new StatusBarProgressTracker("Reading " + file.getName(), (int) fileSize);
+        mainPT = new StatusBarProgressTracker(
+                "Reading " + file.getName(), (int) fileSize);
         Composition comp = null;
         try (InputStream is = new ProgressTrackingInputStream(
                 new FileInputStream(file), mainPT)) {
@@ -69,15 +71,18 @@ public class PXCFormat {
             int versionByte = is.read();
             if (versionByte == 0) {
                 throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
+                        .getName() + " is in an obsolete pxc format, " +
+                        "it can only be opened in the old beta Pixelitor versions 0.9.2-0.9.7");
             }
             if (versionByte == 1) {
                 throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, it can only be opened in the old beta Pixelitor version 0.9.8");
+                        .getName() + " is in an obsolete pxc format, " +
+                        "it can only be opened in the old beta Pixelitor version 0.9.8");
             }
             if (versionByte == 2) {
                 throw new NotPxcFormatException(file
-                        .getName() + " is in an obsolete pxc format, it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
+                        .getName() + " is in an obsolete pxc format, " +
+                        "it can only be opened in the old Pixelitor versions 0.9.9-1.1.2");
             }
             if (versionByte > 3) {
                 throw new NotPxcFormatException(file.getName() + " has unknown version byte " + versionByte);
@@ -101,7 +106,8 @@ public class PXCFormat {
     }
 
     public static void write(Composition comp, File f) {
-        mainPT = new StatusBarProgressTracker("Writing " + f.getName(), 100);
+        mainPT = new StatusBarProgressTracker(
+                "Writing " + f.getName(), 100);
         int numImages = comp.calcNumImages();
         if (numImages > 0) {
             workRatioForOneImage = 1.0 / numImages;
@@ -124,7 +130,8 @@ public class PXCFormat {
         mainPT = null;
     }
 
-    public static void serializeImage(ObjectOutputStream out, BufferedImage img) throws IOException {
+    public static void serializeImage(ObjectOutputStream out,
+                                      BufferedImage img) throws IOException {
         assert img != null;
         int imgType = img.getType();
         int imgWidth = img.getWidth();
@@ -136,10 +143,10 @@ public class PXCFormat {
 
         ProgressTracker pt = getImageTracker();
 
-        if (imgType == BufferedImage.TYPE_BYTE_GRAY) {
+        if (imgType == TYPE_BYTE_GRAY) {
             ImageIO.write(img, "PNG", out);
         } else {
-            int[] pixels = ImageUtils.getPixelsAsArray(img);
+            int[] pixels = getPixelsAsArray(img);
             int length = pixels.length;
             int progress = 0;
             int fiveUnits = length / 20;
@@ -161,11 +168,11 @@ public class PXCFormat {
         int height = in.readInt();
         int type = in.readInt();
 
-        if (type == BufferedImage.TYPE_BYTE_GRAY) {
+        if (type == TYPE_BYTE_GRAY) {
             return ImageIO.read(in);
         } else {
             BufferedImage img = new BufferedImage(width, height, type);
-            int[] pixels = ImageUtils.getPixelsAsArray(img);
+            int[] pixels = getPixelsAsArray(img);
 
             int length = pixels.length;
             for (int i = 0; i < length; i++) {

@@ -20,6 +20,8 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
+import static java.lang.String.format;
+
 /**
  * Creates a button that runs an action when pushed
  */
@@ -27,7 +29,7 @@ public class FilterAction implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
-    private final String lookupName; // the button can be found in AssertJSwing tests by this
+    private final String lookupName; // for AssertJSwing tests
     private final String text;
     private ParamAdjustmentListener adjustmentListener;
     private OrderedExecutionButton button;
@@ -38,11 +40,12 @@ public class FilterAction implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterAction(String text, ActionListener actionListener, String toolTipText, String lookupName) {
-        this(text, actionListener, null, toolTipText, lookupName);
+    public FilterAction(String text, ActionListener actionListener, String toolTipText) {
+        this(text, actionListener, null, toolTipText, null);
     }
 
-    public FilterAction(String text, ActionListener actionListener, Icon icon, String toolTipText, String lookupName) {
+    public FilterAction(String text, ActionListener actionListener, Icon icon,
+                        String toolTipText, String lookupName) {
         this.text = text;
         this.actionListener = actionListener;
         this.icon = icon;
@@ -106,8 +109,7 @@ public class FilterAction implements FilterSetting {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s']",
-                getClass().getSimpleName(), getName());
+        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
     /**
@@ -116,7 +118,8 @@ public class FilterAction implements FilterSetting {
      * (typically to trigger a filter preview)
      */
     private static class OrderedExecutionButton extends JButton {
-        private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {
+        private OrderedExecutionButton(String name, ActionListener actionListener,
+                                       ParamAdjustmentListener adjustmentListener, Icon icon) {
             super(name);
 
             if (icon != null) {

@@ -28,9 +28,11 @@ import java.awt.Point;
  */
 public class ZoomTool extends Tool {
     ZoomTool() {
-        super('z', "Zoom", "zoom_tool_icon.png",
-                "<b>click</b> to zoom in, <b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
-                Cursors.HAND, false, true, ClipStrategy.CANVAS);
+        super("Zoom", 'z', "zoom_tool_icon.png",
+                "<b>click</b> to zoom in, " +
+                        "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
+                Cursors.HAND, false,
+                true, ClipStrategy.CANVAS);
     }
 
     @Override

@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.awt.Color.WHITE;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -59,6 +60,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
  */
 public class TextSettingsPanel extends FilterGUI
         implements ParamAdjustmentListener, ActionListener {
+
     private TextLayer textLayer;
 
     private JTextField textTF;
@@ -201,7 +203,7 @@ public class TextSettingsPanel extends FilterGUI
 
     private JPanel createFontPanel(TextSettings settings) {
         JPanel fontPanel = new JPanel();
-        fontPanel.setBorder(BorderFactory.createTitledBorder("Font"));
+        fontPanel.setBorder(createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(fontPanel);
@@ -268,7 +270,7 @@ public class TextSettingsPanel extends FilterGUI
                     .okText("Close")
                     .build();
         }
-        advancedSettingsDialog.setVisible(true);
+        GUIUtils.showDialog(advancedSettingsDialog);
     }
 
     private JCheckBox createCheckBox(String name, GridBagHelper gbh, boolean selected) {
@@ -325,7 +327,7 @@ public class TextSettingsPanel extends FilterGUI
             areaEffects = settings.getAreaEffects();
         }
         effectsPanel = new EffectsPanel(this, areaEffects);
-        effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+        effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 
     private JPanel createWatermarkPanel(TextSettings settings) {

@@ -16,12 +16,12 @@
  */
 package pixelitor.tools.gradient;
 
-import pixelitor.colors.FgBgColors;
-
 import java.awt.Color;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * The color option in the gradient tool
@@ -30,19 +30,19 @@ public enum GradientColorType {
     FG_TO_BG("Foreground to Background") {
         @Override
         protected Color getFirstColor() {
-            return FgBgColors.getFG();
+            return getFGColor();
         }
 
         @Override
         protected Color getSecondColor() {
-            return FgBgColors.getBG();
+            return getBGColor();
         }
     }, FG_TO_TRANSPARENT("Foreground to Transparent") {
         private final Color transparentColor = new Color(0, 0, 0, 0);
 
         @Override
         protected Color getFirstColor() {
-            return FgBgColors.getFG();
+            return getFGColor();
         }
 
         @Override

@@ -58,7 +58,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
             public void mouseReleased(MouseEvent e) {
                 // on Linux the popup trigger check is not enough
                 // probably because the popups are started by mousePressed
-                boolean showDialog = !e.isPopupTrigger() && SwingUtilities.isLeftMouseButton(e);
+                boolean showDialog = !e.isPopupTrigger()
+                        && SwingUtilities.isLeftMouseButton(e);
                 if (showDialog) {
                     showColorDialog();
                 }
@@ -72,7 +73,10 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private void showColorDialog() {
 //        Color color = JColorChooser.showDialog(this, "Select Color", model.getColor());
 
-        Color color = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select " + model.getName(), model.getColor(), model.allowOpacity());
+        // TODO why is PixelitorWindow the parent? What about GlobalKeyboardWatch.setDialogActive?
+        // see ColorUtils.showColorPickerDialog
+        Color color = ColorPicker.showDialog(PixelitorWindow.getInstance(),
+                "Select " + model.getName(), model.getColor(), model.allowOpacity());
 
         if (color != null) { // ok was pressed
             updateColor(color);

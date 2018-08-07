@@ -35,14 +35,18 @@ public class BlurredRectangle implements BlurredShape {
     private final Rectangle2D outerRect;
     private final Rectangle2D innerRect;
 
-    public BlurredRectangle(double centerX, double centerY, double innerRadiusX, double innerRadiusY, double outerRadiusX, double outerRadiusY) {
+    public BlurredRectangle(double centerX, double centerY,
+                            double innerRadiusX, double innerRadiusY,
+                            double outerRadiusX, double outerRadiusY) {
         this.cx = centerX;
         this.cy = centerY;
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
 
-        outerRect = new Rectangle2D.Double(cx - outerRadiusX, cy - outerRadiusY, 2 * outerRadiusX, 2 * outerRadiusY);
-        innerRect = new Rectangle2D.Double(cx - innerRadiusX, cy - innerRadiusY, 2 * innerRadiusX, 2 * innerRadiusY);
+        outerRect = new Rectangle2D.Double(cx - outerRadiusX, cy - outerRadiusY,
+                2 * outerRadiusX, 2 * outerRadiusY);
+        innerRect = new Rectangle2D.Double(cx - innerRadiusX, cy - innerRadiusY,
+                2 * innerRadiusX, 2 * innerRadiusY);
 
         maxXDist = outerRadiusX - innerRadiusX;
         maxYDist = outerRadiusY - innerRadiusY;

@@ -36,6 +36,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import static javax.imageio.ImageWriteParam.MODE_DEFAULT;
+import static javax.imageio.ImageWriteParam.MODE_DISABLED;
+import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
+
 /**
  * Utility class with static methods related to writing JPEG images
  */
@@ -81,7 +85,10 @@ public final class JpegOutput {
         return new ImageWithSize(previewImage, sizeInBytes);
     }
 
-    private static void writeJPGtoStream(BufferedImage image, ImageInputStream ios, JpegSettings jpegSettings, ProgressTracker tracker) throws IOException {
+    private static void writeJPGtoStream(BufferedImage image,
+                                         ImageInputStream ios,
+                                         JpegSettings jpegSettings,
+                                         ProgressTracker tracker) throws IOException {
         Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
         if (!jpgWriters.hasNext()) {
             throw new IllegalStateException("No JPG writers found");
@@ -91,12 +98,12 @@ public final class JpegOutput {
         ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
 
         if (jpegSettings.isProgressive()) {
-            imageWriteParam.setProgressiveMode(ImageWriteParam.MODE_DEFAULT);
+            imageWriteParam.setProgressiveMode(MODE_DEFAULT);
         } else {
-            imageWriteParam.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+            imageWriteParam.setProgressiveMode(MODE_DISABLED);
         }
 
-        imageWriteParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        imageWriteParam.setCompressionMode(MODE_EXPLICIT);
         imageWriteParam.setCompressionQuality(jpegSettings.getQuality());
 
         IIOImage iioImage = new IIOImage(image, null, null);

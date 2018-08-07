@@ -32,7 +32,9 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     private final MaskViewMode oldMode;
     private ImageComponent ic;
 
-    public CompositionReplacedEdit(String name, ImageComponent ic, Composition oldComp, Composition newComp, MaskViewMode oldMode) {
+    public CompositionReplacedEdit(String name, ImageComponent ic,
+                                   Composition oldComp, Composition newComp,
+                                   MaskViewMode oldMode) {
         super(name, oldComp);
         assert oldComp.getFile().equals(newComp.getFile());
 
@@ -45,14 +47,14 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        ic.replaceComp(comp, false, oldMode);
+        ic.replaceComp(comp, oldMode, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        ic.replaceComp(newComp, false, MaskViewMode.NORMAL);
+        ic.replaceComp(newComp, MaskViewMode.NORMAL, false);
     }
 
     @Override

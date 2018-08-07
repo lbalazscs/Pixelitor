@@ -19,6 +19,7 @@ package pixelitor.io;
 
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.io.JpegOutput.ImageWithSize;
@@ -38,21 +39,22 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog
  */
 public class OptimizedJpegSavePanel extends JPanel {
-    public static final int GRID_HGAP = 10;
-    public static final int GRID_VGAP = 10;
+    private static final int GRID_HGAP = 10;
+    private static final int GRID_VGAP = 10;
     private final BufferedImage image;
     private ImagePanel optimized;
     private RangeParam qualityParam;
     private JLabel sizeLabel;
     private ImagePanel original;
     private JCheckBox progressiveCB;
-    ProgressPanel progressPanel;
+    private ProgressPanel progressPanel;
 
     private OptimizedJpegSavePanel(BufferedImage image) {
         this.image = image;
@@ -89,14 +91,13 @@ public class OptimizedJpegSavePanel extends JPanel {
         comparePanel.add(originalSP);
         comparePanel.add(optimizedSP);
 
-        optimizedSP.getVerticalScrollBar().setModel(originalSP.getVerticalScrollBar().getModel());
-        optimizedSP.getHorizontalScrollBar().setModel(originalSP.getHorizontalScrollBar().getModel());
+        GUIUtils.setupSharedScrollModels(originalSP, optimizedSP);
     }
 
     private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
         JScrollPane sp = new JScrollPane(original);
         HandToolSupport.addBehavior(sp);
-        sp.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        sp.setBorder(createTitledBorder(borderTitle));
 
         return sp;
     }
@@ -120,8 +121,7 @@ public class OptimizedJpegSavePanel extends JPanel {
 
         qualityParam = new RangeParam("  JPEG Quality", 1, 60, 100);
         qualityParam.setAdjustmentListener(() -> updatePreview(false));
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
-        p.add(qualitySpinner);
+        p.add(new SliderSpinner(qualityParam, WEST, false));
 
         sizeLabel = new JLabel();
         p.add(sizeLabel);
@@ -143,7 +143,8 @@ public class OptimizedJpegSavePanel extends JPanel {
         } else {
             pt = new JProgressBarTracker(progressPanel);
         }
-        ImageWithSize imageWithSize = JpegOutput.writeJPGtoPreviewImage(this.image, settings, pt);
+        ImageWithSize imageWithSize = JpegOutput.writeJPGtoPreviewImage(
+                this.image, settings, pt);
 
         BufferedImage newPreview = imageWithSize.getImage();
         optimized.changeImage(newPreview);

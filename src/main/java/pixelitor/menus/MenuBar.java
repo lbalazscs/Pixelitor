@@ -45,12 +45,11 @@ import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.PreferencesPanel;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.PerformanceTestingDialog;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSave;
@@ -93,22 +92,18 @@ import pixelitor.utils.FilterCreator;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Tests3x3;
-import pixelitor.utils.Utils;
 import pixelitor.utils.debug.AppNode;
 import pixelitor.utils.test.Events;
-import pixelitor.utils.test.FilterTests;
 import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
-import pixelitor.utils.test.ToolTests;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Toolkit;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
 
+import static java.lang.String.format;
+import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.colors.FillType.BACKGROUND;
 import static pixelitor.colors.FillType.FOREGROUND;
@@ -121,72 +116,33 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageComponents.duplicateActive;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
+import static pixelitor.gui.ImageComponents.getActiveCompositeImage;
+import static pixelitor.gui.ImageComponents.getActiveIC;
 import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
+import static pixelitor.gui.ImageComponents.onActiveDrawable;
+import static pixelitor.gui.ImageComponents.onActiveImageLayer;
+import static pixelitor.gui.ImageComponents.onActiveTextLayer;
+import static pixelitor.gui.ImageComponents.reloadActiveFromFileAsync;
+import static pixelitor.gui.ImageComponents.repaintActive;
+import static pixelitor.gui.ImageComponents.repaintAll;
+import static pixelitor.gui.ImageComponents.warnAndCloseActive;
+import static pixelitor.gui.ImageComponents.warnAndCloseAll;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
 import static pixelitor.menus.EnabledIf.UNDO_POSSIBLE;
 import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
 import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
+import static pixelitor.utils.Keys.*;
+import static pixelitor.utils.Utils.debugImage;
+import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
  * The menu bar of the app
  */
 public class MenuBar extends JMenuBar {
-    public static final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
-    public static final KeyStroke CTRL_1 = KeyStroke.getKeyStroke('1', MENU_SHORTCUT_KEY_MASK);
-    public static final KeyStroke CTRL_2 = KeyStroke.getKeyStroke('2', MENU_SHORTCUT_KEY_MASK);
-    public static final KeyStroke CTRL_3 = KeyStroke.getKeyStroke('3', MENU_SHORTCUT_KEY_MASK);
-    public static final KeyStroke CTRL_4 = KeyStroke.getKeyStroke('4', MENU_SHORTCUT_KEY_MASK);
-
-    private static final KeyStroke CTRL_B = KeyStroke.getKeyStroke('B', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_D = KeyStroke.getKeyStroke('D', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK);
-    //    private static final KeyStroke CTRL_G = KeyStroke.getKeyStroke('G', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_H = KeyStroke.getKeyStroke('H', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_J = KeyStroke.getKeyStroke('J', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_K = KeyStroke.getKeyStroke('K', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_L = KeyStroke.getKeyStroke('L', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_M = KeyStroke.getKeyStroke('M', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_N = KeyStroke.getKeyStroke('N', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_O = KeyStroke.getKeyStroke('O', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_S = KeyStroke.getKeyStroke('S', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_T = KeyStroke.getKeyStroke('T', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_U = KeyStroke.getKeyStroke('U', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_Z = KeyStroke.getKeyStroke('Z', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK);
-
-    private static final KeyStroke CTRL_SHIFT_S = KeyStroke.getKeyStroke('S', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_ALT_W = KeyStroke.getKeyStroke('W', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
-    private static final KeyStroke CTRL_SHIFT_Z = KeyStroke.getKeyStroke('Z', InputEvent.SHIFT_MASK + MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_SHIFT_F = KeyStroke.getKeyStroke('F', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_C = KeyStroke.getKeyStroke('C', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_ALT_V = KeyStroke.getKeyStroke('V', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
-    private static final KeyStroke CTRL_ALT_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK | InputEvent.ALT_MASK);
-    private static final KeyStroke ALT_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, InputEvent.ALT_MASK);
-    private static final KeyStroke CTRL_BACKSPACE = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_SHIFT_I = KeyStroke.getKeyStroke('I', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke T = KeyStroke.getKeyStroke('T');
-    private static final KeyStroke CTRL_SHIFT_ALT_E = KeyStroke.getKeyStroke('E', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_OPEN_BRACKET = KeyStroke.getKeyStroke('[', MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', MENU_SHORTCUT_KEY_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke ALT_CLOSE_BRACKET = KeyStroke.getKeyStroke(']', InputEvent.ALT_MASK);
-    private static final KeyStroke ALT_OPEN_BRACKET = KeyStroke.getKeyStroke('[', InputEvent.ALT_MASK);
-    private static final KeyStroke F6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
-    private static final KeyStroke F7 = KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0);
-    private static final KeyStroke F12 = KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0);
-    private static final KeyStroke TAB = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
-    private static final KeyStroke CTRL_ALT_R = KeyStroke.getKeyStroke('R', MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
 
     public MenuBar(PixelitorWindow pw) {
         this.add(createFileMenu(pw));
@@ -244,7 +200,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addAction(new MenuAction("Export Optimized JPEG...") {
             @Override
             public void onClick() {
-                BufferedImage image = ImageComponents.getActiveCompositeImage();
+                BufferedImage image = getActiveCompositeImage();
                 OptimizedJpegSavePanel.showInDialog(image, pw);
             }
         });
@@ -278,7 +234,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Close") {
             @Override
             public void onClick() {
-                OpenSave.warnAndCloseImage(ImageComponents.getActiveIC());
+                warnAndCloseActive();
             }
         }, CTRL_W);
 
@@ -286,7 +242,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Close All") {
             @Override
             public void onClick() {
-                OpenSave.warnAndCloseAllImages();
+                warnAndCloseAll();
             }
         }, CTRL_ALT_W);
 
@@ -294,7 +250,7 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Reload") {
             @Override
             public void onClick() {
-                ImageComponents.reloadActiveFromFileAsync();
+                reloadActiveFromFileAsync();
             }
         }, F12);
 
@@ -387,7 +343,8 @@ public class MenuBar extends JMenuBar {
         editMenu.addActionWithKey(new CopyAction(CopySource.LAYER), CTRL_C);
         editMenu.addActionWithKey(new CopyAction(CopySource.COMPOSITE), CTRL_SHIFT_C);
         // paste
-        editMenu.buildAction(new PasteAction(PasteDestination.NEW_IMAGE)).alwaysEnabled().withKey(CTRL_V).add();
+        editMenu.buildAction(new PasteAction(PasteDestination.NEW_IMAGE))
+                .alwaysEnabled().withKey(CTRL_V).add();
         editMenu.addActionWithKey(new PasteAction(PasteDestination.NEW_LAYER), CTRL_SHIFT_V);
         editMenu.addActionWithKey(new PasteAction(PasteDestination.MASK), CTRL_ALT_V);
 
@@ -397,7 +354,7 @@ public class MenuBar extends JMenuBar {
         Action preferencesAction = new MenuAction("Preferences...") {
             @Override
             public void onClick() {
-                AppPreferences.Panel.showInDialog();
+                PreferencesPanel.showInDialog();
             }
         };
         editMenu.add(preferencesAction);
@@ -431,7 +388,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.addActionWithKey(new MenuAction("New Layer from Composite") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().addNewLayerFromComposite("Composite");
+                getActiveCompOrNull().addNewLayerFromComposite();
             }
         }, CTRL_SHIFT_ALT_E);
 
@@ -511,7 +468,8 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addActionWithKey(new GetImageAction("Add from Color Range", true, false) {
+        sub.addActionWithKey(new GetImageAction(
+                "Add from Color Range", true, false) {
             @Override
             protected void process(Layer layer, BufferedImage image) {
                 MaskFromColorRangePanel.showInDialog(layer, image);
@@ -521,7 +479,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageComponent ic = getActiveIC();
                 Composition comp = ic.getComp();
                 Layer layer = comp.getActiveLayer();
 
@@ -534,7 +492,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageComponent ic = ImageComponents.getActiveIC();
+                ImageComponent ic = getActiveIC();
                 Layer layer = ic.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
@@ -573,14 +531,14 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction("Edit...", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
-                ImageComponents.onActiveTextLayer(textLayer -> textLayer.edit(pw));
+                onActiveTextLayer(textLayer -> textLayer.edit(pw));
             }
         }, CTRL_T);
 
         sub.addAction(new MenuAction("Rasterize", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
-                ImageComponents.onActiveTextLayer(TextLayer::replaceWithRasterized);
+                onActiveTextLayer(TextLayer::replaceWithRasterized);
             }
         });
 
@@ -590,7 +548,8 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAdjustmentLayersSubmenu() {
         PMenu sub = new PMenu("New Adjustment Layer");
 
-        sub.addAction(new MenuAction("Invert Adjustment") { // TODO not "Invert" because of assertj test lookup confusion
+        // TODO not called "Invert" because of assertj test lookup confusion
+        sub.addAction(new MenuAction("Invert Adjustment") {
             @Override
             public void onClick() {
                 AddAdjLayerAction.INSTANCE.actionPerformed(null);
@@ -621,8 +580,11 @@ public class MenuBar extends JMenuBar {
                 .add();
 
         selectMenu.addSeparator();
-        selectMenu.buildAction(SelectionActions.getTraceWithBrush()).enableIf(ACTION_ENABLED).add();
-        selectMenu.buildAction(SelectionActions.getTraceWithEraser()).enableIf(ACTION_ENABLED).add();
+
+        selectMenu.buildAction(SelectionActions.getTraceWithBrush())
+                .enableIf(ACTION_ENABLED).add();
+        selectMenu.buildAction(SelectionActions.getTraceWithEraser())
+                .enableIf(ACTION_ENABLED).add();
 
         return selectMenu;
     }
@@ -645,7 +607,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.addAction(new MenuAction("Duplicate") {
             @Override
             public void onClick() {
-                ImageComponents.duplicateActive();
+                duplicateActive();
             }
         });
 
@@ -690,7 +652,6 @@ public class MenuBar extends JMenuBar {
         colorsMenu.buildFilter("Levels", Levels::new)
                 .withKey(CTRL_L)
                 .add();
-//        colorsMenu.buildFilter("Levels 2", Levels2::new).add();
         colorsMenu.buildFilter(BrightnessContrast.NAME, BrightnessContrast::new)
                 .add();
         colorsMenu.buildFilter(Solarize.NAME, Solarize::new)
@@ -707,9 +668,7 @@ public class MenuBar extends JMenuBar {
                 .add();
 
         colorsMenu.add(createExtractChannelsSubmenu());
-
         colorsMenu.add(createReduceColorsSubmenu());
-
         colorsMenu.add(createFillSubmenu());
 
         return colorsMenu;
@@ -727,22 +686,14 @@ public class MenuBar extends JMenuBar {
                 .extract()
                 .add();
 
-        FilterAction extractValueChannel = ExtractChannelFilter.getValueChannelFA();
-        sub.addFilter(extractValueChannel);
-
-        FilterAction desaturateChannel = ExtractChannelFilter.getDesaturateChannelFA();
-        sub.addFilter(desaturateChannel);
+        sub.addFilter(ExtractChannelFilter.getValueChannelFA());
+        sub.addFilter(ExtractChannelFilter.getDesaturateChannelFA());
 
         sub.addSeparator();
 
-        FilterAction getHue = ExtractChannelFilter.getHueChannelFA();
-        sub.addFilter(getHue);
-
-        FilterAction getHuiInColors = ExtractChannelFilter.getHueInColorsChannelFA();
-        sub.addFilter(getHuiInColors);
-
-        FilterAction getSat = ExtractChannelFilter.getSaturationChannelFA();
-        sub.addFilter(getSat);
+        sub.addFilter(ExtractChannelFilter.getHueChannelFA());
+        sub.addFilter(ExtractChannelFilter.getHueInColorsChannelFA());
+        sub.addFilter(ExtractChannelFilter.getSaturationChannelFA());
 
         return sub;
     }
@@ -810,8 +761,8 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createBlurSharpenSubmenu() {
         PMenu sub = new PMenu("Blur/Sharpen");
+
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
-//        sub.addFA(FastBlur.NAME, FastBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);
         sub.addFilter(JHGaussianBlur.NAME, JHGaussianBlur::new);
         sub.addFilter(JHLensBlur.NAME, JHLensBlur::new);
@@ -820,6 +771,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(SPIN_ZOOM_BLUR.createFilterAction());
         sub.addSeparator();
         sub.addFilter(JHUnsharpMask.NAME, JHUnsharpMask::new);
+
         return sub;
     }
 
@@ -929,16 +881,20 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createRenderShapesSubmenu() {
         PMenu sub = new PMenu("Shapes");
+
         sub.addFilter("Flower of Life", FlowerOfLife::new);
         sub.addFilter("Lissajous Curve", Lissajous::new);
         sub.addFilter("Mystic Rose", MysticRose::new);
         sub.addFilter("Spirograph", Spirograph::new);
+
         return sub;
     }
 
     private static JMenu createRenderGeometrySubmenu() {
         PMenu sub = new PMenu("Geometry");
+
         sub.addFilter(Starburst.NAME, Starburst::new);
+
         return sub;
     }
 
@@ -963,10 +919,8 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Find Edges");
 
         sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
-
         sub.addAction(new FilterAction(JHLaplacian.NAME, JHLaplacian::new)
                 .withoutGUI());
-
         sub.addFilter(JHDifferenceOfGaussians.NAME, JHDifferenceOfGaussians::new);
         sub.addFilter("Canny", Canny::new);
 
@@ -1010,7 +964,6 @@ public class MenuBar extends JMenuBar {
                 History.showHistory();
             }
         });
-
         viewMenu.addAction(new MenuAction("Show Navigator...") {
             @Override
             public void onClick() {
@@ -1021,22 +974,24 @@ public class MenuBar extends JMenuBar {
         viewMenu.addSeparator();
 
         viewMenu.add(createColorVariationsSubmenu(pw));
-
         viewMenu.addAlwaysEnabledAction(new MenuAction("Color Palette...") {
             @Override
             public void onClick() {
-                FullPalette palette = new FullPalette();
-                PalettePanel.showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
+                PalettePanel.showDialog(pw, new FullPalette(),
+                        ColorSwatchClickHandler.STANDARD);
             }
         });
 
         viewMenu.addSeparator();
 
         viewMenu.add(ShowHideStatusBarAction.INSTANCE);
-        viewMenu.buildAction(ShowHideHistogramsAction.INSTANCE).alwaysEnabled().withKey(F6).add();
-        viewMenu.buildAction(ShowHideLayersAction.INSTANCE).alwaysEnabled().withKey(F7).add();
+        viewMenu.buildAction(ShowHideHistogramsAction.INSTANCE)
+                .alwaysEnabled().withKey(F6).add();
+        viewMenu.buildAction(ShowHideLayersAction.INSTANCE)
+                .alwaysEnabled().withKey(F7).add();
         viewMenu.add(ShowHideToolsAction.INSTANCE);
-        viewMenu.buildAction(ShowHideAllAction.INSTANCE).alwaysEnabled().withKey(TAB).add();
+        viewMenu.buildAction(ShowHideAllAction.INSTANCE)
+                .alwaysEnabled().withKey(TAB).add();
 
         viewMenu.addAlwaysEnabledAction(new MenuAction("Set Default Workspace") {
             @Override
@@ -1048,7 +1003,7 @@ public class MenuBar extends JMenuBar {
         JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e -> {
             ImageComponent.showPixelGrid = showPixelGridMI.getState();
-            ImageComponents.repaintAll();
+            repaintAll();
         });
         viewMenu.add(showPixelGridMI);
 
@@ -1067,13 +1022,15 @@ public class MenuBar extends JMenuBar {
                 PalettePanel.showFGVariationsDialog(pw);
             }
         });
-        variations.addAlwaysEnabledAction(new MenuAction("HSB Mix Foreground with Background...") {
+        variations.addAlwaysEnabledAction(new MenuAction(
+                "HSB Mix Foreground with Background...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, true);
             }
         });
-        variations.addAlwaysEnabledAction(new MenuAction("RGB Mix Foreground with Background...") {
+        variations.addAlwaysEnabledAction(new MenuAction(
+                "RGB Mix Foreground with Background...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, true);
@@ -1088,13 +1045,15 @@ public class MenuBar extends JMenuBar {
                 PalettePanel.showBGVariationsDialog(pw);
             }
         });
-        variations.addAlwaysEnabledAction(new MenuAction("HSB Mix Background with Foreground...") {
+        variations.addAlwaysEnabledAction(new MenuAction(
+                "HSB Mix Background with Foreground...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, false);
             }
         });
-        variations.addAlwaysEnabledAction(new MenuAction("RGB Mix Background with Foreground...") {
+        variations.addAlwaysEnabledAction(new MenuAction(
+                "RGB Mix Background with Foreground...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, false);
@@ -1156,7 +1115,8 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 String vmRuntimeInfo = ManagementFactory.getRuntimeMXBean().getName();
-                System.out.println(String.format("MenuBar::onClick: vmRuntimeInfo = '%s'", vmRuntimeInfo));
+                System.out.println(format("MenuBar::onClick: vmRuntimeInfo = '%s'",
+                        vmRuntimeInfo));
             }
         });
 
@@ -1164,15 +1124,15 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
-                Utils.debugImage(imageLayer.getImage(), "layer image");
+                debugImage(imageLayer.getImage(), "layer image");
 
                 if (imageLayer.hasMask()) {
                     LayerMask layerMask = imageLayer.getMask();
                     BufferedImage maskImage = layerMask.getImage();
-                    Utils.debugImage(maskImage, "mask image");
+                    debugImage(maskImage, "mask image");
 
                     BufferedImage transparencyImage = layerMask.getTransparencyImage();
-                    Utils.debugImage(transparencyImage, "transparency image");
+                    debugImage(transparencyImage, "transparency image");
                 }
             }
         });
@@ -1200,8 +1160,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
             public void onClick() {
-                ImageComponents.onActiveDrawable(
-                        dr -> Utils.debugImage(dr.getCanvasSizedSubImage()));
+                onActiveDrawable(dr -> debugImage(dr.getCanvasSizedSubImage()));
             }
         });
 
@@ -1215,9 +1174,8 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug translation and canvas") {
             @Override
             public void onClick() {
-                ImageComponents.onActiveImageLayer(layer -> {
-                    String s = layer.toDebugCanvasString();
-                    System.out.println(s);
+                onActiveImageLayer(layer -> {
+                    System.out.println(layer.toDebugCanvasString());
                 });
             }
         });
@@ -1239,8 +1197,9 @@ public class MenuBar extends JMenuBar {
         developMenu.addAlwaysEnabledAction(new MenuAction("Debug Java Main Version") {
             @Override
             public void onClick() {
-                int version = Utils.getCurrentMainJavaVersion();
-                Dialogs.showInfoDialog(pw, "Debug", "Java Main Version = " + version);
+                int version = getJavaMainVersion();
+                Dialogs.showInfoDialog(pw, "Debug",
+                        "Java Main Version = " + version);
             }
         });
 
@@ -1260,7 +1219,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("repaint() on the active image") {
             @Override
             public void onClick() {
-                ImageComponents.repaintActive();
+                repaintActive();
             }
         });
 
@@ -1295,18 +1254,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addAction(new MenuAction("Save All Images to Folder...") {
-            @Override
-            public void onClick() {
-                OpenSave.saveAllImagesToDir();
-            }
-        });
-
         sub.addAction(new MenuAction("Debug ImageLayer Images") {
             @Override
             public void onClick() {
-                ImageComponents.onActiveDrawable(
-                        Drawable::debugImages);
+                onActiveDrawable(Drawable::debugImages);
             }
         });
 
@@ -1325,13 +1276,6 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter("ParamTest", ParamTest::new);
 
-        sub.addActionWithKey(new MenuAction("Random Resize") {
-            @Override
-            public void onClick() {
-                FilterTests.randomResize();
-            }
-        }, CTRL_ALT_R);
-
         sub.buildAction(new MenuAction("Random GUI Test") {
             @Override
             public void onClick() {
@@ -1339,56 +1283,10 @@ public class MenuBar extends JMenuBar {
             }
         }).alwaysEnabled().withKey(CTRL_R).add();
 
-        sub.addAction(new DrawableAction("Filter Performance Test") {
-            @Override
-            protected void process(Drawable dr) {
-                new PerformanceTestingDialog(pw, dr);
-            }
-        });
-
-        sub.addAction(new DrawableAction("Find Slowest Filter", false) {
-            @Override
-            protected void process(Drawable dr) {
-                FilterTests.findSlowestFilter(dr);
-            }
-        });
-
-        sub.addAction(new MenuAction("getCompositeImage() Performance Test...") {
-            @Override
-            public void onClick() {
-                FilterTests.getCompositeImagePerformanceTest();
-            }
-        });
-
-        sub.addSeparator();
-
-        sub.addAction(new DrawableAction("Run All Filters on Current Layer/Mask", false) {
-            @Override
-            protected void process(Drawable dr) {
-                FilterTests.runAllFiltersOn(dr);
-            }
-        });
-
-        sub.addAction(new DrawableAction("Save the Result of Each Filter...") {
-            @Override
-            protected void process(Drawable dr) {
-                FilterTests.saveTheResultOfEachFilter(dr);
-            }
-        });
-
         sub.addAction(new MenuAction("Save Current Image in All Formats...") {
             @Override
             public void onClick() {
                 OpenSave.saveCurrentImageInAllFormats();
-            }
-        });
-
-        sub.addSeparator();
-
-        sub.addAlwaysEnabledAction(new DrawableAction("Test Tools", false) {
-            @Override
-            protected void process(Drawable dr) {
-                ToolTests.testTools(dr);
             }
         });
 
@@ -1419,13 +1317,11 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Experimental");
 
         sub.addFilter(Contours.NAME, Contours::new);
+
         sub.addSeparator();
 
         sub.addFilter(BlurredShapeTester.NAME, BlurredShapeTester::new);
-
         sub.addFilter(XYZTest.NAME, XYZTest::new);
-
-
         sub.addFilter(Droste.NAME, Droste::new);
         sub.addFilter(Sphere3D.NAME, Sphere3D::new);
         sub.addFilter("Grid", RenderGrid::new);
@@ -1444,15 +1340,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-//        JMenu sub = new JMenu("Web");
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Ask for Help", "https://sourceforge.net/projects/pixelitor/forums/forum/1034234"), null, sub, MenuEnableCondition.ACTION_ENABLED);
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Discuss Pixelitor", "https://sourceforge.net/projects/pixelitor/forums/forum/1034233"), null, sub, MenuEnableCondition.ACTION_ENABLED);
-//        MenuFactory.createMenuItem(new OpenInBrowserAction("Report a Bug", "https://sourceforge.net/tracker/?group_id=285935&atid=1211793"), null, sub, MenuEnableCondition.ACTION_ENABLED);
-//        helpMenu.add(sub);
-
         helpMenu.addSeparator();
 
-        helpMenu.add(new OpenInBrowserAction("Report an Issue...", "https://github.com/lbalazscs/Pixelitor/issues"));
+        helpMenu.add(new OpenInBrowserAction("Report an Issue...",
+                "https://github.com/lbalazscs/Pixelitor/issues"));
 
         helpMenu.add(new MenuAction("Internal State...") {
             @Override
@@ -1462,9 +1353,11 @@ public class MenuBar extends JMenuBar {
 
                 JTree tree = new JTree(node);
 
-                JLabel explainLabel = new JLabel("<html>If you are reporting a bug that cannot be reproduced," +
-                        "<br>please include the following information:");
-                explainLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                JLabel explainLabel = new JLabel(
+                        // TODO re-formulate
+                        "<html>If you are reporting a bug that cannot be reproduced," +
+                                "<br>please include the following information:");
+                explainLabel.setBorder(createEmptyBorder(5, 5, 5, 5));
 
                 JPanel form = new JPanel(new BorderLayout());
                 form.add(explainLabel, BorderLayout.NORTH);
@@ -1472,7 +1365,7 @@ public class MenuBar extends JMenuBar {
 
                 String text = node.toDetailedString();
 
-                GUIUtils.showClipboardTextDialog(form, title, text);
+                GUIUtils.showCopyTextToClipboardDialog(form, text, title);
             }
         });
 

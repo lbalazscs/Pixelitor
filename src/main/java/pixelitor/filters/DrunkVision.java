@@ -34,6 +34,7 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.AlphaComposite.SRC_OVER;
 import static java.lang.Math.PI;
 
 /**
@@ -76,7 +77,7 @@ public class DrunkVision extends ParametrizedFilter {
             AffineTransform transform = AffineTransform.getTranslateInstance(
                     transformPoints[i].getX(),
                     transformPoints[i].getY());
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f / (i + 2)));
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER, 1.0f / (i + 2)));
             g.drawImage(src, transform, null);
             pt.unitDone();
         }

@@ -43,12 +43,15 @@ public class JHOilPainting extends ParametrizedFilter {
     private static final int FASTER = 0;
     private static final int BETTER = 1;
 
-    private final GroupedRangeParam brushSize = new GroupedRangeParam("Brush Size", 0, 1, 10, false);
-    private final RangeParam coarseness = new RangeParam("Coarseness", 2, 25, 255);
-    private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality", new Value[]{
-            new Value("Faster", FASTER),
-            new Value("Better", BETTER),
-    }, IGNORE_RANDOMIZE);
+    private final GroupedRangeParam brushSize = new GroupedRangeParam(
+            "Brush Size", 0, 1, 10, false);
+    private final RangeParam coarseness = new RangeParam(
+            "Coarseness", 2, 25, 255);
+    private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality",
+            new Value[]{
+                    new Value("Faster", FASTER),
+                    new Value("Better", BETTER),
+            }, IGNORE_RANDOMIZE);
 
     public JHOilPainting() {
         super(ShowOriginal.YES);
@@ -82,7 +85,7 @@ public class JHOilPainting extends ParametrizedFilter {
             } else if (detailQuality.getValue() == FASTER) {
                 scaleUpQuality = ScaleUpQuality.BILINEAR_FAST;
             } else {
-                throw new IllegalStateException("unexpected value" + detailQuality.getValue());
+                throw new IllegalStateException("value = " + detailQuality.getValue());
             }
 
             double resizeFactor = r.getResizeFactor();
@@ -91,13 +94,11 @@ public class JHOilPainting extends ParametrizedFilter {
             int downScaledBrushY = (int) (brushY / resizeFactor);
 
             int resizeUnits = r.getResizeWorkUnits(scaleUpQuality);
-            long filterWorkAmount = downScaledBrushX * downScaledBrushY;
+            long filterWorkAmount = (long) downScaledBrushX * downScaledBrushY;
             int filterUnits = (int) (filterWorkAmount / 4);
             int workUnits = resizeUnits + filterUnits;
 
             ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
-//            ProgressTracker pt = new DebugProgressTracker("Oil, brushX = " + downScaledBrushX + ", brushY = " + downScaledBrushY, workUnits);
-
             ProgressTracker filterTracker = r.createFilterTracker(pt, filterUnits);
 
             filter.setProgressTracker(filterTracker);
@@ -121,5 +122,4 @@ public class JHOilPainting extends ParametrizedFilter {
     public boolean excludedFromAnimation() {
         return true;
     }
-
 }

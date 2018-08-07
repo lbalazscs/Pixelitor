@@ -40,7 +40,9 @@ public class GradientHandlesTest {
     @Before
     public void setup() {
         ImageComponent ic = TestHelper.createMockICWithoutComp();
-        GradientHandles gh = new GradientHandles(START_X_FOR_START, START_Y_FOR_START, START_X_FOR_END, START_Y_FOR_END, ic);
+        GradientHandles gh = new GradientHandles(
+                START_X_FOR_START, START_Y_FOR_START,
+                START_X_FOR_END, START_Y_FOR_END, ic);
         start = gh.getStart();
         end = gh.getEnd();
         middle = gh.getMiddle();
@@ -101,5 +103,4 @@ public class GradientHandlesTest {
                 .isAt(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0)
                 .isAtIm(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
     }
-
 }

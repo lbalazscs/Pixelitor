@@ -20,18 +20,19 @@ package pixelitor.filters;
 import pixelitor.ChangeReason;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerMask;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 
 /**
@@ -42,7 +43,8 @@ public abstract class Filter implements Serializable {
 
     private transient FilterAction filterAction;
 
-    // used for making sure that there are no unnecessary filters triggered
+    // used for making sure that there are no
+    // unnecessary filter executions triggered
     public static long runCount = 0;
 
     protected Filter() {
@@ -54,7 +56,7 @@ public abstract class Filter implements Serializable {
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
-     * Should a default destination image be created before
+     * Whether a default destination image should be created before
      * running the filter. If this returns false,
      * null will be passed and the filter will take care of that
      */
@@ -81,7 +83,7 @@ public abstract class Filter implements Serializable {
         long startTime = System.nanoTime();
 
         Runnable task = () -> transformAndHandleExceptions(dr, cr);
-        Utils.runWithBusyCursor(busyCursorParent, task);
+        GUIUtils.runWithBusyCursor(busyCursorParent, task);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
         Messages.showPerformanceMessage(getName(), totalTime);
@@ -137,7 +139,7 @@ public abstract class Filter implements Serializable {
 
     public BufferedImage transformImage(BufferedImage src) {
         boolean convertFromGray = false;
-        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) { // editing a mask
+        if (src.getType() == TYPE_BYTE_GRAY) { // editing a mask
             if (!supportsGray()) {
                 convertFromGray = true;
                 src = ImageUtils.toSysCompatibleImage(src);

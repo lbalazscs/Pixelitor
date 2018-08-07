@@ -45,7 +45,8 @@ public class RenderGrid extends ParametrizedFilter {
     private final RangeParam spacingParam = new RangeParam("Spacing", 1, 40, 100);
     private final RangeParam widthParam = new RangeParam("Width", 1, 20, 100);
     private final ColorParam colorParam = new ColorParam("Color", BLACK, FREE_OPACITY);
-    private final BooleanParam emptyIntersectionsParam = new BooleanParam("Empty Intersections", false);
+    private final BooleanParam emptyIntersectionsParam = new BooleanParam(
+            "Empty Intersections", false);
     private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
 
@@ -88,7 +89,8 @@ public class RenderGrid extends ParametrizedFilter {
 //        }
 
         // we draw the grid first on an image with transparent background
-        BufferedImage tmp = ImageUtils.getGridImageOnTransparentBackground(color, maxX, maxY, width, spacing, width, spacing, emptyIntersections);
+        BufferedImage tmp = ImageUtils.getGridImageOnTransparentBackground(color,
+                maxX, maxY, width, spacing, width, spacing, emptyIntersections);
         g.setComposite(AlphaComposite.getInstance(SRC_ATOP, opacity));
         if(rotated) {
             g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

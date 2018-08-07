@@ -52,8 +52,10 @@ public class AnchorPoint extends DraggablePoint {
     public AnchorPoint(double x, double y, View view) {
         super("anchor", x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
 
-        ctrlIn = new ControlPoint("ctrlIn", x, y, view, this, CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
-        ctrlOut = new ControlPoint("ctrlOut", x, y, view, this, CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
+        ctrlIn = new ControlPoint("ctrlIn", x, y, view, this,
+                CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
+        ctrlOut = new ControlPoint("ctrlOut", x, y, view, this,
+                CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
@@ -226,7 +228,7 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void dump() {
-        System.out.println(Ansi.RED + getType() + Ansi.RESET);
+        System.out.println(Ansi.red(getType()));
         System.out.println("    " + toColoredString());
         System.out.println("    " + ctrlIn.toColoredString());
         System.out.println("    " + ctrlOut.toColoredString());

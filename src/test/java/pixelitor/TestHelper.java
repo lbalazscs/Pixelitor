@@ -65,7 +65,8 @@ public class TestHelper {
     private static final int TEST_HEIGHT = 10;
 
     // all coordinates and distances must be even here because of the resize test
-    private static final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
+    private static final Rectangle standardTestSelectionShape
+            = new Rectangle(4, 4, 8, 4);
 
     private TestHelper() {
     }
@@ -105,7 +106,8 @@ public class TestHelper {
 
         Canvas canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
         when(comp.getCanvas()).thenReturn(canvas);
-        when(comp.getCanvasImBounds()).thenReturn(new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
+        when(comp.getCanvasImBounds()).thenReturn(
+                new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
         when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
         when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
 
@@ -157,7 +159,7 @@ public class TestHelper {
     public static Layer createLayerOfClass(Class layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
-            layer = new ImageLayer(comp, "layer 1");
+            layer = ImageLayer.createEmpty(comp, "layer 1");
         } else if (layerClass.equals(TextLayer.class)) {
             layer = createTextLayer(comp, "layer 1");
         } else if (layerClass.equals(AdjustmentLayer.class)) {
@@ -168,7 +170,9 @@ public class TestHelper {
         return layer;
     }
 
-    public static PMouseEvent createEvent(ImageComponent ic, int id, Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+    public static PMouseEvent createEvent(ImageComponent ic, int id,
+                                          Alt alt, Ctrl ctrl, Shift shift,
+                                          MouseButton mouseButton, int x, int y) {
         int modifiers = 0;
         modifiers = alt.modify(modifiers);
         modifiers = ctrl.modify(modifiers);
@@ -217,7 +221,9 @@ public class TestHelper {
         // Rectangle (subclass) from a Rectangle2D (superclass)
         when(ic.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
-            return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
+            return new Rectangle(
+                    (int) in.getX(), (int) in.getY(),
+                    (int) in.getWidth(), (int) in.getHeight());
         });
 
         when(ic.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
@@ -240,7 +246,8 @@ public class TestHelper {
         return ic;
     }
 
-    public static void addSelectionRectTo(Composition comp, int x, int y, int width, int height) {
+    public static void addSelectionRectTo(Composition comp,
+                                          int x, int y, int width, int height) {
         Rectangle shape = new Rectangle(x, y, width, height);
         MockingDetails mockingDetails = mockingDetails(comp);
         if (mockingDetails.isMock()) {
@@ -252,7 +259,8 @@ public class TestHelper {
         }
     }
 
-    public static void moveLayer(Composition comp, boolean makeDuplicateLayer, int relX, int relY) {
+    public static void moveLayer(Composition comp,
+                                 boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(makeDuplicateLayer);
         comp.moveActiveContentRelative(relX, relY);
         comp.endMovement();
@@ -278,7 +286,8 @@ public class TestHelper {
         assertThat(shapeBounds).isEqualTo(expected);
     }
 
-    public static void setStandardTestTranslationToAllLayers(Composition comp, WithTranslation translation) {
+    public static void setStandardTestTranslationToAllLayers(Composition comp,
+                                                             WithTranslation translation) {
         comp.forEachContentLayer(contentLayer -> {
             // should be used on layers without translation
             int tx = contentLayer.getTX();
@@ -290,7 +299,9 @@ public class TestHelper {
         });
     }
 
-    public static void setStandardTestTranslation(Composition comp, ContentLayer layer, WithTranslation translation) {
+    public static void setStandardTestTranslation(Composition comp,
+                                                  ContentLayer layer,
+                                                  WithTranslation translation) {
         // Composition only allows to move the active layer
         // so if the given layer is not active, we need to activate it temporarily
         Layer activeLayerBefore = comp.getActiveLayer();

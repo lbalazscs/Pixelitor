@@ -26,7 +26,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 /**
- * Automatically calculated zoom levels
+ * Zoom levels that are automatically calculated based on the available space
  */
 public enum AutoZoom {
     SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
@@ -90,16 +90,20 @@ public enum AutoZoom {
         double desktopHeight = desktopSize.getHeight();
 
         double canvasToDesktopHorRatio = canvasWidth / desktopWidth;
-        double canvasToDesktopVerRatio = canvasHeight / (desktopHeight - 35); // subtract because of internal frame header
+        // TODO what about the tabbed interface
+        int internalFrameHeightFactor = 35;
+        double canvasToDesktopVerRatio = canvasHeight / (desktopHeight - internalFrameHeightFactor);
 
-        double imageToDesktopRatio = calcImageToDesktopRatio(canvasToDesktopHorRatio, canvasToDesktopVerRatio);
+        double imageToDesktopRatio = calcImageToDesktopRatio(
+                canvasToDesktopHorRatio, canvasToDesktopVerRatio);
 
         double idealZoomPercent = 100.0 / imageToDesktopRatio;
         ZoomLevel[] zoomLevels = ZoomLevel.values();
         ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
         if (maximallyZoomedOut.getPercentValue() > idealZoomPercent) {
-            // the image is so big that it will have scroll bars even if it is maximally zoomed out
+            // the image is so big that it will have scroll bars even
+            // if it is maximally zoomed out
             return maximallyZoomedOut;
         }
 

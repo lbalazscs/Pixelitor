@@ -54,7 +54,8 @@ public class LayerOpacityEdit extends PixelitorEdit {
         float tmp = layer.getOpacity();
 
         layer.setOpacity(backupOpacity, true, false, true);
-        assert layer.getOpacity() == backupOpacity : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
+        assert layer.getOpacity() == backupOpacity
+                : "backupOpacity = " + backupOpacity + ", current = " + layer.getOpacity();
 
         backupOpacity = tmp;
     }

@@ -108,7 +108,7 @@ public class Starburst extends ParametrizedFilter {
                 g.setColor(Color.BLACK);
                 g.fillRect(0, 0, width, height);
             } else if (bg == BG_TOOL) {
-                g.setColor(FgBgColors.getBG());
+                g.setColor(FgBgColors.getBGColor());
                 g.fillRect(0, 0, width, height);
             }
         }

@@ -17,6 +17,8 @@
 
 package pixelitor.selection;
 
+import pixelitor.filters.gui.EnumParam;
+
 import java.awt.Shape;
 import java.awt.geom.Area;
 
@@ -66,6 +68,10 @@ public enum SelectionModifyType {
      * and its stroked outline shape.
      */
     public abstract Shape modify(Area previous, Area outlineShape);
+
+    public static EnumParam<SelectionModifyType> asParam() {
+        return new EnumParam<>("Type", SelectionModifyType.class);
+    }
 
     @Override
     public String toString() {

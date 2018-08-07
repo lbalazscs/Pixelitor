@@ -25,13 +25,16 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Makes sure that only one IO task runs at a time
  */
 public class IOThread {
+    private static final ThreadFactory threadFactory
+            = r -> new Thread(r, "[IO thread]");
     private static final ExecutorService executor
-            = Executors.newSingleThreadExecutor();
+            = Executors.newSingleThreadExecutor(threadFactory);
 
     private static final Set<String> currentPaths = new HashSet<>();
 

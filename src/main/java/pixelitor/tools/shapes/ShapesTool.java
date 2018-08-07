@@ -57,15 +57,15 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
 public class ShapesTool extends DragTool {
     private final EnumComboBoxModel<ShapesAction> actionModel = new EnumComboBoxModel<>(ShapesAction.class);
     private final EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> fillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> strokeFillModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
+    private final EnumComboBoxModel<TwoPointBasedPaint> fillPaintModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
+    private final EnumComboBoxModel<TwoPointBasedPaint> strokePaintModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
     private JButton strokeSettingsButton;
     private BasicStroke strokeForOpenShapes;
     private final JComboBox<TwoPointBasedPaint> strokeFillCombo;
-    private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox<>(fillModel);
+    private final JComboBox<TwoPointBasedPaint> fillCombo = new JComboBox<>(fillPaintModel);
     private JButton effectsButton;
     private JDialog effectsDialog;
     private JDialog strokeSettingsDialog;
@@ -77,12 +77,14 @@ public class ShapesTool extends DragTool {
     private Stroke stroke;
 
     public ShapesTool() {
-        super('u', "Shapes", "shapes_tool_icon.png",
-                "<b>drag</b> to draw a shape. Hold <b>Alt</b> down to drag from the center. Hold <b>SPACE</b> down while drawing to move the shape. ",
+        super("Shapes", 'u', "shapes_tool_icon.png",
+                "<b>drag</b> to draw a shape. " +
+                        "Hold <b>Alt</b> down to drag from the center. " +
+                        "Hold <b>SPACE</b> down while drawing to move the shape. ",
                 Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
 
-        strokeFillModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
-        strokeFillCombo = new JComboBox<>(strokeFillModel);
+        strokePaintModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
+        strokeFillCombo = new JComboBox<>(strokePaintModel);
 
         spaceDragStartPoint = true;
 
@@ -154,7 +156,7 @@ public class ShapesTool extends DragTool {
         Composition comp = e.getComp();
         Drawable dr = comp.getActiveDrawableOrThrow();
 
-        ShapesAction action = actionModel.getSelectedItem();
+        ShapesAction action = getSelectedAction();
         boolean selectionMode = action.createSelection();
         if (!selectionMode) {
 //            saveImageForUndo(comp);
@@ -181,7 +183,7 @@ public class ShapesTool extends DragTool {
                 thickness = effectThickness;
             }
 
-            ShapeType shapeType = typeModel.getSelectedItem();
+            ShapeType shapeType = getSelectedType();
             Shape currentShape = shapeType.getShape(userDrag.toImDrag());
             Rectangle shapeBounds = currentShape.getBounds();
             shapeBounds.grow(thickness, thickness);
@@ -215,7 +217,7 @@ public class ShapesTool extends DragTool {
     }
 
     private void updateEnabledState() {
-        ShapesAction action = actionModel.getSelectedItem();
+        ShapesAction action = getSelectedAction();
 
         enableEffectSettings(action.drawsEffects());
         enableStrokeSettings(action.hasStrokeSettings());
@@ -247,7 +249,7 @@ public class ShapesTool extends DragTool {
     public void paintOverLayer(Graphics2D g, Composition comp) {
         if (drawing) {
             // updates continuously the shape while drawing
-            Shape currentShape = typeModel.getSelectedItem().getShape(userDrag.toImDrag());
+            Shape currentShape = getSelectedType().getShape(userDrag.toImDrag());
             paintShape(g, currentShape, comp);
         }
     }
@@ -256,7 +258,7 @@ public class ShapesTool extends DragTool {
      * Programmatically draw the current shape type with the given drag
      */
     public void paintDrag(Drawable dr, ImDrag imDrag) {
-        Shape shape = typeModel.getSelectedItem().getShape(imDrag);
+        Shape shape = getSelectedType().getShape(imDrag);
         paintShape(dr, shape);
     }
 
@@ -294,39 +296,39 @@ public class ShapesTool extends DragTool {
             strokeForOpenShapes = new BasicStroke(1);
         }
 
-        ShapeType shapeType = typeModel.getSelectedItem();
+        ShapeType shapeType = getSelectedType();
 
-        ShapesAction action = actionModel.getSelectedItem();
+        ShapesAction action = getSelectedAction();
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         if (action.hasFill()) {
-            TwoPointBasedPaint fillType = fillModel.getSelectedItem();
+            TwoPointBasedPaint fillPaint = getSelectedFillPaint();
             if (shapeType.isClosed()) {
-                fillType.setupPaint(g, imDrag);
+                fillPaint.setupPaint(g, imDrag);
                 g.fill(shape);
-                fillType.finish(g);
+                fillPaint.finish(g);
             } else if (!action.hasStroke()) {
                 // special case: a shape that is not closed
                 // can be only stroked, even if stroke is disabled
                 g.setStroke(strokeForOpenShapes);
-                fillType.setupPaint(g, imDrag);
+                fillPaint.setupPaint(g, imDrag);
                 g.draw(shape);
-                fillType.finish(g);
+                fillPaint.finish(g);
             }
         }
 
         if (action.hasStroke()) {
-            TwoPointBasedPaint strokeFill = strokeFillModel.getSelectedItem();
+            TwoPointBasedPaint strokePaint = getSelectedStrokePaint();
             if (stroke == null) {
                 // During a single mouse drag, only one stroke should be created
                 // This is particularly important for "random shape"
                 stroke = strokeParam.createStroke();
             }
             g.setStroke(stroke);
-            strokeFill.setupPaint(g, imDrag);
+            strokePaint.setupPaint(g, imDrag);
             g.draw(shape);
-            strokeFill.finish(g);
+            strokePaint.finish(g);
         }
 
         if (action.drawsEffects()) {
@@ -409,14 +411,30 @@ public class ShapesTool extends DragTool {
         actionModel.setSelectedItem(action);
     }
 
+    private ShapesAction getSelectedAction() {
+        return actionModel.getSelectedItem();
+    }
+
+    private ShapeType getSelectedType() {
+        return typeModel.getSelectedItem();
+    }
+
+    private TwoPointBasedPaint getSelectedFillPaint() {
+        return fillPaintModel.getSelectedItem();
+    }
+
+    private TwoPointBasedPaint getSelectedStrokePaint() {
+        return strokePaintModel.getSelectedItem();
+    }
+
     @Override
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addString("Type", typeModel.getSelectedItem().toString());
-        node.addString("Action", actionModel.getSelectedItem().toString());
-        node.addString("Fill", fillModel.getSelectedItem().toString());
-        node.addString("Stroke", strokeFillModel.getSelectedItem().toString());
+        node.addString("Type", getSelectedType().toString());
+        node.addString("Action", getSelectedAction().toString());
+        node.addString("Fill", getSelectedFillPaint().toString());
+        node.addString("Stroke", getSelectedStrokePaint().toString());
         strokeParam.addDebugNodeInfo(node);
 
         return node;

@@ -37,7 +37,8 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
 import java.util.Optional;
-import java.util.function.Supplier;
+
+import static java.lang.String.format;
 
 /**
  * Static methods for managing history and undo/redo
@@ -78,13 +79,6 @@ public class History {
 
     public static void notifyMenus(PixelitorEdit edit) {
         undoableEditSupport.postEdit(edit);
-    }
-
-    public static void addEdit(boolean addToHistory,
-                               Supplier<PixelitorEdit> supplier) {
-        if (addToHistory) {
-            addEdit(supplier.get());
-        }
     }
 
     public static void addEdit(PixelitorEdit edit) {
@@ -270,9 +264,8 @@ public class History {
     public static void assertNumEditsIs(int expected) {
         int numEdits = undoManager.getSize();
         if (numEdits != expected) {
-            throw new AssertionError(String.format(
-                    "Expected %d edits, but found %d",
-                    expected, numEdits));
+            throw new AssertionError(format(
+                    "Expected %d edits, but found %d", expected, numEdits));
         }
     }
 
@@ -280,7 +273,7 @@ public class History {
     public static void assertLastEditNameIs(String expected) {
         String lastEditName = undoManager.getLastEdit().getName();
         if (!lastEditName.equals(expected)) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "Expected '%s' as the last edit name, but found '%s'",
                     expected, lastEditName));
         }
@@ -290,7 +283,7 @@ public class History {
     public static void assertEditToBeUndoneNameIs(String expected) {
         String name = undoManager.getEditToBeUndone().getName();
         if (!name.equals(expected)) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "Expected '%s' as the edit to be undone name, but found '%s'",
                     expected, name));
         }
@@ -300,7 +293,7 @@ public class History {
     public static void assertEditToBeRedoneNameIs(String expected) {
         String name = undoManager.getEditToBeRedone().getName();
         if (!name.equals(expected)) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "Expected '%s' as the edit to be redone name, but found '%s'",
                     expected, name));
         }

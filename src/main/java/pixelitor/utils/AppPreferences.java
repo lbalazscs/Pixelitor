@@ -20,16 +20,10 @@ package pixelitor.utils;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
-import pixelitor.colors.FgBgColors;
-import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.history.History;
-import pixelitor.io.Directories;
+import pixelitor.io.Dirs;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -38,18 +32,18 @@ import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
 
-import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.File;
-import java.util.function.Predicate;
 import java.util.prefs.Preferences;
+
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * Static methods for saving and loading application preferences
@@ -67,8 +61,10 @@ public final class AppPreferences {
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
-    private static final Preferences mainNode = Preferences.userNodeForPackage(Pixelitor.class);
-    private static final Preferences recentFilesNode = Preferences.userNodeForPackage(RecentFilesMenu.class);
+    private static final Preferences mainNode
+            = Preferences.userNodeForPackage(Pixelitor.class);
+    private static final Preferences recentFilesNode
+            = Preferences.userNodeForPackage(RecentFilesMenu.class);
 
     private static final String FG_COLOR_KEY = "fg_color";
     private static final String BG_COLOR_KEY = "bg_color";
@@ -157,7 +153,8 @@ public final class AppPreferences {
     }
 
     public static BoundedUniqueList<RecentFile> loadRecentFiles() {
-        BoundedUniqueList<RecentFile> retVal = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
+        BoundedUniqueList<RecentFile> retVal
+                = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
         for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String fileName = recentFilesNode.get(key, null);
@@ -217,11 +214,11 @@ public final class AppPreferences {
     }
 
     private static void saveLastOpenDir() {
-        saveDir(Directories.getLastOpenDir(), LAST_OPEN_DIR_KEY);
+        saveDir(Dirs.getLastOpen(), LAST_OPEN_DIR_KEY);
     }
 
     private static void saveLastSaveDir() {
-        saveDir(Directories.getLastSaveDir(), LAST_SAVE_DIR_KEY);
+        saveDir(Dirs.getLastSave(), LAST_SAVE_DIR_KEY);
     }
 
     private static void saveDir(File f, String key) {
@@ -282,12 +279,12 @@ public final class AppPreferences {
     }
 
     private static void saveFgBgColors() {
-        Color fgColor = FgBgColors.getFG();
+        Color fgColor = getFGColor();
         if (fgColor != null) {
             mainNode.putInt(FG_COLOR_KEY, fgColor.getRGB());
         }
 
-        Color bgColor = FgBgColors.getBG();
+        Color bgColor = getBGColor();
         if (bgColor != null) {
             mainNode.putInt(BG_COLOR_KEY, bgColor.getRGB());
         }
@@ -408,93 +405,6 @@ public final class AppPreferences {
         public static void setStatusBarVisibility(boolean v) {
             statusBarVisibility = v;
             PixelitorWindow.getInstance().setStatusBarVisibility(v, true);
-        }
-    }
-
-    /**
-     * The GUI for the preferences dialog
-     */
-    public static class Panel extends JPanel {
-        private final JTextField undoLevelsTF;
-        private final JComboBox<Value> thumbSizeCB;
-
-        Panel() {
-            setLayout(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(this);
-
-            JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
-            uiChooser.setSelectedItem(ImageArea.getMode());
-            uiChooser.setName("uiChooser");
-            gbh.addLabelWithControl("Images In: ", uiChooser);
-            uiChooser.addActionListener(e -> {
-                ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
-                ImageArea.changeUI(mode);
-            });
-
-            undoLevelsTF = new JTextField(3);
-            undoLevelsTF.setName("undoLevelsTF");
-            undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-            gbh.addLabelWithControl("Undo/Redo Levels: ",
-                    TextFieldValidator.createIntOnlyLayerFor(undoLevelsTF));
-
-            Value[] thumbSizes = {
-                    new Value("24x24 pixels", 24),
-                    new Value("48x48 pixels", 48),
-                    new Value("72x72 pixels", 72),
-                    new Value("96x96 pixels", 96),
-            };
-            thumbSizeCB = new JComboBox<>(thumbSizes);
-            thumbSizeCB.setName("thumbSizeCB");
-
-            int currentSize = LayerButtonLayout.getThumbSize();
-            thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
-
-            gbh.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
-            thumbSizeCB.addActionListener(e -> updateThumbSize());
-        }
-
-        private int getUndoLevels() {
-            String s = undoLevelsTF.getText();
-            return Integer.parseInt(s);
-        }
-
-        private void updateThumbSize() {
-            int newSize = ((Value) thumbSizeCB.getSelectedItem()).getValue();
-            LayerButtonLayout.setThumbSize(newSize);
-        }
-
-        public static void showInDialog() {
-            Panel panel = new Panel();
-
-            // we don't want to continuously set the undo levels
-            // as the user edits the text field, because low levels
-            // erase the history, so we set it in the validator
-            Predicate<JDialog> validator = d -> {
-                int undoLevels = 0;
-                boolean couldParse = true;
-                try {
-                    undoLevels = panel.getUndoLevels();
-                } catch (NumberFormatException ex) {
-                    couldParse = false;
-                }
-                if (couldParse) {
-                    History.setUndoLevels(undoLevels);
-                    return true;
-                } else {
-                    Dialogs.showErrorDialog(d, "Error",
-                            "<html>The <b>Undo/Redo Levels</b> must be an integer.");
-                    return false;
-                }
-            };
-
-            new DialogBuilder()
-                    .content(panel)
-                    .noCancelButton()
-                    .title("Preferences")
-                    .okText("Close")
-                    .validator(validator)
-                    .validateWhenCanceled()
-                    .show();
         }
     }
 }

@@ -27,6 +27,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.ChangeReason.PREVIEWING;
 
 /**
@@ -83,7 +84,7 @@ public class RandomFilterGUI extends FilterGUI {
 
         filter = newFilter;
         String filterName = newFilter.getListName();
-        realSettingsPanel.setBorder(BorderFactory.createTitledBorder(filterName));
+        realSettingsPanel.setBorder(createTitledBorder(filterName));
         if (newFilter instanceof FilterWithGUI) {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters

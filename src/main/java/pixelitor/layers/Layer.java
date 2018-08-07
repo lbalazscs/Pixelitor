@@ -51,6 +51,7 @@ import java.util.List;
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static java.lang.String.format;
 
 /**
  * The abstract superclass of all layer classes
@@ -72,10 +73,10 @@ public abstract class Layer implements Serializable {
 
     float opacity = 1.0f;
     BlendingMode blendingMode = BlendingMode.NORMAL;
+    protected boolean isAdjustment = false;
 
     // transient variables from here
     private transient LayerButton ui;
-    protected transient boolean isAdjustment = false;
     private transient List<LayerChangeListener> layerChangeListeners;
 
     /**
@@ -86,6 +87,9 @@ public abstract class Layer implements Serializable {
     private transient boolean maskEditing = false;
 
     Layer(Composition comp, String name, Layer parent) {
+        assert comp != null;
+        assert name != null;
+
         this.comp = comp;
         this.name = name;
         this.parent = parent;
@@ -101,7 +105,13 @@ public abstract class Layer implements Serializable {
         layerChangeListeners = new ArrayList<>();
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+
+        // defaults for transient fields
+        ui = null;
+        maskEditing = false;
+
         in.defaultReadObject();
         layerChangeListeners = new ArrayList<>();
 
@@ -129,7 +139,10 @@ public abstract class Layer implements Serializable {
         comp.imageChanged();
         ui.setOpenEye(newVisibility);
 
-        History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
+        if (addToHistory) {
+            History.addEdit(
+                    new LayerVisibilityChangeEdit(comp, this, newVisibility));
+        }
     }
 
     public LayerButton getUI() {
@@ -172,7 +185,9 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        History.addEdit(addToHistory, () -> new LayerOpacityEdit(this, opacity));
+        if (addToHistory) {
+            History.addEdit(new LayerOpacityEdit(this, opacity));
+        }
 
         this.opacity = newOpacity;
 
@@ -186,7 +201,9 @@ public abstract class Layer implements Serializable {
 
     public void setBlendingMode(BlendingMode mode, boolean updateGUI,
                                 boolean addToHistory, boolean updateImage) {
-        History.addEdit(addToHistory, () -> new LayerBlendingEdit(this, blendingMode));
+        if (addToHistory) {
+            History.addEdit(new LayerBlendingEdit(this, blendingMode));
+        }
 
         this.blendingMode = mode;
         if (updateGUI) {
@@ -209,7 +226,9 @@ public abstract class Layer implements Serializable {
 
         ui.setLayerName(newName);
 
-        History.addEdit(addToHistory, () -> new LayerRenameEdit(this, previousName, name));
+        if (addToHistory) {
+            History.addEdit(new LayerRenameEdit(this, previousName, name));
+        }
     }
 
     public String getName() {
@@ -228,7 +247,7 @@ public abstract class Layer implements Serializable {
         comp.setActiveLayer(this, addToHistory);
     }
 
-    boolean isActive() {
+    public boolean isActive() {
         return comp.isActive(this);
     }
 
@@ -239,13 +258,13 @@ public abstract class Layer implements Serializable {
     public void addMask(LayerMaskAddType addType) {
         if (mask != null) {
             Messages.showInfo("Has layer mask",
-                    String.format("The layer \"%s\" already has a layer mask.", getName()));
+                    format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
         Selection selection = comp.getSelection();
         if (addType.missingSelection(selection)) {
             Messages.showInfo("No selection",
-                    String.format("The composition \"%s\" has no selection.", comp.getName()));
+                    format("The composition \"%s\" has no selection.", comp.getName()));
             return;
         }
 
@@ -283,7 +302,8 @@ public abstract class Layer implements Serializable {
             Shape backupShape = comp.getSelectionShape();
             comp.deselect(false);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
-                DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
+                DeselectEdit deselectEdit = new DeselectEdit(
+                        comp, backupShape, "nested deselect");
                 edit = new LinkedEdit(editName, comp, edit, deselectEdit);
             }
         }
@@ -324,7 +344,9 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged();
 
-        History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+        if (addToHistory) {
+            History.addEdit(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+        }
 
         Layers.maskDeletedFrom(this);
         ui.deleteMaskIconLabel();
@@ -461,7 +483,8 @@ public abstract class Layer implements Serializable {
      * according to the blending mode and opacity of the layer
      */
     public void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {  // the first visible layer is always painted with normal mode
+        if (isFirstVisibleLayer) {
+            // the first visible layer is always painted with normal mode
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
         } else {
             Composite composite = blendingMode.getComposite(opacity);
@@ -535,7 +558,9 @@ public abstract class Layer implements Serializable {
         mask.updateIconImage();
         notifyLayerChangeListeners();
 
-        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
+        if (addToHistory) {
+            History.addEdit(new EnableLayerMaskEdit(comp, this));
+        }
     }
 
     private boolean useMask() {

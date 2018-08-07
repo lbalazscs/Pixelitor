@@ -22,6 +22,8 @@ import pixelitor.filters.FilterAction;
 import java.awt.Color;
 
 import static pixelitor.colors.ColorUtils.TRANSPARENT_COLOR;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * A fill color with a string description
@@ -45,12 +47,12 @@ public enum FillType {
     }, FOREGROUND("Foreground Color") {
         @Override
         public Color getColor() {
-            return FgBgColors.getFG();
+            return getFGColor();
         }
     }, BACKGROUND("Background Color") {
         @Override
         public Color getColor() {
-            return FgBgColors.getBG();
+            return getBGColor();
         }
     };
 

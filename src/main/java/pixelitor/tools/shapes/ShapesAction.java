@@ -20,12 +20,12 @@ package pixelitor.tools.shapes;
  * The "Action" in the shapes tool
  */
 public enum ShapesAction {
-    FILL(true, false, false, false, true, true, false, "Fill") {
-    }, STROKE(false, true, true, true, false, true, false, "Stroke") {
-    }, FILL_AND_STROKE(true, true, true, true, true, true, false, "Fill and Stroke") {
-    }, EFFECTS_ONLY(false, false, false, false, false, true, false, "Effects Only") {
-    }, SELECTION(false, false, false, false, false, false, true, "Selection") {
-    }, SELECTION_FROM_STROKE(false, false, true, false, false, false, true, "Selection from Stroke") {
+    FILL("Fill", true, false, false, false, true, true, false) {
+    }, STROKE("Stroke", false, true, true, true, false, true, false) {
+    }, FILL_AND_STROKE("Fill and Stroke", true, true, true, true, true, true, false) {
+    }, EFFECTS_ONLY("Effects Only", false, false, false, false, false, true, false) {
+    }, SELECTION("Selection", false, false, false, false, false, false, true) {
+    }, SELECTION_FROM_STROKE("Selection from Stroke", false, false, true, false, false, false, true) {
     };
 
     private final boolean enableStrokeSettings;
@@ -39,7 +39,12 @@ public enum ShapesAction {
 
     private final String guiName;
 
-    ShapesAction(boolean enableFillPaintSelection, boolean enableStrokePaintSelection, boolean enableStrokeSettings, boolean stroke, boolean fill, boolean drawEffects, boolean createSelection, String guiName) {
+    ShapesAction(String guiName, boolean enableFillPaintSelection,
+                 boolean enableStrokePaintSelection,
+                 boolean enableStrokeSettings,
+                 boolean stroke, boolean fill, boolean drawEffects,
+                 boolean createSelection) {
+
         this.enableFillPaintSelection = enableFillPaintSelection;
         this.enableStrokePaintSelection = enableStrokePaintSelection;
         this.enableStrokeSettings = enableStrokeSettings;

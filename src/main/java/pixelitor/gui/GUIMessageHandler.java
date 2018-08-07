@@ -21,11 +21,10 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.MessageHandler;
 import pixelitor.utils.ProgressHandler;
 
-import javax.swing.*;
 import java.awt.EventQueue;
 
 /**
- * The MessageHandler that is normally used (in non-testing code)
+ * The MessageHandler that is normally used (except in unit-testing code)
  */
 public class GUIMessageHandler implements MessageHandler {
     public GUIMessageHandler() {
@@ -33,14 +32,14 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         StatusBar.INSTANCE.setMessage(msg);
     }
 
     @Override
     public ProgressHandler startProgress(String msg, int max) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         return StatusBar.INSTANCE.startProgress(msg, max);
     }

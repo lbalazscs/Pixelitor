@@ -52,8 +52,12 @@ public class PenTool extends Tool {
     private boolean ignoreModeChooserAction = false;
 
     public PenTool() {
-        super('p', "Pen", "pen_tool_icon.png",
-                "<b>click</b> and <b>drag</b> to create a Bezier curve. <b>Ctrl-click</b> to finish. Press <b>Esc</b> to start from scratch.", Cursors.DEFAULT, false, true, ClipStrategy.INTERNAL_FRAME);
+        super("Pen", 'p', "pen_tool_icon.png",
+                "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
+                        "<b>Ctrl-click</b> to finish. " +
+                        "Press <b>Esc</b> to start from scratch.",
+                Cursors.DEFAULT, false, true,
+                ClipStrategy.INTERNAL_FRAME);
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -76,16 +80,7 @@ public class PenTool extends Tool {
     @Override
     public void initSettingsPanel() {
         modeChooser = new JComboBox<>(new String[]{MODE_BUILD, MODE_EDIT});
-        modeChooser.addActionListener(e -> {
-            if (ignoreModeChooserAction) {
-                return;
-            }
-            if (modeChooser.getSelectedItem().equals("Build")) {
-                resetStateToInitial();
-            } else {
-                startEditing(true);
-            }
-        });
+        modeChooser.addActionListener(e -> onModeChooserAction());
         settingsPanel.addWithLabel("Mode:", modeChooser);
 
         settingsPanel.addButton(toSelectionAction,
@@ -98,6 +93,17 @@ public class PenTool extends Tool {
                     path.dump();
                 }
             });
+        }
+    }
+
+    private void onModeChooserAction() {
+        if (ignoreModeChooserAction) {
+            return;
+        }
+        if (modeChooser.getSelectedItem().equals("Build")) {
+            resetStateToInitial();
+        } else {
+            startEditing(true);
         }
     }
 
@@ -149,7 +155,9 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         mode.paint(g2);

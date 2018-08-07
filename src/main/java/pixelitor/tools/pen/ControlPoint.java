@@ -33,8 +33,8 @@ public class ControlPoint extends DraggablePoint {
     private ControlPoint sibling;
 
     // this needs to be remembered because otherwise the distance keeps
-    // drifting for smooth anchors because of accumulating rounding errors
-    private double rememberedDistanceFromAnchor;
+    // drifting for smooth anchors as rounding errors accumulate
+    private double rememberedDistFromAnchor;
 
     public ControlPoint(String name, double x, double y, View view,
                         AnchorPoint anchor, Color color, Color activeColor) {
@@ -72,11 +72,11 @@ public class ControlPoint extends DraggablePoint {
     }
 
     private void rememberDistFromAnchor() {
-        rememberedDistanceFromAnchor = distanceFrom(anchor);
+        rememberedDistFromAnchor = distanceFrom(anchor);
     }
 
-    public double getRememberedDistanceFromAnchor() {
-        return rememberedDistanceFromAnchor;
+    public double getRememberedDistFromAnchor() {
+        return rememberedDistFromAnchor;
     }
 
     public AnchorPoint getAnchor() {
@@ -91,7 +91,7 @@ public class ControlPoint extends DraggablePoint {
     public void copyPositionFrom(DraggablePoint that) {
         super.copyPositionFrom(that);
         if (that instanceof ControlPoint) { // should be always the case
-            rememberedDistanceFromAnchor = ((ControlPoint) that).getRememberedDistanceFromAnchor();
+            rememberedDistFromAnchor = ((ControlPoint) that).getRememberedDistFromAnchor();
         }
     }
 
@@ -106,7 +106,7 @@ public class ControlPoint extends DraggablePoint {
     @Override
     public String toColoredString() {
         if (isRetracted()) {
-            return super.toColoredString() + Ansi.RED + " retracted!" + Ansi.RESET;
+            return super.toColoredString() + Ansi.red(" retracted!");
         }
         return super.toColoredString();
     }
@@ -121,6 +121,6 @@ public class ControlPoint extends DraggablePoint {
 
     void retract() {
         setLocationOnlyForThis(anchor.x, anchor.y);
-        rememberedDistanceFromAnchor = 0;
+        rememberedDistFromAnchor = 0;
     }
 }

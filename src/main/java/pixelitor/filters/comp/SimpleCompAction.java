@@ -24,6 +24,7 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
 import javax.swing.*;
@@ -54,21 +55,13 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void process(Composition comp) {
-        MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
+        MultiLayerBackup backup = new MultiLayerBackup(comp,
+                getEditName(), changesCanvasDimensions);
 
         Canvas canvas = comp.getCanvas();
         comp.transformSelection(() -> createCanvasTX(canvas));
 
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                applyTx(contentLayer);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                applyTx(mask);
-            }
-        });
+        comp.forEachLayer(this::processLayer);
 
         MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup);
         History.addEdit(edit);
@@ -81,6 +74,17 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         comp.updateAllIconImages();
 
         comp.imageChanged(REPAINT, true);
+    }
+
+    private void processLayer(Layer layer) {
+        if (layer instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) layer;
+            applyTx(contentLayer);
+        }
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
+            applyTx(mask);
+        }
     }
 
     protected abstract void changeCanvas(Composition comp);

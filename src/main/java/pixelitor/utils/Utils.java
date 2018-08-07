@@ -22,14 +22,11 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -56,14 +53,13 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
+import static java.lang.String.format;
 
 /**
  * Utility class with static methods
@@ -72,34 +68,7 @@ public final class Utils {
     private static final int BYTES_IN_1_KILOBYTE = 1_024;
     private static final int BYTES_IN_1_MEGABYTE = 1_048_576;
 
-    private static final int WAIT_CURSOR_DELAY = 300; // in milliseconds
-
     private Utils() {
-    }
-
-    public static void runWithBusyCursor(Runnable task) {
-        runWithBusyCursor(PixelitorWindow.getInstance(), task);
-    }
-
-    public static void runWithBusyCursor(Component parent, Runnable task) {
-        Timer timer = new Timer();
-        TimerTask startBusyCursorTask = new TimerTask() {
-            @Override
-            public void run() {
-                parent.setCursor(Cursors.BUSY);
-            }
-        };
-
-        try {
-            // if after WAIT_CURSOR_DELAY the original task is still running,
-            // set the cursor to the delay cursor
-            timer.schedule(startBusyCursorTask, WAIT_CURSOR_DELAY);
-            task.run(); // on the current thread!
-        } finally {
-            // when the original task has stopped running, the cursor is reset
-            timer.cancel();
-            parent.setCursor(Cursors.DEFAULT);
-        }
     }
 
     /**
@@ -113,7 +82,7 @@ public final class Utils {
         if (f == 0.0f) {
             return "";
         }
-        return String.format("%.3f", f);
+        return format("%.3f", f);
     }
 
     public static float string2float(String s) throws NotANumberException {
@@ -162,10 +131,10 @@ public final class Utils {
             return bytes + " bytes";
         } else if (bytes < BYTES_IN_1_MEGABYTE) {
             float kiloBytes = ((float) bytes) / BYTES_IN_1_KILOBYTE;
-            return String.format("%.2f kilobytes", kiloBytes);
+            return format("%.2f kilobytes", kiloBytes);
         } else {
             float megaBytes = ((float) bytes) / BYTES_IN_1_MEGABYTE;
-            return String.format("%.2f megabytes", megaBytes);
+            return format("%.2f megabytes", megaBytes);
         }
     }
 
@@ -179,20 +148,6 @@ public final class Utils {
         return (int) (usedMemory / BYTES_IN_1_MEGABYTE);
     }
 
-    @SuppressWarnings("SameReturnValue")  // used in asserts
-    public static boolean checkRasterMinimum(BufferedImage newImage) {
-        if (RandomGUITest.isRunning()) {
-            WritableRaster raster = newImage.getRaster();
-            if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
-                throw new
-                        IllegalArgumentException("Raster " + raster +
-                        " has minX or minY not equal to zero: "
-                        + raster.getMinX() + ' ' + raster.getMinY());
-            }
-        }
-        return true;
-    }
-
     public static void copyStringToClipboard(String text) {
         Transferable stringSelection = new StringSelection(text);
 
@@ -200,18 +155,10 @@ public final class Utils {
         clipboard.setContents(stringSelection, null);
     }
 
-    public static ProgressMonitor createPercentageProgressMonitor(String msg) {
-        return new ProgressMonitor(PixelitorWindow.getInstance(), msg, "", 0, 100);
-    }
-
-    public static ProgressMonitor createPercentageProgressMonitor(String msg, String cancelButtonText) {
-        String oldText = UIManager.getString("OptionPane.cancelButtonText");
-        UIManager.put("OptionPane.cancelButtonText", cancelButtonText);
-        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(), msg, "", 0, 100);
-        UIManager.put("OptionPane.cancelButtonText", oldText);
-        return pm;
-    }
-
+    /**
+     * Input: an angle between -PI and PI, as returned form Math.atan2
+     * Output: an angle between 0 and 2*PI, and in the intuitive direction
+     */
     public static double atan2AngleToIntuitive(double angleInRadians) {
         double angle;
         if (angleInRadians <= 0) {
@@ -237,8 +184,11 @@ public final class Utils {
     }
 
     public static int parseInt(String input, int defaultValue) {
-        if ((input != null) && !input.isEmpty()) {
-            return Integer.parseInt(input);
+        if (input != null) {
+            input = input.trim();
+            if (!input.isEmpty()) {
+                return Integer.parseInt(input);
+            }
         }
         return defaultValue;
     }
@@ -277,13 +227,14 @@ public final class Utils {
         int imgWidth = shapeBounds.x + shapeBounds.width + 50;
         int imgHeight = shapeBounds.y + shapeBounds.height + 50;
         BufferedImage img = ImageUtils.createSysCompatibleImage(imgWidth, imgHeight);
-        Graphics2D g = img.createGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, imgWidth, imgHeight);
-        g.setColor(Color.BLACK);
-        g.setStroke(new BasicStroke(3));
-        g.draw(shapeCopy);
-        g.dispose();
+        Drawer.on(img)
+                .fillWith(Color.WHITE)
+                .useAA()
+                .draw(g -> {
+                    g.setColor(Color.BLACK);
+                    g.setStroke(new BasicStroke(3));
+                    g.draw(shapeCopy);
+                });
         debugImage(img, name);
     }
 
@@ -329,7 +280,7 @@ public final class Utils {
         debugImage(debugImage);
     }
 
-    public static void checkThatAssertionsAreEnabled() {
+    public static void makeSureAssertionsAreEnabled() {
         boolean assertsEnabled = false;
         //noinspection AssertWithSideEffects
         assert assertsEnabled = true;
@@ -369,14 +320,16 @@ public final class Utils {
         long s = seconds % 60;
         long m = (seconds / 60) % 60;
         long h = (seconds / (60 * 60)) % 24;
-        return String.format("%d:%02d:%02d", h, m, s);
+        return format("%d:%02d:%02d", h, m, s);
     }
 
     /**
      * Creates the name of the duplicated layers and compositions
      */
     public static String createCopyName(String orig) {
-        String copyString = "copy"; // could be longer or shorter in other languages
+        String copyString = "copy";
+
+        // could be longer or shorter in other languages
         int copyStringLength = copyString.length();
 
         int index = orig.lastIndexOf(copyString);
@@ -451,7 +404,7 @@ public final class Utils {
         return false;
     }
 
-    public static int getCurrentMainJavaVersion() {
+    public static int getJavaMainVersion() {
         return parseJavaVersion(System.getProperty("java.version"));
     }
 
@@ -521,6 +474,12 @@ public final class Utils {
                 throw new RuntimeException(e);
             }
         };
+    }
+
+    public static void preloadFontNames() {
+        GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        // the results are cached, no need to cache them here
+        localGE.getAvailableFontFamilyNames();
     }
 }
 

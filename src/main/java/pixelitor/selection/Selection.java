@@ -89,7 +89,7 @@ public class Selection {
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
             if(!hidden) {
-                dashPhase += 1.0f / ic.getViewScale();
+                dashPhase += 1.0f / (float) ic.getViewScale();
                 repaint();
             }
         });
@@ -215,7 +215,8 @@ public class Selection {
         Composition comp = ic.getComp();
         boolean stillSelection = clipToCanvasSize(comp);
         if (stillSelection) {
-            SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", comp, backupShape);
+            SelectionChangeEdit edit = new SelectionChangeEdit(
+                    "Modify Selection", comp, backupShape);
             History.addEdit(edit);
         } else {
             comp.deselect(true);
@@ -230,7 +231,8 @@ public class Selection {
 
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
-        History.addEdit(new SelectionChangeEdit("Nudge Selection", ic.getComp(), backupShape));
+        History.addEdit(new SelectionChangeEdit(
+                "Nudge Selection", ic.getComp(), backupShape));
     }
 
     public boolean isHidden() {

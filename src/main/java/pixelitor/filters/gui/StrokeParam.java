@@ -19,7 +19,6 @@ package pixelitor.filters.gui;
 
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.shapes.BasicStrokeCap;
 import pixelitor.tools.shapes.BasicStrokeJoin;
 import pixelitor.tools.shapes.ShapeType;
@@ -42,10 +41,10 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
     // controls in the Stroke Settings dialog
-    private final EnumParam<BasicStrokeCap> strokeCapParam = new EnumParam<>("", BasicStrokeCap.class);
-    private final EnumParam<BasicStrokeJoin> strokeJoinParam = new EnumParam<>("", BasicStrokeJoin.class);
-    private final EnumParam<StrokeType> strokeTypeParam = new EnumParam<>("", StrokeType.class);
-    private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("", ShapeType.class);
+    private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam("");
+    private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam("");
+    private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam("");
+    private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam("");
     private final BooleanParam dashedParam = new BooleanParam("", false);
     private DefaultButton defaultButton;
     private JComponent previewer;
@@ -62,11 +61,8 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
-        paramGUI = new ConfigureParamGUI(owner -> {
-            JDialog dialog = createSettingsDialog(owner);
-            GUIUtils.centerOnScreen(dialog);
-            return dialog;
-        }, defaultButton);
+        paramGUI = new ConfigureParamGUI(
+                this::createSettingsDialog, defaultButton);
 
         setParamGUIEnabledState();
         return (JComponent) paramGUI;

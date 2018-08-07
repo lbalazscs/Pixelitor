@@ -37,7 +37,8 @@ public class ResizingFilterHelper {
     public enum ScaleUpQuality {
         BILINEAR_FAST {
             @Override
-            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest, double resizeFactor, ProgressTracker pt) {
+            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
+                                         double resizeFactor, ProgressTracker pt) {
                 BufferedImage dest = ImageUtils.createImageWithSameCM(src);
                 Graphics2D g2 = dest.createGraphics();
                 g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
@@ -56,7 +57,8 @@ public class ResizingFilterHelper {
             }
         }, BILINEAR12 {
             @Override
-            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest, double resizeFactor, ProgressTracker pt) {
+            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
+                                         double resizeFactor, ProgressTracker pt) {
                 return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
                         VALUE_INTERPOLATION_BILINEAR, 1.2, pt);
             }
@@ -68,7 +70,8 @@ public class ResizingFilterHelper {
         }, BILINEAR11 { // highest quality with 1.1 steps
 
             @Override
-            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest, double resizeFactor, ProgressTracker pt) {
+            public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
+                                         double resizeFactor, ProgressTracker pt) {
                 return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
                         VALUE_INTERPOLATION_BILINEAR, 1.1, pt);
             }
@@ -79,7 +82,8 @@ public class ResizingFilterHelper {
             }
         };
 
-        public abstract BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest, double resizeFactor, ProgressTracker pt);
+        public abstract BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
+                                              double resizeFactor, ProgressTracker pt);
 
         public abstract int getWorkUnits(double resizeFactor);
     }
@@ -119,7 +123,9 @@ public class ResizingFilterHelper {
         return resizeFactor;
     }
 
-    public BufferedImage invoke(ScaleUpQuality quality, BufferedImageOp filter, ProgressTracker pt, int filterUnits) {
+    public BufferedImage invoke(ScaleUpQuality quality,
+                                BufferedImageOp filter,
+                                ProgressTracker pt, int filterUnits) {
         assert resizeFactor > 1.0;
         assert onlyNullTrackersHaveFilterUnits(filter, filterUnits);
 
@@ -139,7 +145,7 @@ public class ResizingFilterHelper {
         return dest;
     }
 
-    public BufferedImage getDownscaledSource() {
+    private BufferedImage getDownscaledSource() {
         // For the downscaling there is no quality improvement if it is done
         // in multiple steps, so this is always done the fast way.
         int smallWidth = (int) (srcWidth / resizeFactor);
@@ -152,19 +158,23 @@ public class ResizingFilterHelper {
         return smallSrc;
     }
 
-    public ProgressTracker createFilterTracker(ProgressTracker realTracker, int allocatedFilterUnits) {
+    public ProgressTracker createFilterTracker(ProgressTracker realTracker,
+                                               int allocatedFilterUnits) {
         // this method assumes that the filter is a regular filter with "height" units
         double smallHeight = src.getHeight() / resizeFactor;
         return createFilterTracker(realTracker, allocatedFilterUnits, smallHeight);
     }
 
     @SuppressWarnings("MethodMayBeStatic")
-    public ProgressTracker createFilterTracker(ProgressTracker realTracker, int allocatedFilterUnits, double realFilterUnits) {
+    private ProgressTracker createFilterTracker(ProgressTracker realTracker,
+                                                int allocatedFilterUnits,
+                                                double realFilterUnits) {
         double ratio = allocatedFilterUnits / realFilterUnits;
         return new SubtaskProgressTracker(ratio, realTracker);
     }
 
-    private static boolean onlyNullTrackersHaveFilterUnits(BufferedImageOp filter, int filterUnits) {
+    private static boolean onlyNullTrackersHaveFilterUnits(BufferedImageOp filter,
+                                                           int filterUnits) {
         if (filterUnits > 0) {
             if (filter instanceof AbstractBufferedImageOp) {
                 return ((AbstractBufferedImageOp) filter).getProgressTracker()

@@ -26,23 +26,28 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 
+import static javax.swing.BorderFactory.createTitledBorder;
+
 /**
  * The GUI for the "Channel Mixer"
  */
 public class ChannelMixerGUI extends ParametrizedFilterGUI {
     public ChannelMixerGUI(ParametrizedFilter filter, Drawable dr, Action[] actions) {
-        super(filter, dr, actions, ShowOriginal.YES);
+        super(filter, dr, ShowOriginal.YES, actions);
     }
 
     @Override
-    protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
+    protected void setupGUI(ParamSet params,
+                            ShowOriginal addShowOriginal,
+                            Object otherInfo) {
         JPanel upperPanel = new JPanel(new FlowLayout());
         JPanel leftPanel = GUIUtils.arrangeParamsInVerticalGridBag(params.getParams());
         JPanel rightPanel = createPresetsPanel((Action[]) otherInfo);
         upperPanel.add(leftPanel);
         upperPanel.add(rightPanel);
 
-        JPanel buttonsPanel = createFilterActionsPanel(params.getActions(), addShowOriginal, 5);
+        JPanel buttonsPanel = createFilterActionsPanel(
+                params.getActions(), addShowOriginal, 5);
 
         setLayout(new BorderLayout());
         add(upperPanel, BorderLayout.CENTER);
@@ -52,7 +57,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     private static JPanel createPresetsPanel(Action[] actions) {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Presets"));
+        rightPanel.setBorder(createTitledBorder("Presets"));
         for (Action action : actions) {
             JComponent b = new JButton(action);
             b.setAlignmentX(Component.LEFT_ALIGNMENT);

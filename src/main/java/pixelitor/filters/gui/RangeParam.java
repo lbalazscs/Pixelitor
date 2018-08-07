@@ -28,6 +28,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
@@ -63,11 +64,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position) {
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+                      SliderSpinner.TextPosition position) {
         this(name, min, def, max, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+                      SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         assert min < max : name + ": min (" + min + ") >= max (" + max + ')';
@@ -130,15 +133,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         setValue(defaultValue, trigger);
     }
 
-    /**
-     * This class can be used to manage non-integer values by multiplying them with 100
-     */
     public float getValueAsPercentage() {
         return (getValueAsFloat()) / 100.0f;
     }
 
     /**
-     * Int values measured in grades are transformed to radians
+     * Int values measured in degrees are transformed to radians
      */
     public float getValueInRadians() {
         return (float) Math.toRadians(getValueAsDouble());
@@ -375,7 +375,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', value = %.2f]",
+        return format("%s[name = '%s', value = %.2f]",
                 getClass().getSimpleName(), getName(), value);
     }
 }

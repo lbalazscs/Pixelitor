@@ -54,7 +54,9 @@ public class AngleGradientPaint implements Paint {
     }
 
     @Override
-    public PaintContext createContext(ColorModel cm, Rectangle deviceBounds, Rectangle2D userBounds, AffineTransform xform, RenderingHints hints) {
+    public PaintContext createContext(ColorModel cm,
+                                      Rectangle deviceBounds, Rectangle2D userBounds,
+                                      AffineTransform xform, RenderingHints hints) {
         int numComponents = cm.getNumComponents();
 
         if (numComponents == 1) {
@@ -88,7 +90,9 @@ public class AngleGradientPaint implements Paint {
         protected final ColorModel cm;
         protected final double drawAngle;
 
-        private AngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private AngleGradientPaintContext(ImDrag imDrag,
+                                          Color startColor, Color endColor,
+                                          ColorModel cm, CycleMethod cycleMethod) {
             this.imDrag = imDrag;
             this.cycleMethod = cycleMethod;
 
@@ -127,13 +131,13 @@ public class AngleGradientPaint implements Paint {
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i) * 4;
                     int x = startX + i;
-                    double interpolationValue = getInterpolationValue(x, y);
+                    double interpolation = getInterpolation(x, y);
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
                         double distance = imDrag.taxiCabMetric(x, y);
                         double threshold = 0.2 / distance;
-                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
+                        needsAA = interpolation > (1.0 - threshold) || interpolation < threshold;
                     }
 
                     if (needsAA) {
@@ -147,12 +151,12 @@ public class AngleGradientPaint implements Paint {
                             for (int n = 0; n < AA_RES; n++) {
                                 double xx = x + 1.0 / AA_RES * n - 0.5;
 
-                                double interpolationValueAA = getInterpolationValue(xx, yy);
+                                double interpolationAA = getInterpolation(xx, yy);
 
-                                a += (int) (startAlpha + interpolationValueAA * (endAlpha - startAlpha));
-                                r += (int) (startRed + interpolationValueAA * (endRed - startRed));
-                                g += (int) (startGreen + interpolationValueAA * (endGreen - startGreen));
-                                b += (int) (startBlue + interpolationValueAA * (endBlue - startBlue));
+                                a += (int) (startAlpha + interpolationAA * (endAlpha - startAlpha));
+                                r += (int) (startRed + interpolationAA * (endRed - startRed));
+                                g += (int) (startGreen + interpolationAA * (endGreen - startGreen));
+                                b += (int) (startBlue + interpolationAA * (endBlue - startBlue));
                             }
                         }
                         a /= AA_RES2;
@@ -165,10 +169,10 @@ public class AngleGradientPaint implements Paint {
                         rasterData[base + 2] = b;
                         rasterData[base + 3] = a;
                     } else { // no AA
-                        int a = (int) (startAlpha + interpolationValue * (endAlpha - startAlpha));
-                        int r = (int) (startRed + interpolationValue * (endRed - startRed));
-                        int g = (int) (startGreen + interpolationValue * (endGreen - startGreen));
-                        int b = (int) (startBlue + interpolationValue * (endBlue - startBlue));
+                        int a = (int) (startAlpha + interpolation * (endAlpha - startAlpha));
+                        int r = (int) (startRed + interpolation * (endRed - startRed));
+                        int g = (int) (startGreen + interpolation * (endGreen - startGreen));
+                        int b = (int) (startBlue + interpolation * (endBlue - startBlue));
 
                         rasterData[base] = r;
                         rasterData[base + 1] = g;
@@ -182,28 +186,28 @@ public class AngleGradientPaint implements Paint {
             return raster;
         }
 
-        public double getInterpolationValue(double x, double y) {
+        public double getInterpolation(double x, double y) {
             double relativeAngle = imDrag.getAngleFromStartTo(x, y) - drawAngle;
 
             // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
 
-            double interpolationValue = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
-            interpolationValue %= 1.0f; // between 0..1
+            double interpolation = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
+            interpolation %= 1.0f; // between 0..1
 
             if (cycleMethod == REFLECT) {
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
+                if (interpolation < 0.5) {
+                    interpolation = 2.0f * interpolation;
                 } else {
-                    interpolationValue = 2.0f * (1 - interpolationValue);
+                    interpolation = 2.0f * (1 - interpolation);
                 }
             } else if (cycleMethod == REPEAT) {
-                if (interpolationValue < 0.5) {
-                    interpolationValue = 2.0f * interpolationValue;
+                if (interpolation < 0.5) {
+                    interpolation = 2.0f * interpolation;
                 } else {
-                    interpolationValue = 2.0f * (interpolationValue - 0.5);
+                    interpolation = 2.0f * (interpolation - 0.5);
                 }
             }
-            return interpolationValue;
+            return interpolation;
         }
     }
 
@@ -211,7 +215,9 @@ public class AngleGradientPaint implements Paint {
         private final int startGray;
         private final int endGray;
 
-        private GrayAngleGradientPaintContext(ImDrag imDrag, Color startColor, Color endColor, ColorModel cm, CycleMethod cycleMethod) {
+        private GrayAngleGradientPaintContext(ImDrag imDrag,
+                                              Color startColor, Color endColor,
+                                              ColorModel cm, CycleMethod cycleMethod) {
             super(imDrag, startColor, endColor, cm, cycleMethod);
 
             startGray = startColor.getRed();
@@ -228,13 +234,13 @@ public class AngleGradientPaint implements Paint {
                 for (int i = 0; i < width; i++) {
                     int base = (j * width + i);
                     int x = startX + i;
-                    double interpolationValue = getInterpolationValue(x, y);
+                    double interpolation = getInterpolation(x, y);
 
                     boolean needsAA = false;
                     if (cycleMethod != REFLECT) {
                         double distance = imDrag.taxiCabMetric(x, y);
                         double threshold = 0.2 / distance;
-                        needsAA = interpolationValue > (1.0 - threshold) || interpolationValue < threshold;
+                        needsAA = interpolation > (1.0 - threshold) || interpolation < threshold;
                     }
 
                     if (needsAA) {
@@ -245,16 +251,16 @@ public class AngleGradientPaint implements Paint {
                             for (int n = 0; n < AA_RES; n++) {
                                 double xx = x + 1.0 / AA_RES * n - 0.5;
 
-                                double interpolationValueAA = getInterpolationValue(xx, yy);
+                                double interpolationAA = getInterpolation(xx, yy);
 
-                                g += (int) (startGray + interpolationValueAA * (endGray - startGray));
+                                g += (int) (startGray + interpolationAA * (endGray - startGray));
                             }
                         }
                         g /= AA_RES2;
 
                         rasterData[base] = g;
                     } else { // no AA
-                        int g = (int) (startGray + interpolationValue * (endGray - startGray));
+                        int g = (int) (startGray + interpolation * (endGray - startGray));
 
                         rasterData[base] = g;
                     }

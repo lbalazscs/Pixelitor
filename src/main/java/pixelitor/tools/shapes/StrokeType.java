@@ -24,6 +24,7 @@ import com.jhlabs.awt.CompositeStroke;
 import com.jhlabs.awt.ShapeStroke;
 import com.jhlabs.awt.WobbleStroke;
 import com.jhlabs.awt.ZigzagStroke;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.util.ImDrag;
 
 import java.awt.BasicStroke;
@@ -201,12 +202,9 @@ public enum StrokeType {
      */
     public abstract int getExtraWidth(int specifiedWidth);
 
-//    /**
-//     * A simple getter for the brushes
-//     */
-//    public Stroke getStroke(float width) {
-//        return getStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, null);
-//    }
+    public static EnumParam<StrokeType> asParam(String name) {
+        return new EnumParam<>(name, StrokeType.class);
+    }
 
     @Override
     public String toString() {

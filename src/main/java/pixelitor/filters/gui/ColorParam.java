@@ -26,6 +26,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Objects;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -140,7 +141,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', color = '%s']",
+        return format("%s[name = '%s', color = '%s']",
                 getClass().getSimpleName(), getName(), color.toString());
     }
 

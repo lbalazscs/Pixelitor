@@ -31,6 +31,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static javax.swing.BorderFactory.createTitledBorder;
+
 /**
  * An adjustment panel for customizable convolutions
  */
@@ -57,8 +59,23 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
     }
 
     private void initLeftVerticalBox(Convolve filter) {
-        Box leftVerticalBox = Box.createVerticalBox();
+        Box box = Box.createVerticalBox();
 
+        addTextFieldsPanel(box);
+        addNormalizeButton(box);
+        addTryButton(box);
+
+        box.add(Box.createVerticalStrut(20));
+
+        addConvolveMethodSelector(filter, box);
+
+        box.setMaximumSize(box.getPreferredSize());
+        box.setAlignmentY(Component.TOP_ALIGNMENT);
+
+        add(box);
+    }
+
+    private void addTextFieldsPanel(Box leftVerticalBox) {
         textFieldsP = new JPanel();
         textFields = new JTextField[size * size];
         for (int i = 0; i < textFields.length; i++) {
@@ -68,44 +85,45 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         for (JTextField textField : textFields) {
             setupTextField(textField);
         }
-        textFieldsP.setBorder(BorderFactory.createTitledBorder("Kernel"));
+        textFieldsP.setBorder(createTitledBorder("Kernel"));
         textFieldsP.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(textFieldsP);
 
-        // these two lines must come after adding the textFieldsP to the box
+        // this must come after adding the textFieldsP to the box
         Dimension minimumSize = textFieldsP.getMinimumSize();
-        textFieldsP.setPreferredSize(new Dimension(size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+        textFieldsP.setPreferredSize(new Dimension(
+                size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+    }
 
+    private void addNormalizeButton(Box leftVerticalBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
         normalizeButton.addActionListener(this);
         normalizeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(normalizeButton);
+    }
 
+    private void addTryButton(Box leftVerticalBox) {
         JButton tryButton = new JButton("Try");
         tryButton.addActionListener(this);
         leftVerticalBox.add(tryButton);
+    }
 
-        leftVerticalBox.add(Box.createVerticalStrut(20));
-
+    private void addConvolveMethodSelector(Convolve filter, Box leftVerticalBox) {
         JLabel cmLabel = new JLabel("Convolution method:", JLabel.LEFT);
         cmLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(cmLabel);
-        EnumComboBoxModel<ConvolveMethod> convolveMethodModel = filter.getConvolveMethodModel();
+        EnumComboBoxModel<ConvolveMethod> convolveMethodModel
+                = filter.getConvolveMethodModel();
         JComboBox<ConvolveMethod> convolveMethodCB = new JComboBox<>(convolveMethodModel);
 
         convolveMethodCB.setAlignmentX(Component.LEFT_ALIGNMENT);
         leftVerticalBox.add(convolveMethodCB);
         convolveMethodCB.addActionListener(this);
-
-        leftVerticalBox.setMaximumSize(leftVerticalBox.getPreferredSize());
-        leftVerticalBox.setAlignmentY(Component.TOP_ALIGNMENT);
-
-        add(leftVerticalBox);
     }
 
     private void initPresetBox() {
         presetsBox = Box.createVerticalBox();
-        presetsBox.setBorder(BorderFactory.createTitledBorder("Presets"));
+        presetsBox.setBorder(createTitledBorder("Presets"));
 
         if (size == 3) {
             init3x3Presets();
@@ -220,7 +238,6 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
                 0.1115f, 0.1115f, 0.1115f,
                 0.1115f, 0.1115f, 0.1115f});
 
-
         initPreset("Sharpen", new float[]{
                 0, -1, 0,
                 -1, 5, -1,
@@ -256,12 +273,10 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
                 0, 0, 0,
                 0, 0, 2});
 
-
         initPreset("Color Emboss", new float[]{
                 -1, -1, 0,
                 -1, 1, 1,
                 0, 1, 1});
-
     }
 
     private void reset(int size) {

@@ -585,11 +585,11 @@ public class CompositionTest {
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
-        comp.addNewLayerFromComposite("composite layer");
+        comp.addNewLayerFromComposite();
 
         assertThat(comp)
                 .isDirty()
-                .layerNamesAre("layer 1", "layer 2", "composite layer")
+                .layerNamesAre("layer 1", "layer 2", "Composite")
                 .thirdLayerIsActive();
         History.assertNumEditsIs(1);
         History.assertLastEditNameIs("New Layer from Composite");
@@ -601,7 +601,7 @@ public class CompositionTest {
 
         History.redo();
         assertThat(comp)
-                .layerNamesAre("layer 1", "layer 2", "composite layer")
+                .layerNamesAre("layer 1", "layer 2", "Composite")
                 .thirdLayerIsActive();
     }
 

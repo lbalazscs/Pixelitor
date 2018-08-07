@@ -64,7 +64,6 @@ public class DialogParam extends AbstractFilterParam {
                 .okText("Close")
                 .noCancelButton()
                 .build();
-        GUIUtils.centerOnScreen(d);
         return d;
     }
 

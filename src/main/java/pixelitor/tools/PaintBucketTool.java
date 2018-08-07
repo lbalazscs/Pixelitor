@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
@@ -37,6 +36,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
@@ -60,10 +61,11 @@ public class PaintBucketTool extends Tool {
             new String[]{ACTION_LOCAL, ACTION_GLOBAL});
 
     public PaintBucketTool() {
-        super('n', "Paint Bucket",
+        super("Paint Bucket", 'n',
                 "paint_bucket_tool_icon.png",
                 "<b>click</b> to fill with the selected color.",
-                Cursors.DEFAULT, true, true, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, true,
+                true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -120,10 +122,10 @@ public class PaintBucketTool extends Tool {
         int newRGB;
         switch (fill) {
             case FILL_FOREGROUND:
-                newRGB = FgBgColors.getFG().getRGB();
+                newRGB = getFGColor().getRGB();
                 break;
             case FILL_BACKGROUND:
-                newRGB = FgBgColors.getBG().getRGB();
+                newRGB = getBGColor().getRGB();
                 break;
             case FILL_TRANSPARENT:
                 newRGB = 0x00000000;

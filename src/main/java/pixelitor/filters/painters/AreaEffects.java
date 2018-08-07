@@ -62,7 +62,8 @@ public class AreaEffects implements Serializable {
 
     public AreaEffect[] asArray() {
         List<AreaEffect> effects = new ArrayList<>(2);
-        // draw the drop shadow first so that it doesn't get painted over other effects
+        // draw the drop shadow first so that
+        // it gets painted behind the other effects
         if (dropShadowEffect != null) {
             effects.add(dropShadowEffect);
         }
@@ -151,12 +152,5 @@ public class AreaEffects implements Serializable {
             ae.setGlowEffect(new GlowPathEffect(1.0f));
         }
         return ae;
-    }
-
-    /**
-     * Returns true if at least one effect is enabled
-     */
-    public boolean hasAny() {
-        return asArray().length > 0;
     }
 }

@@ -34,19 +34,23 @@ import pixelitor.utils.test.Events;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.menus.MenuBar.CTRL_1;
-import static pixelitor.menus.MenuBar.CTRL_2;
-import static pixelitor.menus.MenuBar.CTRL_3;
-import static pixelitor.menus.MenuBar.CTRL_4;
+import static pixelitor.utils.Keys.CTRL_1;
+import static pixelitor.utils.Keys.CTRL_2;
+import static pixelitor.utils.Keys.CTRL_3;
+import static pixelitor.utils.Keys.CTRL_4;
 
 /**
  * Determines whether the layer or its mask is visible/edited.
  */
 public enum MaskViewMode {
-    NORMAL("Show and Edit Layer", false, false, false, AllowedLayerType.ANY, CTRL_1) {
-    }, SHOW_MASK("Show and Edit Mask", true, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
-    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false, AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
-    }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true, AllowedLayerType.HAS_LAYER_MASK, CTRL_4) {
+    NORMAL("Show and Edit Layer", false, false, false,
+            AllowedLayerType.ANY, CTRL_1) {
+    }, SHOW_MASK("Show and Edit Mask", true, true, false,
+            AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
+    }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
+            AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
+    }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
+            AllowedLayerType.HAS_LAYER_MASK, CTRL_4) {
     };
 
     private final String guiName;
@@ -56,7 +60,8 @@ public enum MaskViewMode {
     private final boolean showMask;
     private final boolean editMask;
 
-    MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby, AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
+    MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby,
+                 AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;

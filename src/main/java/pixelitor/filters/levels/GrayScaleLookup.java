@@ -24,13 +24,15 @@ import com.jhlabs.image.PixelUtils;
  * describing the adjustments made to a single channel
  */
 public class GrayScaleLookup {
-    private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(0, 255, 0, 255);
+    private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(
+            0, 255, 0, 255);
     private final short[] mapping = new short[256];
 
     public GrayScaleLookup(int inputBlackValue, int inputWhiteValue,
                            int outputBlackValue, int outputWhiteValue) {
         for (int i = 0; i < mapping.length; i++) {
-            double multiplier = ((double) (outputWhiteValue - outputBlackValue)) / ((double) (inputWhiteValue - inputBlackValue));
+            double multiplier = ((double) (outputWhiteValue - outputBlackValue))
+                    / ((double) (inputWhiteValue - inputBlackValue));
             double constant = (outputBlackValue) - (multiplier * inputBlackValue);
             mapping[i] = (short) PixelUtils.clamp((int) ((multiplier * i) + constant));
         }

@@ -39,11 +39,16 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     private static boolean resetParams = true;
     private ShowOriginalCB showOriginalCB;
 
-    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr, ShowOriginal addShowOriginal) {
-        this(filter, dr, null, addShowOriginal);
+    public ParametrizedFilterGUI(ParametrizedFilter filter,
+                                 Drawable dr,
+                                 ShowOriginal addShowOriginal) {
+        this(filter, dr, addShowOriginal, null);
     }
 
-    public ParametrizedFilterGUI(ParametrizedFilter filter, Drawable dr, Object otherInfo, ShowOriginal addShowOriginal) {
+    public ParametrizedFilterGUI(ParametrizedFilter filter,
+                                 Drawable dr,
+                                 ShowOriginal addShowOriginal,
+                                 Object otherInfo) {
         super(filter, dr);
 
         ParamSet params = filter.getParamSet();
@@ -53,14 +58,17 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         }
         params.setAdjustmentListener(this);
 
-        setupGUI(params, otherInfo, addShowOriginal);
+        setupGUI(params, addShowOriginal, otherInfo);
 
         paramAdjusted();
     }
 
-    protected void setupGUI(ParamSet params, Object otherInfo, ShowOriginal addShowOriginal) {
+    protected void setupGUI(ParamSet params,
+                            ShowOriginal addShowOriginal,
+                            Object otherInfo) {
         JPanel filterParamsPanel = createFilterParamsPanel(params.getParams());
-        JPanel filterActionsPanel = createFilterActionsPanel(params.getActions(), addShowOriginal, 3);
+        JPanel filterActionsPanel = createFilterActionsPanel(
+                params.getActions(), addShowOriginal, 3);
 
         this.setLayout(new BorderLayout());
         this.add(filterParamsPanel, BorderLayout.CENTER);
@@ -74,7 +82,9 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         return GUIUtils.arrangeParamsInVerticalGridBag(paramList);
     }
 
-    protected JPanel createFilterActionsPanel(List<FilterAction> actionList, ShowOriginal addShowOriginal, int maxControlsInRow) {
+    protected JPanel createFilterActionsPanel(List<FilterAction> actionList,
+                                              ShowOriginal addShowOriginal,
+                                              int maxControlsInRow) {
         int numControls = actionList.size();
         if (addShowOriginal.isYes()) {
             numControls++;

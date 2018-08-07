@@ -32,11 +32,16 @@ import java.awt.image.BufferedImage;
  * based on CannyEdgeDetector by Tom Gibara - http://www.tomgibara.com/computer-vision/canny-edge-detector
  */
 public class Canny extends ParametrizedFilter {
-    private final RangeParam lowThreshold = new RangeParam("Low Threshold", 1, 250, 1000);
-    private final RangeParam highThreshold = new RangeParam("High Threshold", 1, 750, 1000);
-    private final RangeParam gaussianKernelWidth = new RangeParam("Gaussian Kernel Width", 2, 16, 50);
-    private final RangeParam gaussianKernelRadius = new RangeParam("Gaussian Kernel Radius", 1, 2, 10);
-    private final BooleanParam contrastNormalized = new BooleanParam("Contrast Normalized", false);
+    private final RangeParam lowThreshold = new RangeParam(
+            "Low Threshold", 1, 250, 1000);
+    private final RangeParam highThreshold = new RangeParam(
+            "High Threshold", 1, 750, 1000);
+    private final RangeParam gaussianKernelWidth = new RangeParam(
+            "Gaussian Kernel Width", 2, 16, 50);
+    private final RangeParam gaussianKernelRadius = new RangeParam(
+            "Gaussian Kernel Radius", 1, 2, 10);
+    private final BooleanParam contrastNormalized = new BooleanParam(
+            "Contrast Normalized", false);
 
     public Canny() {
         super(ShowOriginal.YES);
@@ -58,10 +63,7 @@ public class Canny extends ParametrizedFilter {
         long availableMemoryMB = memoryInfo.getAvailableMemoryMB();
 
         if (estimatedMemoryMB > availableMemoryMB) {
-            Messages.showInfo("Not enough memory",
-                    "This image is too large for the Canny edge detection algorithm.\n" +
-                            "Press Cancel in the following dialog and try with smaller images.\n" +
-                            "Available memory is " + availableMemoryMB + " megabytes, memory needed for this image is " + estimatedMemoryMB + " megabytes.");
+            showNotEnoughMemoryDialog(estimatedMemoryMB, availableMemoryMB);
             dest = src;
             return dest;
         }
@@ -83,13 +85,24 @@ public class Canny extends ParametrizedFilter {
         return dest;
     }
 
+    private static void showNotEnoughMemoryDialog(long estimatedMemoryMB,
+                                                  long availableMemoryMB) {
+        String msg = "This image is too large for the Canny edge detection algorithm.\n" +
+                "Press Cancel in the following dialog and try with smaller images.\n" +
+                "Available memory is " + availableMemoryMB +
+                " megabytes, memory needed for this image is " + estimatedMemoryMB
+                + " megabytes.";
+        Messages.showInfo("Not enough memory", msg);
+    }
+
     private static long estimateNeededMemoryMB(BufferedImage src) {
         int width = src.getWidth();
         int height = src.getHeight();
-        long numPixels = width * height;
+        long numPixels = (long) width * height;
         // 6 arrays with 4-byte data type
-        long estimatedMemoryMB = (int) (6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE);
-        estimatedMemoryMB *= 1.8; // found experimentally, this is still needed to prevent OutOfMemory errors
+        long estimatedMemoryMB = 6 * numPixels * 4 / MemoryInfo.ONE_MEGABYTE;
+        // 1.8 was found experimentally, this is still needed to prevent OutOfMemory errors
+        estimatedMemoryMB = (long) (estimatedMemoryMB * 1.8);
         return estimatedMemoryMB;
     }
 

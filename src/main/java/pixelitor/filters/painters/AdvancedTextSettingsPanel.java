@@ -26,97 +26,107 @@ import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
+import static java.awt.font.TextAttribute.KERNING;
+import static java.awt.font.TextAttribute.KERNING_ON;
+import static java.awt.font.TextAttribute.LIGATURES;
+import static java.awt.font.TextAttribute.LIGATURES_ON;
+import static java.awt.font.TextAttribute.STRIKETHROUGH;
+import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
+import static java.awt.font.TextAttribute.TRACKING;
+import static java.awt.font.TextAttribute.UNDERLINE;
+import static java.awt.font.TextAttribute.UNDERLINE_ON;
+
 /**
  * GUI for the advanced font attribute settings
  */
 public class AdvancedTextSettingsPanel extends JPanel {
-    private final JCheckBox underlineCB;
-    private final JCheckBox strikeThroughCB;
-    private final JCheckBox kerningCB;
-    private final JCheckBox ligaturesCB;
-    private final RangeParam trackingParam;
+    private JCheckBox underlineCB;
+    private JCheckBox strikeThroughCB;
+    private JCheckBox kerningCB;
+    private JCheckBox ligaturesCB;
+    private RangeParam trackingParam;
+    private final GridBagHelper gbh;
+    private final ActionListener actionListener;
 
-    public AdvancedTextSettingsPanel(ActionListener actionListener, Map<TextAttribute, Object> map) {
+    public AdvancedTextSettingsPanel(ActionListener actionListener,
+                                     Map<TextAttribute, Object> map) {
         super(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(this);
+        this.actionListener = actionListener;
+        gbh = new GridBagHelper(this);
 
-        boolean defaultStrikethrough = false;
-        boolean defaultKerning = false;
-        boolean defaultUnderline = false;
-        boolean defaultLigatures = false;
-        int defaultTracking = 0;
+        addCheckboxes(map);
+        addTrackingGUI(map);
+    }
+
+
+    private void addCheckboxes(Map<TextAttribute, Object> map) {
+        boolean strikethrough = false;
+        boolean kerning = false;
+        boolean underline = false;
+        boolean ligatures = false;
+
         if (map != null) {
-            Object strikeThroughSetting = map.get(TextAttribute.STRIKETHROUGH);
-            if (TextAttribute.STRIKETHROUGH_ON.equals(strikeThroughSetting)) {
-                defaultStrikethrough = true;
-            }
-            Object kerningSetting = map.get(TextAttribute.KERNING);
-            if (TextAttribute.KERNING_ON.equals(kerningSetting)) {
-                defaultKerning = true;
-            }
-            Object underlineSetting = map.get(TextAttribute.UNDERLINE);
-            if (TextAttribute.UNDERLINE_ON.equals(underlineSetting)) {
-                defaultUnderline = true;
-            }
-            Object ligaturesSetting = map.get(TextAttribute.LIGATURES);
-            if (TextAttribute.LIGATURES_ON.equals(ligaturesSetting)) {
-                defaultLigatures = true;
-            }
+            strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
+            kerning = KERNING_ON.equals(map.get(KERNING));
+            underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
+            ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
+        }
 
-            Float trackingSetting = (Float) map.get(TextAttribute.TRACKING);
+        strikeThroughCB = addCheckBox("Strikethrough:", strikethrough);
+        underlineCB = addCheckBox("Underline:", underline);
+        kerningCB = addCheckBox("Kerning:", kerning);
+        ligaturesCB = addCheckBox("Ligatures:", ligatures);
+    }
+
+    private JCheckBox addCheckBox(String labelText, boolean selected) {
+        JCheckBox cb = new JCheckBox("", selected);
+        cb.addActionListener(actionListener);
+        gbh.addLabelWithControl(labelText, cb);
+        return cb;
+    }
+
+    private void addTrackingGUI(Map<TextAttribute, Object> map) {
+        int tracking = 0;
+        if (map != null) {
+            Float trackingSetting = (Float) map.get(TRACKING);
             if (trackingSetting != null) {
-                defaultTracking = (int) (100 * trackingSetting);
+                tracking = (int) (100 * trackingSetting);
             }
         }
-        strikeThroughCB = new JCheckBox("", defaultStrikethrough);
-        strikeThroughCB.addActionListener(actionListener);
-        gbh.addLabelWithControl("Strikethrough:", strikeThroughCB);
-
-        underlineCB = new JCheckBox("", defaultUnderline);
-        underlineCB.addActionListener(actionListener);
-        gbh.addLabelWithControl("Underline:", underlineCB);
-
-        kerningCB = new JCheckBox("", defaultKerning);
-        kerningCB.addActionListener(actionListener);
-        gbh.addLabelWithControl("Kerning:", kerningCB);
-
-        ligaturesCB = new JCheckBox("", defaultLigatures);
-        ligaturesCB.addActionListener(actionListener);
-        gbh.addLabelWithControl("Ligatures:", ligaturesCB);
 
         trackingParam = new RangeParam("", -20, 0, 70);
-        trackingParam.setValue(defaultTracking);
+        trackingParam.setValue(tracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
-        JComponent trackingGUI = trackingParam.createGUI();
-        gbh.addLabelWithControl("Tracking (Letter-spacing):", trackingGUI);
+        gbh.addLabelWithControl("Tracking (Letter-spacing):",
+                trackingParam.createGUI());
     }
 
     public void updateFontAttributesMap(Map<TextAttribute, Object> map) {
         Boolean strikeThroughSetting = Boolean.FALSE;
         if (strikeThroughCB.isSelected()) {
-            strikeThroughSetting = TextAttribute.STRIKETHROUGH_ON;
+            strikeThroughSetting = STRIKETHROUGH_ON;
         }
-        map.put(TextAttribute.STRIKETHROUGH, strikeThroughSetting);
+        map.put(STRIKETHROUGH, strikeThroughSetting);
 
         Integer kerningSetting = 0;
         if (kerningCB.isSelected()) {
-            kerningSetting = TextAttribute.KERNING_ON;
+            kerningSetting = KERNING_ON;
         }
-        map.put(TextAttribute.KERNING, kerningSetting);
+        map.put(KERNING, kerningSetting);
 
         Integer ligaturesSetting = 0;
         if (ligaturesCB.isSelected()) {
-            ligaturesSetting = TextAttribute.LIGATURES_ON;
+            ligaturesSetting = LIGATURES_ON;
         }
-        map.put(TextAttribute.LIGATURES, ligaturesSetting);
+        map.put(LIGATURES, ligaturesSetting);
 
         Integer underlineSetting = -1;
         if (underlineCB.isSelected()) {
-            underlineSetting = TextAttribute.UNDERLINE_ON;
+            underlineSetting = UNDERLINE_ON;
         }
-        map.put(TextAttribute.UNDERLINE, underlineSetting);
+        map.put(UNDERLINE, underlineSetting);
 
         Float tracking = trackingParam.getValueAsPercentage();
-        map.put(TextAttribute.TRACKING, tracking);
+        map.put(TRACKING, tracking);
     }
 }

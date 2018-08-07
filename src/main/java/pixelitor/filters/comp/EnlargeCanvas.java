@@ -27,6 +27,7 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.utils.Messages;
 
@@ -58,16 +59,7 @@ public class EnlargeCanvas implements CompAction {
         String editName = "Enlarge Canvas";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.enlargeCanvas(north, east, south, west);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.enlargeCanvas(north, east, south, west);
-            }
-        });
+        comp.forEachLayer(this::processLayer);
 
         if (north > 0 || west > 0) {
             comp.transformSelection(
@@ -90,6 +82,17 @@ public class EnlargeCanvas implements CompAction {
 
         Messages.showInStatusBar("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
+    }
+
+    private void processLayer(Layer layer) {
+        if (layer instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) layer;
+            contentLayer.enlargeCanvas(north, east, south, west);
+        }
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
+            mask.enlargeCanvas(north, east, south, west);
+        }
     }
 
     public static Action getAction() {

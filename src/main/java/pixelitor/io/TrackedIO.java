@@ -18,7 +18,6 @@
 package pixelitor.io;
 
 import pixelitor.gui.utils.ThumbInfo;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.TrackerReadProgressListener;
@@ -40,23 +39,29 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.Iterator;
 
+import static pixelitor.utils.ImageUtils.createThumbnail;
+
 /**
- * Utility methods like in ImageIO,
- * but with progress tracking
+ * Utility methods like in ImageIO, but with progress tracking
  */
 public class TrackedIO {
     private TrackedIO() {
         // do not instantiate
     }
 
-    public static void write(BufferedImage img, String formatName, File file) throws IOException {
+    public static void write(BufferedImage img,
+                             String formatName,
+                             File file) throws IOException {
         ProgressTracker pt = new StatusBarProgressTracker("Writing " + file.getName(), 100);
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
             writeToIOS(img, ios, formatName, pt);
         }
     }
 
-    public static void writeToStream(BufferedImage img, OutputStream os, String formatName, ProgressTracker pt) throws IOException {
+    public static void writeToStream(BufferedImage img,
+                                     OutputStream os,
+                                     String formatName,
+                                     ProgressTracker pt) throws IOException {
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
             writeToIOS(img, ios, formatName, pt);
         }
@@ -76,9 +81,7 @@ public class TrackedIO {
         ImageWriter writer = writers.next();
         try {
             writer.setOutput(ios);
-
             writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(pt));
-
             writer.write(img);
         } finally {
             writer.dispose();
@@ -94,7 +97,8 @@ public class TrackedIO {
     }
 
     public static BufferedImage read(File file) throws IOException {
-        ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
+        ProgressTracker pt = new StatusBarProgressTracker(
+                "Reading " + file.getName(), 100);
 
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
@@ -103,7 +107,8 @@ public class TrackedIO {
         return image;
     }
 
-    public static BufferedImage readFromStream(InputStream is, ProgressTracker pt) throws IOException {
+    public static BufferedImage readFromStream(InputStream is,
+                                               ProgressTracker pt) throws IOException {
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(is)) {
             image = readFromIIS(iis, pt);
@@ -111,7 +116,8 @@ public class TrackedIO {
         return image;
     }
 
-    public static BufferedImage readFromIIS(ImageInputStream iis, ProgressTracker pt) throws IOException {
+    public static BufferedImage readFromIIS(ImageInputStream iis,
+                                            ProgressTracker pt) throws IOException {
         BufferedImage image;
         Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 
@@ -142,7 +148,10 @@ public class TrackedIO {
      * <p>
      * Idea from https://stackoverflow.com/questions/3294388/make-a-bufferedimage-use-less-ram
      */
-    public static ThumbInfo readSubsampledThumb(File file, int thumbMaxWidth, int thumbMaxHeight, ProgressTracker pt) throws IOException {
+    public static ThumbInfo readSubsampledThumb(File file,
+                                                int thumbMaxWidth,
+                                                int thumbMaxHeight,
+                                                ProgressTracker pt) throws IOException {
         ThumbInfo thumbInfo;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
@@ -172,8 +181,8 @@ public class TrackedIO {
                     // subsampling only makes sense when
                     // the image is shrunk by 2x or greater
                     BufferedImage image = reader.read(0);
-                    BufferedImage thumb = ImageUtils
-                            .createThumbnail(image, Math.min(thumbMaxWidth, thumbMaxHeight), null);
+                    BufferedImage thumb = createThumbnail(image,
+                            Math.min(thumbMaxWidth, thumbMaxHeight), null);
                     return new ThumbInfo(thumb, imgWidth, imgHeight);
                 }
 
@@ -185,7 +194,8 @@ public class TrackedIO {
 //                }
 
                 ImageReadParam imageReaderParams = reader.getDefaultReadParam();
-                int subsampling = calcSubsamplingCols(imgWidth, imgHeight, thumbMaxWidth, thumbMaxHeight);
+                int subsampling = calcSubsamplingCols(imgWidth, imgHeight,
+                        thumbMaxWidth, thumbMaxHeight);
 
                 imageReaderParams.setSourceSubsampling(subsampling, subsampling, 0, 0);
                 BufferedImage image = reader.read(0, imageReaderParams);
@@ -203,7 +213,8 @@ public class TrackedIO {
      * for the horizontal and vertical subsampling.
      */
     @VisibleForTesting
-    public static int calcSubsamplingCols(int imgWidth, int imgHeight, int thumbMaxWidth, int thumbMaxHeight) {
+    public static int calcSubsamplingCols(int imgWidth, int imgHeight,
+                                          int thumbMaxWidth, int thumbMaxHeight) {
         assert imgWidth >= thumbMaxWidth * 2;
         assert imgHeight >= thumbMaxHeight * 2;
 

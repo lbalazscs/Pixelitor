@@ -50,7 +50,9 @@ public class Gradient {
     private final BlendingMode blendingMode;
     private final float opacity;
 
-    public Gradient(ImDrag imDrag, GradientType type, CycleMethod cycleMethod, GradientColorType colorType, boolean inverted, BlendingMode blendingMode, float opacity) {
+    public Gradient(ImDrag imDrag, GradientType type,
+                    CycleMethod cycleMethod, GradientColorType colorType,
+                    boolean inverted, BlendingMode blendingMode, float opacity) {
         assert !imDrag.isClick();
         this.imDrag = imDrag;
         this.type = type;
@@ -108,14 +110,6 @@ public class Gradient {
                 && opacity == 1.0f;
     }
 
-    public Point2D getImStartPoint() {
-        return imDrag.getStartPoint();
-    }
-
-    public Point2D getImEndPoint() {
-        return imDrag.getEndPoint();
-    }
-
     public GradientType getType() {
         return type;
     }
@@ -141,8 +135,8 @@ public class Gradient {
     }
 
     public GradientHandles createHandles(View view) {
-        Point2D handleStart = view.imageToComponentSpace(getImStartPoint());
-        Point2D handleEnd = view.imageToComponentSpace(getImEndPoint());
+        Point2D handleStart = view.imageToComponentSpace(imDrag.getStartPoint());
+        Point2D handleEnd = view.imageToComponentSpace(imDrag.getEndPoint());
 
         return new GradientHandles(handleStart, handleEnd, view);
     }

@@ -39,11 +39,13 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.debug.ImageComponentNode;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -62,14 +64,17 @@ import static java.awt.Color.BLACK;
 /**
  * The GUI component that shows a composition
  */
-public class ImageComponent extends JComponent implements MouseListener, MouseMotionListener, View {
+public class ImageComponent extends JComponent
+        implements MouseListener, MouseMotionListener, View {
+
     private double viewScale = 1.0f;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
 
     private ImageWindow imageWindow = null;
 
-    private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
+    private static final CheckerboardPainter checkerBoardPainter
+            = ImageUtils.createCheckerboardPainter();
 
     private LayersPanel layersPanel;
 
@@ -82,8 +87,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     private double canvasStartX;
     private double canvasStartY;
 
-    private AffineTransform coToIm;
-    private AffineTransform imToCo;
+    private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTX);
+    private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTX);
 
     private Navigator navigator;
 
@@ -104,7 +109,9 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         addListeners();
     }
 
-    public PixelitorEdit replaceComp(Composition newComp, boolean addToHistory, MaskViewMode newMaskViewMode) {
+    public PixelitorEdit replaceComp(Composition newComp,
+                                     MaskViewMode newMaskViewMode,
+                                     boolean addToHistory) {
         assert newComp != null;
         PixelitorEdit edit = null;
 
@@ -338,7 +345,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         g2.setTransform(componentTransform);
 
         if (ImageComponents.isActive(this)) {
-            currentTool.paintOverImage(g2, canvas, this, componentTransform, imageTransform);
+            currentTool.paintOverImage(g2, canvas, this,
+                    componentTransform, imageTransform);
         }
 
         g2.setClip(canvasClip);
@@ -383,11 +391,14 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
      * Makes sure that not the whole area is repainted, only the canvas,
      * and only inside the visible area of scrollbars
      */
-    private static Rectangle setVisibleCanvasClip(Graphics g, double canvasStartX, double canvasStartY, int maxWidth, int maxHeight) {
+    private static Rectangle setVisibleCanvasClip(Graphics g,
+                                                  double canvasStartX, double canvasStartY,
+                                                  int maxWidth, int maxHeight) {
         // if there are scollbars, this is the visible area
         Rectangle clipBounds = g.getClipBounds();
 
-        Rectangle imageRect = new Rectangle((int) canvasStartX, (int) canvasStartY, maxWidth, maxHeight);
+        Rectangle imageRect = new Rectangle((int) canvasStartX, (int) canvasStartY,
+                maxWidth, maxHeight);
 
         // now we are definitely not drawing neither outside
         // the canvas nor outside the scrollbars visible area
@@ -607,9 +618,8 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
         canvasStartX = (myWidth - canvasCoWidth) / 2.0;
         canvasStartY = (myHeight - canvasCoHeight) / 2.0;
 
-        // make the transforms invalid
-        imToCo = null;
-        coToIm = null;
+        imToCo.invalidate();
+        coToIm.invalidate();
     }
 
     @Override
@@ -684,23 +694,27 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
 
     @Override
     public AffineTransform getImageToComponentTransform() {
-        if (imToCo == null) {
-            imToCo = new AffineTransform();
-            imToCo.translate(canvasStartX, canvasStartY);
-            imToCo.scale(viewScale, viewScale);
-        }
-        return imToCo;
+        return imToCo.get();
+    }
+
+    private AffineTransform createImToCoTX() {
+        AffineTransform at = new AffineTransform();
+        at.translate(canvasStartX, canvasStartY);
+        at.scale(viewScale, viewScale);
+        return at;
     }
 
     @Override
     public AffineTransform getComponentToImageTransform() {
-        if (coToIm == null) {
-            coToIm = new AffineTransform();
-            double s = 1.0 / viewScale;
-            coToIm.scale(s, s);
-            coToIm.translate(-canvasStartX, -canvasStartY);
-        }
-        return coToIm;
+        return coToIm.get();
+    }
+
+    private AffineTransform createCoToImTX() {
+        AffineTransform at = new AffineTransform();
+        double s = 1.0 / viewScale;
+        at.scale(s, s);
+        at.translate(-canvasStartX, -canvasStartY);
+        return at;
     }
 
     /**
@@ -746,14 +760,16 @@ public class ImageComponent extends JComponent implements MouseListener, MouseMo
     }
 
     public void updateNavigator(boolean icSizeChanged) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
         if (navigator != null) {
             if (icSizeChanged) {
                 // defer until all
                 // pending events have been processed
                 SwingUtilities.invokeLater(() -> {
                     if (navigator != null) { // check again for safety
-                        navigator.recalculateSize(this, false, true, false);
+                        navigator.recalculateSize(this, false,
+                                true, false);
                     }
                 });
             } else {

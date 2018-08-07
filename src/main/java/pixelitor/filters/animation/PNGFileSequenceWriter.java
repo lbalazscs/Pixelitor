@@ -24,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import static java.lang.String.format;
+
 /**
  * An {@link AnimationWriter} implementation
  * that writes a sequence of PNG files
@@ -39,7 +41,7 @@ public class PNGFileSequenceWriter implements AnimationWriter {
 
     @Override
     public void addFrame(BufferedImage image) throws IOException {
-        String fileName = String.format("frame_%05d.png", fileSequenceNumber);
+        String fileName = format("frame_%05d.png", fileSequenceNumber);
         fileSequenceNumber++;
         File outputFile = new File(outputDir, fileName);
 

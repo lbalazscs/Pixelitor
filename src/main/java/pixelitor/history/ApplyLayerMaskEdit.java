@@ -37,7 +37,9 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     private ImageLayer layer;
     private final MaskViewMode oldMode;
 
-    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage, MaskViewMode oldMode) {
+    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer,
+                              LayerMask oldMask, BufferedImage oldImage,
+                              MaskViewMode oldMode) {
         super("Apply Layer Mask", comp);
 
         this.oldMode = oldMode;

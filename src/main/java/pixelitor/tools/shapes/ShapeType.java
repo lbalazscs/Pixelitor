@@ -18,6 +18,7 @@
 package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.geom.Star2D;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.tools.custom.BatShape;
 import pixelitor.tools.custom.CatShape;
 import pixelitor.tools.custom.HeartShape;
@@ -291,6 +292,10 @@ public enum ShapeType {
     }
 
     public abstract Shape getShape(double x, double y, int diameter);
+
+    public static EnumParam<ShapeType> asParam(String name) {
+        return new EnumParam<>(name, ShapeType.class);
+    }
 
     @Override
     public String toString() {

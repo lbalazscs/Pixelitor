@@ -24,7 +24,6 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.NewImage;
 import pixelitor.automate.SingleDirChooser;
-import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
@@ -33,7 +32,7 @@ import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponents;
-import pixelitor.io.Directories;
+import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
@@ -53,14 +52,15 @@ import java.io.File;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
+import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 
 /**
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
-    //    public static final String SPLASH_SCREEN_FONT = "Comic Sans MS";
     private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     private SplashImageCreator() {
@@ -74,14 +74,14 @@ public class SplashImageCreator {
         int numCreatedImages = 32;
 
         MessageHandler msgHandler = Messages.getMessageHandler();
-        String msg = String.format("Save %d Splash Images: ", numCreatedImages);
+        String msg = format("Save %d Splash Images: ", numCreatedImages);
         ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
-        File lastSaveDir = Directories.getLastSaveDir();
+        File lastSaveDir = Dirs.getLastSave();
 
         for (int i = 0; i < numCreatedImages; i++) {
             OutputFormat outputFormat = OutputFormat.getLastUsed();
 
-            String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
+            String fileName = format("splash%04d.%s", i, outputFormat.toString());
 
             progressHandler.updateProgress(i);
 
@@ -99,11 +99,11 @@ public class SplashImageCreator {
             });
         }
         progressHandler.stopProgress();
-        msgHandler.showInStatusBar(String.format("Finished saving splash images to %s", lastSaveDir));
+        msgHandler.showInStatusBar(format("Finished saving splash images to %s", lastSaveDir));
     }
 
     public static void createSplashImage() {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
@@ -123,17 +123,22 @@ public class SplashImageCreator {
         layer.setOpacity(0.4f, true, true, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
 
-        FgBgColors.setFG(WHITE);
+        setFGColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
-        layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE,
+                font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
-        layer = addRasterizedTextLayer(comp, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp,
+                "Loading...",
+                WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
-        layer = addRasterizedTextLayer(comp, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp,
+                "version " + Build.VERSION_NUMBER,
+                WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
@@ -157,10 +162,14 @@ public class SplashImageCreator {
 
     private static void addRasterizedTextLayer(Composition comp, String text, int translationY) {
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        addRasterizedTextLayer(comp, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
+        addRasterizedTextLayer(comp, text, WHITE,
+                font, translationY, BlendingMode.NORMAL, 1.0f, false);
     }
 
-    private static ImageLayer addRasterizedTextLayer(Composition comp, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
+    private static ImageLayer addRasterizedTextLayer(Composition comp, String text,
+                                                     Color textColor, Font font,
+                                                     int translationY, BlendingMode blendingMode,
+                                                     float opacity, boolean dropShadow) {
         ImageLayer layer = addNewLayer(comp, text);
         TextFilter textFilter = TextFilter.getInstance();
 

@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
@@ -43,6 +42,8 @@ import java.util.Random;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * Fills the image with random circles
@@ -55,20 +56,20 @@ public class RandomSpheres extends ParametrizedFilter {
     private static final int COLORS_SAMPLE_IMAGE = 1;
     private static final int COLORS_FG_BG = 2;
 
-    private static final int TYPE_SPHERES = 1;
-    private static final int TYPE_BUBBLES = 2;
-
     private final RangeParam radius = new RangeParam("Radius", 2, 10, 100);
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 200);
 
-    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source", new Value[]{
-            new Value("Sample Image", COLORS_SAMPLE_IMAGE),
-            new Value("Use FG, BG Colors", COLORS_FG_BG),
-    });
-    private final BooleanParam addHighLightsCB = new BooleanParam("Add Highlights", true);
-    private final AngleParam highlightAngleSelector = new AngleParam("Light Direction (Azimuth) - Degrees", 0);
-
-    private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam("Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
+    private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source",
+            new Value[]{
+                    new Value("Sample Image", COLORS_SAMPLE_IMAGE),
+                    new Value("Use FG, BG Colors", COLORS_FG_BG),
+            });
+    private final BooleanParam addHighLightsCB = new BooleanParam(
+            "Add Highlights", true);
+    private final AngleParam highlightAngleSelector = new AngleParam(
+            "Light Direction (Azimuth) - Degrees", 0);
+    private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
+            "Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
 
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
 
@@ -120,7 +121,7 @@ public class RandomSpheres extends ParametrizedFilter {
         Color c = null;
 
         if (colorSrc == COLORS_FG_BG) {
-            colors = new Color[]{FgBgColors.getFG(), FgBgColors.getBG()};
+            colors = new Color[]{getFGColor(), getBGColor()};
             c = colors[0];
         }
 
@@ -148,7 +149,9 @@ public class RandomSpheres extends ParametrizedFilter {
             // setup paint
             if (addHighlights) {
                 float[] fractions = {0.0f, 1.0f};
-                Paint gradientPaint = new RadialGradientPaint(x + centerShiftX, y + centerShiftY, r, fractions, colors, NO_CYCLE);
+                Paint gradientPaint = new RadialGradientPaint(
+                        x + centerShiftX, y + centerShiftY, r,
+                        fractions, colors, NO_CYCLE);
 
                 g.setPaint(gradientPaint);
             } else {

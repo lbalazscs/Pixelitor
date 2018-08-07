@@ -96,23 +96,32 @@ public class TweenAnimation {
      * @return true if the rendering can proceed
      */
     public boolean checkOverwrite(Component dialogParent) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
         if (outputType.needsDirectory()) {
             if (output.list().length == 0) {
                 return true;
             } else {
-                return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
-                        "<html>The folder " + output.getAbsolutePath() + " is not empty. " +
-                                "<br>Some files might get replaced. Are sure you want to continue?");
+                return showFolderNotEmptyDialog(dialogParent);
             }
         } else { // file
             if (output.exists()) {
-                return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
-                        output.getAbsolutePath() + " exists already. Overwrite?");
+                return showFileExistsDialog(dialogParent);
             } else {
                 return true;
             }
         }
+    }
+
+    private boolean showFolderNotEmptyDialog(Component dialogParent) {
+        return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
+                "<html>The folder " + output.getAbsolutePath() + " is not empty. " +
+                        "<br>Some files might get replaced. Are sure you want to continue?");
+    }
+
+    private boolean showFileExistsDialog(Component dialogParent) {
+        return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
+                output.getAbsolutePath() + " exists already. Overwrite?");
     }
 
     public void setPingPong(boolean pingPong) {

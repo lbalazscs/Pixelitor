@@ -31,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
  * Manages external files dropped on the image area
  */
@@ -89,7 +91,7 @@ public class DropListener extends DropTargetAdapter {
     private static void dropFiles(List<File> list) {
         for (File file : list) {
             if (file.isDirectory()) {
-                String question = String.format("You have dropped the folder \"%s\". " +
+                String question = format("You have dropped the folder \"%s\". " +
                         "Do you want to open all image files inside it?", file.getName());
 
                 if (Dialogs.showYesNoQuestionDialog("Question", question)) {

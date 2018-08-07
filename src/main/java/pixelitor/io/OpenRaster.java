@@ -52,6 +52,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -59,7 +61,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Only image layers are saved as the format does not cover other layer types.
  */
 public class OpenRaster {
-
     private static final String MERGED_IMAGE_NAME = "mergedimage.png";
 
     private OpenRaster() {
@@ -79,7 +80,7 @@ public class OpenRaster {
         FileOutputStream fos = new FileOutputStream(outFile);
         ZipOutputStream zos = new ZipOutputStream(fos);
 
-        String stackXML = String.format("<?xml version='1.0' encoding='UTF-8'?>\n" +
+        String stackXML = format("<?xml version='1.0' encoding='UTF-8'?>\n" +
                 "<image w=\"%d\" h=\"%d\">\n" +
                 "<stack>\n", comp.getCanvasImWidth(), comp.getCanvasImHeight());
 
@@ -96,11 +97,11 @@ public class OpenRaster {
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
-                stackXML += writeLayer(zos, i, imageLayer, spt);
+                stackXML += writeLayer(imageLayer, i, zos, spt);
             }
         }
 
-        if(addMergedImage) {
+        if (addMergedImage) {
             zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
             ProgressTracker subTaskTracker = new SubtaskProgressTracker(workRatio, pt);
             BufferedImage img = comp.getCompositeImage();
@@ -124,9 +125,12 @@ public class OpenRaster {
         pt.finish();
     }
 
-    private static String writeLayer(ZipOutputStream zos, int layerIndex,
-                                     ImageLayer layer, ProgressTracker pt) throws IOException {
-        String stackXML = String.format(Locale.ENGLISH, "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+    private static String writeLayer(ImageLayer layer,
+                                     int layerIndex,
+                                     ZipOutputStream zos,
+                                     ProgressTracker pt) throws IOException {
+        String stackXML = format(Locale.ENGLISH,
+                "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
                 layer.getName(),
                 layer.getVisibilityAsORAString(),
                 layer.getBlendingMode().toSVGName(),
@@ -134,7 +138,7 @@ public class OpenRaster {
                 layerIndex,
                 layer.getTX(),
                 layer.getTY());
-        ZipEntry entry = new ZipEntry(String.format("data/%d.png", layerIndex));
+        ZipEntry entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
         BufferedImage image = layer.getImage();
 
@@ -145,25 +149,16 @@ public class OpenRaster {
     }
 
     public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
-        ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
-
         String stackXML = null;
+        ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
         Map<String, BufferedImage> images = new HashMap<>();
         try (ZipFile zipFile = new ZipFile(file)) {
             // first iterate to count the image files...
-            Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
-            int numImageFiles = 0;
-            while (fileEntries.hasMoreElements()) {
-                ZipEntry entry = fileEntries.nextElement();
-                String name = entry.getName().toLowerCase();
-                if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME)) {
-                    numImageFiles++;
-                }
-            }
+            int numImageFiles = countNumImageFiles(zipFile);
             double workRatio = 1.0 / numImageFiles;
 
-            // ...then iterate again to actually read the image files
-            fileEntries = zipFile.entries();
+            // ...then iterate again to actually read the files
+            Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
             while (fileEntries.hasMoreElements()) {
                 ZipEntry entry = fileEntries.nextElement();
                 String name = entry.getName();
@@ -172,34 +167,30 @@ public class OpenRaster {
                     stackXML = extractString(zipFile.getInputStream(entry));
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
                     // no need for that
-                } else {
-                    boolean hasPNGExt = FileUtils.getExt(name)
-                            .filter(s -> s.equalsIgnoreCase("png"))
-                            .isPresent();
-                    if (hasPNGExt) {
-                        ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
-                        InputStream stream = zipFile.getInputStream(entry);
-                        BufferedImage image = TrackedIO.readFromStream(stream, spt);
-                        images.put(name, image);
-                    }
+                } else if (hasPNGExtension(name)) {
+                    ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
+                    InputStream stream = zipFile.getInputStream(entry);
+                    BufferedImage image = TrackedIO.readFromStream(stream, spt);
+                    images.put(name, image);
                 }
             }
         }
 
-        if(stackXML == null) {
+        if (stackXML == null) {
             throw new IllegalStateException("No stack.xml found.");
         }
 
         Element doc = loadXMLFromString(stackXML).getDocumentElement();
         doc.normalize();
         String documentElementNodeName = doc.getNodeName();
-        if(!documentElementNodeName.equals("image")) {
-            throw new IllegalStateException(String.format("stack.xml root element is '%s', expected: 'image'",
+        if (!documentElementNodeName.equals("image")) {
+            throw new IllegalStateException(format(
+                    "stack.xml root element is '%s', expected: 'image'",
                     documentElementNodeName));
         }
 
-        int compWidth = Integer.parseInt(doc.getAttribute("w"));
-        int compHeight = Integer.parseInt(doc.getAttribute("h"));
+        int compWidth = parseInt(doc.getAttribute("w").trim());
+        int compHeight = parseInt(doc.getAttribute("h").trim());
 
         Composition comp = Composition.createEmpty(compWidth, compHeight);
         comp.setFile(file);
@@ -221,7 +212,7 @@ public class OpenRaster {
             BufferedImage image = images.get(layerImageSource);
             image = ImageUtils.toSysCompatibleImage(image);
 
-            if(layerVisibility == null || layerVisibility.isEmpty()) {
+            if (layerVisibility == null || layerVisibility.isEmpty()) {
                 //workaround: paint.net exported files use "visible" attribute instead of "visibility"
                 layerVisibility = layerVisible;
             }
@@ -248,7 +239,28 @@ public class OpenRaster {
         return comp;
     }
 
-    private static Document loadXMLFromString(String xml) throws ParserConfigurationException, IOException, SAXException {
+    private static int countNumImageFiles(ZipFile zipFile) {
+        Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
+        int numImageFiles = 0;
+        while (fileEntries.hasMoreElements()) {
+            ZipEntry entry = fileEntries.nextElement();
+            String name = entry.getName().toLowerCase();
+            if (name.endsWith("png") && !name.equals(MERGED_IMAGE_NAME)) {
+                numImageFiles++;
+            }
+        }
+        return numImageFiles;
+    }
+
+    private static boolean hasPNGExtension(String name) {
+        return FileUtils.getExt(name)
+                .filter(s -> s.equalsIgnoreCase("png"))
+                .isPresent();
+    }
+
+    private static Document loadXMLFromString(String xml)
+            throws ParserConfigurationException, IOException, SAXException {
+
         if (xml.startsWith("\uFEFF")) { // starts with UTF BOM character
             // paint.net exported xml files start with this
             // see http://www.rgagnon.com/javadetails/java-handle-utf8-file-with-bom.html
@@ -263,7 +275,7 @@ public class OpenRaster {
 
     private static String extractString(InputStream is) {
         String retVal;
-        try (Scanner s = new Scanner(is).useDelimiter("\\A")) {
+        try (Scanner s = new Scanner(is, UTF_8.name()).useDelimiter("\\A")) {
             retVal = s.hasNext() ? s.next() : "";
         }
         return retVal;

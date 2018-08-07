@@ -47,7 +47,7 @@ public enum BasicStrokeJoin {
         return guiName;
     }
 
-    public static EnumParam<BasicStrokeJoin> asParam() {
-        return new EnumParam<>("Cap", BasicStrokeJoin.class);
+    public static EnumParam<BasicStrokeJoin> asParam(String name) {
+        return new EnumParam<>(name, BasicStrokeJoin.class);
     }
 }

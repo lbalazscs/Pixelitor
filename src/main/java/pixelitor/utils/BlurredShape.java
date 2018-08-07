@@ -49,21 +49,33 @@ public interface BlurredShape {
         });
     }
 
-    static BlurredShape create(int type, double centerX, double centerY, double innerRadiusX, double innerRadiusY, double outerRadiusX, double outerRadiusY) {
+    static BlurredShape create(int type, double centerX, double centerY,
+                               double innerRadiusX, double innerRadiusY,
+                               double outerRadiusX, double outerRadiusY) {
         switch (type) {
             case TYPE_ELLIPSE:
-                return new BlurredEllipse(centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+                return new BlurredEllipse(centerX, centerY,
+                        innerRadiusX, innerRadiusY,
+                        outerRadiusX, outerRadiusY);
             case TYPE_RECTANGLE:
-                return new BlurredRectangle(centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+                return new BlurredRectangle(centerX, centerY,
+                        innerRadiusX, innerRadiusY,
+                        outerRadiusX, outerRadiusY);
             case TYPE_RECTANGLE2:
                 return BlurredAnyShape
-                        .get(ShapeType.RECTANGLE, centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+                        .get(ShapeType.RECTANGLE, centerX, centerY,
+                                innerRadiusX, innerRadiusY,
+                                outerRadiusX, outerRadiusY);
             case TYPE_HEART:
                 return BlurredAnyShape
-                        .get(ShapeType.HEART, centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+                        .get(ShapeType.HEART, centerX, centerY,
+                                innerRadiusX, innerRadiusY,
+                                outerRadiusX, outerRadiusY);
             case TYPE_DIAMOND:
                 return BlurredAnyShape
-                        .get(ShapeType.DIAMOND, centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+                        .get(ShapeType.DIAMOND, centerX, centerY,
+                                innerRadiusX, innerRadiusY,
+                                outerRadiusX, outerRadiusY);
             default:
                 throw new IllegalStateException();
         }

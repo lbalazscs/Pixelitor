@@ -17,7 +17,6 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -25,6 +24,8 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * The brush used by the Smudge Tool
@@ -67,7 +68,7 @@ public class SmudgeBrush extends CopyBrush {
 
         if (firstUsageInStroke && fingerPainting) {
             // finger painting starts with the foreground color
-            g.setColor(FgBgColors.getFG());
+            g.setColor(getFGColor());
             g.fillRect(0, 0, diameter, diameter);
         } else {
             // samples the source image at lastX, lastY into the brush image

@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.io.OpenSave;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -29,10 +28,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.BorderFactory.createEtchedBorder;
 
 /**
  * A user interface ({@link ImageAreaUI} implementation)
@@ -42,16 +45,18 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private boolean userInitiated = true;
 
     public TabsUI() {
-        addChangeListener(e -> {
-            if (!userInitiated) {
-                return;
-            }
-            int selectedIndex = getSelectedIndex();
-            if (selectedIndex != -1) { // it is -1 if all tabs have been closed
-                ImageTab tab = (ImageTab) getComponentAt(selectedIndex);
-                tab.onActivation();
-            }
-        });
+        addChangeListener(e -> tabsChanged());
+    }
+
+    private void tabsChanged() {
+        if (!userInitiated) {
+            return;
+        }
+        int selectedIndex = getSelectedIndex();
+        if (selectedIndex != -1) { // it is -1 if all tabs have been closed
+            ImageTab tab = (ImageTab) getComponentAt(selectedIndex);
+            tab.onActivation();
+        }
     }
 
     @Override
@@ -79,10 +84,10 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         tab.onActivation();
     }
 
-    public static void warnAndCloseTab(ImageTab tab) {
+    private static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
-            OpenSave.warnAndCloseImage(tab.getIC());
+            ImageComponents.warnAndClose(tab.getIC());
         }
     }
 
@@ -105,7 +110,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             super(new GridBagLayout());
             setOpaque(false);
             titleLabel = new JLabel(title);
-            titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+            titleLabel.setBorder(createEmptyBorder(0, 0, 0, 5));
 
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -148,7 +153,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             setUI(new BasicButtonUI());
             setContentAreaFilled(false);
             setFocusable(false);
-            setBorder(BorderFactory.createEtchedBorder());
+            setBorder(createEtchedBorder());
             setBorderPainted(false);
             addMouseListener(buttonMouseListener);
             setRolloverEnabled(true);
@@ -163,7 +168,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
             g2.setStroke(new BasicStroke(2));
             if (getModel().isRollover()) {
                 g2.setColor(Color.RED);

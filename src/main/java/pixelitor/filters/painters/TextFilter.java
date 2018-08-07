@@ -23,7 +23,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
-import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -35,6 +35,21 @@ public class TextFilter extends FilterWithGUI {
     private static TextFilter instance;
 
     private TextFilter() {
+    }
+
+    @SuppressWarnings("NonThreadSafeLazyInitialization")
+    public static TextFilter getInstance() {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        if (instance == null) {
+            instance = new TextFilter();
+        }
+
+        return instance;
+    }
+
+    public static FilterAction createFilterAction() {
+        return new FilterAction("Text", TextFilter::getInstance);
     }
 
     @Override
@@ -77,20 +92,5 @@ public class TextFilter extends FilterWithGUI {
 
     public void setSettings(TextSettings settings) {
         this.settings = settings;
-    }
-
-    @SuppressWarnings("NonThreadSafeLazyInitialization")
-    public static TextFilter getInstance() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-
-        if (instance == null) {
-            instance = new TextFilter();
-        }
-
-        return instance;
-    }
-
-    public static FilterAction createFilterAction() {
-        return new FilterAction("Text", TextFilter::getInstance);
     }
 }

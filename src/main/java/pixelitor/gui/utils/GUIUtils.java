@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.Pixelitor;
+import com.bric.util.JVM;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
@@ -25,53 +25,36 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static pixelitor.utils.Cursors.BUSY;
+import static pixelitor.utils.Cursors.DEFAULT;
+import static pixelitor.utils.Keys.ESC;
 
 /**
  * Static GUI-related utility methods
  */
 public final class GUIUtils {
+    private static final int BUSY_CURSOR_DELAY = 300; // in milliseconds
+
     private GUIUtils() {
-    }
-
-    public static void testJDialog(JDialog d) {
-        JComponent contentPane = (JComponent) d.getContentPane();
-        testJComponent(contentPane);
-    }
-
-    public static void testJComponent(JComponent p) {
-        Runnable runnable = () -> {
-            try {
-                String lookAndFeelClass = Pixelitor.getLFClassName();
-                UIManager.setLookAndFeel(lookAndFeelClass);
-            } catch (Exception e) {
-                Messages.showException(e);
-            }
-
-            JFrame frame = new JFrame("Test");
-
-            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.setLayout(new BorderLayout());
-
-            frame.add(p, BorderLayout.CENTER);
-
-            SwingUtilities.updateComponentTreeUI(frame);
-
-            frame.pack();
-            centerOnScreen(frame);
-            frame.setVisible(true);
-        };
-        EventQueue.invokeLater(runnable);
     }
 
     public static void centerOnScreen(Component component) {
@@ -102,13 +85,15 @@ public final class GUIUtils {
         return Utils.anyMatch(Window.getWindows(), Window::isActive);
     }
 
-    public static void showClipboardTextDialog(JComponent form, String title, String text) {
+    public static void showCopyTextToClipboardDialog(JComponent content,
+                                                     String text,
+                                                     String title) {
         new DialogBuilder()
                 .okText("Copy as Text to the Clipboard")
                 .cancelText("Close")
                 .okAction(() -> Utils.copyStringToClipboard(text))
                 .title(title)
-                .content(form)
+                .content(content)
                 .owner(PixelitorWindow.getInstance())
                 .show();
     }
@@ -187,5 +172,91 @@ public final class GUIUtils {
                 bmp.randomize();
             }
         }
+    }
+
+    public static void invokeAndWait(Runnable task) {
+        assert !EventQueue.isDispatchThread() : "EDT thread";
+        try {
+            EventQueue.invokeAndWait(task);
+        } catch (InterruptedException | InvocationTargetException e) {
+            Messages.showExceptionOnEDT(e);
+        }
+    }
+
+    public static ProgressMonitor createPercentageProgressMonitor(String msg) {
+        return new ProgressMonitor(PixelitorWindow.getInstance(),
+                msg, "", 0, 100);
+    }
+
+    public static ProgressMonitor createPercentageProgressMonitor(String msg,
+                                                                  String cancelButtonText) {
+        String oldText = UIManager.getString("OptionPane.cancelButtonText");
+        UIManager.put("OptionPane.cancelButtonText", cancelButtonText);
+        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(),
+                msg, "", 0, 100);
+        UIManager.put("OptionPane.cancelButtonText", oldText);
+        return pm;
+    }
+
+    public static void addOKCancelButtons(JPanel panel,
+                                          JButton okButton, JButton cancelButton) {
+        if (JVM.isMac) {
+            panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+            panel.add(cancelButton);
+            panel.add(okButton);
+        } else {
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+            panel.add(okButton);
+            panel.add(cancelButton);
+        }
+    }
+
+    public static void setupCancelWhenTheDialogIsClosed(JDialog d, Runnable cancelAction) {
+        d.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        d.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // the user pressed the X button...
+                cancelAction.run();
+            }
+        });
+    }
+
+    public static void setupCancelWhenEscIsPressed(JDialog d, Runnable cancelAction) {
+        JComponent contentPane = (JComponent) d.getContentPane();
+        contentPane.registerKeyboardAction(e -> cancelAction.run(),
+                ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    }
+
+    public static void runWithBusyCursor(Runnable task) {
+        runWithBusyCursor(PixelitorWindow.getInstance(), task);
+    }
+
+    public static void runWithBusyCursor(Component parent, Runnable task) {
+        java.util.Timer timer = new Timer();
+        TimerTask startBusyCursorTask = new TimerTask() {
+            @Override
+            public void run() {
+                parent.setCursor(BUSY);
+            }
+        };
+
+        try {
+            // if after BUSY_CURSOR_DELAY the original task is still running,
+            // set the cursor to the delay cursor
+            timer.schedule(startBusyCursorTask, BUSY_CURSOR_DELAY);
+            task.run(); // on the current thread!
+        } finally {
+            // when the original task has stopped running, the cursor is reset
+            timer.cancel();
+            parent.setCursor(DEFAULT);
+        }
+    }
+
+    public static void setupSharedScrollModels(JScrollPane from, JScrollPane to) {
+        to.getVerticalScrollBar().setModel(
+                from.getVerticalScrollBar().getModel());
+        to.getHorizontalScrollBar().setModel(
+                from.getHorizontalScrollBar().getModel());
     }
 }

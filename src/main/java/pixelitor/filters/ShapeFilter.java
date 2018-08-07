@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.GroupedRangeParam;
@@ -43,6 +42,8 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -113,7 +114,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 g2.fillRect(0, 0, srcWidth, srcHeight);
                 break;
             case BG_TOOL:
-                g2.setColor(FgBgColors.getBG());
+                g2.setColor(getBGColor());
                 g2.fillRect(0, 0, srcWidth, srcHeight);
                 break;
             case BG_ORIGINAL:
@@ -130,7 +131,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 g2.setColor(WHITE);
                 break;
             case FG_TOOL:
-                g2.setColor(FgBgColors.getFG());
+                g2.setColor(getFGColor());
                 break;
             case FG_GRADIENT:
                 float cx = srcWidth / 2.0f;

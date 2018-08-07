@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -282,7 +283,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', selected = '%s']",
+        return format("%s[name = '%s', selected = '%s']",
                 getClass().getSimpleName(), getName(), currentChoice.toString());
     }
 }

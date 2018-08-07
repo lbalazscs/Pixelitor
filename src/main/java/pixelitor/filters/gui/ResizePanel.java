@@ -39,6 +39,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * The GUI for the resize dialog
  */
@@ -169,7 +171,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (e.getSource() == widthTF) {
             if (pixelsSelected()) {
                 try {
-                    newWidth = Integer.parseInt(widthTF.getText());
+                    newWidth = parseInt(widthTF.getText().trim());
                     if (constrainProportions()) {
                         newHeight = (int) (newWidth / origProportion);
                         if (newHeight == 0) {
@@ -189,7 +191,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     }
                 }
             } else { // percent was selected
-                newWidthInPercent = parseLocalizedDouble(widthTF.getText());
+                newWidthInPercent = parseLocalizedDouble(widthTF.getText().trim());
                 newWidth = (int) (oldWidth * newWidthInPercent / 100);
                 if (constrainProportions()) {
                     newHeight = (int) (newWidth / origProportion);
@@ -201,14 +203,14 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         } else if (e.getSource() == heightTF) {
             if (pixelsSelected()) {
                 try {
-                    newHeight = Integer.parseInt(heightTF.getText());
+                    newHeight = parseInt(heightTF.getText().trim());
                     if (constrainProportions()) {
                         newWidth = (int) (newHeight * origProportion);
                         if (newWidth == 0) {
                             newWidth = 1;
                         }
                         widthTF.setText(String.valueOf(newWidth));
-                        newWidthInPercent = parseLocalizedDouble(widthTF.getText());
+                        newWidthInPercent = parseLocalizedDouble(widthTF.getText().trim());
                     }
                     newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                 } catch (NumberFormatException ex) {
@@ -221,7 +223,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     }
                 }
             } else {  // percent was selected
-                newHeightInPercent = parseLocalizedDouble(heightTF.getText());
+                newHeightInPercent = parseLocalizedDouble(heightTF.getText().trim());
                 newHeight = (int) (oldHeight * newHeightInPercent / 100);
                 if (constrainProportions()) {
                     newWidth = (int) (newHeight * origProportion);

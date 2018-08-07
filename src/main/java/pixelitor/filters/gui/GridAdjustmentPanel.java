@@ -35,7 +35,8 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
     private final boolean addGridLabels;
 
-    public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr, boolean addGridLabels, ShowOriginal showOriginal) {
+    public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr,
+                               boolean addGridLabels, ShowOriginal showOriginal) {
         super(filter, dr, showOriginal);
         this.addGridLabels = addGridLabels;
     }
@@ -64,7 +65,8 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
 
             String labelText = param.getName() + ':';
 
-            if (i < MAX_GRID_PARAMS) { // the first 4 are added into the 4 grid positions...
+            // the first 4 are added into the 4 grid positions...
+            if (i < MAX_GRID_PARAMS) {
                 if (addGridLabels) {
                     gridPanel.add(new JLabel(labelText));
                 }

@@ -17,7 +17,8 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.RandomUtils;
@@ -34,7 +35,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
- * Text settings for the text filter and text layers
+ * Settings for the text filter and text layers
  */
 public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -43,12 +44,16 @@ public class TextSettings implements Serializable {
     private final Font font;
     private final AreaEffects areaEffects;
     private final Color color;
-    private final AbstractLayoutPainter.VerticalAlignment verticalAlignment;
-    private final AbstractLayoutPainter.HorizontalAlignment horizontalAlignment;
+    private final VerticalAlignment verticalAlignment;
+    private final HorizontalAlignment horizontalAlignment;
     private final boolean watermark;
     private final double rotation;
 
-    public TextSettings(String text, Font font, Color color, AreaEffects areaEffects, AbstractLayoutPainter.HorizontalAlignment horizontalAlignment, AbstractLayoutPainter.VerticalAlignment verticalAlignment, boolean watermark, double rotation) {
+    public TextSettings(String text, Font font, Color color,
+                        AreaEffects areaEffects,
+                        HorizontalAlignment horizontalAlignment,
+                        VerticalAlignment verticalAlignment,
+                        boolean watermark, double rotation) {
         this.areaEffects = areaEffects;
         this.color = color;
         this.font = font;
@@ -63,7 +68,7 @@ public class TextSettings implements Serializable {
     public TextSettings(TextSettings other) {
         text = other.text;
         font = other.font;
-        // we can share even mutable objects, since they are re-created
+        // even mutable objects can be shared, since they are re-created
         // after every editing
         areaEffects = other.areaEffects;
         color = other.color;
@@ -85,7 +90,7 @@ public class TextSettings implements Serializable {
         return font;
     }
 
-    public AbstractLayoutPainter.HorizontalAlignment getHorizontalAlignment() {
+    public HorizontalAlignment getHorizontalAlignment() {
         return horizontalAlignment;
     }
 
@@ -97,7 +102,7 @@ public class TextSettings implements Serializable {
         this.text = text;
     }
 
-    public AbstractLayoutPainter.VerticalAlignment getVerticalAlignment() {
+    public VerticalAlignment getVerticalAlignment() {
         return verticalAlignment;
     }
 
@@ -148,8 +153,8 @@ public class TextSettings implements Serializable {
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
                 RandomUtils.createRandomColor(false),
                 AreaEffects.createRandom(rand),
-                AbstractLayoutPainter.HorizontalAlignment.CENTER,
-                AbstractLayoutPainter.VerticalAlignment.CENTER,
+                HorizontalAlignment.CENTER,
+                VerticalAlignment.CENTER,
                 rand.nextBoolean(), rand.nextDouble() * Math.PI * 2);
     }
 }

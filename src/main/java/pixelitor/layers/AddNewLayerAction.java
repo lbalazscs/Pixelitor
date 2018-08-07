@@ -47,7 +47,7 @@ public class AddNewLayerAction extends AbstractAction implements ActiveImageChan
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         boolean addBellowActive = ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
-        comp.addNewEmptyLayer(null, addBellowActive);
+        comp.addNewEmptyLayer(comp.generateNewLayerName(), addBellowActive);
     }
 
     @Override

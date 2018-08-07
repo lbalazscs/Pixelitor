@@ -21,7 +21,7 @@ import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
@@ -39,7 +39,8 @@ public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard(Drawable dr) {
-        super(SELECT_FILTER, "Export Tweening Animation", "Render", 450, 380, dr);
+        super(SELECT_FILTER, "Export Tweening Animation",
+                "Render", 450, 380, dr);
     }
 
     @Override
@@ -52,25 +53,12 @@ public class TweenWizard extends Wizard {
     }
 
     private void calculateAnimation() {
-        ProgressMonitor progressMonitor = new ProgressMonitor(PixelitorWindow.getInstance(),
-                "Rendering Frames", "", 1, 100);
-        progressMonitor.setProgress(0);
+        ProgressMonitor progressMonitor =
+                GUIUtils.createPercentageProgressMonitor("Rendering Frames");
 
-        RenderFramesTask task = new RenderFramesTask(animation, dr);
-        task.addPropertyChangeListener(evt -> {
-            if ("progress".equals(evt.getPropertyName())) {
-                int progress = (Integer) evt.getNewValue();
-
-                progressMonitor.setProgress(progress);
-                progressMonitor.setNote(String.format("Completed %d%%.\n", progress));
-                if (progressMonitor.isCanceled()) {
-                    // Probably nothing bad happens if the current frame rendering is
-                    // interrupted, but to be on the safe side, let the current frame
-                    // finish by passing false to cancel
-                    task.cancel(false);
-                }
-            }
-        });
+        RenderTweenFramesTask task = new RenderTweenFramesTask(animation, dr);
+        task.addPropertyChangeListener(evt ->
+                task.onPropertyChange(evt, progressMonitor));
         task.execute();
     }
 
@@ -79,7 +67,8 @@ public class TweenWizard extends Wizard {
     }
 
     @Override
-    protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage, Component dialogParent) {
+    protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage,
+                                                  Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
             ValidatedPanel settings = (ValidatedPanel) currentPage.getPanel(this, dr);
             ValidationResult validity = settings.checkValidity();
@@ -92,7 +81,8 @@ public class TweenWizard extends Wizard {
     }
 
     @Override
-    protected boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent) {
+    protected boolean mayProceedAfterMovingForward(WizardPage wizardPage,
+                                                   Component dialogParent) {
         if(wizardPage == OUTPUT_SETTINGS) {
             if (!animation.checkOverwrite(dialogParent)) {
                 return false;

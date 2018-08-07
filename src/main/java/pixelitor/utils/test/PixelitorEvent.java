@@ -22,11 +22,13 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
 
-import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static java.lang.String.format;
 
 /**
  * An event that occurred inside Pixelitor.
@@ -47,7 +49,7 @@ public class PixelitorEvent {
         }
 
         date = new Date();
-        if (SwingUtilities.isEventDispatchThread()) {
+        if (EventQueue.isDispatchThread()) {
             threadName = "EDT";
         } else {
             threadName = Thread.currentThread().getName();
@@ -78,23 +80,23 @@ public class PixelitorEvent {
     // saves the actual state of the composition to a string
     private String saveState(String type) {
         if (comp == null) { // "all images are closed" is also an event
-            return String.format("%s (%s) no composition", type, threadName);
+            return format("%s (%s) no composition", type, threadName);
         }
 
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle rect = comp.getSelection().getShapeBounds();
-            selectionInfo = String.format("sel. bounds = '%s'", rect.toString());
+            selectionInfo = format("sel. bounds = '%s'", rect.toString());
         }
         String maskInfo = "no mask";
         if (layer.hasMask()) {
-            maskInfo = String.format("has mask (enabled = %s, editing = %s, linked = %s)",
+            maskInfo = format("has mask (enabled = %s, editing = %s, linked = %s)",
                     layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
         }
 
         String layerType = layer.getClass().getSimpleName();
         String formattedDate = dateFormatter.format(date);
-        return String.format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
+        return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
                 type, threadName, comp.getName(), layer.getName(),
                 layerType, selectionInfo, maskInfo, formattedDate);
     }

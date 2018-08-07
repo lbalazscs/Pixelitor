@@ -17,31 +17,39 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.AutoZoom;
 import pixelitor.gui.ImageComponents;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import static pixelitor.menus.MenuBar.MENU_SHORTCUT_KEY_MASK;
+import static java.lang.String.format;
+import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_HEIGHT_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
+import static pixelitor.gui.AutoZoom.FIT_WIDTH_ACTION;
+import static pixelitor.utils.Keys.ACTUAL_PIXELS_KEY;
+import static pixelitor.utils.Keys.CTRL_ALT_NUMPAD_0;
+import static pixelitor.utils.Keys.CTRL_MINUS;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_0;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_MINUS;
+import static pixelitor.utils.Keys.CTRL_NUMPAD_PLUS;
+import static pixelitor.utils.Keys.CTRL_PLUS;
+import static pixelitor.utils.Keys.CTRL_SHIFT_EQUALS;
+import static pixelitor.utils.Keys.FIT_SPACE_KEY;
 
 /**
  * The zoom menu
  */
 public class ZoomMenu extends PMenu {
-    private static final KeyStroke ACTUAL_PIXELS_KEY = KeyStroke.getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK);
-    public static final String ACTUAL_PIXELS_TOOLTIP = String.format("Set the zoom level to 100%% (%s)",
+    public static final String ACTUAL_PIXELS_TOOLTIP = format(
+            "Set the zoom level to 100%% (%s)",
             Utils.keystrokeAsText(ACTUAL_PIXELS_KEY));
 
-    private static final KeyStroke FIT_SPACE_KEY = KeyStroke
-            .getKeyStroke(KeyEvent.VK_0, MENU_SHORTCUT_KEY_MASK + InputEvent.ALT_MASK);
-    public static final String FIT_SPACE_TOOLTIP = String
-            .format("Display the image at the largest zoom that can fit in the available space (%s)",
-                    Utils.keystrokeAsText(FIT_SPACE_KEY));
+    public static final String FIT_SPACE_TOOLTIP = format(
+            "Display the image at the largest zoom that can fit in the available space (%s)",
+            Utils.keystrokeAsText(FIT_SPACE_KEY));
 
     private static final ButtonGroup radioGroup = new ButtonGroup();
 
@@ -49,14 +57,6 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_DECREASE = "decrease";
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
-
-    private static final KeyStroke CTRL_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, MENU_SHORTCUT_KEY_MASK);
-    private static final KeyStroke CTRL_NUMPAD_PLUS = KeyStroke.getKeyStroke(KeyEvent.VK_ADD, InputEvent.CTRL_DOWN_MASK);
-    private static final KeyStroke CTRL_NUMPAD_MINUS = KeyStroke.getKeyStroke(KeyEvent.VK_SUBTRACT, InputEvent.CTRL_DOWN_MASK);
-    private static final KeyStroke CTRL_SHIFT_EQUALS = KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_MASK);
-    private static final KeyStroke CTRL_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK);
-    private static final KeyStroke CTRL_ALT_NUMPAD_0 = KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD0, InputEvent.CTRL_DOWN_MASK + InputEvent.ALT_MASK);
 
     private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
         @Override
@@ -77,19 +77,17 @@ public class ZoomMenu extends PMenu {
     private ZoomMenu() {
         super("Zoom");
 
-        addActionWithKey(ZOOM_IN_ACTION, CTRL_PLUS);
+        setupZoomKeys(this);
 
+        addActionWithKey(ZOOM_IN_ACTION, CTRL_PLUS);
         addActionWithKey(ZOOM_OUT_ACTION, CTRL_MINUS);
 
-        addActionWithKey(AutoZoom.ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
-
-        addActionWithKey(AutoZoom.FIT_SPACE_ACTION, FIT_SPACE_KEY);
-
-        addAction(AutoZoom.FIT_WIDTH_ACTION);
-        addAction(AutoZoom.FIT_HEIGHT_ACTION);
+        addActionWithKey(ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_KEY);
+        addActionWithKey(FIT_SPACE_ACTION, FIT_SPACE_KEY);
+        addAction(FIT_WIDTH_ACTION);
+        addAction(FIT_HEIGHT_ACTION);
 
         addSeparator();
-        setupZoomKeys(this);
 
         ZoomLevel[] zoomLevels = ZoomLevel.values();
         for (ZoomLevel level : zoomLevels) {
@@ -114,11 +112,11 @@ public class ZoomMenu extends PMenu {
 
         // ctrl + numpad 0 = actual pixels
         inputMap.put(CTRL_NUMPAD_0, ACTION_MAP_KEY_ACTUAL_PIXELS);
-        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, AutoZoom.ACTUAL_PIXELS_ACTION);
+        actionMap.put(ACTION_MAP_KEY_ACTUAL_PIXELS, ACTUAL_PIXELS_ACTION);
 
         // ctrl + alt + numpad 0 = fit screen
         inputMap.put(CTRL_ALT_NUMPAD_0, ACTION_MAP_KEY_FIT_SPACE);
-        actionMap.put(ACTION_MAP_KEY_FIT_SPACE, AutoZoom.FIT_SPACE_ACTION);
+        actionMap.put(ACTION_MAP_KEY_FIT_SPACE, FIT_SPACE_ACTION);
     }
 
     /**

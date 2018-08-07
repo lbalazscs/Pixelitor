@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
+import pixelitor.utils.test.Assertions;
 
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -67,7 +67,7 @@ public enum DrawStrategy {
         public void prepareBrushStroke(Drawable dr) {
             BufferedImage image = dr.getImage();
 
-            assert Utils.checkRasterMinimum(image);
+            assert Assertions.checkRasterMinimum(image);
 
             copyBeforeStart = ImageUtils.copyImage(image);
         }

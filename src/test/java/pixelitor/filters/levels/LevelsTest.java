@@ -157,10 +157,10 @@ public class LevelsTest {
         assertEquals(expected, lookup.mapBlue(input));
     }
 
-    private static void checkRGBMapping(RGBLookup lookup, int input, int expectedRed, int expectedGreen, int expectedBlue) {
+    private static void checkRGBMapping(RGBLookup lookup, int input,
+                                        int expectedRed, int expectedGreen, int expectedBlue) {
         assertEquals(expectedRed, lookup.mapRed(input));
         assertEquals(expectedGreen, lookup.mapGreen(input));
         assertEquals(expectedBlue, lookup.mapBlue(input));
     }
-
 }

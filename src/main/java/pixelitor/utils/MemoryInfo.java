@@ -17,6 +17,8 @@
 
 package pixelitor.utils;
 
+import static java.lang.String.format;
+
 public class MemoryInfo {
     public static final int ONE_MEGABYTE = 1024*1024;
 
@@ -61,6 +63,7 @@ public class MemoryInfo {
 
     @Override
     public String toString() {
-        return String.format("allocated = %d, used = %d, free = %d, max = %d", totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);
+        return format("allocated = %d, used = %d, free = %d, max = %d",
+                totalMemoryMB, usedMemoryMB, freeMemoryMB, maxMemoryMB);
     }
 }

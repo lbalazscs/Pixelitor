@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 
 /**
@@ -97,7 +98,9 @@ public class FilterUtils {
         return Optional.ofNullable(lastFilter);
     }
 
-    public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp, BufferedImage src, BufferedImage dest) {
+    public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp,
+                                              BufferedImage src,
+                                              BufferedImage dest) {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
@@ -125,6 +128,6 @@ public class FilterUtils {
         allFilters.forEach(FilterAction::getFilter);
 
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        System.out.println(String.format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
+        System.out.println(format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
     }
 }

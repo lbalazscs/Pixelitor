@@ -90,7 +90,7 @@ public enum Symmetry {
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
-        private static final double sin120 = 0.86602540378443864676372317075294;
+        private static final double sin120 = 0.8660254037844386;
         private static final double cos240 = cos120;
         private static final double sin240 = -sin120;
 

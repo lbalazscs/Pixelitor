@@ -27,6 +27,8 @@ import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ActiveImageChangeListener;
 
+import static java.lang.String.format;
+
 /**
  * Used for tracking what happens in long-running automatic tests.
  * Listens to changes and generates events.
@@ -81,7 +83,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     @Override
     public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         String oldICName = oldIC == null ? "null" : oldIC.getName();
-        Events.postListenerEvent(String.format("activeImageHasChanged %s => %s",
+        Events.postListenerEvent(format("activeImageHasChanged %s => %s",
                 oldICName, newIC.getName()),
                 newIC.getComp(), null);
     }

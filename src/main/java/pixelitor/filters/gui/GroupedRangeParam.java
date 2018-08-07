@@ -52,15 +52,17 @@ public class GroupedRangeParam extends AbstractFilterParam {
     /**
      * 2 linked params
      */
-    public GroupedRangeParam(String name, String firstRangeName, String secondRangeName, int min, int def, int max, boolean linked) {
-        this(name, new String[]{firstRangeName, secondRangeName}, min, def, max, linked);
+    public GroupedRangeParam(String name, String firstChildName, String secondChildName,
+                             int min, int def, int max, boolean linked) {
+        this(name, new String[]{firstChildName, secondChildName}, min, def, max, linked);
     }
 
     /**
      * Any number of linked params
      */
-    public GroupedRangeParam(String name, String[] rangeNames, int min, int def, int max, boolean linked) {
-        this(name, createParams(rangeNames, min, def, max), linked);
+    public GroupedRangeParam(String name, String[] childNames,
+                             int min, int def, int max, boolean linked) {
+        this(name, createParams(childNames, min, def, max), linked);
     }
 
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
@@ -81,6 +83,16 @@ public class GroupedRangeParam extends AbstractFilterParam {
         paramGUI = gui;
         setParamGUIEnabledState();
         return gui;
+    }
+
+    private static RangeParam[] createParams(String[] names,
+                                             int min, int def, int max) {
+        RangeParam[] rangeParams = new RangeParam[names.length];
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            rangeParams[i] = new RangeParam(name, min, def, max);
+        }
+        return rangeParams;
     }
 
     private void linkParams() {
@@ -250,19 +262,11 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
             double[] interpolatedValues = new double[values.length];
             for (int i = 0; i < values.length; i++) {
-                interpolatedValues[i] = ImageMath.lerp(progress, values[i], apEndState.values[i]);
+                interpolatedValues[i] = ImageMath.lerp(
+                        progress, values[i], apEndState.values[i]);
             }
 
             return new GRState(interpolatedValues);
         }
-    }
-
-    private static RangeParam[] createParams(String[] names, int min, int def, int max) {
-        RangeParam[] rangeParams = new RangeParam[names.length];
-        for (int i = 0; i < names.length; i++) {
-            String name = names[i];
-            rangeParams[i] = new RangeParam(name, min, def, max);
-        }
-        return rangeParams;
     }
 }

@@ -66,7 +66,10 @@ public class MultiLayerEditTest {
     private final WithSelection withSelection;
     private final WithMask withMask;
 
-    public MultiLayerEditTest(NumLayers numLayers, WithTranslation withTranslation, WithSelection withSelection, WithMask withMask) {
+    public MultiLayerEditTest(NumLayers numLayers,
+                              WithTranslation withTranslation,
+                              WithSelection withSelection,
+                              WithMask withMask) {
         this.numLayers = numLayers;
         this.withSelection = withSelection;
         this.withTranslation = withTranslation;
@@ -305,8 +308,10 @@ public class MultiLayerEditTest {
                             origImageWidth);
         }
 
-        int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT + withTranslation.getExpectedTY();
-        int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH + withTranslation.getExpectedTX();
+        int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT
+                + withTranslation.getExpectedTY();
+        int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
+                + withTranslation.getExpectedTX();
         if (angle == ANGLE_90) {
             assertThat(comp).activeLayerTranslationIs(
                     canvasDistFromImgBottom,

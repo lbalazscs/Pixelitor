@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -167,7 +168,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', currentValue = %s]",
+        return format("%s[name = '%s', currentValue = %s]",
                 getClass().getSimpleName(), getName(), currentValue);
     }
 

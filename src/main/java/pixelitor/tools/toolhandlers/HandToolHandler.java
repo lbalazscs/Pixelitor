@@ -80,7 +80,7 @@ public class HandToolHandler extends ToolHandler {
     }
 
     public void spacePressed() {
-        if (!spaceDown) { // this is called all the time while the space is held down, but we are interested only in ist first call
+        if (!spaceDown) { // this is called all the time while the space is held down
             if (!currentToolUsage) {
                 ImageComponents.setCursorForAll(Tools.HAND.getStartingCursor());
             }

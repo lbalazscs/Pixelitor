@@ -22,6 +22,8 @@ import pixelitor.io.FileChoosers;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
+import static java.lang.String.format;
+
 /**
  * The output type of the tweening animation
  */
@@ -83,19 +85,24 @@ public enum TweenOutputType {
 
     public abstract boolean needsDirectory();
 
-    private static String expectFileInExistingDir(File output, TweenOutputType type, String fileType) {
+    private static String expectFileInExistingDir(File output,
+                                                  TweenOutputType type,
+                                                  String fileType) {
         if (output.exists()) {
             if (output.isDirectory()) {
-                return String.format("<html>%s is a folder." +
-                                "<br>For the \"%s\" output type, select a (new or existing) %s file in an existing folder.",
+                return format("<html>%s is a folder." +
+                                "<br>For the \"%s\" output type, " +
+                                "select a (new or existing) %s file in an existing folder.",
                         output.getAbsolutePath(), type.toString(), fileType);
             }
         } else { // if it does not exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
             if (!parentDir.exists()) {
-                return String.format("<html>The folder %s of the %s file does not exist." +
-                                "<br>For the \"%s\" output type, select a (new or existing) %s file in an existing folder.",
-                        parentDir.getName(), output.getAbsolutePath(), type.toString(), fileType);
+                return format("<html>The folder %s of the %s file does not exist." +
+                                "<br>For the \"%s\" output type, " +
+                                "select a (new or existing) %s file in an existing folder.",
+                        parentDir.getName(), output.getAbsolutePath(),
+                        type.toString(), fileType);
             }
         }
         return null;
@@ -104,7 +111,7 @@ public enum TweenOutputType {
     private static String expectDir(File output, TweenOutputType type) {
         // we expect it to be an existing directory
         if (!output.isDirectory()) {
-            return String.format("<html>%s is not a folder." +
+            return format("<html>%s is not a folder." +
                             "<br>For the \"%s\" output type, select an existing folder.",
                     output.getAbsolutePath(), type.toString());
         }

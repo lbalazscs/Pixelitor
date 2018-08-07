@@ -23,7 +23,6 @@ import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.colors.ColorUtils;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
@@ -64,23 +63,29 @@ import java.net.URL;
 import java.util.Random;
 
 import static java.awt.AlphaComposite.SRC_OVER;
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.awt.image.DataBuffer.TYPE_INT;
+import static java.lang.String.format;
+import static pixelitor.colors.ColorUtils.rgbIntToString;
+import static pixelitor.colors.ColorUtils.toPackedInt;
 
 /**
  * Static image-related utility methods
  */
 public class ImageUtils {
     public static final double DEG_315_IN_RADIANS = 0.7853981634;
-    public static final float[] FRACTIONS_2_COLOR_UNIFORM = {0.0f, 1.0f};
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
     private static final GraphicsConfiguration graphicsConfiguration = GraphicsEnvironment
@@ -105,9 +110,8 @@ public class ImageUtils {
             return input;
         }
 
-        int transparency = Transparency.TRANSLUCENT;
         BufferedImage output = graphicsConfiguration
-                .createCompatibleImage(input.getWidth(), input.getHeight(), transparency);
+                .createCompatibleImage(input.getWidth(), input.getHeight(), TRANSLUCENT);
         Graphics2D g = output.createGraphics();
         g.drawImage(input, 0, 0, null);
         g.dispose();
@@ -118,20 +122,22 @@ public class ImageUtils {
     public static BufferedImage createSysCompatibleImage(int width, int height) {
         assert (width > 0) && (height > 0);
 
-        return graphicsConfiguration.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+        return graphicsConfiguration.createCompatibleImage(width, height, TRANSLUCENT);
     }
 
     public static BufferedImage createImageWithSameCM(BufferedImage src) {
         ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
-                .isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(
+                src.getWidth(), src.getHeight()),
+                dstCM.isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
-    public static BufferedImage createImageWithSameCM(BufferedImage src, int width, int height) {
+    public static BufferedImage createImageWithSameCM(BufferedImage src,
+                                                      int width, int height) {
         ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height), dstCM
-                .isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height),
+                dstCM.isAlphaPremultiplied(), null);
     }
 
 
@@ -170,7 +176,8 @@ public class ImageUtils {
      * @return a scaled version of the original BufferedImage
      */
     public static BufferedImage getFasterScaledInstance(BufferedImage img,
-                                                        int targetWidth, int targetHeight, Object hint,
+                                                        int targetWidth, int targetHeight,
+                                                        Object hint,
                                                         boolean progressiveBilinear) {
         assert img != null;
 
@@ -254,7 +261,9 @@ public class ImageUtils {
     /**
      * Also an iterative approach, but using even smaller steps
      */
-    public static BufferedImage enlargeSmooth(BufferedImage src, int targetWidth, int targetHeight, Object hint, double step, ProgressTracker pt) {
+    public static BufferedImage enlargeSmooth(BufferedImage src,
+                                              int targetWidth, int targetHeight,
+                                              Object hint, double step, ProgressTracker pt) {
         int srcWidth = src.getWidth();
         int srcHeight = src.getHeight();
         double factorX = targetWidth / (double) srcWidth;
@@ -316,7 +325,9 @@ public class ImageUtils {
         return retVal;
     }
 
-    private static BufferedImage simpleResize(BufferedImage img, int targetWidth, int targetHeight, Object hint) {
+    private static BufferedImage simpleResize(BufferedImage img,
+                                              int targetWidth, int targetHeight,
+                                              Object hint) {
         assert img != null;
 
         BufferedImage ret = new BufferedImage(targetWidth, targetHeight, img.getType());
@@ -406,12 +417,12 @@ public class ImageUtils {
 
         boolean packedInt = hasPackedIntArray(src);
         if (packedInt) {
-            assert src.getRaster().getTransferType() == DataBuffer.TYPE_INT;
+            assert src.getRaster().getTransferType() == TYPE_INT;
             assert src.getRaster().getNumDataElements() == 1;
 
             DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
             pixels = srcDataBuffer.getData();
-        } else if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+        } else if (src.getType() == TYPE_BYTE_GRAY) {
             // TODO this does not seem to work - why?
             int width = src.getWidth();
             int height = src.getHeight();
@@ -432,7 +443,7 @@ public class ImageUtils {
     }
 
     public static byte[] getGrayPixelsAsByteArray(BufferedImage img) {
-        assert img.getType() == BufferedImage.TYPE_BYTE_GRAY;
+        assert img.getType() == TYPE_BYTE_GRAY;
 
         WritableRaster raster = img.getRaster();
         DataBufferByte db = (DataBufferByte) raster.getDataBuffer();
@@ -549,7 +560,7 @@ public class ImageUtils {
 
         Dimension thumbDim = calcThumbDimensions(src, size);
 
-        return downSizeFast(src, painter, thumbDim.width, thumbDim.height);
+        return downSizeFast(src, thumbDim.width, thumbDim.height, painter);
     }
 
     public static Dimension calcThumbDimensions(BufferedImage src, int size) {
@@ -578,7 +589,9 @@ public class ImageUtils {
         return new Dimension(thumbWidth, thumbHeight);
     }
 
-    public static BufferedImage createThumbnail(BufferedImage src, int maxWidth, int maxHeight, CheckerboardPainter painter) {
+    public static BufferedImage createThumbnail(BufferedImage src,
+                                                int maxWidth, int maxHeight,
+                                                CheckerboardPainter painter) {
         assert src != null;
 
         int imgWidth = src.getWidth();
@@ -590,10 +603,12 @@ public class ImageUtils {
         int thumbWidth = (int) (imgWidth * scaling);
         int thumbHeight = (int) (imgHeight * scaling);
 
-        return downSizeFast(src, painter, thumbWidth, thumbHeight);
+        return downSizeFast(src, thumbWidth, thumbHeight, painter);
     }
 
-    private static BufferedImage downSizeFast(BufferedImage src, CheckerboardPainter painter, int thumbWidth, int thumbHeight) {
+    private static BufferedImage downSizeFast(BufferedImage src,
+                                              int thumbWidth, int thumbHeight,
+                                              CheckerboardPainter painter) {
         BufferedImage thumb = createSysCompatibleImage(thumbWidth, thumbHeight);
         Graphics2D g = thumb.createGraphics();
 
@@ -698,7 +713,7 @@ public class ImageUtils {
         return output;
     }
 
-    public static int lerpAndPremultiplyColorWithAlpha(float t, int[] color1, int[] color2) {
+    public static int lerpAndPremultiply(float t, int[] color1, int[] color2) {
         int alpha = color1[0] + (int) (t * (color2[0] - color1[0]));
         int red;
         int green;
@@ -714,9 +729,9 @@ public class ImageUtils {
 
             if (alpha != 255) {  // premultiply
                 float f = alpha / 255.0f;
-                red *= f;
-                green *= f;
-                blue *= f;
+                red = (int) (red * f);
+                green = (int) (green * f);
+                blue = (int) (blue * f);
             }
         }
 
@@ -819,16 +834,25 @@ public class ImageUtils {
         return image;
     }
 
-    public static BufferedImage getGridImageOnTransparentBackground(Color color, int maxX, int maxY, int hWidth, int hSpacing, int vWidth, int vSpacing, boolean emptyIntersections) {
+    public static BufferedImage getGridImageOnTransparentBackground(Color color,
+                                                                    int maxX, int maxY,
+                                                                    int hWidth, int hSpacing,
+                                                                    int vWidth, int vSpacing,
+                                                                    boolean emptyIntersections) {
         // create transparent image
         BufferedImage img = new BufferedImage(maxX, maxY, TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
-        drawGrid(color, g, maxX, maxY, hWidth, hSpacing, vWidth, vSpacing, emptyIntersections);
+        drawGrid(color, g, maxX, maxY,
+                hWidth, hSpacing, vWidth, vSpacing, emptyIntersections);
         g.dispose();
         return img;
     }
 
-    public static void drawGrid(Color color, Graphics2D g, int maxX, int maxY, int hWidth, int hSpacing, int vWidth, int vSpacing, boolean emptyIntersections) {
+    public static void drawGrid(Color color, Graphics2D g,
+                                int maxX, int maxY,
+                                int hWidth, int hSpacing,
+                                int vWidth, int vSpacing,
+                                boolean emptyIntersections) {
         if (hWidth < 0) {
             throw new IllegalArgumentException("hWidth = " + hWidth);
         }
@@ -872,7 +896,8 @@ public class ImageUtils {
         }
     }
 
-    public static void drawBrickGrid(Color color, Graphics2D g, int size, int maxX, int maxY) {
+    public static void drawBrickGrid(Color color, Graphics2D g, int size,
+                                     int maxX, int maxY) {
         if (size < 1) {
             throw new IllegalArgumentException("size = " + size);
         }
@@ -899,15 +924,23 @@ public class ImageUtils {
         }
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, String filterName) {
-        return bumpMap(src, bumpMapSource, (float) ImageUtils.DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
+    public static BufferedImage bumpMap(BufferedImage src,
+                                        BufferedImage bumpMapSource,
+                                        String filterName) {
+        return bumpMap(src, bumpMapSource,
+                (float) ImageUtils.DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, float azimuth, float elevation, float bumpHeight, String filterName) {
+    public static BufferedImage bumpMap(BufferedImage src,
+                                        BufferedImage bumpMapSource,
+                                        float azimuth, float elevation, float bumpHeight,
+                                        String filterName) {
         return bumpMap(src, bumpMapSource, BlendComposite.HardLight, azimuth, elevation, bumpHeight, filterName);
     }
 
-    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, Composite composite, float azimuth, float elevation, float bumpHeight, String filterName) {
+    public static BufferedImage bumpMap(BufferedImage src, BufferedImage bumpMapSource, Composite composite,
+                                        float azimuth, float elevation, float bumpHeight,
+                                        String filterName) {
         // TODO optimize it so that the bumpMapSource can be smaller, and an offset is given - useful for text effects
         // tiling could be also an option
 
@@ -935,9 +968,9 @@ public class ImageUtils {
         int b = rgb & 0xFF;
 
         float f = a * (1.0f / 255.0f);
-        r *= f;
-        g *= f;
-        b *= f;
+        r = (int) (r * f);
+        g = (int) (g * f);
+        b = (int) (b * f);
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -952,9 +985,9 @@ public class ImageUtils {
         }
 
         float f = 255.0f / a;
-        r *= f;
-        g *= f;
-        b *= f;
+        r = (int) (r * f);
+        g = (int) (g * f);
+        b = (int) (b * f);
         if (r > 255) {
             r = 255;
         }
@@ -986,13 +1019,13 @@ public class ImageUtils {
 
 //        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.setStroke(zoomLevel.getOuterStroke());
+//        g.setStroke(zoomLevel.getOuterStroke());
 
         for (Shape shape : shapes) {
             g.draw(shape);
         }
         g.setColor(WHITE);
-        g.setStroke(zoomLevel.getInnerStroke());
+//        g.setStroke(zoomLevel.getInnerStroke());
 
         for (Shape shape : shapes) {
             g.draw(shape);
@@ -1004,7 +1037,7 @@ public class ImageUtils {
     public static void debugImageToText(BufferedImage img) {
         BufferedImageNode imgNode = new BufferedImageNode("debug", img);
         String s = imgNode.toDetailedString();
-        System.out.println(String.format("ImageUtils::debugImage: s = '%s'", s));
+        System.out.println("ImageUtils::debugImage: " + s);
     }
 
     public static void fillWithTransparentRectangle(Graphics2D g, int size) {
@@ -1025,9 +1058,9 @@ public class ImageUtils {
                 int rgb1 = img1.getRGB(x, y);
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
-                    String msg = String.format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                            x, y, ColorUtils.rgbIntToString(rgb1), ColorUtils.rgbIntToString(rgb2));
-                    System.out.println(String.format("ImageUtils::compareSmallImages: %s", msg));
+                    String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
+                            x, y, rgbIntToString(rgb1), rgbIntToString(rgb2));
+                    System.out.println("ImageUtils::compareSmallImages: " + msg);
                     return false;
                 }
             }
@@ -1043,7 +1076,7 @@ public class ImageUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);
-                String asString = ColorUtils.rgbIntToString(rgb);
+                String asString = rgbIntToString(rgb);
                 s.append(asString);
                 if (x == width - 1) {
                     s.append("\n");
@@ -1061,18 +1094,17 @@ public class ImageUtils {
 
     public static BufferedImage create1x1Image(int a, int r, int g, int b) {
         BufferedImage img = createSysCompatibleImage(1, 1);
-        img.setRGB(0, 0, ColorUtils.toPackedInt(a, r, g, b));
+        img.setRGB(0, 0, toPackedInt(a, r, g, b));
         return img;
     }
 
     public static void paintBlurredGlow(Shape shape, Graphics2D g, int numSteps, float effectWidth) {
         float brushAlpha = 1.0f / numSteps;
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, brushAlpha));
+        g.setComposite(AlphaComposite.getInstance(SRC_OVER, brushAlpha));
 //        g.setComposite(new AddComposite(brushAlpha));
         for (float i = 0; i < numSteps; i = i + 1.0f) {
             float brushWidth = i * effectWidth / numSteps;
-            g.setStroke(new BasicStroke(brushWidth,
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setStroke(new BasicStroke(brushWidth, CAP_ROUND, JOIN_ROUND));
             g.draw(shape);
         }
     }

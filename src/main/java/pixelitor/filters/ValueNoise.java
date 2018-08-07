@@ -77,7 +77,8 @@ public class ValueNoise extends ParametrizedFilter {
         int[] colorArray2 = {c2.getAlpha(), c2.getRed(), c2.getGreen(), c2.getBlue()};
 
         for (int i = 0, lookupTableLength = lookupTable.length; i < lookupTableLength; i++) {
-            lookupTable[i] = ImageUtils.lerpAndPremultiplyColorWithAlpha(i / 255.0f, colorArray1, colorArray2);
+            lookupTable[i] = ImageUtils.lerpAndPremultiply(
+                    i / 255.0f, colorArray1, colorArray2);
         }
 
         int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -93,7 +94,8 @@ public class ValueNoise extends ParametrizedFilter {
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(lookupTable, destData, width, frequency, persistence, amplitude, finalY);
+            Runnable lineTask = () -> calculateLine(lookupTable, destData,
+                    width, frequency, persistence, amplitude, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitForFutures(futures, pt);
@@ -103,11 +105,14 @@ public class ValueNoise extends ParametrizedFilter {
         return dest;
     }
 
-    private void calculateLine(int[] lookupTable, int[] destData, int width, float frequency, float persistence, float amplitude, int y) {
+    private void calculateLine(int[] lookupTable, int[] destData,
+                               int width, float frequency, float persistence,
+                               float amplitude, int y) {
         for (int x = 0; x < width; x++) {
             int octaves = details.getValue();
 
-            int noise = (int) (255 * generateValueNoise(x, y, octaves, frequency, persistence, amplitude));
+            int noise = (int) (255 * generateValueNoise(x, y,
+                    octaves, frequency, persistence, amplitude));
 
             int value = lookupTable[noise];
             destData[x + y * width] = value;
@@ -118,7 +123,11 @@ public class ValueNoise extends ParametrizedFilter {
      * Returns a float between 0 and 1
      */
     @SuppressWarnings("WeakerAccess")
-    public static float generateValueNoise(int x, int y, int octaves, float frequency, float persistence, float amplitude) {
+    public static float generateValueNoise(int x, int y,
+                                           int octaves,
+                                           float frequency,
+                                           float persistence,
+                                           float amplitude) {
         float total = 0.0f;
 
         for (int lcv = 0; lcv < octaves; lcv++) {
@@ -159,7 +168,7 @@ public class ValueNoise extends ParametrizedFilter {
         int n = x + y * 57;
         n = (n << 13) ^ n;
 
-        return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7fffffff) / 1073741824.0f);
+        return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7fffffff) / 1.07374182E+9f);
     }
 
     private static float interpolate(float x, float y, float a) {

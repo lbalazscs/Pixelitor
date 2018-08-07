@@ -39,7 +39,6 @@ public class Fade extends ParametrizedFilter {
     );
 //    private BlendingModeParam blendingModeParam = new BlendingModeParam(BlendingMode.values());
 
-
     public Fade() {
         super(ShowOriginal.YES);
 
@@ -74,7 +73,8 @@ public class Fade extends ParametrizedFilter {
         opacityParam.setValue(newOpacity);
     }
 
-    public static BufferedImage fade(BufferedImage before, BufferedImage after, BufferedImage dest, RangeParam opacity) {
+    public static BufferedImage fade(BufferedImage before, BufferedImage after,
+                                     BufferedImage dest, RangeParam opacity) {
         if (opacity.getValue() == 100) {
             return after;
         }

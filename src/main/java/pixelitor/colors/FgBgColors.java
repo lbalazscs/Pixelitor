@@ -39,23 +39,23 @@ public class FgBgColors {
         return selector;
     }
 
-    public static Color getFG() {
+    public static Color getFGColor() {
         return selector.getFgColor();
     }
 
-    public static Color getBG() {
+    public static Color getBGColor() {
         return selector.getBgColor();
     }
 
-    public static void setFG(Color c) {
+    public static void setFGColor(Color c) {
         selector.setFgColor(c, true);
     }
 
-    public static void setBG(Color c) {
+    public static void setBGColor(Color c) {
         selector.setBgColor(c, true);
     }
 
-    public static void randomize() {
+    public static void randomizeColors() {
         selector.randomize();
     }
 

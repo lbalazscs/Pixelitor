@@ -22,26 +22,49 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
+import static java.lang.String.format;
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
 
 /**
  * A SwingWorker for rendering the frames of a tween animation
  */
-class RenderFramesTask extends SwingWorker<Void, Void> {
+class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
     private final Drawable dr;
 
-    public RenderFramesTask(TweenAnimation tweenAnimation, Drawable dr) {
+    public RenderTweenFramesTask(TweenAnimation tweenAnimation, Drawable dr) {
         this.animation = tweenAnimation;
         this.dr = dr;
+    }
+
+    void onPropertyChange(PropertyChangeEvent evt,
+                          ProgressMonitor progressMonitor) {
+        if ("progress".equals(evt.getPropertyName())) {
+            int progress = (Integer) evt.getNewValue();
+
+            onProgress(progress, progressMonitor);
+        }
+    }
+
+    private void onProgress(int progress,
+                            ProgressMonitor progressMonitor) {
+        progressMonitor.setProgress(progress);
+        progressMonitor.setNote(format("Completed %d%%.\n", progress));
+        if (progressMonitor.isCanceled()) {
+            // Probably nothing bad happens if the current frame rendering is
+            // interrupted, but to be on the safe side, let the current frame
+            // finish by passing false to cancel
+            cancel(false);
+        }
     }
 
     @SuppressWarnings("ProhibitedExceptionDeclared")
@@ -49,14 +72,14 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
     protected Void doInBackground() {
         try {
             renderFrames();
-        } catch (Throwable e) {
-            SwingUtilities.invokeLater(() -> Messages.showException(e));
+        } catch (Exception e) {
+            Messages.showExceptionOnEDT(e);
         }
 
         return null;
     }
 
-    private void renderFrames() throws InvocationTargetException, InterruptedException {
+    private void renderFrames() {
         int numFrames = animation.getNumFrames();
         ParametrizedFilter filter = animation.getFilter();
 
@@ -65,7 +88,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
 
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
-        SwingUtilities.invokeAndWait(dr::tweenCalculatingStarted);
+        dr.tweenCalculatingStarted();
 
         int numTotalFrames = numFrames;
         boolean pingPong = animation.isPingPong() && numFrames > 2;
@@ -99,7 +122,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
                 BufferedImage image = renderFrame(filter, time, busyCursorParent);
 
                 // ...then write the file
-                SwingUtilities.invokeAndWait(() -> {
+                GUIUtils.invokeAndWait(() -> {
                     try {
                         // TODO ideally while writing out the frame,
                         // the rendering of the next frame should be
@@ -129,7 +152,10 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         });
     }
 
-    private BufferedImage renderFrame(ParametrizedFilter filter, double time, PixelitorWindow busyCursorParent) throws InvocationTargetException, InterruptedException {
+    private BufferedImage renderFrame(ParametrizedFilter filter,
+                                      double time,
+                                      PixelitorWindow busyCursorParent) {
+
         long runCountBefore = Filter.runCount;
 
         ParamSetState intermediateState = animation.tween(time);
@@ -138,7 +164,7 @@ class RenderFramesTask extends SwingWorker<Void, Void> {
         // all sorts of problems can happen
         // if filters run outside of EDT
         Runnable filterRunTask = () -> filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
-        SwingUtilities.invokeAndWait(filterRunTask);
+        GUIUtils.invokeAndWait(filterRunTask);
 
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;

@@ -30,8 +30,10 @@ import java.awt.Cursor;
 public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;
 
-    protected BlendingModeBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
-        super(activationKeyChar, name, iconFileName, toolMessage, cursor);
+    protected BlendingModeBrushTool(String name, char activationKeyChar,
+                                    String iconFileName, String toolMessage,
+                                    Cursor cursor) {
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor);
         drawStrategy = DrawStrategy.TMP_LAYER;
     }
 
@@ -60,7 +62,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         DebugNode node = super.getDebugNode();
 
         node.addFloat("Opacity", blendingModePanel.getOpacity());
-        node.addQuotedString("Blending Mode", blendingModePanel.getBlendingMode().toString());
+        node.addQuotedString("Blending Mode",
+                blendingModePanel.getBlendingMode().toString());
 
         return node;
     }

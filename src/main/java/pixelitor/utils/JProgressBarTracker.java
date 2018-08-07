@@ -21,6 +21,7 @@ import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.Container;
+import java.awt.EventQueue;
 
 /**
  * A {@link ProgressTracker} that tracks the progress by using an
@@ -47,7 +48,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     void startProgressTracking() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         topContainer.setCursor(Cursors.BUSY);
 
@@ -56,7 +57,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     void updateProgressTracking(int percent) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         progressPanel.setProgress(percent);
 

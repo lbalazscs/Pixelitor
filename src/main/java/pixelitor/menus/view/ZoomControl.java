@@ -25,8 +25,11 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
+import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
+import static pixelitor.menus.view.ZoomMenu.ACTUAL_PIXELS_TOOLTIP;
+import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
 
 /**
  * The zoom widget in the status bar
@@ -43,13 +46,12 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
     private final JButton actualPixelsButton;
 
     private boolean enabled = true;
+    private final ZoomLevel[] zoomLevels = ZoomLevel.values();
 
     private ZoomControl() {
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-        ZoomLevel[] values = ZoomLevel.values();
-
-        zoomSlider = new JSlider(0, values.length - 1);
+        zoomSlider = new JSlider(0, zoomLevels.length - 1);
 
         // Make sure that the status bar height does not increase because of this control.
         // Normally the JSlider vertical size in Nimbus would be 21.
@@ -61,12 +63,8 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-                ImageComponents.onActiveIC(ic -> {
-                    int sliderValue = zoomSlider.getValue();
-                    ZoomLevel zoomLevel = values[sliderValue];
-                    ic.setZoomAtCenter(zoomLevel);
-                    setNewZoomText(zoomLevel);
-                }));
+                ImageComponents.onActiveIC(
+                        this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  Zoom: ");
 
@@ -75,14 +73,24 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         add(zoomDisplay);
 
         Dimension buttonSize = new Dimension(60, PREFERRED_HEIGHT);
-        fitButton = addZoomButton(buttonSize, "Fit", FIT_SPACE_ACTION, ZoomMenu.FIT_SPACE_TOOLTIP);
-        actualPixelsButton = addZoomButton(buttonSize, "100%", ACTUAL_PIXELS_ACTION, ZoomMenu.ACTUAL_PIXELS_TOOLTIP);
+        fitButton = addZoomButton(buttonSize, "Fit",
+                FIT_SPACE_ACTION, FIT_SPACE_TOOLTIP);
+        actualPixelsButton = addZoomButton(buttonSize, "100%",
+                ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
         ImageComponents.addActiveImageChangeListener(this);
     }
 
-    private JButton addZoomButton(Dimension buttonSize, String text, Action action, String tooltip) {
+    private void zoomAccordingToTheSlider(ImageComponent ic) {
+        int sliderValue = zoomSlider.getValue();
+        ZoomLevel zoomLevel = zoomLevels[sliderValue];
+        ic.setZoomAtCenter(zoomLevel);
+        setNewZoomText(zoomLevel);
+    }
+
+    private JButton addZoomButton(Dimension buttonSize, String text,
+                                  Action action, String tooltip) {
         JButton b = new JButton(text) {
             boolean shiftLocation = true;
 
@@ -106,7 +114,7 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         b.setToolTipText(tooltip);
         b.setPreferredSize(buttonSize);
 
-        b.setBorder(BorderFactory.createEmptyBorder());
+        b.setBorder(createEmptyBorder());
 
         add(b);
         return b;

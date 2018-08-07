@@ -26,6 +26,8 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static java.lang.String.format;
+
 /**
  * An action which is typically added to menus
  */
@@ -52,7 +54,7 @@ public abstract class MenuAction extends NamedAction {
 
             @Override
             public String getErrorMessage(Layer layer) {
-                return String.format("The layer \"%s\" has no layer mask.", layer.getName());
+                return format("The layer \"%s\" has no layer mask.", layer.getName());
             }
         }, IS_TEXT_LAYER("Not a text layer") {
             @Override
@@ -62,7 +64,7 @@ public abstract class MenuAction extends NamedAction {
 
             @Override
             public String getErrorMessage(Layer layer) {
-                return String.format("The layer \"%s\" is not a text layer.", layer.getName());
+                return format("The layer \"%s\" is not a text layer.", layer.getName());
             }
         };
 

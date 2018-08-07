@@ -27,9 +27,10 @@ public class HandTool extends Tool {
     private final HandToolSupport handToolSupport = new HandToolSupport();
     
     HandTool() {
-        super('h', "Hand", "hand_tool_icon.png",
+        super("Hand", 'h', "hand_tool_icon.png",
                 "<b>drag</b> to move the view (if scrollbars are present).",
-                Cursors.HAND, false, false, ClipStrategy.CANVAS);
+                Cursors.HAND, false,
+                false, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -49,7 +50,5 @@ public class HandTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-
     }
-
 }

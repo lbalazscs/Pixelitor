@@ -22,7 +22,10 @@ import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
+
+import static javax.swing.BorderFactory.createEtchedBorder;
 
 /**
  * The status bar of the app.
@@ -44,7 +47,7 @@ public class StatusBar extends JPanel {
         add(leftPanel, BorderLayout.CENTER);
         add(ZoomControl.INSTANCE, BorderLayout.EAST);
 
-        setBorder(BorderFactory.createEtchedBorder());
+        setBorder(createEtchedBorder());
     }
 
     public void setMessage(String msg) {
@@ -58,7 +61,7 @@ public class StatusBar extends JPanel {
 
     public ProgressHandler startProgress(String msg, int max) {
         assert msg != null;
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         statusBarLabel.setText("");
 
@@ -79,23 +82,19 @@ public class StatusBar extends JPanel {
             this.leftPanel = leftPanel;
             progressBar = new JProgressBar(0, max);
             msgLabel = new JLabel(msg);
-//        progressBar.setStringPainted(true);
 
             // call these instead of revalidate/repaint
             // because we want to stay on the EDT
             leftPanel.validate();
-//            progressBar.setSize(progressBar.getPreferredSize());
-//            progressBar.setLocation(statusBarLabel.getPreferredSize().width + 7, -1);
             leftPanel.add(msgLabel);
             leftPanel.add(progressBar);
 
             leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
-
         }
 
         @Override
         public void updateProgress(int value) {
-            assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+            assert EventQueue.isDispatchThread() : "not EDT thread";
 
             progressBar.setValue(value);
             leftPanel.paintImmediately(progressBar.getBounds());
@@ -103,7 +102,7 @@ public class StatusBar extends JPanel {
 
         @Override
         public void stopProgress() {
-            assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+            assert EventQueue.isDispatchThread() : "not EDT thread";
 
             leftPanel.remove(progressBar);
             leftPanel.remove(msgLabel);

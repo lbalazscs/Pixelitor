@@ -20,21 +20,23 @@ package pixelitor.automate;
 import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.Directories;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.io.Dirs;
 import pixelitor.io.FileUtils;
 import pixelitor.io.OpenSave;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
-import static java.util.Objects.requireNonNull;
+import static java.lang.String.format;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
 
 /**
  * Utility class with static methods for batch processing
@@ -57,23 +59,17 @@ public class Automate {
      */
     public static void processEachFile(CompAction action,
                                        String dialogTitle) {
-        File lastOpenDir = requireNonNull(Directories.getLastOpenDir());
-        if (!lastOpenDir.exists()) {
-            throw new IllegalStateException("Last open dir " + lastOpenDir.getAbsolutePath() + " does not exist");
-        }
+        File openDir = Dirs.getLastOpen();
+        File saveDir = Dirs.getLastSave();
 
-        File lastSaveDir = requireNonNull(Directories.getLastSaveDir());
-        if (!lastSaveDir.exists()) {
-            throw new IllegalStateException("Last save dir " + lastSaveDir.getAbsolutePath() + " does not exist");
-        }
-
-        File[] inputFiles = FileUtils.listSupportedInputFilesIn(lastOpenDir);
+        File[] inputFiles = FileUtils.listSupportedInputFilesIn(openDir);
         if (inputFiles.length == 0) {
-            Messages.showInfo("No files", "There are no supported files in " + lastOpenDir.getAbsolutePath());
+            Messages.showInfo("No files", "There are no supported files in " + openDir.getAbsolutePath());
             return;
         }
 
-        ProgressMonitor progressMonitor = Utils.createPercentageProgressMonitor(dialogTitle);
+        ProgressMonitor progressMonitor = GUIUtils.createPercentageProgressMonitor(
+                dialogTitle);
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
@@ -87,18 +83,9 @@ public class Automate {
                     File file = inputFiles[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
                     progressMonitor.setNote("Processing " + file.getName());
-
                     System.out.println("Processing " + file.getName());
 
-                    OpenSave.openFileAsync(file)
-                            .thenApplyAsync(
-                                    comp -> Automate.process(comp, action),
-                                    EventQueue::invokeLater)
-                            .thenComposeAsync(
-                                    comp -> saveAndClose(comp, lastSaveDir),
-                                    EventQueue::invokeLater)
-                            .exceptionally(Messages::showExceptionOnEDT)
-                            .join();
+                    processFile(file, action, saveDir);
 
                     if (stopProcessing) {
                         break;
@@ -112,9 +99,21 @@ public class Automate {
         worker.execute();
     }
 
+    private static void processFile(File file, CompAction action, File saveDir) {
+        OpenSave.openFileAsync(file)
+                .thenApplyAsync(
+                        comp -> Automate.process(comp, action),
+                        EventQueue::invokeLater)
+                .thenComposeAsync(
+                        comp -> saveAndClose(comp, saveDir),
+                        EventQueue::invokeLater)
+                .exceptionally(Messages::showExceptionOnEDT)
+                .join();
+    }
+
     private static Composition process(Composition comp,
                                        CompAction action) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         System.out.println("Automate::processFile: CALLED, comp = " + comp.getName());
 
@@ -128,34 +127,17 @@ public class Automate {
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
-        OutputFormat outputFormat = OutputFormat.getLastUsed();
-        String inputFileName = comp.getFile().getName();
-        String outFileName = FileUtils.replaceExt(inputFileName, outputFormat.toString());
         ImageComponent ic = comp.getIC();
-        File outputFile = new File(lastSaveDir, outFileName);
+        OutputFormat outputFormat = OutputFormat.getLastUsed();
+        File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
         CompletableFuture<Void> retVal = null;
 
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
         SaveSettings saveSettings = new SaveSettings(outputFormat, outputFile);
-        if (outputFile.exists() && (!overwriteAll)) {
-            JOptionPane pane = new JOptionPane(String.format("File %s already exists. Overwrite?", outputFile),
-                    JOptionPane.WARNING_MESSAGE);
-
-            pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
-            pane.setInitialValue(OVERWRITE_NO);
-
-            JDialog dialog = pane.createDialog(PixelitorWindow.getInstance(), "Warning");
-            dialog.setVisible(true);
-            String value = (String) pane.getValue();
-            String answer;
-
-            if (value == null) { // cancelled
-                answer = OVERWRITE_CANCEL;
-            } else {
-                answer = value;
-            }
+        if (outputFile.exists() && !overwriteAll) {
+            String answer = showOverwriteWarningDialog(outputFile);
 
             switch (answer) {
                 case OVERWRITE_YES:
@@ -169,7 +151,7 @@ public class Automate {
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    OpenSave.warnAndCloseImage(ic);
+                    ImageComponents.warnAndClose(ic);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
             }
@@ -177,12 +159,39 @@ public class Automate {
             ic.paintImmediately(ic.getBounds());
             retVal = comp.saveAsync(saveSettings, false);
         }
-        OpenSave.warnAndCloseImage(ic);
+        ImageComponents.warnAndClose(ic);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;
         } else {
             return CompletableFuture.completedFuture(null);
         }
+    }
+
+    private static File calcOutputFile(Composition comp, File lastSaveDir, OutputFormat outputFormat) {
+        String inFileName = comp.getFile().getName();
+        String outFileName = FileUtils.replaceExt(inFileName, outputFormat.toString());
+        return new File(lastSaveDir, outFileName);
+    }
+
+    private static String showOverwriteWarningDialog(File outputFile) {
+        JOptionPane pane = new JOptionPane(
+                format("File %s already exists. Overwrite?", outputFile),
+                WARNING_MESSAGE);
+
+        pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
+        pane.setInitialValue(OVERWRITE_NO);
+
+        JDialog dialog = pane.createDialog(PixelitorWindow.getInstance(), "Warning");
+        dialog.setVisible(true);
+        String value = (String) pane.getValue();
+        String answer;
+
+        if (value == null) { // cancelled
+            answer = OVERWRITE_CANCEL;
+        } else {
+            answer = value;
+        }
+        return answer;
     }
 }

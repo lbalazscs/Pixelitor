@@ -65,7 +65,8 @@ public class CropTool extends DragTool {
 
     private final RangeParam maskOpacity = new RangeParam("Mask Opacity (%)", 0, 75, 100);
 
-    private Composite hideComposite = AlphaComposite.getInstance(SRC_OVER, maskOpacity.getValueAsPercentage());
+    private Composite hideComposite = AlphaComposite.getInstance(
+            SRC_OVER, maskOpacity.getValueAsPercentage());
 
     private final JButton cancelButton = new JButton("Cancel");
     private JButton cropButton;
@@ -74,16 +75,21 @@ public class CropTool extends DragTool {
     private final JLabel heightLabel = new JLabel("Height:");
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
-    private JComboBox guidelinesSelector;
+    private JComboBox guidesSelector;
 
     private JCheckBox allowGrowingCB;
 
     private final RectGuideline rectGuideline = new RectGuideline();
 
     public CropTool() {
-        super('c', "Crop", "crop_tool_icon.png",
-                "<b>drag</b> to start, hold down <b>SPACE</b> to move the entire region. After the handles appear: <b>Shift-drag</b> the handles to keep the aspect ratio. <b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
-                Cursors.DEFAULT, false, true, false, ClipStrategy.CUSTOM);
+        super("Crop", 'c', "crop_tool_icon.png",
+                "<b>drag</b> to start, " +
+                        "hold down <b>SPACE</b> to move the entire region. " +
+                        "After the handles appear: " +
+                        "<b>Shift-drag</b> the handles to keep the aspect ratio. " +
+                        "<b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
+                Cursors.DEFAULT, false,
+                true, false, ClipStrategy.CUSTOM);
         spaceDragStartPoint = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
@@ -108,29 +114,49 @@ public class CropTool extends DragTool {
      */
     @Override
     public void initSettingsPanel() {
-        SliderSpinner maskOpacitySpinner = new SliderSpinner(maskOpacity, WEST, false);
-        settingsPanel.add(maskOpacitySpinner);
+        addMaskOpacitySelector();
+        settingsPanel.addSeparator();
 
+        addGuidesSelector();
+        settingsPanel.addSeparator();
+
+        addCropSizeControls();
+        settingsPanel.addSeparator();
+
+        addAllowGrowingCheckBox();
+        settingsPanel.addSeparator();
+
+        addCropButton();
+        addCancelButton();
+
+        enableCropActions(false);
+    }
+
+    private void addMaskOpacitySelector() {
+        SliderSpinner maskOpacitySpinner = new SliderSpinner(
+                maskOpacity, WEST, false);
+        settingsPanel.add(maskOpacitySpinner);
+    }
+
+    private void addGuidesSelector() {
+        guidesSelector = new JComboBox<>(RectGuidelineType.values());
+        guidesSelector.setToolTipText("Composition guides");
+        guidesSelector.setMaximumRowCount(guidesSelector.getItemCount());
+//        guidesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
+        guidesSelector.addActionListener(e -> ImageComponents.repaintActive());
+        settingsPanel.addWithLabel("Guides:", guidesSelector);
+    }
+
+    private void addCropSizeControls() {
         ChangeListener whChangeListener = e -> {
             if (state == TRANSFORM && !cropBox.isAdjusting()) {
                 cropBox.setImSize(
-                    (int) wSizeSpinner.getValue(),
-                    (int) hSizeSpinner.getValue(),
-                    ImageComponents.getActiveIC()
+                        (int) wSizeSpinner.getValue(),
+                        (int) hSizeSpinner.getValue(),
+                        ImageComponents.getActiveIC()
                 );
             }
         };
-        settingsPanel.addSeparator();
-
-        // add crop guidelines type selector
-        guidelinesSelector = new JComboBox<>(RectGuidelineType.values());
-        guidelinesSelector.setToolTipText("Composition guides");
-        guidelinesSelector.setMaximumRowCount(guidelinesSelector.getItemCount());
-//        guidelinesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
-        guidelinesSelector.addActionListener(e -> ImageComponents.repaintActive());
-        settingsPanel.addWithLabel("Guides:", guidelinesSelector);
-
-        settingsPanel.addSeparator();
 
         // add crop width spinner
         wSizeSpinner = new JSpinner(new SpinnerNumberModel(
@@ -147,26 +173,23 @@ public class CropTool extends DragTool {
         hSizeSpinner.setToolTipText("Height of the cropped image (px)");
         settingsPanel.add(heightLabel);
         settingsPanel.add(hSizeSpinner);
+    }
 
-        settingsPanel.addSeparator();
-
-        // add allow growing check box
+    private void addAllowGrowingCheckBox() {
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
+    }
 
-        settingsPanel.addSeparator();
-
-        // add crop button
+    private void addCropButton() {
         cropButton = new JButton("Crop");
         cropButton.addActionListener(e -> executeCropCommand());
         settingsPanel.add(cropButton);
+    }
 
-        // add cancel button
+    private void addCancelButton() {
         cancelButton.addActionListener(e -> executeCancelCommand());
         settingsPanel.add(cancelButton);
-
-        enableCropActions(false);
     }
 
     @Override
@@ -193,7 +216,8 @@ public class CropTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        // in case of crop/image change the ended is set to true even if the tool is not ended
+        // in case of crop/image change the ended is set to
+        // true even if the tool is not ended.
         // if a new drag is started, then reset it
         ended = false;
 
@@ -317,7 +341,7 @@ public class CropTool extends DragTool {
             g2.setClip(componentSpaceVisiblePart);
 
             // draw guidelines
-            RectGuidelineType guidelineType = (RectGuidelineType) guidelinesSelector.getSelectedItem();
+            RectGuidelineType guidelineType = (RectGuidelineType) guidesSelector.getSelectedItem();
             rectGuideline.draw(cropRect.getCo(), guidelineType, g2);
 
             cropBox.paintHandles(g2);

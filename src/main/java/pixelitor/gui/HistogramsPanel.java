@@ -32,6 +32,7 @@ import java.util.Objects;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
+import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
  * The panel that shows the histograms
@@ -66,23 +67,27 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
         painters.add(green);
         painters.add(blue);
 
-        JComboBox<String> typeChooser = new JComboBox<>(new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
+        JComboBox<String> typeChooser = new JComboBox<>(
+                new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
         JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         northPanel.add(new JLabel("Type:"));
         northPanel.add(typeChooser);
         add(northPanel, BorderLayout.NORTH);
-        typeChooser.addActionListener(e -> {
-            String selected = (String) typeChooser.getSelectedItem();
-            boolean newValue = selected.equals(TYPE_LOGARITHMIC);
-            if (newValue != logarithmic) {
-                logarithmic = newValue;
-                ImageComponents.getActiveComp().ifPresent(this::updateFromCompIfShown);
-            }
-        });
+        typeChooser.addActionListener(e ->
+                typeChanged((String) typeChooser.getSelectedItem()));
 
-        setBorder(BorderFactory.createTitledBorder("Histograms"));
+        setBorder(createTitledBorder("Histograms"));
         JScrollPane scrollPane = new JScrollPane(painters);
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void typeChanged(String selected) {
+        boolean isLogarithmicNow = selected.equals(TYPE_LOGARITHMIC);
+        if (isLogarithmicNow != logarithmic) {
+            logarithmic = isLogarithmicNow;
+            ImageComponents.getActiveComp().ifPresent(
+                    this::updateFromCompIfShown);
+        }
     }
 
     public boolean isShown() {

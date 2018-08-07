@@ -36,7 +36,8 @@ public class DebugProgressTracker implements ProgressTracker {
     private long lastTime;
     private int calledUnits;
 
-    public DebugProgressTracker(String name, int expectedTotalUnits, ProgressTracker delegateTracker) {
+    public DebugProgressTracker(String name, int expectedTotalUnits,
+                                ProgressTracker delegateTracker) {
         this.name = name;
         this.expectedTotalUnits = expectedTotalUnits;
         this.delegateTracker = delegateTracker;
@@ -117,7 +118,8 @@ public class DebugProgressTracker implements ProgressTracker {
         private final int totalUnits;
         private final long duration;
 
-        public CallInfo(String method, long time, long lastTime, StackTraceElement ste, int totalUnits) {
+        public CallInfo(String method, long time, long lastTime,
+                        StackTraceElement ste, int totalUnits) {
             this.method = method;
             this.time = time;
             this.totalUnits = totalUnits;
@@ -132,11 +134,14 @@ public class DebugProgressTracker implements ProgressTracker {
             double durationPercentage = (duration * 100.0) / totalDuration;
 
             String whatWithPercent = String
-                    .format("%s (%.1f%%=>%.2fu)", method, durationPercentage, (durationPercentage / 100.0) * totalUnits);
+                    .format("%s (%.1f%%=>%.2fu)", method, durationPercentage,
+                            (durationPercentage / 100.0) * totalUnits);
 
             return String
-                    .format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)", timeSeconds, durationSeconds, whatWithPercent,
-                    ste.getClassName(), ste.getMethodName(), ste.getFileName(), ste.getLineNumber());
+                    .format("%.2fs (dur=%.2fs): %-21s at %s.%s(%s:%d)",
+                            timeSeconds, durationSeconds, whatWithPercent,
+                            ste.getClassName(), ste.getMethodName(),
+                            ste.getFileName(), ste.getLineNumber());
         }
     }
 }

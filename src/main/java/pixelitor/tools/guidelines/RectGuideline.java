@@ -23,15 +23,21 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.tools.guidelines.RectGuidelineType.DIAGONALS;
+import static pixelitor.tools.guidelines.RectGuidelineType.GOLDEN_SECTIONS;
+import static pixelitor.tools.guidelines.RectGuidelineType.RULE_OF_THIRDS;
 
 /**
  * Crop guidelines renderer
  */
 public class RectGuideline {
 
-    private final Stroke outerStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{5, 2}, 0);
+    private final Stroke outerStroke = new BasicStroke(1,
+            CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0);
     private final Stroke innerStroke = new BasicStroke(3);
     private Graphics2D g2;
 
@@ -42,11 +48,11 @@ public class RectGuideline {
         }
 
         this.g2 = g2;
-        if (type == RectGuidelineType.RULE_OF_THIRDS) {
+        if (type == RULE_OF_THIRDS) {
             drawRuleOfThirds(rect);
-        } else if (type == RectGuidelineType.GOLDEN_SECTIONS) {
+        } else if (type == GOLDEN_SECTIONS) {
             drawGoldenSections(rect);
-        } else if (type == RectGuidelineType.DIAGONALS) {
+        } else if (type == DIAGONALS) {
             drawDiagonals(rect);
         }
     }

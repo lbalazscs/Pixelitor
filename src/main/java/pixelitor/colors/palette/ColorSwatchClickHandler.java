@@ -17,11 +17,12 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.colors.FgBgColors;
-
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
+
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
 
 /**
  * Defines what happens when a color swatch button is clicked
@@ -34,9 +35,9 @@ public interface ColorSwatchClickHandler {
     ColorSwatchClickHandler STANDARD = (newColor, e) -> {
         boolean rightClick = SwingUtilities.isRightMouseButton(e);
         if (rightClick) {
-            FgBgColors.setBG(newColor);
+            setBGColor(newColor);
         } else {
-            FgBgColors.setFG(newColor);
+            setFGColor(newColor);
         }
     };
 

@@ -21,13 +21,17 @@ import pixelitor.Build;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
-import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
+
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static pixelitor.menus.help.AboutDialog.HOME_PAGE;
+import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
  * Checking for new Pixelitor versions
@@ -40,21 +44,24 @@ public class UpdatesCheck {
     public static void checkForUpdates() {
         try {
             Properties versionInfo = downloadVersionInfo();
-            String lastVersion = versionInfo.getProperty("last_version");
+            String lastVersion = versionInfo.getProperty("last_version").trim();
 
             if (Build.VERSION_NUMBER.equals(lastVersion)) {
-                String msg = String
-                        .format("You already have the latest version (%s) of Pixelitor installed", lastVersion);
+                String msg = format(
+                        "You already have the latest version (%s) of Pixelitor installed",
+                        lastVersion);
                 Messages.showInfo("Pixelitor is up to date", msg);
             } else {
-                String requiredJavaVersion = versionInfo.getProperty("required_java_version"); // like "7"
+                String requiredJavaVersion = versionInfo.getProperty(
+                        "required_java_version").trim(); // like "7"
                 newVersionAlert(lastVersion, requiredJavaVersion);
             }
         } catch (IOException e) {
             String msg = "Could not check for updates on the Pixelitor website.";
             String title = "Could not check for updates";
             Object[] options = {"See Details", "Close"};
-            if (Dialogs.showOKCancelDialog(msg, title, options, 1, JOptionPane.ERROR_MESSAGE)) {
+            if (Dialogs.showOKCancelDialog(msg, title,
+                    options, 1, ERROR_MESSAGE)) {
                 Messages.showException(e);
             }
         }
@@ -63,30 +70,32 @@ public class UpdatesCheck {
     private static void newVersionAlert(String lastVersion, String requiredJavaVersion) {
         // see http://stackoverflow.com/questions/2591083/getting-version-of-java-in-runtime
 
-        String msg = String.format("There is a newer version (%s) available.", lastVersion);
+        String msg = format("There is a newer version (%s) available.", lastVersion);
 
         if (needsJavaUpdate(requiredJavaVersion)) {
-            msg += String.format("\nAlso note that the newest Pixelitor requires Java %s" +
+            msg += format("\nAlso note that the newest Pixelitor requires Java %s" +
                             "\n(It is currently running on Java %d)",
-                    requiredJavaVersion, Utils.getCurrentMainJavaVersion());
+                    requiredJavaVersion, getJavaMainVersion());
         }
         String title = "Pixelitor is not up to date";
         Object[] options = {"Go to the Pixelitor homepage", "Close"};
         if (Dialogs.showOKCancelWarningDialog(msg, title, options, 0)) {
-            new OpenInBrowserAction(null, AboutDialog.HOME_PAGE).actionPerformed(null);
+            new OpenInBrowserAction(null, HOME_PAGE).actionPerformed(null);
         }
     }
 
     private static boolean needsJavaUpdate(String requiredJavaVersion) {
-        if (requiredJavaVersion.equals("7")) {
-            return false; // we always have at least Java 7, otherwise this code would not run
+        if (requiredJavaVersion.equals("8")) {
+            // we always have at least Java 8, otherwise this code would not run
+            return false;
         }
-        int currentMainJavaVersion = Utils.getCurrentMainJavaVersion();
-        return Integer.parseInt(requiredJavaVersion) > currentMainJavaVersion;
+        int currentMainJavaVersion = getJavaMainVersion();
+        return parseInt(requiredJavaVersion) > currentMainJavaVersion;
     }
 
     private static Properties downloadVersionInfo() throws IOException {
-        URL lastVersionURL = new URL("http://pixelitor.sourceforge.net/version_info.txt");
+        URL lastVersionURL = new URL(
+                "http://pixelitor.sourceforge.net/version_info.txt");
         URLConnection conn = lastVersionURL.openConnection();
         Properties properties = new Properties();
         properties.load(conn.getInputStream());

@@ -20,7 +20,6 @@ package pixelitor.tools;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.DialogBuilder;
@@ -49,6 +48,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
@@ -64,23 +64,28 @@ public abstract class AbstractBrushTool extends Tool {
     private JComboBox<BrushType> typeSelector;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius",
+            MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
-    private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
+    private final EnumComboBoxModel<Symmetry> symmetryModel
+            = new EnumComboBoxModel<>(Symmetry.class);
 
     protected Brush brush;
     private SymmetryBrush symmetryBrush;
     protected BrushAffectedArea brushAffectedArea;
 
-    private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
+    // for the first click it shouldn't draw lines even if it is a shift-click
+    private boolean firstMouseDown = true;
+
     private JButton brushSettingsButton;
 
     private JDialog settingsDialog;
 
     DrawStrategy drawStrategy;
 
-    AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
-        super(activationKeyChar, name, iconFileName, toolMessage,
+    AbstractBrushTool(String name, char activationKeyChar,
+                      String iconFileName, String toolMessage, Cursor cursor) {
+        super(name, activationKeyChar, iconFileName, toolMessage,
                 cursor, true, true, ClipStrategy.CANVAS);
         initBrushVariables();
     }
@@ -93,21 +98,22 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addTypeSelector() {
-        typeSelector = new JComboBox<>(BrushType.values());
+        BrushType[] brushTypes = BrushType.values();
+        typeSelector = new JComboBox<>(brushTypes);
         settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
-        typeSelector.addActionListener(e -> {
-            closeToolDialogs();
-
-            BrushType brushType = getBrushType();
-            symmetryBrush.brushTypeChanged(brushType, getRadius());
-
-            brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterSetting.EnabledReason.APP_LOGIC);
-
-            brushSettingsButton.setEnabled(brushType.hasSettings());
-        });
+        typeSelector.addActionListener(e -> brushTypeChanged());
 
         // make sure all values are visible without a scrollbar
-        typeSelector.setMaximumRowCount(BrushType.values().length);
+        typeSelector.setMaximumRowCount(brushTypes.length);
+    }
+
+    private void brushTypeChanged() {
+        closeToolDialogs();
+
+        BrushType brushType = getBrushType();
+        symmetryBrush.brushTypeChanged(brushType, getRadius());
+        brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), APP_LOGIC);
+        brushSettingsButton.setEnabled(brushType.hasSettings());
     }
 
     protected void addSizeSelector() {
@@ -265,9 +271,11 @@ public abstract class AbstractBrushTool extends Tool {
         brush.setRadius(newRadius);
 
 //        int desiredImgSize = 2 * newRadius;
-//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(desiredImgSize, desiredImgSize);
+//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(
+//              desiredImgSize, desiredImgSize);
 //
-//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(cursorSize.width, cursorSize.height);
+//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(
+//              cursorSize.width, cursorSize.height);
 //        Graphics2D g = cursorImage.createGraphics();
 //        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 //        g.setColor(Color.RED);
@@ -320,7 +328,8 @@ public abstract class AbstractBrushTool extends Tool {
         ImageComponent ic = dr.getComp().getIC();
         PPoint startingPoint = null;
 
-        PathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
+        PathIterator fpi = new FlatteningPathIterator(
+                shape.getPathIterator(null), 1.0);
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
@@ -364,7 +373,8 @@ public abstract class AbstractBrushTool extends Tool {
     protected int getRadius() {
         int value = brushRadiusParam.getValue();
 
-        // because of a JDK bug, sometimes it is possible to drag the slider to negative values
+        // because of a JDK bug (?), sometimes it is possible
+        // to drag the slider to negative values
         if (value < MIN_BRUSH_RADIUS) {
             value = MIN_BRUSH_RADIUS;
             brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
@@ -394,13 +404,17 @@ public abstract class AbstractBrushTool extends Tool {
 
     // TODO indicate the size of the brush
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas,
+                               ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();
 //            int y = userDrag.getCoEndY();
 //            double radius = getRadius() * ic.getViewScale();
 //            double diameter = 2 * radius;
-//            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
+//            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
+//                  diameter, diameter);
 //            g2.setStroke(stroke3);
 //            g2.setColor(Color.BLACK);
 //            g2.draw(shape);

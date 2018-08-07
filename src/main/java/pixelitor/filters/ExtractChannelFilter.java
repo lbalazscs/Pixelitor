@@ -145,7 +145,8 @@ public class ExtractChannelFilter extends Filter {
                     return 0; // for premultiplied images
                 }
                 tmpHSBArray = Color.RGBtoHSB(r, g, b, tmpHSBArray);
-                int newRGB = Color.HSBtoRGB(tmpHSBArray[0], DEFAULT_SATURATION, DEFAULT_BRIGHTNESS); // alpha is 255 here
+                int newRGB = Color.HSBtoRGB(tmpHSBArray[0],
+                        DEFAULT_SATURATION, DEFAULT_BRIGHTNESS); // alpha is 255
                 newRGB &= 0x00FFFFFF;  // set alpha to 0
                 return (a << 24) | newRGB; // add the real alpha
             }

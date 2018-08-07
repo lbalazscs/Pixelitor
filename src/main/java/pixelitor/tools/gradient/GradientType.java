@@ -20,16 +20,16 @@ import pixelitor.tools.gradient.paints.AngleGradientPaint;
 import pixelitor.tools.gradient.paints.DiamondGradientPaint;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
 import pixelitor.tools.util.ImDrag;
-import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.LinearGradientPaint;
-import java.awt.MultipleGradientPaint.ColorSpaceType;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+
+import static java.awt.MultipleGradientPaint.ColorSpaceType.SRGB;
 
 /**
  * The type of the gradient in the gradient tool
@@ -37,44 +37,46 @@ import java.awt.geom.Point2D;
 public enum GradientType {
     LINEAR("Linear") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
             Point2D.Double start = imDrag.getStartPoint();
             Point2D.Double end = imDrag.getEndPoint();
 
-            return new LinearGradientPaint(start, end, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
+            return new LinearGradientPaint(start, end, FRACTIONS,
+                    colors, cycle, SRGB, gradientTransform);
         }
     }, RADIAL("Radial") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
             float radius = (float) imDrag.getDistance();
             Point2D.Double center = imDrag.getStartPoint();
 
-            return new RadialGradientPaint(center, radius, center, ImageUtils.FRACTIONS_2_COLOR_UNIFORM, colors, cycleMethod, colorSpaceType, gradientTransform);
+            return new RadialGradientPaint(center, radius, center, FRACTIONS,
+                    colors, cycle, SRGB, gradientTransform);
         }
     }, ANGLE("Angle") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new AngleGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
+            return new AngleGradientPaint(imDrag, colors[0], colors[1], cycle);
         }
     }, SPIRAL_CW("CW Spiral") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new SpiralGradientPaint(true, imDrag, colors[0], colors[1], cycleMethod);
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
+            return new SpiralGradientPaint(true, imDrag, colors[0], colors[1], cycle);
         }
     }, SPIRAL_CCW("CCW Spiral") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new SpiralGradientPaint(false, imDrag, colors[0], colors[1], cycleMethod);
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
+            return new SpiralGradientPaint(false, imDrag, colors[0], colors[1], cycle);
         }
     }, DIAMOND("Diamond") {
         @Override
-        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod) {
-            return new DiamondGradientPaint(imDrag, colors[0], colors[1], cycleMethod);
+        public Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle) {
+            return new DiamondGradientPaint(imDrag, colors[0], colors[1], cycle);
         }
     };
 
+    private static final float[] FRACTIONS = {0.0f, 1.0f};
     private static final AffineTransform gradientTransform = new AffineTransform();
-    private static final ColorSpaceType colorSpaceType = ColorSpaceType.SRGB;
 
     private final String guiName;
 
@@ -82,7 +84,7 @@ public enum GradientType {
         this.guiName = guiName;
     }
 
-    public abstract Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycleMethod);
+    public abstract Paint createPaint(ImDrag imDrag, Color[] colors, CycleMethod cycle);
 
     @Override
     public String toString() {

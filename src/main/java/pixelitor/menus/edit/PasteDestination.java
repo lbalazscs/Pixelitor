@@ -19,9 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.Composition.LayerAdder;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
@@ -44,14 +42,7 @@ public enum PasteDestination {
         @Override
         void addImage(BufferedImage pastedImage) {
             Composition comp = ImageComponents.getActiveCompOrNull();
-            int width = comp.getCanvasImWidth();
-            int height = comp.getCanvasImHeight();
-            Layer newLayer = new ImageLayer(comp, pastedImage,
-                    "Pasted Layer", width, height);
-
-            new LayerAdder(comp)
-                    .withHistory("New Pasted Layer")
-                    .add(newLayer);
+            comp.addPastedImageAsNewLayer(pastedImage);
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;

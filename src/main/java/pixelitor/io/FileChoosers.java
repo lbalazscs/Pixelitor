@@ -24,13 +24,15 @@ import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressPanel;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.io.File;
+
+import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
  * Utility class with static methods related to file choosers
@@ -50,10 +52,12 @@ public class FileChoosers {
     private static final FileFilter[] OPEN_SAVE_FILTERS;
 
     static {
-        if (Utils.getCurrentMainJavaVersion() == 8) {
-            OPEN_SAVE_FILTERS = new FileFilter[]{bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
+        if (getJavaMainVersion() == 8) {
+            OPEN_SAVE_FILTERS = new FileFilter[]{
+                    bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
         } else {
-            OPEN_SAVE_FILTERS = new FileFilter[]{bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter, tiffFilter};
+            OPEN_SAVE_FILTERS = new FileFilter[]{
+                    bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter, tiffFilter};
         }
     }
 
@@ -61,11 +65,11 @@ public class FileChoosers {
     }
 
     private static void initOpenChooser() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         if (openChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
-            openChooser = new JFileChooser(Directories.getLastOpenDir());
+            openChooser = new JFileChooser(Dirs.getLastOpen());
             openChooser.setName("open");
 
             setDefaultOpenExtensions();
@@ -83,11 +87,11 @@ public class FileChoosers {
     }
 
     public static void initSaveChooser() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         if (saveChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
-            saveChooser = new SaveFileChooser(Directories.getLastSaveDir());
+            saveChooser = new SaveFileChooser(Dirs.getLastSave());
             saveChooser.setName("save");
             saveChooser.setDialogTitle("Save As");
 
@@ -106,7 +110,7 @@ public class FileChoosers {
             File selectedFile = openChooser.getSelectedFile();
             String fileName = selectedFile.getName();
 
-            Directories.setLastOpenDir(selectedFile.getParentFile());
+            Dirs.setLastOpen(selectedFile.getParentFile());
 
             if (FileUtils.hasSupportedInputExt(fileName)) {
                 OpenSave.openFileAsync(selectedFile);
@@ -129,7 +133,8 @@ public class FileChoosers {
         Messages.showError("Error", msg);
     }
 
-    public static boolean showSaveChooserAndSaveComp(Composition comp, SaveSettings settings) {
+    public static boolean showSaveChooserAndSaveComp(Composition comp,
+                                                     SaveSettings settings) {
         String defaultFileName = FileUtils.stripExtension(comp.getName());
         saveChooser.setSelectedFile(new File(defaultFileName));
 
@@ -150,11 +155,11 @@ public class FileChoosers {
             if (customSaveDir == null) {
                 // if the comp had no file, and lastSaveDir was used,
                 // then update lastSaveDir
-                Directories.setLastSaveDir(selectedFile.getParentFile());
+                Dirs.setLastSave(selectedFile.getParentFile());
             } else {
                 // if a custom save directory (the file dir) was used,
                 // reset the directory stored inside the chooser
-                saveChooser.setCurrentDirectory(Directories.getLastSaveDir());
+                saveChooser.setCurrentDirectory(Dirs.getLastSave());
             }
 
             String extension = saveChooser.getExtension();
@@ -223,7 +228,8 @@ public class FileChoosers {
         }
     }
 
-    private static void setupFilterToOnlyOneFormat(JFileChooser chooser, FileFilter chosenFilter) {
+    private static void setupFilterToOnlyOneFormat(JFileChooser chooser,
+                                                   FileFilter chosenFilter) {
         for (FileFilter filter : OPEN_SAVE_FILTERS) {
             if(filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
@@ -245,7 +251,7 @@ public class FileChoosers {
 
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveChooser.getSelectedFile();
-                Directories.setLastSaveDir(selectedFile.getParentFile());
+                Dirs.setLastSave(selectedFile.getParentFile());
             }
             if (status == JFileChooser.CANCEL_OPTION) {
                 // save cancelled

@@ -27,13 +27,14 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * An EffectConfiguratorPanel that has a width parameter.
- * Most effect configurator panels need this as the superclass
+ * Most effect configurator panels use this as the superclass
  */
 public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final RangeParam widthRange;
     private final SliderSpinner widthSlider;
 
-    public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor, int defaultWidth) {
+    public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected,
+                                         Color defaultColor, int defaultWidth) {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);

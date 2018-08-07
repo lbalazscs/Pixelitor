@@ -33,7 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
@@ -222,13 +221,14 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action[] actions = {switchRedGreen, switchRedBlue, switchGreenBlue, shiftRGBR, shiftRBGR, averageBW, luminosityBW, sepia};
+    private final Action[] actions = {switchRedGreen, switchRedBlue, switchGreenBlue,
+            shiftRGBR, shiftRBGR, averageBW, luminosityBW, sepia};
 
     public ChannelMixer() {
         super(ShowOriginal.YES);
 
         FilterAction normalize = new FilterAction("Normalize", normalizeAction,
-                "Makes sure that the sum of the channel contributions is 100%", null);
+                "Makes sure that the sum of the channel contributions is 100%");
         FilterParam[] params = {
                 redFromRed,
                 redFromGreen,
@@ -250,12 +250,14 @@ public class ChannelMixer extends ParametrizedFilter {
                 e -> {
                     paramSet.randomize();
                     normalizeAction.actionPerformed(null);
-                }, "Randomizes settings and normalizes the brightness", null);
+                }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
     }
 
-    private static void normalizeChannel(RangeParam fromRed, RangeParam fromGreen, RangeParam fromBlue) {
+    private static void normalizeChannel(RangeParam fromRed,
+                                         RangeParam fromGreen,
+                                         RangeParam fromBlue) {
         int red = fromRed.getValue();
         int green = fromGreen.getValue();
         int blue = fromBlue.getValue();
@@ -292,11 +294,8 @@ public class ChannelMixer extends ParametrizedFilter {
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
 
         if (packedInt) {
-            DataBufferInt srcDataBuffer = (DataBufferInt) src.getRaster().getDataBuffer();
-            int[] srcData = srcDataBuffer.getData();
-
-            DataBufferInt destDataBuffer = (DataBufferInt) dest.getRaster().getDataBuffer();
-            int[] destData = destDataBuffer.getData();
+            int[] srcData = ImageUtils.getPixelsAsArray(src);
+            int[] destData = ImageUtils.getPixelsAsArray(dest);
 
             int length = srcData.length;
             assert length == destData.length;

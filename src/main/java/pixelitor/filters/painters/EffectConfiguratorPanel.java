@@ -36,6 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
@@ -62,10 +63,11 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
 
-        setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
+        setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, false);
+        SliderSpinner opacitySlider = new SliderSpinner(
+                opacityRange, NONE, false);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
@@ -96,7 +98,9 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
     }
 
     private void showColorDialog() {
-        Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
+        Color selectedColor = ColorPicker.showDialog(
+                PixelitorWindow.getInstance(),
+                "Select Color", color, true);
         if (selectedColor != null) { // ok was pressed
             setColor(selectedColor, true);
         }

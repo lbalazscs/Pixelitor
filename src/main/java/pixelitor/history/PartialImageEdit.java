@@ -31,9 +31,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 
+import static java.lang.String.format;
+
 /**
  * Represents the changes made to a part of an image (for example brush strokes).
- * Only the affected pixels are saved in order to reduce overall memory usage
+ * Only the affected pixels are saved in order to reduce the memory usage
  */
 public class PartialImageEdit extends FadeableEdit {
     private final Rectangle saveRect;
@@ -42,7 +44,8 @@ public class PartialImageEdit extends FadeableEdit {
 
     private final Drawable dr;
 
-    public PartialImageEdit(String name, Composition comp, Drawable dr, BufferedImage image, Rectangle saveRect, boolean canRepeat) {
+    public PartialImageEdit(String name, Composition comp, Drawable dr,
+                            BufferedImage image, Rectangle saveRect, boolean canRepeat) {
         super(name, comp, dr);
 
         this.canRepeat = canRepeat;
@@ -105,8 +108,10 @@ public class PartialImageEdit extends FadeableEdit {
         int numBands = raster.getNumBands();
         int numDataElements = raster.getNumDataElements();
 
-        String msg = String.format("className = %s, rasterBounds = %s, dataType = %d, typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
-                className, rasterBounds, dataType, typeAsString, numBanks, numBands, numDataElements);
+        String msg = format("className = %s, rasterBounds = %s, dataType = %d, " +
+                        "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
+                className, rasterBounds, dataType,
+                typeAsString, numBanks, numBands, numDataElements);
 
         System.out.println("PartialImageEdit::debugRaster debugging raster: " + name + ": " + msg);
     }

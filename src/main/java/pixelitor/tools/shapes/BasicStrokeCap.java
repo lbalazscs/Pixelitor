@@ -47,7 +47,7 @@ public enum BasicStrokeCap {
         return guiName;
     }
 
-    public static EnumParam<BasicStrokeCap> asParam() {
-        return new EnumParam<>("Cap", BasicStrokeCap.class);
+    public static EnumParam<BasicStrokeCap> asParam(String name) {
+        return new EnumParam<>(name, BasicStrokeCap.class);
     }
 }

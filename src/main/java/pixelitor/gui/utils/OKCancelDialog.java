@@ -17,38 +17,39 @@
 
 package pixelitor.gui.utils;
 
-import com.bric.util.JVM;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+
+import static java.awt.BorderLayout.CENTER;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
+import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 
 /**
- * A dialog with OK and Cancel buttons at the bottom
+ * A dialog with OK and Cancel buttons at the bottom.
  *
- * This is kind of deprecated.
- * A better alternative for creating dialogs is {@link DialogBuilder}.
+ * Usually a better alternative for creating dialogs is {@link DialogBuilder}.
  */
 public abstract class OKCancelDialog extends JDialog {
-    protected JComponent formPanel;
+    private JComponent formPanel;
     private JLabel msgLabel;
     private JScrollPane scrollPane;
     private JButton okButton;
 
-    protected OKCancelDialog(JComponent form, Frame owner, String title, String okText, String cancelText) {
+    protected OKCancelDialog(JComponent form, Frame owner,
+                             String title, String okText, String cancelText) {
         super(owner, title, true);
         init(form, okText, cancelText, true);
     }
 
-    private void init(JComponent form, String okText, String cancelText, boolean addScrollBars) {
-        assert EventQueue.isDispatchThread();
+    private void init(JComponent form,
+                      String okText, String cancelText, boolean addScrollBars) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         this.formPanel = form;
 
@@ -62,15 +63,7 @@ public abstract class OKCancelDialog extends JDialog {
 
         GlobalKeyboardWatch.setDialogActive(true);
 
-        if (JVM.isMac) {
-            southPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-            southPanel.add(cancelButton);
-            southPanel.add(okButton);
-        } else {
-            southPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-            southPanel.add(okButton);
-            southPanel.add(cancelButton);
-        }
+        GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
 
         add(southPanel, BorderLayout.SOUTH);
 
@@ -91,26 +84,11 @@ public abstract class OKCancelDialog extends JDialog {
             }
         });
 
-        // cancel when window is closed
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                // the user pressed the X button...
-                cancelAction();
-            }
-        });
-
-        // cancel when ESC is pressed
-        ((JComponent) getContentPane()).registerKeyboardAction(e -> cancelAction(), KeyStroke
-                .getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        GUIUtils.setupCancelWhenTheDialogIsClosed(this, this::cancelAction);
+        GUIUtils.setupCancelWhenEscIsPressed(this, this::cancelAction);
 
         pack();
         GUIUtils.centerOnScreen(this);
-    }
-
-    public void setOKButtonEnabled(boolean b) {
-        okButton.setEnabled(b);
     }
 
     public void setOKButtonText(String text) {
@@ -138,7 +116,7 @@ public abstract class OKCancelDialog extends JDialog {
             remove(msgLabel);
         }
         msgLabel = new JLabel(msg);
-        msgLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        msgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
         add(msgLabel, BorderLayout.NORTH);
         revalidate();
     }
@@ -156,12 +134,13 @@ public abstract class OKCancelDialog extends JDialog {
 
     private void addForm(JComponent form, boolean addScrollBars) {
         if (addScrollBars) {
-            scrollPane = new JScrollPane(form, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            add(scrollPane, BorderLayout.CENTER);
+            scrollPane = new JScrollPane(form,
+                    VERTICAL_SCROLLBAR_AS_NEEDED,
+                    HORIZONTAL_SCROLLBAR_NEVER);
+            add(scrollPane, CENTER);
         } else {
-            add(form, BorderLayout.CENTER);
+            add(form, CENTER);
             scrollPane = null; // so that we later know that we have to remove from the root
         }
     }
-
 }

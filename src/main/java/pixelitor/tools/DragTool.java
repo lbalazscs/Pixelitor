@@ -38,8 +38,14 @@ public abstract class DragTool extends Tool {
     // movement when Shift is pressed if this is set to true
     private final boolean constrainIfShiftDown;
 
-    protected DragTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor, boolean allowOnlyDrawables, boolean handToolForwarding, boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
-        super(activationKeyChar, name, iconFileName, toolMessage, cursor, allowOnlyDrawables, handToolForwarding, clipStrategy);
+    protected DragTool(String name, char activationKeyChar, String iconFileName,
+                       String toolMessage, Cursor cursor,
+                       boolean allowOnlyDrawables, boolean handToolForwarding,
+                       boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
+
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor,
+                allowOnlyDrawables, handToolForwarding, clipStrategy);
+
         this.constrainIfShiftDown = constrainIfShiftDown;
     }
 
@@ -88,5 +94,4 @@ public abstract class DragTool extends Tool {
     public abstract void ongoingDrag(PMouseEvent e);
 
     public abstract void dragFinished(PMouseEvent e);
-
 }

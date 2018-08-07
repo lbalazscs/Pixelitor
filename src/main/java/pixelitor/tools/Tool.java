@@ -60,7 +60,7 @@ public abstract class Tool implements KeyListener {
 
     final ToolHandlerChain handlerChain;
 
-    protected Tool(char activationKeyChar, String name, String iconFileName,
+    protected Tool(String name, char activationKeyChar, String iconFileName,
                    String toolMessage, Cursor cursor,
                    boolean allowOnlyDrawables, boolean handToolForwarding,
                    ClipStrategy clipStrategy) {
@@ -71,7 +71,8 @@ public abstract class Tool implements KeyListener {
         this.cursor = cursor;
         this.clipStrategy = clipStrategy;
 
-        handlerChain = new ToolHandlerChain(this, cursor, allowOnlyDrawables, handToolForwarding);
+        handlerChain = new ToolHandlerChain(this, cursor,
+                allowOnlyDrawables, handToolForwarding);
     }
 
     public boolean doColorPickerForwarding() {
@@ -137,7 +138,10 @@ public abstract class Tool implements KeyListener {
      * A possibility to paint temporarily something on the
      * {@link ImageComponent} after all the layers have been painted.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas,
+                               ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
         // empty instead of abstract for the convenience of subclasses
     }
 

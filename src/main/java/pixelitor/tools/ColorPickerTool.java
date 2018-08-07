@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
@@ -29,6 +28,11 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.lang.String.format;
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
+
 /**
  * The color picker tool
  */
@@ -37,9 +41,11 @@ public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
-        super('i', "Color Picker", "color_picker_tool_icon.png",
-                "<b>click</b> to pick the foreground color, <b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
-                Cursors.CROSSHAIR, false, true, ClipStrategy.CANVAS);
+        super("Color Picker", 'i', "color_picker_tool_icon.png",
+                "<b>click</b> to pick the foreground color, " +
+                        "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
+                Cursors.CROSSHAIR, false,
+                true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -61,7 +67,6 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-
     }
 
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
@@ -78,7 +83,7 @@ public class ColorPickerTool extends Tool {
 
             Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             img = dr.getImage();
-            isGray = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
+            isGray = img.getType() == TYPE_BYTE_GRAY;
 
             x -= dr.getTX();
             y -= dr.getTY();
@@ -95,9 +100,9 @@ public class ColorPickerTool extends Tool {
 
             Color sampledColor = new Color(rgb);
             if (selectBackground) {
-                FgBgColors.setBG(sampledColor);
+                setBGColor(sampledColor);
             } else {
-                FgBgColors.setFG(sampledColor);
+                setFGColor(sampledColor);
             }
         }
     }
@@ -114,7 +119,9 @@ public class ColorPickerTool extends Tool {
         } else {
             float[] hsbValues = Color.RGBtoHSB(r, g, b, null);
 
-            msg += String.format(", alpha = %d, red = %d, green = %d, blue = %d, hue = %.2f, saturation = %.2f, brightness = %.2f", a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
+            msg += format(", alpha = %d, red = %d, green = %d, blue = %d, " +
+                    "hue = %.2f, saturation = %.2f, brightness = %.2f",
+                    a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
         Messages.showInStatusBar(msg);

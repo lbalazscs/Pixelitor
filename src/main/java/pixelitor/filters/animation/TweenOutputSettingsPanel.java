@@ -24,7 +24,7 @@ import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
-import pixelitor.io.Directories;
+import pixelitor.io.Dirs;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -36,13 +36,18 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 
+import static java.lang.Double.parseDouble;
+import static java.lang.String.format;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
 
 /**
  * The settings for the tweening animation output
  */
-public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFieldValidator {
+public class TweenOutputSettingsPanel extends ValidatedPanel
+        implements TextFieldValidator {
+
     private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
     private int nrFrames;
@@ -51,7 +56,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
     private JComboBox<Interpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
-    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(Directories.getLastSaveDir().getAbsolutePath());
+    private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(
+            Dirs.getLastSave().getAbsolutePath());
     private JTextField fileNameTF;
 
     public TweenOutputSettingsPanel() {
@@ -75,7 +81,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
 
     private void addOutputTypeSelector(GridBagHelper gbh) {
         //noinspection unchecked
-        EnumComboBoxModel<TweenOutputType> model = new EnumComboBoxModel(TweenOutputType.class);
+        EnumComboBoxModel<TweenOutputType> model =
+                new EnumComboBoxModel(TweenOutputType.class);
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
@@ -83,7 +90,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
         gbh.addLabelWithControl("Output Type:", outputTypeCB);
     }
 
-    private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
+    private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI,
+                                            GridBagHelper gbh) {
         gbh.addLabelWithControl("Number of Seconds:",
                 new JLayer<>(numSecondsTF, tfLayerUI));
 
@@ -104,7 +112,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
     }
 
     private void addInterpolationSelector(GridBagHelper gbh) {
-        EnumComboBoxModel<Interpolation> ipCBM = new EnumComboBoxModel<>(Interpolation.class);
+        EnumComboBoxModel<Interpolation> ipCBM
+                = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
         gbh.addLabelWithControl("Interpolation:", ipCB);
@@ -118,7 +127,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
 
     private void addFileSelector(LayerUI<JTextField> tfLayerUI, GridBagHelper gbh) {
         JPanel filePanel = new JPanel(new FlowLayout());
-        filePanel.setBorder(BorderFactory.createTitledBorder("Output File/Folder"));
+        filePanel.setBorder(createTitledBorder("Output File/Folder"));
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
         filePanel.add(browseFilesSupport.getBrowseButton());
@@ -153,15 +162,16 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
     }
 
     private String calculateNrFramesText() {
-        double nrSeconds = Double.parseDouble(numSecondsTF.getText().trim());
-        fps = Double.parseDouble(fpsTF.getText().trim());
+        double nrSeconds = parseDouble(numSecondsTF.getText().trim());
+        fps = parseDouble(fpsTF.getText().trim());
         nrFrames = (int) (nrSeconds * fps);
         String labelText = String.valueOf(nrFrames);
 
         if (pingPongCB.isSelected()) {
             int totalFrames = 2 * nrFrames - 2;
             double totalSeconds = totalFrames / fps;
-            labelText += String.format(" (with PP: %d frames, %.2f seconds)", totalFrames, totalSeconds);
+            labelText += format(" (with PP: %d frames, %.2f seconds)",
+                    totalFrames, totalSeconds);
         }
         return labelText;
     }
@@ -205,9 +215,9 @@ public class TweenOutputSettingsPanel extends ValidatedPanel implements TextFiel
         animation.setPingPong(pingPongCB.isSelected());
 
         if (output.isDirectory()) {
-            Directories.setLastSaveDir(output);
+            Dirs.setLastSaveIfValid(output);
         } else {
-            Directories.setLastSaveDir(output.getParentFile());
+            Dirs.setLastSaveIfValid(output.getParentFile());
         }
     }
 }

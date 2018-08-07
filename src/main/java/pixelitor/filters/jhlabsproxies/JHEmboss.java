@@ -36,10 +36,14 @@ public class JHEmboss extends ParametrizedFilter {
 
     private static final double INTUITIVE_RADIANS_30 = -0.54;
 
-    private final AngleParam lightDirection = new AngleParam("Light Direction (Azimuth) - Degrees", 0);
-    private final ElevationAngleParam lightElevation = new ElevationAngleParam("Light Elevation Angle - Degrees", INTUITIVE_RADIANS_30);
-    private final RangeParam bumpHeight = new RangeParam("Depth", 2, 100, 500);
-    private final BooleanParam texture = new BooleanParam("Texture (Multiply with the Source Image)", false);
+    private final AngleParam lightDirection = new AngleParam(
+            "Light Direction (Azimuth) - Degrees", 0);
+    private final ElevationAngleParam lightElevation = new ElevationAngleParam(
+            "Light Elevation Angle - Degrees", INTUITIVE_RADIANS_30);
+    private final RangeParam bumpHeight = new RangeParam(
+            "Depth", 2, 100, 500);
+    private final BooleanParam texture = new BooleanParam(
+            "Texture (Multiply with the Source Image)", false);
 
     private EmbossFilter filter;
 

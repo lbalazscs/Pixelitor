@@ -34,7 +34,8 @@ public class ReseedNoiseFilterAction extends FilterAction {
     }
 
     public ReseedNoiseFilterAction(String name) {
-        this(name, "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
+        this(name, "<html>Reinitialize the randomness." +
+                "<br>Has effect only if some randomness is enabled in the settings.");
     }
 
     public ReseedNoiseFilterAction(String name, String toolTip) {
@@ -54,7 +55,8 @@ public class ReseedNoiseFilterAction extends FilterAction {
         this(name, "Reinitialize the randomness", actionListener);
     }
 
-    public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
+    public ReseedNoiseFilterAction(String name, String toolTipText,
+                                   ActionListener actionListener) {
         super(name, actionListener, Icons.getTwoDicesIcon(),
                 toolTipText, "reseed");
         setIgnoreFinalAnimationSettingMode(false);

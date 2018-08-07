@@ -21,6 +21,7 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.io.IOThread;
@@ -43,15 +44,17 @@ import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static javax.swing.JOptionPane.CANCEL_OPTION;
+import static javax.swing.JOptionPane.NO_OPTION;
+import static javax.swing.JOptionPane.YES_OPTION;
 
 /**
  * Static methods for maintaining the list of open ImageComponent objects
@@ -59,7 +62,8 @@ import static java.util.stream.Collectors.joining;
 public class ImageComponents {
     private static final List<ImageComponent> icList = new ArrayList<>();
     private static ImageComponent activeIC;
-    private static final Collection<ActiveImageChangeListener> activeICChangeListeners = new ArrayList<>();
+    private static final List<ActiveImageChangeListener> activeICChangeListeners
+            = new ArrayList<>();
 
     private ImageComponents() {
     }
@@ -270,7 +274,7 @@ public class ImageComponents {
         Composition comp = activeIC.getComp();
         File file = comp.getFile();
         if (file == null) {
-            String msg = String.format(
+            String msg = format(
                     "The image '%s' cannot be reloaded because it was not yet saved.",
                     comp.getName());
             Messages.showError("No file", msg);
@@ -278,7 +282,7 @@ public class ImageComponents {
         }
 
         if (!file.exists()) {
-            String msg = String.format(
+            String msg = format(
                     "The image '%s' cannot be reloaded because the file\n" +
                             "%s\n" +
                             "does not exist anymore.",
@@ -291,21 +295,27 @@ public class ImageComponents {
             return;
         }
 
-        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(file);
-        cf.thenAcceptAsync(newComp -> {
-            PixelitorEdit edit = activeIC.replaceComp(newComp, true,
-                    MaskViewMode.NORMAL);
+        OpenSave.loadCompFromFileAsync(file)
+                .thenAcceptAsync(ImageComponents::replaceJustReloadedComp,
+                        EventQueue::invokeLater)
+                .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
+                .exceptionally(Messages::showExceptionOnEDT);
+    }
 
-            assert edit != null;
-            History.addEdit(edit);
+    private static void replaceJustReloadedComp(Composition newComp) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
-            String msg = String.format(
-                    "The image '%s' was reloaded from the file %s.",
-                    comp.getName(), file.getAbsolutePath());
-            Messages.showInStatusBar(msg);
-            ImageComponents.repaintActive();
-        }, EventQueue::invokeLater)
-                .whenComplete((v, e) -> IOThread.processingFinishedFor(file));
+        PixelitorEdit edit = activeIC.replaceComp(newComp,
+                MaskViewMode.NORMAL, true);
+
+        assert edit != null;
+        History.addEdit(edit);
+
+        String msg = format(
+                "The image '%s' was reloaded from the file %s.",
+                newComp.getName(), newComp.getFile().getAbsolutePath());
+        Messages.showInStatusBar(msg);
+        activeIC.repaint();
     }
 
     public static void duplicateActive() {
@@ -412,7 +422,7 @@ public class ImageComponents {
             return;
         }
 
-        throw new AssertionError(String.format(
+        throw new AssertionError(format(
                 "Expected %d images, found %d (%s)",
                 expected, numOpenImages, getOpenImageNamesAsString()));
     }
@@ -422,7 +432,7 @@ public class ImageComponents {
         if (numOpenImages >= expected) {
             return;
         }
-        throw new AssertionError(String.format(
+        throw new AssertionError(format(
                 "Expected at least %d images, found %d (%s)",
                 expected, numOpenImages, getOpenImageNamesAsString()));
     }
@@ -431,5 +441,43 @@ public class ImageComponents {
         return icList.stream()
                 .map(ImageComponent::getName)
                 .collect(joining(", ", "[", "]"));
+    }
+
+    public static void warnAndCloseActive() {
+        warnAndClose(activeIC);
+    }
+
+    public static void warnAndClose(ImageComponent ic) {
+        try {
+            Composition comp = ic.getComp();
+            if (comp.isDirty()) {
+                int answer = Dialogs.showCloseWarningDialog(comp.getName());
+
+                if (answer == YES_OPTION) { // save
+                    boolean fileSaved = OpenSave.save(comp, false);
+                    if (fileSaved) {
+                        ic.close();
+                    }
+                } else if (answer == NO_OPTION) { // don't save
+                    ic.close();
+                } else if (answer == CANCEL_OPTION) { // cancel
+                    // do nothing
+                } else { // dialog closed by pressing X
+                    // do nothing
+                }
+            } else {
+                ic.close();
+            }
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
+    }
+
+    public static void warnAndCloseAll() {
+        // make a copy because items will be removed from the original while iterating
+        Iterable<ImageComponent> tmpCopy = new ArrayList<>(icList);
+        for (ImageComponent ic : tmpCopy) {
+            warnAndClose(ic);
+        }
     }
 }

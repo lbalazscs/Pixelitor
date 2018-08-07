@@ -43,25 +43,27 @@ public enum OutputFormat {
         }
     };
 
-    private final boolean layered;
-    private final boolean hasAlpha;
+    private final boolean supportsMultipleLayers;
+    private final boolean supportsAlpha;
 
     OutputFormat(boolean layered, boolean hasAlpha) {
-        this.layered = layered;
-        this.hasAlpha = hasAlpha;
+        this.supportsMultipleLayers = layered;
+        this.supportsAlpha = hasAlpha;
     }
 
     public Runnable getSaveTask(Composition comp, SaveSettings settings) {
-        assert !layered; // overwritten for layered formats
+        assert !supportsMultipleLayers; // overwritten for multi-layered formats
 
-        return () -> {
-            BufferedImage img = comp.getCompositeImage();
-            if (!hasAlpha) {
-                // no alpha support, convert first to RGB
-                img = ImageUtils.convertToRGB(img, false);
-            }
-            OpenSave.saveImageToFile(img, settings);
-        };
+        return () -> saveSingleLayered(comp, settings);
+    }
+
+    private void saveSingleLayered(Composition comp, SaveSettings settings) {
+        BufferedImage img = comp.getCompositeImage();
+        if (!supportsAlpha) {
+            // no alpha support, convert first to RGB
+            img = ImageUtils.convertToRGB(img, false);
+        }
+        OpenSave.saveImageToFile(img, settings);
     }
 
     @Override
@@ -99,7 +101,7 @@ public enum OutputFormat {
         }
     }
 
-    private static OutputFormat lastOutputFormat = JPG;
+    private static volatile OutputFormat lastOutputFormat = JPG;
 
     public static OutputFormat getLastUsed() {
         return lastOutputFormat;

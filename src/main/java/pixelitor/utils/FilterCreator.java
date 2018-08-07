@@ -29,6 +29,9 @@ import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
+
 /**
  * Creates a skeleton of source code for a filter
  * (used only for development)
@@ -141,17 +144,20 @@ public class FilterCreator extends JPanel {
                 .title("Filter Creator")
                 .okText("Show Source")
                 .validator(d -> {
-                    String s = filterCreator.createFilterSource();
-                    JTextArea ta = new JTextArea(s);
-                    JScrollPane sp = new JScrollPane(ta);
-                    sp.setPreferredSize(new Dimension(sp.getPreferredSize().width + 50, 500));
-                    GUIUtils.showClipboardTextDialog(sp, "Source", s);
+                    showFilterSource(filterCreator.createSource());
 
                     // the OK button should never close it,
                     // and the okAction will never be executed
                     return false;
                 })
                 .show();
+    }
+
+    private static void showFilterSource(String sourceCode) {
+        JTextArea ta = new JTextArea(sourceCode);
+        JScrollPane sp = new JScrollPane(ta);
+        sp.setPreferredSize(new Dimension(sp.getPreferredSize().width + 50, 500));
+        GUIUtils.showCopyTextToClipboardDialog(sp, sourceCode, "Source");
     }
 
     public static class ParamPanel extends JPanel {
@@ -179,9 +185,9 @@ public class FilterCreator extends JPanel {
         private ParameterInfo getParameterInfo() {
             String name = nameTextField.getText().trim();
             if (!name.isEmpty()) {
-                int min = Integer.parseInt(minTextField.getText());
-                int max = Integer.parseInt(maxTextField.getText());
-                int defaultValue = Integer.parseInt(defaultTextField.getText());
+                int min = parseInt(minTextField.getText().trim());
+                int max = parseInt(maxTextField.getText().trim());
+                int defaultValue = parseInt(defaultTextField.getText().trim());
                 return new ParameterInfo(name, min, max, defaultValue);
             } else {
                 return null;
@@ -189,7 +195,7 @@ public class FilterCreator extends JPanel {
         }
     }
 
-    private String createFilterSource() {
+    private String createSource() {
         boolean parametrizedGui = parametrizedGuiCB.isSelected();
         boolean gui = guiCB.isSelected();
         boolean copySrc = copySrcCB.isSelected();
@@ -207,7 +213,9 @@ public class FilterCreator extends JPanel {
 
         ParameterInfo[] params = getParameterInfoArray();
 
-        return getCode(new FilterDescription(parametrizedGui, gui, copySrc, name, pixelLoop, proxy, proxyName, angleParam, center, edge, color, gradient, interpolation, params));
+        return getCode(new FilterDescription(parametrizedGui, gui,
+                copySrc, name, pixelLoop, proxy, proxyName, angleParam, center,
+                edge, color, gradient, interpolation, params));
     }
 
     private static String getCode(FilterDescription desc) {
@@ -217,7 +225,8 @@ public class FilterCreator extends JPanel {
 
         retVal += addSuperClass(desc);
 
-        retVal += String.format("    public static final String NAME = \"%s\";\n\n", desc.getName());
+        retVal += format("    public static final String NAME = \"%s\";\n\n",
+                desc.getName());
 
         if (desc.isGui() && desc.isParametrizedGui()) {
             retVal += addParamsDeclaration(desc);
@@ -355,7 +364,8 @@ public class FilterCreator extends JPanel {
     private static String addParamSetToConstructor(FilterDescription desc) {
         String retVal = "";
         if (desc.getParams().length == 1) {
-            retVal += "        setParamSet(new ParamSet(" + desc.getParams()[0].getVariableName() + "));\n";
+            retVal += "        setParamSet(new ParamSet("
+                    + desc.getParams()[0].getVariableName() + "));\n";
         } else {
             retVal += "        setParamSet(new ParamSet(\n";
             for (int i = 0; i < desc.getParams().length; i++) {
@@ -383,7 +393,7 @@ public class FilterCreator extends JPanel {
         String retVal = "";
         for (ParameterInfo param : desc.getParams()) {
 
-            String paramLine = String.format(
+            String paramLine = format(
                     "    private final RangeParam %s = new RangeParam(\"%s\", %d, %d, %d);",
                     param.getVariableName(), param.getName(),
                     param.getMin(), param.getDefaultValue(), param.getMax());
@@ -431,7 +441,12 @@ public class FilterCreator extends JPanel {
         private final boolean interpolation;
         private final ParameterInfo[] params;
 
-        private FilterDescription(boolean parametrizedGui, boolean gui, boolean copySrc, String name, boolean pixelLoop, boolean proxy, String proxyName, boolean angleParam, boolean center, boolean edge, boolean color, boolean gradient, boolean interpolation, ParameterInfo[] params) {
+        private FilterDescription(boolean parametrizedGui, boolean gui,
+                                  boolean copySrc, String name, boolean pixelLoop,
+                                  boolean proxy, String proxyName,
+                                  boolean angleParam, boolean center, boolean edge,
+                                  boolean color, boolean gradient, boolean interpolation,
+                                  ParameterInfo[] params) {
             this.parametrizedGui = parametrizedGui;
             this.gui = gui;
             this.copySrc = copySrc;

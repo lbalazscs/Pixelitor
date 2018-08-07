@@ -17,26 +17,18 @@
 
 package pixelitor.gui.utils;
 
-import com.bric.util.JVM;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.awt.BorderLayout.SOUTH;
-import static java.awt.FlowLayout.CENTER;
-import static java.awt.FlowLayout.RIGHT;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
  * A fluent interface for building JDialogs
@@ -49,7 +41,7 @@ public class DialogBuilder {
     private String cancelText;
     private boolean addOKButton = true;
     private boolean addCancelButton = true;
-    private JComponent form;
+    private JComponent content;
     private boolean addScrollBars;
     private JFrame frameOwner;
     private JDialog dialogOwner;
@@ -120,7 +112,7 @@ public class DialogBuilder {
      * Uses the given component as the contents of the dialog.
      */
     public DialogBuilder content(JComponent form) {
-        this.form = form;
+        this.content = form;
         return this;
     }
 
@@ -129,7 +121,7 @@ public class DialogBuilder {
      * sets up validation based on it.
      */
     public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
-        this.form = validatedPanel;
+        this.content = validatedPanel;
         return validator(d -> {
             ValidationResult validationResult = validatedPanel.checkValidity();
             if (validationResult.isOK()) {
@@ -211,10 +203,35 @@ public class DialogBuilder {
      * Builds the dialog without showing it.
      */
     public JDialog build() {
-        assert form != null : "no form";
+        assert content != null : "no content";
 
         setupDefaults();
 
+        JDialog d = createDialog();
+
+        d.setTitle(title);
+        d.setModal(modal);
+
+        if (name != null) {
+            d.setName(name);
+        }
+
+        addContent(d);
+        addButtons(d);
+
+        if (reconfigureGlobalKeyWatch) {
+            GlobalKeyboardWatch.setDialogActive(true);
+        }
+
+        Runnable cancelTask = () -> dialogCancelled(d);
+        GUIUtils.setupCancelWhenTheDialogIsClosed(d, cancelTask);
+        GUIUtils.setupCancelWhenEscIsPressed(d, cancelTask);
+
+        d.pack();
+        return d;
+    }
+
+    private JDialog createDialog() {
         JDialog d;
         if (dialogFactory != null) {
             d = dialogFactory.get();
@@ -228,41 +245,27 @@ public class DialogBuilder {
                 d = new JDialog(pw);
             }
         }
+        return d;
+    }
 
-        d.setTitle(title);
-        d.setModal(modal);
-
-        if (name != null) {
-            d.setName(name);
-        }
-
+    private void addContent(JDialog d) {
         d.setLayout(new BorderLayout());
         if (addScrollBars) {
-            JScrollPane scrollPane = new JScrollPane(form,
+            JScrollPane scrollPane = new JScrollPane(content,
                     VERTICAL_SCROLLBAR_AS_NEEDED,
                     HORIZONTAL_SCROLLBAR_NEVER);
             d.add(scrollPane, BorderLayout.CENTER);
         } else {
-            d.add(form, BorderLayout.CENTER);
+            d.add(content, BorderLayout.CENTER);
         }
+    }
 
+    private void addButtons(JDialog d) {
         JButton okButton = null;
         if (addOKButton) {
             okButton = new JButton(okText);
             okButton.setName("ok");
-            okButton.addActionListener(e -> {
-                if (validator != null) {
-                    if (!validator.test(d)) {
-                        // keep the dialog open
-                        return;
-                    }
-                }
-
-                closeDialog(d);
-                if (okAction != null) {
-                    okAction.run();
-                }
-            });
+            okButton.addActionListener(e -> okButtonPressed(d));
             d.getRootPane().setDefaultButton(okButton);
         }
         JButton cancelButton = null;
@@ -270,7 +273,7 @@ public class DialogBuilder {
             cancelButton = new JButton(cancelText);
             cancelButton.setName("cancel");
 
-            cancelButton.addActionListener(e -> cancelDialog(d, cancelAction));
+            cancelButton.addActionListener(e -> dialogCancelled(d));
         }
 
         JPanel southPanel = null;
@@ -281,56 +284,29 @@ public class DialogBuilder {
 
         if (addOKButton) {
             if (addCancelButton) { // add both
-                if (JVM.isMac) {
-                    southPanel.setLayout(new FlowLayout(RIGHT, 5, 5));
-                    southPanel.add(cancelButton);
-                    southPanel.add(okButton);
-                } else {
-                    southPanel.setLayout(new FlowLayout(CENTER, 5, 5));
-                    southPanel.add(okButton);
-                    southPanel.add(cancelButton);
-                }
+                GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
             } else { // only ok button
                 southPanel.add(okButton);
             }
         }
+    }
 
-        if (reconfigureGlobalKeyWatch) {
-            GlobalKeyboardWatch.setDialogActive(true);
-        }
-
-        // cancel when window is closed
-        d.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        d.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                // the user pressed the X button...
-                cancelDialog(d, cancelAction);
+    private void okButtonPressed(JDialog d) {
+        if (validator != null) {
+            if (!validator.test(d)) {
+                // keep the dialog open
+                return;
             }
-        });
-
-        // cancel when ESC is pressed
-        ((JComponent) d.getContentPane()).registerKeyboardAction(e ->
-                        cancelDialog(d, cancelAction),
-                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-
-
-        d.pack();
-        return d;
-    }
-
-    private void setupDefaults() {
-        if (okText == null) {
-            okText = DEFAULT_OK_TEXT;
         }
-        if (cancelText == null) {
-            cancelText = DEFAULT_CANCEL_TEXT;
+
+        closeDialog(d);
+        if (okAction != null) {
+            okAction.run();
         }
     }
 
-    // an OK dialog can still be cancelled with Esc/X
-    private void cancelDialog(JDialog d, Runnable cancelAction) {
+    // a dialog without a Cancel button can still be cancelled with Esc/X
+    private void dialogCancelled(JDialog d) {
         if (validateWhenCanceled && validator != null) {
             if (!validator.test(d)) {
                 // keep the dialog open
@@ -351,5 +327,14 @@ public class DialogBuilder {
         // dispose should not be called if the dialog will be re-shown
         // because then AssertJ-Swing doesn't find it even if it is there
         d.dispose();
+    }
+
+    private void setupDefaults() {
+        if (okText == null) {
+            okText = DEFAULT_OK_TEXT;
+        }
+        if (cancelText == null) {
+            cancelText = DEFAULT_CANCEL_TEXT;
+        }
     }
 }

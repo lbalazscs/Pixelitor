@@ -32,29 +32,11 @@ public class CompositionNode extends DebugNode {
     public CompositionNode(Composition comp) {
         super("Composition", comp);
 
-        Layer activeLayer = comp.getActiveLayer();
-
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                ImageLayerNode node;
-                if (imageLayer == activeLayer) {
-                    node = new ImageLayerNode("ACTIVE Layer - " + layer.getName(), imageLayer);
-                } else {
-                    node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
-                }
-                add(node);
-            } else if (layer instanceof TextLayer) {
-                TextLayer textLayer = (TextLayer) layer;
-                TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
-                add(node);
-            } else {
-                addQuotedString("Layer of class", layer.getClass().getName());
-            }
-        });
+        comp.forEachLayer(this::addLayerNode);
 
         BufferedImage compositeImage = comp.getCompositeImage();
-        BufferedImageNode imageNode = new BufferedImageNode("Composite Image", compositeImage);
+        BufferedImageNode imageNode = new BufferedImageNode(
+                "Composite Image", compositeImage);
         add(imageNode);
 
         addInt("numLayers", comp.getNumLayers());
@@ -83,5 +65,33 @@ public class CompositionNode extends DebugNode {
         addInt("canvasWidth", canvasWidth);
         int canvasHeight = comp.getCanvasImHeight();
         addInt("canvasHeight", canvasHeight);
+    }
+
+    private void addLayerNode(Layer layer) {
+        if (layer instanceof ImageLayer) {
+            addImageLayerNode(layer);
+        } else if (layer instanceof TextLayer) {
+            addTextLayerNode(layer);
+        } else {
+            addQuotedString("Layer of class",
+                    layer.getClass().getName());
+        }
+    }
+
+    private void addImageLayerNode(Layer layer) {
+        ImageLayer imageLayer = (ImageLayer) layer;
+        ImageLayerNode node;
+        if (imageLayer.isActive()) {
+            node = new ImageLayerNode("ACTIVE Layer - " + layer.getName(), imageLayer);
+        } else {
+            node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
+        }
+        add(node);
+    }
+
+    private void addTextLayerNode(Layer layer) {
+        TextLayer textLayer = (TextLayer) layer;
+        TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
+        add(node);
     }
 }

@@ -37,8 +37,11 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
  */
 public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
-        super('k', "Smudge", "smudge_tool_icon.png",
-                "<b>click and drag</b> to smudge. <b>Click</b> and <b>Shift-click</b> to smudge along a line.", Cursors.HAND);
+        super("Smudge", 'k', "smudge_tool_icon.png",
+                "<b>click and drag</b> to smudge. " +
+                        "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
+                Cursors.HAND);
+
         drawStrategy = DrawStrategy.DIRECT;
     }
 
@@ -65,7 +68,8 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     private void addStrengthSelector() {
-        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
+        SliderSpinner strengthSelector = new SliderSpinner(
+                strengthParam, WEST, false);
         settingsPanel.add(strengthSelector);
     }
 

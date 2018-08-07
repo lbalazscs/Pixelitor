@@ -72,34 +72,59 @@ public class GradientTool extends DragTool {
     private boolean ignoreRegenerate = false;
 
     public GradientTool() {
-        super('g', "Gradient", "gradient_tool_icon.png",
-                "<b>click</b> and <b>drag</b> to draw a gradient, <b>Shift-drag</b> to constrain the direction. Press <b>Esc</b> to hide the handles and the arrow.",
-                Cursors.DEFAULT, true, true, true, ClipStrategy.INTERNAL_FRAME);
+        super("Gradient", 'g', "gradient_tool_icon.png",
+                "<b>click</b> and <b>drag</b> to draw a gradient, " +
+                        "<b>Shift-drag</b> to constrain the direction. " +
+                        "Press <b>Esc</b> to hide the handles and the arrow.",
+                Cursors.DEFAULT, true, true,
+                true, ClipStrategy.INTERNAL_FRAME);
     }
 
     @Override
     public void initSettingsPanel() {
-        typeSelector = new JComboBox<>(GradientType.values());
-        typeSelector.addActionListener(e -> regenerateGradient(true));
-        settingsPanel.addWithLabel("Type: ", typeSelector, "gradientTypeSelector");
-
-        // cycle methods cannot be put directly in the JComboBox, because they would be all uppercase
-        cycleMethodSelector = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodSelector.addActionListener(e -> regenerateGradient(true));
-        settingsPanel.addWithLabel("Cycling: ", cycleMethodSelector, "gradientCycleMethodSelector");
+        addTypeSelector();
+        addCycleMethodSelector();
 
         settingsPanel.addSeparator();
 
+        addColorTypeSelector();
+        addInvertCheckBox();
+
+        settingsPanel.addSeparator();
+
+        addBlendingModePanel();
+    }
+
+    private void addTypeSelector() {
+        typeSelector = new JComboBox<>(GradientType.values());
+        typeSelector.addActionListener(e -> regenerateGradient(true));
+        settingsPanel.addWithLabel("Type: ",
+                typeSelector, "gradientTypeSelector");
+    }
+
+    private void addCycleMethodSelector() {
+        // cycle methods cannot be put directly in the JComboBox,
+        // because they would be all uppercase
+        cycleMethodSelector = new JComboBox<>(CYCLE_METHODS);
+        cycleMethodSelector.addActionListener(e -> regenerateGradient(true));
+        settingsPanel.addWithLabel("Cycling: ",
+                cycleMethodSelector, "gradientCycleMethodSelector");
+    }
+
+    private void addColorTypeSelector() {
         colorTypeSelector = new JComboBox<>(GradientColorType.values());
         colorTypeSelector.addActionListener(e -> regenerateGradient(true));
-        settingsPanel.addWithLabel("Color: ", colorTypeSelector, "gradientColorTypeSelector");
+        settingsPanel.addWithLabel("Color: ",
+                colorTypeSelector, "gradientColorTypeSelector");
+    }
 
+    private void addInvertCheckBox() {
         invertCheckBox = new JCheckBox();
         invertCheckBox.addActionListener(e -> regenerateGradient(true));
         settingsPanel.addWithLabel("Invert: ", invertCheckBox, "gradientInvert");
+    }
 
-        settingsPanel.addSeparator();
-
+    private void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         blendingModePanel.addActionListener(e -> regenerateGradient(true));
         settingsPanel.add(blendingModePanel);
@@ -254,7 +279,7 @@ public class GradientTool extends DragTool {
         }
     }
 
-    public void hideHandles(View view) {
+    private void hideHandles(View view) {
         handles = null;
         activeHandle = null;
         lastGradient = null;
@@ -262,7 +287,8 @@ public class GradientTool extends DragTool {
     }
 
     private CycleMethod getCycleType() {
-        return getCycleMethodFromString((String) cycleMethodSelector.getSelectedItem());
+        String typeString = (String) cycleMethodSelector.getSelectedItem();
+        return getCycleMethodFromString(typeString);
     }
 
     private GradientColorType getGradientColorType() {
@@ -296,7 +322,9 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic, AffineTransform componentTransform, AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
         if (handles != null) {
             handles.paint(g2);
         } else {
@@ -379,7 +407,8 @@ public class GradientTool extends DragTool {
         node.addQuotedString("Color", getGradientColorType().toString());
         node.addBoolean("Invert", invertCheckBox.isSelected());
         node.addFloat("Opacity", blendingModePanel.getOpacity());
-        node.addQuotedString("Blending Mode", blendingModePanel.getBlendingMode().toString());
+        node.addQuotedString("Blending Mode",
+                blendingModePanel.getBlendingMode().toString());
 
         return node;
     }

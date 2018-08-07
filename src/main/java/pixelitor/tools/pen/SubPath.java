@@ -124,7 +124,8 @@ public class SubPath {
                             ToDoubleFunction<DraggablePoint> toX,
                             ToDoubleFunction<DraggablePoint> toY) {
 
-        if (first == null) { // TODO maybe a Path should be created only when there is at least one node
+        // TODO maybe a Path should be created only when there is at least one node
+        if (first == null) {
             return;
         }
 
@@ -306,7 +307,7 @@ public class SubPath {
         }
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
-            out.print(Ansi.PURPLE + "Point " + i + ": ");
+            out.print(Ansi.purple("Point " + i + ": "));
             if (point == first) {
                 out.print("first ");
             }
@@ -318,8 +319,6 @@ public class SubPath {
             }
             point.dump();
         }
-//        System.out.println("SubPath::dump: moving = " + moving);
-//        System.out.println("SubPath::dump: last = " + last);
     }
 
     public AnchorPoint getPoint(int index) {

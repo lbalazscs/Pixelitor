@@ -22,6 +22,7 @@ import com.jhlabs.image.ImageMath;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -149,7 +150,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
+        return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
                 getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 }

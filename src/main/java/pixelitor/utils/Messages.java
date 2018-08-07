@@ -22,6 +22,8 @@ import pixelitor.gui.GUIMessageHandler;
 
 import java.io.File;
 
+import static java.lang.String.format;
+
 /**
  * Static methods for status bar and dialog messages
  */
@@ -51,6 +53,7 @@ public class Messages {
         msgHandler.showError(title, message);
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static <T> T showExceptionOnEDT(Throwable e) {
         msgHandler.showExceptionOnEDT(e);
         // returns a null which can be a null of the desired type...:
@@ -99,7 +102,7 @@ public class Messages {
             msg = filterName + " took " + totalTime + " ms";
         } else {
             float seconds = totalTime / 1000.0f;
-            msg = String.format("%s took %.1f s", filterName, seconds);
+            msg = format("%s took %.1f s", filterName, seconds);
         }
         showInStatusBar(msg);
     }

@@ -20,6 +20,8 @@ package pixelitor.utils.debug;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.Enumeration;
 
+import static java.lang.String.format;
+
 /**
  * The superclass of all debugging nodes that appear
  * in the "Pixelitor Internal State" JTree
@@ -76,7 +78,7 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addQuotedString(String name, String s) {
-        add(new DefaultMutableTreeNode(String.format("%s = \"%s\"", name, s)));
+        add(new DefaultMutableTreeNode(format("%s = \"%s\"", name, s)));
     }
 
     public void addInt(String name, int i) {
@@ -84,11 +86,11 @@ public class DebugNode extends DefaultMutableTreeNode {
     }
 
     public void addFloat(String name, float f) {
-        add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
+        add(new DefaultMutableTreeNode(format("%s = %.2f", name, f)));
     }
 
     public void addDouble(String name, double f) {
-        add(new DefaultMutableTreeNode(String.format("%s = %.2f", name, f)));
+        add(new DefaultMutableTreeNode(format("%s = %.2f", name, f)));
     }
 
     public void addBoolean(String name, boolean b) {

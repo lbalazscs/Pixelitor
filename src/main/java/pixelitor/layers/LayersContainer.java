@@ -25,6 +25,8 @@ import pixelitor.utils.ActiveImageChangeListener;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
+import static javax.swing.BorderFactory.createTitledBorder;
+
 /**
  * The part of the GUI that manages the layers of a composition.
  */
@@ -45,7 +47,7 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         JPanel southPanel = initSouthPanel();
         add(southPanel, BorderLayout.SOUTH);
 
-        setBorder(BorderFactory.createTitledBorder("Layers"));
+        setBorder(createTitledBorder("Layers"));
 
         ImageComponents.addActiveImageChangeListener(this);
     }
@@ -54,20 +56,20 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 
-        southPanel.add(createButtonFromAction(AddNewLayerAction.INSTANCE, "addLayer"));
-        southPanel.add(createButtonFromAction(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
-        southPanel.add(createButtonFromAction(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
-        southPanel.add(createButtonFromAction(AddLayerMaskAction.INSTANCE, "addLayerMask"));
-        southPanel.add(createButtonFromAction(AddTextLayerAction.INSTANCE, "addTextLayer"));
+        southPanel.add(createButton(AddNewLayerAction.INSTANCE, "addLayer"));
+        southPanel.add(createButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
+        southPanel.add(createButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
+        southPanel.add(createButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
+        southPanel.add(createButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
         if (Build.enableAdjLayers) {
-            southPanel.add(createButtonFromAction(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+            southPanel.add(createButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 
         return southPanel;
     }
 
-    private static JButton createButtonFromAction(Action a, String name) {
+    private static JButton createButton(Action a, String name) {
         JButton button = new JButton(a);
         button.setHideActionText(true);
         button.setName(name);

@@ -16,8 +16,13 @@
  */
 package pixelitor.menus.file;
 
+import pixelitor.io.OpenSave;
+import pixelitor.utils.Messages;
+
 import javax.swing.*;
 import java.io.File;
+
+import static java.lang.String.format;
 
 /**
  * A menu item for the recent file entries
@@ -41,9 +46,17 @@ public class RecentFilesMenuItem extends JMenuItem {
 //        setToolTipText("<html><img src=\"" + url.toString() + "\" width=200 height=200 /> " + file.getAbsolutePath());
 
         setToolTipText(file.getAbsolutePath());
+        addActionListener(e -> openAsync());
     }
 
-    public RecentFile getRecentFile() {
-        return recentFile;
+    private void openAsync() {
+        File f = recentFile.getFile();
+        if (f.exists()) {
+            OpenSave.openFileAsync(f);
+        } else {
+            // the file was deleted since Pixelitor started
+            Messages.showError("Problem",
+                    format("The file %s does not exist.", f.toString()));
+        }
     }
 }

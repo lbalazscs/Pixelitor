@@ -25,7 +25,6 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.Cursors;
-import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -41,10 +40,16 @@ import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DstIn;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
 import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
+import static pixelitor.utils.ImageUtils.calcThumbDimensions;
+import static pixelitor.utils.ImageUtils.convertToGrayScaleImage;
+import static pixelitor.utils.ImageUtils.copyImage;
+import static pixelitor.utils.ImageUtils.createSysCompatibleImage;
+import static pixelitor.utils.ImageUtils.createThumbnail;
 
 /**
  * The GUI for "Mask from Color Range"
@@ -61,7 +66,7 @@ public class MaskFromColorRangePanel extends JPanel {
     private final JComboBox<String> colorSpaceCB = new JComboBox(new Value[]{
             new Value("HSB", MaskFromColorRangeFilter.HSB),
             new Value("RGB", MaskFromColorRangeFilter.RGB),
-            });
+    });
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
     private final JCheckBox invertCB = new JCheckBox();
@@ -80,20 +85,43 @@ public class MaskFromColorRangePanel extends JPanel {
                     PREVIEW_MODE_WHITE_MATTE,
                     PREVIEW_MODE_RUBYLITH});
 
-
     private MaskFromColorRangePanel(BufferedImage image) {
         super(new BorderLayout());
         this.image = image;
 
+        add(createNorthPanel(), BorderLayout.NORTH);
+        add(createImagesPanel(image), BorderLayout.CENTER);
+        add(createSouthPanel(), BorderLayout.SOUTH);
+    }
+
+    private JPanel createNorthPanel() {
         JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         northPanel.add(new JLabel("Preview Mode:"));
         northPanel.add(previewModeCB);
-        add(northPanel, BorderLayout.NORTH);
+        return northPanel;
+    }
+
+    private JPanel createImagesPanel(BufferedImage image) {
+        Dimension thumbDim = calcThumbDimensions(image, DEFAULT_THUMB_SIZE);
+
+        ColorPickerThumbnailPanel colorPickerPanel = getColorPickerPanel(image, thumbDim);
+        previewPanel.setPreferredSize(thumbDim);
+
+        JPanel left = new JPanel(new BorderLayout());
+        left.setBorder(createTitledBorder(HELP_TEXT));
+        left.add(colorPickerPanel, BorderLayout.CENTER);
+
+        JPanel right = new JPanel(new BorderLayout());
+        right.setBorder(createTitledBorder("Preview"));
+        right.add(previewPanel, BorderLayout.CENTER);
 
         JPanel imagesPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        imagesPanel.add(left);
+        imagesPanel.add(right);
+        return imagesPanel;
+    }
 
-        Dimension thumbDim = ImageUtils.calcThumbDimensions(image, DEFAULT_THUMB_SIZE);
-
+    private ColorPickerThumbnailPanel getColorPickerPanel(BufferedImage image, Dimension thumbDim) {
         ColorPickerThumbnailPanel colorPickerPanel =
                 new ColorPickerThumbnailPanel(thumb, (c) -> {
                     lastColor = c;
@@ -112,7 +140,7 @@ public class MaskFromColorRangePanel extends JPanel {
                 lastPickerWidth = newWidth;
                 lastPickerHeight = newHeight;
 
-                thumb = ImageUtils.createThumbnail(image, newWidth, newHeight, null);
+                thumb = createThumbnail(image, newWidth, newHeight, null);
 
                 colorPickerPanel.setImage(thumb);
                 colorPickerPanel.repaint();
@@ -122,20 +150,10 @@ public class MaskFromColorRangePanel extends JPanel {
 
         colorPickerPanel.setCursor(Cursors.CROSSHAIR);
         colorPickerPanel.setPreferredSize(thumbDim);
-        previewPanel.setPreferredSize(thumbDim);
+        return colorPickerPanel;
+    }
 
-        JPanel left = new JPanel(new BorderLayout());
-        left.setBorder(BorderFactory.createTitledBorder(HELP_TEXT));
-        left.add(colorPickerPanel, BorderLayout.CENTER);
-
-        JPanel right = new JPanel(new BorderLayout());
-        right.setBorder(BorderFactory.createTitledBorder("Preview"));
-        right.add(previewPanel, BorderLayout.CENTER);
-
-        imagesPanel.add(left);
-        imagesPanel.add(right);
-
-        add(imagesPanel, BorderLayout.CENTER);
+    private JPanel createSouthPanel() {
         JPanel southPanel = new JPanel(new BorderLayout());
 
         JPanel southCenterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
@@ -161,7 +179,15 @@ public class MaskFromColorRangePanel extends JPanel {
         previewModeCB.addActionListener(actionListener);
         colorSpaceCB.addActionListener(actionListener);
 
-        add(southPanel, BorderLayout.SOUTH);
+        return southPanel;
+    }
+
+    private boolean validate(JDialog d) {
+        if (getLastColor() == null) {
+            Dialogs.showInfoDialog(d, "No color selected", HELP_TEXT);
+            return false;
+        }
+        return true;
     }
 
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
@@ -189,52 +215,60 @@ public class MaskFromColorRangePanel extends JPanel {
                 previewPanel.changeImage(rgbMask);
                 break;
             case PREVIEW_MODE_RUBYLITH: {
-                BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
-                BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL, grayMask.getRaster(), false, null);
-                BufferedImage thumbWithRuby = ImageUtils.copyImage(thumb);
-                Graphics2D g = thumbWithRuby.createGraphics();
-                g.setComposite(RUBYLITH_COMPOSITE);
-                g.drawImage(ruby, 0, 0, null);
-                g.dispose();
-                previewPanel.changeImage(thumbWithRuby);
+                updateRubyPreview(rgbMask);
                 break;
             }
-            default:
-                BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
-                BufferedImage transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(), false, null);
-
-                BufferedImage thumbWithTransparency = ImageUtils.copyImage(thumb);
-                Graphics2D g = thumbWithTransparency.createGraphics();
-                g.setComposite(DstIn);
-                g.drawImage(transparencyImage, 0, 0, null);
-                g.dispose();
-
-                BufferedImage preview = ImageUtils.createSysCompatibleImage(rgbMask.getWidth(), rgbMask.getHeight());
-                Graphics2D previewG = preview.createGraphics();
-                switch (previewMode) {
-                    case PREVIEW_MODE_BLACK_MATTE:
-                        previewG.setColor(Color.BLACK);
-                        break;
-                    case PREVIEW_MODE_WHITE_MATTE:
-                        previewG.setColor(Color.WHITE);
-                        break;
-                    default:
-                        throw new IllegalStateException("previewMode = " + previewMode);
-                }
-                previewG.fillRect(0, 0, preview.getWidth(), preview.getHeight());
-                previewG.drawImage(thumbWithTransparency, 0, 0, null);
-                previewG.dispose();
-
-                previewPanel.changeImage(preview);
+            case PREVIEW_MODE_BLACK_MATTE:
+                updateMattePreview(rgbMask, Color.BLACK);
                 break;
+            case PREVIEW_MODE_WHITE_MATTE:
+                updateMattePreview(rgbMask, Color.WHITE);
+                break;
+            default:
+                throw new IllegalStateException("previewMode = " + previewMode);
         }
+    }
+
+    private void updateRubyPreview(BufferedImage rgbMask) {
+        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
+        BufferedImage ruby = new BufferedImage(RUBYLITH_COLOR_MODEL,
+                grayMask.getRaster(), false, null);
+        BufferedImage thumbWithRuby = copyImage(thumb);
+        Graphics2D g = thumbWithRuby.createGraphics();
+        g.setComposite(RUBYLITH_COMPOSITE);
+        g.drawImage(ruby, 0, 0, null);
+        g.dispose();
+        previewPanel.changeImage(thumbWithRuby);
+    }
+
+    private void updateMattePreview(BufferedImage rgbMask, Color matteColor) {
+        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
+        BufferedImage transparencyImage = new BufferedImage(
+                TRANSPARENCY_COLOR_MODEL, grayMask.getRaster(),
+                false, null);
+
+        BufferedImage thumbWithTransparency = copyImage(thumb);
+        Graphics2D g = thumbWithTransparency.createGraphics();
+        g.setComposite(DstIn);
+        g.drawImage(transparencyImage, 0, 0, null);
+        g.dispose();
+
+        BufferedImage preview = createSysCompatibleImage(
+                rgbMask.getWidth(), rgbMask.getHeight());
+        Graphics2D previewG = preview.createGraphics();
+        previewG.setColor(matteColor);
+        previewG.fillRect(0, 0, preview.getWidth(), preview.getHeight());
+        previewG.drawImage(thumbWithTransparency, 0, 0, null);
+        previewG.dispose();
+
+        previewPanel.changeImage(preview);
     }
 
     private BufferedImage getMaskImage() {
         MaskFromColorRangeFilter filter = createFilterFromSettings(lastColor);
 
         BufferedImage rgbMask = filter.filter(image, null);
-        BufferedImage grayMask = ImageUtils.convertToGrayScaleImage(rgbMask);
+        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
 
         return grayMask;
     }
@@ -244,25 +278,19 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     public static void showInDialog(Layer layer, BufferedImage image) {
-        MaskFromColorRangePanel form = new MaskFromColorRangePanel(image);
+        MaskFromColorRangePanel panel = new MaskFromColorRangePanel(image);
 
         String okText = layer.hasMask() ? "Replace Mask" : "Add Mask";
 
         new DialogBuilder()
                 .title(NAME)
-                .content(form)
+                .content(panel)
                 .okText(okText)
                 .okAction(() -> {
-                    BufferedImage maskImage = form.getMaskImage();
+                    BufferedImage maskImage = panel.getMaskImage();
                     layer.addOrReplaceMaskImage(maskImage, NAME);
                 })
-                .validator(d -> {
-                    if (form.getLastColor() == null) {
-                        Dialogs.showInfoDialog(d, "No color selected", HELP_TEXT);
-                        return false;
-                    }
-                    return true;
-                })
+                .validator(panel::validate)
                 .show();
     }
 }

@@ -36,6 +36,7 @@ import java.awt.geom.QuadCurve2D;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.tools.shapes.ShapeType.KIWI;
 import static pixelitor.tools.shapes.StrokeType.BASIC;
 import static pixelitor.tools.shapes.StrokeType.SHAPE;
@@ -55,7 +56,6 @@ public class StrokeSettingsPanel extends JPanel {
         BooleanParam dashedParam = sp.getDashedParam();
         EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
 
-        //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setLayout(new GridBagLayout());
 
         JComponent strokeWidthGUI = strokeWidthParam.createGUI();
@@ -72,7 +72,8 @@ public class StrokeSettingsPanel extends JPanel {
         gbc.gridy = 1;
         add(capJoinPanel, gbc);
 
-        JPanel strokeTypePanel = createStrokeTypePanel(strokeTypeParam, shapeTypeParam, dashedParam);
+        JPanel strokeTypePanel = createStrokeTypePanel(strokeTypeParam,
+                shapeTypeParam, dashedParam);
         gbc.gridy = 2;
         add(strokeTypePanel, gbc);
 
@@ -87,7 +88,7 @@ public class StrokeSettingsPanel extends JPanel {
             EnumParam<BasicStrokeCap> capParam,
             EnumParam<BasicStrokeJoin> joinParam) {
         JPanel p = new JPanel();
-        p.setBorder(BorderFactory.createTitledBorder("Line Endpoints"));
+        p.setBorder(createTitledBorder("Line Endpoints"));
         p.setLayout(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(p);
@@ -116,7 +117,7 @@ public class StrokeSettingsPanel extends JPanel {
                                                 EnumParam<ShapeType> shapeTypeParam,
                                                 BooleanParam dashedParam) {
         JPanel p = new JPanel();
-        p.setBorder(BorderFactory.createTitledBorder("Stroke Type"));
+        p.setBorder(createTitledBorder("Stroke Type"));
 
         p.setLayout(new GridBagLayout());
 
@@ -175,7 +176,7 @@ public class StrokeSettingsPanel extends JPanel {
 
         JPanel p = new JPanel(new BorderLayout());
         p.add(preview, BorderLayout.CENTER);
-        p.setBorder(BorderFactory.createTitledBorder("Stroke Preview"));
+        p.setBorder(createTitledBorder("Stroke Preview"));
 
         return p;
     }

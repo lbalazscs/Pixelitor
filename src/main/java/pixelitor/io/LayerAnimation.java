@@ -19,11 +19,11 @@ package pixelitor.io;
 
 import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -89,6 +89,6 @@ public class LayerAnimation {
         assert selectedFile != null;
 
         Runnable r = () -> export(selectedFile);
-        Utils.runWithBusyCursor(r);
+        GUIUtils.runWithBusyCursor(r);
     }
 }

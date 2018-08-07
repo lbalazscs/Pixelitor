@@ -18,11 +18,12 @@
 package pixelitor.colors.palette;
 
 import pixelitor.colors.ColorUtils;
-import pixelitor.colors.FgBgColors;
 
 import java.awt.Color;
 
 import static com.jhlabs.image.ImageMath.lerp;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * A palette that mixes the foreground color with the background color
@@ -49,11 +50,11 @@ public class HSBColorMixPalette extends Palette {
 
         Color color, otherColor;
         if (startWithFg) {
-            color = FgBgColors.getFG();
-            otherColor = FgBgColors.getBG();
+            color = getFGColor();
+            otherColor = getBGColor();
         } else {
-            color = FgBgColors.getBG();
-            otherColor = FgBgColors.getFG();
+            color = getBGColor();
+            otherColor = getFGColor();
         }
 
         float[] hsb = ColorUtils.toHSB(color);

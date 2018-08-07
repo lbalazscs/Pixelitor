@@ -18,7 +18,6 @@
 package pixelitor.gui;
 
 import pixelitor.Canvas;
-import pixelitor.io.OpenSave;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -42,7 +41,8 @@ public class ImageFrame extends JInternalFrame
     private final JScrollPane scrollPane;
 
     public ImageFrame(ImageComponent ic, int locX, int locY) {
-        super(ic.createTitleWithZoom(), true, true, true, true);
+        super(ic.createTitleWithZoom(),
+                true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
         this.ic = ic;
@@ -72,7 +72,7 @@ public class ImageFrame extends JInternalFrame
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         if (!RandomGUITest.isRunning()) {
-            OpenSave.warnAndCloseImage(ic);
+            ImageComponents.warnAndClose(ic);
         }
     }
 
@@ -134,7 +134,8 @@ public class ImageFrame extends JInternalFrame
             }
         }
 
-        super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
+        super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT,
+                height + NIMBUS_VERTICAL_ADJUSTMENT);
     }
 
     @Override
@@ -157,4 +158,3 @@ public class ImageFrame extends JInternalFrame
         setTitle(ic.createTitleWithZoom());
     }
 }
-

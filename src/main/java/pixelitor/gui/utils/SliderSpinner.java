@@ -34,6 +34,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import static java.awt.Color.GRAY;
+import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
  * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
@@ -41,7 +42,9 @@ import static java.awt.Color.GRAY;
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
-    private Resettable resettableParam; // if set to non-null, its reset is called instead of the reset this object
+
+    // if set to non-null, its reset is called instead of the reset this object
+    private Resettable resettableParam;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
@@ -67,7 +70,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         this(model, leftColor, rightColor, TextPosition.BORDER, true);
     }
 
-    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, boolean addDefaultButton) {
+    private SliderSpinner(RangeParam model,
+                          Color leftColor, Color rightColor,
+                          TextPosition textPosition, boolean addDefaultButton) {
+
         setLayout(new BorderLayout());
         this.model = model;
 
@@ -78,9 +84,9 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (textPosition == TextPosition.BORDER) {
             if ((leftColor != null) && (rightColor != null)) {
                 Border gradientBorder = new GradientBorder(leftColor, rightColor);
-                this.setBorder(BorderFactory.createTitledBorder(gradientBorder, model.getName()));
+                this.setBorder(createTitledBorder(gradientBorder, model.getName()));
             } else {
-                this.setBorder(BorderFactory.createTitledBorder(model.getName()));
+                this.setBorder(createTitledBorder(model.getName()));
                 this.leftColor = GRAY;
                 this.rightColor = GRAY;
             }
@@ -111,9 +117,8 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         p.add(spinner);
 
         if (addDefaultButton) {
-            defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
-//            int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
-//            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
+            defaultButton = new DefaultButton(resettableParam == null
+                    ? model : resettableParam);
             if (colorsUsed) {
                 defaultButton.setBackground(GRAY);
             }

@@ -35,6 +35,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.test.Assertions;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -53,6 +54,7 @@ import java.io.ObjectOutputStream;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
@@ -61,6 +63,7 @@ import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
 import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
+import static pixelitor.utils.ImageUtils.copyImage;
 
 /**
  * An image layer.
@@ -116,11 +119,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient BufferedImage filterSourceImage;
 
+    private ImageLayer(Composition comp, String name, Layer parent) {
+        super(comp, name, parent);
+    }
+
     /**
      * Creates a new layer with the given image
      */
     public ImageLayer(Composition comp, BufferedImage image, String name, Layer parent) {
-        super(comp, name == null ? comp.generateNewLayerName() : name, parent);
+        this(comp, name, parent);
 
         requireNonNull(image);
 
@@ -130,61 +137,79 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     /**
-     * Creates a new layer with the given image and size.
-     * Used when an image is pasted into a layer
+     * Creates a new empty layer
      */
-    public ImageLayer(Composition comp, BufferedImage pastedImage, String name, int width, int height) {
-        super(comp, name, null);
+    public static ImageLayer createEmpty(Composition comp, String name) {
+        ImageLayer imageLayer = new ImageLayer(comp, name, null);
 
+        BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
+                comp.getCanvasImWidth(), comp.getCanvasImHeight());
+        imageLayer.setImage(emptyImage);
+        imageLayer.checkConstructorPostConditions();
+
+        return imageLayer;
+    }
+
+    public static ImageLayer createFromPastedImage(BufferedImage pastedImage,
+                                                   Composition comp) {
+        ImageLayer layer = new ImageLayer(comp, "Pasted Layer", null);
         requireNonNull(pastedImage);
+
+        int canvasWidth = comp.getCanvasImWidth();
+        int canvasHeight = comp.getCanvasImHeight();
 
         int pastedWidth = pastedImage.getWidth();
         int pastedHeight = pastedImage.getHeight();
 
-        boolean pastedImageTooSmall = pastedWidth < width || pastedHeight < height;
+        BufferedImage newImage = layer.calcNewImageFromPasted(pastedImage,
+                canvasWidth, canvasHeight, pastedWidth, pastedHeight);
+        layer.setImage(newImage);
+
+        layer.setTranslationForPasted(canvasWidth, canvasHeight,
+                pastedWidth, pastedHeight);
+
+        layer.updateIconImage();
+        layer.checkConstructorPostConditions();
+
+        return layer;
+    }
+
+    private BufferedImage calcNewImageFromPasted(BufferedImage pastedImage,
+                                                 int canvasWidth, int canvasHeight,
+                                                 int pastedWidth, int pastedHeight) {
+        boolean pastedImageTooSmall = pastedWidth < canvasWidth
+                || pastedHeight < canvasHeight;
 
         BufferedImage newImage = pastedImage;
         if (pastedImageTooSmall) {
             // a new image is created
-            int newWidth = Math.max(width, pastedWidth);
-            int newHeight = Math.max(height, pastedHeight);
+            int newWidth = Math.max(canvasWidth, pastedWidth);
+            int newHeight = Math.max(canvasHeight, pastedHeight);
             newImage = createEmptyImageForLayer(newWidth, newHeight);
             Graphics2D g = newImage.createGraphics();
 
-            int drawX = Math.max((width - pastedWidth) / 2, 0);
-            int drawY = Math.max((height - pastedHeight) / 2, 0);
+            int drawX = Math.max((canvasWidth - pastedWidth) / 2, 0);
+            int drawY = Math.max((canvasHeight - pastedHeight) / 2, 0);
 
             g.drawImage(pastedImage, drawX, drawY, null);
             g.dispose();
         }
-
-        setImage(newImage);
-
-        boolean addXTranslation = pastedWidth > width;
-        boolean addYTranslation = pastedHeight > height;
-        int newTX = 0;
-        int newTY = 0;
-        if (addXTranslation) {
-            newTX = -(pastedWidth - width) / 2;
-        }
-        if (addYTranslation) {
-            newTY = -(pastedHeight - height) / 2;
-        }
-        setTranslation(newTX, newTY);
-
-        updateIconImage();
-        checkConstructorPostConditions();
+        return newImage;
     }
 
-    /**
-     * Creates a new empty layer
-     */
-    public ImageLayer(Composition comp, String name) {
-        super(comp, name == null ? comp.generateNewLayerName() : name, null);
-
-        BufferedImage emptyImage = createEmptyImageForLayer(canvas.getImWidth(), canvas.getImHeight());
-        setImage(emptyImage);
-        checkConstructorPostConditions();
+    private void setTranslationForPasted(int canvasWidth, int canvasHeight,
+                                         int pastedWidth, int pastedHeight) {
+        boolean addXTranslation = pastedWidth > canvasWidth;
+        boolean addYTranslation = pastedHeight > canvasHeight;
+        int newTX = 0;
+        if (addXTranslation) {
+            newTX = -(pastedWidth - canvasWidth) / 2;
+        }
+        int newTY = 0;
+        if (addYTranslation) {
+            newTY = -(pastedHeight - canvasHeight) / 2;
+        }
+        setTranslation(newTX, newTY);
     }
 
     private void checkConstructorPostConditions() {
@@ -198,7 +223,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // init transient fields
         state = NORMAL;
+        tmpDrawingLayer = null;
+        previewImage = null;
+        filterSourceImage = null;
+        image = null;
+
         in.defaultReadObject();
         setImage(PXCFormat.deserializeImage(in));
         imageContentChanged = false;
@@ -206,7 +237,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public ImageLayer duplicate(boolean sameName) {
-        BufferedImage imageCopy = ImageUtils.copyImage(image);
+        BufferedImage imageCopy = copyImage(image);
         String duplicateName = sameName ? name : Utils.createCopyName(name);
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, null);
         d.setOpacity(opacity, false, false, true);
@@ -244,7 +275,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     private BufferedImage replaceSelectedPart(BufferedImage src, BufferedImage newImg) {
         assert src != null;
         assert newImg != null;
-        assert Utils.checkRasterMinimum(newImg);
+        assert Assertions.checkRasterMinimum(newImg);
 
         Shape selectionShape = comp.getSelectionShape();
         if (selectionShape == null) {
@@ -271,7 +302,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         image = requireNonNull(newImage);
         imageRefChanged();
 
-        assert Utils.checkRasterMinimum(newImage);
+        assert Assertions.checkRasterMinimum(newImage);
 
         comp.imageChanged(INVALIDATE_CACHE);
 
@@ -305,7 +336,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // the image reference, because when we draw into the preview image, we would
             // also draw on the real image, and after cancel we would still have the
             // changed version.
-            previewImage = ImageUtils.copyImage(image);
+            previewImage = copyImage(image);
         } else {
             // if there is no selection, then there is no problem, because
             // the previewImage reference will be overwritten
@@ -335,7 +366,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this, getSelectedSubImage(true),
+            ImageEdit edit = new ImageEdit(filterName, comp, this,
+                    getSelectedSubImage(true),
                     false, true);
             History.addEdit(edit);
         }
@@ -380,13 +412,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
-            throw new IllegalStateException(String.format(
+            throw new IllegalStateException(format(
                     "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
                     filterName, cr, this.getClass().getSimpleName()));
         }
 
         assert previewImage != null :
-                String.format("previewImage was null with %s, changeReason = %s, class = %s",
+                format("previewImage was null with %s, changeReason = %s, class = %s",
                         filterName, cr, this.getClass().getSimpleName());
         assert img != null;
 
@@ -424,9 +456,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         // A filter without dialog should never return the original image...
         if (transformedImage == image) {
-            // ...unless Repeat Last starts a filter that normally has a dialog without one
+            // ...unless "Repeat Last" starts a filter with settings
+            // without a dialog
             if (cr != REPEAT_LAST) {
-                throw new IllegalStateException(filterName + " returned the original image, changeReason = " + cr);
+                throw new IllegalStateException(filterName
+                        + " returned the original image, changeReason = " + cr);
             } else {
                 return;
             }
@@ -609,7 +643,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (mask == null || !isMaskEnabled()) {
             return image;
         } else {
-            BufferedImage copy = ImageUtils.copyImage(image);
+            BufferedImage copy = copyImage(image);
             mask.applyToImage(copy);
             return copy;
         }
@@ -628,7 +662,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         Graphics2D g = image.createGraphics();
 
-        tmpDrawingLayer.paintLayer(g, -getTX(), -getTY());
+        tmpDrawingLayer.paintOn(g, -getTX(), -getTY());
         g.dispose();
 
         tmpDrawingLayer.dispose();
@@ -667,12 +701,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
             System.out.printf("ImageLayer.getCanvasSizedSubImage x = %d, y = %d, " +
                             "canvasWidth = %d, canvasHeight = %d, " +
                             "imageWidth = %d, imageHeight = %d%n",
-                    x, y, canvasWidth, canvasHeight, image.getWidth(), image.getHeight());
+                    x, y, canvasWidth, canvasHeight,
+                    image.getWidth(), image.getHeight());
             WritableRaster raster = image.getRaster();
 
             System.out.printf("ImageLayer.getCanvasSizedSubImage " +
                             "minX = %d, minY = %d, width = %d, height=%d %n",
-                    raster.getMinX(), raster.getMinY(), raster.getWidth(), raster.getHeight());
+                    raster.getMinX(), raster.getMinY(),
+                    raster.getWidth(), raster.getHeight());
 
             throw e;
         }
@@ -699,7 +735,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         Selection selection = comp.getSelection();
         if (selection == null) { // no selection => return full image
             if (copyIfNoSelection) {
-                return ImageUtils.copyImage(image);
+                return copyImage(image);
             }
             return image;
         }
@@ -737,7 +773,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int canvasHeight = canvas.getImHeight();
 
         if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
-            BufferedImage newImage = ImageUtils.crop(image, -getTX(), -getTY(), canvasWidth, canvasHeight);
+            BufferedImage newImage = ImageUtils.crop(image,
+                    -getTX(), -getTY(), canvasWidth, canvasHeight);
 
             BufferedImage tmp = image;
             setImage(newImage);
@@ -838,27 +875,31 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage visibleImage = getVisibleImage();
 
         if (tmpDrawingLayer == null) {
-            paintLayerOnGraphicsWOTmpLayer(g, firstVisibleLayer, visibleImage);
+            paintLayerOnGraphicsWOTmpLayer(g, visibleImage, firstVisibleLayer);
         } else { // we are in the middle of a brush draw
             if (isNormalAndOpaque()) {
                 g.drawImage(visibleImage, getTX(), getTY(), null);
-                tmpDrawingLayer.paintLayer(g, 0, 0);
+                tmpDrawingLayer.paintOn(g, 0, 0);
             } else { // layer is not in normal mode
                 // first create a merged layer-brush image
-                BufferedImage mergedLayerBrushImg = ImageUtils.copyImage(visibleImage);
-                // TODO a canvas-sized image is enough and then less translating is necessary
+                BufferedImage mergedLayerBrushImg = copyImage(visibleImage);
+                // TODO a canvas-sized image would be enough?
                 Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
 
-                tmpDrawingLayer.paintLayer(mergedLayerBrushG, -getTX(), -getTY()); // draw the brush on the layer
+                // draw the brush on the layer
+                tmpDrawingLayer.paintOn(mergedLayerBrushG, -getTX(), -getTY());
                 mergedLayerBrushG.dispose();
 
-                // now draw the merged layer-brush on the target Graphics with the layer composite
+                // now draw the merged layer-brush on the target Graphics
+                // with the layer composite
                 g.drawImage(mergedLayerBrushImg, getTX(), getTY(), null);
             }
         }
     }
 
-    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage visibleImage) {
+    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
+                                                  BufferedImage visibleImage,
+                                                  boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing() && isActive() && !isMaskEditing()) {
             paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
@@ -866,7 +907,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g, BufferedImage visibleImage, boolean firstVisibleLayer) {
+    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g,
+                                                     BufferedImage visibleImage,
+                                                     boolean firstVisibleLayer) {
         if (firstVisibleLayer) {
             // Create a copy of the graphics, because we don't want to
             // mess with the clipping of the original
@@ -984,7 +1027,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
         // the image reference will not be replaced
-        BufferedImage oldImage = ImageUtils.copyImage(image);
+        BufferedImage oldImage = copyImage(image);
 
         LayerMask oldMask = mask;
         MaskViewMode oldMode = comp.getIC().getMaskViewMode();
@@ -992,8 +1035,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         mask.applyToImage(image);
         deleteMask(false);
 
-        History.addEdit(addToHistory, () ->
-                new ApplyLayerMaskEdit(comp, this, oldMask, oldImage, oldMode));
+        if (addToHistory) {
+            History.addEdit(new ApplyLayerMaskEdit(
+                    comp, this, oldMask, oldImage, oldMode));
+        }
 
         updateIconImage();
         return oldImage;

@@ -27,6 +27,8 @@ import java.awt.Shape;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
 /**
  * A {@link BlurredShape} which can take any shape
  */
@@ -40,13 +42,19 @@ public class BlurredAnyShape implements BlurredShape {
     private final double innerRadiusY;
     private final double outerRadiusX;
     private final double outerRadiusY;
-    final byte[] pixels;
+    private final byte[] pixels;
 
     private static WeakReference<BlurredAnyShape> lastRef;
 
-    public static BlurredAnyShape get(ShapeType shapeType, double centerX, double centerY, double innerRadiusX, double innerRadiusY, double outerRadiusX, double outerRadiusY) {
+    public static BlurredAnyShape get(ShapeType shapeType,
+                                      double centerX, double centerY,
+                                      double innerRadiusX, double innerRadiusY,
+                                      double outerRadiusX, double outerRadiusY) {
         if (lastRef == null) {
-            BlurredAnyShape last = new BlurredAnyShape(shapeType, centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+            BlurredAnyShape last = new BlurredAnyShape(shapeType,
+                    centerX, centerY,
+                    innerRadiusX, innerRadiusY,
+                    outerRadiusX, outerRadiusY);
             lastRef = new WeakReference<>(last);
             return last;
         }
@@ -65,12 +73,18 @@ public class BlurredAnyShape implements BlurredShape {
         }
 
         // there was a radius or softness change
-        last = new BlurredAnyShape(shapeType, centerX, centerY, innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
+        last = new BlurredAnyShape(shapeType,
+                centerX, centerY,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
         lastRef = new WeakReference<>(last);
         return last;
     }
 
-    private BlurredAnyShape(ShapeType shapeType, double centerX, double centerY, double innerRadiusX, double innerRadiusY, double outerRadiusX, double outerRadiusY) {
+    private BlurredAnyShape(ShapeType shapeType,
+                            double centerX, double centerY,
+                            double innerRadiusX, double innerRadiusY,
+                            double outerRadiusX, double outerRadiusY) {
         this.shapeType = shapeType;
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
@@ -81,7 +95,7 @@ public class BlurredAnyShape implements BlurredShape {
 
         imgWidth = (int) (2 * outerRadiusX);
         imgHeight = (int) (2 * outerRadiusY);
-        BufferedImage img = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage img = new BufferedImage(imgWidth, imgHeight, TYPE_BYTE_GRAY);
         Graphics2D g2 = img.createGraphics();
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, imgWidth, imgHeight);
@@ -92,7 +106,8 @@ public class BlurredAnyShape implements BlurredShape {
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeType.getShape(new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
+        Shape shape = shapeType.getShape(
+                new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, imgWidth, imgHeight);
@@ -102,7 +117,8 @@ public class BlurredAnyShape implements BlurredShape {
         int numIterations = 3;
         float hRadius = (float) ((int) (shapeStartX / numIterations));
         float vRadius = (float) ((int) (shapeStartY / numIterations));
-        BoxBlurFilter blurFilter = new BoxBlurFilter(hRadius, vRadius, numIterations, "");
+        BoxBlurFilter blurFilter = new BoxBlurFilter(
+                hRadius, vRadius, numIterations, "");
         blurFilter.setPremultiplyAlpha(false);
 
         // it would be complicated to set up a better progress tracking

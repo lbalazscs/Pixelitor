@@ -22,7 +22,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
-import pixelitor.io.Directories;
+import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 
 import javax.swing.*;
@@ -98,7 +98,7 @@ public class SingleDirChooser extends ValidatedPanel {
      */
     public static boolean selectOutputDir(boolean addOutputChooser) {
         SingleDirChooser chooserPanel = new SingleDirChooser("Output Folder:",
-                Directories.getLastSaveDir().getAbsolutePath(),
+                Dirs.getLastSave().getAbsolutePath(),
                 "Select Output Folder", addOutputChooser);
 
         boolean[] selectionWasMade = {false};
@@ -107,7 +107,7 @@ public class SingleDirChooser extends ValidatedPanel {
                 .title("Select Output Folder")
                 .okAction(() -> {
                     File dir = chooserPanel.getSelectedDir();
-                    Directories.setLastSaveDir(dir);
+                    Dirs.setLastSaveIfValid(dir);
                     selectionWasMade[0] = true;
                 })
                 .show();

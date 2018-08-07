@@ -84,10 +84,6 @@ public class BlurredShapeTester extends ParametrizedFilter {
         private double outerRadiusX;
         private double outerRadiusY;
 
-        public static final int BG_BLACK = 0;
-        public static final int BG_WHITE = 1;
-        public static final int BG_TRANSPARENT = 2;
-
         private static final int RGB_BLACK = 0xFF000000;
         private static final int RGB_WHITE = 0xFFFFFFFF;
 
@@ -95,11 +91,6 @@ public class BlurredShapeTester extends ParametrizedFilter {
 
         public Impl() {
             super(NAME);
-        }
-
-        @Override
-        public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            return super.filter(src, dst);
         }
 
         @Override
