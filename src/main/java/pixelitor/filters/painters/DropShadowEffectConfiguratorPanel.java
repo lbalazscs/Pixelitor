@@ -28,8 +28,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
-
 /**
  * A GUI for configuring the "drop shadow" shape effect
  */
@@ -44,7 +42,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
+        SliderSpinner distanceSlider = SliderSpinner.simpleFrom(distanceParam);
         gbh.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
@@ -52,7 +50,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         gbh.addLabelWithControl("Angle:", angleSelector);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
+        SliderSpinner spreadSlider = SliderSpinner.simpleFrom(spreadParam);
         gbh.addLabelWithControl("Spread:", spreadSlider);
 
         ChangeListener changeListener = e -> updateDefaultButtonIcon();

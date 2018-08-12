@@ -56,6 +56,7 @@ public class BrushTool extends BlendingModeBrushTool {
         settingsPanel.addSeparator();
 
         addBlendingModePanel();
+        addLazyMouseDialogButton();
     }
 
     @Override

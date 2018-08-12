@@ -37,19 +37,19 @@ public class SymmetryBrush implements Brush {
     private final Tool tool;
     private BrushType brushType;
     private Symmetry symmetry;
-    private final BrushAffectedArea affectedArea;
+    private final AffectedArea affectedArea;
 
     public SymmetryBrush(Tool tool, BrushType brushType, Symmetry symmetry, int radius) {
         this.tool = tool;
         this.brushType = brushType;
         this.symmetry = symmetry;
-        this.affectedArea = new BrushAffectedArea();
+        this.affectedArea = new AffectedArea();
         numInstantiatedBrushes = symmetry.getNumBrushes();
         assert numInstantiatedBrushes <= MAX_BRUSHES;
         brushTypeChanged(brushType, radius);
     }
 
-    public BrushAffectedArea getAffectedArea() {
+    public AffectedArea getAffectedArea() {
         return affectedArea;
     }
 
@@ -63,7 +63,6 @@ public class SymmetryBrush implements Brush {
     @Override
     public void setRadius(int radius) {
         for(int i = 0; i < numInstantiatedBrushes; i++) {
-            assert brushes[i] != null : "i = " + i + ", numInstantiatedBrushes = " + numInstantiatedBrushes;
             brushes[i].setRadius(radius);
         }
     }
@@ -76,6 +75,11 @@ public class SymmetryBrush implements Brush {
     @Override
     public void onNewStrokePoint(PPoint p) {
         symmetry.onNewStrokePoint(this, p);
+    }
+
+    @Override
+    public void lineConnectTo(PPoint p) {
+        symmetry.lineConnectTo(this, p);
     }
 
     public void brushTypeChanged(BrushType brushType, int radius) {
@@ -117,13 +121,22 @@ public class SymmetryBrush implements Brush {
     }
 
     public void onStrokeStart(int brushNo, PPoint p) {
-        affectedArea.updateAffectedCoordinates(p);
+        if(brushNo == 0) {
+            affectedArea.initAt(p);
+        } else {
+            affectedArea.updateWith(p);
+        }
         brushes[brushNo].onStrokeStart(p);
     }
 
     public void onNewStrokePoint(int brushNo, PPoint p) {
-        affectedArea.updateAffectedCoordinates(p);
+        affectedArea.updateWith(p);
         brushes[brushNo].onNewStrokePoint(p);
+    }
+
+    public void lineConnectTo(int brushNo, PPoint p) {
+        affectedArea.updateWith(p);
+        brushes[brushNo].lineConnectTo(p);
     }
 
     @Override
@@ -140,5 +153,10 @@ public class SymmetryBrush implements Brush {
         node.add(affectedArea.getDebugNode());
 
         return node;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return brushes[0].getPreferredSpacing();
     }
 }

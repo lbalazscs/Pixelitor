@@ -232,11 +232,11 @@ public class ShapesTool extends DragTool {
     }
 
     private void closeEffectsDialog() {
-        GUIUtils.closeDialog(effectsDialog);
+        GUIUtils.closeDialog(effectsDialog, true);
     }
 
     private void closeStrokeDialog() {
-        GUIUtils.closeDialog(strokeSettingsDialog);
+        GUIUtils.closeDialog(strokeSettingsDialog, true);
     }
 
     @Override

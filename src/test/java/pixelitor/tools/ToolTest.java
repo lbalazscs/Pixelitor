@@ -52,7 +52,19 @@ public class ToolTest {
     @Parameter
     public Tool tool;
 
-    @Parameters(name = "{index}: {0}")
+    @Parameter(value = 1)
+    public Alt alt;
+
+    @Parameter(value = 2)
+    public Ctrl ctrl;
+
+    @Parameter(value = 3)
+    public Shift shift;
+
+    @Parameter(value = 4)
+    public MouseButton mouseButton;
+
+    @Parameters(name = "{index}: tool = {0} Tool, alt = {1}, ctrl = {2}, shift = {3}, mouseButton = {4}")
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         Tools.CLONE.setState(CloneTool.State.CLONING);
 
@@ -65,7 +77,16 @@ public class ToolTest {
 //            tool.initSettingsPanel();
             SwingUtilities.invokeAndWait(tool::initSettingsPanel);
 
-            instances.add(new Object[]{tool});
+            // for each combination, create an independent test run
+            for (Alt alt : Alt.values()) {
+                for (Ctrl ctrl : Ctrl.values()) {
+                    for (Shift shift : Shift.values()) {
+                        for (MouseButton mouseButton : MouseButton.values()) {
+                            instances.add(new Object[]{tool, alt, ctrl, shift, mouseButton});
+                        }
+                    }
+                }
+            }
         }
 
         return instances;
@@ -92,32 +113,12 @@ public class ToolTest {
 
     @Test
     public void simpleStroke() {
-        strokeMouseLeftRight();
+        stroke(alt, ctrl, shift, mouseButton);
 
         // also test with space down
         GlobalKeyboardWatch.setSpaceDown(true);
-        strokeMouseLeftRight();
+        stroke(alt, ctrl, shift, mouseButton);
         GlobalKeyboardWatch.setSpaceDown(false);
-    }
-
-    private void strokeMouseLeftRight() {
-        strokeAltYesNo(MouseButton.LEFT);
-        strokeAltYesNo(MouseButton.RIGHT);
-    }
-
-    private void strokeAltYesNo(MouseButton mouseButton) {
-        strokeCtrlYesNo(Alt.NO, mouseButton);
-        strokeCtrlYesNo(Alt.YES, mouseButton);
-    }
-
-    private void strokeCtrlYesNo(Alt alt, MouseButton mouseButton) {
-        strokeShiftYesNo(alt, Ctrl.NO, mouseButton);
-        strokeShiftYesNo(alt, Ctrl.YES, mouseButton);
-    }
-
-    private void strokeShiftYesNo(Alt alt, Ctrl ctrl, MouseButton mouseButton) {
-        stroke(alt, ctrl, Shift.NO, mouseButton);
-        stroke(alt, ctrl, Shift.YES, mouseButton);
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {

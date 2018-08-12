@@ -35,6 +35,7 @@ import pixelitor.layers.LayersPanel;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
+import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
@@ -129,6 +130,10 @@ public class ImageComponent extends JComponent
                 DeselectEdit deselectEdit = oldComp.createDeselectEdit();
                 edit = new LinkedEdit("Reload", oldComp, deselectEdit, replaceEdit);
                 oldComp.deselect(false);
+
+                // call explicitly with the new comp, because at this point oldComp
+                // is not the active comp anymore, so deselect didn't call it
+                SelectionActions.setEnabled(false, comp);
             } else {
                 edit = replaceEdit;
             }

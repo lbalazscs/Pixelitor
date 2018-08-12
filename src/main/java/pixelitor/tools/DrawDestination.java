@@ -30,10 +30,10 @@ import java.awt.image.BufferedImage;
  * a temporary layer (so that the tool can have blending
  * mode and opacity) or directly into the layer image
  */
-public enum DrawStrategy {
+public enum DrawDestination {
     TMP_LAYER {
         @Override
-        public Graphics2D createDrawGraphics(Drawable dr, Composite composite) {
+        public Graphics2D createGraphics(Drawable dr, Composite composite) {
             return dr.createTmpDrawingLayer(composite).getGraphics();
         }
 
@@ -57,7 +57,7 @@ public enum DrawStrategy {
         private BufferedImage copyBeforeStart;
 
         @Override
-        public Graphics2D createDrawGraphics(Drawable dr, Composite composite) {
+        public Graphics2D createGraphics(Drawable dr, Composite composite) {
             // ignores the composite!
             BufferedImage drawImage = dr.getCanvasSizedSubImage();
             return drawImage.createGraphics();
@@ -88,7 +88,7 @@ public enum DrawStrategy {
         }
     };
 
-    public abstract Graphics2D createDrawGraphics(Drawable dr, Composite composite);
+    public abstract Graphics2D createGraphics(Drawable dr, Composite composite);
 
     public abstract void prepareBrushStroke(Drawable dr);
 

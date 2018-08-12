@@ -24,12 +24,14 @@ import pixelitor.utils.debug.DebugNode;
  * An abstract superclass for brushes that work by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
+    private final SpacingStrategy spacingStrategy;
     protected DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
     protected DabsBrush(int radius, SpacingStrategy spacingStrategy,
                         AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         super(radius);
+        this.spacingStrategy = spacingStrategy;
         settings = new DabsBrushSettings(angleSettings, spacingStrategy);
         dabsStrategy = new LinearDabsStrategy(this,
                 spacingStrategy,
@@ -42,8 +44,9 @@ public abstract class DabsBrush extends AbstractBrush {
                         boolean refreshBrushForEachDab) {
         super(radius);
         this.settings = settings;
+        this.spacingStrategy = settings.getSpacingStrategy();
         dabsStrategy = new LinearDabsStrategy(this,
-                settings.getSpacingStrategy(),
+                spacingStrategy,
                 settings.getAngleSettings(),
                 refreshBrushForEachDab);
         settings.registerBrush(this);
@@ -97,9 +100,13 @@ public abstract class DabsBrush extends AbstractBrush {
         AngleSettings angleSettings = settings.getAngleSettings();
         node.addBoolean("Jitter Aware", angleSettings.shouldJitterAngle());
 
-        SpacingStrategy spacingStrategy = settings.getSpacingStrategy();
         node.addDouble("Spacing", spacingStrategy.getSpacing(radius));
 
         return node;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return spacingStrategy.getSpacing(radius);
     }
 }

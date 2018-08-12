@@ -68,8 +68,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         double dx = endX - prevX;
         double dy = endY - prevY;
-        // TODO distance should be a method in PPoint
-        double lineDist = Math.sqrt(dx * dx + dy * dy);
+        double lineDist = end.imDist(prev);
 
         double spacing = spacingStrategy.getSpacing(brush.getRadius());
         double relativeSpacingDist = spacing / lineDist;

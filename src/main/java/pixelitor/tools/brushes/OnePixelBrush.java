@@ -63,4 +63,9 @@ public class OnePixelBrush extends AbstractBrush {
 
         return node;
     }
+
+    @Override
+    public double getPreferredSpacing() {
+        return 0;
+    }
 }

@@ -214,6 +214,15 @@ public class ColorUtils {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
+    public static String debugPackedInt(int argb) {
+        int a = (argb >>> 24) & 0xFF;
+        int r = (argb >>> 16) & 0xFF;
+        int g = (argb >>> 8) & 0xFF;
+        int b = argb & 0xFF;
+
+        return "(a = " + a + ", r = " + r + ", g = " + g + ", b = " + b + ")";
+    }
+
     // should not be called from dialogs because it sets dialogActive to false at the end
     public static Color showColorPickerDialog(PixelitorWindow pw, String title,
                                               Color selectedColor, boolean allowOpacity) {

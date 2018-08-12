@@ -129,6 +129,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 //        showTicksAsFloat();
     }
 
+    public static SliderSpinner simpleFrom(RangeParam model) {
+        return new SliderSpinner(model, TextPosition.NONE, false);
+    }
+
     public void setupTicks() {
         int range = model.getMaximum() - model.getMinimum();
         int minorSpacing;

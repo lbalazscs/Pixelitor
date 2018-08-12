@@ -24,7 +24,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
 /**
- * The "Pixelitor Point" represents a point on an image both in
+ * The "Pixelitor Point" represents an immutable point on an image both in
  * component (mouse) coordinates and image coordinates.
  * <p>
  * Component coordinates are relative to the {@link ImageComponent},
@@ -96,6 +96,16 @@ public abstract class PPoint {
     public void drawLineTo(PPoint end, Graphics2D g) {
         Line2D.Double line = new Line2D.Double(getImX(), getImY(), end.getImX(), end.getImY());
         g.draw(line);
+    }
+
+    public double imDistSq(PPoint other) {
+        double dx = imX - other.imX;
+        double dy = imY - other.imY;
+        return dx * dx + dy * dy;
+    }
+
+    public double imDist(PPoint other) {
+        return Math.sqrt(imDistSq(other));
     }
 
     /**

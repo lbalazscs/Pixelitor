@@ -53,11 +53,13 @@ public abstract class StrokeBrush extends AbstractBrush {
         super.onStrokeStart(p);
         drawStartShape(p);
         updateComp(p);
-        rememberPrevious(p);
+//        rememberPrevious(p);
     }
 
     @Override
     public void onNewStrokePoint(PPoint p) {
+        assert previous != null;
+
         drawLine(previous, p);
         updateComp(p);
         rememberPrevious(p);
@@ -90,5 +92,10 @@ public abstract class StrokeBrush extends AbstractBrush {
         node.addString("Stroke Type", strokeType.toString());
 
         return node;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return 0;
     }
 }

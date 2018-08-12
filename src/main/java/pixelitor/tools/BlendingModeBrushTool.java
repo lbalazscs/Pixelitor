@@ -34,15 +34,15 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
                                     String iconFileName, String toolMessage,
                                     Cursor cursor) {
         super(name, activationKeyChar, iconFileName, toolMessage, cursor);
-        drawStrategy = DrawStrategy.TMP_LAYER;
+        drawDestination = DrawDestination.TMP_LAYER;
     }
 
     public void setupMaskEditing(boolean isMask) {
         if (isMask) {
-            drawStrategy = DrawStrategy.DIRECT;
+            drawDestination = DrawDestination.DIRECT;
             blendingModePanel.setEnabled(false);
         } else {
-            drawStrategy = DrawStrategy.TMP_LAYER;
+            drawDestination = DrawDestination.TMP_LAYER;
             blendingModePanel.setEnabled(true);
         }
     }

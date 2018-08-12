@@ -37,7 +37,6 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * A GUI for configuring an area effect
@@ -66,8 +65,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = new SliderSpinner(
-                opacityRange, NONE, false);
+        SliderSpinner opacitySlider = SliderSpinner.simpleFrom(opacityRange);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");

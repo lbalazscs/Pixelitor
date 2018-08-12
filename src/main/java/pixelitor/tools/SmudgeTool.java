@@ -20,8 +20,10 @@ package pixelitor.tools;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.AffectedArea;
+import pixelitor.tools.brushes.AffectedAreaTracker;
 import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SmudgeBrush;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -42,7 +44,7 @@ public class SmudgeTool extends AbstractBrushTool {
                         "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
                 Cursors.HAND);
 
-        drawStrategy = DrawStrategy.DIRECT;
+        drawDestination = DrawDestination.DIRECT;
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
@@ -52,8 +54,19 @@ public class SmudgeTool extends AbstractBrushTool {
     @Override
     protected void initBrushVariables() {
         smudgeBrush = new SmudgeBrush(getRadius(), CopyBrushType.HARD);
-        brush = new BrushAffectedArea(smudgeBrush);
-        brushAffectedArea = (BrushAffectedArea) brush;
+        affectedArea = new AffectedArea();
+        brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
+    }
+
+    @Override
+    protected void setLazyBrush() {
+        if (lazyMouseCB.isSelected()) {
+            brush = new AffectedAreaTracker(
+                    new LazyMouseBrush(smudgeBrush),
+                    affectedArea);
+        } else {
+            brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
+        }
     }
 
     @Override
@@ -65,6 +78,10 @@ public class SmudgeTool extends AbstractBrushTool {
         addSizeSelector();
         addStrengthSelector();
         addFingerPaintingSelector();
+
+        settingsPanel.addSeparator();
+
+        addLazyMouseDialogButton();
     }
 
     private void addStrengthSelector() {
@@ -90,7 +107,7 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        if (!e.isShiftDown()) { // not a line-click
+        if (!withLine(e)) { // not a line-click
             initStroke(sourceImage, e);
         }
         super.mousePressed(e);

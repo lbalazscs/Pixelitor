@@ -53,7 +53,6 @@ import java.util.Map;
 import static java.awt.Color.WHITE;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * Customization panel for the text filter and for text layers
@@ -212,7 +211,7 @@ public class TextSettingsPanel extends FilterGUI
         int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
 
         RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, 1000);
-        fontSizeSlider = new SliderSpinner(fontSizeParam, NONE, false);
+        fontSizeSlider = SliderSpinner.simpleFrom(fontSizeParam);
         fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
         gbh.addLastControl(fontSizeSlider);

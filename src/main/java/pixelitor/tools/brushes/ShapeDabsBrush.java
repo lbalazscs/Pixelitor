@@ -32,15 +32,6 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * A {@link DabsBrush} where the dabs are filled shapes
  */
 public class ShapeDabsBrush extends DabsBrush {
-    public ShapeDabsBrush(int radius, ShapeType shapeType, SpacingStrategy spacingStrategy,
-                          AngleSettings angleSettings) {
-        super(radius, new ShapeDabsBrushSettings(
-                angleSettings,
-                spacingStrategy,
-                shapeType
-        ), false);
-    }
-
     public ShapeDabsBrush(int radius, ShapeDabsBrushSettings settings) {
         super(radius, settings, false);
     }

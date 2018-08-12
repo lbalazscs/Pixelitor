@@ -48,6 +48,7 @@ public class DialogBuilder {
     private String title;
     private boolean reconfigureGlobalKeyWatch = true;
     private boolean modal = true;
+    private boolean disposeWhenClosing = true;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -135,6 +136,11 @@ public class DialogBuilder {
 
     public DialogBuilder notModal() {
         this.modal = false;
+        return this;
+    }
+
+    public DialogBuilder willBeShownAgain() {
+        disposeWhenClosing = false;
         return this;
     }
 
@@ -326,7 +332,9 @@ public class DialogBuilder {
         }
         // dispose should not be called if the dialog will be re-shown
         // because then AssertJ-Swing doesn't find it even if it is there
-        d.dispose();
+        if (disposeWhenClosing) {
+            d.dispose();
+        }
     }
 
     private void setupDefaults() {

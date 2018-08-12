@@ -24,18 +24,24 @@ import java.awt.FlowLayout;
  * The settings of a {@link OnePixelBrush}
  */
 public class OnePixelBrushSettings implements BrushSettings {
-    private final JCheckBox aa = new JCheckBox();
+    private static final boolean DEFAULT_AA = false;
+
+    private JCheckBox aa;
 
     @Override
     public JPanel getConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
         p.add(new JLabel("Anti-aliasing"));
+        aa = new JCheckBox("", DEFAULT_AA);
         p.add(aa);
 
         return p;
     }
 
     public boolean hasAA() {
-        return aa.isSelected();
+        if (aa != null) {
+            return aa.isSelected();
+        }
+        return DEFAULT_AA;
     }
 }

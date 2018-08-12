@@ -524,6 +524,7 @@ public class AssertJSwingTest {
         // TODO
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         // delete the created layer mask
         runMenuCommand("Delete");
@@ -552,6 +553,7 @@ public class AssertJSwingTest {
                 .enterText("other text");
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
         keyboardUndoRedo();
         assert checkConsistency();
 
@@ -587,6 +589,7 @@ public class AssertJSwingTest {
         log(0, "testing the help menu");
 
         testTipOfTheDay();
+        testInternalState();
         testCheckForUpdate();
         testAbout();
 
@@ -600,6 +603,15 @@ public class AssertJSwingTest {
         findButtonByText(dialog, "Next >").click();
         findButtonByText(dialog, "< Back").click();
         findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
+    }
+
+    private void testInternalState() {
+        runMenuCommand("Internal State...");
+        DialogFixture dialog = findDialogByTitle("Internal State");
+        findButtonByText(dialog, "Copy as Text to the Clipboard").click();
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
     }
 
     private void testColors() {
@@ -627,6 +639,7 @@ public class AssertJSwingTest {
             dialog.resizeTo(new Dimension(700, 500));
         }
         dialog.close();
+        dialog.requireNotVisible();
     }
 
     private void testCheckForUpdate() {
@@ -641,15 +654,16 @@ public class AssertJSwingTest {
 
     private void testAbout() {
         runMenuCommand("About");
-        DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
+        DialogFixture dialog = findDialogByTitle("About Pixelitor");
 
-        JTabbedPaneFixture tabbedPane = aboutDialog.tabbedPane();
+        JTabbedPaneFixture tabbedPane = dialog.tabbedPane();
         tabbedPane.requireTabTitles("About", "Credits", "System Info");
         tabbedPane.selectTab("Credits");
         tabbedPane.selectTab("System Info");
         tabbedPane.selectTab("About");
 
-        aboutDialog.button("ok").click();
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void exit() {
@@ -701,10 +715,10 @@ public class AssertJSwingTest {
         log(1, "testing the preferences dialog");
 
         runMenuCommand("Preferences...");
-        DialogFixture d = findDialogByTitle("Preferences");
+        DialogFixture dialog = findDialogByTitle("Preferences");
 
         // Test "Images In"
-        JComboBoxFixture uiChooser = d.comboBox("uiChooser");
+        JComboBoxFixture uiChooser = dialog.comboBox("uiChooser");
         if (ImageArea.getMode() == FRAMES) {
             uiChooser.requireSelection("Internal Windows");
             uiChooser.selectItem("Tabs");
@@ -716,12 +730,12 @@ public class AssertJSwingTest {
         }
 
         // Test "Layer/Mask Thumb Sizes"
-        JComboBoxFixture thumbSizeCB = d.comboBox("thumbSizeCB");
+        JComboBoxFixture thumbSizeCB = dialog.comboBox("thumbSizeCB");
         thumbSizeCB.selectItem(3);
         thumbSizeCB.selectItem(0);
 
         // Test "Undo/Redo Levels"
-        JTextComponentFixture undoLevelsTF = d.textBox("undoLevelsTF");
+        JTextComponentFixture undoLevelsTF = dialog.textBox("undoLevelsTF");
         boolean undoWas5 = false;
         if (undoLevelsTF.text().equals("5")) {
             undoWas5 = true;
@@ -729,7 +743,7 @@ public class AssertJSwingTest {
         undoLevelsTF.deleteText().enterText("n");
 
         // try to accept the dialog
-        d.button("ok").click();
+        dialog.button("ok").click();
 
         expectAndCloseErrorDialog();
 
@@ -741,10 +755,10 @@ public class AssertJSwingTest {
         }
 
         // try again
-        d.button("ok").click();
+        dialog.button("ok").click();
 
         // this time the preferences dialog should close
-        d.requireNotVisible();
+        dialog.requireNotVisible();
     }
 
     private void testImageMenu() {
@@ -784,27 +798,29 @@ public class AssertJSwingTest {
 
     private void resize(int targetWidth) {
         runMenuCommand("Resize...");
-        DialogFixture resizeDialog = findDialogByTitle("Resize");
+        DialogFixture dialog = findDialogByTitle("Resize");
 
-        JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
+        JTextComponentFixture widthTF = dialog.textBox("widthTF");
         widthTF.deleteText().enterText(String.valueOf(targetWidth));
 
         // no need to also set the height, because
         // constrain proportions is checked by default
 
-        resizeDialog.button("ok").click();
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void testEnlargeCanvas() {
         runMenuCommand("Enlarge Canvas...");
-        DialogFixture enlargeDialog = findDialogByTitle("Enlarge Canvas");
+        DialogFixture dialog = findDialogByTitle("Enlarge Canvas");
 
-        enlargeDialog.slider("north").slideTo(100);
-        enlargeDialog.slider("west").slideTo(100);
-        enlargeDialog.slider("east").slideTo(100);
-        enlargeDialog.slider("south").slideTo(100);
+        dialog.slider("north").slideTo(100);
+        dialog.slider("west").slideTo(100);
+        dialog.slider("east").slideTo(100);
+        dialog.slider("south").slideTo(100);
 
-        enlargeDialog.button("ok").click();
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         keyboardUndoRedoUndo();
     }
@@ -881,23 +897,23 @@ public class AssertJSwingTest {
         log(1, "testing new image");
 
         runMenuCommand("New Image...");
-        DialogFixture d = findDialogByTitle("New Image");
-        d.textBox("widthTF").deleteText().enterText("611");
-        d.textBox("heightTF").deleteText().enterText("e");
+        DialogFixture dialog = findDialogByTitle("New Image");
+        dialog.textBox("widthTF").deleteText().enterText("611");
+        dialog.textBox("heightTF").deleteText().enterText("e");
 
         // try to accept the dialog
-        d.button("ok").click();
+        dialog.button("ok").click();
 
         expectAndCloseErrorDialog();
 
         // correct the error
-        d.textBox("heightTF").deleteText().enterText("411");
+        dialog.textBox("heightTF").deleteText().enterText("411");
 
         // try again
-        d.button("ok").click();
+        dialog.button("ok").click();
 
         // this time the dialog should close
-        d.requireNotVisible();
+        dialog.requireNotVisible();
 
         testingMode.set(this);
     }
@@ -944,7 +960,6 @@ public class AssertJSwingTest {
     private void testExportOpenRaster() {
         log(1, "testing export openraster");
 
-        // precondition: the active image has only 1 layer
         assert numLayersIs(1);
 
         runMenuCommand("Export OpenRaster...");
@@ -988,10 +1003,15 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
         dialog.comboBox().selectItem("Angular Waves");
         dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
+        dialog.requireVisible();
 
         if (quick) {
             dialog.textBox("numSecondsTF").deleteText().enterText("1");
@@ -1004,10 +1024,12 @@ public class AssertJSwingTest {
         }
 
         dialog.button("ok").click(); // render button
+        dialog.requireVisible(); // still visible because of the validation error
 
         // say OK to the folder not empty question
         JOptionPaneFixture optionPane = findJOptionPane();
         optionPane.yesButton().click();
+        dialog.requireNotVisible();
 
         waitForProgressMonitorEnd();
 
@@ -1058,6 +1080,7 @@ public class AssertJSwingTest {
         dialog.textBox("widthTF").setText("200");
         dialog.textBox("heightTF").setText("200");
         dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         assert checkConsistency();
     }
@@ -1076,6 +1099,7 @@ public class AssertJSwingTest {
         Utils.sleep(3, SECONDS);
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // start processing
+        dialog.requireNotVisible();
 
         waitForProgressMonitorEnd();
 
@@ -1142,6 +1166,8 @@ public class AssertJSwingTest {
         }
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
+
         keyboardUndoRedoUndo();
     }
 
@@ -1171,6 +1197,8 @@ public class AssertJSwingTest {
             cb.uncheck();
         }
         dialog.button("ok").click();
+        dialog.requireNotVisible();
+
         testingMode.set(this);
 
         assert checkConsistency();
@@ -1290,6 +1318,7 @@ public class AssertJSwingTest {
         redoButton.requireDisabled();
 
         dialog.close();
+        dialog.requireNotVisible();
     }
 
     private void testFilters() {
@@ -1651,6 +1680,7 @@ public class AssertJSwingTest {
         dialog.checkBox("enabledCB").check();
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void setupStrokeSettingsDialog() {
@@ -1660,6 +1690,7 @@ public class AssertJSwingTest {
         dialog.slider().slideTo(20);
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void testColorPickerTool() {
@@ -1737,9 +1768,29 @@ public class AssertJSwingTest {
         log(1, "testing the brush tool");
 
         pw.toggleButton("Brush Tool Button").click();
+
+        enableLazyMouse(false);
+        testBrushStrokes();
+
+        enableLazyMouse(true);
         testBrushStrokes();
 
         assert checkConsistency();
+    }
+
+    private void enableLazyMouse(boolean b) {
+        findButtonByText(pw, "Lazy Mouse...").click();
+        DialogFixture dialog = findDialogByTitle("Lazy Mouse");
+        if (b) {
+            dialog.checkBox().check();
+            dialog.slider().requireEnabled();
+            dialog.slider().slideToMinimum();
+        } else {
+            dialog.checkBox().uncheck();
+            dialog.slider().requireDisabled();
+        }
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
     }
 
     private void testBrushStrokes() {
@@ -1944,6 +1995,7 @@ public class AssertJSwingTest {
         findButtonByText(dialog, "Change!").click();
         findButtonByText(dialog, "Change!").click();
         findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
 
         keyboardUndoRedoUndo();
     }
@@ -2098,27 +2150,28 @@ public class AssertJSwingTest {
         dragTo(navigator, mouseStartX, mouseStartY);
 
         navigator.close();
+        navigator.requireNotVisible();
     }
 
     private void testNavigatorRightClickPopupMenu() {
         runMenuCommand("Show Navigator...");
-        DialogFixture navigatorDialog = findDialogByTitle("Navigator");
-        navigatorDialog.resizeTo(new Dimension(500, 400));
+        DialogFixture navigator = findDialogByTitle("Navigator");
+        navigator.resizeTo(new Dimension(500, 400));
 
-        JPopupMenuFixture popupMenu = navigatorDialog.showPopupMenu();
+        JPopupMenuFixture popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "Navigator Zoom: 100%");
 
-        popupMenu = navigatorDialog.showPopupMenu();
+        popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "Navigator Zoom: 50%");
 
-        popupMenu = navigatorDialog.showPopupMenu();
+        popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "Navigator Zoom: 25%");
 
-        popupMenu = navigatorDialog.showPopupMenu();
+        popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "Navigator Zoom: 12.5%");
 
-        navigatorDialog.resizeTo(new Dimension(500, 400));
-        popupMenu = navigatorDialog.showPopupMenu();
+        navigator.resizeTo(new Dimension(500, 400));
+        popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "View Box Color...");
 
         DialogFixture colorSelector = findDialogByTitle("Navigator");
@@ -2126,7 +2179,8 @@ public class AssertJSwingTest {
         dragTo(colorSelector, 100, 300);
         findButtonByText(colorSelector, "OK").click();
 
-        navigatorDialog.close();
+        navigator.close();
+        navigator.requireNotVisible();
     }
 
     private void testAutoZoomButtons() {
@@ -2555,6 +2609,7 @@ public class AssertJSwingTest {
                 .enterText("some text");
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void addAdjustmentLayer() {
@@ -2584,6 +2639,7 @@ public class AssertJSwingTest {
     private void expectAndCloseErrorDialog() {
         DialogFixture errorDialog = findDialogByTitle("Error");
         findButtonByText(errorDialog, "OK").click();
+        errorDialog.requireNotVisible();
     }
 
     private void openFileWithDialog(String fileName) {

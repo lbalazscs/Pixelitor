@@ -61,7 +61,7 @@ public class AbstractBrushToolTest {
     private Drawable dr;
     private ImageComponent ic;
 
-    @Parameters(name = "{index}: {0}, mask = {1}")
+    @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() {
         Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
         for (Tool tool : tools) {

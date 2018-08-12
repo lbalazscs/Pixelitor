@@ -26,9 +26,11 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.AffectedArea;
+import pixelitor.tools.brushes.AffectedAreaTracker;
 import pixelitor.tools.brushes.CloneBrush;
 import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
@@ -97,6 +99,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
         settingsPanel.addButton("Transform...", e -> transformButtonPressed());
+
+        addLazyMouseDialogButton();
     }
 
     private void transformButtonPressed() {
@@ -121,8 +125,19 @@ public class CloneTool extends BlendingModeBrushTool {
     @Override
     protected void initBrushVariables() {
         cloneBrush = new CloneBrush(getRadius(), CopyBrushType.SOFT);
-        brush = new BrushAffectedArea(cloneBrush);
-        brushAffectedArea = (BrushAffectedArea) brush;
+        affectedArea = new AffectedArea();
+        brush = new AffectedAreaTracker(cloneBrush, affectedArea);
+    }
+
+    @Override
+    protected void setLazyBrush() {
+        if (lazyMouseCB.isSelected()) {
+            brush = new AffectedAreaTracker(
+                    new LazyMouseBrush(cloneBrush),
+                    affectedArea);
+        } else {
+            brush = new AffectedAreaTracker(cloneBrush, affectedArea);
+        }
     }
 
     @Override
@@ -238,7 +253,7 @@ public class CloneTool extends BlendingModeBrushTool {
     @Override
     protected void closeToolDialogs() {
         super.closeToolDialogs();
-        GUIUtils.closeDialog(transformDialog);
+        GUIUtils.closeDialog(transformDialog, true);
     }
 
     @Override

@@ -240,8 +240,7 @@ public class AutoPaint {
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
             gbh.addLabelWithControl("Stroke Length Variability:",
-                    new SliderSpinner(lengthVariability,
-                            SliderSpinner.TextPosition.NONE, false));
+                    SliderSpinner.simpleFrom(lengthVariability));
 
 
             colorsLabel = new JLabel("Random Colors:");

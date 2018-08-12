@@ -25,6 +25,8 @@ import java.awt.Graphics2D;
 
 /**
  * A brush.
+ * The received coordinates correspond to the mouse events,
+ * they are not translated with the brush radius.
  */
 public interface Brush {
     /**
@@ -39,19 +41,28 @@ public interface Brush {
 
     /**
      * The start of a new brush stroke.
-     *
-     * The given mouse event point is NOT translated with the radius.
      */
     void onStrokeStart(PPoint p);
 
     /**
      * A new drawing mouse event has been received.
-     *
-     * The given mouse event point is NOT translated with the radius.
      */
     void onNewStrokePoint(PPoint p);
+
+    /**
+     * A shift-click happened.
+     */
+    void lineConnectTo(PPoint p);
 
     default void dispose() {}
 
     DebugNode getDebugNode();
+
+    /**
+     * Returns the space between the dabs.
+     *
+     * If the brush doesn't use uniform spacing, it can return
+     * any spacing that looks good, or 0 to skip the decision.
+     */
+    double getPreferredSpacing();
 }

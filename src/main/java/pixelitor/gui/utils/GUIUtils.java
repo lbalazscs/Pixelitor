@@ -91,7 +91,10 @@ public final class GUIUtils {
         new DialogBuilder()
                 .okText("Copy as Text to the Clipboard")
                 .cancelText("Close")
-                .okAction(() -> Utils.copyStringToClipboard(text))
+                .validator(d -> {
+                    Utils.copyStringToClipboard(text);
+                    return false; // prevents the dialog from closing
+                })
                 .title(title)
                 .content(content)
                 .owner(PixelitorWindow.getInstance())
@@ -141,10 +144,12 @@ public final class GUIUtils {
         d.setVisible(true);
     }
 
-    public static void closeDialog(JDialog d) {
+    public static void closeDialog(JDialog d, boolean dispose) {
         if (d != null && d.isVisible()) {
             d.setVisible(false);
-            d.dispose();
+            if (dispose) {
+                d.dispose();
+            }
         }
     }
 

@@ -17,35 +17,25 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Tracks the area affected by a brush for the undo
- * Can be used as a decorator to other brushes
+ * Calculates the area affected by a brush for the undo.
  */
-public class BrushAffectedArea implements Brush {
+public class AffectedArea {
     // affected area coordinates
     private double minX = 0;
     private double minY = 0;
     private double maxX = 0;
     private double maxY = 0;
 
-    private Brush delegate;
-
-    public BrushAffectedArea(Brush delegate) {
-        this.delegate = delegate;
+    public AffectedArea() {
     }
 
-    // this constructor is used when this object is not used as a brush delegate
-    public BrushAffectedArea() {
-    }
-
-    public void updateAffectedCoordinates(PPoint p) {
+    public void updateWith(PPoint p) {
         double x = p.getImX();
         double y = p.getImY();
         if(x > maxX) {
@@ -61,7 +51,7 @@ public class BrushAffectedArea implements Brush {
         }
     }
 
-    public void initAffectedCoordinates(PPoint p) {
+    public void initAt(PPoint p) {
         double x = p.getImX();
         double y = p.getImY();
         minX = x;
@@ -71,10 +61,11 @@ public class BrushAffectedArea implements Brush {
     }
 
     /**
-     * Calculates the rectangle affected by a brush stroke for the undo mechanism
+     * Returns the rectangle affected by a brush stroke for the undo
      */
-    public Rectangle getRectangleAffectedByBrush(int radius) {
-        // To be on the safe side, save a little more than necessary - some brushes have randomness
+    public Rectangle asRectangle(int radius) {
+        // To be on the safe side, save a little more than
+        // necessary - some brushes have randomness
         int radius2 = 2 * radius;
         int radius4 = 4 * radius;
 
@@ -87,42 +78,13 @@ public class BrushAffectedArea implements Brush {
                 (int) saveWidth, (int) saveHeight);
     }
 
-    @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        delegate.setTarget(comp, g);
-    }
-
-    @Override
-    public void setRadius(int radius) {
-        delegate.setRadius(radius);
-    }
-
-    @Override
-    public void onStrokeStart(PPoint p) {
-        updateAffectedCoordinates(p);
-        delegate.onStrokeStart(p);
-    }
-
-    @Override
-    public void onNewStrokePoint(PPoint p) {
-        updateAffectedCoordinates(p);
-        delegate.onNewStrokePoint(p);
-    }
-
-    @Override
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("Brush Affected Area", this);
+        DebugNode node = new DebugNode("Affected Area", this);
 
         node.addDouble("minX", minX);
         node.addDouble("minY", minY);
         node.addDouble("maxX", maxX);
         node.addDouble("maxY", maxY);
-
-        if (delegate != null) {
-            node.add(delegate.getDebugNode());
-        } else {
-            node.addString("delegate", "null");
-        }
 
         return node;
     }

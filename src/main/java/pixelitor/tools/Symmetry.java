@@ -36,6 +36,11 @@ public enum Symmetry {
         public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
             brush.onNewStrokePoint(0, p);
         }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+        }
     }, VERTICAL_MIRROR("Vertical", 2) {
         @Override
         public void onStrokeStart(SymmetryBrush brush, PPoint p) {
@@ -48,6 +53,12 @@ public enum Symmetry {
             brush.onNewStrokePoint(0, p);
             brush.onNewStrokePoint(1, p.mirrorVertically(compWidth));
         }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, p.mirrorVertically(compWidth));
+        }
     }, HORIZONTAL_MIRROR("Horizontal", 2) {
         @Override
         public void onStrokeStart(SymmetryBrush brush, PPoint p) {
@@ -59,6 +70,12 @@ public enum Symmetry {
         public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
             brush.onNewStrokePoint(0, p);
             brush.onNewStrokePoint(1, p.mirrorHorizontally(compHeight));
+        }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, p.mirrorHorizontally(compHeight));
         }
     }, TWO_MIRRORS("Two Mirrors", 4) {
         @Override
@@ -76,6 +93,14 @@ public enum Symmetry {
             brush.onNewStrokePoint(2, p.mirrorHorizontally(compHeight));
             brush.onNewStrokePoint(3, p.mirrorBoth(compWidth, compHeight));
         }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, p.mirrorVertically(compWidth));
+            brush.lineConnectTo(2, p.mirrorHorizontally(compHeight));
+            brush.lineConnectTo(3, p.mirrorBoth(compWidth, compHeight));
+        }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override
         public void onStrokeStart(SymmetryBrush brush, PPoint p) {
@@ -87,6 +112,12 @@ public enum Symmetry {
         public void onNewStrokePoint(SymmetryBrush brush, PPoint p) {
             brush.onNewStrokePoint(0, p);
             brush.onNewStrokePoint(1, p.mirrorBoth(compWidth, compHeight));
+        }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+            brush.lineConnectTo(1, p.mirrorBoth(compWidth, compHeight));
         }
     }, CENTRAL_3("Central 3", 3) {
         private static final double cos120 = -0.5;
@@ -153,6 +184,25 @@ public enum Symmetry {
             PPoint finalPos = getRotatedPoint2(ic, relX, relY);
             brush.onNewStrokePoint(2, finalPos);
         }
+
+        @Override
+        public void lineConnectTo(SymmetryBrush brush, PPoint p) {
+            brush.lineConnectTo(0, p);
+
+            double x = p.getImX();
+            double y = p.getImY();
+            // coordinates relative to the center
+            double relX = x - compCenterX;
+            double relY = compCenterY - y; // calculate in upwards looking coords
+
+            ImageComponent ic = p.getIC();
+
+            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            brush.lineConnectTo(1, p1);
+
+            PPoint finalPos = getRotatedPoint2(ic, relX, relY);
+            brush.lineConnectTo(2, finalPos);
+        }
     };
 
     private static int compWidth;
@@ -175,9 +225,11 @@ public enum Symmetry {
         this.numBrushes = numBrushes;
     }
 
-    public abstract void onStrokeStart(SymmetryBrush symmetryBrush, PPoint p);
+    public abstract void onStrokeStart(SymmetryBrush brush, PPoint p);
 
     public abstract void onNewStrokePoint(SymmetryBrush brush, PPoint p);
+
+    public abstract void lineConnectTo(SymmetryBrush brush, PPoint p);
 
     public int getNumBrushes() {
         return numBrushes;

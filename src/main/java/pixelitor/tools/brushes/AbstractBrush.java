@@ -24,9 +24,13 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
+/**
+ * An abstract base class for the brushes that are
+ * "real" in the sense that they are not decorators
+ */
 public abstract class AbstractBrush implements Brush {
     protected Graphics2D targetG;
-    private Composition comp;
+    protected Composition comp;
 
     protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected int diameter;
@@ -66,6 +70,19 @@ public abstract class AbstractBrush implements Brush {
         rememberPrevious(p);
     }
 
+    @Override
+    public void lineConnectTo(PPoint p) {
+        if(previous == null) {
+            // can happen if the first click (in the tool of after a
+            // symmetry activation) is a shift-click
+            onStrokeStart(p);
+        } else {
+            // most brushes connect with lines anyway, but if there is an
+            // extra smoothing, this must be overridden
+            onNewStrokePoint(p);
+        }
+    }
+
     public int getRadius() {
         return radius;
     }
@@ -75,8 +92,10 @@ public abstract class AbstractBrush implements Brush {
         DebugNode node = new DebugNode("Brush", this);
         node.addClass();
         node.addInt("Radius", radius);
-        node.addDouble("PreviousX", previous.getImX());
-        node.addDouble("PreviousY", previous.getImY());
+        if (previous != null) {
+            node.addDouble("PreviousX", previous.getImX());
+            node.addDouble("PreviousY", previous.getImY());
+        }
 
         return node;
     }
