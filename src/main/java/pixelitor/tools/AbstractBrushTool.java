@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
@@ -26,6 +25,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.AffectedArea;
 import pixelitor.tools.brushes.Brush;
@@ -33,7 +33,6 @@ import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.tools.util.ToolAffectedArea;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -43,7 +42,6 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
@@ -66,7 +64,6 @@ public abstract class AbstractBrushTool extends Tool {
 
     private JComboBox<BrushType> typeSelector;
     protected JCheckBox lazyMouseCB;
-    private final RangeParam lazyMouseDist = LazyMouseBrush.createParam();
     private JDialog lazyMouseDialog;
 
     protected Graphics2D graphics;
@@ -180,19 +177,32 @@ public abstract class AbstractBrushTool extends Tool {
             GUIUtils.showDialog(lazyMouseDialog);
             return;
         }
-        SliderSpinner slider = SliderSpinner.simpleFrom(lazyMouseDist);
-        boolean lazyMouseEnabledByDefault = false;
-        lazyMouseCB = new JCheckBox("", lazyMouseEnabledByDefault);
-        slider.setEnabled(lazyMouseEnabledByDefault);
-
-        lazyMouseCB.addActionListener(e -> setLazyBrush());
-        lazyMouseCB.addActionListener(e -> slider.setEnabled(lazyMouseCB.isSelected()));
-
         JPanel p = new JPanel(new GridBagLayout());
         p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         GridBagHelper gbh = new GridBagHelper(p);
+
+        boolean lazyMouseEnabledByDefault = false;
+        lazyMouseCB = new JCheckBox("", lazyMouseEnabledByDefault);
+        lazyMouseCB.addActionListener(e -> setLazyBrush());
         gbh.addLabelWithControlNoStretch("Enabled:", lazyMouseCB);
-        gbh.addLabelWithControl(lazyMouseDist.getName() + ":", slider);
+
+        RangeParam lazyMouseDist = LazyMouseBrush.createDistParam();
+        SliderSpinner distSlider = SliderSpinner.simpleFrom(lazyMouseDist);
+        distSlider.setName("distSlider");
+        distSlider.setEnabled(lazyMouseEnabledByDefault);
+        gbh.addLabelWithControl(lazyMouseDist.getName() + ":", distSlider);
+
+        RangeParam lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
+        SliderSpinner spacingSlider = SliderSpinner.simpleFrom(lazyMouseSpacing);
+        spacingSlider.setEnabled(lazyMouseEnabledByDefault);
+        spacingSlider.setName("spacingSlider");
+        gbh.addLabelWithControl(lazyMouseSpacing.getName() + ":", spacingSlider);
+
+        lazyMouseCB.addActionListener(e -> {
+            boolean enable = lazyMouseCB.isSelected();
+            distSlider.setEnabled(enable);
+            spacingSlider.setEnabled(enable);
+        });
 
         lazyMouseDialog = new DialogBuilder()
                 .content(p)
@@ -246,11 +256,9 @@ public abstract class AbstractBrushTool extends Tool {
     private void finishBrushStroke(Drawable dr) {
         int radius = getRadius();
         BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
-        ToolAffectedArea affectedArea = new ToolAffectedArea(
-                this.affectedArea.asRectangle(radius),
+        History.addToolArea(affectedArea.asRectangle(radius),
                 originalImage, dr,
                 false, getName());
-        affectedArea.addToHistory();
 
         if (graphics != null) {
             graphics.dispose();
@@ -463,11 +471,11 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     // TODO indicate the size of the brush
-    @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas,
-                               ImageComponent ic,
-                               AffineTransform componentTransform,
-                               AffineTransform imageTransform) {
+//    @Override
+//    public void paintOverImage(Graphics2D g2, Canvas canvas,
+//                               ImageComponent ic,
+//                               AffineTransform componentTransform,
+//                               AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();
 //            int y = userDrag.getCoEndY();
@@ -482,7 +490,7 @@ public abstract class AbstractBrushTool extends Tool {
 //            g2.setColor(Color.WHITE);
 //            g2.draw(shape);
 //        }
-    }
+//    }
 //    private static final Stroke stroke3 = new BasicStroke(3);
 //    private static final Stroke stroke1 = new BasicStroke(1);
 

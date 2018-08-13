@@ -34,6 +34,10 @@ public class LazyMouseBrush implements Brush {
     private static final int DEFAULT_DIST = 30;
     private static final int MAX_DIST = 200;
 
+    private static final int MIN_SPACING = 1;
+    private static final int DEFAULT_SPACING = 3;
+    private static final int MAX_SPACING = 10;
+
     private final Brush delegate;
     private double mouseX;
     private double mouseY;
@@ -41,6 +45,7 @@ public class LazyMouseBrush implements Brush {
     private double drawY;
     private ImageComponent ic;
     private double spacing;
+    private static int defaultSpacing = DEFAULT_SPACING;
 
     // the lazy mouse distance is shared between the tools
     private static int minDist = DEFAULT_DIST;
@@ -48,15 +53,23 @@ public class LazyMouseBrush implements Brush {
 
     public LazyMouseBrush(Brush delegate) {
         this.delegate = delegate;
-        spacing = delegate.getPreferredSpacing();
-        if (spacing == 0) {
-            spacing = 3;
-        }
+        calcSpacing();
     }
 
     private static void setDist(int value) {
         minDist = value;
         minDist2 = value * value;
+    }
+
+    private static void setDefaultSpacing(int value) {
+        defaultSpacing = value;
+    }
+
+    private void calcSpacing() {
+        spacing = delegate.getPreferredSpacing();
+        if (spacing == 0) {
+            spacing = defaultSpacing;
+        }
     }
 
     @Override
@@ -80,6 +93,8 @@ public class LazyMouseBrush implements Brush {
 
         drawX = mouseX;
         drawY = mouseY;
+
+        calcSpacing();
     }
 
     @Override
@@ -131,11 +146,19 @@ public class LazyMouseBrush implements Brush {
         return delegate.getPreferredSpacing();
     }
 
-    public static RangeParam createParam() {
+    public static RangeParam createDistParam() {
         RangeParam param = new RangeParam(
                 "Distance (px)", MIN_DIST, minDist, MAX_DIST);
         param.setAdjustmentListener(() ->
                 LazyMouseBrush.setDist(param.getValue()));
+        return param;
+    }
+
+    public static RangeParam createSpacingParam() {
+        RangeParam param = new RangeParam(
+                "Spacing (px)", MIN_SPACING, defaultSpacing, MAX_SPACING);
+        param.setAdjustmentListener(() ->
+                LazyMouseBrush.setDefaultSpacing(param.getValue()));
         return param;
     }
 }

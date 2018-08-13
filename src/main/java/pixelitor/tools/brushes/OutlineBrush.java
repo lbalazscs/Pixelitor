@@ -20,31 +20,30 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.geom.Rectangle2D;
+public abstract class OutlineBrush extends StrokeBrush {
+    private double origRadius;
 
-import static java.awt.BasicStroke.CAP_SQUARE;
-import static java.awt.BasicStroke.JOIN_BEVEL;
-
-/**
- * The "Squares" brush
- */
-public class OutlineSquareBrush extends OutlineBrush {
-    public OutlineSquareBrush(int radius) {
-        super(radius, CAP_SQUARE, JOIN_BEVEL);
+    protected OutlineBrush(int radius, int cap, int join) {
+        super(radius, StrokeType.OUTLINE, cap, join);
     }
 
     @Override
-    public void drawStartShape(PPoint p) {
-        double x = p.getImX();
-        double y = p.getImY();
-        Stroke savedStroke = targetG.getStroke();
+    public void setRadius(int radius) {
+        super.setRadius(radius);
+        origRadius = radius;
+    }
 
-        Shape rect = new Rectangle2D.Double(x - radius, y - radius, diameter, diameter);
-        targetG.setStroke(StrokeType.OUTLINE.getInnerStroke());
-        targetG.draw(rect);
+    @Override
+    public void onNewStrokePoint(PPoint p) {
+        double dist = previous.imDist(p);
 
-        targetG.setStroke(savedStroke);
+        double scaled = origRadius / Math.sqrt(dist);
+
+        radius = (int) scaled;
+        diameter = (int) (2 * scaled);
+
+        currentStroke = createStroke((float) scaled);
+
+        super.onNewStrokePoint(p);
     }
 }

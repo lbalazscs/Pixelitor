@@ -36,6 +36,8 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -102,6 +104,43 @@ public class History {
             Events.postAddToHistoryEvent(edit);
             ConsistencyChecks.checkAll(edit.getComp(), false);
         }
+    }
+
+    /**
+     * Save only the affected area for undo.
+     */
+    public static void addToolArea(Rectangle rect, BufferedImage origImage,
+                                   Drawable dr, boolean relativeToImage,
+                                   String toolName) {
+        assert rect.width > 0 : "rectangle.width = " + rect.width;
+        assert rect.height > 0 : "rectangle.height = " + rect.height;
+
+        if (!relativeToImage) {
+            // if the coordinates are relative to the canvas,
+            // translate them to be relative to the image
+            int dx = -dr.getTX();
+            int dy = -dr.getTY();
+            rect.translate(dx, dy);
+        }
+
+        rect = SwingUtilities.computeIntersection(0, 0,
+                origImage.getWidth(), origImage.getHeight(), // full image bounds
+                rect
+        );
+
+        assert (origImage != null);
+        if (rect.isEmpty()) {
+            return;
+        }
+
+        Composition comp = dr.getComp();
+
+        // we could also intersect with the selection bounds,
+        // but typically the extra savings would be minimal
+
+        PartialImageEdit edit = new PartialImageEdit(toolName, comp,
+                dr, origImage, rect, false);
+        addEdit(edit);
     }
 
     public static String getUndoPresentationName() {

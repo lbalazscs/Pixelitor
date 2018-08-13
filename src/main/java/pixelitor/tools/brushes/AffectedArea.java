@@ -26,7 +26,7 @@ import java.awt.Rectangle;
  * Calculates the area affected by a brush for the undo.
  */
 public class AffectedArea {
-    // affected area coordinates
+    // affected area coordinates (in image space)
     private double minX = 0;
     private double minY = 0;
     private double maxX = 0;
@@ -35,6 +35,21 @@ public class AffectedArea {
     public AffectedArea() {
     }
 
+    /**
+     * Initialize the area with a brush position
+     */
+    public void initAt(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
+        minX = x;
+        minY = y;
+        maxX = x;
+        maxY = y;
+    }
+
+    /**
+     * Update the area with a brush position
+     */
     public void updateWith(PPoint p) {
         double x = p.getImX();
         double y = p.getImY();
@@ -49,15 +64,6 @@ public class AffectedArea {
         } else if(y < minY) {
             minY = y;
         }
-    }
-
-    public void initAt(PPoint p) {
-        double x = p.getImX();
-        double y = p.getImY();
-        minX = x;
-        minY = y;
-        maxX = x;
-        maxY = y;
     }
 
     /**

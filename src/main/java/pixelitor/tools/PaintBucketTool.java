@@ -20,9 +20,9 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.util.ToolAffectedArea;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
@@ -155,9 +155,8 @@ public class PaintBucketTool extends Tool {
         }
 
         if (replacedArea != null) { // something was replaced
-            ToolAffectedArea affectedArea = new ToolAffectedArea(replacedArea,
+            History.addToolArea(replacedArea,
                     backupForUndo, dr, true, getName());
-            affectedArea.addToHistory();
 
             if (thereIsSelection) {
                 Graphics2D g = image.createGraphics();

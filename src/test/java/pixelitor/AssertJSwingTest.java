@@ -1783,11 +1783,13 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Lazy Mouse");
         if (b) {
             dialog.checkBox().check();
-            dialog.slider().requireEnabled();
-            dialog.slider().slideToMinimum();
+            dialog.slider("distSlider").requireEnabled();
+            dialog.slider("distSlider").slideToMinimum();
+            dialog.slider("spacingSlider").requireEnabled();
         } else {
             dialog.checkBox().uncheck();
-            dialog.slider().requireDisabled();
+            dialog.slider("distSlider").requireDisabled();
+            dialog.slider("spacingSlider").requireDisabled();
         }
         findButtonByText(dialog, "Close").click();
         dialog.requireNotVisible();

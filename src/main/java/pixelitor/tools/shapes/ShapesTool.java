@@ -35,7 +35,6 @@ import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.tools.util.ToolAffectedArea;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
@@ -190,9 +189,8 @@ public class ShapesTool extends DragTool {
 
             if (!shapeBounds.isEmpty()) {
                 BufferedImage originalImage = dr.getImage();
-                ToolAffectedArea affectedArea = new ToolAffectedArea(shapeBounds,
+                History.addToolArea(shapeBounds,
                         originalImage, dr, false, getName());
-                affectedArea.addToHistory();
             }
             paintShape(dr, currentShape);
 

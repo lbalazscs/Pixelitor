@@ -143,10 +143,10 @@ public final class SelectionActions {
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
         assert comp == null || ImageComponents.getActiveCompOrNull() == comp;
 
         if (RandomGUITest.isRunning()) {
+            assert EventQueue.isDispatchThread() : "not EDT thread";
             if (comp != null) {
                 boolean hasSelection = comp.hasSelection();
                 if (hasSelection != b) {

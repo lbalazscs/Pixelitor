@@ -27,7 +27,7 @@ import java.awt.Graphics2D;
  * A decorator for other brushes that tracks their affected area.
  */
 public class AffectedAreaTracker implements Brush {
-    private Brush delegate;
+    private final Brush delegate;
     private final AffectedArea affectedArea;
 
     public AffectedAreaTracker(Brush delegate, AffectedArea affectedArea) {

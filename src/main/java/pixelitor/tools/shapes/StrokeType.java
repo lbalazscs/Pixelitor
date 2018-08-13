@@ -39,7 +39,7 @@ import java.awt.Stroke;
 public enum StrokeType {
     BASIC("Basic") {
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BasicStroke(width, cap, join, 1.5f,
                     dashFloats,
                     0.0f);
@@ -53,8 +53,8 @@ public enum StrokeType {
         private Stroke tmp;
 
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
-            tmp = BASIC.getStroke(width, cap, join, dashFloats);
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
+            tmp = BASIC.createStroke(width, cap, join, dashFloats);
             return new ZigzagStroke(tmp, width, width);
         }
 
@@ -72,7 +72,7 @@ public enum StrokeType {
         private WobbleStroke wobbleStroke;
 
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             if (wobbleStroke == null) {
                 wobbleStroke = new WobbleStroke(0.5f, width, 10);
                 lastWidth = width;
@@ -96,7 +96,7 @@ public enum StrokeType {
         }
     }, CHARCOAL("Charcoal (can be slow!)") {
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CharcoalStroke(width, 0.5f);
         }
 
@@ -106,7 +106,7 @@ public enum StrokeType {
         }
     }, BRISTLE("Bristle (can be slow!)") {
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BristleStroke(width, 0.5f);
         }
 
@@ -116,7 +116,7 @@ public enum StrokeType {
         }
     }, OUTLINE("Outline") {
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CompositeStroke(
                     new BasicStroke(width, cap, join),
                     innerOutlineStroke);
@@ -133,7 +133,7 @@ public enum StrokeType {
         }
     }, CALLIGRAPHY("Calligraphy") {
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CalligraphyStroke(width);
         }
 
@@ -145,7 +145,7 @@ public enum StrokeType {
         private ShapeType shapeType;
 
         @Override
-        public Stroke getStroke(float width, int cap, int join, float[] dashFloats) {
+        public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             float advance = width * 1.2f;
             if (dashFloats != null) {
                 advance *= 2.0f; // simulate dashes
@@ -194,7 +194,7 @@ public enum StrokeType {
         // do nothing by default, overridden in SHAPE
     }
 
-    public abstract Stroke getStroke(float width, int cap, int join, float[] dashFloats);
+    public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
 
     /**
      * The real thickness of some strokes (which is relevant for the undo) is bigger than

@@ -77,12 +77,16 @@ public abstract class StrokeBrush extends AbstractBrush {
     protected void drawLine(PPoint start, PPoint end) {
         int thickness = 2*radius;
         if(thickness != lastDiameter) {
-            currentStroke = strokeType.getStroke(thickness, cap, join, null);
+            currentStroke = createStroke(thickness);
             lastDiameter = thickness;
         }
 
         targetG.setStroke(currentStroke);
         start.drawLineTo(end, targetG);
+    }
+
+    protected Stroke createStroke(float thickness) {
+        return strokeType.createStroke(thickness, cap, join, null);
     }
 
     @Override

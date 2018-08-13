@@ -132,7 +132,7 @@ public class StrokeParam extends AbstractFilterParam {
             dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
         }
 
-        return getStrokeType().getStroke(
+        return getStrokeType().createStroke(
                 strokeWidth,
                 strokeCapParam.getSelected().getValue(),
                 strokeJoinParam.getSelected().getValue(),

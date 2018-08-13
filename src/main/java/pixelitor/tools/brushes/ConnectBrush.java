@@ -135,7 +135,8 @@ public class ConnectBrush extends AbstractBrush {
     }
 
     private static class HistoryPoint {
-        double x, y;
+        final double x;
+        final double y;
 
         HistoryPoint(double x, double y) {
             this.x = x;

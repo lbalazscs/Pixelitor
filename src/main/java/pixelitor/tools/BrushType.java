@@ -47,10 +47,12 @@ public enum BrushType {
         public Brush createBrush(Tool tool, int radius) {
             return new WobbleBrush(radius);
         }
-    }, CALLIGRAPHY("Calligraphy", false) {
+    }, CALLIGRAPHY("Calligraphy", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            return new CalligraphyBrush(radius);
+            CalligraphyBrushSettings settings = (CalligraphyBrushSettings) findSettings(
+                    tool, CalligraphyBrushSettings::new);
+            return new CalligraphyBrush(radius, settings);
         }
     }, REALISTIC("Realistic", false) {
         @Override
@@ -127,7 +129,7 @@ public enum BrushType {
 
     // The settings must be shared between the symmetry-brushes of a
     // tool, but they must be different between the different tools
-    protected Map<Tool, BrushSettings> settingsByTool;
+    private Map<Tool, BrushSettings> settingsByTool;
 
     BrushType(String guiName, boolean hasSettings) {
         this.guiName = guiName;

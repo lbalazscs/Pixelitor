@@ -274,4 +274,12 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     public void addChangeListener(ChangeListener listener) {
         slider.addChangeListener(listener);
     }
+
+    // overridden so that AssertJSwing tests find the components easily
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        slider.setName(name);
+        spinner.setName(name);
+    }
 }

@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import com.bric.awt.CalligraphyStroke;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
@@ -25,37 +26,50 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 
 /**
- * The calligraphy brush based on CalligraphyStroke
+ * The calligraphy brush based on {@link CalligraphyStroke}
  */
 public class CalligraphyBrush extends StrokeBrush {
-    private static final Stroke pointStroke = new BasicStroke(1.2f);
+    private static final Stroke pointStroke = new BasicStroke(2.0f);
+    private final CalligraphyBrushSettings settings;
 
-    public CalligraphyBrush(int radius) {
+    public CalligraphyBrush(int radius, CalligraphyBrushSettings settings) {
         super(radius, StrokeType.CALLIGRAPHY);
+        this.settings = settings;
+    }
+
+    @Override
+    public void onStrokeStart(PPoint p) {
+        currentStroke = createStroke(2 * radius);
+
+        super.onStrokeStart(p);
+    }
+
+    @Override
+    protected Stroke createStroke(float thickness) {
+        double angle = settings.getAngle();
+        return new CalligraphyStroke(thickness, (float) angle);
     }
 
     @Override
     protected void drawStartShape(PPoint p) {
-        // TODO these calculations could be simpler
+        double angle = settings.getAngle();
 
-        float projectedShift = diameter / 1.4142f;
-        float projectedStart = (diameter - projectedShift) / 2.0f;
-        float projectedEnd = projectedStart + projectedShift;
+        // 2.0 is an experimentally found value for the best gap-filling...
+        double dx = (radius - 2.0) * Math.cos(angle);
+        double dy = (radius - 2.0) * Math.sin(angle);
 
         double x = p.getImX();
         double y = p.getImY();
 
-        double startX = x + projectedStart - radius;
-        double startY = y + projectedEnd - radius;
-        double endX = x + projectedEnd - radius;
-        double endY = y + projectedStart - radius;
+        double startX = x + dx;
+        double startY = y + dy;
+        double endX = x - dx;
+        double endY = y - dy;
 
         targetG.setStroke(pointStroke);
 
-        // for some reasons (rounding errors previously?) these ones have to be added and subtracted
-//        targetG.drawLine(startX + 1, startY - 1, endX - 1, endY + 1);
-        // TODO is this necessary after the PPoint refactoring?
-        Line2D.Double line = new Line2D.Double(startX + 1, startY - 1, endX - 1, endY + 1);
+        Line2D.Double line = new Line2D.Double(startX, startY, endX, endY);
+
         targetG.draw(line);
 
         if (currentStroke != null) {
@@ -68,7 +82,6 @@ public class CalligraphyBrush extends StrokeBrush {
         super.drawLine(start, end);
 
         // for some reason this must be called, otherwise gaps remain
-        // TODO still true?
         drawStartShape(start);
     }
 }
