@@ -489,7 +489,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     protected void closeToolDialogs() {
         closeBrushSettingsDialog();
-        GUIUtils.closeDialog(settingsDialog, false);
+        GUIUtils.closeDialog(lazyMouseDialog, false);
     }
 
     private void closeBrushSettingsDialog() {

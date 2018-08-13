@@ -57,7 +57,6 @@ import static java.lang.String.format;
  * The main class
  */
 public class Pixelitor {
-    private static final CompletableFuture<?>[] EMPTY_ARRAY = new CompletableFuture<?>[0];
 
     private Pixelitor() {
         // should not be instantiated
@@ -149,7 +148,7 @@ public class Pixelitor {
             }
         }
 
-        return CompletableFuture.allOf(openedFiles.toArray(EMPTY_ARRAY));
+        return Utils.allOfList(openedFiles);
     }
 
     public static void exitApp(PixelitorWindow pw) {
@@ -174,6 +173,8 @@ public class Pixelitor {
             // in the final builds nothing should run
             return;
         }
+
+//        SplashImageCreator.saveManySplashImages();
 
 //        addTestPath();
 

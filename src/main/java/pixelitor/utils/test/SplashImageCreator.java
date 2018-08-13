@@ -31,7 +31,7 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.ImageComponent;
 import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
@@ -49,6 +49,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
@@ -67,42 +68,62 @@ public class SplashImageCreator {
     }
 
     public static void saveManySplashImages() {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
         boolean okPressed = SingleDirChooser.selectOutputDir(true);
         if (!okPressed) {
             return;
         }
-        int numCreatedImages = 32;
-
+        File lastSaveDir = Dirs.getLastSave();
         MessageHandler msgHandler = Messages.getMessageHandler();
+        int numCreatedImages = 32;
         String msg = format("Save %d Splash Images: ", numCreatedImages);
         ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
-        File lastSaveDir = Dirs.getLastSave();
 
+        CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
         for (int i = 0; i < numCreatedImages; i++) {
-            OutputFormat outputFormat = OutputFormat.getLastUsed();
-
-            String fileName = format("splash%04d.%s", i, outputFormat.toString());
-
-            progressHandler.updateProgress(i);
-
-            createSplashImage();
-
-            ImageComponents.onActiveICAndComp((ic, comp) -> {
-                ic.paintImmediately(ic.getBounds());
-                File f = new File(lastSaveDir, fileName);
-
-                SaveSettings saveSettings = new SaveSettings(outputFormat, f);
-                comp.saveAsync(saveSettings, false).join();
-
-                ic.close();
-                ValueNoise.reseed();
-            });
+            int seqNo = i;
+            cf = cf.thenCompose(v -> makeSplashAsync(lastSaveDir, progressHandler, seqNo));
         }
-        progressHandler.stopProgress();
-        msgHandler.showInStatusBar(format("Finished saving splash images to %s", lastSaveDir));
+        cf.thenRunAsync(() -> {
+                    progressHandler.stopProgress();
+                    msgHandler.showInStatusBar(format(
+                            "Finished saving %d splash images to %s",
+                            numCreatedImages, lastSaveDir));
+                }, EventQueue::invokeLater);
+
     }
 
-    public static void createSplashImage() {
+    private static CompletableFuture<Void> makeSplashAsync(File lastSaveDir,
+                                                           ProgressHandler progressHandler,
+                                                           int seqNo) {
+        return CompletableFuture.supplyAsync(() -> {
+            progressHandler.updateProgress(seqNo);
+
+            OutputFormat outputFormat = OutputFormat.getLastUsed();
+
+            String fileName = format("splash%04d.%s", seqNo, outputFormat.toString());
+
+            ValueNoise.reseed();
+            Composition comp = createSplashImage();
+            ImageComponent ic = comp.getIC();
+
+            ic.paintImmediately(ic.getBounds());
+
+            File f = new File(lastSaveDir, fileName);
+            comp.setFile(f);
+
+            return comp;
+        }, EventQueue::invokeLater).thenCompose(comp -> {
+            SaveSettings saveSettings = new SaveSettings(
+                    OutputFormat.getLastUsed(), comp.getFile());
+            return comp.saveAsync(saveSettings, false)
+                    // closed here because here we have a comp reference
+                    .thenAcceptAsync(v -> comp.getIC().close(), EventQueue::invokeLater);
+        });
+    }
+
+    public static Composition createSplashImage() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
         Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
@@ -144,6 +165,7 @@ public class SplashImageCreator {
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
 //        addRasterizedTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
 
+        return comp;
     }
 
     private static void addDropShadow(ImageLayer layer) {

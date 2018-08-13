@@ -42,7 +42,7 @@ public enum Build {
 
     public static Build CURRENT = FINAL;
 
-    public static final String VERSION_NUMBER = "4.1.0";
+    public static final String VERSION_NUMBER = "4.2.0";
 
     // Lazy because it should be calculated after the CURRENT is set.
     private static final Lazy<String> fixTitle = Lazy.of(Build::calcFixTitle);

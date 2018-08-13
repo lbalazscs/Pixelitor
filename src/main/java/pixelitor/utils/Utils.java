@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -67,6 +68,7 @@ import static java.lang.String.format;
 public final class Utils {
     private static final int BYTES_IN_1_KILOBYTE = 1_024;
     private static final int BYTES_IN_1_MEGABYTE = 1_048_576;
+    private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
 
     private Utils() {
     }
@@ -480,6 +482,10 @@ public final class Utils {
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         // the results are cached, no need to cache them here
         localGE.getAvailableFontFamilyNames();
+    }
+
+    public static <T> CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
+        return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }
 }
 
