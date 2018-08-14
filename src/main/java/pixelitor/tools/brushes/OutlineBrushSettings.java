@@ -20,30 +20,27 @@ package pixelitor.tools.brushes;
 import javax.swing.*;
 import java.awt.FlowLayout;
 
-/**
- * The settings of a {@link OnePixelBrush}
- */
-public class OnePixelBrushSettings implements BrushSettings {
-    private static final boolean DEFAULT_AA = false;
+public class OutlineBrushSettings implements BrushSettings {
+    private static final boolean DEFAULT_SPEED_DEPENDENCE = true;
 
-    private JCheckBox aa;
+    private JCheckBox dependsOnSpeedCB;
 
     @Override
     public JPanel getConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
-        p.add(new JLabel("Anti-aliasing"));
-        if (aa == null) {
-            aa = new JCheckBox("", DEFAULT_AA);
+        p.add(new JLabel("Radius depends on mouse speed"));
+        if (dependsOnSpeedCB == null) {
+            dependsOnSpeedCB = new JCheckBox("", DEFAULT_SPEED_DEPENDENCE);
         }
-        p.add(aa);
+        p.add(dependsOnSpeedCB);
 
         return p;
     }
 
-    public boolean hasAA() {
-        if (aa != null) {
-            return aa.isSelected();
+    public boolean dependsOnSpeed() {
+        if (dependsOnSpeedCB != null) {
+            return dependsOnSpeedCB.isSelected();
         }
-        return DEFAULT_AA;
+        return DEFAULT_SPEED_DEPENDENCE;
     }
 }

@@ -31,8 +31,8 @@ import static java.awt.BasicStroke.JOIN_ROUND;
  * The "Circles" brush
  */
 public class OutlineCircleBrush extends OutlineBrush {
-    public OutlineCircleBrush(int radius) {
-        super(radius, CAP_ROUND, JOIN_ROUND);
+    public OutlineCircleBrush(int radius, OutlineBrushSettings settings) {
+        super(settings, radius, CAP_ROUND, JOIN_ROUND);
     }
 
     @Override

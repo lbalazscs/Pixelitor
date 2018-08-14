@@ -21,10 +21,12 @@ import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
 public abstract class OutlineBrush extends StrokeBrush {
+    private final OutlineBrushSettings settings;
     private double origRadius;
 
-    protected OutlineBrush(int radius, int cap, int join) {
+    protected OutlineBrush(OutlineBrushSettings settings, int radius, int cap, int join) {
         super(radius, StrokeType.OUTLINE, cap, join);
+        this.settings = settings;
     }
 
     @Override
@@ -35,14 +37,16 @@ public abstract class OutlineBrush extends StrokeBrush {
 
     @Override
     public void onNewStrokePoint(PPoint p) {
-        double dist = previous.imDist(p);
+        if (settings.dependsOnSpeed()) {
+            double dist = previous.imDist(p);
 
-        double scaled = origRadius / Math.sqrt(dist);
+            double scaled = origRadius / Math.sqrt(dist);
 
-        radius = (int) scaled;
-        diameter = (int) (2 * scaled);
+            radius = (int) scaled;
+            diameter = (int) (2 * scaled);
 
-        currentStroke = createStroke((float) scaled);
+            currentStroke = createStroke((float) scaled);
+        }
 
         super.onNewStrokePoint(p);
     }

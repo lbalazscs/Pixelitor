@@ -100,15 +100,19 @@ public enum BrushType {
                     tool, ConnectBrushSettings::new);
             return new ConnectBrush(settings, radius);
         }
-    }, OUTLINE_CIRCLE("Circles", false) {
+    }, OUTLINE_CIRCLE("Circles", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            return new OutlineCircleBrush(radius);
+            OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
+                    tool, OutlineBrushSettings::new);
+            return new OutlineCircleBrush(radius, settings);
         }
-    }, OUTLINE_SQUARE("Squares", false) {
+    }, OUTLINE_SQUARE("Squares", true) {
         @Override
         public Brush createBrush(Tool tool, int radius) {
-            return new OutlineSquareBrush(radius);
+            OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
+                    tool, OutlineBrushSettings::new);
+            return new OutlineSquareBrush(radius, settings);
         }
     }, ONE_PIXEL("One Pixel", true) {
         @Override
