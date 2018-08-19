@@ -29,16 +29,19 @@ import java.awt.event.MouseEvent;
  * A pen tool interaction mode where a path can be edited
  */
 public class PathEditor implements PenToolMode {
-    private final Path path;
+    private Path path;
     private DraggablePoint activeDraggablePoint;
 
     public PathEditor(Path path) {
+        assert path != null;
         this.path = path;
     }
 
     @Override
     public void paint(Graphics2D g) {
-        path.paintForEditing(g);
+        if (path != null) {
+            path.paintForEditing(g);
+        }
     }
 
     @Override
@@ -99,5 +102,10 @@ public class PathEditor implements PenToolMode {
             }
         }
         return false;
+    }
+
+    @Override
+    public void setPath(Path path) {
+        this.path = path;
     }
 }

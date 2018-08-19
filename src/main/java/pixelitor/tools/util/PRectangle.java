@@ -97,7 +97,7 @@ public class PRectangle {
         coRect = Shapes.toPositiveRect(coRect);
     }
 
-    public void viewSizeChanged(View view) {
+    public void coCoordsChanged(View view) {
         recalcCo(view);
     }
 

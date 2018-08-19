@@ -20,13 +20,13 @@ import java.awt.geom.Path2D;
 
 // not finished
 public class SkullShape extends AbstractShape {
-    public SkullShape(int x, int y, int width, int height) {
-        float cp1X; // x of control point 1
-        float cp1Y; // y of control point 1
-        float cp2X; // x of control point 2
-        float cp2Y; // y of control point 2
-        float epX;  // x of end point
-        float epY;  // y of end point
+    public SkullShape(double x, double y, double width, double height) {
+        double cp1X; // x of control point 1
+        double cp1Y; // y of control point 1
+        double cp2X; // x of control point 2
+        double cp2Y; // y of control point 2
+        double epX;  // x of end point
+        double epY;  // y of end point
 
         path.setWindingRule(Path2D.WIND_EVEN_ODD);
 

@@ -94,8 +94,6 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import static java.awt.event.InputEvent.BUTTON1_MASK;
-import static java.awt.event.InputEvent.BUTTON3_MASK;
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
@@ -116,17 +114,17 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
  * can control other apps as well if they escape.
  */
 public class RandomGUITest {
-    private final static Random rand = new Random();
+    private static final Random rand = new Random();
 
     // set to null to select random tools
-    private static final Tool preferredTool = Tools.GRADIENT;
+    private static final Tool preferredTool = Tools.BRUSH;
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
     private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT
             = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
 
-    private static boolean continueRunning = true;
+    private static boolean keepRunning = true;
 
     private static final WeightedCaller weightedCaller = new WeightedCaller();
     private static final boolean PRINT_MEMORY = false;
@@ -166,10 +164,10 @@ public class RandomGUITest {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
-                continueRunning = false;
+                keepRunning = false;
             }
         }));
-        continueRunning = true;
+        keepRunning = true;
 
         // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
@@ -210,7 +208,7 @@ public class RandomGUITest {
     }
 
     public static void stop() {
-        continueRunning = false;
+        keepRunning = false;
         PixelitorWindow.getInstance().setAlwaysOnTop(false);
     }
 
@@ -229,8 +227,7 @@ public class RandomGUITest {
                         int percent = 100 * i / numTests;
                         System.out.print(percent + "% ");
                         if (PRINT_MEMORY) {
-                            String memoryString = new MemoryInfo().toString();
-                            System.out.println(memoryString);
+                            System.out.println(new MemoryInfo().toString());
                         } else {
                             if (((percent + 1) % 20) == 0) {
                                 System.out.println();
@@ -250,7 +247,7 @@ public class RandomGUITest {
                         }
                     }
 
-                    if (!continueRunning) {
+                    if (!keepRunning) {
                         System.out.println("\nRandomGUITest stopped.");
                         finishRunning();
                         break;
@@ -559,17 +556,19 @@ public class RandomGUITest {
     }
 
     private static void randomZoom() {
-        ImageComponents.onActiveIC(ic -> {
-            ZoomLevel randomZoomLevel = getRandomZoomLevel();
-            log("zoom zoomLevel = " + randomZoomLevel);
+        ImageComponents.onActiveIC(RandomGUITest::setRandomZoom);
+    }
 
-            if (rand.nextBoolean()) {
-                ic.setZoom(randomZoomLevel, null);
-            } else {
-                Point mousePos = pickRandomPointOn(ic);
-                ic.setZoom(randomZoomLevel, mousePos);
-            }
-        });
+    private static void setRandomZoom(ImageComponent ic) {
+        ZoomLevel randomZoomLevel = getRandomZoomLevel();
+        log("zoom zoomLevel = " + randomZoomLevel);
+
+        if (rand.nextBoolean()) {
+            ic.setZoom(randomZoomLevel, null);
+        } else {
+            Point mousePos = pickRandomPointOn(ic);
+            ic.setZoom(randomZoomLevel, mousePos);
+        }
     }
 
     private static ZoomLevel getRandomZoomLevel() {
@@ -584,8 +583,14 @@ public class RandomGUITest {
 
     private static Point pickRandomPointOn(ImageComponent ic) {
         Rectangle vp = ic.getVisiblePart();
-        int randX = RandomUtils.intInRange(vp.x + 1, vp.x + vp.width - 2);
-        int randY = RandomUtils.intInRange(vp.y + 1, vp.y + vp.height - 2);
+        int randX = vp.x;
+        if (vp.width >= 2) {
+            randX = RandomUtils.intInRange(vp.x, vp.x + vp.width);
+        }
+        int randY = vp.y;
+        if (vp.height >= 2) {
+            randY = RandomUtils.intInRange(vp.y, vp.y + vp.height);
+        }
         return new Point(randX, randY);
     }
 
@@ -920,7 +925,7 @@ public class RandomGUITest {
         Tool currentTool = Tools.getCurrent();
         if (currentTool != tool) {
             log("tool click on " + currentTool);
-            tool.getButton().doClick();
+            tool.activate();
         }
     }
 

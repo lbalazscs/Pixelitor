@@ -225,8 +225,8 @@ public class CropBox {
         return rect;
     }
 
-    public void viewSizeChanged(View ic) {
-        rect.viewSizeChanged(ic);
+    public void coCoordsChanged(View ic) {
+        rect.coCoordsChanged(ic);
         update(rect);
     }
 

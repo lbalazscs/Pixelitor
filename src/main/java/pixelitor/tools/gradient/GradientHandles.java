@@ -90,7 +90,7 @@ public class GradientHandles {
         return imDrag;
     }
 
-    public void viewSizeChanged(View view) {
+    public void coCoordsChanged(View view) {
         if (view == this.view) {
             start.restoreCoordsFromImSpace(view);
             end.restoreCoordsFromImSpace(view);

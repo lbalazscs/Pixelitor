@@ -17,6 +17,8 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.TransformFilter;
+import pixelitor.filters.gui.AngleParam;
+import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
@@ -31,10 +33,11 @@ import java.awt.image.BufferedImage;
 public class Slice extends ParametrizedFilter {
     public static final String NAME = "Slice";
 
-    private final RangeParam size = new RangeParam("Size", 0, 6, 100);
+    private final RangeParam size = new RangeParam("Size", 1, 75, 300);
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
-    private final RangeParam shiftH = new RangeParam("Shift Effect Horizontal", 0, 0, 100);
-    private final RangeParam shiftV = new RangeParam("Shift Effect Vertical", 0, 0, 100);
+    private final GroupedRangeParam shift = new GroupedRangeParam(
+            "Shift Effect", 0, 0, 100, false);
+    private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
     private SliceFilter filter;
@@ -45,8 +48,8 @@ public class Slice extends ParametrizedFilter {
         setParamSet(new ParamSet(
                 size.withAdjustedRange(0.25),
                 offset.withAdjustedRange(0.25),
-                shiftH,
-                shiftV,
+                shift,
+                angle,
                 edgeAction
         ));
     }
@@ -58,9 +61,10 @@ public class Slice extends ParametrizedFilter {
         }
 
         filter.setOffset(offset.getValue());
-        filter.setShiftHorizontal(shiftH.getValueAsPercentage());
-        filter.setShiftVertical(shiftV.getValueAsPercentage());
+        filter.setShiftHorizontal(shift.getValueAsPercentage(0));
+        filter.setShiftVertical(shift.getValueAsPercentage(1));
         filter.setSize(size.getValue());
+        filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR); // no difference
 

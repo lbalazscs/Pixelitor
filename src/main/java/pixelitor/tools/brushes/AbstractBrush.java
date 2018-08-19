@@ -32,18 +32,24 @@ public abstract class AbstractBrush implements Brush {
     protected Graphics2D targetG;
     protected Composition comp;
 
-    protected int radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
-    protected int diameter;
+    protected double radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
+    protected double diameter;
     protected PPoint previous;
 
-    protected AbstractBrush(int radius) {
+    protected AbstractBrush(double radius) {
         setRadius(radius);
     }
 
     @Override
-    public void setRadius(int radius) {
+    public void setRadius(double radius) {
         this.radius = radius;
         this.diameter = 2 * radius;
+    }
+
+    @Override
+    public double getActualRadius() {
+        // add one to make sure rounding errors don't ruin the undo
+        return radius + 1.0;
     }
 
     @Override
@@ -63,7 +69,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
+    public void startAt(PPoint p) {
         // when starting a new stroke, the previous
         // variables should not be set to 0, 0
         // because it causes unnecessary repainting
@@ -75,15 +81,20 @@ public abstract class AbstractBrush implements Brush {
         if(previous == null) {
             // can happen if the first click (in the tool of after a
             // symmetry activation) is a shift-click
-            onStrokeStart(p);
+            startAt(p);
         } else {
             // most brushes connect with lines anyway, but if there is an
             // extra smoothing, this must be overridden
-            onNewStrokePoint(p);
+            continueTo(p);
         }
     }
 
-    public int getRadius() {
+    @Override
+    public void finish() {
+        // do nothing
+    }
+
+    public double getRadius() {
         return radius;
     }
 
@@ -91,7 +102,7 @@ public abstract class AbstractBrush implements Brush {
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("Brush", this);
         node.addClass();
-        node.addInt("Radius", radius);
+        node.addDouble("Radius", radius);
         if (previous != null) {
             node.addDouble("PreviousX", previous.getImX());
             node.addDouble("PreviousY", previous.getImY());

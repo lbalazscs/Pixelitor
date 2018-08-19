@@ -29,7 +29,7 @@ public class RadiusRatioSpacing implements SpacingStrategy {
     }
 
     @Override
-    public double getSpacing(int radius) {
+    public double getSpacing(double radius) {
         return radius * spacingRatio;
     }
 }

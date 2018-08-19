@@ -73,10 +73,15 @@ public class RandomUtils {
     }
 
     public static int intInRange(int min, int max) {
+        assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
         return min + rand.nextInt(max - min + 1);
     }
 
     public static long nextLong() {
         return rand.nextLong();
+    }
+
+    public static double nextGaussian() {
+        return rand.nextGaussian();
     }
 }

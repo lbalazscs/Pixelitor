@@ -17,7 +17,11 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.history.History;
+import pixelitor.tools.pen.history.AddAnchorPointEdit;
+import pixelitor.tools.pen.history.CloseSubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
@@ -44,6 +48,7 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  */
 public class SubPath {
     private final List<AnchorPoint> anchorPoints = new ArrayList<>();
+    private final Composition comp;
     // The curve point which is currently moving while the path is being built
     private AnchorPoint moving;
 
@@ -61,6 +66,10 @@ public class SubPath {
     private static final ToDoubleFunction<DraggablePoint> TO_CO_Y = p -> p.y;
     private static final ToDoubleFunction<DraggablePoint> TO_IM_X = p -> p.imX;
     private static final ToDoubleFunction<DraggablePoint> TO_IM_Y = p -> p.imY;
+
+    public SubPath(Composition comp) {
+        this.comp = comp;
+    }
 
     public void addFirstPoint(AnchorPoint p) {
         anchorPoints.add(p);
@@ -81,17 +90,20 @@ public class SubPath {
         last = p;
     }
 
-    public void setMovingPoint(AnchorPoint p) {
+    public void setMoving(AnchorPoint p) {
         moving = p;
     }
 
-    public void finalizeMovingPoint(int x, int y) {
+    public void finalizeMovingPoint(int x, int y, boolean finishSubPath) {
         moving.setLocation(x, y);
         moving.calcImCoords();
         anchorPoints.add(moving);
         moving.setPath(this);
         last = moving;
         moving = null;
+
+        History.addEdit(new AddAnchorPointEdit(
+                comp, this, last, finishSubPath));
     }
 
     public AnchorPoint getMoving() {
@@ -241,13 +253,16 @@ public class SubPath {
         return null;
     }
 
-    public void close() {
+    public void close(boolean addToHistory) {
         int numPoints = anchorPoints.size();
-        if (numPoints > 1 && last.samePositionAs(first)) {
+
+        // this condition doesn't occur while building a path interactively,
+        // only when converting from closed Shape objects
+        boolean lastIsFirst = numPoints > 1 && last.samePositionAs(first);
+        if (lastIsFirst) {
             assert last != first;
 
-            // converting from closed shape: the last added
-            // point is identical to the first, so remove it
+            // the last added point is identical to the first, so remove it
             int indexOfLast = numPoints - 1;
             anchorPoints.remove(indexOfLast);
 
@@ -259,13 +274,22 @@ public class SubPath {
         }
         moving = null; // can be ignored in this case
         closed = true;
+
+        if (addToHistory) {
+            History.addEdit(new CloseSubPathEdit(comp, this));
+        }
+    }
+
+    public void undoClosing() {
+        moving = new AnchorPoint(first, false);
+        closed = false;
     }
 
     public boolean isClosed() {
         return closed;
     }
 
-    public void viewSizeChanged(View view) {
+    public void coCoordsChanged(View view) {
         for (AnchorPoint point : anchorPoints) {
             point.restoreCoordsFromImSpace(view);
             point.ctrlIn.restoreCoordsFromImSpace(view);
@@ -273,6 +297,9 @@ public class SubPath {
         }
     }
 
+    /**
+     * Checks whether all the objects are wired together correctly
+     */
     @SuppressWarnings("SameReturnValue")
     public boolean checkWiring() {
         int numPoints = anchorPoints.size();
@@ -352,5 +379,15 @@ public class SubPath {
             last = anchorPoints.get(index - 1);
         }
         anchorPoints.remove(index);
+    }
+
+    public void deleteLast() {
+        int indexOfLast = anchorPoints.size() - 1;
+        AnchorPoint removed = anchorPoints.remove(indexOfLast);
+        last = anchorPoints.get(indexOfLast - 1);
+
+        if (moving == null) { // when undoing a finished subpath
+            moving = removed;
+        }
     }
 }

@@ -48,7 +48,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new Rectangle2D.Double(x, y, diameter, diameter);
         }
     }, ELLIPSE("Ellipse", true) {
@@ -59,7 +59,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new Ellipse2D.Double(x, y, diameter, diameter);
         }
     }, DIAMOND("Diamond", true) {
@@ -85,7 +85,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return createDiamond(x, y, diameter, diameter);
         }
     }, LINE("Line", false) {
@@ -96,7 +96,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new Rectangle2D.Double(x, y, diameter / 5.0, diameter);
         }
     }, HEART("Heart", true) {
@@ -107,7 +107,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new HeartShape(x, y, diameter, diameter);
         }
     }, STAR("Star", true) {
@@ -141,7 +141,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return createStar(x, y, diameter, diameter / 3.0 + 1);
         }
     }, RANDOM_STAR("Random Star", true) {
@@ -161,7 +161,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             RandomStarShape.randomize();
             return new RandomStarShape(x, y, diameter, diameter);
         }
@@ -191,7 +191,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             double middleY = (y + diameter / 2.0);
             ImDrag imDrag = new ImDrag(
                     x,
@@ -208,7 +208,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new CatShape(x, y, diameter, diameter);
         }
     }, KIWI("Kiwi", true) {
@@ -219,7 +219,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new KiwiShape(x, y, diameter, diameter);
         }
     }, BAT("Bat", true) {
@@ -230,7 +230,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new BatShape(x, y, diameter, diameter);
         }
     }, RABBIT("Rabbit", true) {
@@ -241,7 +241,7 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape getShape(double x, double y, int diameter) {
+        public Shape getShape(double x, double y, double diameter) {
             return new RabbitShape(x, y, diameter, diameter);
         }
         //    }, SKULL("Skull", true) {
@@ -291,7 +291,13 @@ public enum ShapeType {
         return closed;
     }
 
-    public abstract Shape getShape(double x, double y, int diameter);
+    public abstract Shape getShape(double x, double y, double diameter);
+
+    public static EnumParam<ShapeType> asParam(ShapeType defaultValue) {
+        EnumParam<ShapeType> param = asParam("Shape");
+        param.selectAndSetAsDefault(defaultValue);
+        return param;
+    }
 
     public static EnumParam<ShapeType> asParam(String name) {
         return new EnumParam<>(name, ShapeType.class);

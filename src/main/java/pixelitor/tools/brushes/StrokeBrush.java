@@ -34,14 +34,14 @@ public abstract class StrokeBrush extends AbstractBrush {
     private final int cap;
     private final int join;
 
-    protected int lastDiameter = -1;
+    protected double lastDiameter = -1;
     protected Stroke currentStroke;
 
-    protected StrokeBrush(int radius, StrokeType strokeType) {
+    protected StrokeBrush(double radius, StrokeType strokeType) {
         this(radius, strokeType, CAP_ROUND, JOIN_ROUND);
     }
 
-    protected StrokeBrush(int radius, StrokeType strokeType, int cap, int join) {
+    protected StrokeBrush(double radius, StrokeType strokeType, int cap, int join) {
         super(radius);
         this.strokeType = strokeType;
         this.cap = cap;
@@ -49,15 +49,15 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        super.onStrokeStart(p);
+    public void startAt(PPoint p) {
+        super.startAt(p);
         drawStartShape(p);
         updateComp(p);
 //        rememberPrevious(p);
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void continueTo(PPoint p) {
         assert previous != null;
 
         drawLine(previous, p);
@@ -75,9 +75,9 @@ public abstract class StrokeBrush extends AbstractBrush {
      * Connects the two points with a line, using the stroke
      */
     protected void drawLine(PPoint start, PPoint end) {
-        int thickness = 2*radius;
+        double thickness = 2 * radius;
         if(thickness != lastDiameter) {
-            currentStroke = createStroke(thickness);
+            currentStroke = createStroke((float) thickness);
             lastDiameter = thickness;
         }
 

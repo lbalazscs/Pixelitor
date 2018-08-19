@@ -117,7 +117,7 @@ public abstract class AbstractBrushTool extends Tool {
     protected void addTypeSelector() {
         BrushType[] brushTypes = BrushType.values();
         typeSelector = new JComboBox<>(brushTypes);
-        settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
+        settingsPanel.addWithLabel("Brush:", typeSelector, "brushTypeSelector");
         typeSelector.addActionListener(e -> brushTypeChanged());
 
         // make sure all values are visible without a scrollbar
@@ -249,14 +249,15 @@ public abstract class AbstractBrushTool extends Tool {
             return;
         }
 
+        brush.finish();
+
         Composition comp = e.getComp();
         finishBrushStroke(comp.getActiveDrawableOrThrow());
     }
 
     private void finishBrushStroke(Drawable dr) {
-        int radius = getRadius();
         BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
-        History.addToolArea(affectedArea.asRectangle(radius),
+        History.addToolArea(affectedArea.asRectangle(brush.getActualRadius()),
                 originalImage, dr,
                 false, getName());
 
@@ -275,8 +276,8 @@ public abstract class AbstractBrushTool extends Tool {
     public void drawBrushStrokeProgrammatically(Drawable dr, PPoint start, PPoint end) {
         prepareProgrammaticBrushStroke(dr, start);
 
-        brush.onStrokeStart(start);
-        brush.onNewStrokePoint(end);
+        brush.startAt(start);
+        brush.continueTo(end);
 
         finishBrushStroke(dr);
     }
@@ -327,10 +328,10 @@ public abstract class AbstractBrushTool extends Tool {
             if (lineConnect) {
                 brush.lineConnectTo(p);
             } else {
-                brush.onStrokeStart(p);
+                brush.startAt(p);
             }
         } else {
-            brush.onNewStrokePoint(p);
+            brush.continueTo(p);
         }
     }
 
@@ -398,25 +399,31 @@ public abstract class AbstractBrushTool extends Tool {
 
         PathIterator fpi = new FlatteningPathIterator(
                 shape.getPathIterator(null), 1.0);
+
+//        MeasuredShape[] subpaths = MeasuredShape.getSubpaths(shape, 3.0f);
+//        GeneralPath gp = new GeneralPath();
+//        subpaths[0].writeShape(new GeneralPathWriter(gp));
+//        PathIterator fpi = gp.getPathIterator(null);
+
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
             double x = coords[0];
             double y = coords[1];
-            PPoint p = new PPoint.Image(ic, x, y);
+            PPoint p = PPoint.lazyFromIm(x, y, ic);
             affectedArea.updateWith(p);
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
                     startingPoint = p;
                     prepareProgrammaticBrushStroke(dr, p);
-                    brush.onStrokeStart(p);
+                    brush.startAt(p);
                     break;
                 case PathIterator.SEG_LINETO:
-                    brush.onNewStrokePoint(p);
+                    brush.continueTo(p);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    brush.onNewStrokePoint(startingPoint);
+                    brush.continueTo(startingPoint);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);

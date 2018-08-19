@@ -92,36 +92,29 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             }
         }
 
-        slider = new JSlider(model);
+        this.slider = createSlider(model);
         if (textPosition == TextPosition.BORDER) {
             setupTicks();
         }
-        slider.addChangeListener(this);
 
-        spinner = new JSpinner(new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1));
-        spinner.addChangeListener(this);
+        this.spinner = createSpinner(model);
 
-        label = new JLabel(model.getName() + ": ");
         if (textPosition == TextPosition.WEST) {
+            label = new JLabel(model.getName() + ": ");
             add(label, BorderLayout.WEST);
         } else if (textPosition == TextPosition.NORTH) {
+            label = new JLabel(model.getName() + ": ");
             add(label, BorderLayout.NORTH);
+        } else {
+            label = null;
         }
 
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        add(slider, BorderLayout.CENTER);
-        p.add(spinner);
+        add(this.slider, BorderLayout.CENTER);
+        p.add(this.spinner);
 
         if (addDefaultButton) {
-            defaultButton = new DefaultButton(resettableParam == null
-                    ? model : resettableParam);
-            if (colorsUsed) {
-                defaultButton.setBackground(GRAY);
-            }
+            createDefaultButton(model);
             p.add(defaultButton);
         }
         add(p, BorderLayout.EAST);
@@ -129,8 +122,36 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 //        showTicksAsFloat();
     }
 
+    private JSlider createSlider(RangeParam model) {
+        JSlider s = new JSlider(model);
+        s.addChangeListener(this);
+        return s;
+    }
+
+    private JSpinner createSpinner(RangeParam model) {
+        JSpinner s = new JSpinner(new SpinnerNumberModel(
+                model.getValue(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                1));
+        s.addChangeListener(this);
+        return s;
+    }
+
+    private void createDefaultButton(RangeParam model) {
+        defaultButton = new DefaultButton(resettableParam == null
+                ? model : resettableParam);
+        if (colorsUsed) {
+            defaultButton.setBackground(GRAY);
+        }
+    }
+
     public static SliderSpinner simpleFrom(RangeParam model) {
         return new SliderSpinner(model, TextPosition.NONE, false);
+    }
+
+    public static SliderSpinner simpleWithDefaultButton(RangeParam model) {
+        return new SliderSpinner(model, TextPosition.NONE, true);
     }
 
     public void setupTicks() {

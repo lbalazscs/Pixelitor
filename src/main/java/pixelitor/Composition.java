@@ -35,7 +35,10 @@ import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
+import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
@@ -85,6 +88,7 @@ public class Composition implements Serializable {
     private String name; // the file name or something like "Untitled 1"
 
     private final Canvas canvas;
+    private Paths paths;
 
     //
     // the following variables are all transient, their state is not saved in PXC!
@@ -165,7 +169,7 @@ public class Composition implements Serializable {
         compCopy.newLayerCount = orig.newLayerCount;
 
         if (orig.selection != null) {
-            compCopy.selection = new Selection(orig.selection, forUndo);
+            compCopy.setSelectionRef(new Selection(orig.selection, forUndo));
         }
         if (forUndo) {
             compCopy.dirty = orig.dirty;
@@ -401,7 +405,7 @@ public class Composition implements Serializable {
             LayerButton button = layerToBeDeleted.getUI();
             ic.deleteLayerButton(button);
 
-            if (isActiveComp()) {
+            if (isActive()) {
                 Layers.numLayersChanged(this, layerList.size());
             }
 
@@ -569,7 +573,7 @@ public class Composition implements Serializable {
 
     public void flattenImage(boolean updateGUI, boolean addToHistory) {
         if (updateGUI) {
-            assert isActiveComp();
+            assert isActive();
         }
 
         if (layerList.size() < 2) {
@@ -718,10 +722,18 @@ public class Composition implements Serializable {
         return retVal;
     }
 
-    public void updateRegion(PPoint start, PPoint end, int thickness) {
+    public void updateRegion(PPoint start, PPoint end, double thickness) {
         compositeImage.invalidate();
         if (ic != null) { // during reload image it can be null
             ic.updateRegion(start, end, thickness);
+            ic.updateNavigator(false);
+        }
+    }
+
+    public void updateRegion(PRectangle area) {
+        compositeImage.invalidate();
+        if (ic != null) { // during reload image it can be null
+            ic.updateRegion(area);
             ic.updateNavigator(false);
         }
     }
@@ -799,9 +811,9 @@ public class Composition implements Serializable {
 
             boolean wasHidden = selection.isHidden();
             selection.die();
-            selection = null;
+            setSelectionRef(null);
 
-            if (isActiveComp()) {
+            if (isActive()) {
                 if (wasHidden) {
                     SelectionActions.getShowHide()
                             .setHideName();
@@ -812,6 +824,9 @@ public class Composition implements Serializable {
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
+        }
+        if (Build.CURRENT.isDevelopment() && isActive()) {
+            ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
     }
 
@@ -862,12 +877,12 @@ public class Composition implements Serializable {
     // this is the "complete" method for setting a selection
     // from shape in the sense that it handles
     // everything: existing selections, history management
-    public void setSelectionFromShapeComplete(Shape shape) {
+    public PixelitorEdit setSelectionFromShapeComplete(Shape shape) {
         PixelitorEdit edit;
         shape = canvas.clipShapeToBounds(shape);
         if (shape.getBounds().isEmpty()) {
             // the new selection was outside the canvas
-            return;
+            return null;
         }
 
         if (selection != null) {
@@ -875,13 +890,20 @@ public class Composition implements Serializable {
             selection.setShape(shape);
             edit = new SelectionChangeEdit("Selection Change", this, backupSelectionShape);
         } else {
-            selection = createSelectionFromShape(shape);
+            setSelectionRef(createSelectionFromShape(shape));
             edit = new NewSelectionEdit(this, selection.getShape());
         }
-        History.addEdit(edit);
+        return edit;
     }
 
-    public void setSelection(Selection selection) {
+    /**
+     * Changing the selection reference should be done only by using this method
+     * (in order to make debugging easier)
+     */
+    public void setSelectionRef(Selection selection) {
+//        if(this.selection != null && selection == null) {
+//            Thread.dumpStack();
+//        }
         this.selection = selection;
     }
 
@@ -942,8 +964,8 @@ public class Composition implements Serializable {
 
     public void setNewSelection(Selection selection) {
         assert selection != null;
-        this.selection = selection;
-        if (isActiveComp() && !ic.isMock()) {
+        setSelectionRef(selection);
+        if (isActive() && !ic.isMock()) {
             SelectionActions.setEnabled(true, this);
         }
     }
@@ -982,7 +1004,7 @@ public class Composition implements Serializable {
         }
     }
 
-    private boolean isActiveComp() {
+    private boolean isActive() {
         return (ImageComponents.getActiveCompOrNull() == this);
     }
 
@@ -1042,7 +1064,7 @@ public class Composition implements Serializable {
             Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);
             if (intersection.getBounds().isEmpty()) {
                 selection.die();
-                selection = null;
+                setSelectionRef(null);
             } else {
                 // the intersection has to be translated
                 // into the coordinate system of the new, cropped image
@@ -1130,6 +1152,20 @@ public class Composition implements Serializable {
             RecentFilesMenu.getInstance().addFile(file);
         }
         Messages.showFileSavedMessage(file);
+    }
+
+    public Path getActivePath() {
+        if (paths != null) {
+            return paths.getActivePath();
+        }
+        return null;
+    }
+
+    public void setActivePath(Path path) {
+        if (paths == null) {
+            paths = new Paths();
+        }
+        paths.setActivePath(path);
     }
 
     public enum ImageChangeActions {

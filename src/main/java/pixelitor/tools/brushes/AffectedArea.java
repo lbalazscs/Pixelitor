@@ -69,16 +69,13 @@ public class AffectedArea {
     /**
      * Returns the rectangle affected by a brush stroke for the undo
      */
-    public Rectangle asRectangle(int radius) {
-        // To be on the safe side, save a little more than
-        // necessary - some brushes have randomness
-        int radius2 = 2 * radius;
-        int radius4 = 4 * radius;
+    public Rectangle asRectangle(double radius) {
+        double extraSize = 2 * radius + 2.0;
 
-        double saveX = minX - radius2;
-        double saveY = minY - radius2;
-        double saveWidth = maxX - minX + radius4;
-        double saveHeight = maxY - minY + radius4;
+        double saveX = minX - radius;
+        double saveY = minY - radius;
+        double saveWidth = maxX - minX + extraSize;
+        double saveHeight = maxY - minY + extraSize;
 
         return new Rectangle((int) saveX, (int) saveY,
                 (int) saveWidth, (int) saveHeight);

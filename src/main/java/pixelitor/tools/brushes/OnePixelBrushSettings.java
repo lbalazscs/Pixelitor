@@ -23,13 +23,13 @@ import java.awt.FlowLayout;
 /**
  * The settings of a {@link OnePixelBrush}
  */
-public class OnePixelBrushSettings implements BrushSettings {
+public class OnePixelBrushSettings extends BrushSettings {
     private static final boolean DEFAULT_AA = false;
 
     private JCheckBox aa;
 
     @Override
-    public JPanel getConfigPanel() {
+    protected JPanel createConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
         p.add(new JLabel("Anti-aliasing"));
         if (aa == null) {

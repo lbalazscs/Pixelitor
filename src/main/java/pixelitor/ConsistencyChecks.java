@@ -60,7 +60,7 @@ public final class ConsistencyChecks {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean fadeWouldWorkOn(Drawable dr) {
+    private static boolean fadeWouldWorkOn(Drawable dr) {
         assert dr != null;
         if (!History.canFade(dr)) {
             return true;
@@ -97,7 +97,7 @@ public final class ConsistencyChecks {
                 || imgA.getHeight() != imgB.getHeight();
     }
 
-    private static void selectionActionsEnabledCheck(Composition comp) {
+    public static void selectionActionsEnabledCheck(Composition comp) {
         if (comp.hasSelection()) {
             if (!SelectionActions.areEnabled()) {
                 throw new IllegalStateException(comp.getName()

@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.util.PMouseEvent;
@@ -43,8 +44,10 @@ public class PathBuilderTest {
     @Test
     public void testBuilding3PointClosedPath() {
         Graphics2D g = mock(Graphics2D.class);
-        Path path = new Path();
-        PathBuilder pb = new PathBuilder(path);
+        Composition comp = mock(Composition.class);
+        Path path = new Path(comp);
+        PathBuilder pb = new PathBuilder();
+        pb.setPath(path);
         pb.assertStateIs(INITIAL);
 
         // start the curve

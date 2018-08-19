@@ -17,6 +17,8 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.utils.Lazy;
+
 import javax.swing.*;
 
 /**
@@ -25,6 +27,12 @@ import javax.swing.*;
  * because the settings are shared between different symmetry-instances
  * of the same brush type
  */
-public interface BrushSettings {
-    JPanel getConfigPanel();
+public abstract class BrushSettings {
+    private final Lazy<JPanel> configPanel = Lazy.of(this::createConfigPanel);
+
+    public JPanel getConfigPanel() {
+        return configPanel.get();
+    }
+
+    protected abstract JPanel createConfigPanel();
 }

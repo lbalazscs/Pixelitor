@@ -251,12 +251,18 @@ public abstract class Tool implements KeyListener {
         // empty instead of abstract for the convenience of subclasses
     }
 
-    // A lot of events can trigger this, such as image resizing,
-    // image zoom, or simply changing the canvasStartX in the ImageComponent
-    // TODO image resizing cannot be handled by simply passing the new ImageComponent,
-    // and only the selections are resized (they are called explicitly)
-    // but no other tool
-    public void icSizeChanged(ImageComponent ic) {
+    /**
+     * The component coordinates have changed in the given active {@link ImageComponent}.
+     * A lot of events can trigger this, such as zooming, or changing the canvasStartX
+     * by resizing.
+     * TODO image resizing cannot be handled by simply passing the new ImageComponent,
+     * and only the selections are resized (they are resized explicitly) but no other tool
+     */
+    public void coCoordsChanged(ImageComponent ic) {
         // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void activate() {
+        getButton().doClick();
     }
 }

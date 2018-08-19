@@ -32,16 +32,16 @@ public class CalligraphyBrush extends StrokeBrush {
     private static final Stroke pointStroke = new BasicStroke(2.0f);
     private final CalligraphyBrushSettings settings;
 
-    public CalligraphyBrush(int radius, CalligraphyBrushSettings settings) {
+    public CalligraphyBrush(double radius, CalligraphyBrushSettings settings) {
         super(radius, StrokeType.CALLIGRAPHY);
         this.settings = settings;
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        currentStroke = createStroke(2 * radius);
+    public void startAt(PPoint p) {
+        currentStroke = createStroke((float) (2 * radius));
 
-        super.onStrokeStart(p);
+        super.startAt(p);
     }
 
     @Override

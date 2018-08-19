@@ -226,13 +226,13 @@ public class Marble extends ParametrizedFilter {
                     c = ((float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType))) / 4.0f;
                     break;
                 case TYPE_RINGS:
-                    double dist = sqrt(dx * dx + dy * dy) / zoom;
+                    float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
                     f += dist;
 
                     c = (float) ((1 + wave(f, waveType)) / 2);
                     break;
                 case TYPE_STAR:
-                    double pixelAngle = atan2(dy, dx);
+                    float pixelAngle = (float) atan2(dy, dx);
                     f += (pixelAngle - rotAngle) * 10.0f;
                     c = (float) ((1 + wave(f, waveType)) / 2);
                     break;

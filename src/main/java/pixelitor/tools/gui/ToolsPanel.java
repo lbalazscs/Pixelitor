@@ -53,15 +53,16 @@ public class ToolsPanel extends JPanel {
                 AddTextLayerAction.INSTANCE.actionPerformed(null);
             }
         };
-        GlobalKeyboardWatch.add(MappedKey.fromChar('t', true, "text", textToolAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar(
+                't', true, "text", textToolAction));
     }
 
     private static void setupKeyboardShortcut(Tool tool) {
-        Action pressToolAction = new AbstractAction() {
+        Action activateAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (Tools.currentTool != tool) {
-                    tool.getButton().doClick();
+                    tool.activate();
                 }
             }
         };
@@ -69,7 +70,7 @@ public class ToolsPanel extends JPanel {
         String toolName = tool.getName();
         char activationChar = tool.getActivationKeyChar();
 
-        GlobalKeyboardWatch.add(MappedKey.fromChar(activationChar, true, toolName, pressToolAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar(
+                activationChar, true, toolName, activateAction));
     }
-
 }

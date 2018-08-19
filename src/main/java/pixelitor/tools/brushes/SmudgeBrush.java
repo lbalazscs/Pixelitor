@@ -50,7 +50,7 @@ public class SmudgeBrush extends CopyBrush {
      */
     private boolean fingerPainting = false;
 
-    public SmudgeBrush(int radius, CopyBrushType type) {
+    public SmudgeBrush(double radius, CopyBrushType type) {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
@@ -69,7 +69,8 @@ public class SmudgeBrush extends CopyBrush {
         if (firstUsageInStroke && fingerPainting) {
             // finger painting starts with the foreground color
             g.setColor(getFGColor());
-            g.fillRect(0, 0, diameter, diameter);
+            int size = (int) diameter;
+            g.fillRect(0, 0, size, size);
         } else {
             // samples the source image at lastX, lastY into the brush image
             g.drawImage(sourceImage,

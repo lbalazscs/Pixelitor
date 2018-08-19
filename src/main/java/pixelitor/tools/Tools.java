@@ -40,7 +40,6 @@ public class Tools {
     public static final MoveTool MOVE = new MoveTool();
     public static final CropTool CROP = new CropTool();
     public static final SelectionTool SELECTION = new SelectionTool();
-    //    public static final LassoTool LASSO = new LassoTool();
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
 
@@ -128,8 +127,8 @@ public class Tools {
         currentTool.fgBgColorsChanged();
     }
 
-    public static void icSizeChanged(ImageComponent ic) {
-        currentTool.icSizeChanged(ic);
+    public static void coCoordsChanged(ImageComponent ic) {
+        currentTool.coCoordsChanged(ic);
     }
 
     public static class EventDispatcher {
@@ -146,6 +145,13 @@ public class Tools {
         }
 
         public static void mouseReleased(MouseEvent e, ImageComponent ic) {
+            if (!mouseDown) {
+                // the "mouse pressed" event was lost/consumed somehow
+                // (for example a combo box was open when it happened)
+                // and the recovery in mouseDragged didn't happen because
+                // it was a click
+                return;
+            }
             lastEvent = new PMouseEvent(e, ic);
             currentTool.handlerChain.handleMouseReleased(lastEvent);
             mouseDown = false;
@@ -153,6 +159,13 @@ public class Tools {
 
         public static void mouseDragged(MouseEvent e, ImageComponent ic) {
             lastEvent = new PMouseEvent(e, ic);
+            if (!mouseDown) {
+                // recover from a missing "mouse pressed" event by
+                // simulating one
+                currentTool.handlerChain.handleMousePressed(lastEvent);
+                mouseDown = true;
+                return;
+            }
             currentTool.handlerChain.handleMouseDragged(lastEvent);
         }
 

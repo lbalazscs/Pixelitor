@@ -52,7 +52,7 @@ public class Shapes {
      * in image coordinates, to a {@link Path}
      */
     public static Path shapeToPath(Shape shape, ImageComponent ic) {
-        Path path = new Path();
+        Path path = new Path(ic.getComp());
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];
         while (!it.isDone()) {
@@ -78,7 +78,7 @@ public class Shapes {
                     path.addCubicCurve(x, y, xx, yy, xxx, yyy, ic);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    path.close();
+                    path.close(false);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);

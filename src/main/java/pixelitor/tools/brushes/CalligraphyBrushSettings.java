@@ -25,13 +25,13 @@ import java.awt.FlowLayout;
 /**
  * The settings of a {@link CalligraphyBrush}
  */
-public class CalligraphyBrushSettings implements BrushSettings {
+public class CalligraphyBrushSettings extends BrushSettings {
     private static final double DEFAULT_ANGLE = -Math.PI / 4.0;
 
     private AngleParam angleParam;
 
     @Override
-    public JPanel getConfigPanel() {
+    protected JPanel createConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
         angleParam = new AngleParam("Angle", DEFAULT_ANGLE);
         p.add(angleParam.createGUI());

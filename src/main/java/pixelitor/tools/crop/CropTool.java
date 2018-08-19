@@ -408,9 +408,9 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void icSizeChanged(ImageComponent ic) {
+    public void coCoordsChanged(ImageComponent ic) {
         if (cropBox != null && state == TRANSFORM) {
-            cropBox.viewSizeChanged(ic);
+            cropBox.coCoordsChanged(ic);
         }
     }
 

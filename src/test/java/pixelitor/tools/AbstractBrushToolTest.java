@@ -110,17 +110,17 @@ public class AbstractBrushToolTest {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
-        verify(brushSpy).onStrokeStart(any());
-        verify(brushSpy, times(5)).onNewStrokePoint(any());
+        verify(brushSpy).startAt(any());
+        verify(brushSpy, times(5)).continueTo(any());
     }
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        PPoint start = new PPoint.Image(ic, 2.0, 2.0);
-        PPoint end = new PPoint.Image(ic, 5.0, 5.0);
+        PPoint start = PPoint.eagerFromIm(2.0, 2.0, ic);
+        PPoint end = PPoint.eagerFromIm(5.0, 5.0, ic);
         tool.drawBrushStrokeProgrammatically(dr, start, end);
 
-        verify(brushSpy).onStrokeStart(any());
-        verify(brushSpy).onNewStrokePoint(any());
+        verify(brushSpy).startAt(any());
+        verify(brushSpy).continueTo(any());
     }
 }

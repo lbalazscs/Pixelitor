@@ -35,17 +35,17 @@ public class OnePixelBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        super.onStrokeStart(p);
+    public void startAt(PPoint p) {
+        super.startAt(p);
         updateComp(p);
         rememberPrevious(p);
 
         // make sure a pixel is changed without dragging
-        onNewStrokePoint(p);
+        continueTo(p);
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void continueTo(PPoint p) {
         if (!settings.hasAA()) {
             targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
         }

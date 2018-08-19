@@ -34,7 +34,6 @@ import pixelitor.layers.AddTextLayerAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.utils.AppPreferences;
@@ -44,6 +43,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
@@ -167,7 +167,6 @@ public class Pixelitor {
     /**
      * A possibility for automatic debugging or testing
      */
-    @SuppressWarnings("UnusedParameters")
     private static void afterStartTestActions(PixelitorWindow pw) {
         if (Build.CURRENT == Build.FINAL) {
             // in the final builds nothing should run
@@ -183,8 +182,8 @@ public class Pixelitor {
 
 //        Navigator.showInDialog(pw);
 
-//        clickTool(Tools.PEN);
-//        addMaskAndShowIt();
+//        Tools.PEN.activate();
+        //        addMaskAndShowIt();
 
 //        showAddTextLayerDialog();
 
@@ -198,7 +197,18 @@ public class Pixelitor {
 
 //        new TweenWizard().start(pw);
 
-//        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+//        dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
+    }
+
+    private static void dispatchKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
+        int modifiers;
+        if (ctrl) {
+            modifiers = KeyEvent.CTRL_MASK;
+        } else {
+            modifiers = 0;
+        }
+        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED,
+                System.currentTimeMillis(), modifiers, keyCode, keyChar));
     }
 
     private static void addTestPath() {
@@ -207,7 +217,7 @@ public class Pixelitor {
         Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
         Tools.PEN.setPath(path);
         Tools.PEN.startEditing(false);
-        Tools.PEN.getButton().doClick();
+        Tools.PEN.activate();
     }
 
     private static void showAddTextLayerDialog() {
@@ -220,10 +230,6 @@ public class Pixelitor {
         Layer layer = ic.getComp()
                 .getActiveLayer();
         MaskViewMode.SHOW_MASK.activate(ic, layer, "after-start test");
-    }
-
-    private static void clickTool(Tool tool) {
-        tool.getButton().doClick();
     }
 
     private static void startFilter(Filter filter) {
@@ -242,7 +248,7 @@ public class Pixelitor {
             while (true) {
                 Utils.sleep(1, TimeUnit.SECONDS);
 
-                Runnable changeToolOnEDTTask = () -> clickTool(Tools.getRandomTool());
+                Runnable changeToolOnEDTTask = () -> Tools.getRandomTool().activate();
                 GUIUtils.invokeAndWait(changeToolOnEDTTask);
             }
         };

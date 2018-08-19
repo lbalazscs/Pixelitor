@@ -34,46 +34,46 @@ import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
 public enum BrushType {
     IDEAL("Hard", false) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             return new IdealBrush(radius);
         }
     }, SOFT("Soft", false) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius, ImageBrushType.SOFT, 0.25, NOT_ANGLE_AWARE);
         }
     }, WOBBLE("Wobble", false) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             return new WobbleBrush(radius);
         }
     }, CALLIGRAPHY("Calligraphy", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             CalligraphyBrushSettings settings = (CalligraphyBrushSettings) findSettings(
                     tool, CalligraphyBrushSettings::new);
             return new CalligraphyBrush(radius, settings);
         }
     }, REALISTIC("Realistic", false) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius, ImageBrushType.REAL, 0.05, NOT_ANGLE_AWARE);
         }
     }, HAIR("Hair", false) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             return new ImageDabsBrush(radius, ImageBrushType.HAIR, 0.02, NOT_ANGLE_AWARE);
         }
-    }, SHAPE("Shape", true) {
+    }, SHAPE("Shapes", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             ShapeDabsBrushSettings settings = (ShapeDabsBrushSettings) findSettings(
                     tool, this::createShapeDabsBrushSettings);
             return new ShapeDabsBrush(radius, settings);
         }
 
         private ShapeDabsBrushSettings createShapeDabsBrushSettings() {
-            ShapeType shapeType = ShapeDabsBrushSettingsPanel.SHAPE_SELECTED_BY_DEFAULT;
+            ShapeType shapeType = ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
             double spacingRatio = ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
             RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
             return new ShapeDabsBrushSettings(
@@ -85,38 +85,45 @@ public enum BrushType {
 
         //    }, ARROW("Image-Based Arrow") {
 //        @Override
-//        public Brush createBrush(Tool tool, int radius) {
+//        public Brush createBrush(Tool tool, double radius) {
 //            return new ImageDabsBrush(radius, ImageBrushType.ARROW, 2.5, true);
 //        }
 //    }, GREEK("Image-Based Greek") {
 //        @Override
-//        public Brush createBrush(Tool tool, int radius) {
+//        public Brush createBrush(Tool tool, double radius) {
 //            return new ImageDabsBrush(radius, ImageBrushType.GREEK, 2.0, true);
 //        }
+    }, SPRAY("Spray Shapes", true) {
+        @Override
+        public Brush createBrush(Tool tool, double radius) {
+            SprayBrushSettings settings = (SprayBrushSettings) findSettings(
+                    tool, SprayBrushSettings::new);
+            return new SprayBrush(radius, settings);
+        }
     }, CONNECT("Connect", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             ConnectBrushSettings settings = (ConnectBrushSettings) findSettings(
                     tool, ConnectBrushSettings::new);
             return new ConnectBrush(settings, radius);
         }
     }, OUTLINE_CIRCLE("Circles", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
                     tool, OutlineBrushSettings::new);
             return new OutlineCircleBrush(radius, settings);
         }
     }, OUTLINE_SQUARE("Squares", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
                     tool, OutlineBrushSettings::new);
             return new OutlineSquareBrush(radius, settings);
         }
     }, ONE_PIXEL("One Pixel", true) {
         @Override
-        public Brush createBrush(Tool tool, int radius) {
+        public Brush createBrush(Tool tool, double radius) {
             OnePixelBrushSettings settings = (OnePixelBrushSettings) findSettings(
                     tool, OnePixelBrushSettings::new);
             return new OnePixelBrush(settings);
@@ -140,7 +147,7 @@ public enum BrushType {
         this.hasSettings = hasSettings;
     }
 
-    public abstract Brush createBrush(Tool tool, int radius);
+    public abstract Brush createBrush(Tool tool, double radius);
 
     @Override
     public String toString() {

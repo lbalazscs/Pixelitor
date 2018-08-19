@@ -39,7 +39,8 @@ public class SymmetryBrush implements Brush {
     private Symmetry symmetry;
     private final AffectedArea affectedArea;
 
-    public SymmetryBrush(Tool tool, BrushType brushType, Symmetry symmetry, int radius) {
+    public SymmetryBrush(Tool tool, BrushType brushType,
+                         Symmetry symmetry, double radius) {
         this.tool = tool;
         this.brushType = brushType;
         this.symmetry = symmetry;
@@ -61,20 +62,25 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void setRadius(int radius) {
+    public void setRadius(double radius) {
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             brushes[i].setRadius(radius);
         }
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        symmetry.onStrokeStart(this, p);
+    public double getActualRadius() {
+        return brushes[0].getActualRadius();
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
-        symmetry.onNewStrokePoint(this, p);
+    public void startAt(PPoint p) {
+        symmetry.startAt(this, p);
+    }
+
+    @Override
+    public void continueTo(PPoint p) {
+        symmetry.continueTo(this, p);
     }
 
     @Override
@@ -82,7 +88,12 @@ public class SymmetryBrush implements Brush {
         symmetry.lineConnectTo(this, p);
     }
 
-    public void brushTypeChanged(BrushType brushType, int radius) {
+    @Override
+    public void finish() {
+        symmetry.finish(this);
+    }
+
+    public void brushTypeChanged(BrushType brushType, double radius) {
         this.brushType = brushType;
         for(int i = 0; i < numInstantiatedBrushes; i++) {
             if(brushes[i] != null) {
@@ -90,10 +101,10 @@ public class SymmetryBrush implements Brush {
             }
             brushes[i] = brushType.createBrush(tool, radius);
         }
-        assert checkThatAllBrushesAreDifferentInstances();
+        assert allBrushesAreDifferentInstances();
     }
 
-    public void symmetryChanged(Symmetry symmetry, int radius) {
+    public void symmetryChanged(Symmetry symmetry, double radius) {
         this.symmetry = symmetry;
         if(symmetry.getNumBrushes() > numInstantiatedBrushes) {
             // we need to create more brushes of the same type
@@ -104,10 +115,11 @@ public class SymmetryBrush implements Brush {
             }
             numInstantiatedBrushes = newNumBrushes;
         }
-        assert checkThatAllBrushesAreDifferentInstances();
+        assert allBrushesAreDifferentInstances();
     }
 
-    private boolean checkThatAllBrushesAreDifferentInstances() {
+    // used in assertions
+    private boolean allBrushesAreDifferentInstances() {
         for (int i = 0; i < numInstantiatedBrushes; i++) {
             for (int j = 0; j < numInstantiatedBrushes; j++) {
                 if(i != j) {
@@ -120,23 +132,27 @@ public class SymmetryBrush implements Brush {
         return true;
     }
 
-    public void onStrokeStart(int brushNo, PPoint p) {
+    public void startAt(int brushNo, PPoint p) {
         if(brushNo == 0) {
             affectedArea.initAt(p);
         } else {
             affectedArea.updateWith(p);
         }
-        brushes[brushNo].onStrokeStart(p);
+        brushes[brushNo].startAt(p);
     }
 
-    public void onNewStrokePoint(int brushNo, PPoint p) {
+    public void continueTo(int brushNo, PPoint p) {
         affectedArea.updateWith(p);
-        brushes[brushNo].onNewStrokePoint(p);
+        brushes[brushNo].continueTo(p);
     }
 
     public void lineConnectTo(int brushNo, PPoint p) {
         affectedArea.updateWith(p);
         brushes[brushNo].lineConnectTo(p);
+    }
+
+    public void finish(int brushNo) {
+        brushes[brushNo].finish();
     }
 
     @Override

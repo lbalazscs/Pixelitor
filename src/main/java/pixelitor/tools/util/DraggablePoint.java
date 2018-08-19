@@ -67,7 +67,7 @@ public class DraggablePoint extends Point2D.Double {
 
     private Shape shape;
     private Shape shadow;
-    private final static Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
+    private static final Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
     public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
         this.name = name;
@@ -278,8 +278,11 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public String toColoredString() {
-        String sb = String
-                .format("\u001B[32m%s\u001B[0m {x = \u001B[33m%.2f\u001B[0m, y = \u001B[33m%.2f\u001B[0m}{imX = \u001B[36m%.1f\u001B[0m, imY = \u001B[36m%.1f\u001B[0m}",
+        String sb = String.format("\u001B[32m%s\u001B[0m " +
+                        "{x = \u001B[33m%.2f\u001B[0m, " +
+                        "y = \u001B[33m%.2f\u001B[0m}" +
+                        "{imX = \u001B[36m%.1f\u001B[0m, " +
+                        "imY = \u001B[36m%.1f\u001B[0m}",
                         name, x, y, imX, imY);
         return sb;
     }

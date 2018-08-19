@@ -66,18 +66,18 @@ public class SelectionBuilder {
 
         if (selectionInteraction == SelectionInteraction.REPLACE) {
             replacedShape = selection.getShape();
-//            selection.stopMarching();
-//            selection.repaint();
-            comp.setSelection(null);
-            selection.die();
+            // At this point the mouse was pressed, and it is clear that the
+            // old selection should go away, but we don't know yet whether the
+            // mouse will be released at the same point (Deselect) or another
+            // point (Replace Selection)
+            // Therefore we don't deselect yet (the selection information
+            // will be needed when the mouse will be released), only hide.
+            selection.setHidden(true, true);
         } else {
 //            // the current shape becomes the previous shape
 //            // and will be replaced as mouse dragged events come
-//            selection.setLastShape(selection.getShape());
 
             selection.setFrozen(true);
-
-//            selection.setHidden(false, false); // unhide
         }
     }
 

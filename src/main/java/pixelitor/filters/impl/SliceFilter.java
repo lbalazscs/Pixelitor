@@ -16,14 +16,13 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.TransformFilter;
-import net.jafama.FastMath;
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Slice;
 
 /**
  * The implementation of the {@link Slice} filter.
  */
-public class SliceFilter extends TransformFilter {
+public class SliceFilter extends RotatedEffectFilter {
     private double shiftHorizontal;
     private double shiftVertical;
     private int offset;
@@ -34,15 +33,22 @@ public class SliceFilter extends TransformFilter {
     }
 
     @Override
-    protected void transformInverse(int x, int y, float[] out) {
-//        x += offset * Math.signum(ImageMath.sinLikeTriangle(y / (double) size + shift));
-//        y += offset * Math.signum(ImageMath.sinLikeTriangle(x / (double)size + shift));
+    protected double transformX(double ii, double jj) {
+        return (float) (ii + calcShift(jj, shiftVertical));
+    }
 
-        x += offset * Math.signum(FastMath.cos(y / (double) size - shiftVertical));
-        y += offset * Math.signum(FastMath.cos(x / (double) size - shiftHorizontal));
+    @Override
+    protected double transformY(double ii, double jj) {
+        return (jj + calcShift(ii, shiftHorizontal));
+    }
 
-        out[0] = x;
-        out[1] = y;
+    private double calcShift(double coord, double shift) {
+//        return offset * Math.signum(FastMath.cos(coord / (double) size - shift));
+        double mod = ImageMath.mod(coord + shift, 2 * size) - size;
+        if (mod >= 0) {
+            return offset;
+        }
+        return -offset;
     }
 
     public void setShiftHorizontal(double t) {
@@ -60,4 +66,10 @@ public class SliceFilter extends TransformFilter {
     public void setSize(int size) {
         this.size = size;
     }
+
+//    public void setAngle(double angle) {
+//        this.angle = angle;
+//        sin = Math.sin(angle);
+//        cos = Math.cos(angle);
+//    }
 }

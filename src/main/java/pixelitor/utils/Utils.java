@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import net.jafama.FastMath;
 import pixelitor.Build;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -209,7 +210,13 @@ public final class Utils {
         if (debugCompOpt.isPresent()) { // TODO after Java 9: ifPresentOrElse​
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
+            Canvas canvas = comp.getCanvas();
             comp.getActiveDrawableOrThrow().setImage(copy);
+            if (canvas.getImWidth() != img.getWidth()
+                    || canvas.getImHeight() != img.getHeight()) {
+                canvas.changeImSize(img.getWidth(), img.getHeight());
+            }
+
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);

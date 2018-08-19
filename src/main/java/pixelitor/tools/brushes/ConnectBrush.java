@@ -39,16 +39,16 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class ConnectBrush extends AbstractBrush {
     private final List<HistoryPoint> history = new ArrayList<>();
     private final ConnectBrushSettings settings;
-    private int diamSq;
+    private double diamSq;
 
-    public ConnectBrush(ConnectBrushSettings settings, int radius) {
+    public ConnectBrush(ConnectBrushSettings settings, double radius) {
         super(radius);
         this.settings = settings;
         settings.setBrush(this);
     }
 
     @Override
-    public void setRadius(int radius) {
+    public void setRadius(double radius) {
         super.setRadius(radius);
         diamSq = 4 * radius * radius;
     }
@@ -63,8 +63,8 @@ public class ConnectBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        super.onStrokeStart(p);
+    public void startAt(PPoint p) {
+        super.startAt(p);
 
         if (settings.deleteHistoryForEachStroke()) {
             deleteHistory();
@@ -73,7 +73,7 @@ public class ConnectBrush extends AbstractBrush {
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void continueTo(PPoint p) {
         int currentColor = targetG.getColor().getRGB();
         int currentColorZeroAlpha = currentColor & 0x00FFFFFF;
 

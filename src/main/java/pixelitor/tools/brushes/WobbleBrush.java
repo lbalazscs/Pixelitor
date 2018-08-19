@@ -30,15 +30,20 @@ import java.awt.geom.Ellipse2D;
 public class WobbleBrush extends StrokeBrush {
     private static final float SIZE_DIVIDING_FACTOR = 4.0f;
 
-    public WobbleBrush(int radius) {
+    public WobbleBrush(double radius) {
         super(radius, StrokeType.WOBBLE);
+    }
+
+    @Override
+    public double getActualRadius() {
+        return 5.0 + radius * 1.5; // can be bigger because of the randomness
     }
 
     @Override
     public void drawStartShape(PPoint p) {
         double x = p.getImX();
         double y = p.getImY();
-        float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
+        float smallThickness = (float) (diameter / SIZE_DIVIDING_FACTOR);
 
         if(diameter != lastDiameter) {
             currentStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
@@ -51,8 +56,8 @@ public class WobbleBrush extends StrokeBrush {
 
     @Override
     public void drawLine(PPoint start, PPoint end) {
-        int savedRadius = radius;
-        radius = (int) (radius / SIZE_DIVIDING_FACTOR);
+        double savedRadius = radius;
+        radius = radius / SIZE_DIVIDING_FACTOR;
 
         super.drawLine(start, end);
 

@@ -24,11 +24,10 @@ import java.util.List;
 /**
  * The settings of a {@link DabsBrush}
  */
-public class DabsBrushSettings implements BrushSettings {
+public class DabsBrushSettings extends BrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
     private final List<DabsBrush> brushes = new ArrayList<>(4);
-    private JPanel configPanel;
 
     public DabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy) {
         this.angleSettings = angleSettings;
@@ -74,14 +73,9 @@ public class DabsBrushSettings implements BrushSettings {
     }
 
     @Override
-    public JPanel getConfigPanel() {
-        if (configPanel == null) {
-            configPanel = createConfigPanel();
-        }
-        return configPanel;
-    }
-
     protected JPanel createConfigPanel() {
+        // TODO either the class should be abstract or this should do something
+        // why instantiate
         return new JPanel();
     }
 }

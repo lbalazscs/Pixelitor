@@ -22,7 +22,6 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.Build;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.history.History;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -39,8 +38,10 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
@@ -193,7 +194,7 @@ public class Dialogs {
 
         System.err.printf("Exception in the thread '%s'%n", thread.getName());
         e.printStackTrace();
-        showMoreDevelopmentInfo();
+        showMoreDevelopmentInfo(e);
 
         if (e instanceof CompletionException) {
             e = e.getCause();
@@ -213,24 +214,29 @@ public class Dialogs {
         JXErrorPane.showDialog(parent, ii);
     }
 
-    private static void showMoreDevelopmentInfo() {
+    private static void showMoreDevelopmentInfo(Throwable e) {
         if (Build.CURRENT.isFinal()) {
             return;
         }
+
+        Predicate<String> isRandomGUITest = s -> s.contains("RandomGUITest");
+        Predicate<String> isAssertJSwingTest = s -> s.contains("AssertJSwingTest");
+        boolean autoTest = Arrays.stream(e.getStackTrace())
+                .map(StackTraceElement::getClassName)
+                .anyMatch(isRandomGUITest.or(isAssertJSwingTest));
+
+        if (!autoTest) {
+            return;
+        }
+
         // avoid the mixing of the stack trace with
         // the event dumps
         Utils.sleep(2, TimeUnit.SECONDS);
 
-        if (RandomGUITest.isRunning()) {
-            Events.dumpAll();
-            History.showHistory();
-            Toolkit.getDefaultToolkit().beep();
-            playWarningSound();
-
-            RandomGUITest.stop();
-        } else if (Build.CURRENT.isDevelopment()) {
-            Events.dumpForActiveComp();
-        }
+        RandomGUITest.stop();
+        Events.dumpForActiveComp();
+        Toolkit.getDefaultToolkit().beep();
+        playWarningSound();
     }
 
     private static void playWarningSound() {

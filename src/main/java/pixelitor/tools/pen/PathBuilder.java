@@ -32,7 +32,7 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  * A pen tool interaction mode where a path can be built from scratch
  */
 public class PathBuilder implements PenToolMode {
-    enum State {
+    public enum State {
         INITIAL {
         }, DRAGGING_THE_CONTROL_OF_LAST {
         }, MOVING_TO_NEXT_CURVE_POINT {
@@ -45,18 +45,22 @@ public class PathBuilder implements PenToolMode {
 
     private State state;
 
-    private SubPath activeSubPath;
-    private final Path path;
+    //    private SubPath activeSubPath;
+    private Path path;
 
-    public PathBuilder(Path path) {
-        this.path = path;
+    public PathBuilder() {
         state = INITIAL;
     }
 
-    private void setState(State state) {
-        if (this.state == FINISHED) {
-            throw new IllegalStateException();
+    @Override
+    public void setPath(Path path) {
+        this.path = path;
+        if (path == null) {
+            state = INITIAL;
         }
+    }
+
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -66,18 +70,10 @@ public class PathBuilder implements PenToolMode {
             return;
         }
 
-        int x = e.getCoX();
-        int y = e.getCoY();
-
         if (e.isControlDown()) {
-            finish(x, y);
+            finish(e);
             return;
         }
-
-//        System.out.printf("PathBuilder::mousePressed: x = %d, y = %d, state = %s%n", x, y, state);
-
-//        lastMousePressX = x;
-//        lastMousePressY = y;
 
         assert state == INITIAL
                 || state == MOVING_TO_NEXT_CURVE_POINT
@@ -87,23 +83,31 @@ public class PathBuilder implements PenToolMode {
             // only add a point if previously we were
             // in the initial mode. Normally points
             // are added in mouseReleased
-            AnchorPoint p = new AnchorPoint(x, y, e.getIC());
+            AnchorPoint p = new AnchorPoint(e);
 
-            path.startNewSubPath(p);
-            this.activeSubPath = path.getActiveSubpath();
+            path.startNewSubPath(p, true);
+//            this.activeSubPath = path.getActiveSubpath();
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            AnchorPoint first = activeSubPath.getFirst();
-            if (first.handleContains(x, y) && activeSubPath.getNumPoints() > 2) {
+            int x = e.getCoX();
+            int y = e.getCoY();
+            AnchorPoint first = path.getFirst();
+            if (shouldBeClosed(first, x, y)) {
                 first.setActive(false);
-                activeSubPath.close();
+                path.close(true);
                 setState(FINISHED);
                 return;
             } else {
                 // fix the final position of the moved curve point
-                activeSubPath.finalizeMovingPoint(x, y);
+                path.finalizeMovingPoint(x, y, false);
             }
         }
         setState(DRAGGING_THE_CONTROL_OF_LAST);
+        assert path.checkWiring();
+    }
+
+    private boolean shouldBeClosed(AnchorPoint first, int x, int y) {
+        return first.handleContains(x, y)
+                && path.getNumPointsInActiveSubpath() > 2;
     }
 
     @Override
@@ -115,8 +119,8 @@ public class PathBuilder implements PenToolMode {
 
         int x = e.getCoX();
         int y = e.getCoY();
-        ControlPoint p = activeSubPath.getLast().ctrlOut;
-        p.setLocation(x, y);
+        ControlPoint ctrlOut = path.getLast().ctrlOut;
+        ctrlOut.setLocation(x, y);
 
         setState(DRAGGING_THE_CONTROL_OF_LAST);
     }
@@ -130,21 +134,16 @@ public class PathBuilder implements PenToolMode {
         int x = e.getCoX();
         int y = e.getCoY();
 
-//        System.out.printf("PathBuilder::mouseReleased: x = %d, y = %d, state = %s%n", x, y, state);
-
         assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
-        ControlPoint ctrlOut = activeSubPath.getLast().ctrlOut;
+        ControlPoint ctrlOut = path.getLast().ctrlOut;
         ctrlOut.setLocation(x, y);
         ctrlOut.afterMouseReleasedActions();
 
-        activeSubPath.setMovingPoint(new AnchorPoint(x, y, e.getIC()));
+        path.setMoving(new AnchorPoint(x, y, e.getIC()));
         setState(MOVING_TO_NEXT_CURVE_POINT);
+        assert path.checkWiring();
     }
-
-//    private boolean wasClick(int x, int y) {
-//        return x == lastMousePressX && y == lastMousePressY;
-//    }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
@@ -157,11 +156,10 @@ public class PathBuilder implements PenToolMode {
         int x = e.getX();
         int y = e.getY();
 
-//        System.out.printf("PathBuilder::mouseMoved: x = %d, y = %d, state = %s%n", x, y, state);
+        AnchorPoint moving = path.getMoving();
+        moving.setLocation(x, y);
 
-        activeSubPath.getMoving().setLocation(x, y);
-
-        AnchorPoint first = activeSubPath.getFirst();
+        AnchorPoint first = path.getFirst();
         if (first.handleContains(x, y)) {
             first.setActive(true);
         } else {
@@ -174,22 +172,21 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void paint(Graphics2D g) {
-        path.paintForBuilding(g, state);
+        if (path != null) {
+            path.paintForBuilding(g, state);
+        }
     }
 
-    public SubPath getActiveSubPath() {
-        return activeSubPath;
-    }
-
-    public void finish(int x, int y) {
-//        System.out.printf("PathBuilder::finish: x = %d, y = %d, state = %s%n", x, y, state);
+    public void finish(PMouseEvent e) {
+        int x = e.getCoX();
+        int y = e.getCoY();
 
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            ControlPoint p = activeSubPath.getLast().ctrlOut;
+            ControlPoint p = path.getLast().ctrlOut;
             p.setLocation(x, y);
             p.calcImCoords();
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            activeSubPath.finalizeMovingPoint(x, y);
+            path.finalizeMovingPoint(x, y, true);
         }
         setState(FINISHED);
     }

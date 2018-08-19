@@ -24,6 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideAction;
@@ -31,6 +32,7 @@ import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
@@ -83,14 +85,24 @@ public final class SelectionActions {
         @Override
         public void actionPerformed(ActionEvent e) {
             Composition comp = ImageComponents.getActiveCompOrNull();
-            Shape shape = comp.getSelection().getShape();
-            comp.deselect(true);
-            Path path = Shapes.shapeToPath(shape, comp.getIC());
-            Tools.PEN.setPath(path);
-            Tools.PEN.startEditing(false);
-            Tools.PEN.getButton().doClick();
+            selectionToPath(comp, true);
         }
     };
+
+    public static void selectionToPath(Composition comp, boolean addToHistory) {
+        Shape shape = comp.getSelection().getShape();
+        Path oldActivePath = comp.getActivePath();
+        comp.deselect(false);
+        Path path = Shapes.shapeToPath(shape, comp.getIC());
+        Tools.PEN.setPath(path);
+        Tools.PEN.startEditing(false);
+        comp.setActivePath(path);
+        Tools.PEN.activate();
+
+        if (addToHistory) {
+            History.addEdit(new ConvertSelectionToPathEdit(comp, shape, oldActivePath));
+        }
+    }
 
     private static final Action modify = new MenuAction("Modify Selection...") {
         @Override

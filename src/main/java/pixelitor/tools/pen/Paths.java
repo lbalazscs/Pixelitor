@@ -17,23 +17,23 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
-import pixelitor.tools.util.PMouseEvent;
+import pixelitor.Composition;
 
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
+import java.io.Serializable;
 
-public interface PenToolMode {
-    void mousePressed(PMouseEvent e);
+/**
+ * All the {@link Path} objects that belong to a {@link Composition}
+ */
+public class Paths implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    void mouseDragged(PMouseEvent e);
+    private Path activePath;
 
-    void mouseReleased(PMouseEvent e);
+    public Path getActivePath() {
+        return activePath;
+    }
 
-    // return true if needs repainting
-    boolean mouseMoved(MouseEvent e, ImageComponent ic);
-
-    void paint(Graphics2D g);
-
-    void setPath(Path path);
+    public void setActivePath(Path activePath) {
+        this.activePath = activePath;
+    }
 }

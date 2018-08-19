@@ -138,6 +138,7 @@ public class MorphologyFilter extends WholeImageFilter {
         return (a >= b) ? a : b;
     }
 
+    @Override
     public String toString() {
         return "Blur/Minimum";
     }

@@ -41,26 +41,36 @@ public class AffectedAreaTracker implements Brush {
     }
 
     @Override
-    public void setRadius(int radius) {
+    public void setRadius(double radius) {
         delegate.setRadius(radius);
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        affectedArea.initAt(p);
-        delegate.onStrokeStart(p);
+    public double getActualRadius() {
+        return delegate.getActualRadius();
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void startAt(PPoint p) {
+        affectedArea.initAt(p);
+        delegate.startAt(p);
+    }
+
+    @Override
+    public void continueTo(PPoint p) {
         affectedArea.updateWith(p);
-        delegate.onNewStrokePoint(p);
+        delegate.continueTo(p);
     }
 
     @Override
     public void lineConnectTo(PPoint p) {
         affectedArea.updateWith(p);
         delegate.lineConnectTo(p);
+    }
+
+    @Override
+    public void finish() {
+        delegate.finish();
     }
 
     @Override

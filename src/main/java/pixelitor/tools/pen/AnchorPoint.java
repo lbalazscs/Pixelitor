@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.Ansi;
 
@@ -58,6 +59,22 @@ public class AnchorPoint extends DraggablePoint {
                 CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
+    }
+
+    public AnchorPoint(PPoint p) {
+        this(p.getCoX(), p.getCoY(), p.getIC());
+    }
+
+    public AnchorPoint(AnchorPoint other, boolean copyControlPositions) {
+        this(other.x, other.y, other.view);
+        this.path = other.path;
+        this.type = other.type;
+        if (copyControlPositions) {
+            this.ctrlIn.x = other.ctrlIn.x;
+            this.ctrlIn.y = other.ctrlIn.y;
+            this.ctrlOut.x = other.ctrlOut.x;
+            this.ctrlOut.y = other.ctrlOut.y;
+        }
     }
 
     public void paintHandles(Graphics2D g, boolean paintIn, boolean paintOut) {

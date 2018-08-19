@@ -82,15 +82,15 @@ public abstract class PPoint {
     }
 
     public PPoint mirrorVertically(int compWidth) {
-        return new PPoint.Image(ic, compWidth - getImX(), getImY());
+        return new EagerImage(ic, compWidth - getImX(), getImY());
     }
 
     public PPoint mirrorHorizontally(int compHeight) {
-        return new PPoint.Image(ic, getImX(), compHeight - getImY());
+        return new EagerImage(ic, getImX(), compHeight - getImY());
     }
 
     public PPoint mirrorBoth(int compWidth, int compHeight) {
-        return new PPoint.Image(ic, compWidth - getImX(), compHeight - getImY());
+        return new EagerImage(ic, compWidth - getImX(), compHeight - getImY());
     }
 
     public void drawLineTo(PPoint end, Graphics2D g) {
@@ -98,14 +98,52 @@ public abstract class PPoint {
         g.draw(line);
     }
 
+    /**
+     * Returns the squared distance in image space
+     */
     public double imDistSq(PPoint other) {
-        double dx = imX - other.imX;
-        double dy = imY - other.imY;
+        double dx = getImX() - other.getImX();
+        double dy = getImY() - other.getImY();
         return dx * dx + dy * dy;
     }
 
+    /**
+     * Returns the distance in image space
+     */
     public double imDist(PPoint other) {
         return Math.sqrt(imDistSq(other));
+    }
+
+    /**
+     * Returns the squared distance in component space
+     */
+    public double coDistSq(PPoint other) {
+        double dx = getCoX() - other.getCoX();
+        double dy = getCoY() - other.getCoY();
+        return dx * dx + dy * dy;
+    }
+
+    /**
+     * Returns the distance in component space
+     */
+    public double coDist(PPoint other) {
+        return Math.sqrt(coDistSq(other));
+    }
+
+    public static PPoint lazyFromCo(int x, int y, ImageComponent ic) {
+        return new Lazy(ic, x, y);
+    }
+
+    public static PPoint eagerFromCo(int x, int y, ImageComponent ic) {
+        return new Eager(ic, x, y);
+    }
+
+    public static PPoint eagerFromIm(double imX, double imY, ImageComponent ic) {
+        return new EagerImage(ic, imX, imY);
+    }
+
+    public static PPoint lazyFromIm(double imX, double imY, ImageComponent ic) {
+        return new LazyImage(ic, imX, imY);
     }
 
     /**
@@ -121,7 +159,7 @@ public abstract class PPoint {
             super(ic);
             coX = x;
             coY = y;
-            // image space coordinates are not uet initialized
+            // image space coordinates are not yet initialized
         }
 
         @Override
@@ -160,13 +198,46 @@ public abstract class PPoint {
     /**
      * A {@link PPoint} eagerly initialized with image-space coordinates
      */
-    public static class Image extends PPoint {
-        public Image(ImageComponent ic, double imX, double imY) {
+    private static class EagerImage extends PPoint {
+        public EagerImage(ImageComponent ic, double imX, double imY) {
             super(ic);
             this.imX = imX;
             this.imY = imY;
             this.coX = (int) ic.imageXToComponentSpace(imX);
             this.coY = (int) ic.imageYToComponentSpace(imY);
+        }
+    }
+
+    /**
+     * A {@link PPoint} lazily initialized with image-space coordinates
+     */
+    private static class LazyImage extends PPoint {
+        private boolean xConverted = false;
+        private boolean yConverted = false;
+
+        public LazyImage(ImageComponent ic, double imX, double imY) {
+            super(ic);
+            this.imX = imX;
+            this.imY = imY;
+            // component space coordinates are not yet initialized
+        }
+
+        @Override
+        public int getCoX() {
+            if (!xConverted) {
+                this.coX = (int) ic.imageXToComponentSpace(imX);
+                xConverted = true;
+            }
+            return coX;
+        }
+
+        @Override
+        public int getCoY() {
+            if (!yConverted) {
+                this.coY = (int) ic.imageYToComponentSpace(imY);
+                yConverted = true;
+            }
+            return coY;
         }
     }
 }

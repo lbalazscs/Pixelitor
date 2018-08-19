@@ -17,7 +17,9 @@
 
 package pixelitor.tools;
 
+import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.selection.Selection;
@@ -192,6 +194,10 @@ public class SelectionTool extends DragTool {
         deselect(e.getComp(), true);
 
         altMeansSubtract = false;
+
+        if (Build.CURRENT.isDevelopment()) {
+            ConsistencyChecks.selectionActionsEnabledCheck(e.getComp());
+        }
     }
 
     private static void deselect(Composition comp, boolean addToHistory) {

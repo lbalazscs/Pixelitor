@@ -17,10 +17,15 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
+import pixelitor.history.History;
+import pixelitor.tools.pen.history.FirstAnchorPointEdit;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -40,8 +45,14 @@ import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
  */
 public class Path {
     private final List<SubPath> subPaths = new ArrayList<>();
+    private final Composition comp;
     private SubPath activeSubPath;
 
+    public Path(Composition comp) {
+        this.comp = comp;
+    }
+
+    @VisibleForTesting
     public SubPath getActiveSubpath() {
         return activeSubPath;
     }
@@ -88,22 +99,46 @@ public class Path {
         return path;
     }
 
-    public void startNewSubPath(AnchorPoint first) {
-        activeSubPath = new SubPath();
+    public void startNewSubPath(AnchorPoint first, boolean addToHistory) {
+        activeSubPath = new SubPath(comp);
         subPaths.add(activeSubPath);
         activeSubPath.addFirstPoint(first);
+
+        if (addToHistory) {
+            History.addEdit(new FirstAnchorPointEdit(comp, this));
+        }
     }
 
     public void addPoint(AnchorPoint ap) {
         activeSubPath.addPoint(ap);
     }
 
+    public AnchorPoint getFirst() {
+        return activeSubPath.getFirst();
+    }
+
     public AnchorPoint getLast() {
         return activeSubPath.getLast();
     }
 
-    public void close() {
-        activeSubPath.close();
+    public void close(boolean addToHistory) {
+        activeSubPath.close(addToHistory);
+    }
+
+    public void finalizeMovingPoint(int x, int y, boolean finishSubPath) {
+        activeSubPath.finalizeMovingPoint(x, y, finishSubPath);
+    }
+
+    public int getNumPointsInActiveSubpath() {
+        return activeSubPath.getNumPoints();
+    }
+
+    public void setMoving(AnchorPoint point) {
+        activeSubPath.setMoving(point);
+    }
+
+    public AnchorPoint getMoving() {
+        return activeSubPath.getMoving();
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -116,7 +151,12 @@ public class Path {
 
     public void dump() {
         for (SubPath sp : subPaths) {
-            System.out.println("New subpath");
+            if (sp.isClosed()) {
+                System.out.println("New closed subpath");
+            } else {
+                System.out.println("New unclosed subpath");
+            }
+
             sp.dump();
         }
     }
@@ -127,18 +167,16 @@ public class Path {
         }
     }
 
-    public void viewSizeChanged(View view) {
+    public void coCoordsChanged(View view) {
         for (SubPath sp : subPaths) {
-            sp.viewSizeChanged(view);
+            sp.coCoordsChanged(view);
         }
     }
 
     public void startNewSubpath(double x, double y, ImageComponent ic) {
-        x = ic.imageXToComponentSpace(x);
-        y = ic.imageYToComponentSpace(y);
-        AnchorPoint first = new AnchorPoint(x, y, ic);
+        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, ic));
         first.setType(SMOOTH);
-        startNewSubPath(first);
+        startNewSubPath(first, false);
     }
 
     public void addLine(double newX, double newY, ImageComponent ic) {

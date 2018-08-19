@@ -20,12 +20,14 @@ package pixelitor.tools.brushes;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
+import java.awt.geom.Ellipse2D;
+
 /**
  * A brush that paints with vector-based "perfect" circles
  */
 public class IdealBrush extends StrokeBrush {
 
-    public IdealBrush(int radius) {
+    public IdealBrush(double radius) {
         super(radius, StrokeType.BASIC);
     }
 
@@ -34,6 +36,7 @@ public class IdealBrush extends StrokeBrush {
         double x = p.getImX();
         double y = p.getImY();
 
-        targetG.fillOval((int) x - radius, (int) y - radius, diameter, diameter);
+        Ellipse2D.Double circle = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);
+        targetG.fill(circle);
     }
 }

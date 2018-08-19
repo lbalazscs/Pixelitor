@@ -160,9 +160,11 @@ public class AutoPaint {
 
     private static PPoint calcStartPoint(Composition comp, Random rand) {
         Canvas canvas = comp.getCanvas();
-        return new PPoint.Image(comp.getIC(),
+        return PPoint.lazyFromIm(
                 rand.nextInt(canvas.getImWidth()),
-                rand.nextInt(canvas.getImHeight()));
+                rand.nextInt(canvas.getImHeight()),
+                comp.getIC()
+        );
     }
 
     private static PPoint calcEndPoint(PPoint start, Composition comp,
@@ -171,7 +173,7 @@ public class AutoPaint {
         double angle = rand.nextDouble() * 2 * Math.PI;
         double endX = start.getImX() + strokeLength * FastMath.cos(angle);
         double endY = start.getImY() + strokeLength * FastMath.sin(angle);
-        return new PPoint.Image(comp.getIC(), endX, endY);
+        return PPoint.lazyFromIm(endX, endY, comp.getIC());
     }
 
     private static void drawBrushStroke(Drawable dr,

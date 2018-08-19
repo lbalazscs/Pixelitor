@@ -35,18 +35,21 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
  * A {@link DabsBrush} where the dabs are images
  */
 public class ImageDabsBrush extends DabsBrush {
-    private static final Map<ImageBrushType, BufferedImage> templateImages = new EnumMap<>(ImageBrushType.class);
-    private final BufferedImage templateImage;
-    private BufferedImage coloredBrushImage;
-    private BufferedImage finalScaledImage;
+    private static final Map<ImageBrushType, BufferedImage> templateImages
+            = new EnumMap<>(ImageBrushType.class);
+    private final BufferedImage templateImg;
+    private BufferedImage coloredBrushImg;
+    private BufferedImage finalScaledImg;
     private Color lastColor;
 
-    public ImageDabsBrush(int radius, ImageBrushType imageBrushType, double spacingRatio, AngleSettings angleSettings) {
-        super(radius, new RadiusRatioSpacing(spacingRatio), angleSettings, false);
+    public ImageDabsBrush(double radius, ImageBrushType imageBrushType,
+                          double spacingRatio, AngleSettings angleSettings) {
+        super(radius, new RadiusRatioSpacing(spacingRatio),
+                angleSettings, false);
 
-        // for each brush type multiple brush instances are created because of the symmetry
-        // however the template image can be shared between them
-        templateImage = templateImages.computeIfAbsent(imageBrushType,
+        // for each brush type multiple brush instances are created because
+        // of the symmetry, but the template image can be shared between them
+        templateImg = templateImages.computeIfAbsent(imageBrushType,
                 ImageBrushType::createBWBrushImage);
     }
 
@@ -65,50 +68,50 @@ public class ImageDabsBrush extends DabsBrush {
     }
 
     /**
-     * This method assumes that the color of coloredBrushImage is OK
+     * This method assumes that the color of coloredBrushImg is OK
      */
-    private void resizeBrushImage(float newSize, boolean force) {
+    private void resizeBrushImage(double newSize, boolean force) {
         if (!force) {
-            if (finalScaledImage != null && finalScaledImage.getWidth() == newSize) {
+            if (finalScaledImg != null && finalScaledImg.getWidth() == newSize) {
                 return;
             }
         }
 
-        if (finalScaledImage != null) {
-            finalScaledImage.flush();
+        if (finalScaledImg != null) {
+            finalScaledImg.flush();
         }
 
         int newSizeInt = (int) newSize;
         assert newSizeInt > 0 : "newSize = " + newSize;
-        finalScaledImage = new BufferedImage(newSizeInt, newSizeInt, TYPE_INT_ARGB);
-        Graphics2D g = finalScaledImage.createGraphics();
-        g.drawImage(coloredBrushImage, 0, 0, newSizeInt, newSizeInt, null);
+        finalScaledImg = new BufferedImage(newSizeInt, newSizeInt, TYPE_INT_ARGB);
+        Graphics2D g = finalScaledImg.createGraphics();
+        g.drawImage(coloredBrushImg, 0, 0, newSizeInt, newSizeInt, null);
         g.dispose();
     }
 
     /**
-     * Creates a colorized brush image from the template image according to the foreground color
-     *
-     * @param color
+     * Creates a colorized brush image from the template image
+     * according to the foreground color
      */
     private void colorizeBrushImage(Color color) {
-        coloredBrushImage = new BufferedImage(templateImage.getWidth(), templateImage.getHeight(), TYPE_INT_ARGB);
-        int[] srcPixels = ImageUtils.getPixelsAsArray(templateImage);
-        int[] destPixels = ImageUtils.getPixelsAsArray(coloredBrushImage);
+        coloredBrushImg = new BufferedImage(
+                templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
+        int[] srcPixels = ImageUtils.getPixelsAsArray(templateImg);
+        int[] destPixels = ImageUtils.getPixelsAsArray(coloredBrushImg);
 
-        int destRed = color.getRed();
-        int destGreen = color.getGreen();
-        int destBlue = color.getBlue();
+        int destR = color.getRed();
+        int destG = color.getGreen();
+        int destB = color.getBlue();
         for (int i = 0; i < destPixels.length; i++) {
             int srcRGB = srcPixels[i];
 
             //int a = (srcRGB >>> 24) & 0xFF;
-            int srcRed = (srcRGB >>> 16) & 0xFF;
-            int srcGreen = (srcRGB >>> 8) & 0xFF;
-            int srcBlue = (srcRGB) & 0xFF;
-            int srcAverage = (srcRed + srcGreen + srcBlue) / 3;
+            int srcR = (srcRGB >>> 16) & 0xFF;
+            int srcG = (srcRGB >>> 8) & 0xFF;
+            int srcB = (srcRGB) & 0xFF;
+            int srcAverage = (srcR + srcG + srcB) / 3;
 
-            destPixels[i] = (0xFF - srcAverage) << 24 | destRed << 16 | destGreen << 8 | destBlue;
+            destPixels[i] = (0xFF - srcAverage) << 24 | destR << 16 | destG << 8 | destB;
         }
     }
 
@@ -116,13 +119,15 @@ public class ImageDabsBrush extends DabsBrush {
     public void putDab(PPoint p, double theta) {
         double x = p.getImX();
         double y = p.getImY();
+        int drawStartX = (int) (x - radius);
+        int drawStartY = (int) (y - radius);
         if (!settings.isAngleAware() || theta == 0) {
-            targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+            targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
             AffineTransform oldTransform = targetG.getTransform();
             targetG.rotate(theta, x, y);
             targetG.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-            targetG.drawImage(finalScaledImage, (int) x - radius, (int) y - radius, null);
+            targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
             targetG.setTransform(oldTransform);
         }
         updateComp(p);

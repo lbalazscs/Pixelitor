@@ -39,6 +39,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.debug.ImageComponentNode;
@@ -416,7 +417,7 @@ public class ImageComponent extends JComponent
     /**
      * Repaints only a region of the image
      */
-    public void updateRegion(PPoint start, PPoint end, int thickness) {
+    public void updateRegion(PPoint start, PPoint end, double thickness) {
         int startX = start.getCoX();
         int startY = start.getCoY();
         int endX = end.getCoX();
@@ -436,17 +437,24 @@ public class ImageComponent extends JComponent
 
         // the thickness is derived from the brush radius, therefore
         // it still needs to be converted into component space
-        thickness = (int) (viewScale * thickness);
+        thickness = viewScale * thickness;
 
-        startX -= thickness;
-        endX += thickness;
-        startY -= thickness;
-        endY += thickness;
+        startX = (int) (startX - thickness);
+        endX = (int) (endX + thickness);
+        startY = (int) (startY - thickness);
+        endY = (int) (endY + thickness);
 
         int repWidth = endX - startX;
         int repHeight = endY - startY;
 
         repaint(startX, startY, repWidth, repHeight);
+    }
+
+    /**
+     * Repaints only a region of the image
+     */
+    public void updateRegion(PRectangle area) {
+        repaint(area.getCo());
     }
 
     public void ensurePositiveLocation() {
@@ -482,7 +490,7 @@ public class ImageComponent extends JComponent
         updateCanvasLocation();
     }
 
-    public void setImageWindowSize() {
+    private void setImageWindowSize() {
         if (imageWindow instanceof ImageFrame) {
             int windowWidth = canvas.getCoWidth();
             int windowHeight = canvas.getCoHeight();
@@ -558,7 +566,7 @@ public class ImageComponent extends JComponent
         repaint();
     }
 
-    public void setZoomLevel(ZoomLevel zoomLevel) {
+    private void setZoomLevel(ZoomLevel zoomLevel) {
         this.zoomLevel = zoomLevel;
         this.viewScale = zoomLevel.getViewScale();
         canvas.recalcCoSize();
@@ -595,16 +603,10 @@ public class ImageComponent extends JComponent
     private void onSizeChanged() {
         updateCanvasLocation();
 
-        // one can zoom an inactive image with the mouse wheel,
-        // but the tools are interacting only with the active image
-        if (ImageComponents.isActive(this)) {
-            Tools.icSizeChanged(this);
-        }
-
         repaint();
     }
 
-    public void updateCanvasLocation() {
+    private void updateCanvasLocation() {
         int myWidth = getWidth();
         int myHeight = getHeight();
         int canvasCoWidth = canvas.getCoWidth();
@@ -622,6 +624,12 @@ public class ImageComponent extends JComponent
         // centralize the canvas within this component
         canvasStartX = (myWidth - canvasCoWidth) / 2.0;
         canvasStartY = (myHeight - canvasCoHeight) / 2.0;
+
+        // one can zoom an inactive image with the mouse wheel,
+        // but the tools are interacting only with the active image
+        if (ImageComponents.isActive(this)) {
+            Tools.coCoordsChanged(this);
+        }
 
         imToCo.invalidate();
         coToIm.invalidate();

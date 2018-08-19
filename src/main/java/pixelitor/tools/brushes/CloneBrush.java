@@ -45,7 +45,7 @@ public class CloneBrush extends CopyBrush {
     private double scaleY;
     private double rotate;
 
-    public CloneBrush(int radius, CopyBrushType type) {
+    public CloneBrush(double radius, CopyBrushType type) {
         super(radius, type, new RadiusRatioSpacing(0.25));
     }
 

@@ -67,7 +67,6 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         }
     }
 
-    @SuppressWarnings("ProhibitedExceptionDeclared")
     @Override
     protected Void doInBackground() {
         try {

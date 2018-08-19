@@ -37,22 +37,35 @@ public interface Brush {
     /**
      * Sets the radius of the brush
      */
-    void setRadius(int radius);
+    void setRadius(double radius);
+
+    /**
+     * Used to determine the area saved for the undo.
+     * Note that this can be bigger than the radius, because
+     * some brushes use randomness and paint outside their radius.
+     */
+    double getActualRadius();
 
     /**
      * The start of a new brush stroke.
      */
-    void onStrokeStart(PPoint p);
+    void startAt(PPoint p);
 
     /**
-     * A new drawing mouse event has been received.
+     * The brush stroke should be continued to the given point.
      */
-    void onNewStrokePoint(PPoint p);
+    void continueTo(PPoint p);
 
     /**
-     * A shift-click happened.
+     * The brush stroke should be connected by a straight line
+     * to the given point (usually because a shift-click happened)
      */
     void lineConnectTo(PPoint p);
+
+    /**
+     * The brush stroke should be finished.
+     */
+    void finish();
 
     default void dispose() {}
 

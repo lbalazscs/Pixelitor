@@ -20,13 +20,13 @@ package pixelitor.tools.brushes;
 import javax.swing.*;
 import java.awt.FlowLayout;
 
-public class OutlineBrushSettings implements BrushSettings {
+public class OutlineBrushSettings extends BrushSettings {
     private static final boolean DEFAULT_SPEED_DEPENDENCE = true;
 
     private JCheckBox dependsOnSpeedCB;
 
     @Override
-    public JPanel getConfigPanel() {
+    protected JPanel createConfigPanel() {
         JPanel p = new JPanel(new FlowLayout());
         p.add(new JLabel("Radius depends on mouse speed"));
         if (dependsOnSpeedCB == null) {

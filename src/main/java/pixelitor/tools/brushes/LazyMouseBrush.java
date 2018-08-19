@@ -36,7 +36,7 @@ public class LazyMouseBrush implements Brush {
 
     private static final int MIN_SPACING = 1;
     private static final int DEFAULT_SPACING = 3;
-    private static final int MAX_SPACING = 10;
+    private static final int MAX_SPACING = 20;
 
     private final Brush delegate;
     private double mouseX;
@@ -80,13 +80,18 @@ public class LazyMouseBrush implements Brush {
     }
 
     @Override
-    public void setRadius(int radius) {
+    public void setRadius(double radius) {
         delegate.setRadius(radius);
     }
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        delegate.onStrokeStart(p);
+    public double getActualRadius() {
+        return delegate.getActualRadius();
+    }
+
+    @Override
+    public void startAt(PPoint p) {
+        delegate.startAt(p);
 
         mouseX = p.getImX();
         mouseY = p.getImY();
@@ -98,7 +103,7 @@ public class LazyMouseBrush implements Brush {
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void continueTo(PPoint p) {
         mouseX = p.getImX();
         mouseY = p.getImY();
 
@@ -116,8 +121,8 @@ public class LazyMouseBrush implements Brush {
             this.drawX += advanceDX;
             this.drawY += advanceDY;
 
-            delegate.onNewStrokePoint(
-                    new PPoint.Image(ic, this.drawX, this.drawY));
+            delegate.continueTo(
+                    PPoint.eagerFromIm(this.drawX, this.drawY, ic));
 
             dx = mouseX - this.drawX;
             dy = mouseY - this.drawY;
@@ -128,7 +133,12 @@ public class LazyMouseBrush implements Brush {
     @Override
     public void lineConnectTo(PPoint p) {
         // TODO
-        onNewStrokePoint(p);
+        continueTo(p);
+    }
+
+    @Override
+    public void finish() {
+        delegate.finish();
     }
 
     @Override

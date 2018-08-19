@@ -16,30 +16,21 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.TransformFilter;
 import net.jafama.FastMath;
 import pixelitor.filters.GlassTiles;
-
-import java.awt.image.BufferedImage;
 
 /**
  * The implementation of the {@link GlassTiles} filter.
  *
  * Inspired by the Paint.net tile effect
  */
-public class TilesFilter extends TransformFilter {
+public class TilesFilter extends RotatedEffectFilter {
     private float sizeX;
     private float sizeY;
-    private float halfWidth;
-    private float halfHeight;
     private float curvatureX;
     private float curvatureY;
     private float shiftX;
     private float shiftY;
-
-    private double angle;
-    private double cos = 1.0;
-    private double sin = 0.0;
 
     public TilesFilter(String filterName) {
         super(filterName);
@@ -62,45 +53,13 @@ public class TilesFilter extends TransformFilter {
     }
 
     @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        halfWidth = src.getWidth() / 2.0f;
-        halfHeight = src.getHeight() / 2.0f;
-
-        return super.filter(src, dst);
+    protected double transformX(double ii, double jj) {
+        return ii + (curvatureX * FastMath.tan(ii * sizeX - shiftX / (double) sizeX));
     }
 
     @Override
-    protected void transformInverse(int x, int y, float[] out) {
-        double i = x - halfWidth;
-        double j = y - halfHeight;
-
-        double ii, jj;
-        if (angle != 0) {
-            // rotate the sampling coordinates around the center
-            ii = i * cos - j * sin;
-            jj = j * cos + i * sin;
-        } else {
-            ii = i;
-            jj = j;
-        }
-
-        double sampleX = ii + (curvatureX * FastMath.tan(ii * sizeX - shiftX / (double) sizeX));
-        double sampleY = jj + (curvatureY * FastMath.tan(jj * sizeY - shiftY / (double) sizeY));
-
-        // So far we have rotated both the tiles
-        // distortion and the background.
-        // Now rotate the background back.
-        double sampleXX, sampleYY;
-        if (angle != 0) {
-            sampleXX = sampleX * cos + sampleY * sin;
-            sampleYY = sampleY * cos - sampleX * sin;
-        } else {
-            sampleXX = sampleX;
-            sampleYY = sampleY;
-        }
-
-        out[0] = (float) (halfWidth + sampleXX);
-        out[1] = (float) (halfHeight + sampleYY);
+    protected double transformY(double ii, double jj) {
+        return jj + (curvatureY * FastMath.tan(jj * sizeY - shiftY / (double) sizeY));
     }
 
     public void setShiftX(float shiftX) {
@@ -109,13 +68,5 @@ public class TilesFilter extends TransformFilter {
 
     public void setShiftY(float shiftY) {
         this.shiftY = shiftY;
-    }
-
-    public void setAngle(double angle) {
-        this.angle = angle;
-        if (angle != 0) {
-            cos = FastMath.cos(angle);
-            sin = FastMath.sin(angle);
-        }
     }
 }

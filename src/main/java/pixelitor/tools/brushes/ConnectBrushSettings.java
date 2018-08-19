@@ -17,31 +17,21 @@
 
 package pixelitor.tools.brushes;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.utils.Lazy;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
 
-public class ConnectBrushSettings implements BrushSettings {
+public class ConnectBrushSettings extends BrushSettings {
     private static final boolean RESET_DEFAULT = false;
 
-    private final Lazy<JPanel> configPanel = Lazy.of(this::createConfigPanel);
     private JCheckBox resetForEachStroke;
 
-    private final EnumComboBoxModel<Style> styleModel = new EnumComboBoxModel<>(Style.class);
+    private final EnumParam<Style> styleModel = Style.asParam();
 
     private ConnectBrush brush;
     private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
     private final RangeParam widthModel = new RangeParam("Line Width (px)", 1, 1, 10);
-
-    @Override
-    public JPanel getConfigPanel() {
-        return configPanel.get();
-    }
 
     public boolean deleteHistoryForEachStroke() {
         if (resetForEachStroke == null) { // not configured
@@ -51,28 +41,21 @@ public class ConnectBrushSettings implements BrushSettings {
     }
 
     public Style getStyle() {
-        return styleModel.getSelectedItem();
+        return styleModel.getSelected();
     }
 
-    private JPanel createConfigPanel() {
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(p);
+    @Override
+    protected JPanel createConfigPanel() {
+        BrushSettingsPanel p = new BrushSettingsPanel();
 
-        JComboBox<Style> styleCombo = new JComboBox<>(styleModel);
-        gbh.addLabelWithControl("Length: ", styleCombo);
-
-        SliderSpinner densitySlider = SliderSpinner.simpleFrom(densityModel);
-        gbh.addLabelWithControl(densityModel.getName() + ":", densitySlider);
-
-        SliderSpinner widthSlider = SliderSpinner.simpleFrom(widthModel);
-        gbh.addLabelWithControl(widthModel.getName() + ":", widthSlider);
+        p.addParam(styleModel);
+        p.addSlider(densityModel);
+        p.addSlider(widthModel);
 
         resetForEachStroke = new JCheckBox("", RESET_DEFAULT);
-        gbh.addLabelWithControl("Reset History for Each Stroke: ", resetForEachStroke);
+        p.addLabelWithControl("Reset History for Each Stroke: ", resetForEachStroke);
 
-        JButton resetHistoryNowButton = new JButton("Reset History Now");
-        gbh.addOnlyControl(resetHistoryNowButton);
-        resetHistoryNowButton.addActionListener(e -> brush.deleteHistory());
+        p.addOnlyButton("Reset History Now", e -> brush.deleteHistory());
 
         return p;
     }
@@ -110,6 +93,11 @@ public class ConnectBrushSettings implements BrushSettings {
         @Override
         public String toString() {
             return guiName;
+        }
+
+        public static EnumParam<Style> asParam() {
+            EnumParam<Style> param = new EnumParam<>("Length", Style.class);
+            return param;
         }
     }
 }

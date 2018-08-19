@@ -28,7 +28,7 @@ public abstract class DabsBrush extends AbstractBrush {
     protected DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
-    protected DabsBrush(int radius, SpacingStrategy spacingStrategy,
+    protected DabsBrush(double radius, SpacingStrategy spacingStrategy,
                         AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         super(radius);
         this.spacingStrategy = spacingStrategy;
@@ -40,7 +40,7 @@ public abstract class DabsBrush extends AbstractBrush {
         settings.registerBrush(this);
     }
 
-    protected DabsBrush(int radius, DabsBrushSettings settings,
+    protected DabsBrush(double radius, DabsBrushSettings settings,
                         boolean refreshBrushForEachDab) {
         super(radius);
         this.settings = settings;
@@ -61,14 +61,14 @@ public abstract class DabsBrush extends AbstractBrush {
     public abstract void putDab(PPoint p, double theta);
 
     @Override
-    public void onStrokeStart(PPoint p) {
-        super.onStrokeStart(p);
+    public void startAt(PPoint p) {
+        super.startAt(p);
         dabsStrategy.onStrokeStart(p);
         updateComp(p);
     }
 
     @Override
-    public void onNewStrokePoint(PPoint p) {
+    public void continueTo(PPoint p) {
         dabsStrategy.onNewStrokePoint(p);
         updateComp(p);
         rememberPrevious(p);
