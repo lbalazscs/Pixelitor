@@ -71,7 +71,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         if (e.isControlDown()) {
-            finish(e);
+            finishByCtrlClick(e);
             return;
         }
 
@@ -94,7 +94,7 @@ public class PathBuilder implements PenToolMode {
             if (shouldBeClosed(first, x, y)) {
                 first.setActive(false);
                 path.close(true);
-                setState(FINISHED);
+                finish(e);
                 return;
             } else {
                 // fix the final position of the moved curve point
@@ -177,7 +177,7 @@ public class PathBuilder implements PenToolMode {
         }
     }
 
-    public void finish(PMouseEvent e) {
+    private void finishByCtrlClick(PMouseEvent e) {
         int x = e.getCoX();
         int y = e.getCoY();
 
@@ -188,7 +188,12 @@ public class PathBuilder implements PenToolMode {
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
             path.finalizeMovingPoint(x, y, true);
         }
+        finish(e);
+    }
+
+    private void finish(PMouseEvent e) {
         setState(FINISHED);
+        e.getComp().setActivePath(path);
     }
 
     public void assertStateIs(State s) {

@@ -41,6 +41,8 @@ import java.util.Optional;
  * or when shape handles are rotated.
  */
 public class DraggablePoint extends Point2D.Double {
+    private static final long serialVersionUID = 1L;
+
     private static final int HANDLE_RADIUS = 5;
     private static final int HANDLE_DIAMETER = 2 * HANDLE_RADIUS;
     private static final int SHADOW_OFFSET = 1;
@@ -63,7 +65,8 @@ public class DraggablePoint extends Point2D.Double {
     //    private boolean active = false;
     private static DraggablePoint activePoint = null;
 
-    protected final View view;
+    // transient: it has to be reset after deserialization
+    protected transient View view;
 
     private Shape shape;
     private Shape shadow;
@@ -270,6 +273,11 @@ public class DraggablePoint extends Point2D.Double {
         HandleMovedEdit edit = new HandleMovedEdit(
                 "Handle Moved", this, before, comp);
         return Optional.of(edit);
+    }
+
+    // used only after deserializing from a pxc file
+    public void setView(View view) {
+        this.view = view;
     }
 
     @Override

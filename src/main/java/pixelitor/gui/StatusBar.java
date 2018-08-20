@@ -83,12 +83,12 @@ public class StatusBar extends JPanel {
             progressBar = new JProgressBar(0, max);
             msgLabel = new JLabel(msg);
 
-            // call these instead of revalidate/repaint
-            // because we want to stay on the EDT
-            leftPanel.validate();
             leftPanel.add(msgLabel);
             leftPanel.add(progressBar);
 
+            // call these instead of revalidate()/repaint()
+            // because we want to stay on the EDT
+            leftPanel.validate(); // otherwise the panel width/height are 0
             leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
         }
 

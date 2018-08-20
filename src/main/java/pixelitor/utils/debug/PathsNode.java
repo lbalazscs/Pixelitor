@@ -15,32 +15,18 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.pen;
+package pixelitor.utils.debug;
 
-import pixelitor.Composition;
-import pixelitor.gui.View;
+import pixelitor.tools.pen.Paths;
 
-import java.io.Serializable;
-
-/**
- * All the {@link Path} objects that belong to a {@link Composition}
- */
-public class Paths implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private Path activePath;
-
-    public Path getActivePath() {
-        return activePath;
+public class PathsNode extends DebugNode {
+    public PathsNode(Paths paths) {
+        this("Paths", paths);
     }
 
-    public void setActivePath(Path activePath) {
-        this.activePath = activePath;
-    }
+    public PathsNode(String name, Paths paths) {
+        super(name, paths);
 
-    public void setView(View view) {
-        if (activePath != null) {
-            activePath.setView(view);
-        }
+        addBoolean("has active path", paths.getActivePath() != null);
     }
 }

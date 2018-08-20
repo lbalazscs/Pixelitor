@@ -18,6 +18,7 @@
 package pixelitor.tools.util;
 
 import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 
 import java.awt.Graphics2D;
@@ -144,6 +145,10 @@ public abstract class PPoint {
 
     public static PPoint lazyFromIm(double imX, double imY, ImageComponent ic) {
         return new LazyImage(ic, imX, imY);
+    }
+
+    public Composition getComp() {
+        return ic.getComp();
     }
 
     /**

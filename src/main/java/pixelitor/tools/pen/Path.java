@@ -31,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +44,9 @@ import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
  * Technically, it consists of a series of geometrically distinct
  * {@link SubPath} objects (typically only one).
  */
-public class Path {
+public class Path implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     private final List<SubPath> subPaths = new ArrayList<>();
     private final Composition comp;
     private SubPath activeSubPath;
@@ -243,5 +246,11 @@ public class Path {
         ControlPoint nextIn = next.ctrlIn;
         nextIn.setLocationOnlyForThis(cp2x, cp2y);
         nextIn.afterMovingActionsForThis();
+    }
+
+    public void setView(View view) {
+        for (SubPath subPath : subPaths) {
+            subPath.setView(view);
+        }
     }
 }

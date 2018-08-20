@@ -222,6 +222,9 @@ public class Composition implements Serializable {
         if (selection != null) { // can happen when duplicating
             selection.setIC(ic);
         }
+        if (paths != null) {
+            paths.setView(ic);
+        }
     }
 
     public boolean isEmpty() {
@@ -1152,6 +1155,10 @@ public class Composition implements Serializable {
             RecentFilesMenu.getInstance().addFile(file);
         }
         Messages.showFileSavedMessage(file);
+    }
+
+    public Paths getPaths() {
+        return paths;
     }
 
     public Path getActivePath() {

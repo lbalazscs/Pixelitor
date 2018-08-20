@@ -405,6 +405,7 @@ public abstract class AbstractBrushTool extends Tool {
 //        subpaths[0].writeShape(new GeneralPathWriter(gp));
 //        PathIterator fpi = gp.getPathIterator(null);
 
+        boolean brushStrokePrepared = false;
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
@@ -415,8 +416,15 @@ public abstract class AbstractBrushTool extends Tool {
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
+                    // we can get here more than once if there are multiple subpaths!
                     startingPoint = p;
-                    prepareProgrammaticBrushStroke(dr, p);
+                    if (!brushStrokePrepared) {
+                        // TODO this should not be here, and it should not need
+                        // a point argument, but it is here because some hacks
+                        // in the clone and smudge tools need that point
+                        prepareProgrammaticBrushStroke(dr, p);
+                        brushStrokePrepared = true;
+                    }
                     brush.startAt(p);
                     break;
                 case PathIterator.SEG_LINETO:

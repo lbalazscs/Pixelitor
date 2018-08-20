@@ -17,7 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 
 import javax.swing.*;
@@ -41,10 +40,6 @@ public class PMouseEvent extends PPoint.Lazy {
 
     public JViewport getViewport() {
         return (JViewport) ic.getParent();
-    }
-
-    public Composition getComp() {
-        return ic.getComp();
     }
 
     public MouseEvent getOrigEvent() {

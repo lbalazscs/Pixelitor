@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
+import pixelitor.tools.pen.Paths;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -38,6 +39,13 @@ public class CompositionNode extends DebugNode {
         BufferedImageNode imageNode = new BufferedImageNode(
                 "Composite Image", compositeImage);
         add(imageNode);
+
+        Paths paths = comp.getPaths();
+        if (paths == null) {
+            addBoolean("Paths", false);
+        } else {
+            add(new PathsNode(paths));
+        }
 
         addInt("numLayers", comp.getNumLayers());
         addQuotedString("name", comp.getName());

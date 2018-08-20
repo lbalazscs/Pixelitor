@@ -34,17 +34,19 @@ import static pixelitor.tools.pen.PathBuilder.State.INITIAL;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
 
 public class PathBuilderTest {
-    ImageComponent ic;
+    private ImageComponent ic;
+    private Composition comp;
 
     @Before
     public void setup() {
-        ic = TestHelper.createMockICWithoutComp();
+        comp = mock(Composition.class);
+        ic = TestHelper.setupAMockICFor(comp);
     }
 
     @Test
     public void testBuilding3PointClosedPath() {
         Graphics2D g = mock(Graphics2D.class);
-        Composition comp = mock(Composition.class);
+
         Path path = new Path(comp);
         PathBuilder pb = new PathBuilder();
         pb.setPath(path);

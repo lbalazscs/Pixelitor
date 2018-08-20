@@ -62,7 +62,7 @@ public class PenTool extends Tool {
     public PenTool() {
         super("Pen", 'p', "pen_tool_icon.png",
                 "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
-                        "<b>Ctrl-click</b> to finish. " +
+                        "<b>Ctrl-click</b> or close the path to finish. " +
                         "Press <b>Esc</b> to start from scratch.",
                 Cursors.DEFAULT, false, true,
                 ClipStrategy.INTERNAL_FRAME);

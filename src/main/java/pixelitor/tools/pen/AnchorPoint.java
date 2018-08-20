@@ -239,6 +239,13 @@ public class AnchorPoint extends DraggablePoint {
         this.path = path;
     }
 
+    @Override
+    public void setView(View view) {
+        super.setView(view);
+        ctrlIn.setView(view);
+        ctrlOut.setView(view);
+    }
+
     private void delete() {
         path.deletePoint(this);
         view.repaint();

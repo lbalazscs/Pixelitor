@@ -30,6 +30,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToDoubleFunction;
@@ -46,7 +47,9 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  * <p>
  * https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve
  */
-public class SubPath {
+public class SubPath implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final List<AnchorPoint> anchorPoints = new ArrayList<>();
     private final Composition comp;
     // The curve point which is currently moving while the path is being built
@@ -388,6 +391,15 @@ public class SubPath {
 
         if (moving == null) { // when undoing a finished subpath
             moving = removed;
+        }
+    }
+
+    public void setView(View view) {
+        for (AnchorPoint ap : anchorPoints) {
+            ap.setView(view);
+        }
+        if (moving != null) {
+            moving.setView(view);
         }
     }
 }
