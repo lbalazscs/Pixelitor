@@ -22,6 +22,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
+import pixelitor.utils.CachedFloatRandom;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
@@ -34,7 +35,8 @@ public class SprayBrush extends AbstractBrush {
     private static final int DELAY_MILLIS = 50;
     private final SprayBrushSettings settings;
     private Timer timer;
-    private double shapeRadius;
+    private double minShapeRadius;
+    private double maxShapeRadius;
     private ShapeType shapeType;
     private int numSimultaneousPoints;
     private boolean randomOpacity;
@@ -42,6 +44,7 @@ public class SprayBrush extends AbstractBrush {
     private double mouseY;
     private double maxRadiusSoFar;
     private boolean isEraser;
+    private final CachedFloatRandom rnd = new CachedFloatRandom();
 
     public SprayBrush(double radius, SprayBrushSettings settings) {
         super(radius);
@@ -59,16 +62,20 @@ public class SprayBrush extends AbstractBrush {
     public double getActualRadius() {
         // The points have a Gaussian distribution, so the actual
         // radius is theoretically infinite, so we return the maximum observed value
-        return shapeRadius + maxRadiusSoFar;
+        return maxShapeRadius + maxRadiusSoFar;
     }
 
     @Override
     public void startAt(PPoint p) {
         super.startAt(p);
 
-        shapeRadius = settings.getShapeRadius();
-        shapeType = settings.getShapeType();
+        double shapeRadius = settings.getShapeRadius();
+        float radiusVariability = settings.getRadiusVariability();
+        minShapeRadius = shapeRadius - radiusVariability * shapeRadius;
+        maxShapeRadius = shapeRadius + radiusVariability * shapeRadius;
         numSimultaneousPoints = settings.getFlow();
+
+        shapeType = settings.getShapeType();
         randomOpacity = settings.randomOpacity();
         maxRadiusSoFar = Double.MIN_VALUE;
 
@@ -81,11 +88,16 @@ public class SprayBrush extends AbstractBrush {
         sprayOnce();
     }
 
+    private double nextShapeRadius() {
+        return minShapeRadius + rnd.nextFloat() * (maxShapeRadius - minShapeRadius);
+    }
+
     private void sprayOnce() {
         double minX = Double.MAX_VALUE;
         double minY = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
         double maxY = Double.MIN_VALUE;
+
         for (int i = 0; i < numSimultaneousPoints; i++) {
             double dx = nextGaussian() * radius;
             double x = mouseX + dx;
@@ -95,12 +107,13 @@ public class SprayBrush extends AbstractBrush {
 
             if (randomOpacity) {
                 if (isEraser) {
-                    targetG.setComposite(AlphaComposite.DstOut.derive((float) Math.random()));
+                    targetG.setComposite(AlphaComposite.DstOut.derive(rnd.nextFloat()));
                 } else {
-                    targetG.setComposite(AlphaComposite.SrcOver.derive((float) Math.random()));
+                    targetG.setComposite(AlphaComposite.SrcOver.derive(rnd.nextFloat()));
                 }
             }
 
+            double shapeRadius = nextShapeRadius();
             Shape shape = shapeType.getShape(
                     x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
             targetG.fill(shape);
@@ -120,10 +133,10 @@ public class SprayBrush extends AbstractBrush {
         }
         ImageComponent ic = comp.getIC();
         PRectangle area = PRectangle.fromIm(
-                minX - shapeRadius,
-                minY - shapeRadius,
-                maxX - minX + 2 * shapeRadius,
-                maxY - minY + 2 * shapeRadius, ic);
+                minX - maxShapeRadius,
+                minY - maxShapeRadius,
+                maxX - minX + 2 * maxShapeRadius + 2,
+                maxY - minY + 2 * maxShapeRadius + 2, ic);
 
         comp.updateRegion(area);
     }
@@ -155,7 +168,9 @@ public class SprayBrush extends AbstractBrush {
 
         mouseX = previous.getImX();
         mouseY = previous.getImY();
-        sprayOnce();
+
+        // calling sprayOnce() here would make the flow dependent
+        // on the mouse speed and low flow values impossible
     }
 
     @Override

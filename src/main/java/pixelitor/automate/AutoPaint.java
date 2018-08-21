@@ -237,11 +237,11 @@ public class AutoPaint {
                     TextFieldValidator.createIntOnlyLayerFor(numStrokesTF));
 
             lengthTF = new JTextField(String.valueOf(defaultLength));
-            gbh.addLabelWithControl("Stroke Length Average:",
+            gbh.addLabelWithControl("Average Stroke Length:",
                     TextFieldValidator.createIntOnlyLayerFor(lengthTF));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
-            gbh.addLabelWithControl("Stroke Length Variability:",
+            gbh.addLabelWithControl("Stroke Length Variability (%):",
                     SliderSpinner.simpleFrom(lengthVariability));
 
 
@@ -310,7 +310,7 @@ public class AutoPaint {
             try {
                 getStrokeLength();
             } catch (NumberFormatException e) {
-                retVal = retVal.addError("\"Stroke Length Average\" must be an integer.");
+                retVal = retVal.addError("\"Average Stroke Length\" must be an integer.");
             }
             return retVal;
         }

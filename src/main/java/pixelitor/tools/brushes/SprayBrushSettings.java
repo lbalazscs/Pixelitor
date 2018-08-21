@@ -30,7 +30,8 @@ import javax.swing.*;
 public class SprayBrushSettings extends BrushSettings {
     private static final ShapeType DEFAULT_SHAPE = ShapeType.RANDOM_STAR;
 
-    private final RangeParam radiusModel = new RangeParam("Shape Radius (%)", 1, 4, 20);
+    private final RangeParam radiusModel = new RangeParam("Average Shape Radius (px)", 1, 4, 20);
+    private final RangeParam radiusVariabilityModel = new RangeParam("Shape Radius Variability (%)", 0, 50, 100);
     private final RangeParam flowModel = new RangeParam("Flow", 1, 5, 10);
     private final BooleanParam randomOpacityModel = new BooleanParam("Random Opacity", true);
     private EnumParam<ShapeType> typeModel;
@@ -43,6 +44,7 @@ public class SprayBrushSettings extends BrushSettings {
         p.addParam(typeModel);
 
         p.addSlider(radiusModel);
+        p.addSlider(radiusVariabilityModel);
         p.addSlider(flowModel);
         p.addParam(randomOpacityModel);
 
@@ -64,9 +66,8 @@ public class SprayBrushSettings extends BrushSettings {
         return flowModel.getValue();
     }
 
-    public float getRadiusRandomness() {
-        // TODO
-        return 0.5f;
+    public float getRadiusVariability() {
+        return radiusVariabilityModel.getValueAsPercentage();
     }
 
     public boolean randomOpacity() {

@@ -18,6 +18,8 @@
 package pixelitor.tools.custom;
 
 import net.jafama.FastMath;
+import pixelitor.utils.CachedFloatRandom;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -26,7 +28,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Random;
 
 /**
  * A random star, inspired by http://tips4java.wordpress.com/2013/05/13/playing-with-shapes/
@@ -38,7 +39,7 @@ public class RandomStarShape implements Shape {
     // Things are OK with this delegate
     private GeneralPath delegate = null;
 
-    private static final Random random = new Random();
+    private static final CachedFloatRandom random = new CachedFloatRandom();
 
     private static int numPoints;
     private static int numRadius;
@@ -48,18 +49,18 @@ public class RandomStarShape implements Shape {
     private static double initialAngle;
 
     public static void randomize() {
-        numPoints = 2*(4 + random.nextInt(6));
+        numPoints = 2 * (4 + RandomUtils.nextInt(6));
         numRadius = 2; // if higher than 2 then sometimes nice dancing starts are produced, but often ugly ones
         radiusRatios = new double[numRadius];
         radiusRatios[0] = 1.0;
         for (int i = 1; i < numRadius; i++) {
-            radiusRatios[i] = 0.1 + random.nextDouble() / 2.5;
+            radiusRatios[i] = 0.1 + random.nextFloat() / 2.5;
         }
 
         unitAngle = (2 * Math.PI) / numPoints;
 
         // a random value between 0 and unitAngle
-        initialAngle = 2 * random.nextDouble() * unitAngle;
+        initialAngle = 2 * random.nextFloat() * unitAngle;
     }
 
     static {
