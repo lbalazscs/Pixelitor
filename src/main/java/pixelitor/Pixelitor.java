@@ -121,6 +121,11 @@ public class Pixelitor {
 
     private static void setLookAndFeel() {
         try {
+//            // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/color.html
+//            UIManager.put("nimbusBase", new ColorUIResource(19, 111, 13));
+//            UIManager.put("nimbusBlueGrey", new ColorUIResource(5, 27, 111));
+//            UIManager.put("control", new ColorUIResource(111, 0, 18));
+
             UIManager.setLookAndFeel(
                     "javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {

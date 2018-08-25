@@ -30,20 +30,20 @@ import java.awt.geom.Rectangle2D;
  * Corresponds to the "Type" combo box in the Selection Tool.
  */
 public enum SelectionType {
-    RECTANGLE("Rectangle") {
+    RECTANGLE("Rectangle", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             ImDrag imDrag = (ImDrag) mouseInfo;
             return imDrag.createPositiveRect();
         }
-    }, ELLIPSE("Ellipse") {
+    }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             ImDrag imDrag = (ImDrag) mouseInfo;
             Rectangle2D dr = imDrag.createPositiveRect();
             return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
-    }, LASSO("Freehand") {
+    }, LASSO("Freehand", false) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             ImDrag imDrag = (ImDrag) mouseInfo;
@@ -68,7 +68,7 @@ public enum SelectionType {
                 return gp;
             }
         }
-    }, POLYGONAL_LASSO("Polygonal") {
+    }, POLYGONAL_LASSO("Polygonal", false) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             PMouseEvent pe = (PMouseEvent) mouseInfo;
@@ -96,11 +96,19 @@ public enum SelectionType {
 
     private final String guiName;
 
-    SelectionType(String guiName) {
+    // whether this selection type should display width and height info
+    private final boolean displayWH;
+
+    SelectionType(String guiName, boolean displayWH) {
         this.guiName = guiName;
+        this.displayWH = displayWH;
     }
 
     public abstract Shape createShape(Object mouseInfo, Shape oldShape);
+
+    public boolean displayWidthHeight() {
+        return displayWH;
+    }
 
     @Override
     public String toString() {

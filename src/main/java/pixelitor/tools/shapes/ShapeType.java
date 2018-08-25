@@ -25,6 +25,7 @@ import pixelitor.tools.custom.HeartShape;
 import pixelitor.tools.custom.KiwiShape;
 import pixelitor.tools.custom.RabbitShape;
 import pixelitor.tools.custom.RandomStarShape;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -51,6 +52,11 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return new Rectangle2D.Double(x, y, diameter, diameter);
         }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.WIDTH_HEIGHT;
+        }
     }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape getShape(ImDrag imDrag) {
@@ -61,6 +67,11 @@ public enum ShapeType {
         @Override
         public Shape getShape(double x, double y, double diameter) {
             return new Ellipse2D.Double(x, y, diameter, diameter);
+        }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.WIDTH_HEIGHT;
         }
     }, DIAMOND("Diamond", true) {
         @Override
@@ -88,6 +99,11 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return createDiamond(x, y, diameter, diameter);
         }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.WIDTH_HEIGHT;
+        }
     }, LINE("Line", false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
@@ -98,6 +114,11 @@ public enum ShapeType {
         @Override
         public Shape getShape(double x, double y, double diameter) {
             return new Rectangle2D.Double(x, y, diameter / 5.0, diameter);
+        }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.ANGLE_DIST;
         }
     }, HEART("Heart", true) {
         @Override
@@ -144,6 +165,11 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return createStar(x, y, diameter, diameter / 3.0 + 1);
         }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.WIDTH_HEIGHT;
+        }
     }, RANDOM_STAR("Random Star", true) {
         private ImDrag lastUserDrag;
 
@@ -164,6 +190,11 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             RandomStarShape.randomize();
             return new RandomStarShape(x, y, diameter, diameter);
+        }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.WIDTH_HEIGHT;
         }
     }, ARROW("Arrow", true) {
         GeneralPath unitArrow = null;
@@ -199,6 +230,11 @@ public enum ShapeType {
                     x + diameter,
                     middleY);
             return getShape(imDrag);
+        }
+
+        @Override
+        public DragDisplayType getDragDisplayType() {
+            return DragDisplayType.ANGLE_DIST;
         }
     }, CAT("Cat", true) {
         @Override
@@ -255,6 +291,7 @@ public enum ShapeType {
     private final String guiName;
     private final boolean closed;
 
+    @SuppressWarnings("WeakerAccess")
     protected double x, y, width, height;
 
     ShapeType(String guiName, boolean closed) {
@@ -306,5 +343,10 @@ public enum ShapeType {
     @Override
     public String toString() {
         return guiName;
+    }
+
+    public DragDisplayType getDragDisplayType() {
+        // overridden if necessary
+        return DragDisplayType.NONE;
     }
 }

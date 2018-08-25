@@ -35,6 +35,7 @@ import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.util.function.BooleanSupplier;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -65,10 +66,10 @@ public class ChannelMixer extends ParametrizedFilter {
         normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
 
         // no need for filter triggering here, because this will happen automatically via ActionParam
-        // the actions on the right side DO require explicit triggering because they are simple JButtons
+        // the presets on the right side DO require explicit triggering because they are simple JButtons
     };
 
-    private final Action switchRedGreen
+    private final Action swapRedGreen
             = new AbstractAction("Swap Red-Green") {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -88,7 +89,7 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action switchRedBlue = new AbstractAction("Swap Red-Blue") {
+    private final Action swapRedBlue = new AbstractAction("Swap Red-Blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(0);
@@ -107,7 +108,7 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action switchGreenBlue = new AbstractAction("Swap Green-Blue") {
+    private final Action swapGreenBlue = new AbstractAction("Swap Green-Blue") {
         @Override
         public void actionPerformed(ActionEvent e) {
             redFromRed.setValueNoTrigger(100);
@@ -157,6 +158,63 @@ public class ChannelMixer extends ParametrizedFilter {
             greenFromBlue.setValueNoTrigger(100);
 
             blueFromRed.setValueNoTrigger(100);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(0);
+
+            getParamSet().runFilter();
+        }
+    };
+
+    private final Action removeRed = new AbstractAction("Remove Red") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            redFromRed.setValueNoTrigger(0);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(0);
+
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(100);
+            greenFromBlue.setValueNoTrigger(0);
+
+            blueFromRed.setValueNoTrigger(0);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(100);
+
+            getParamSet().runFilter();
+        }
+    };
+
+    private final Action removeGreen = new AbstractAction("Remove Green") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            redFromRed.setValueNoTrigger(100);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(0);
+
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(0);
+            greenFromBlue.setValueNoTrigger(0);
+
+            blueFromRed.setValueNoTrigger(0);
+            blueFromGreen.setValueNoTrigger(0);
+            blueFromBlue.setValueNoTrigger(100);
+
+            getParamSet().runFilter();
+        }
+    };
+
+    private final Action removeBlue = new AbstractAction("Remove Blue") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            redFromRed.setValueNoTrigger(100);
+            redFromGreen.setValueNoTrigger(0);
+            redFromBlue.setValueNoTrigger(0);
+
+            greenFromRed.setValueNoTrigger(0);
+            greenFromGreen.setValueNoTrigger(100);
+            greenFromBlue.setValueNoTrigger(0);
+
+            blueFromRed.setValueNoTrigger(0);
             blueFromGreen.setValueNoTrigger(0);
             blueFromBlue.setValueNoTrigger(0);
 
@@ -221,8 +279,10 @@ public class ChannelMixer extends ParametrizedFilter {
         }
     };
 
-    private final Action[] actions = {switchRedGreen, switchRedBlue, switchGreenBlue,
-            shiftRGBR, shiftRBGR, averageBW, luminosityBW, sepia};
+    private final Action[] presets = {swapRedGreen, swapRedBlue, swapGreenBlue,
+            shiftRGBR, shiftRBGR, removeRed, removeGreen, removeBlue,
+            averageBW, luminosityBW, sepia};
+    private boolean monochrome = false;
 
     public ChannelMixer() {
         super(ShowOriginal.YES);
@@ -242,6 +302,16 @@ public class ChannelMixer extends ParametrizedFilter {
                 blueFromGreen,
                 blueFromBlue,
         };
+        BooleanSupplier ifMonochrome = () -> monochrome;
+        redFromRed.linkWith(greenFromRed, ifMonochrome);
+        redFromRed.linkWith(blueFromRed, ifMonochrome);
+
+        redFromBlue.linkWith(greenFromBlue, ifMonochrome);
+        redFromBlue.linkWith(blueFromBlue, ifMonochrome);
+
+        redFromGreen.linkWith(greenFromGreen, ifMonochrome);
+        redFromGreen.linkWith(blueFromGreen, ifMonochrome);
+
         setParamSet(new ParamSet(params)
                 .withAction(normalize));
 
@@ -253,6 +323,50 @@ public class ChannelMixer extends ParametrizedFilter {
                 }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
+    }
+
+    public void setMonochrome(boolean monochrome) {
+        boolean wasMonochrome = this.monochrome;
+        if (wasMonochrome == monochrome) {
+            return;
+        }
+        this.monochrome = monochrome;
+
+        boolean allowColors = !monochrome;
+
+        swapGreenBlue.setEnabled(allowColors);
+        swapRedBlue.setEnabled(allowColors);
+        swapRedGreen.setEnabled(allowColors);
+
+        shiftRBGR.setEnabled(allowColors);
+        shiftRGBR.setEnabled(allowColors);
+
+        removeRed.setEnabled(allowColors);
+        removeGreen.setEnabled(allowColors);
+        removeBlue.setEnabled(allowColors);
+
+        sepia.setEnabled(allowColors);
+
+        if (monochrome) {
+            int fromRed = (redFromRed.getValue() + greenFromRed.getValue() + blueFromRed.getValue()) / 3;
+            redFromRed.setValueNoTrigger(fromRed);
+            greenFromRed.setValueNoTrigger(fromRed);
+            blueFromRed.setValueNoTrigger(fromRed);
+
+            int fromGreen = (redFromGreen.getValue() + greenFromGreen.getValue() + blueFromGreen.getValue()) / 3;
+            redFromGreen.setValueNoTrigger(fromGreen);
+            greenFromGreen.setValueNoTrigger(fromGreen);
+            blueFromGreen.setValueNoTrigger(fromGreen);
+
+            int fromBlue = (redFromBlue.getValue() + greenFromBlue.getValue() + blueFromBlue.getValue()) / 3;
+            redFromBlue.setValueNoTrigger(fromBlue);
+            greenFromBlue.setValueNoTrigger(fromBlue);
+            blueFromBlue.setValueNoTrigger(fromBlue);
+
+            if (!wasMonochrome) {
+                getParamSet().runFilter();
+            }
+        }
     }
 
     private static void normalizeChannel(RangeParam fromRed,
@@ -333,7 +447,7 @@ public class ChannelMixer extends ParametrizedFilter {
 
     @Override
     public FilterGUI createGUI(Drawable dr) {
-        return new ChannelMixerGUI(this, dr, actions);
+        return new ChannelMixerGUI(this, dr, presets);
     }
 
     private static RangeParam createParam(String first, String second, int defaultValue) {

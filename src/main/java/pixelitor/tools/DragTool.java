@@ -17,11 +17,16 @@
 
 package pixelitor.tools;
 
+import pixelitor.Canvas;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.ImageComponent;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.UserDrag;
 
 import java.awt.Cursor;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 /**
  * A tool where only matters where the user
@@ -94,4 +99,22 @@ public abstract class DragTool extends Tool {
     public abstract void ongoingDrag(PMouseEvent e);
 
     public abstract void dragFinished(PMouseEvent e);
+
+    @Override
+    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
+        if (ended) {
+            return;
+        }
+        if (userDrag == null || !userDrag.isDragging()) {
+            return;
+        }
+
+        getDragDisplayType().draw(g2, userDrag);
+    }
+
+    public DragDisplayType getDragDisplayType() {
+        return DragDisplayType.WIDTH_HEIGHT;
+    }
 }

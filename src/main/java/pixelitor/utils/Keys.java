@@ -108,6 +108,9 @@ public class Keys {
 
     public static final KeyStroke ESC = getKeyStroke(VK_ESCAPE, 0);
 
+    public static final KeyStroke CTRL_TAB = getKeyStroke("ctrl TAB");
+    public static final KeyStroke CTRL_SHIFT_TAB = getKeyStroke("ctrl shift TAB");
+
     private Keys() {
         // do not instantiate
     }

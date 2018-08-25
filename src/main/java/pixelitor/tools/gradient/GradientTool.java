@@ -31,6 +31,7 @@ import pixelitor.tools.DragTool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
 import pixelitor.tools.gradient.history.NewGradientEdit;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
@@ -78,6 +79,7 @@ public class GradientTool extends DragTool {
                         "Press <b>Esc</b> to hide the handles and the arrow.",
                 Cursors.DEFAULT, true, true,
                 true, ClipStrategy.INTERNAL_FRAME);
+        spaceDragStartPoint = true;
     }
 
     @Override
@@ -325,6 +327,9 @@ public class GradientTool extends DragTool {
     public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
+        // the superclass draws the drag display
+        super.paintOverImage(g2, canvas, ic, componentTransform, imageTransform);
+
         if (handles != null) {
             handles.paint(g2);
         } else {
@@ -334,6 +339,16 @@ public class GradientTool extends DragTool {
                 userDrag.drawGradientArrow(g2);
             }
         }
+    }
+
+    @Override
+    public DragDisplayType getDragDisplayType() {
+        if (handles == null) {
+            return DragDisplayType.ANGLE_DIST;
+        }
+        // TODO has to be implemented for the handles separately,
+        // it cannot rely on the user drag
+        return DragDisplayType.NONE;
     }
 
     private static CycleMethod getCycleMethodFromString(String s) {

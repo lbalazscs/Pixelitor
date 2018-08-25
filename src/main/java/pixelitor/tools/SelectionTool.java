@@ -28,6 +28,7 @@ import pixelitor.selection.SelectionBuilder;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
@@ -49,7 +50,7 @@ public class SelectionTool extends DragTool {
             "<b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +
             "<b>click</b> to add points, " +
-            "<b>double-click</b> (or <b>right-click</b>) to finish the selection.";
+            "<b>double-click</b> (or <b>right-click</b>) to close the selection.";
 
     private JComboBox<SelectionType> typeCombo;
     private JComboBox<SelectionInteraction> interactionCombo;
@@ -59,6 +60,7 @@ public class SelectionTool extends DragTool {
 
     private SelectionBuilder selectionBuilder;
     private boolean polygonal = false;
+    private boolean displayWidthHeight = true;
 
     SelectionTool() {
         super("Selection", 'm', "selection_tool_icon.png",
@@ -92,7 +94,11 @@ public class SelectionTool extends DragTool {
 
     private void selectionTypeChanged() {
         stopBuildingSelection();
-        polygonal = typeCombo.getSelectedItem() == SelectionType.POLYGONAL_LASSO;
+
+        SelectionType type = getSelectionType();
+        polygonal = type == SelectionType.POLYGONAL_LASSO;
+        displayWidthHeight = type.displayWidthHeight();
+
         if (polygonal) {
             Messages.showInStatusBar(POLY_HELP_TEXT);
         } else {
@@ -220,6 +226,14 @@ public class SelectionTool extends DragTool {
         return false;
     }
 
+    @Override
+    public DragDisplayType getDragDisplayType() {
+        if (displayWidthHeight) {
+            return DragDisplayType.WIDTH_HEIGHT;
+        }
+        return DragDisplayType.NONE;
+    }
+
     private void setupInteractionWithKeyModifiers(PMouseEvent e) {
         boolean shiftDown = e.isShiftDown();
         boolean altDown = e.isAltDown();
@@ -278,8 +292,8 @@ public class SelectionTool extends DragTool {
 
     @Override
     public String getStateInfo() {
-        Object type = typeCombo.getSelectedItem();
-        Object interaction = interactionCombo.getSelectedItem();
+        SelectionType type = getSelectionType();
+        SelectionInteraction interaction = getCurrentInteraction();
 
         return "type = " + type + ", interaction = " + interaction;
     }
@@ -288,8 +302,8 @@ public class SelectionTool extends DragTool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addString("Type", typeCombo.getSelectedItem().toString());
-        node.addString("Interaction", interactionCombo.getSelectedItem().toString());
+        node.addString("Type", getSelectionType().toString());
+        node.addString("Interaction", getCurrentInteraction().toString());
 
         return node;
     }

@@ -33,6 +33,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -54,10 +55,14 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
  * The Shapes Tool
  */
 public class ShapesTool extends DragTool {
-    private final EnumComboBoxModel<ShapesAction> actionModel = new EnumComboBoxModel<>(ShapesAction.class);
-    private final EnumComboBoxModel<ShapeType> typeModel = new EnumComboBoxModel<>(ShapeType.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> fillPaintModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> strokePaintModel = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
+    private final EnumComboBoxModel<ShapesAction> actionModel
+            = new EnumComboBoxModel<>(ShapesAction.class);
+    private final EnumComboBoxModel<ShapeType> typeModel
+            = new EnumComboBoxModel<>(ShapeType.class);
+    private final EnumComboBoxModel<TwoPointBasedPaint> fillPaintModel
+            = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
+    private final EnumComboBoxModel<TwoPointBasedPaint> strokePaintModel
+            = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
@@ -80,7 +85,8 @@ public class ShapesTool extends DragTool {
                 "<b>drag</b> to draw a shape. " +
                         "Hold <b>Alt</b> down to drag from the center. " +
                         "Hold <b>SPACE</b> down while drawing to move the shape. ",
-                Cursors.DEFAULT, true, true, false, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, true, true,
+                false, ClipStrategy.CANVAS);
 
         strokePaintModel.setSelectedItem(TwoPointBasedPaint.BACKGROUND);
         strokeFillCombo = new JComboBox<>(strokePaintModel);
@@ -145,7 +151,9 @@ public class ShapesTool extends DragTool {
         Composition comp = e.getComp();
 
         // this will trigger paintOverLayer, therefore the continuous drawing of the shape
-        comp.imageChanged(REPAINT); // TODO optimize, the whole image should not be repainted
+        // TODO it could be optimized not to repaint the whole image, however
+        // it is not easy as some shapes extend beyond their drag rectangle
+        comp.imageChanged(REPAINT);
     }
 
     @Override
@@ -174,7 +182,8 @@ public class ShapesTool extends DragTool {
             if (effectsPanel != null) {
                 effectThickness = effectsPanel.getMaxEffectThickness();
 
-                // the extra stroke thickness must be added to this because the effect can be on the stroke
+                // the extra stroke thickness must be added
+                // because the effect can be on the stroke
                 effectThickness += extraStrokeThickness;
             }
 
@@ -202,7 +211,8 @@ public class ShapesTool extends DragTool {
 
                 PixelitorEdit edit;
                 if (backupSelectionShape != null) {
-                    edit = new SelectionChangeEdit("Selection Change", comp, backupSelectionShape);
+                    edit = new SelectionChangeEdit("Selection Change",
+                            comp, backupSelectionShape);
                 } else {
                     edit = new NewSelectionEdit(comp, selection.getShape());
                 }
@@ -250,6 +260,11 @@ public class ShapesTool extends DragTool {
             Shape currentShape = getSelectedType().getShape(userDrag.toImDrag());
             paintShape(g, currentShape, comp);
         }
+    }
+
+    @Override
+    public DragDisplayType getDragDisplayType() {
+        return getSelectedType().getDragDisplayType();
     }
 
     /**
@@ -356,7 +371,8 @@ public class ShapesTool extends DragTool {
                 selectionShape = stroke.createStrokedShape(shape);
             } else if (!shapeType.isClosed()) {
                 if (strokeForOpenShapes == null) {
-                    throw new IllegalStateException("action = " + action + ", shapeType = " + shapeType);
+                    throw new IllegalStateException("action = " + action
+                            + ", shapeType = " + shapeType);
                 }
                 selectionShape = strokeForOpenShapes.createStrokedShape(shape);
             } else {

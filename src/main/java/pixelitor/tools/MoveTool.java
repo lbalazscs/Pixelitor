@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -50,7 +51,13 @@ public class MoveTool extends DragTool {
         ImDrag imDrag = userDrag.toImDrag();
         double relX = imDrag.getDX();
         double relY = imDrag.getDY();
+
         e.getComp().moveActiveContentRelative(relX, relY);
+    }
+
+    @Override
+    public DragDisplayType getDragDisplayType() {
+        return DragDisplayType.REL_MOUSE_POS;
     }
 
     @Override

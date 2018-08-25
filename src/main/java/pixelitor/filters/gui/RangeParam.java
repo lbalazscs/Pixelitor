@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
+import java.util.function.BooleanSupplier;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -115,6 +116,23 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
                         EnabledReason.APP_LOGIC));
     }
 
+    /**
+     * Synchronizes the value of this object with the value of another
+     * {@link RangeParam} if the given condition evaluates to true.
+     */
+    public void linkWith(RangeParam other, BooleanSupplier condition) {
+        this.addChangeListener(e -> {
+            if (condition.getAsBoolean()) {
+                other.setValueNoTrigger(this.getValue());
+            }
+        });
+        other.addChangeListener(e -> {
+            if (condition.getAsBoolean()) {
+                this.setValueNoTrigger(other.getValue());
+            }
+        });
+    }
+
     @Override
     public boolean isSetToDefault() {
         return (getValue() == defaultValue);
@@ -126,6 +144,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     /**
      * Resets to the default value.
+     *
      * @param trigger should be true if called from a GUI component
      */
     @Override
@@ -306,17 +325,17 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void considerImageSize(Rectangle bounds) {
-        if(adjustMaxAccordingToImage) {
+        if (adjustMaxAccordingToImage) {
             double defaultToMaxRatio = ((double) defaultValue) / ((double) maxValue);
             maxValue = (int) (maxToImageSizeRatio * Math.max(bounds.width, bounds.height));
-            if(maxValue <= minValue) { // can happen with very small (for example 1x1) images
+            if (maxValue <= minValue) { // can happen with very small (for example 1x1) images
                 maxValue = minValue + 1;
             }
             defaultValue = (int) (defaultToMaxRatio * maxValue);
-            if(defaultValue > maxValue) {
+            if (defaultValue > maxValue) {
                 defaultValue = maxValue;
             }
-            if(defaultValue < minValue) {
+            if (defaultValue < minValue) {
                 defaultValue = minValue;
             }
             value = defaultValue;

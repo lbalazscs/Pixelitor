@@ -22,11 +22,13 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
+import pixelitor.utils.Keys;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.AWTEvent;
+import java.awt.AWTKeyStroke;
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
@@ -34,7 +36,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
+import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
 
 /**
  * A global listener for keyboard events
@@ -69,7 +76,8 @@ public class GlobalKeyboardWatch {
         // we want to use the tab key as "hide all", but
         // tab is the focus traversal key, it must be
         // handled before it gets consumed
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+        KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        keyboardFocusManager.addKeyEventDispatcher(e -> {
             int id = e.getID();
             if (id == KeyEvent.KEY_PRESSED) {
                 keyPressed(e);
@@ -78,13 +86,27 @@ public class GlobalKeyboardWatch {
             }
             return false;
         });
+
+        // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
+        // so that they can be used to switch between tabs/internal frames
+        Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
+                .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
+        forwardKeys = new HashSet<>(forwardKeys); // make modifiable
+        forwardKeys.remove(Keys.CTRL_TAB);
+        keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
+
+        Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
+                .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
+        backwardKeys = new HashSet<>(backwardKeys); // make modifiable
+        backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
+        keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
     }
 
     private static void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_TAB:
-                if (!dialogActive) {
+                if (!dialogActive && !e.isControlDown()) {
                     ShowHideAllAction.INSTANCE.actionPerformed(null);
                 }
                 break;

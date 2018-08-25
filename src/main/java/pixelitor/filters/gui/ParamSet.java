@@ -37,6 +37,7 @@ public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterAction> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
+    private Runnable beforeResetAction;
 
     public ParamSet(FilterParam... params) {
         paramList.addAll(Arrays.asList(params));
@@ -119,6 +120,9 @@ public class ParamSet {
      * Resets all params without triggering the filter
      */
     public void reset() {
+        if (beforeResetAction != null) {
+            beforeResetAction.run();
+        }
         for (FilterParam param : paramList) {
             param.reset(false);
         }
@@ -218,5 +222,12 @@ public class ParamSet {
         paramList = new ArrayList<>(params.length + old.size());
         Collections.addAll(paramList, params);
         paramList.addAll(old);
+    }
+
+    /**
+     * Allows registering an action that will run before "reset all"
+     */
+    public void setBeforeResetAction(Runnable beforeResetAction) {
+        this.beforeResetAction = beforeResetAction;
     }
 }

@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.filters.ChannelMixer;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -24,7 +25,6 @@ import pixelitor.layers.Drawable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 
@@ -40,11 +40,17 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     protected void setupGUI(ParamSet params,
                             ShowOriginal addShowOriginal,
                             Object otherInfo) {
-        JPanel upperPanel = new JPanel(new FlowLayout());
+        JPanel upperPanel = new JPanel(new BorderLayout());
         JPanel leftPanel = GUIUtils.arrangeParamsInVerticalGridBag(params.getParams());
         JPanel rightPanel = createPresetsPanel((Action[]) otherInfo);
-        upperPanel.add(leftPanel);
-        upperPanel.add(rightPanel);
+        JCheckBox monochromeCB = new JCheckBox("Convert to Black and White", false);
+        monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        monochromeCB.addChangeListener(e ->
+                ((ChannelMixer) filter).setMonochrome(monochromeCB.isSelected()));
+        params.setBeforeResetAction(() -> monochromeCB.setSelected(false));
+        upperPanel.add(monochromeCB, BorderLayout.NORTH);
+        upperPanel.add(leftPanel, BorderLayout.CENTER);
+        upperPanel.add(rightPanel, BorderLayout.EAST);
 
         JPanel buttonsPanel = createFilterActionsPanel(
                 params.getActions(), addShowOriginal, 5);

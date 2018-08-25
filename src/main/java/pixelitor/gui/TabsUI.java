@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.utils.Keys;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -42,10 +43,15 @@ import static javax.swing.BorderFactory.createEtchedBorder;
  * where the edited images are in tabs
  */
 public class TabsUI extends JTabbedPane implements ImageAreaUI {
+
     private boolean userInitiated = true;
 
     public TabsUI() {
         addChangeListener(e -> tabsChanged());
+
+        InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(Keys.CTRL_TAB, "navigateNext");
+        inputMap.put(Keys.CTRL_SHIFT_TAB, "navigatePrevious");
     }
 
     private void tabsChanged() {
@@ -131,7 +137,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     static class CloseTabButton extends JButton {
-        private final static MouseListener buttonMouseListener = new MouseAdapter() {
+        private static final MouseListener buttonMouseListener = new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 CloseTabButton button = (CloseTabButton) e.getComponent();
