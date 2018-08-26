@@ -713,7 +713,6 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
         sub.addFilter(JHDither.NAME, JHDither::new);
 
         return sub;
@@ -886,6 +885,7 @@ public class MenuBar extends JMenuBar {
         sub.addFilter("Lissajous Curve", Lissajous::new);
         sub.addFilter("Mystic Rose", MysticRose::new);
         sub.addFilter("Spirograph", Spirograph::new);
+        sub.addFilter("Grid", RenderGrid::new);
 
         return sub;
     }
@@ -912,8 +912,21 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHStamp.NAME, JHStamp::new);
         sub.addFilter(JHWeave.NAME, JHWeave::new);
 
+        sub.add(createHalftoneSubmenu());
+
         return sub;
     }
+
+    private static JMenu createHalftoneSubmenu() {
+        PMenu sub = new PMenu("Halftone");
+
+        sub.addFilter(JHStripedHalftone.NAME, JHStripedHalftone::new);
+        sub.addFilter(JHConcentricHalftone.NAME, JHConcentricHalftone::new);
+        sub.addFilter(JHColorHalftone.NAME, JHColorHalftone::new);
+
+        return sub;
+    }
+
 
     private static JMenu createFindEdgesSubmenu() {
         PMenu sub = new PMenu("Find Edges");
@@ -1174,9 +1187,8 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug translation and canvas") {
             @Override
             public void onClick() {
-                onActiveImageLayer(layer -> {
-                    System.out.println(layer.toDebugCanvasString());
-                });
+                onActiveImageLayer(layer ->
+                        System.out.println(layer.toDebugCanvasString()));
             }
         });
 
@@ -1317,6 +1329,7 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Experimental");
 
         sub.addFilter(Contours.NAME, Contours::new);
+        sub.addFilter(JHCustomHalftone.NAME, JHCustomHalftone::new);
 
         sub.addSeparator();
 
