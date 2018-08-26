@@ -21,7 +21,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -55,7 +54,7 @@ public class PolarTiles extends ParametrizedFilter {
 
         ReseedNoiseFilterAction reseedRandomness = new ReseedNoiseFilterAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 numAngDivisions,
                 numRadDivisions,
@@ -65,7 +64,7 @@ public class PolarTiles extends ParametrizedFilter {
                 new DialogParam("Background", zoom, rotateImage),
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

@@ -78,12 +78,24 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     public abstract BufferedImage doTransform(BufferedImage src, BufferedImage dest);
 
-    public void setParamSet(ParamSet paramSet) {
+    private void setParamSet(ParamSet paramSet) {
         this.paramSet = paramSet;
         // switch the affected area functionality here on-off
 //        paramSet.addCommonActions(showAffectedAreaParam);
 
         paramSet.addCommonActions();
+    }
+
+    public ParamSet setParams(FilterParam param) {
+        ParamSet ps = new ParamSet(param);
+        setParamSet(ps);
+        return ps;
+    }
+
+    public ParamSet setParams(FilterParam... params) {
+        ParamSet ps = new ParamSet(params);
+        setParamSet(ps);
+        return ps;
     }
 
     public ParamSet getParamSet() {

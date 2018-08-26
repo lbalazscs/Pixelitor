@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -45,7 +44,7 @@ public class ColorThreshold extends ParametrizedFilter {
                         blueThreshold
                 }, false);
 
-        setParamSet(new ParamSet(threshold));
+        setParams(threshold);
     }
 
     @Override

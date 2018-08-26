@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -57,14 +56,14 @@ public class JHStamp extends ParametrizedFilter {
     public JHStamp() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 lightDarkBalance,
                 smoothness.withAdjustedRange(0.05),
                 soften,
                 brightColor,
                 darkColor,
                 blurMethod
-        ));
+        );
     }
 
     @Override

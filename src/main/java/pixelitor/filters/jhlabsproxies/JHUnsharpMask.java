@@ -19,7 +19,6 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.UnsharpFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -40,11 +39,11 @@ public class JHUnsharpMask extends ParametrizedFilter {
     public JHUnsharpMask() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 amount,
                 radius,
                 threshold
-        ));
+        );
     }
 
     @Override

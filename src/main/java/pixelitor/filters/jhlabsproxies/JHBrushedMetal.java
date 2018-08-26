@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.BrushedMetalFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
@@ -45,12 +44,12 @@ public class JHBrushedMetal extends ParametrizedFilter {
     public JHBrushedMetal() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 color,
                 radius.withAdjustedRange(0.5),
                 amount,
                 shine
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

@@ -21,7 +21,6 @@ import com.jhlabs.image.BlockFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
@@ -68,11 +67,11 @@ public class JHPixelate extends ParametrizedFilter {
     public JHPixelate() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 cellSizeParam.withAdjustedRange(0.2),
                 styleParam,
                 typeParam
-        ));
+        );
     }
 
     @Override

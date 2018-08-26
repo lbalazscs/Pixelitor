@@ -19,7 +19,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MarbleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -47,14 +46,14 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     public JHTurbulentDistortion() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 scale.withAdjustedRange(0.1),
                 amount.withAdjustedRange(0.07),
                 turbulence,
                 time,
                 edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override

@@ -17,7 +17,6 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
@@ -47,7 +46,7 @@ public class Posterize extends ParametrizedFilter {
                         blueLevels
                 }, true);
 
-        setParamSet(new ParamSet(levels));
+        setParams(levels);
     }
 
     @Override

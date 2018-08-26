@@ -22,7 +22,6 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BlurredShape;
@@ -45,12 +44,12 @@ public class BlurredShapeTester extends ParametrizedFilter {
     public BlurredShapeTester() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius.withAdjustedRange(1.0),
                 softness,
                 shape
-        ));
+        );
     }
 
     @Override

@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -49,10 +48,10 @@ public class DrunkVision extends ParametrizedFilter {
     public DrunkVision() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 drunkenness,
                 numEyes
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

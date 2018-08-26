@@ -21,7 +21,6 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -43,11 +42,11 @@ public class JHBoxBlur extends ParametrizedFilter {
     public JHBoxBlur() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 radius,
                 numberOfIterations,
                 hpSharpening
-        ));
+        );
     }
 
     @Override

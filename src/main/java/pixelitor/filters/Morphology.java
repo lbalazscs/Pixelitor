@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
@@ -55,7 +54,7 @@ public class Morphology extends ParametrizedFilter {
     public Morphology() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(op, kernel, radius));
+        setParams(op, kernel, radius);
     }
 
     @Override

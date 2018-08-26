@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.Composition;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.ImageComponents;
@@ -42,10 +41,7 @@ public class Fade extends ParametrizedFilter {
     public Fade() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
-                opacityParam
-//                blendingModeParam
-        ));
+        setParams(opacityParam);
     }
 
     @Override

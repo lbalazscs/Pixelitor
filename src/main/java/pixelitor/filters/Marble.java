@@ -25,7 +25,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -84,7 +83,7 @@ public class Marble extends ParametrizedFilter {
         GroupedRangeParam details = new GroupedRangeParam("Details",
                 new RangeParam[]{detailsLevel, detailsStrength}, false);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 waveType,
                 time,
@@ -94,7 +93,7 @@ public class Marble extends ParametrizedFilter {
                 details.setLinkable(false),
                 smoothDetails,
                 gradient
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override

@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BricTransitionFilter;
@@ -79,7 +78,7 @@ public class Transition2D extends ParametrizedFilter {
     public Transition2D() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(type, progress));
+        setParams(type, progress);
     }
 
     @Override

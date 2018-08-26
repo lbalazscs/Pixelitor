@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -47,12 +46,12 @@ public class Solarize extends ParametrizedFilter {
     public Solarize() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 redThreshold,
                 greenThreshold,
                 blueThreshold
-        ));
+        );
     }
 
     @Override

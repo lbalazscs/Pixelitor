@@ -24,7 +24,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -66,7 +65,7 @@ public class JHCells extends ParametrizedFilter {
     public JHCells() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 refineType,
                 gridType,
@@ -79,7 +78,7 @@ public class JHCells extends ParametrizedFilter {
         ).withAction(new ReseedNoiseFilterAction(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
-        })));
+        }));
     }
 
     @Override

@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pd.CannyEdgeDetector;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.MemoryInfo;
@@ -46,13 +45,13 @@ public class Canny extends ParametrizedFilter {
     public Canny() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 lowThreshold,
                 highThreshold,
                 gaussianKernelWidth,
                 gaussianKernelRadius,
                 contrastNormalized
-        ));
+        );
     }
 
     @Override

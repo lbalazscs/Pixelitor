@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.AngularWavesFilter;
@@ -47,7 +46,7 @@ public class AngularWaves extends ParametrizedFilter {
     public AngularWaves() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radialWL.withAdjustedRange(0.05),
                 amount,
@@ -56,7 +55,7 @@ public class AngularWaves extends ParametrizedFilter {
                 zoom,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

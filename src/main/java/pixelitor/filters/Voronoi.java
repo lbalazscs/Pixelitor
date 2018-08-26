@@ -21,7 +21,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.VoronoiFilter;
@@ -53,13 +52,13 @@ public class Voronoi extends ParametrizedFilter {
     public Voronoi() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 numberOfPoints,
                 distance,
                 showPoints,
                 useImageColors,
                 antiAliasing
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

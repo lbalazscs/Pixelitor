@@ -20,7 +20,6 @@ package pixelitor.filters;
 import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -58,12 +57,12 @@ public class Clouds extends ParametrizedFilter {
     public Clouds() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 scaleParam.withAdjustedRange(0.3),
                 roughnessParam,
                 color1,
                 color2
-        ).withAction(new ReseedNoiseFilterAction(e -> reseed())));
+        ).withAction(new ReseedNoiseFilterAction(e -> reseed()));
     }
 
     @Override

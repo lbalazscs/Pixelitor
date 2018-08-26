@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -46,7 +45,7 @@ public class ColorWheel extends ParametrizedFilter {
     public ColorWheel() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(center, hueShiftParam, brightnessParam, satParam));
+        setParams(center, hueShiftParam, brightnessParam, satParam);
     }
 
     @Override

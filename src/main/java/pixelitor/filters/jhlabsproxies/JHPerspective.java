@@ -23,7 +23,6 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.Drawable;
 
@@ -45,10 +44,10 @@ public class JHPerspective extends ParametrizedFilter {
     public JHPerspective() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 northWest, northEast, southWest, southEast,
                 edgeAction, interpolation
-        ));
+        );
     }
 
     @Override

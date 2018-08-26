@@ -23,7 +23,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
@@ -86,13 +85,13 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     protected ShapeFilter() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 background,
                 foreground,
                 new DialogParam("Transform", center, scale),
                 strokeParam,
                 effectsParam
-        ));
+        );
 
         // disable effects if foreground is set to transparent
         foreground.setupDisableOtherIf(effectsParam,

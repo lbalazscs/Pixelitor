@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -40,17 +39,17 @@ public class XYZTest extends ParametrizedFilter {
     private final RangeParam z = new RangeParam("Z", -20, 0, 20);
     private final BooleanParam linRGB = new BooleanParam("Linearize", false);
 
-    private final static ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
+    private static final ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
 
     public XYZTest() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 x,
                 y,
                 z,
                 linRGB
-        ));
+        );
     }
 
     @Override

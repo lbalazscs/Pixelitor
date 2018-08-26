@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -60,12 +59,12 @@ public class ValueNoise extends ParametrizedFilter {
     public ValueNoise() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 scale.withAdjustedRange(0.3),
                 details,
                 color1,
                 color2
-        ).withAction(new ReseedNoiseFilterAction(e -> reseed())));
+        ).withAction(new ReseedNoiseFilterAction(e -> reseed()));
     }
 
     @Override

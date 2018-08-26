@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.composite.MultiplyComposite;
 import com.jhlabs.image.BoxBlurFilter;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -41,10 +40,10 @@ public class Orton extends ParametrizedFilter {
     public Orton() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 blurRadius.withAdjustedRange(0.01),
                 amount
-        ));
+        );
     }
 
     @Override

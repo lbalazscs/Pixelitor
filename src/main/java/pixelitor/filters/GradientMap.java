@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import com.jhlabs.image.Colormap;
 import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
@@ -37,7 +36,7 @@ public class GradientMap extends ParametrizedFilter {
     public GradientMap() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(gradient));
+        setParams(gradient);
     }
 
     @Override

@@ -23,7 +23,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -68,11 +67,11 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     public JHConvolutionEdge() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 horizontalMethod,
                 verticalMethod,
                 invertImage
-        ));
+        );
     }
 
     @Override

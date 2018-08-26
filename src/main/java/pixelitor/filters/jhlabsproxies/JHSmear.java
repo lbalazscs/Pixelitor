@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
@@ -55,13 +54,13 @@ public class JHSmear extends ParametrizedFilter {
     public JHSmear() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 distance.withAdjustedRange(0.1),
                 shape.withAction(ReseedSupport.createAction()),
                 angle,
                 density,
                 mix
-        ));
+        );
 
         // disable angle if the shape is not lines
         shape.setupDisableOtherIf(angle,

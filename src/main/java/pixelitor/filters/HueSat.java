@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -50,11 +49,11 @@ public class HueSat extends ParametrizedFilter {
     public HueSat() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 hue,
                 saturation,
                 brightness
-        ));
+        );
     }
 
     @Override

@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.GlintFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -52,7 +51,7 @@ public class JHGlint extends ParametrizedFilter {
     public JHGlint() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 threshold,
                 coverage,
                 intensity,
@@ -60,7 +59,7 @@ public class JHGlint extends ParametrizedFilter {
                 blur,
                 colors
 //                glintOnly
-        ));
+        );
     }
 
     @Override

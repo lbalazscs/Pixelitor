@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.RadialWavesFilter;
@@ -46,7 +45,7 @@ public class RadialWaves extends ParametrizedFilter {
     public RadialWaves() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 angularDivision,
                 radialAmplitude.withAdjustedRange(1.0),
@@ -55,7 +54,7 @@ public class RadialWaves extends ParametrizedFilter {
                 zoom,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

@@ -23,7 +23,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -52,7 +51,7 @@ public class JHCrystallize extends ParametrizedFilter {
     public JHCrystallize() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 size.withAdjustedRange(0.2),
                 edgeThickness,
                 gridType,
@@ -62,7 +61,7 @@ public class JHCrystallize extends ParametrizedFilter {
         ).withAction(new ReseedNoiseFilterAction(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
-        })));
+        }));
     }
 
     @Override

@@ -22,7 +22,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -52,7 +51,7 @@ public class JHPolarCoordinates extends ParametrizedFilter {
     public JHPolarCoordinates() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(center, type, zoom, angle, edgeAction, interpolation));
+        setParams(center, type, zoom, angle, edgeAction, interpolation);
     }
 
     @Override

@@ -23,7 +23,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BlurredShape;
@@ -51,7 +50,7 @@ public class JHFocus extends ParametrizedFilter {
     public JHFocus() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius,
                 softness,
@@ -60,7 +59,7 @@ public class JHFocus extends ParametrizedFilter {
                 numberOfIterations,
                 invert,
                 hpSharpening
-        ));
+        );
     }
 
     @Override

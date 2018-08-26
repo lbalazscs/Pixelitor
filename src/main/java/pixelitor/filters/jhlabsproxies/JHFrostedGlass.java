@@ -19,7 +19,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.DiffuseFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -42,10 +41,10 @@ public class JHFrostedGlass extends ParametrizedFilter {
     public JHFrostedGlass() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(amount.withAdjustedRange(0.1),
+        setParams(amount.withAdjustedRange(0.1),
                 interpolation,
                 edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS)
-        ));
+        );
     }
 
     @Override

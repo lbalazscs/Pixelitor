@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
@@ -45,11 +44,11 @@ public class Colorize extends ParametrizedFilter {
     public Colorize() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 colorParam,
                 adjustBrightness,
                 opacityParam
-        ));
+        );
     }
 
     @Override

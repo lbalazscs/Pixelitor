@@ -19,7 +19,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.TilesFilter;
 
@@ -43,14 +42,14 @@ public class GlassTiles extends ParametrizedFilter {
     public GlassTiles() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 size.withAdjustedRange(0.5),
                 curvature,
                 phase.setLinkable(false),
                 angle,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

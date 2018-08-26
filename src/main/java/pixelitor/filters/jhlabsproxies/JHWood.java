@@ -21,7 +21,6 @@ import com.jhlabs.image.WoodFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -55,7 +54,7 @@ public class JHWood extends ParametrizedFilter {
     public JHWood() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 angle,
                 scale.withAdjustedRange(0.5),
                 stretch,
@@ -64,7 +63,7 @@ public class JHWood extends ParametrizedFilter {
                 turbulence,
                 fibres,
                 gain
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override

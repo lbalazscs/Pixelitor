@@ -17,7 +17,6 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.SepiaFilter;
@@ -37,7 +36,7 @@ public class Sepia extends ParametrizedFilter {
     public Sepia() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(intensity));
+        setParams(intensity);
     }
 
     @Override

@@ -20,7 +20,6 @@ package pixelitor.filters;
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -56,12 +55,12 @@ public class AddNoise extends ParametrizedFilter {
     public AddNoise() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 coverageParam,
                 saturationParam,
                 opacityParam,
                 method
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

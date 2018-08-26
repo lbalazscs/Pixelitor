@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -53,14 +52,14 @@ public class RenderGrid extends ParametrizedFilter {
     public RenderGrid() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 spacingParam,
                 widthParam,
                 colorParam,
                 emptyIntersectionsParam,
                 opacityParam,
                 rotateResult
-        ));
+        );
     }
 
     @Override

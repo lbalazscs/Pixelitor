@@ -20,7 +20,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MagnifyFilter;
@@ -50,7 +49,7 @@ public class Magnify extends ParametrizedFilter {
 
         showAffectedArea();
 
-        setParamSet(new ParamSet(
+        setParams(
                 magnification,
                 outerRadius.withAdjustedRange(1.0),
                 outerInnerRadiusRatio,
@@ -59,7 +58,7 @@ public class Magnify extends ParametrizedFilter {
                 invert,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

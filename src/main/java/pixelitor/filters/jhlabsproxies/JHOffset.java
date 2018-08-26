@@ -20,7 +20,6 @@ import com.jhlabs.image.OffsetFilter;
 import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -39,7 +38,7 @@ public class JHOffset extends ParametrizedFilter {
     public JHOffset() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(center));
+        setParams(center);
     }
 
     @Override

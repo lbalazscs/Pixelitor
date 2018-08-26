@@ -22,7 +22,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
@@ -81,7 +80,7 @@ public class RandomSpheres extends ParametrizedFilter {
         addHighLightsCB.setupDisableOtherIf(
                 highlightElevationSelector, checked -> !checked);
 
-        setParamSet(new ParamSet(
+        setParams(
                 radius.withAdjustedRange(0.1),
                 density,
                 opacity,
@@ -89,7 +88,7 @@ public class RandomSpheres extends ParametrizedFilter {
                 addHighLightsCB,
                 highlightAngleSelector,
                 highlightElevationSelector
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

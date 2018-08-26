@@ -21,7 +21,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -47,7 +46,7 @@ public class JHWrapAroundArc extends ParametrizedFilter {
     public JHWrapAroundArc() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 radius.withAdjustedRange(1.0),
                 thickness.withAdjustedRange(0.5),
                 spread,
@@ -55,7 +54,7 @@ public class JHWrapAroundArc extends ParametrizedFilter {
                 center,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

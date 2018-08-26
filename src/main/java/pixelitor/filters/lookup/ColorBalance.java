@@ -21,7 +21,6 @@ import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -61,12 +60,12 @@ public class ColorBalance extends ParametrizedFilter {
     public ColorBalance() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 affect,
                 cyanRed,
                 magentaGreen,
                 yellowBlue
-        ));
+        );
     }
 
     @Override

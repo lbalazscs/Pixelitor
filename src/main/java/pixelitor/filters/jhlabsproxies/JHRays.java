@@ -23,7 +23,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -55,7 +54,7 @@ public class JHRays extends ParametrizedFilter {
     public JHRays() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 length,
                 threshold,
@@ -63,7 +62,7 @@ public class JHRays extends ParametrizedFilter {
                 opacity,
                 rotation,
                 raysOnly
-        ));
+        );
     }
 
     @Override

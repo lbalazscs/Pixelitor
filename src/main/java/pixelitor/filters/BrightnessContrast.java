@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -39,12 +38,12 @@ public class BrightnessContrast extends ParametrizedFilter {
     public BrightnessContrast() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 power,
                 multiply,
                 add,
                 contrast
-        ));
+        );
     }
 
     @Override

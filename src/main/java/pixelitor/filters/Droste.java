@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.DrosteFilter;
@@ -51,7 +50,7 @@ public class Droste extends ParametrizedFilter {
     public Droste() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 innerRadius,
                 outerRadius,
                 periodicity,
@@ -63,7 +62,7 @@ public class Droste extends ParametrizedFilter {
                 fractalPoints,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

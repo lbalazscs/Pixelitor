@@ -22,7 +22,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
@@ -96,7 +95,7 @@ public class FractalTree extends ParametrizedFilter {
     public FractalTree() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 iterations,
                 zoom,
                 randomnessParam,
@@ -106,7 +105,7 @@ public class FractalTree extends ParametrizedFilter {
                 width.setLinkable(false),
                 colors,
                 quality
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

@@ -21,7 +21,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Drawable;
@@ -50,13 +49,13 @@ public class TransformLayer extends ParametrizedFilter {
     public TransformLayer() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 centerParam,
                 angleParam,
                 scaleParam,
                 shearParam,
                 bgColorParam
-        ));
+        );
         shearParam.setLinked(false);
     }
 

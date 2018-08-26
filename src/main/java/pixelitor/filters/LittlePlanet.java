@@ -21,7 +21,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.LittlePlanetFilter;
@@ -47,7 +46,7 @@ public class LittlePlanet extends ParametrizedFilter {
     public LittlePlanet() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 rotateResult,
                 zoom,
                 innerZoom,
@@ -55,7 +54,7 @@ public class LittlePlanet extends ParametrizedFilter {
                 invert,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

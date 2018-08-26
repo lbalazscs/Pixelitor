@@ -22,7 +22,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -73,7 +72,7 @@ public class PhotoCollage extends ParametrizedFilter {
     public PhotoCollage() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 imageNumber,
                 size.withAdjustedRange(1.0),
                 randomRotation,
@@ -84,7 +83,7 @@ public class PhotoCollage extends ParametrizedFilter {
                 shadowAngleParam,
                 shadowDistance.withAdjustedRange(0.02),
                 shadowSoftnessParam.withAdjustedRange(0.01)
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override

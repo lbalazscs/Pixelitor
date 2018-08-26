@@ -24,7 +24,6 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -74,14 +73,14 @@ public class Starburst extends ParametrizedFilter {
         FilterAction reseedColorsAction = ReseedSupport.createAction(
                 "Reseed", "Changes the random colors");
 
-        setParamSet(new ParamSet(
+        setParams(
                 numberOfRaysParam,
                 background,
                 foreground,
                 randomColors.withAction(reseedColorsAction),
                 center,
                 rotate
-        ));
+        );
 
         // enable the "Reseed Colors" button only if
         // the "Use Random Colors for Rays" checkbox is checked

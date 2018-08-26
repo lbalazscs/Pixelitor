@@ -22,7 +22,6 @@ import pixelitor.filters.gui.ChannelMixerGUI;
 import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.Drawable;
@@ -312,8 +311,8 @@ public class ChannelMixer extends ParametrizedFilter {
         redFromGreen.linkWith(greenFromGreen, ifMonochrome);
         redFromGreen.linkWith(blueFromGreen, ifMonochrome);
 
-        setParamSet(new ParamSet(params)
-                .withAction(normalize));
+        setParams(params)
+                .withAction(normalize);
 
         // add this extra action, but after the standard "Randomize Settings"
         FilterAction randomizeAndNormalize = new FilterAction("Randomize and Normalize",

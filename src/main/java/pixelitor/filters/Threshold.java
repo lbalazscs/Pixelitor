@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
@@ -55,7 +54,7 @@ public class Threshold extends ParametrizedFilter {
     public Threshold() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(threshold, criterion));
+        setParams(threshold, criterion);
     }
 
     @Override

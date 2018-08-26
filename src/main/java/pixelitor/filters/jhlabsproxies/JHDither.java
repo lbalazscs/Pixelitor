@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -65,11 +64,11 @@ public class JHDither extends ParametrizedFilter {
     public JHDither() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 levels,
                 colorDither,
                 matrixMethod
-        ));
+        );
     }
 
     @Override

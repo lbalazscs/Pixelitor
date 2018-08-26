@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -50,12 +49,12 @@ public class JHEmboss extends ParametrizedFilter {
     public JHEmboss() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 lightDirection,
                 lightElevation,
                 bumpHeight,
                 texture
-        ));
+        );
     }
 
     @Override

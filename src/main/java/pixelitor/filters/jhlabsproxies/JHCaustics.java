@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -53,7 +52,7 @@ public class JHCaustics extends ParametrizedFilter {
     public JHCaustics() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 bgColor,
                 scale.withAdjustedRange(0.5),
                 brightness,
@@ -62,7 +61,7 @@ public class JHCaustics extends ParametrizedFilter {
                 focus,
                 dispersion,
                 samples
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override

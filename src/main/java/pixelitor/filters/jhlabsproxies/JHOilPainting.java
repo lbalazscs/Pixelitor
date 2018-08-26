@@ -23,7 +23,6 @@ import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
@@ -56,11 +55,11 @@ public class JHOilPainting extends ParametrizedFilter {
     public JHOilPainting() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 brushSize.withAdjustedRange(0.04),
                 coarseness,
                 detailQuality
-        ));
+        );
     }
 
     @Override

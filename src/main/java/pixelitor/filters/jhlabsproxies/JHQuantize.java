@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.QuantizeFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -44,11 +43,11 @@ public class JHQuantize extends ParametrizedFilter {
         // enable serpentine only if dither is checked
         dither.setupEnableOtherIf(serpentine, checked -> checked);
 
-        setParamSet(new ParamSet(
+        setParams(
                 numberOfColors,
                 dither,
                 serpentine
-        ));
+        );
     }
 
     @Override

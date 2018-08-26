@@ -23,7 +23,6 @@ import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -56,14 +55,14 @@ public class JHDropShadow extends ParametrizedFilter {
     public JHDropShadow() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 angle,
                 distance.withAdjustedRange(0.1),
                 opacity,
                 softness.withAdjustedRange(0.025),
                 color,
                 shadowOnly
-        ));
+        );
     }
 
     @Override
