@@ -31,7 +31,8 @@ public class IconUpdateChecker {
     private final int layerIconUpdatesAtStart;
     private final int maskIconUpdatesAtStart;
 
-    public IconUpdateChecker(LayerButton ui, Layer layer, LayerMask mask, int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
+    public IconUpdateChecker(LayerButton ui, Layer layer, LayerMask mask,
+                             int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
         this.ui = ui;
         this.layer = layer;
         this.mask = mask;

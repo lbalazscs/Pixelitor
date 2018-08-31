@@ -17,13 +17,14 @@
 
 package pixelitor.gui;
 
-import pixelitor.MessageHandler;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.utils.MessageHandler;
+import pixelitor.utils.ProgressHandler;
 
-import javax.swing.*;
+import java.awt.EventQueue;
 
 /**
- * The MessageHandler that is normally used in non-testing code
+ * The MessageHandler that is normally used (except in unit-testing code)
  */
 public class GUIMessageHandler implements MessageHandler {
     public GUIMessageHandler() {
@@ -31,40 +32,16 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
         StatusBar.INSTANCE.setMessage(msg);
     }
 
     @Override
-    public void startProgress(String msg, int max) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.startProgress(msg, max);
-        } else {
-            // for example in the tweening animation export
-            // this code runs in the swing worker background thread
-            SwingUtilities.invokeLater(
-                    () -> StatusBar.INSTANCE.startProgress(msg, max));
-        }
-    }
+    public ProgressHandler startProgress(String msg, int max) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
-    @Override
-    public void updateProgress(int value) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.updateProgress(value);
-        } else {
-            SwingUtilities.invokeLater(
-                    () -> StatusBar.INSTANCE.updateProgress(value));
-        }
-
-    }
-
-    @Override
-    public void stopProgress() {
-        if (SwingUtilities.isEventDispatchThread()) {
-            StatusBar.INSTANCE.stopProgress();
-        } else {
-            SwingUtilities.invokeLater(
-                    StatusBar.INSTANCE::stopProgress);
-        }
+        return StatusBar.INSTANCE.startProgress(msg, max);
     }
 
     @Override
@@ -83,13 +60,18 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showNotImageLayerOrMaskError() {
-        Dialogs.showNotImageLayerOrMaskDialog();
+    public void showNotDrawableError() {
+        Dialogs.showNotDrawableDialog();
     }
 
     @Override
     public void showException(Throwable e) {
         Dialogs.showExceptionDialog(e);
+    }
+
+    @Override
+    public void showExceptionOnEDT(Throwable e) {
+        EventQueue.invokeLater(() -> showException(e));
     }
 
     @Override

@@ -17,8 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.MessageHandler;
-
 /**
  * Tracks the progress of some operation and shows a
  * status bar update if it takes a long time.
@@ -26,7 +24,14 @@ import pixelitor.MessageHandler;
 public class StatusBarProgressTracker extends ThresholdProgressTracker {
     private static final MessageHandler messageHandler = Messages.getMessageHandler();
 
+    static {
+        if (messageHandler == null) {
+            throw new IllegalStateException("this class should not be used before Messages initialization");
+        }
+    }
+
     private final String name;
+    private ProgressHandler progressHandler;
 
     public StatusBarProgressTracker(String name, int numComputationUnits) {
         super(numComputationUnits);
@@ -36,16 +41,16 @@ public class StatusBarProgressTracker extends ThresholdProgressTracker {
 
     @Override
     void startProgressTracking() {
-        messageHandler.startProgress(name, 100);
+        progressHandler = messageHandler.startProgress(name, 100);
     }
 
     @Override
     void updateProgressTracking(int percent) {
-        messageHandler.updateProgress(percent);
+        progressHandler.updateProgress(percent);
     }
 
     @Override
     void finishProgressTracking() {
-        messageHandler.stopProgress();
+        progressHandler.stopProgress();
     }
 }

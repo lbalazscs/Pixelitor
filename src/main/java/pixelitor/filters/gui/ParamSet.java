@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.Filter;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
 import java.awt.Rectangle;
@@ -37,6 +37,7 @@ public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterAction> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
+    private Runnable beforeResetAction;
 
     public ParamSet(FilterParam... params) {
         paramList.addAll(Arrays.asList(params));
@@ -61,12 +62,28 @@ public class ParamSet {
     }
 
     public ParamSet addCommonActions(FilterAction... actions) {
-        if (paramList.size() > 1) { // no need for "randomize"/"reset all" if the filter has only one parameter
-            for (FilterAction action : actions) {
-                if(action != null) {
-                    actionList.add(action);
-                }
+        for (FilterAction action : actions) {
+            if (action != null) {
+                actionList.add(action);
             }
+        }
+
+        // no need for "randomize"/"reset all"
+        // if the filter has only one parameter...
+        boolean addRandomizeAndResetAll = paramList.size() > 1;
+
+        if (!addRandomizeAndResetAll) {
+            FilterParam param = paramList.get(0);
+            // ...except if that single parameter is grouped...
+            if (param instanceof GroupedRangeParam) {
+                addRandomizeAndResetAll = true;
+            }
+            // ...or it is a gradient param
+            if (param instanceof GradientParam) {
+                addRandomizeAndResetAll = true;
+            }
+        }
+        if (addRandomizeAndResetAll) {
             addRandomizeAction();
             addResetAllAction();
         }
@@ -76,16 +93,18 @@ public class ParamSet {
     private void addRandomizeAction() {
         FilterAction randomizeAction = new FilterAction("Randomize Settings",
                 e -> randomize(),
-                IconUtils.getDiceIcon(),
-                "Randomize the settings for this filter.");
+                Icons.getDiceIcon(),
+                "Randomize the settings for this filter.",
+                "randomize");
         actionList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
         FilterAction resetAllAction = new FilterAction("Reset All",
                 e -> reset(),
-                IconUtils.getWestArrowIcon(),
-                "Reset all settings to their default values.");
+                Icons.getWestArrowIcon(),
+                "Reset all settings to their default values.",
+                "resetAll");
         actionList.add(resetAllAction);
     }
 
@@ -101,6 +120,9 @@ public class ParamSet {
      * Resets all params without triggering the filter
      */
     public void reset() {
+        if (beforeResetAction != null) {
+            beforeResetAction.run();
+        }
         for (FilterParam param : paramList) {
             param.reset(false);
         }
@@ -116,7 +138,7 @@ public class ParamSet {
         assert before == after : "before = " + before + ", after = " + after;
     }
 
-    public void triggerFilter() {
+    public void runFilter() {
         if (adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
@@ -200,5 +222,12 @@ public class ParamSet {
         paramList = new ArrayList<>(params.length + old.size());
         Collections.addAll(paramList, params);
         paramList.addAll(old);
+    }
+
+    /**
+     * Allows registering an action that will run before "reset all"
+     */
+    public void setBeforeResetAction(Runnable beforeResetAction) {
+        this.beforeResetAction = beforeResetAction;
     }
 }

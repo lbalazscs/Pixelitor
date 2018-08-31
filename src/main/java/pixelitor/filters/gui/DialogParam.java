@@ -17,12 +17,13 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.OKDialog;
 
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.Map;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -55,24 +56,34 @@ public class DialogParam extends AbstractFilterParam {
 
     private JDialog createDialog(JDialog owner) {
         JPanel p = GUIUtils.arrangeParamsInVerticalGridBag(Arrays.asList(children));
-        OKDialog d = new OKDialog(owner, getName(), "Close");
-        d.setupGUI(p);
-        GUIUtils.centerOnScreen(d);
+        JDialog d = new DialogBuilder()
+                .owner(owner)
+                .content(p)
+                .title(getName())
+                .withScrollbars()
+                .okText("Close")
+                .noCancelButton()
+                .build();
         return d;
     }
 
     @Override
     public void randomize() {
-
+        for (FilterParam child : children) {
+            child.randomize();
+        }
     }
 
     @Override
     public void considerImageSize(Rectangle bounds) {
+        for (FilterParam child : children) {
+            child.considerImageSize(bounds);
+        }
     }
 
     @Override
     public ParamState copyState() {
-        return null;
+        return new CompositeState(children);
     }
 
     @Override
@@ -97,11 +108,11 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         for (FilterParam param : children) {
             param.reset(false);
         }
-        if (triggerAction) {
+        if (trigger) {
             adjustmentListener.paramAdjusted();
         } else {
             // this class updates the default button state
@@ -128,6 +139,25 @@ public class DialogParam extends AbstractFilterParam {
 
         for (FilterParam child : children) {
             child.setAdjustmentListener(decoratedListener);
+        }
+    }
+
+    static class CompositeState implements ParamState {
+        private Map<String, ParamState> childStates;
+
+        public CompositeState(FilterParam[] children) {
+            for (FilterParam child : children) {
+                if (child.canBeAnimated()) {
+                    childStates.put(child.getName(), child.copyState());
+                }
+            }
+        }
+
+        @Override
+        public CompositeState interpolate(ParamState endState, double progress) {
+            CompositeState end = (CompositeState) endState;
+            // TODO
+            return null;
         }
     }
 }

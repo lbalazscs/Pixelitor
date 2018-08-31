@@ -34,7 +34,9 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     private final Color defaultInnerColor;
     private final ColorSwatch innerColorSwatch;
 
-    NeonBorderEffectConfiguratorPanel(boolean defaultSelected, Color defaultColor, Color innerColor, int defaultWidth) {
+    NeonBorderEffectConfiguratorPanel(boolean defaultSelected,
+                                      Color defaultColor, Color innerColor,
+                                      int defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColor;
@@ -45,10 +47,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (!e.isPopupTrigger()) {
-                    Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", NeonBorderEffectConfiguratorPanel.this.innerColor, true);
-                    if (selectedColor != null) { // ok was pressed
-                        setNewInnerColor(selectedColor, true);
-                    }
+                    innerColorSwatchClicked();
                 }
             }
         });
@@ -57,6 +56,16 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
                 this::getInnerColor, c -> setNewInnerColor(c, true));
 
         gbh.addLabelWithControl("Inner Color:", innerColorSwatch);
+    }
+
+    private void innerColorSwatchClicked() {
+        // TODO check owner
+        Color selectedColor = ColorPicker.showDialog(
+                PixelitorWindow.getInstance(), "Select Color",
+                this.innerColor, true);
+        if (selectedColor != null) { // ok was pressed
+            setNewInnerColor(selectedColor, true);
+        }
     }
 
     private void setNewInnerColor(Color selectedColor, boolean trigger) {
@@ -81,8 +90,8 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
-        setNewInnerColor(defaultInnerColor, triggerAction);
+        setNewInnerColor(defaultInnerColor, trigger);
     }
 }

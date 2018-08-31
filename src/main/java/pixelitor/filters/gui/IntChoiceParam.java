@@ -20,18 +20,16 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
-import pixelitor.utils.Utils;
+import pixelitor.utils.RandomUtils;
 
-import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -39,14 +37,13 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel<IntChoiceParam.Value> {
+public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Value> {
     private final List<Value> choicesList = new ArrayList<>();
 
     private Value defaultChoice;
     private Value currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
-    private FilterAction action;
 
     public IntChoiceParam(String name, Value[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
@@ -62,42 +59,20 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public JComponent createGUI() {
-        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
-        paramGUI = gui;
-        setParamGUIEnabledState();
-        return gui;
-    }
-
-    @Override
     public boolean isSetToDefault() {
         return defaultChoice.equals(currentChoice);
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setSelectedItem(defaultChoice, triggerAction);
-    }
-
-    @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        super.setAdjustmentListener(listener);
-        if (action != null) {
-            action.setAdjustmentListener(listener);
-        }
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
+    public void reset(boolean trigger) {
+        setSelectedItem(defaultChoice, trigger);
     }
 
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            Random rnd = new Random();
-            int randomIndex = rnd.nextInt(choicesList.size());
-            setCurrentChoice(choicesList.get(randomIndex), false);
+            Value choice = RandomUtils.chooseFrom(choicesList);
+            setCurrentChoice(choice, false);
         }
     }
 
@@ -154,11 +129,6 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     @Override
     public void removeListDataListener(ListDataListener l) {
         listenerList.remove(ListDataListener.class, l);
-    }
-
-    public IntChoiceParam withAction(FilterAction action) {
-        this.action = action;
-        return this;
     }
 
     /**
@@ -263,7 +233,7 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
         icp.withAction(reseedNoise);
 
         // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
-        Utils.setupEnableOtherIf(icp, reseedNoise,
+        icp.setupEnableOtherIf(reseedNoise,
                 selected -> selected.getValue() == WaveType.NOISE);
 
         return icp;
@@ -307,27 +277,13 @@ public class IntChoiceParam extends AbstractFilterParam implements ComboBoxModel
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
-    public boolean canBeAnimated() {
-        return false;
-    }
-
-    @Override
-    public ParamState copyState() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setState(ParamState state) {
-        throw new UnsupportedOperationException();
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultChoice.toString();
     }
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', selected = '%s']",
+        return format("%s[name = '%s', selected = '%s']",
                 getClass().getSimpleName(), getName(), currentChoice.toString());
     }
 }

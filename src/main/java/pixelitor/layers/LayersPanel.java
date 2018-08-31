@@ -69,7 +69,7 @@ public class LayersPanel extends JLayeredPane {
         button.removeDragReorderHandler(dragReorderHandler);
     }
 
-    public void changeLayerOrderInTheGUI(int oldIndex, int newIndex) {
+    public void changeLayerButtonOrder(int oldIndex, int newIndex) {
         LayerButton button = layerButtons.remove(oldIndex);
         layerButtons.add(newIndex, button);
 

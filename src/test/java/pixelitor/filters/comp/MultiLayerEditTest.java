@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
@@ -65,7 +66,10 @@ public class MultiLayerEditTest {
     private final WithSelection withSelection;
     private final WithMask withMask;
 
-    public MultiLayerEditTest(NumLayers numLayers, WithTranslation withTranslation, WithSelection withSelection, WithMask withMask) {
+    public MultiLayerEditTest(NumLayers numLayers,
+                              WithTranslation withTranslation,
+                              WithSelection withSelection,
+                              WithMask withMask) {
         this.numLayers = numLayers;
         this.withSelection = withSelection;
         this.withTranslation = withTranslation;
@@ -90,8 +94,8 @@ public class MultiLayerEditTest {
     }
 
     @BeforeClass
-    public static void initTests() {
-        History.setUndoLevels(10);
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Before
@@ -111,10 +115,10 @@ public class MultiLayerEditTest {
         layer1 = (ImageLayer) comp.getLayer(0);
         layer2 = (ImageLayer) comp.getLayer(1);
 
-        numLayers.init(comp);
-        withTranslation.init(comp);
-        withSelection.init(comp);
-        withMask.init(comp);
+        numLayers.setupFor(comp);
+        withTranslation.setupFor(comp);
+        withSelection.setupFor(comp);
+        withMask.setupFor(comp);
 
         if (withSelection.isYes()) {
             origSelection = TestHelper.getStandardTestSelectionShape();
@@ -304,8 +308,10 @@ public class MultiLayerEditTest {
                             origImageWidth);
         }
 
-        int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT + withTranslation.getExpectedTY();
-        int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH + withTranslation.getExpectedTX();
+        int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT
+                + withTranslation.getExpectedTY();
+        int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
+                + withTranslation.getExpectedTX();
         if (angle == ANGLE_90) {
             assertThat(comp).activeLayerTranslationIs(
                     canvasDistFromImgBottom,

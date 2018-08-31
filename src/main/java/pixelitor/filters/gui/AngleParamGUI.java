@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
@@ -30,21 +31,21 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
  * an {@link ElevationAngleParam}
  */
 public class AngleParamGUI extends JPanel implements ParamGUI {
-    private boolean userChangedSpinner = true;
+    private boolean userChangedSlider = true;
     private final SliderSpinner sliderSpinner;
-    private final AbstractAngleUI selectorUI;
+    private final AbstractAngleUI angleUI;
 
     public AngleParamGUI(AngleParam angleParam) {
         setLayout(new BorderLayout(10, 0));
 
         // the selector UI depends on the specific class
-        selectorUI = angleParam.getAngleSelectorUI();
-        add(selectorUI, BorderLayout.WEST);
+        angleUI = angleParam.getAngleSelectorUI();
+        add(angleUI, BorderLayout.WEST);
 
-        sliderSpinner = createSliderSpinner(angleParam, selectorUI);
+        sliderSpinner = createSliderSpinner(angleParam, angleUI);
         add(sliderSpinner, BorderLayout.CENTER);
 
-        setBorder(BorderFactory.createTitledBorder(angleParam.getName()));
+        setBorder(createTitledBorder(angleParam.getName()));
 
         setupPreferredSize();
     }
@@ -57,33 +58,52 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
                 origPS.height));
     }
 
-    private SliderSpinner createSliderSpinner(AngleParam angleParam, AbstractAngleUI asc) {
-        RangeParam spinnerModel = angleParam.createRangeParam();
-        spinnerModel.addChangeListener(e -> {
-            if (userChangedSpinner) {
-                boolean trigger = !spinnerModel.getValueIsAdjusting();
+    private SliderSpinner createSliderSpinner(AngleParam angleParam,
+                                              AbstractAngleUI angleUI) {
+        RangeParam sliderModel = angleParam.createRangeParam();
+        sliderModel.addChangeListener(e ->
+                sliderModelChanged(angleParam, sliderModel));
 
-                int value = spinnerModel.getValue();
-                angleParam.setValueInDegrees(value, trigger);
-            }
-        });
-
-        SliderSpinner retVal = new SliderSpinner(spinnerModel, NONE, true);
+        SliderSpinner retVal = new SliderSpinner(sliderModel, NONE, true);
 
         retVal.setResettable(angleParam);
+
+        setupSliderTicks(angleParam, retVal);
+
+        angleParam.addChangeListener(e ->
+                angleParamChanged(angleParam, angleUI, sliderModel));
+        return retVal;
+    }
+
+    private void sliderModelChanged(AngleParam angleParam, RangeParam sliderModel) {
+        if (userChangedSlider) {
+            boolean trigger = !sliderModel.getValueIsAdjusting();
+
+            int value = sliderModel.getValue();
+            angleParam.setValueInDegrees(value, trigger);
+        }
+    }
+
+    private void angleParamChanged(AngleParam angleParam,
+                                   AbstractAngleUI angleUI,
+                                   RangeParam sliderModel) {
+        angleUI.repaint();
+        try {
+            userChangedSlider = false;
+            sliderModel.setValue(angleParam.getValueInDegrees());
+        } finally {
+            userChangedSlider = true;
+        }
+    }
+
+    private static void setupSliderTicks(AngleParam angleParam,
+                                         SliderSpinner sliderSpinner) {
         int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
         if (maxAngleInDegrees == 360) {
-            retVal.setupTicks(180, 90);
+            sliderSpinner.setupTicks(180, 90);
         } else if (maxAngleInDegrees == 90) {
-            retVal.setupTicks(15, 0);
+            sliderSpinner.setupTicks(15, 0);
         }
-        angleParam.addChangeListener(e -> {
-            asc.repaint();
-            userChangedSpinner = false;
-            spinnerModel.setValue(angleParam.getValueInDegrees());
-            userChangedSpinner = true;
-        });
-        return retVal;
     }
 
     @Override
@@ -93,7 +113,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setEnabled(boolean enabled) {
-        selectorUI.setEnabled(enabled);
+        angleUI.setEnabled(enabled);
         sliderSpinner.setEnabled(enabled);
         super.setEnabled(enabled);
     }
@@ -101,7 +121,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         setToolTipText(tip);
-        selectorUI.setToolTipText(tip);
+        angleUI.setToolTipText(tip);
         sliderSpinner.setToolTip(tip);
     }
 }

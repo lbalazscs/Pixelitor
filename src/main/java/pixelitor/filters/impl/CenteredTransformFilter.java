@@ -44,7 +44,7 @@ public abstract class CenteredTransformFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
-    protected void calcAbsoluteCenter(BufferedImage src) {
+    public void calcAbsoluteCenter(BufferedImage src) {
         cx = relCX * src.getWidth();
         cy = relCY * src.getHeight();
     }

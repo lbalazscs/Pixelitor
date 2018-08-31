@@ -26,14 +26,16 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * A filter parameter for selecting an angle
+ * A filter parameter for selecting an angle.
  */
 public class AngleParam extends AbstractFilterParam {
-    private double angleInRadians; // as returned form Math.atan2, this is between -PI and PI
-    private double defaultInRadians = 0.0;
+    // as returned form Math.atan2, this is between -PI and PI
+    private double angle;
+    private double defaultVal = 0.0;
 
     private ChangeEvent changeEvent = null;
     private final EventListenerList listenerList = new EventListenerList();
@@ -41,9 +43,9 @@ public class AngleParam extends AbstractFilterParam {
     public AngleParam(String name, double defaultValue) {
         super(name, ALLOW_RANDOMIZE);
 
-        setValueInRadians(defaultValue, false);
+        setValue(defaultValue, false);
 
-        defaultInRadians = defaultValue;
+        defaultVal = defaultValue;
     }
 
     @Override
@@ -53,24 +55,26 @@ public class AngleParam extends AbstractFilterParam {
         return (JComponent) paramGUI;
     }
 
-    public void setValueInDegrees(int d, boolean trigger) {
-        int degrees = d;
+    public void setValueInDegrees(double d, boolean trigger) {
+        double degrees = d;
         if (degrees < 0) {
             degrees = -degrees;
         } else {
             degrees = 360 - degrees;
         }
         double r = Math.toRadians(degrees);
-        setValueInRadians(r, trigger);
+        setValue(r, trigger);
     }
 
-    public void setValueInRadians(double r, boolean trigger) {
-        if (angleInRadians != r) {
-            angleInRadians = r;
+    public void setValue(double r, boolean trigger) {
+        if (angle != r) {
+            angle = r;
             fireStateChanged();
         }
-        if (trigger) { // trigger even if this angle was already set, because we had drag events, and now we have mouse up
-            if (adjustmentListener != null) { // it is null when used in shape tools effects
+        if (trigger) {
+            // trigger even if this angle was already set,
+            // because we had drag events, and now we have mouse up
+            if (adjustmentListener != null) { // can be null when used in tools
                 adjustmentListener.paramAdjusted();
             }
         }
@@ -78,11 +82,11 @@ public class AngleParam extends AbstractFilterParam {
 
     @SuppressWarnings("unused")
     public int getValueInNonIntuitiveDegrees() {
-        return (int) Math.toDegrees(angleInRadians);
+        return (int) Math.toDegrees(angle);
     }
 
     public int getValueInDegrees() {
-        int degrees = (int) Math.toDegrees(angleInRadians);
+        int degrees = (int) Math.toDegrees(angle);
         if (degrees <= 0) {
             degrees = -degrees;
         } else {
@@ -95,19 +99,19 @@ public class AngleParam extends AbstractFilterParam {
      * Returns the "Math.atan2" radians: the value between -PI and PI
      */
     public double getValueInRadians() {
-        return angleInRadians;
+        return angle;
     }
 
     /**
      * Returns the value in the range of 0 and 2*PI, and in the intuitive direction
      */
     public double getValueInIntuitiveRadians() {
-        return Utils.transformAtan2AngleToIntuitive(angleInRadians);
+        return Utils.atan2AngleToIntuitive(angle);
     }
 
     @Override
     public boolean isSetToDefault() {
-        return (angleInRadians == defaultInRadians);
+        return (angle == defaultVal);
     }
 
     @Override
@@ -138,13 +142,13 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public void reset(boolean trigger) {
-        setValueInRadians(defaultInRadians, trigger);
+        setValue(defaultVal, trigger);
     }
 
     @Override
     public void randomize() {
         double random = Math.random();
-        setValueInRadians((random * 2 * Math.PI - Math.PI), false);
+        setValue((random * 2 * Math.PI - Math.PI), false);
     }
 
     public AbstractAngleUI getAngleSelectorUI() {
@@ -156,13 +160,13 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     public RangeParam createRangeParam() {
-        return new RangeParam(AngleParam.this.getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
-            // override reset so that the clicking on the default button resets this object
-            // this is good because this object has greater precision than the RangeParam
+        return new RangeParam(getName(), 0, getValueInDegrees(), getMaxAngleInDegrees()) {
+            // override reset so that the clicking on the default button resets
+            // this object because this has greater precision than the RangeParam
             @Override
-            public void reset(boolean triggerAction) {
-                if (angleInRadians != defaultInRadians) {
-                    AngleParam.this.reset(triggerAction);
+            public void reset(boolean trigger) {
+                if (angle != defaultVal) {
+                    AngleParam.this.reset(trigger);
                 }
             }
         };
@@ -179,12 +183,14 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public ParamState copyState() {
-        return new APState(angleInRadians);
+        // save the degrees so that the interpolation
+        // does not confuse the user
+        return new APState(getValueInDegrees());
     }
 
     @Override
     public void setState(ParamState state) {
-        angleInRadians = ((APState)state).angle;
+        setValueInDegrees(((APState) state).angle, false);
     }
 
     private static class APState implements ParamState {
@@ -204,7 +210,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', angleInRadians = %.2f]",
-                getClass().getSimpleName(), getName(), angleInRadians);
+        return format("%s[name = '%s', angle = %.2f]",
+                getClass().getSimpleName(), getName(), angle);
     }
 }

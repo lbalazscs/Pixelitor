@@ -1,19 +1,44 @@
+/*
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.tools.guidelines;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
+import static pixelitor.tools.guidelines.RectGuidelineType.DIAGONALS;
+import static pixelitor.tools.guidelines.RectGuidelineType.GOLDEN_SECTIONS;
+import static pixelitor.tools.guidelines.RectGuidelineType.RULE_OF_THIRDS;
 
 /**
  * Crop guidelines renderer
  */
 public class RectGuideline {
 
-    private Stroke outerStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{5, 2}, 0);
-    private Stroke innerStroke = new BasicStroke(3);
+    private final Stroke outerStroke = new BasicStroke(1,
+            CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0);
+    private final Stroke innerStroke = new BasicStroke(3);
     private Graphics2D g2;
 
     public void draw(Rectangle2D rect, RectGuidelineType type, Graphics2D g2)
@@ -23,11 +48,11 @@ public class RectGuideline {
         }
 
         this.g2 = g2;
-        if (type == RectGuidelineType.RULE_OF_THIRDS) {
+        if (type == RULE_OF_THIRDS) {
             drawRuleOfThirds(rect);
-        } else if (type == RectGuidelineType.GOLDEN_SECTIONS) {
+        } else if (type == GOLDEN_SECTIONS) {
             drawGoldenSections(rect);
-        } else if (type == RectGuidelineType.DIAGONALS) {
+        } else if (type == DIAGONALS) {
             drawDiagonals(rect);
         }
     }

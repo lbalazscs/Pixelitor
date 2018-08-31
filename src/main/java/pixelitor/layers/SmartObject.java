@@ -74,7 +74,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+    public void resize(int targetWidth, int targetHeight) {
 
     }
 

@@ -23,6 +23,7 @@ import pixelitor.gui.utils.SliderSpinner;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
@@ -48,7 +49,7 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
             addLinkCheckBox();
         }
 
-        setBorder(BorderFactory.createTitledBorder(model.getName()));
+        setBorder(createTitledBorder(model.getName()));
     }
 
     private void addSliderSpinners() {

@@ -19,15 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
-import pixelitor.filters.comp.Flip;
-import pixelitor.filters.comp.Rotate;
-import pixelitor.selection.Selection;
-import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -36,13 +29,9 @@ import java.awt.image.BufferedImage;
  * Can be used with brush tools and filters.
  */
 public interface Drawable {
-    Drawable duplicate(boolean sameName);
-
     BufferedImage getImage();
 
     void setImage(BufferedImage newImage);
-
-    void replaceImage(BufferedImage newImage, String editName);
 
     void startPreviewing();
 
@@ -62,55 +51,23 @@ public interface Drawable {
 
     void changeImageUndoRedo(BufferedImage img, boolean ignoreSelection);
 
-    // returns the image bounds relative to the canvas
-    Rectangle getImageBounds();
-
-    boolean checkImageDoesNotCoverCanvas();
-
-    void enlargeImage(Rectangle canvasBounds);
-
     BufferedImage getImageForFilterDialogs();
-
-    void flip(Flip.Direction direction);
-
-    void rotate(Rotate.SpecialAngle angle);
 
     TmpDrawingLayer createTmpDrawingLayer(Composite c);
 
     void mergeTmpDrawingLayerDown();
 
-    BufferedImage createCanvasSizedTmpImage();
-
     BufferedImage getCanvasSizedSubImage();
 
     BufferedImage getFilterSourceImage();
 
-    BufferedImage getImageOrSubImageIfSelected(boolean copyIfNoSelection, boolean copyAndTranslateIfSelected);
-
-    BufferedImage getSelectionSizedPartFrom(BufferedImage src, Selection selection, boolean copy);
-
-    boolean cropToCanvasSize();
-
-    void enlargeCanvas(int north, int east, int south, int west);
-
-    void resize(int canvasTargetWidth, int canvasTargetHeight, boolean progressiveBilinear);
-
-    boolean isBigLayer();
-
-    void crop(Rectangle2D cropRect);
-
-    void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer);
+    BufferedImage getSelectedSubImage(boolean copyIfNoSelection);
 
     void setShowOriginal(boolean b);
 
     void debugImages();
 
     void updateIconImage();
-
-    BufferedImage applyLayerMask(boolean addToHistory);
-
-    @VisibleForTesting
-    BufferedImage getPreviewImage();
 
     Composition getComp();
 

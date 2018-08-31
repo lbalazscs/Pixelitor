@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
+import pixelitor.tools.pen.Paths;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,30 +33,19 @@ public class CompositionNode extends DebugNode {
     public CompositionNode(Composition comp) {
         super("Composition", comp);
 
-        Layer activeLayer = comp.getActiveLayer();
-
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                ImageLayerNode node;
-                if (imageLayer == activeLayer) {
-                    node = new ImageLayerNode("ACTIVE Layer - " + layer.getName(), imageLayer);
-                } else {
-                    node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
-                }
-                add(node);
-            } else if (layer instanceof TextLayer) {
-                TextLayer textLayer = (TextLayer) layer;
-                TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
-                add(node);
-            } else {
-                addQuotedString("Layer of class", layer.getClass().getName());
-            }
-        });
+        comp.forEachLayer(this::addLayerNode);
 
         BufferedImage compositeImage = comp.getCompositeImage();
-        BufferedImageNode imageNode = new BufferedImageNode("Composite Image", compositeImage);
+        BufferedImageNode imageNode = new BufferedImageNode(
+                "Composite Image", compositeImage);
         add(imageNode);
+
+        Paths paths = comp.getPaths();
+        if (paths == null) {
+            addBoolean("Paths", false);
+        } else {
+            add(new PathsNode(paths));
+        }
 
         addInt("numLayers", comp.getNumLayers());
         addQuotedString("name", comp.getName());
@@ -79,9 +69,37 @@ public class CompositionNode extends DebugNode {
             add(selectionNode);
         }
 
-        int canvasWidth = comp.getCanvasWidth();
+        int canvasWidth = comp.getCanvasImWidth();
         addInt("canvasWidth", canvasWidth);
-        int canvasHeight = comp.getCanvasHeight();
+        int canvasHeight = comp.getCanvasImHeight();
         addInt("canvasHeight", canvasHeight);
+    }
+
+    private void addLayerNode(Layer layer) {
+        if (layer instanceof ImageLayer) {
+            addImageLayerNode(layer);
+        } else if (layer instanceof TextLayer) {
+            addTextLayerNode(layer);
+        } else {
+            addQuotedString("Layer of class",
+                    layer.getClass().getName());
+        }
+    }
+
+    private void addImageLayerNode(Layer layer) {
+        ImageLayer imageLayer = (ImageLayer) layer;
+        ImageLayerNode node;
+        if (imageLayer.isActive()) {
+            node = new ImageLayerNode("ACTIVE Layer - " + layer.getName(), imageLayer);
+        } else {
+            node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
+        }
+        add(node);
+    }
+
+    private void addTextLayerNode(Layer layer) {
+        TextLayer textLayer = (TextLayer) layer;
+        TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
+        add(node);
     }
 }

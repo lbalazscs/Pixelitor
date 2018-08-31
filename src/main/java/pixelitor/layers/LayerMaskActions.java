@@ -25,8 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 public class LayerMaskActions {
     private LayerMaskActions() {
     }
@@ -43,10 +41,10 @@ public class LayerMaskActions {
 
             JMenu showMenu = new JMenu("Show/Edit");
             menu.add(showMenu);
-            MaskViewMode.NORMAL.addToMenu(showMenu, layer);
-            MaskViewMode.SHOW_MASK.addToMenu(showMenu, layer);
-            MaskViewMode.EDIT_MASK.addToMenu(showMenu, layer);
-            MaskViewMode.RUBYLITH.addToMenu(showMenu, layer);
+            MaskViewMode.NORMAL.addToPopupMenu(showMenu, layer);
+            MaskViewMode.SHOW_MASK.addToPopupMenu(showMenu, layer);
+            MaskViewMode.EDIT_MASK.addToPopupMenu(showMenu, layer);
+            MaskViewMode.RUBYLITH.addToPopupMenu(showMenu, layer);
             menu.addSeparator();
 
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
@@ -118,7 +116,7 @@ public class LayerMaskActions {
 
             ((ImageLayer) layer).applyLayerMask(true);
 
-            layer.getComp().imageChanged(FULL);
+            layer.getComp().imageChanged();
         }
     }
 

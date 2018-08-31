@@ -22,7 +22,10 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
+import pixelitor.tools.pen.SubPath;
+import pixelitor.tools.util.DraggablePoint;
 
+@SuppressWarnings("ExtendsUtilityClass")
 public class PixelitorAssertions extends Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static CompositionAssert assertThat(Composition actual) {
@@ -44,4 +47,13 @@ public class PixelitorAssertions extends Assertions {
         return new RandomFilterSourceAssert(actual);
     }
 
+    @org.assertj.core.util.CheckReturnValue
+    public static DraggablePointAssert assertThat(DraggablePoint actual) {
+        return new DraggablePointAssert(actual);
+    }
+
+    @org.assertj.core.util.CheckReturnValue
+    public static SubPathAssert assertThat(SubPath actual) {
+        return new SubPathAssert(actual);
+    }
 }

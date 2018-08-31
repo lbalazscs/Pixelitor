@@ -20,7 +20,7 @@ package pixelitor.menus.file;
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimation;
 import pixelitor.utils.Messages;
@@ -29,11 +29,15 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.io.File;
 
+import static java.lang.Integer.parseInt;
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static pixelitor.io.FileChoosers.gifFilter;
+
 public class AnimGifExport {
     private AnimGifExport() {
     }
 
-    public static void start(JFrame dialogParent) {
+    public static void start(JFrame dialogOwner) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
@@ -43,18 +47,17 @@ public class AnimGifExport {
         }
 
         ExportPanel p = new ExportPanel(comp.getNumLayers());
-        OKCancelDialog d = new OKCancelDialog(p, dialogParent, "Export Animated GIF", "Export", "Cancel", false) {
-            @Override
-            protected void okAction() {
-                close();
-                export(comp, p.getDelayMillis(), p.isPingPong());
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .title("Export Animated GIF")
+                .owner(dialogOwner)
+                .content(p)
+                .okText("Export")
+                .okAction(() -> export(comp, p.getDelayMillis(), p.isPingPong()))
+                .show();
     }
 
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
-        File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.gifFilter);
+        File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
         if (file != null) {
             LayerAnimation animation = new LayerAnimation(activeComp,
                     delayMillis, pingPong);
@@ -68,7 +71,7 @@ public class AnimGifExport {
         private final JCheckBox pingPongCB;
 
         public ExportPanel(int nrLayers) {
-            setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            setBorder(createEmptyBorder(10, 10, 10, 10));
             setLayout(new VerticalLayout(10));
 
             add(new JLabel(" Animation frames are based on the layers of the image. "));
@@ -91,7 +94,7 @@ public class AnimGifExport {
         }
 
         private int getDelayMillis() {
-            return Integer.parseInt(delayTF.getText());
+            return parseInt(delayTF.getText().trim());
         }
 
         private boolean isPingPong() {

@@ -17,11 +17,12 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.io.FileExtensionUtils;
+import pixelitor.io.FileUtils;
 
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.util.Optional;
 
 /**
  * The file chooser used for saving files. It tries to
@@ -41,18 +42,20 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
         if (f == null) {
             return null;
         }
-        extension = FileExtensionUtils.getExt(f.getName());
 
-        if (extension == null) {
+        Optional<String> foundExt = FileUtils.getExt(f.getName());
+        if (!foundExt.isPresent()) {
             // the user has entered no extension
             // determine it from the active FileFilter
             extension = getExtensionFromFileFilter();
             f = new File(f.getAbsolutePath() + '.' + extension);
         } else {
-            boolean supported = FileExtensionUtils.hasSupportedOutputExt(f.getName());
+            boolean supported = FileUtils.hasSupportedOutputExt(f.getName());
             if (!supported) {
                 extension = getExtensionFromFileFilter();
                 f = new File(f.getAbsolutePath() + '.' + extension);
+            } else {
+                extension = foundExt.get();
             }
         }
 

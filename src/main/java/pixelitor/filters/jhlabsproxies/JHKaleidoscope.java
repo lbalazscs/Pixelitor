@@ -21,7 +21,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -48,7 +47,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
     public JHKaleidoscope() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 angle,
                 sides,
@@ -57,7 +56,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
                 rotateResult,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

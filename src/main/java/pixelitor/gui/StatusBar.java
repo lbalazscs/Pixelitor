@@ -18,10 +18,14 @@
 package pixelitor.gui;
 
 import pixelitor.menus.view.ZoomControl;
+import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
+
+import static javax.swing.BorderFactory.createEtchedBorder;
 
 /**
  * The status bar of the app.
@@ -29,10 +33,9 @@ import java.awt.FlowLayout;
 public class StatusBar extends JPanel {
     private final JLabel statusBarLabel;
     private final JPanel leftPanel;
-    private JProgressBar progressBar;
-    private boolean inProgress = false;
 
     public static final StatusBar INSTANCE = new StatusBar();
+    private static int numProgressBars = 0;
 
     private StatusBar() {
         super(new BorderLayout(0, 0));
@@ -44,55 +47,69 @@ public class StatusBar extends JPanel {
         add(leftPanel, BorderLayout.CENTER);
         add(ZoomControl.INSTANCE, BorderLayout.EAST);
 
-        setBorder(BorderFactory.createEtchedBorder());
+        setBorder(createEtchedBorder());
     }
 
     public void setMessage(String msg) {
-        if (inProgress) {
+        assert msg != null;
+        if (numProgressBars > 0) {
             // ignore any messages
         } else {
             statusBarLabel.setText(msg);
         }
     }
 
-    public void startProgress(String msg, int max) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+    public ProgressHandler startProgress(String msg, int max) {
+        assert msg != null;
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        statusBarLabel.setText(msg);
-        progressBar = new JProgressBar(0, max);
-//        progressBar.setStringPainted(true);
+        statusBarLabel.setText("");
 
-        // call these instead of revalidate/repaint
-        // because we want to stay on the EDT
-        leftPanel.validate();
-        progressBar.setSize(progressBar.getPreferredSize());
-        progressBar.setLocation(statusBarLabel.getPreferredSize().width + 7, -1);
-        leftPanel.add(progressBar);
-
-        leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
-
-        inProgress = true;
-    }
-
-    public void updateProgress(int value) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-        assert inProgress;
-
-        progressBar.setValue(value);
-        leftPanel.paintImmediately(progressBar.getBounds());
-    }
-
-    public void stopProgress() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-
-        leftPanel.remove(progressBar);
-        leftPanel.revalidate();
-        repaint();
-        progressBar = null;
-        inProgress = false;
+        numProgressBars++;
+        return new StatusBarProgressHandler(leftPanel, msg, max);
     }
 
     public boolean isShown() {
         return getParent() != null;
     }
+
+    static class StatusBarProgressHandler implements ProgressHandler {
+        private final JLabel msgLabel;
+        private final JPanel leftPanel;
+        private final JProgressBar progressBar;
+
+        public StatusBarProgressHandler(JPanel leftPanel, String msg, int max) {
+            this.leftPanel = leftPanel;
+            progressBar = new JProgressBar(0, max);
+            msgLabel = new JLabel(msg);
+
+            leftPanel.add(msgLabel);
+            leftPanel.add(progressBar);
+
+            // call these instead of revalidate()/repaint()
+            // because we want to stay on the EDT
+            leftPanel.validate(); // otherwise the panel width/height are 0
+            leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
+        }
+
+        @Override
+        public void updateProgress(int value) {
+            assert EventQueue.isDispatchThread() : "not EDT thread";
+
+            progressBar.setValue(value);
+            leftPanel.paintImmediately(progressBar.getBounds());
+        }
+
+        @Override
+        public void stopProgress() {
+            assert EventQueue.isDispatchThread() : "not EDT thread";
+
+            leftPanel.remove(progressBar);
+            leftPanel.remove(msgLabel);
+
+            leftPanel.revalidate();
+            leftPanel.repaint();
+            StatusBar.numProgressBars--;
+        }
+    } 
 }

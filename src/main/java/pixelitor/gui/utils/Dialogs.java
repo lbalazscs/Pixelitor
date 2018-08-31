@@ -22,7 +22,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.Build;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.history.History;
+import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -32,11 +32,28 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 import javax.swing.*;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.logging.Level;
+
+import static java.lang.String.format;
+import static javax.swing.JOptionPane.ERROR_MESSAGE;
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
+import static javax.swing.JOptionPane.OK_OPTION;
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
+import static javax.swing.JOptionPane.YES_NO_OPTION;
+import static javax.swing.JOptionPane.YES_OPTION;
 
 /**
  * Static utility methods related to dialogs
@@ -64,7 +81,7 @@ public class Dialogs {
 
     public static void showInfoDialog(Component parent, String title, String msg) {
         GlobalKeyboardWatch.setDialogActive(true);
-        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
         GlobalKeyboardWatch.setDialogActive(false);
     }
 
@@ -72,36 +89,47 @@ public class Dialogs {
         return showYesNoQuestionDialog(getParent(), title, msg);
     }
 
-    public static boolean showYesNoQuestionDialog(Component parent, String title, String msg) {
-        return showYesNoDialog(parent, title, msg, JOptionPane.QUESTION_MESSAGE);
+    public static boolean showYesNoQuestionDialog(Component parent, String title,
+                                                  String msg) {
+        return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
     }
 
     public static boolean showYesNoWarningDialog(String title, String msg) {
         return showYesNoWarningDialog(getParent(), title, msg);
     }
 
-    public static boolean showYesNoWarningDialog(Component parent, String title, String msg) {
-        return showYesNoDialog(parent, title, msg, JOptionPane.WARNING_MESSAGE);
+    public static boolean showYesNoWarningDialog(Component parent, String title,
+                                                 String msg) {
+        return showYesNoDialog(parent, title, msg, WARNING_MESSAGE);
     }
 
-    public static boolean showYesNoDialog(Component parent, String title, String msg, int messageType) {
+    public static boolean showYesNoDialog(Component parent, String title,
+                                          String msg, int messageType) {
         GlobalKeyboardWatch.setDialogActive(true);
-        int reply = JOptionPane.showConfirmDialog(parent, msg, title, JOptionPane.YES_NO_OPTION, messageType);
+        int reply = JOptionPane.showConfirmDialog(parent, msg, title,
+                YES_NO_OPTION, messageType);
         GlobalKeyboardWatch.setDialogActive(false);
-        return (reply == JOptionPane.YES_OPTION);
+
+        return (reply == YES_OPTION);
     }
 
-    public static boolean showOKCancelWarningDialog(String msg, String title, Object[] options, int initialOptionIndex) {
-        return showOKCancelDialog(msg, title, options, initialOptionIndex, JOptionPane.WARNING_MESSAGE);
+    public static boolean showOKCancelWarningDialog(String msg, String title,
+                                                    Object[] options,
+                                                    int initialOptionIndex) {
+        return showOKCancelDialog(msg, title, options, initialOptionIndex, WARNING_MESSAGE);
     }
 
-    public static boolean showOKCancelDialog(String msg, String title, Object[] options, int initialOptionIndex, int messageType) {
+    public static boolean showOKCancelDialog(String msg, String title,
+                                             Object[] options,
+                                             int initialOptionIndex,
+                                             int messageType) {
         GlobalKeyboardWatch.setDialogActive(true);
         int userAnswer = JOptionPane.showOptionDialog(getParent(), msg, title,
-                JOptionPane.OK_CANCEL_OPTION, messageType, null,
+                OK_CANCEL_OPTION, messageType, null,
                 options, options[initialOptionIndex]);
         GlobalKeyboardWatch.setDialogActive(false);
-        return userAnswer == JOptionPane.OK_OPTION;
+
+        return userAnswer == OK_OPTION;
     }
 
     public static void showErrorDialog(String title, String msg) {
@@ -110,7 +138,7 @@ public class Dialogs {
 
     public static void showErrorDialog(Component parent, String title, String msg) {
         GlobalKeyboardWatch.setDialogActive(true);
-        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalKeyboardWatch.setDialogActive(false);
     }
 
@@ -125,19 +153,21 @@ public class Dialogs {
 
     public static void showWarningDialog(Component parent, String title, String msg) {
         GlobalKeyboardWatch.setDialogActive(true);
-        JOptionPane.showMessageDialog(parent, msg, title, JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
         GlobalKeyboardWatch.setDialogActive(false);
     }
 
     public static void showNotImageLayerDialog() {
         if (!RandomGUITest.isRunning()) {
-            showErrorDialog("Not an image layer", "The active layer is not an image layer.");
+            showErrorDialog("Not an image layer",
+                    "The active layer is not an image layer.");
         }
     }
 
-    public static void showNotImageLayerOrMaskDialog() {
+    public static void showNotDrawableDialog() {
         if (!RandomGUITest.isRunning()) {
-            showErrorDialog("Not an image layer or mask", "The active layer is not an image layer or mask.");
+            showErrorDialog("Not an image layer or mask",
+                    "The active layer is not an image layer or mask.");
         }
     }
 
@@ -147,46 +177,78 @@ public class Dialogs {
     }
 
     public static void showExceptionDialog(Throwable e, Thread thread) {
-        String threadName = thread.getName();
-        System.err.printf("Exception in the thread '%s'%n", threadName);
-        e.printStackTrace();
+        if (!EventQueue.isDispatchThread()) {
+            System.err.printf("ERROR: Dialogs.showExceptionDialog called in %s%n",
+                    Thread.currentThread().toString());
 
-        if(e instanceof InvocationTargetException) {
-            e = e.getCause();
+            // call this method on the EDT
+            Throwable finalE = e;
+            EventQueue.invokeLater(() -> showExceptionDialog(finalE, thread));
+            return;
         }
 
-        if (RandomGUITest.isRunning()) {
-            Events.dumpAll();
-            History.showHistory();
-            Toolkit.getDefaultToolkit().beep();
-            playWarningSound();
+        if (e instanceof OutOfMemoryError) {
+            showOutOfMemoryDialog((OutOfMemoryError) e);
+            return;
+        }
 
-            RandomGUITest.stop();
-        } else if(Build.CURRENT.isDevelopment()) {
-            Events.dumpActive();
+        System.err.printf("Exception in the thread '%s'%n", thread.getName());
+        e.printStackTrace();
+        showMoreDevelopmentInfo(e);
+
+        if (e instanceof CompletionException) {
+            e = e.getCause();
+        }
+        if (e instanceof UncheckedIOException) {
+            e = e.getCause();
+        }
+        if (e instanceof InvocationTargetException) {
+            e = e.getCause();
         }
 
         Frame parent = getParent();
         String basicErrorMessage = "An exception occurred: " + e.getMessage();
-        ErrorInfo ii = new ErrorInfo("Program error", basicErrorMessage, null, null, e, Level.SEVERE, null);
+        ErrorInfo ii = new ErrorInfo("Program error",
+                basicErrorMessage, null, null, e,
+                Level.SEVERE, null);
         JXErrorPane.showDialog(parent, ii);
     }
 
-    private static void playWarningSound() {
-//        if (2 > 1) {
-//            return;
-//        }
+    private static void showMoreDevelopmentInfo(Throwable e) {
+        if (Build.CURRENT.isFinal()) {
+            return;
+        }
 
+        Predicate<String> isRandomGUITest = s -> s.contains("RandomGUITest");
+        Predicate<String> isAssertJSwingTest = s -> s.contains("AssertJSwingTest");
+        boolean autoTest = Arrays.stream(e.getStackTrace())
+                .map(StackTraceElement::getClassName)
+                .anyMatch(isRandomGUITest.or(isAssertJSwingTest));
+
+        if (!autoTest) {
+            return;
+        }
+
+        // avoid the mixing of the stack trace with
+        // the event dumps
+        Utils.sleep(2, TimeUnit.SECONDS);
+
+        RandomGUITest.stop();
+        Events.dumpForActiveComp();
+        Toolkit.getDefaultToolkit().beep();
+        playWarningSound();
+    }
+
+    private static void playWarningSound() {
         try {
-//            int velocity = 127;    // max volume
-            int velocity = 90;    // max volume
+            int maxVolume = 90;
             int sound = 65;
             Synthesizer synthesizer = MidiSystem.getSynthesizer();
             synthesizer.open();
             MidiChannel channel = synthesizer.getChannels()[9];  // drums channel.
             for (int i = 0; i < 10; i++) {
                 Thread.sleep(100);
-                channel.noteOn(sound + i, velocity);
+                channel.noteOn(sound + i, maxVolume);
                 Thread.sleep(100);
                 channel.noteOff(sound + i);
             }
@@ -205,5 +267,23 @@ public class Dialogs {
                 "<li>working with smaller images";
         String title = "Out of memory error.";
         Dialogs.showErrorDialog(title, msg);
+    }
+
+    public static int showCloseWarningDialog(String compName) {
+        Object[] options = {"Save",
+                "Don't Save",
+                "Cancel"};
+        String question = format(
+                "<html><b>Do you want to save the changes made to %s?</b>" +
+                        "<br>Your changes will be lost if you don't save them.</html>",
+                compName);
+
+        GlobalKeyboardWatch.setDialogActive(true);
+        int answer = JOptionPane.showOptionDialog(
+                PixelitorWindow.getInstance(), new JLabel(question),
+                "Unsaved changes", YES_NO_CANCEL_OPTION,
+                WARNING_MESSAGE, null, options, options[0]);
+        GlobalKeyboardWatch.setDialogActive(false);
+        return answer;
     }
 }

@@ -22,10 +22,8 @@ import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.MessageHandler;
 import pixelitor.NewImage;
-import pixelitor.automate.SingleDirChooserPanel;
-import pixelitor.colors.FgBgColors;
+import pixelitor.automate.SingleDirChooser;
 import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
@@ -33,75 +31,100 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.ImageComponents;
-import pixelitor.io.Directories;
+import pixelitor.gui.ImageComponent;
+import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
-import pixelitor.tools.GradientTool;
-import pixelitor.tools.GradientType;
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.gradient.Gradient;
+import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.utils.MessageHandler;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressHandler;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.io.File;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.tools.GradientColorType.BLACK_TO_WHITE;
+import static pixelitor.colors.FgBgColors.setFGColor;
+import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 
 /**
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
-    //    public static final String SPLASH_SCREEN_FONT = "Comic Sans MS";
     private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
 
     private SplashImageCreator() {
     }
 
     public static void saveManySplashImages() {
-        boolean okPressed = SingleDirChooserPanel.selectOutputDir(true);
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        boolean okPressed = SingleDirChooser.selectOutputDir(true);
         if (!okPressed) {
             return;
         }
-        int numCreatedImages = 32;
-
+        File lastSaveDir = Dirs.getLastSave();
         MessageHandler msgHandler = Messages.getMessageHandler();
-        String msg = String.format("Save %d Splash Images: ", numCreatedImages);
-        msgHandler.startProgress(msg, numCreatedImages);
-        File lastSaveDir = Directories.getLastSaveDir();
+        int numCreatedImages = 32;
+        String msg = format("Save %d Splash Images: ", numCreatedImages);
+        ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
 
+        CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
         for (int i = 0; i < numCreatedImages; i++) {
-            OutputFormat outputFormat = OutputFormat.getLastUsed();
-
-            String fileName = String.format("splash%04d.%s", i, outputFormat.toString());
-
-            msgHandler.updateProgress(i);
-
-            createSplashImage();
-
-            ImageComponents.onActiveICAndComp((ic, comp) -> {
-                ic.paintImmediately(ic.getBounds());
-                File f = new File(lastSaveDir, fileName);
-
-                outputFormat.saveComp(comp, f, false);
-
-                ic.close();
-                ValueNoise.reseed();
-            });
+            int seqNo = i;
+            cf = cf.thenCompose(v -> makeSplashAsync(lastSaveDir, progressHandler, seqNo));
         }
-        msgHandler.stopProgress();
-        msgHandler.showInStatusBar(String.format("Finished saving splash images to %s", lastSaveDir));
+        cf.thenRunAsync(() -> {
+                    progressHandler.stopProgress();
+                    msgHandler.showInStatusBar(format(
+                            "Finished saving %d splash images to %s",
+                            numCreatedImages, lastSaveDir));
+                }, EventQueue::invokeLater);
+
     }
 
-    public static void createSplashImage() {
-        assert EventQueue.isDispatchThread();
+    private static CompletableFuture<Void> makeSplashAsync(File lastSaveDir,
+                                                           ProgressHandler progressHandler,
+                                                           int seqNo) {
+        return CompletableFuture.supplyAsync(() -> {
+            progressHandler.updateProgress(seqNo);
+
+            OutputFormat outputFormat = OutputFormat.getLastUsed();
+
+            String fileName = format("splash%04d.%s", seqNo, outputFormat.toString());
+
+            ValueNoise.reseed();
+            Composition comp = createSplashImage();
+            ImageComponent ic = comp.getIC();
+
+            ic.paintImmediately(ic.getBounds());
+
+            File f = new File(lastSaveDir, fileName);
+            comp.setFile(f);
+
+            return comp;
+        }, EventQueue::invokeLater).thenCompose(comp -> {
+            SaveSettings saveSettings = new SaveSettings(
+                    OutputFormat.getLastUsed(), comp.getFile());
+            return comp.saveAsync(saveSettings, false)
+                    // closed here because here we have a comp reference
+                    .thenAcceptAsync(v -> comp.getIC().close(), EventQueue::invokeLater);
+        });
+    }
+
+    public static Composition createSplashImage() {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
@@ -121,22 +144,28 @@ public class SplashImageCreator {
         layer.setOpacity(0.4f, true, true, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
 
-        FgBgColors.setFG(WHITE);
+        setFGColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
-        layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE, font, -17, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE,
+                font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
-        layer = addRasterizedTextLayer(comp, "Loading...", WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp,
+                "Loading...",
+                WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
-        layer = addRasterizedTextLayer(comp, "version " + Build.VERSION_NUMBER, WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+        layer = addRasterizedTextLayer(comp,
+                "version " + Build.VERSION_NUMBER,
+                WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
 //        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
 //        addRasterizedTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
 
+        return comp;
     }
 
     private static void addDropShadow(ImageLayer layer) {
@@ -155,10 +184,14 @@ public class SplashImageCreator {
 
     private static void addRasterizedTextLayer(Composition comp, String text, int translationY) {
         Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
-        addRasterizedTextLayer(comp, text, WHITE, font, translationY, BlendingMode.NORMAL, 1.0f, false);
+        addRasterizedTextLayer(comp, text, WHITE,
+                font, translationY, BlendingMode.NORMAL, 1.0f, false);
     }
 
-    private static ImageLayer addRasterizedTextLayer(Composition comp, String text, Color textColor, Font font, int translationY, BlendingMode blendingMode, float opacity, boolean dropShadow) {
+    private static ImageLayer addRasterizedTextLayer(Composition comp, String text,
+                                                     Color textColor, Font font,
+                                                     int translationY, BlendingMode blendingMode,
+                                                     float opacity, boolean dropShadow) {
         ImageLayer layer = addNewLayer(comp, text);
         TextFilter textFilter = TextFilter.getInstance();
 
@@ -176,7 +209,7 @@ public class SplashImageCreator {
         textFilter.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setTranslation(0, translationY);
 
-        layer.enlargeImage(layer.getComp().getCanvasBounds());
+        layer.enlargeImage(layer.getComp().getCanvasImBounds());
 
         layer.setOpacity(opacity, true, true, true);
         layer.setBlendingMode(blendingMode, true, true, true);
@@ -186,8 +219,8 @@ public class SplashImageCreator {
 
     public static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
         Canvas canvas = dr.getComp().getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         int startX = canvasWidth / 2;
         int startY = canvasHeight / 2;
@@ -208,12 +241,11 @@ public class SplashImageCreator {
             gradientType = GradientType.SPIRAL_CW;
         }
 
-        GradientTool.drawGradient(dr,
-                gradientType,
-                BLACK_TO_WHITE,
-                REFLECT,
-                AlphaComposite.SrcOver,
-                new UserDrag(startX, startY, endX, endY),
-                false);
+        Gradient gradient = new Gradient(
+                new ImDrag(startX, startY, endX, endY),
+                gradientType, REFLECT, BLACK_TO_WHITE,
+                false,
+                BlendingMode.NORMAL, 1.0f);
+        gradient.drawOn(dr);
     }
 }

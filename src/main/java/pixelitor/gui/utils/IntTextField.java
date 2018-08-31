@@ -20,6 +20,8 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * A JTextfield that allows only input consisting
  * of numbers and nothing else.
@@ -76,8 +78,8 @@ public class IntTextField extends JTextField implements KeyListener {
     }
 
     public int getIntValue() {
-        String s = getText();
-        int intValue = Integer.parseInt(s);
+        String s = getText().trim();
+        int intValue = parseInt(s);
         if (limitRange) {
             if (intValue > maxValue) {
                 intValue = maxValue;

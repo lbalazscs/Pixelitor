@@ -22,12 +22,13 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
 
-import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
+
+import static java.lang.String.format;
 
 /**
  * An event that occurred inside Pixelitor.
@@ -43,10 +44,12 @@ public class PixelitorEvent {
 
     protected PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
-        assert Build.CURRENT.isDevelopment();
+        if (!Build.CURRENT.isDevelopment()) {
+            throw new IllegalStateException("should be used only for development");
+        }
 
         date = new Date();
-        if (SwingUtilities.isEventDispatchThread()) {
+        if (EventQueue.isDispatchThread()) {
             threadName = "EDT";
         } else {
             threadName = Thread.currentThread().getName();
@@ -54,10 +57,10 @@ public class PixelitorEvent {
 
         if (comp == null) {
             assert layer == null;
-            Optional<Composition> opt = ImageComponents.getActiveComp();
-            if (opt.isPresent()) {
-                this.comp = opt.get();
-                this.layer = this.comp.getActiveLayer();
+            Composition activeComp = ImageComponents.getActiveCompOrNull();
+            if (activeComp != null) {
+                this.comp = activeComp;
+                this.layer = activeComp.getActiveLayer();
             } else {
                 this.comp = null;
                 this.layer = null;
@@ -77,23 +80,23 @@ public class PixelitorEvent {
     // saves the actual state of the composition to a string
     private String saveState(String type) {
         if (comp == null) { // "all images are closed" is also an event
-            return String.format("%s (%s) no composition", type, threadName);
+            return format("%s (%s) no composition", type, threadName);
         }
 
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle rect = comp.getSelection().getShapeBounds();
-            selectionInfo = String.format("sel. bounds = '%s'", rect.toString());
+            selectionInfo = format("sel. bounds = '%s'", rect.toString());
         }
         String maskInfo = "no mask";
         if (layer.hasMask()) {
-            maskInfo = String.format("has mask (enabled = %s, editing = %s, linked = %s)",
+            maskInfo = format("has mask (enabled = %s, editing = %s, linked = %s)",
                     layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
         }
 
         String layerType = layer.getClass().getSimpleName();
         String formattedDate = dateFormatter.format(date);
-        return String.format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
+        return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
                 type, threadName, comp.getName(), layer.getName(),
                 layerType, selectionInfo, maskInfo, formattedDate);
     }

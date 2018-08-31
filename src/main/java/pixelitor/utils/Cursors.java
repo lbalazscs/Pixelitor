@@ -20,7 +20,7 @@ package pixelitor.utils;
 import java.awt.Cursor;
 
 /**
- * A convenience class for keeping track of used mouse cursors
+ * A convenience class for keeping track of mouse cursors
  */
 public class Cursors {
     public static final Cursor MOVE = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
@@ -28,4 +28,7 @@ public class Cursors {
     public static final Cursor DEFAULT = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
     public static final Cursor BUSY = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
     public static final Cursor CROSSHAIR = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
+
+    private Cursors() {
+    }
 }

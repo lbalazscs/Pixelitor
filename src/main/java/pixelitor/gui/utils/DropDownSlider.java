@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -32,8 +32,8 @@ import java.awt.event.MouseEvent;
  * that shows a slider in a popup window
  */
 public class DropDownSlider extends JComponent {
-    private static final Icon downIconEnabled = IconUtils.loadIcon("dropdown_enabled.gif");
-    private static final Icon downIconDisabled = IconUtils.loadIcon("dropdown_disabled.gif");
+    private static final Icon downIconEnabled = Icons.load("dropdown_enabled.gif");
+    private static final Icon downIconDisabled = Icons.load("dropdown_disabled.gif");
 
     private final IntTextField textField;
     private JButton dropDownButton;
@@ -94,30 +94,34 @@ public class DropDownSlider extends JComponent {
     private void setDropDownButtonSize() {
         Dimension ps = textField.getPreferredSize();
 
+        // Works only for the Nimbus L&F
         int width = 17;
         int height = 22;
-
         int boundsX = ps.width - width;
         int boundsY = (ps.height - height) / 2;
-        dropDownButton.setBounds(boundsX, boundsY, width, height); // Works only for the Nimbus L&F
+
+        dropDownButton.setBounds(boundsX, boundsY, width, height);
     }
 
     private void connectSlideAndTextField() {
-        slider.addChangeListener(e -> {
-            int value1 = slider.getValue();
-            textField.setText(String.valueOf(value1));
-            if (!slider.getValueIsAdjusting()) {
-                textField.fireActionPerformed();
-            }
-        });
+        slider.addChangeListener(e -> sliderChanged());
+        textField.addActionListener(e -> textFieldChanged());
+    }
 
-        textField.addActionListener(e -> {
-            int value1 = textField.getIntValue();
-            int sliderValue = slider.getValue();
-            if (value1 != sliderValue) {
-                slider.setValue(value1);
-            }
-        });
+    private void sliderChanged() {
+        int value1 = slider.getValue();
+        textField.setText(String.valueOf(value1));
+        if (!slider.getValueIsAdjusting()) {
+            textField.fireActionPerformed();
+        }
+    }
+
+    private void textFieldChanged() {
+        int value1 = textField.getIntValue();
+        int sliderValue = slider.getValue();
+        if (value1 != sliderValue) {
+            slider.setValue(value1);
+        }
     }
 
     public int getValue() {
@@ -148,7 +152,9 @@ public class DropDownSlider extends JComponent {
             } else {
                 Dimension size = getSize();
                 Dimension preferredSize = popupMenu.getPreferredSize();
-                popupMenu.show(this, size.width - preferredSize.width, size.height);
+                int popupX = size.width - preferredSize.width;
+                int popupY = size.height;
+                popupMenu.show(this, popupX, popupY);
             }
         }
     }

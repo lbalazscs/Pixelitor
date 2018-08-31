@@ -36,9 +36,11 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 
 /**
  * Color-related static utility methods.
@@ -181,30 +183,12 @@ public class ColorUtils {
         }
     }
 
-    public static Color createRandomColor(boolean randomAlpha) {
-        Random rnd = new Random();
-        return createRandomColor(rnd, randomAlpha);
-    }
-
-    public static Color createRandomColor(Random rnd, boolean randomAlpha) {
-        int r = rnd.nextInt(256);
-        int g = rnd.nextInt(256);
-        int b = rnd.nextInt(256);
-
-        if (randomAlpha) {
-            int a = rnd.nextInt(256);
-            return new Color(r, g, b, a);
-        }
-
-        return new Color(r, g, b);
-    }
-
     public static String rgbIntToString(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
-        return String.format("(%d, %d, %d, %d)", a, r, g, b);
+        return format("(%d, %d, %d, %d)", a, r, g, b);
     }
 
     public static float calcSaturation(int r, int g, int b) {
@@ -230,8 +214,18 @@ public class ColorUtils {
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
+    public static String debugPackedInt(int argb) {
+        int a = (argb >>> 24) & 0xFF;
+        int r = (argb >>> 16) & 0xFF;
+        int g = (argb >>> 8) & 0xFF;
+        int b = argb & 0xFF;
+
+        return "(a = " + a + ", r = " + r + ", g = " + g + ", b = " + b + ")";
+    }
+
     // should not be called from dialogs because it sets dialogActive to false at the end
-    public static Color showColorPickerDialog(PixelitorWindow pw, String title, Color selectedColor, boolean allowOpacity) {
+    public static Color showColorPickerDialog(PixelitorWindow pw, String title,
+                                              Color selectedColor, boolean allowOpacity) {
         GlobalKeyboardWatch.setDialogActive(true);
         Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
         GlobalKeyboardWatch.setDialogActive(false);
@@ -255,7 +249,7 @@ public class ColorUtils {
     }
 
     public static void copyColorToClipboard(Color c) {
-        String htmlHexString = String.format("%06X", (0xFFFFFF & c.getRGB()));
+        String htmlHexString = format("%06X", (0xFFFFFF & c.getRGB()));
 
         Utils.copyStringToClipboard(htmlHexString);
     }
@@ -276,9 +270,9 @@ public class ColorUtils {
         // try HTML hex format
         if (text.length() == 6) {
             return new Color(
-                    Integer.parseInt(text.substring(0, 2), 16),
-                    Integer.parseInt(text.substring(2, 4), 16),
-                    Integer.parseInt(text.substring(4, 6), 16));
+                    parseInt(text.substring(0, 2), 16),
+                    parseInt(text.substring(2, 4), 16),
+                    parseInt(text.substring(4, 6), 16));
         }
 
         // try rgb(163, 69, 151) format
@@ -287,9 +281,9 @@ public class ColorUtils {
             String[] strings = text.split("\\s*,\\s*");
             if (strings.length == 3) {
                 return new Color(
-                        Integer.parseInt(strings[0]),
-                        Integer.parseInt(strings[1]),
-                        Integer.parseInt(strings[2]));
+                        parseInt(strings[0]),
+                        parseInt(strings[1]),
+                        parseInt(strings[2]));
             }
         }
 

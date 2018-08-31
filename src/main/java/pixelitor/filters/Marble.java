@@ -25,7 +25,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -52,6 +51,7 @@ public class Marble extends ParametrizedFilter {
     private final RangeParam zoom = new RangeParam("Zoom", 1, 10, 200);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam distortion = new RangeParam("Distortion", 0, 25, 100);
+    private final RangeParam time = new RangeParam("Time (Phase)", 0, 0, 100);
 
     private final RangeParam detailsLevel = new RangeParam("Level", 0, 3, 8);
     private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 50);
@@ -83,16 +83,17 @@ public class Marble extends ParametrizedFilter {
         GroupedRangeParam details = new GroupedRangeParam("Details",
                 new RangeParam[]{detailsLevel, detailsStrength}, false);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 waveType,
+                time,
                 angle,
                 zoom.withAdjustedRange(0.25),
                 distortion,
                 details.setLinkable(false),
                 smoothDetails,
                 gradient
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override
@@ -116,7 +117,8 @@ public class Marble extends ParametrizedFilter {
         filter.setDetailsStrength(detailsStrength.getValueAsFloat() / 4.0f);
         filter.setColormap(gradient.getValue());
         filter.setSmoothDetails(smoothDetails.isChecked());
-
+        filter.setTime(time.getValueAsFloat() / 5.0f);
+        
         dest = filter.filter(src, dest);
         return dest;
     }
@@ -139,6 +141,7 @@ public class Marble extends ParametrizedFilter {
         private float cx, cy;
         private int waveType;
         private boolean smoothDetails;
+        private float time;
 
         protected Impl(String filterName) {
             super(filterName);
@@ -199,12 +202,13 @@ public class Marble extends ParametrizedFilter {
             ny /= zoom;
 
             float c;
-            float f = strength * (noise2(nx * 0.1f, ny * 0.1f));
+            float f = strength * noise2(nx * 0.1f, ny * 0.1f);
             if (smoothDetails) {
                 f += detailsStrength * turbulence2B(nx * 0.2f, ny * 0.2f, octaves);
             } else {
                 f += detailsStrength * turbulence2(nx * 0.2f, ny * 0.2f, octaves);
             }
+            f += time;
 
             switch (type) {
                 case TYPE_LINES:
@@ -221,13 +225,13 @@ public class Marble extends ParametrizedFilter {
                     c = ((float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType))) / 4.0f;
                     break;
                 case TYPE_RINGS:
-                    double dist = sqrt(dx * dx + dy * dy) / zoom;
+                    float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
                     f += dist;
 
                     c = (float) ((1 + wave(f, waveType)) / 2);
                     break;
                 case TYPE_STAR:
-                    double pixelAngle = atan2(dy, dx);
+                    float pixelAngle = (float) atan2(dy, dx);
                     f += (pixelAngle - rotAngle) * 10.0f;
                     c = (float) ((1 + wave(f, waveType)) / 2);
                     break;
@@ -240,6 +244,10 @@ public class Marble extends ParametrizedFilter {
 
         public void setColormap(Colormap colormap) {
             this.colormap = colormap;
+        }
+
+        public void setTime(float time) {
+            this.time = time;
         }
     }
 

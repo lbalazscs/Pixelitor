@@ -19,14 +19,17 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
-import java.util.Random;
+import java.util.function.BooleanSupplier;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
@@ -62,11 +65,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position) {
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+                      SliderSpinner.TextPosition position) {
         this(name, min, def, max, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton, SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
+    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+                      SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         assert min < max : name + ": min (" + min + ") >= max (" + max + ')';
@@ -86,7 +91,46 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         setParamGUIEnabledState();
+
+        if (action != null) {
+            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JComponent actionGUI = action.createGUI();
+            p.add(sliderSpinner);
+            p.add(actionGUI);
+            return p;
+        }
+
         return sliderSpinner;
+    }
+
+    /**
+     * Sets up the automatic enabling of another {@link FilterSetting}
+     * when the value of this one is not zero.
+     * Typically used when this is a randomness slider, and the other
+     * is a "reseed randomness" button.
+     */
+    public void setupEnableOtherIfNotZero(FilterSetting other) {
+        other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC);
+        addChangeListener(e ->
+                other.setEnabled(getValue() != 0,
+                        EnabledReason.APP_LOGIC));
+    }
+
+    /**
+     * Synchronizes the value of this object with the value of another
+     * {@link RangeParam} if the given condition evaluates to true.
+     */
+    public void linkWith(RangeParam other, BooleanSupplier condition) {
+        this.addChangeListener(e -> {
+            if (condition.getAsBoolean()) {
+                other.setValueNoTrigger(this.getValue());
+            }
+        });
+        other.addChangeListener(e -> {
+            if (condition.getAsBoolean()) {
+                this.setValueNoTrigger(other.getValue());
+            }
+        });
     }
 
     @Override
@@ -100,22 +144,20 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     /**
      * Resets to the default value.
-     * @param triggerAction should be true if called from a GUI component
+     *
+     * @param trigger should be true if called from a GUI component
      */
     @Override
-    public void reset(boolean triggerAction) {
-        setValue(defaultValue, triggerAction);
+    public void reset(boolean trigger) {
+        setValue(defaultValue, trigger);
     }
 
-    /**
-     * This class can be used to manage non-integer values by multiplying them with 100
-     */
     public float getValueAsPercentage() {
         return (getValueAsFloat()) / 100.0f;
     }
 
     /**
-     * Int values measured in grades are transformed to radians
+     * Int values measured in degrees are transformed to radians
      */
     public float getValueInRadians() {
         return (float) Math.toRadians(getValueAsDouble());
@@ -133,8 +175,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void randomize() {
         if (randomizePolicy.allow()) {
             int range = maxValue - minValue;
-            Random rnd = new Random();
-            int newValue = minValue + rnd.nextInt(range);
+            int newValue = minValue + RandomUtils.nextInt(range);
 
             setValueNoTrigger(newValue);
         }
@@ -195,10 +236,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setValue(int n, boolean trigger) {
-// these assertions cannot be made because of swing bugs
-//        assert n <= maxValue : getName() + ": n (" + n + ") > maxValue (" + maxValue + ')';
-//        assert n >= minValue : getName() + ": n (" + n + ") < minValue (" + minValue + ')';
-
         if (n > maxValue) {
             n = maxValue;
         }
@@ -288,17 +325,17 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void considerImageSize(Rectangle bounds) {
-        if(adjustMaxAccordingToImage) {
+        if (adjustMaxAccordingToImage) {
             double defaultToMaxRatio = ((double) defaultValue) / ((double) maxValue);
             maxValue = (int) (maxToImageSizeRatio * Math.max(bounds.width, bounds.height));
-            if(maxValue <= minValue) { // can happen with very small (for example 1x1) images
+            if (maxValue <= minValue) { // can happen with very small (for example 1x1) images
                 maxValue = minValue + 1;
             }
             defaultValue = (int) (defaultToMaxRatio * maxValue);
-            if(defaultValue > maxValue) {
+            if (defaultValue > maxValue) {
                 defaultValue = maxValue;
             }
-            if(defaultValue < minValue) {
+            if (defaultValue < minValue) {
                 defaultValue = minValue;
             }
             value = defaultValue;
@@ -351,8 +388,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultValue;
+    }
+
+    @Override
     public String toString() {
-        return String.format("%s[name = '%s', value = %.2f]",
+        return format("%s[name = '%s', value = %.2f]",
                 getClass().getSimpleName(), getName(), value);
     }
 }

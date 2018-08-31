@@ -17,15 +17,17 @@
 
 package pixelitor.menus.file;
 
-import pixelitor.io.OpenSaveManager;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
+import java.awt.EventQueue;
 import java.io.File;
 
+/**
+ * The "File/Recent Files" menu
+ */
 public final class RecentFilesMenu extends JMenu {
     public static final int MAX_RECENT_FILES = 10;
 
@@ -35,37 +37,19 @@ public final class RecentFilesMenu extends JMenu {
 
     private BoundedUniqueList<RecentFile> recentFiles;
 
-    private final ActionListener fileOpener = e -> {
-        try {
-            RecentFilesMenuItem mi = (RecentFilesMenuItem) e.getSource();
-            File f = mi.getRecentFile().getFile();
-            if (f.exists()) {
-                OpenSaveManager.openFile(f);
-            } else {
-                // the file was deleted since Pixelitor started
-                Messages.showError("Problem",
-                        String.format("The file %s does not exist.", f.toString()));
-            }
-        } catch (Exception ex) {
-            Messages.showException(ex);
-        }
-    };
-
     private RecentFilesMenu() {
         super("Recent Files");
 
         clearMenuItem = new JMenuItem("Clear Recent Files");
-        ActionListener clearer = e -> {
+        clearMenuItem.addActionListener(e -> {
             try {
                 clear();
             } catch (Exception ex) {
                 Messages.showException(ex);
             }
-        };
-        clearMenuItem.addActionListener(clearer);
+        });
         load();
         rebuildGUI();
-
     }
 
     private void clear() {
@@ -75,7 +59,7 @@ public final class RecentFilesMenu extends JMenu {
     }
 
     public static RecentFilesMenu getInstance() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         if (singleInstance == null) {
             //noinspection NonThreadSafeLazyInitialization
@@ -106,12 +90,11 @@ public final class RecentFilesMenu extends JMenu {
 
     private void rebuildGUI() {
         clearGUI();
-        for (int i = 0, recentFileNamesSize = recentFiles.size(); i < recentFileNamesSize; i++) {
+        for (int i = 0; i < recentFiles.size(); i++) {
             RecentFile recentFile = recentFiles.get(i);
             recentFile.setNr(i + 1);
             RecentFilesMenuItem item = new RecentFilesMenuItem(recentFile);
             add(item);
-            item.addActionListener(fileOpener);
         }
         if (!recentFiles.isEmpty()) {
             addSeparator();

@@ -33,6 +33,7 @@ import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 
 import static java.awt.AlphaComposite.DstIn;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
  * A layer mask.
@@ -72,7 +73,8 @@ public class LayerMask extends ImageLayer {
 
     public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
 
-    public LayerMask(Composition comp, BufferedImage bwImage, Layer layer, boolean inheritTranslation) {
+    public LayerMask(Composition comp, BufferedImage bwImage,
+                     Layer layer, boolean inheritTranslation) {
         super(comp, bwImage, layer.getName() + " MASK", layer);
 
         if (inheritTranslation && layer instanceof ContentLayer) {
@@ -81,7 +83,7 @@ public class LayerMask extends ImageLayer {
             translationY = contentLayer.getTY();
         }
 
-        assert bwImage.getType() == BufferedImage.TYPE_BYTE_GRAY;
+        assert bwImage.getType() == TYPE_BYTE_GRAY;
     }
 
     public void applyToImage(BufferedImage in) {
@@ -92,7 +94,7 @@ public class LayerMask extends ImageLayer {
     }
 
     public void updateFromBWImage() {
-        assert image.getType() == BufferedImage.TYPE_BYTE_GRAY;
+        assert image.getType() == TYPE_BYTE_GRAY;
         assert image.getColorModel() != TRANSPARENCY_COLOR_MODEL;
 
         // The transparency image shares the raster data with the BW image,
@@ -100,13 +102,15 @@ public class LayerMask extends ImageLayer {
         // Therefore this method needs to be called only when
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
-        this.transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL, raster, false, null);
+        this.transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL,
+                raster, false, null);
     }
 
     public void paintAsRubylith(Graphics2D g) {
         Composite oldComposite = g.getComposite();
         WritableRaster raster = getVisibleImage().getRaster();
-        BufferedImage rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL, raster, false, null);
+        BufferedImage rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
+                raster, false, null);
         g.setComposite(RUBYLITH_COMPOSITE);
         g.drawImage(rubylithImage, 0, 0, null);
         g.setComposite(oldComposite);
@@ -114,8 +118,7 @@ public class LayerMask extends ImageLayer {
 
     @Override
     protected BufferedImage createEmptyImageForLayer(int width, int height) {
-//        BufferedImage empty = new BufferedImage(GRAY_MODEL, GRAY_MODEL.createCompatibleWritableRaster(width, height), false, null);
-        BufferedImage empty = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage empty = new BufferedImage(width, height, TYPE_BYTE_GRAY);
 
         // when enlarging a layer mask, the new areas need to be white
         Graphics2D g = empty.createGraphics();
@@ -159,7 +162,9 @@ public class LayerMask extends ImageLayer {
     public void setLinked(boolean linked, boolean addToHistory) {
         this.linked = linked;
         notifyLayerChangeListeners();
-        History.addEdit(addToHistory, () -> new LinkLayerMaskEdit(comp, this));
+        if (addToHistory) {
+            History.addEdit(new LinkLayerMaskEdit(comp, this));
+        }
     }
 
     @Override
@@ -167,13 +172,10 @@ public class LayerMask extends ImageLayer {
         throw new IllegalStateException("tmp layer with masks");
     }
 
-//    @Override
-//    public void mergeTmpDrawingLayerDown() {
-//        updateIconImage();
-//    }
-
     @Override
-    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage visibleImage) {
+    protected void paintLayerOnGraphicsWOTmpLayer(Graphics2D g,
+                                                  BufferedImage visibleImage,
+                                                  boolean firstVisibleLayer) {
         if (Tools.isShapesDrawing()) {
             paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
@@ -182,7 +184,9 @@ public class LayerMask extends ImageLayer {
     }
 
     @Override
-    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g, BufferedImage visibleImage, boolean firstVisibleLayer) {
+    protected void paintDraggedShapesIntoActiveLayer(Graphics2D g,
+                                                     BufferedImage visibleImage,
+                                                     boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTX(), getTY(), null);
         Tools.SHAPES.paintOverLayer(g, comp);
     }
@@ -195,7 +199,8 @@ public class LayerMask extends ImageLayer {
 
             // Create a temporary image that shows how the image would look like
             // if the shapes tool would draw directly into the mask image
-            BufferedImage tmp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
+            BufferedImage tmp = new BufferedImage(
+                    image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
             Graphics2D tmpG = tmp.createGraphics();
             tmpG.drawImage(image, 0, 0, null);
             Tools.SHAPES.paintOverLayer(tmpG, comp);
@@ -203,7 +208,8 @@ public class LayerMask extends ImageLayer {
 
             // ... and return a transparency image based on it
             WritableRaster raster = tmp.getRaster();
-            BufferedImage tmpTransparency = new BufferedImage(TRANSPARENCY_COLOR_MODEL, raster, false, null);
+            BufferedImage tmpTransparency = new BufferedImage(
+                    TRANSPARENCY_COLOR_MODEL, raster, false, null);
             return tmpTransparency;
         }
     }

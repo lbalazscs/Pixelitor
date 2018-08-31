@@ -25,16 +25,37 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
- * Manages external files dropped on the JDesktopPane
+ * Manages external files dropped on the image area
  */
 public class DropListener extends DropTargetAdapter {
     public DropListener() {
+    }
+
+    @Override
+    public void dragEnter(DropTargetDragEvent dtde) {
+        handleOngoingDrag(dtde);
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {
+        handleOngoingDrag(dtde);
+    }
+
+    private static void handleOngoingDrag(DropTargetDragEvent dtde) {
+        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            dtde.acceptDrag(DnDConstants.ACTION_COPY);
+        } else {
+            dtde.rejectDrag();
+        }
     }
 
     @Override
@@ -48,7 +69,7 @@ public class DropListener extends DropTargetAdapter {
             }
             if (flavor.isFlavorJavaFileListType()) {
                 // this is where we get after dropping a file or directory
-                e.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                e.acceptDrop(DnDConstants.ACTION_COPY);
 
                 try {
                     @SuppressWarnings("unchecked")
@@ -70,14 +91,14 @@ public class DropListener extends DropTargetAdapter {
     private static void dropFiles(List<File> list) {
         for (File file : list) {
             if (file.isDirectory()) {
-                String question = String.format("You have dropped the folder \"%s\". " +
+                String question = format("You have dropped the folder \"%s\". " +
                         "Do you want to open all image files inside it?", file.getName());
 
                 if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                    OpenSaveManager.openAllImagesInDir(file);
+                    OpenSave.openAllImagesInDir(file);
                 }
             } else if (file.isFile()) {
-                OpenSaveManager.openFile(file);
+                OpenSave.openFileAsync(file);
             }
         }
     }

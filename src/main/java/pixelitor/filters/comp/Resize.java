@@ -17,17 +17,16 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
-import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
 
 import java.awt.geom.AffineTransform;
 
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
  * Resizes all content layers of a composition
@@ -48,8 +47,9 @@ public class Resize implements CompAction {
 
     @Override
     public void process(Composition comp) {
-        int canvasCurrWidth = comp.getCanvasWidth();
-        int canvasCurrHeight = comp.getCanvasHeight();
+        Canvas canvas = comp.getCanvas();
+        int canvasCurrWidth = canvas.getImWidth();
+        int canvasCurrHeight = canvas.getImHeight();
 
         if ((canvasCurrWidth == canvasTargetWidth) && (canvasCurrHeight == canvasTargetHeight)) {
             return;
@@ -64,49 +64,38 @@ public class Resize implements CompAction {
             canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
         }
 
-        boolean progressiveBilinear = false;
-        if ((canvasTargetWidth < (canvasCurrWidth / 2))
-                || (canvasTargetHeight < (canvasCurrHeight / 2))) {
-            progressiveBilinear = true;
-        }
-
         String editName = "Resize";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelection();
-
+        comp.transformSelection(() -> {
             double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
             double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-            AffineTransform tx = AffineTransform.getScaleInstance(sx, sy);
-            selection.transform(tx);
-        }
+            return AffineTransform.getScaleInstance(sx, sy);
+        });
 
-        resizeLayers(comp, progressiveBilinear);
+        resizeLayers(comp);
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
 
-        comp.getCanvas().changeSize(canvasTargetWidth, canvasTargetHeight);
+        canvas.changeImSize(canvasTargetWidth, canvasTargetHeight);
 
-        // Only after the shared canvas size was updated
-        // The icon image should change if the proportions were
+        // Only after the shared canvas size was updated.
+        // The icon image could change if the proportions were
         // changed or if it was resized to a very small size
         comp.updateAllIconImages();
 
-        comp.imageChanged(INVALIDATE_CACHE, true);
-
-        AppLogic.activeCompSizeChanged(comp);
+        comp.imageChanged(REPAINT, true);
 
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
     }
 
-    private void resizeLayers(Composition comp, boolean progressiveBilinear) {
+    private void resizeLayers(Composition comp) {
         comp.forEachLayer(layer -> {
-            layer.resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+            layer.resize(canvasTargetWidth, canvasTargetHeight);
             if (layer.hasMask()) {
-                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight, progressiveBilinear);
+                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight);
             }
         });
     }

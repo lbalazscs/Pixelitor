@@ -24,8 +24,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * A kind of compound edit used when an image
  * and its mask are changed together.
@@ -82,10 +80,9 @@ public class ImageAndMaskEdit extends ImageEdit {
         // the two edits are set to embedded, so we update - except
         // if this edit is also embedded
         if (!embedded) {
-            comp.imageChanged(FULL);
+            comp.imageChanged();
             dr.updateIconImage();
             ((ImageLayer) dr).getMask().updateIconImage();
-            History.notifyMenus(this);
         }
     }
 }

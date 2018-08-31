@@ -39,8 +39,6 @@ public class NewSelectionEdit extends PixelitorEdit {
         super.undo();
 
         comp.deselect(false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -48,7 +46,5 @@ public class NewSelectionEdit extends PixelitorEdit {
         super.redo();
 
         comp.createSelectionFromShape(newShape);
-
-        History.notifyMenus(this);
     }
 }

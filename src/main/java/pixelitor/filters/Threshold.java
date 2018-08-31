@@ -20,9 +20,9 @@ package pixelitor.filters;
 import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.lookup.LuminanceLookup;
 
 import java.awt.image.BufferedImage;
 
@@ -54,7 +54,7 @@ public class Threshold extends ParametrizedFilter {
     public Threshold() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(threshold, criterion));
+        setParams(threshold, criterion);
     }
 
     @Override
@@ -68,8 +68,7 @@ public class Threshold extends ParametrizedFilter {
         switch (basedOn) {
             case CRIT_LUMINOSITY:
                 return (a, r, g, b) -> {
-                    // TODO can be faster with the luminosity lookup?
-                    double luminosity = 0.299 * r + 0.587 * g + 0.114 * b;
+                    double luminosity = LuminanceLookup.from(r, g, b);
                     if (luminosity > threshold) {
                         r = 255;
                         g = 255;

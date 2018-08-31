@@ -58,7 +58,7 @@ public class TmpDrawingLayer {
         image = null;
     }
 
-    public void paintLayer(Graphics2D g, int tx, int ty) {
+    public void paintOn(Graphics2D g, int tx, int ty) {
         g.setComposite(composite);
         g.drawImage(image, tx, ty, null);
     }

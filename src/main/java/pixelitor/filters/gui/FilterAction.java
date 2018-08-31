@@ -20,6 +20,8 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
+import static java.lang.String.format;
+
 /**
  * Creates a button that runs an action when pushed
  */
@@ -27,7 +29,8 @@ public class FilterAction implements FilterSetting {
     private final ActionListener actionListener;
     private final Icon icon;
     private final String toolTipText;
-    private final String name;
+    private final String lookupName; // for AssertJSwing tests
+    private final String text;
     private ParamAdjustmentListener adjustmentListener;
     private OrderedExecutionButton button;
 
@@ -37,24 +40,29 @@ public class FilterAction implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterAction(String name, ActionListener actionListener, String toolTipText) {
-        this(name, actionListener, null, toolTipText);
+    public FilterAction(String text, ActionListener actionListener, String toolTipText) {
+        this(text, actionListener, null, toolTipText, null);
     }
 
-    public FilterAction(String name, ActionListener actionListener, Icon icon, String toolTipText) {
-        this.name = name;
+    public FilterAction(String text, ActionListener actionListener, Icon icon,
+                        String toolTipText, String lookupName) {
+        this.text = text;
         this.actionListener = actionListener;
         this.icon = icon;
         this.toolTipText = toolTipText;
+        this.lookupName = lookupName;
     }
 
     @Override
     public JComponent createGUI() {
-        button = new OrderedExecutionButton(getName(), actionListener, adjustmentListener, icon);
+        button = new OrderedExecutionButton(text, actionListener, adjustmentListener, icon);
         if(toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
         button.setEnabled(shouldBeEnabled());
+        if (lookupName != null) {
+            button.setName(lookupName);
+        }
         return button;
     }
 
@@ -96,21 +104,22 @@ public class FilterAction implements FilterSetting {
 
     @Override
     public String getName() {
-        return name;
+        return text;
     }
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s']",
-                getClass().getSimpleName(), getName());
+        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
     /**
-     * A button that runs first its ActionListener,
-     * and after then its ParamAdjustmentListener
+     * A button that runs first its ActionListener (to do its
+     * specific job), and after then its ParamAdjustmentListener
+     * (typically to trigger a filter preview)
      */
     private static class OrderedExecutionButton extends JButton {
-        private OrderedExecutionButton(String name, ActionListener actionListener, ParamAdjustmentListener adjustmentListener, Icon icon) {
+        private OrderedExecutionButton(String name, ActionListener actionListener,
+                                       ParamAdjustmentListener adjustmentListener, Icon icon) {
             super(name);
 
             if (icon != null) {

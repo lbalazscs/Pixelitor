@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,17 +18,17 @@
 package pixelitor.tools;
 
 import pixelitor.colors.ColorUtils;
-import pixelitor.colors.FgBgColors;
-import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
+import pixelitor.utils.Cursors;
 
-import javax.swing.*;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
+
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * The brush tool
@@ -37,9 +37,11 @@ public class BrushTool extends BlendingModeBrushTool {
     private Color drawingColor;
 
     public BrushTool() {
-        super('b', "Brush", "brush_tool_icon.png",
-                "click and drag to draw with the current brush, Shift-click to draw lines, right-click to draw with the background color",
-                Cursor.getDefaultCursor()
+        super("Brush", 'b', "brush_tool_icon.png",
+                "<b>click</b> or <b>drag</b> to draw with the current brush, " +
+                        "<b>Shift-click</b> to draw lines, " +
+                        "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
+                Cursors.CROSSHAIR
         );
     }
 
@@ -54,12 +56,13 @@ public class BrushTool extends BlendingModeBrushTool {
         settingsPanel.addSeparator();
 
         addBlendingModePanel();
+        addLazyMouseDialogButton();
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
         setupDrawingColor(e);
-        super.mousePressed(e, ic);
+        super.mousePressed(e);
     }
 
     @Override
@@ -69,32 +72,33 @@ public class BrushTool extends BlendingModeBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
-        graphics.setColor(FgBgColors.getFG());
+        graphics.setColor(getFGColor());
     }
 
-    private void setupDrawingColor(MouseEvent e) {
-        if (SwingUtilities.isRightMouseButton(e)) {
-            drawingColor = FgBgColors.getBG();
-        } else if (SwingUtilities.isMiddleMouseButton(e)) {
-            // TODO we never get here because isAltDown is always true for middle-button events, even if Alt is not pressed?
+    private void setupDrawingColor(PMouseEvent e) {
+        if (e.isRight()) {
+            drawingColor = getBGColor();
+        } else if (e.isMiddle()) {
+            // TODO we never get here because isAltDown is always true
+            // for middle-button events, even if Alt is not pressed?
             // See source comment in java.awt.Event for ALT_MASK
-            Color fg = FgBgColors.getFG();
-            Color bg = FgBgColors.getBG();
+            Color fg = getFGColor();
+            Color bg = getBGColor();
             if (e.isControlDown()) {
                 drawingColor = ColorUtils.calcHSBAverage(fg, bg);
             } else {
                 drawingColor = ColorUtils.calcRGBAverage(fg, bg);
             }
         } else {
-            drawingColor = FgBgColors.getFG();
+            drawingColor = getFGColor();
         }
     }
 
     @Override
     public void trace(Drawable dr, Shape shape) {
-        drawingColor = FgBgColors.getFG();
+        drawingColor = getFGColor();
         super.trace(dr, shape);
     }
 }

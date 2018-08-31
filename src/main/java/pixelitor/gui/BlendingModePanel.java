@@ -19,11 +19,12 @@ package pixelitor.gui;
 
 import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.layers.BlendingMode;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import java.awt.Composite;
 import java.awt.FlowLayout;
-import java.util.Random;
+import java.awt.event.ActionListener;
 
 /**
  * A GUI selector for opacity and blending mode.
@@ -67,8 +68,16 @@ public class BlendingModePanel extends JPanel {
         return opacityDDSlider.getValue() / 100.0f;
     }
 
+    public void setOpacity(float f) {
+        opacityDDSlider.setValue((int) (f * 100.0f));
+    }
+
     public BlendingMode getBlendingMode() {
         return (BlendingMode) bmCombo.getSelectedItem();
+    }
+
+    public void setBlendingMode(BlendingMode bm) {
+        bmCombo.setSelectedItem(bm);
     }
 
     public Composite getComposite() {
@@ -77,11 +86,10 @@ public class BlendingModePanel extends JPanel {
 
     public void randomize() {
         BlendingMode[] blendingModes = BlendingMode.values();
-        Random r = new Random();
-        int randomIndex = r.nextInt(blendingModes.length);
+        int randomIndex = RandomUtils.nextInt(blendingModes.length);
         bmCombo.setSelectedIndex(randomIndex);
 
-        int newOpacity = r.nextInt(100);
+        int newOpacity = RandomUtils.nextInt(100);
         opacityDDSlider.setValue(newOpacity);
     }
 
@@ -91,5 +99,10 @@ public class BlendingModePanel extends JPanel {
         opacityDDSlider.setEnabled(b);
         bmLabel.setEnabled(b);
         bmCombo.setEnabled(b);
+    }
+
+    public void addActionListener(ActionListener al) {
+        opacityDDSlider.addActionListener(al);
+        bmCombo.addActionListener(al);
     }
 }

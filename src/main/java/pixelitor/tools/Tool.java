@@ -22,32 +22,27 @@ import pixelitor.Composition;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.History;
-import pixelitor.history.ImageEdit;
-import pixelitor.history.PartialImageEdit;
-import pixelitor.layers.Drawable;
-import pixelitor.tools.toolhandlers.ColorPickerToolHandler;
-import pixelitor.tools.toolhandlers.CurrentToolHandler;
-import pixelitor.tools.toolhandlers.DrawableCheckHandler;
-import pixelitor.tools.toolhandlers.HandToolHandler;
-import pixelitor.tools.toolhandlers.ToolHandler;
-import pixelitor.utils.Utils;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.tools.gui.ToolButton;
+import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.toolhandlers.ToolHandlerChain;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.KeyListener;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 
-import javax.swing.*;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 /**
- * An abstract superclass for all tools
+ * An abstract superclass for all tools.
+ *
+ * A tool defines the interaction between the user's
+ * mouse and key events and an {@link ImageComponent}
  */
-public abstract class Tool implements KeyboardObserver {
-    private boolean mouseDown = false;
+public abstract class Tool implements KeyListener {
     private boolean altDown = false;
 
     private ToolButton toolButton;
@@ -56,140 +51,43 @@ public abstract class Tool implements KeyboardObserver {
     private final String iconFileName;
     private final String toolMessage;
     private final Cursor cursor;
-    private final boolean constrainIfShiftDown;
     private final ClipStrategy clipStrategy;
 
-    private boolean endPointInitialized = false;
-    protected boolean spaceDragBehavior = false;
-
-    protected UserDrag userDrag;
-
     private final char activationKeyChar;
-    private ToolHandler handlerChainStart;
-    private HandToolHandler handToolHandler;
 
     protected ToolSettingsPanel settingsPanel;
     protected boolean ended = false;
 
-    // a dialog with more settings that will be closed automatically
-    // when the user switches to another tool
-    protected JDialog toolDialog;
+    final ToolHandlerChain handlerChain;
 
-    protected Tool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding, boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
+    protected Tool(String name, char activationKeyChar, String iconFileName,
+                   String toolMessage, Cursor cursor,
+                   boolean allowOnlyDrawables, boolean handToolForwarding,
+                   ClipStrategy clipStrategy) {
         this.activationKeyChar = activationKeyChar;
         this.name = name;
         this.iconFileName = iconFileName;
         this.toolMessage = toolMessage;
         this.cursor = cursor;
-        this.constrainIfShiftDown = constrainIfShiftDown;
         this.clipStrategy = clipStrategy;
 
-        initHandlerChain(cursor, allowOnlyImageLayers, handToolForwarding);
+        handlerChain = new ToolHandlerChain(this, cursor,
+                allowOnlyDrawables, handToolForwarding);
     }
 
-    private void initHandlerChain(Cursor cursor, boolean allowOnlyImageLayers, boolean handToolForwarding) {
-        ToolHandler lastHandler = null;
-        if (handToolForwarding) {
-            // most tools behave like the hand tool if the space is pressed
-            handToolHandler = new HandToolHandler(cursor);
-            lastHandler = addHandlerToChain(handToolHandler, lastHandler);
-        }
-        if (allowOnlyImageLayers) {
-            lastHandler = addHandlerToChain(
-                    new DrawableCheckHandler(this), lastHandler);
-        }
-        if(doColorPickerForwarding()) {
-            // brush tools behave like the color picker if Alt is pressed
-            ColorPickerToolHandler colorPickerHandler = new ColorPickerToolHandler();
-            lastHandler = addHandlerToChain(colorPickerHandler, lastHandler);
-        }
-        // if there was no special case, the current tool should handle the events
-        addHandlerToChain(new CurrentToolHandler(this), lastHandler);
-    }
-
-    protected boolean doColorPickerForwarding() {
+    public boolean doColorPickerForwarding() {
         return false;
-    }
-
-    /**
-     * Adds the new handler to the end of the chain and returns the new end of the chain
-     */
-    private ToolHandler addHandlerToChain(ToolHandler newHandler, ToolHandler lastOne) {
-        if (lastOne == null) {
-            handlerChainStart = newHandler;
-            return handlerChainStart;
-        } else {
-            lastOne.setSuccessor(newHandler);
-            return newHandler;
-        }
     }
 
     public String getToolMessage() {
         return toolMessage;
     }
 
-    public boolean dispatchMouseClicked(MouseEvent e, ImageComponent ic) {
+    public void mouseClicked(PMouseEvent e) {
         // empty for the convenience of subclasses
-        return false;
     }
 
-    public void dispatchMousePressed(MouseEvent e, ImageComponent ic) {
-        if (mouseDown) {
-            // can happen if the tool is changed while drawing, and then changed back
-            MouseEvent fake = new MouseEvent((Component) e.getSource(), e.getID(), e.getWhen(), e.getModifiers(),
-                    (int)userDrag.getEndX(), (int)userDrag.getEndY(), 1, false);
-            dispatchMouseReleased(fake, ic); // try to clean-up
-        }
-        mouseDown = true;
-
-        userDrag = new UserDrag();
-        userDrag.setStartFromMouseEvent(e, ic);
-
-        handlerChainStart.handleMousePressed(e, ic);
-
-        endPointInitialized = false;
-    }
-
-    public void dispatchMouseReleased(MouseEvent e, ImageComponent ic) {
-        if (!mouseDown) { // can happen if the tool is changed while drawing
-            dispatchMousePressed(e, ic); // try to initialize
-        }
-        mouseDown = false;
-
-        userDrag.setEndFromMouseEvent(e, ic);
-
-        handlerChainStart.handleMouseReleased(e, ic);
-
-        endPointInitialized = false;
-    }
-
-    public void dispatchMouseDragged(MouseEvent e, ImageComponent ic) {
-        if (!mouseDown) { // can happen if the tool is changed while drawing
-            dispatchMousePressed(e, ic); // try to initialize
-        }
-        mouseDown = true;
-
-        if (spaceDragBehavior) {
-            userDrag.saveEndValues();
-        }
-        if (constrainIfShiftDown) {
-            userDrag.setConstrainPoints(e.isShiftDown());
-        }
-
-        userDrag.setEndFromMouseEvent(e, ic);
-
-        if (spaceDragBehavior) {
-            if (endPointInitialized && GlobalKeyboardWatch.isSpaceDown()) {
-                userDrag.adjustStartForSpaceDownMove();
-            }
-
-            endPointInitialized = true;
-        }
-
-        handlerChainStart.handleMouseDragged(e, ic);
-    }
-
-    void setButton(ToolButton toolButton) {
+    public void setButton(ToolButton toolButton) {
         this.toolButton = toolButton;
     }
 
@@ -203,7 +101,7 @@ public abstract class Tool implements KeyboardObserver {
         return name;
     }
 
-    protected String getIconFileName() {
+    public String getIconFileName() {
         return iconFileName;
     }
 
@@ -211,123 +109,72 @@ public abstract class Tool implements KeyboardObserver {
         return activationKeyChar;
     }
 
-    /**
-     * Saves the full image or the selected area only if there is a selection
-     */
-    void saveFullImageForUndo(Composition comp) {
-        BufferedImage copy = comp.getActiveDrawable()
-                .getImageOrSubImageIfSelected(true, true);
-
-        ImageEdit edit = new ImageEdit(getName(), comp,
-                comp.getActiveDrawable(), copy,
-                false, false);
-        History.addEdit(edit);
-    }
-
-    /**
-     * This saving method is used by the brush tools, by the shapes and by the paint bucket.
-     * It saves the intersection of the selection (if there is one) with the maximal affected area.
-     */
-    // TODO currently it does not take the selection into account
-    protected void saveSubImageForUndo(BufferedImage originalImage, ToolAffectedArea affectedArea) {
-        assert (originalImage != null);
-        Rectangle affectedRect = affectedArea.getRect();
-        if (affectedRect.isEmpty()) {
-            return;
-        }
-
-        Drawable dr = affectedArea.getDrawable();
-        Composition comp = dr.getComp();
-
-//        Rectangle fullImageBounds = new Rectangle(0, 0, originalImage.getWidth(), originalImage.getHeight());
-//        Rectangle saveRectangle = affectedRect.intersection(fullImageBounds);
-
-        Rectangle saveRectangle = SwingUtilities.computeIntersection(
-                0, 0, originalImage.getWidth(), originalImage.getHeight(), // full image bounds
-                affectedRect
-        );
-
-        if (!saveRectangle.isEmpty()) {
-            PartialImageEdit edit = new PartialImageEdit(getName(), comp, dr, originalImage, saveRectangle, false);
-            History.addEdit(edit);
-        }
-    }
-
     protected void toolStarted() {
         ended = false;
 
-        GlobalKeyboardWatch.setObserver(this);
-        
+        GlobalKeyboardWatch.setKeyListener(this);
         ImageComponents.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
         ended = true;
 
-        closeToolDialog();
+        closeToolDialogs();
     }
 
-    protected void closeToolDialog() {
-        if (toolDialog != null && toolDialog.isVisible()) {
-            toolDialog.setVisible(false);
-            toolDialog.dispose();
-        }
+    protected void closeToolDialogs() {
+        // empty instead of abstract for the convenience of subclasses
     }
 
-    public Cursor getCursor() {
+    public Cursor getStartingCursor() {
         return cursor;
     }
 
     public void paintOverLayer(Graphics2D g, Composition comp) {
-        // empty for the convenience of subclasses
+        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
-     * A possibility to paint temporarily something (like marching ants) on the ImageComponent
-     * after all the layers have been painted.
+     * A possibility to paint temporarily something on the
+     * {@link ImageComponent} after all the layers have been painted.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent callingIC, AffineTransform unscaledTransform) {
-        // empty for the convenience of subclasses
+    public void paintOverImage(Graphics2D g2, Canvas canvas,
+                               ImageComponent ic,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
+        // empty instead of abstract for the convenience of subclasses
     }
 
-    public void dispatchMouseMoved(MouseEvent e, ImageComponent ic) {
-        // empty for the convenience of subclasses
+    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+        // empty instead of abstract for the convenience of subclasses
     }
 
-    public abstract void mousePressed(MouseEvent e, ImageComponent ic);
+    public abstract void mousePressed(PMouseEvent e);
 
-    public abstract void mouseDragged(MouseEvent e, ImageComponent ic);
+    public abstract void mouseDragged(PMouseEvent e);
 
-    public abstract void mouseReleased(MouseEvent e, ImageComponent ic);
+    public abstract void mouseReleased(PMouseEvent e);
 
     public void setSettingsPanel(ToolSettingsPanel settingsPanel) {
         this.settingsPanel = settingsPanel;
     }
 
     public void randomize() {
-        Utils.randomizeGUIWidgetsOn(settingsPanel);
+        GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
-    public UserDrag getUserDrag() {
-        return userDrag;
-    }
-
-    public void setClip(Graphics2D g, ImageComponent ic) {
-        clipStrategy.setClip(g, ic);
+    public void setClipFor(Graphics2D g, ImageComponent ic) {
+        clipStrategy.setClipFor(g, ic);
     }
 
     @Override
     public void spacePressed() {
-        if (handToolHandler != null) { // there is hand tool forwarding
-            handToolHandler.spacePressed();
-        }
+        handlerChain.spacePressed();
     }
 
     @Override
     public void spaceReleased() {
-        if (handToolHandler != null) { // there is hand tool forwarding
-            handToolHandler.spaceReleased();
-        }
+        handlerChain.spaceReleased();
     }
 
     @Override
@@ -354,7 +201,8 @@ public abstract class Tool implements KeyboardObserver {
     @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
-            ImageComponents.forAllImages(ic -> ic.setCursor(Tools.COLOR_PICKER.getCursor()));
+            ImageComponents.setCursorForAll(
+                    Tools.COLOR_PICKER.getStartingCursor());
         }
         altDown = true;
     }
@@ -362,7 +210,7 @@ public abstract class Tool implements KeyboardObserver {
     @Override
     public void altReleased() {
         if(doColorPickerForwarding()) {
-            ImageComponents.forAllImages(ic -> ic.setCursor(cursor));
+            ImageComponents.setCursorForAll(cursor);
         }
         altDown = false;
     }
@@ -381,5 +229,40 @@ public abstract class Tool implements KeyboardObserver {
         DebugNode toolNode = new DebugNode("Active Tool", this);
         toolNode.addString("Name", getName());
         return toolNode;
+    }
+
+    public void noOpenImageAnymore() {
+        resetStateToInitial();
+    }
+
+    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+        assert Tools.currentTool == this;
+        if (oldIC != null) {
+            oldIC.repaint();
+        }
+        resetStateToInitial();
+    }
+
+    public void resetStateToInitial() {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void fgBgColorsChanged() {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    /**
+     * The component coordinates have changed in the given active {@link ImageComponent}.
+     * A lot of events can trigger this, such as zooming, or changing the canvasStartX
+     * by resizing.
+     * TODO image resizing cannot be handled by simply passing the new ImageComponent,
+     * and only the selections are resized (they are resized explicitly) but no other tool
+     */
+    public void coCoordsChanged(ImageComponent ic) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void activate() {
+        getButton().doClick();
     }
 }

@@ -18,53 +18,59 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DragDisplayType;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
-
-import javax.swing.*;
-import java.awt.event.MouseEvent;
 
 /**
  * The move tool.
  */
-public class MoveTool extends Tool {
-
+public class MoveTool extends DragTool {
     public MoveTool() {
-        super('v', "Move", "move_tool_icon.png",
-                "drag to move the active layer, Alt-drag (or right-mouse-drag) to move a duplicate of the active layer. Shift-drag to constrain the movement.",
-                Cursors.MOVE, false, true, true, ClipStrategy.IMAGE_ONLY);
+        super("Move", 'v', "move_tool_icon.png",
+                "<b>drag</b> to move the active layer, " +
+                        "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
+                        "<b>Shift-drag</b> to constrain the movement.",
+                Cursors.MOVE, false, true, true, ClipStrategy.CANVAS);
     }
 
     @Override
     public void initSettingsPanel() {
-
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        ic.getComp().startMovement(e.isAltDown() || SwingUtilities.isRightMouseButton(e));
+    public void dragStarted(PMouseEvent e) {
+        e.getComp().startMovement(e.isAltDown() || e.isRight());
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        Composition c = ic.getComp();
-        double relativeX = userDrag.getDX();
-        double relativeY = userDrag.getDY();
-        c.moveActiveContentRelative(relativeX, relativeY);
+    public void ongoingDrag(PMouseEvent e) {
+        ImDrag imDrag = userDrag.toImDrag();
+        double relX = imDrag.getDX();
+        double relY = imDrag.getDY();
+
+        e.getComp().moveActiveContentRelative(relX, relY);
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        ic.getComp().endMovement();
+    public DragDisplayType getDragDisplayType() {
+        return DragDisplayType.REL_MOUSE_POS;
+    }
+
+    @Override
+    public void dragFinished(PMouseEvent e) {
+        e.getComp().endMovement();
     }
 
     /**
      * Moves the active layer programmatically.
      */
-    public static void move(Composition comp, int relativeX, int relativeY) {
+    public static void move(Composition comp, int relX, int relY) {
         comp.startMovement(false);
-        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.moveActiveContentRelative(relX, relY);
         comp.endMovement();
     }
 

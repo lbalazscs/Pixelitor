@@ -17,7 +17,8 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Stroke;
@@ -33,14 +34,14 @@ public abstract class StrokeBrush extends AbstractBrush {
     private final int cap;
     private final int join;
 
-    protected int lastDiameter = -1;
+    protected double lastDiameter = -1;
     protected Stroke currentStroke;
 
-    protected StrokeBrush(int radius, StrokeType strokeType) {
+    protected StrokeBrush(double radius, StrokeType strokeType) {
         this(radius, strokeType, CAP_ROUND, JOIN_ROUND);
     }
 
-    protected StrokeBrush(int radius, StrokeType strokeType, int cap, int join) {
+    protected StrokeBrush(double radius, StrokeType strokeType, int cap, int join) {
         super(radius);
         this.strokeType = strokeType;
         this.cap = cap;
@@ -48,37 +49,44 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        drawStartShape(x, y);
-        updateComp(x, y);
-        rememberPrevious(x, y);
+    public void startAt(PPoint p) {
+        super.startAt(p);
+        drawStartShape(p);
+        updateComp(p);
+//        rememberPrevious(p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
-        drawLine(previousX, previousY, x, y);
-        updateComp(x, y);
-        rememberPrevious(x, y);
+    public void continueTo(PPoint p) {
+        assert previous != null;
+
+        drawLine(previous, p);
+        updateComp(p);
+        rememberPrevious(p);
     }
 
     /**
      * The ability to draw something sensible immediately
      * when the user has just clicked but didn't drag the mouse yet.
      */
-    abstract void drawStartShape(double x, double y);
+    abstract void drawStartShape(PPoint p);
 
     /**
      * Connects the two points with a line, using the stroke
      */
-    protected void drawLine(double startX, double startY, double endX, double endY) {
-        int thickness = 2*radius;
+    protected void drawLine(PPoint start, PPoint end) {
+        double thickness = 2 * radius;
         if(thickness != lastDiameter) {
-            currentStroke = strokeType.getStroke(thickness, cap, join, null);
+            currentStroke = createStroke((float) thickness);
             lastDiameter = thickness;
         }
 
         targetG.setStroke(currentStroke);
-        targetG.drawLine((int) startX, (int) startY, (int) endX, (int) endY);
+        start.drawLineTo(end, targetG);
+    }
+
+    protected Stroke createStroke(float thickness) {
+        return strokeType.createStroke(thickness, cap, join, null);
     }
 
     @Override
@@ -88,5 +96,10 @@ public abstract class StrokeBrush extends AbstractBrush {
         node.addString("Stroke Type", strokeType.toString());
 
         return node;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return 0;
     }
 }

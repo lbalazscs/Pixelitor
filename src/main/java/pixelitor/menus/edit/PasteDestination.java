@@ -20,7 +20,6 @@ package pixelitor.menus.edit;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
@@ -43,9 +42,7 @@ public enum PasteDestination {
         @Override
         void addImage(BufferedImage pastedImage) {
             Composition comp = ImageComponents.getActiveCompOrNull();
-            Layer newLayer = new ImageLayer(comp, pastedImage, "Pasted Layer", comp.getCanvasWidth(), comp.getCanvasHeight());
-
-            comp.addLayer(newLayer, true, "New Pasted Layer", true, false);
+            comp.addPastedImageAsNewLayer(pastedImage);
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;
@@ -62,7 +59,7 @@ public enum PasteDestination {
             Composition comp = Composition.fromImage(pastedImage,
                     null, title);
 
-            ImageComponents.addCompAsNewImage(comp);
+            ImageComponents.addAsNewImage(comp);
             pastedCount++;
         }
     }, MASK {
@@ -75,13 +72,14 @@ public enum PasteDestination {
         void addImage(BufferedImage pastedImage) {
             Composition comp = ImageComponents.getActiveCompOrNull();
             Canvas canvas = comp.getCanvas();
-            int width = canvas.getWidth();
-            int height = canvas.getHeight();
+            int width = canvas.getImWidth();
+            int height = canvas.getImHeight();
 
             int imgWidth = pastedImage.getWidth();
             int imgHeight = pastedImage.getHeight();
 
-            BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+            BufferedImage bwImage = new BufferedImage(width, height,
+                    TYPE_BYTE_GRAY);
             Graphics2D g = bwImage.createGraphics();
 
             if (imgWidth < width || imgHeight < height) {

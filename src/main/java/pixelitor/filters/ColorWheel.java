@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -46,7 +45,7 @@ public class ColorWheel extends ParametrizedFilter {
     public ColorWheel() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(center, hueShiftParam, brightnessParam, satParam));
+        setParams(center, hueShiftParam, brightnessParam, satParam);
     }
 
     @Override
@@ -68,7 +67,8 @@ public class ColorWheel extends ParametrizedFilter {
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(destData, width, cx, cy, hueShift, saturation, brightness, finalY);
+            Runnable lineTask = () -> calculateLine(
+                    destData, width, finalY, cx, cy, hueShift, saturation, brightness);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitForFutures(futures, pt);
@@ -77,7 +77,9 @@ public class ColorWheel extends ParametrizedFilter {
         return dest;
     }
 
-    private static void calculateLine(int[] destData, int width, int cx, int cy, float hueShift, float saturation, float brightness, int y) {
+    private static void calculateLine(int[] destData, int width, int y,
+                                      int cx, int cy, float hueShift,
+                                      float saturation, float brightness) {
         for (int x = 0; x < width; x++) {
             double yDiff = (double) (cy - y);
             double xDiff = (double) x - cx;

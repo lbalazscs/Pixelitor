@@ -54,26 +54,25 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createTransform(Canvas canvas) {
-        return angle.getCanvasTX(canvas);
+    protected AffineTransform createCanvasTX(Canvas canvas) {
+        return angle.createCanvasTX(canvas);
     }
 
     public enum SpecialAngle {
         ANGLE_90(90, "Rotate 90\u00B0 CW") {
-            @SuppressWarnings("SuspiciousNameCombination")
             @Override
             public void changeCanvas(Canvas canvas) {
                 // switch width and height
-                int newWidth = canvas.getHeight();
-                int newHeight = canvas.getWidth();
-                canvas.changeSize(newWidth, newHeight);
+                int newWidth = canvas.getImHeight();
+                int newHeight = canvas.getImWidth();
+                canvas.changeImSize(newWidth, newHeight);
             }
 
             @Override
-            public AffineTransform getCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        canvas.getHeight(), 0);
+                        canvas.getImHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -88,7 +87,7 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         layer.getImage().getHeight(), 0);
@@ -102,10 +101,10 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        canvas.getWidth(), canvas.getHeight());
+                        canvas.getImWidth(), canvas.getImHeight());
                 at.quadrantRotate(2);
                 return at;
             }
@@ -120,9 +119,9 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(ImageLayer layer) {
                 Canvas canvas = layer.getComp().getCanvas();
-                AffineTransform transform = getCanvasTX(canvas);
+                AffineTransform transform = createCanvasTX(canvas);
                 int tx = layer.getTX();
                 int ty = layer.getTY();
                 transform.translate(tx, ty);
@@ -136,10 +135,10 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        0, canvas.getWidth());
+                        0, canvas.getImWidth());
                 at.quadrantRotate(3);
                 return at;
             }
@@ -154,7 +153,7 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         0, layer.getImage().getWidth());
@@ -181,12 +180,12 @@ public class Rotate extends SimpleCompAction {
          * Returns the transformation in canvas space.
          * Needed for transforming the selection.
          */
-        public abstract AffineTransform getCanvasTX(Canvas canvas);
+        public abstract AffineTransform createCanvasTX(Canvas canvas);
 
         /**
          * Return the transformation of the image
          */
-        public abstract AffineTransform getImageTX(ImageLayer layer);
+        public abstract AffineTransform createImageTX(ImageLayer layer);
 
         public int getAngleDegree() {
             return angleDegree;

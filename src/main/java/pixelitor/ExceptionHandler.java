@@ -20,7 +20,7 @@ package pixelitor;
 import pixelitor.utils.Messages;
 
 /**
- * Handles uncaught exceptions and other errors
+ * Handles uncaught exceptions
  */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public static final ExceptionHandler INSTANCE = new ExceptionHandler();
@@ -37,6 +37,14 @@ public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        StackTraceElement[] stackTrace = e.getStackTrace();
+        for (StackTraceElement ste : stackTrace) {
+            if (ste.getMethodName().equals("showException")) {
+                e.printStackTrace();
+                return; // avoid infinite loop
+            }
+        }
+
         Messages.showException(e, t);
     }
 }

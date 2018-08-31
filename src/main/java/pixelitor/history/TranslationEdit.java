@@ -25,8 +25,6 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * Saves and restores the translation of a ContentLayer.
  * Not to be confused with {@link ContentLayerMoveEdit}:
@@ -97,8 +95,7 @@ public class TranslationEdit extends PixelitorEdit {
         backupTY = tmpTY;
 
         if (!embedded) {
-            layer.getComp().imageChanged(FULL);
-            History.notifyMenus(this);
+            layer.getComp().imageChanged();
         }
     }
 

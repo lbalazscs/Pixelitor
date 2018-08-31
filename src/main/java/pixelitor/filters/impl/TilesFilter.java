@@ -16,22 +16,17 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.TransformFilter;
 import net.jafama.FastMath;
 import pixelitor.filters.GlassTiles;
-
-import java.awt.image.BufferedImage;
 
 /**
  * The implementation of the {@link GlassTiles} filter.
  *
  * Inspired by the Paint.net tile effect
  */
-public class TilesFilter extends TransformFilter {
+public class TilesFilter extends RotatedEffectFilter {
     private float sizeX;
     private float sizeY;
-    private float halfWidth;
-    private float halfHeight;
     private float curvatureX;
     private float curvatureY;
     private float shiftX;
@@ -58,23 +53,13 @@ public class TilesFilter extends TransformFilter {
     }
 
     @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        halfWidth = src.getWidth() / 2.0f;
-        halfHeight = src.getHeight() / 2.0f;
-
-        return super.filter(src, dst);
+    protected double transformX(double ii, double jj) {
+        return ii + (curvatureX * FastMath.tan(ii * sizeX - shiftX / (double) sizeX));
     }
 
     @Override
-    protected void transformInverse(int x, int y, float[] out) {
-        float i = x - halfWidth;
-        float j = y - halfHeight;
-
-        float sampleX = (float) (i + (curvatureX * FastMath.tan(i * sizeX - shiftX/(double)sizeX)));
-        float sampleY = (float) (j + (curvatureY * FastMath.tan(j * sizeY - shiftY/(double)sizeY)));
-
-        out[0] = halfWidth + sampleX;
-        out[1] = halfHeight + sampleY;
+    protected double transformY(double ii, double jj) {
+        return jj + (curvatureY * FastMath.tan(jj * sizeY - shiftY / (double) sizeY));
     }
 
     public void setShiftX(float shiftX) {

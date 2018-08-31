@@ -17,12 +17,14 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Resize;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -37,10 +39,12 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * The GUI for the resize dialog
  */
-public class ResizePanel extends JPanel implements KeyListener, ItemListener {
+public class ResizePanel extends ValidatedPanel implements KeyListener, ItemListener {
     private static final NumberFormat doubleFormatter = new DecimalFormat("#0.00");
 
     private final JCheckBox constrainProportionsCB;
@@ -58,9 +62,9 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     private String errorMessage;
     private static final int NR_OF_COLUMNS = 5;
 
-    private ResizePanel(Composition comp) {
-        oldWidth = comp.getCanvasWidth();
-        oldHeight = comp.getCanvasHeight();
+    private ResizePanel(Canvas canvas) {
+        oldWidth = canvas.getImWidth();
+        oldHeight = canvas.getImHeight();
 
         origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;
@@ -150,7 +154,6 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                 heightTF.setText(doubleFormatter.format(newHeightInPercent));
             }
         }
-//        updateFilter();
     }
 
     @Override
@@ -168,7 +171,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         if (e.getSource() == widthTF) {
             if (pixelsSelected()) {
                 try {
-                    newWidth = Integer.parseInt(widthTF.getText());
+                    newWidth = parseInt(widthTF.getText().trim());
                     if (constrainProportions()) {
                         newHeight = (int) (newWidth / origProportion);
                         if (newHeight == 0) {
@@ -188,7 +191,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     }
                 }
             } else { // percent was selected
-                newWidthInPercent = parseLocalizedDouble(widthTF.getText());
+                newWidthInPercent = parseLocalizedDouble(widthTF.getText().trim());
                 newWidth = (int) (oldWidth * newWidthInPercent / 100);
                 if (constrainProportions()) {
                     newHeight = (int) (newWidth / origProportion);
@@ -200,14 +203,14 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
         } else if (e.getSource() == heightTF) {
             if (pixelsSelected()) {
                 try {
-                    newHeight = Integer.parseInt(heightTF.getText());
+                    newHeight = parseInt(heightTF.getText().trim());
                     if (constrainProportions()) {
                         newWidth = (int) (newHeight * origProportion);
                         if (newWidth == 0) {
                             newWidth = 1;
                         }
                         widthTF.setText(String.valueOf(newWidth));
-                        newWidthInPercent = parseLocalizedDouble(widthTF.getText());
+                        newWidthInPercent = parseLocalizedDouble(widthTF.getText().trim());
                     }
                     newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                 } catch (NumberFormatException ex) {
@@ -220,7 +223,7 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                     }
                 }
             } else {  // percent was selected
-                newHeightInPercent = parseLocalizedDouble(heightTF.getText());
+                newHeightInPercent = parseLocalizedDouble(heightTF.getText().trim());
                 newHeight = (int) (oldHeight * newHeightInPercent / 100);
                 if (constrainProportions()) {
                     newWidth = (int) (newHeight * origProportion);
@@ -230,20 +233,18 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
                 }
             }
         }
-//        updateFilter();
     }
 
-    private boolean validData() {
+    @Override
+    public ValidationResult checkValidity() {
         if (getNewWidth() == 0 || getNewHeight() == 0) {
-            validData = false;
-            errorMessage = "Width and height cannot be 0";
+            return ValidationResult.error("Width and height cannot be 0");
         }
-
-        return validData;
-    }
-
-    private String getErrorMessage() {
-        return errorMessage;
+        if (validData) {
+            return ValidationResult.ok();
+        } else {
+            return ValidationResult.error(errorMessage);
+        }
     }
 
     private int getNewWidth() {
@@ -255,19 +256,13 @@ public class ResizePanel extends JPanel implements KeyListener, ItemListener {
     }
 
     public static void showInDialog(Composition comp) {
-        ResizePanel p = new ResizePanel(comp);
-        OKCancelDialog d = new OKCancelDialog(p, "Resize") {
-            @Override
-            protected void okAction() {
-                if (!p.validData()) {
-                    Dialogs.showErrorDialog(this, "Error", p.getErrorMessage());
-                    return;
-                }
-                new Resize(p.getNewWidth(), p.getNewHeight(), false).process(comp);
-                close();
-            }
-        };
-        d.setVisible(true);
+        ResizePanel p = new ResizePanel(comp.getCanvas());
+        new DialogBuilder()
+                .validatedContent(p)
+                .title("Resize")
+                .okAction(() -> new Resize(p.getNewWidth(), p.getNewHeight(), false)
+                        .process(comp))
+                .show();
     }
 
     public static void resizeActiveImage() {

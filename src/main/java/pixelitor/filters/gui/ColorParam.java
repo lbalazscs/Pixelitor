@@ -19,12 +19,14 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.ColorHistory;
 import pixelitor.colors.ColorUtils;
+import pixelitor.utils.RandomUtils;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Objects;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -61,8 +63,8 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setColor(defaultColor, triggerAction);
+    public void reset(boolean trigger) {
+        setColor(defaultColor, trigger);
     }
 
     @Override
@@ -72,7 +74,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = ColorUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
+        Color c = RandomUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
         setColor(c, false);
     }
 
@@ -139,7 +141,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', color = '%s']",
+        return format("%s[name = '%s', color = '%s']",
                 getClass().getSimpleName(), getName(), color.toString());
     }
 

@@ -71,6 +71,7 @@ public class AbstractAreaEffect implements AreaEffect {
         Rectangle2D clipShapeBounds = clipShape.getBounds2D();
 
         if(clipShapeBounds.isEmpty()) {
+            // check added by lbalazscs
             return;
         }
 
@@ -80,16 +81,21 @@ public class AbstractAreaEffect implements AreaEffect {
                 width + getEffectWidth() * 2 + 1,
                 height + getEffectWidth() * 2 + 1);
 
-
-        assert !effectBounds.isEmpty() :
-                "width = " + width + ", height = " + height
-                + ", getEffectWidth() = " + getEffectWidth()
-                + ", clipShapeBounds = " + clipShapeBounds;
+        if (effectBounds.isEmpty()) {
+            // check added by lbalazscs
+            // this can be empty even if the clip shape bounds is not
+            // when the clip shape starts at large negative coordinates
+            return;
+        }
 
         // Apply the border glow effect
         if (isShapeMasked()) {
             BufferedImage clipImage = getClipImage(effectBounds);
             Graphics2D g2 = clipImage.createGraphics();
+
+            // lbalazscs: moved here from getClipImage
+            // in order to avoid two createGraphics calls
+            g2.clearRect(0, 0, clipImage.getWidth(), clipImage.getHeight());
 
             try {
                 // clear the buffer
@@ -152,7 +158,6 @@ public class AbstractAreaEffect implements AreaEffect {
                     effectBounds.width,
                     effectBounds.height, BufferedImage.TYPE_INT_ARGB);
         }
-        _clipImage.getGraphics().clearRect(0, 0, _clipImage.getWidth(), _clipImage.getHeight());
         return _clipImage;
     }
 

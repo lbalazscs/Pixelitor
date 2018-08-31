@@ -18,13 +18,13 @@
 package pixelitor.filters.impl;
 
 import com.jhlabs.image.TransformFilter;
+import pixelitor.filters.Droste;
 
 import java.awt.image.BufferedImage;
 
 /**
  * The implementation of the {@link Droste} filter.
- * <p>
- * the "Droste effect" - not finished
+ * This is not finished, actually not even really started.
  */
 public class DrosteFilter extends TransformFilter {
     Complex xBounds, yBounds;
@@ -36,7 +36,7 @@ public class DrosteFilter extends TransformFilter {
     }
 
     void evaluateDependents() {
-        tileBasedOnTransparency = false; // TODO
+        tileBasedOnTransparency = false;
     }
 
     public void setRadiusInside(float radiusInside) {

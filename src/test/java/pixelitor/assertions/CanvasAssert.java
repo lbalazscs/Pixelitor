@@ -42,14 +42,14 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
      * @return this assertion object.
      * @throws AssertionError - if the actual Canvas's bounds is not equal to the given one.
      */
-    public CanvasAssert hasBounds(java.awt.Rectangle bounds) {
+    public CanvasAssert hasImBounds(java.awt.Rectangle bounds) {
         isNotNull();
 
         // overrides the default error message with a more explicit one
         String assertjErrorMessage = "\nExpecting bounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // null safe check
-        java.awt.Rectangle actualBounds = actual.getBounds();
+        java.awt.Rectangle actualBounds = actual.getImBounds();
         if (!Objects.areEqual(actualBounds, bounds)) {
             failWithMessage(assertjErrorMessage, actual, bounds, actualBounds);
         }
@@ -64,14 +64,14 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
      * @return this assertion object.
      * @throws AssertionError - if the actual Canvas's height is not equal to the given one.
      */
-    public CanvasAssert hasHeight(int height) {
+    public CanvasAssert hasImHeight(int height) {
         isNotNull();
 
         // overrides the default error message with a more explicit one
         String assertjErrorMessage = "\nExpecting height of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // check
-        int actualHeight = actual.getHeight();
+        int actualHeight = actual.getImHeight();
         if (actualHeight != height) {
             failWithMessage(assertjErrorMessage, actual, height, actualHeight);
         }
@@ -86,14 +86,14 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
      * @return this assertion object.
      * @throws AssertionError - if the actual Canvas's width is not equal to the given one.
      */
-    public CanvasAssert hasWidth(int width) {
+    public CanvasAssert hasImWidth(int width) {
         isNotNull();
 
         // overrides the default error message with a more explicit one
         String assertjErrorMessage = "\nExpecting width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // check
-        int actualWidth = actual.getWidth();
+        int actualWidth = actual.getImWidth();
         if (actualWidth != width) {
             failWithMessage(assertjErrorMessage, actual, width, actualWidth);
         }
@@ -102,66 +102,54 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
     }
 
     /**
-     * Verifies that the actual Canvas's zoomedHeight is equal to the given one.
-     *
-     * @param zoomedHeight the given zoomedHeight to compare the actual Canvas's zoomedHeight to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's zoomedHeight is not equal to the given one.
+     * Verifies that the actual Canvas's component space width is equal to the given one.
      */
-    public CanvasAssert hasZoomedHeight(int zoomedHeight) {
+    public CanvasAssert hasCoWidth(int coWidth) {
         isNotNull();
 
         // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting zoomedHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String assertjErrorMessage = "\nExpecting component space width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // check
-        int actualZoomedHeight = actual.getZoomedHeight();
-        if (actualZoomedHeight != zoomedHeight) {
-            failWithMessage(assertjErrorMessage, actual, zoomedHeight, actualZoomedHeight);
+        int actualCoWidth = actual.getCoWidth();
+        if (actualCoWidth != coWidth) {
+            failWithMessage(assertjErrorMessage, actual, coWidth, actualCoWidth);
         }
 
         return this;
     }
 
     /**
-     * Verifies that the actual Canvas's zoomedSize is equal to the given one.
-     *
-     * @param zoomedSize the given zoomedSize to compare the actual Canvas's zoomedSize to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's zoomedSize is not equal to the given one.
+     * Verifies that the actual Canvas's component space height is equal to the given one.
      */
-    public CanvasAssert hasZoomedSize(java.awt.Dimension zoomedSize) {
+    public CanvasAssert hasCoHeight(int coHeight) {
         isNotNull();
 
         // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting zoomedSize of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String assertjErrorMessage = "\nExpecting coHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+
+        // check
+        int actualCoHeight = actual.getCoHeight();
+        if (actualCoHeight != coHeight) {
+            failWithMessage(assertjErrorMessage, actual, coHeight, actualCoHeight);
+        }
+
+        return this;
+    }
+
+    /**
+     * Verifies that the actual Canvas's component space size is equal to the given one.
+     */
+    public CanvasAssert hasCoSize(java.awt.Dimension coSize) {
+        isNotNull();
+
+        // overrides the default error message with a more explicit one
+        String assertjErrorMessage = "\nExpecting coSize of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         // null safe check
-        java.awt.Dimension actualZoomedSize = actual.getZoomedSize();
-        if (!Objects.areEqual(actualZoomedSize, zoomedSize)) {
-            failWithMessage(assertjErrorMessage, actual, zoomedSize, actualZoomedSize);
-        }
-
-        return this;
-    }
-
-    /**
-     * Verifies that the actual Canvas's zoomedWidth is equal to the given one.
-     *
-     * @param zoomedWidth the given zoomedWidth to compare the actual Canvas's zoomedWidth to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's zoomedWidth is not equal to the given one.
-     */
-    public CanvasAssert hasZoomedWidth(int zoomedWidth) {
-        isNotNull();
-
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting zoomedWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
-        // check
-        int actualZoomedWidth = actual.getZoomedWidth();
-        if (actualZoomedWidth != zoomedWidth) {
-            failWithMessage(assertjErrorMessage, actual, zoomedWidth, actualZoomedWidth);
+        java.awt.Dimension actualCoSize = actual.getCoSize();
+        if (!Objects.areEqual(actualCoSize, coSize)) {
+            failWithMessage(assertjErrorMessage, actual, coSize, actualCoSize);
         }
 
         return this;

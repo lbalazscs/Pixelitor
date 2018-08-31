@@ -19,6 +19,10 @@
  */
 package com.bric.plaf;
 
+import com.bric.swing.GradientSlider;
+import com.bric.swing.MultiThumbSlider;
+
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -34,11 +38,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
-
-import javax.swing.JComponent;
-
-import com.bric.swing.GradientSlider;
-import com.bric.swing.MultiThumbSlider;
 
 /** The UI for the GradientSlider class.
  * 
@@ -286,6 +285,13 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 	
 	@Override
 	protected void paintTrack(Graphics2D g) {
+        // Laszlo added this to add a more disabled-like look
+        if (!slider.isEnabled()) {
+            g.setColor(g.getBackground().darker());
+            g.draw(getFrame());
+            return;
+        }
+
 		Composite oldComposite = g.getComposite();
 		float alpha = slider.isEnabled() ? 1 : .5f;
 		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));

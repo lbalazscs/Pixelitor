@@ -18,21 +18,22 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.AlphaComposite.SRC_OVER;
 import static java.lang.Math.PI;
 
 /**
@@ -47,10 +48,10 @@ public class DrunkVision extends ParametrizedFilter {
     public DrunkVision() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 drunkenness,
                 numEyes
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override
@@ -70,10 +71,12 @@ public class DrunkVision extends ParametrizedFilter {
 
         int maxDistance = (int) (drunkenness.getValueAsPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
 
-        Point[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
+        Point2D[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
         for (int i = 0; i < numShiftedImages; i++) {
-            AffineTransform transform = AffineTransform.getTranslateInstance(transformPoints[i].x, transformPoints[i].y);
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f / (i + 2)));
+            AffineTransform transform = AffineTransform.getTranslateInstance(
+                    transformPoints[i].getX(),
+                    transformPoints[i].getY());
+            g.setComposite(AlphaComposite.getInstance(SRC_OVER, 1.0f / (i + 2)));
             g.drawImage(src, transform, null);
             pt.unitDone();
         }
@@ -86,8 +89,8 @@ public class DrunkVision extends ParametrizedFilter {
 
     // generates the transforms for the images that are shifted
     // from the original
-    private static Point[] generateTransforms(int numImages, int maxDistance, Random rand) {
-        Point[] retVal = new Point[numImages];
+    private static Point2D[] generateTransforms(int numImages, int maxDistance, Random rand) {
+        Point2D[] retVal = new Point2D[numImages];
         int i = 0;
         double firstPointAngle = 0;
         while (i < numImages) {
@@ -99,12 +102,12 @@ public class DrunkVision extends ParametrizedFilter {
                 } else { // to the left
                     firstPointAngle = PI - 0.75 + r;
                 }
-                retVal[i] = pointFormPolar(firstPointAngle, maxDistance);
+                retVal[i] = Utils.offsetFromPolar(maxDistance, firstPointAngle);
             } else if (i == 1) {
                 // put it more or less opposing the first point
                 double rangeStart = firstPointAngle + 3 * PI / 4;
                 double angle = rangeStart + PI * rand.nextDouble() / 2;
-                retVal[i] = pointFormPolar(angle, maxDistance);
+                retVal[i] = Utils.offsetFromPolar(maxDistance, angle);
             } else if (i < 4) {
                 double rangeStart;
                 if (i == 2) {
@@ -113,26 +116,20 @@ public class DrunkVision extends ParametrizedFilter {
                     rangeStart = firstPointAngle + 5 * PI / 4;
                 }
                 double angle = rangeStart + PI * rand.nextDouble() / 2;
-                retVal[i] = pointFormPolar(angle, maxDistance);
+                retVal[i] = Utils.offsetFromPolar(maxDistance, angle);
             } else {
                 double randomAngle = rand.nextDouble() * PI * 2;
 
                 double minDistance = maxDistance / (double) i;
                 double distance = minDistance + (maxDistance - minDistance) * rand.nextDouble();
 
-                int shiftX = (int) (distance * FastMath.cos(randomAngle));
-                int shiftY = (int) (distance * FastMath.sin(randomAngle));
-                retVal[i] = new Point(shiftX, shiftY);
+                double shiftX = distance * FastMath.cos(randomAngle);
+                double shiftY = distance * FastMath.sin(randomAngle);
+                retVal[i] = new Point2D.Double(shiftX, shiftY);
             }
             i++;
         }
 
         return retVal;
-    }
-
-    private static Point pointFormPolar(double angle, double dist) {
-        int x = (int) (dist * FastMath.cos(angle));
-        int y = (int) (dist * FastMath.sin(angle));
-        return new Point(x, y);
     }
 }

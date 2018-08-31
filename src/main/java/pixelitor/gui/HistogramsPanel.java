@@ -24,23 +24,30 @@ import pixelitor.utils.ImageUtils;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
+import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
  * The panel that shows the histograms
  */
 public class HistogramsPanel extends JPanel implements ActiveImageChangeListener {
     public static final HistogramsPanel INSTANCE = new HistogramsPanel();
+    private static final String TYPE_LOGARITHMIC = "Logarithmic";
+    private static final String TYPE_LINEAR = "Linear";
 
     private final HistogramPainter red;
     private final HistogramPainter green;
     private final HistogramPainter blue;
     private static final int HISTOGRAM_RESOLUTION = 256;
+
+    private boolean logarithmic;
 
     private HistogramsPanel() {
         setLayout(new BorderLayout());
@@ -49,19 +56,38 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
         green = new HistogramPainter(GREEN);
         blue = new HistogramPainter(BLUE);
 
-        JPanel box = new JPanel();
-        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
-        box.setPreferredSize(new Dimension(256, 300));
-        box.setMinimumSize(new Dimension(256, 300));
+        JPanel painters = new JPanel();
+        painters.setLayout(new GridLayout(3, 1, 0, 0));
 
-        box.add(red);
-        box.add(green);
-        box.add(blue);
-        setBorder(BorderFactory.createTitledBorder("Histograms"));
+        Dimension size = new Dimension(258, 306);
+        painters.setPreferredSize(size);
+        painters.setMinimumSize(size);
 
-        box.setBorder(BorderFactory.createLineBorder(BLUE));
-        JScrollPane scrollPane = new JScrollPane(box);
+        painters.add(red);
+        painters.add(green);
+        painters.add(blue);
+
+        JComboBox<String> typeChooser = new JComboBox<>(
+                new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
+        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        northPanel.add(new JLabel("Type:"));
+        northPanel.add(typeChooser);
+        add(northPanel, BorderLayout.NORTH);
+        typeChooser.addActionListener(e ->
+                typeChanged((String) typeChooser.getSelectedItem()));
+
+        setBorder(createTitledBorder("Histograms"));
+        JScrollPane scrollPane = new JScrollPane(painters);
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void typeChanged(String selected) {
+        boolean isLogarithmicNow = selected.equals(TYPE_LOGARITHMIC);
+        if (isLogarithmicNow != logarithmic) {
+            logarithmic = isLogarithmicNow;
+            ImageComponents.getActiveComp().ifPresent(
+                    this::updateFromCompIfShown);
+        }
     }
 
     public boolean isShown() {
@@ -77,11 +103,7 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         updateFromCompIfShown(newIC.getComp());
     }
 
@@ -110,12 +132,14 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
             }
         }
 
-        boolean logarithmic = false;
         if (logarithmic) {
             for (int i = 0; i < HISTOGRAM_RESOLUTION; i++) {
-                reds[i] = (int) (1000.0 * Math.log(reds[i]));
-                greens[i] = (int) (1000.0 * Math.log(greens[i]));
-                blues[i] = (int) (1000.0 * Math.log(blues[i]));
+                // Add one before taking the logarithm to avoid calculating log(0)
+                // Note that log(1) = 0, which is just perfect
+                // Also multiply with a big number to avoid rounding errors
+                reds[i] = (int) (1000.0 * (Math.log(reds[i] + 1)));
+                greens[i] = (int) (1000.0 * (Math.log(greens[i] + 1)));
+                blues[i] = (int) (1000.0 * (Math.log(blues[i] + 1)));
             }
         }
 

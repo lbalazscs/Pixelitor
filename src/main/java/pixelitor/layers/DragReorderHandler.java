@@ -122,7 +122,7 @@ public class DragReorderHandler extends MouseInputAdapter {
     }
 
     public void detachFromComponent(Component c) {
-        c.addMouseListener(this);
-        c.addMouseMotionListener(this);
+        c.removeMouseListener(this);
+        c.removeMouseMotionListener(this);
     }
 }

@@ -18,21 +18,18 @@
 package pixelitor.filters.gui;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.utils.RandomUtils;
 
-import javax.swing.*;
 import javax.swing.event.ListDataListener;
-import java.awt.Rectangle;
-import java.util.Random;
 
 /**
- * Just like IntChoiceParam, this is a model for a JComboBox,
- * but the values are coming from an enum
+ * Just like {@link IntChoiceParam}, this is a model
+ * for a JComboBox, but the values are coming from an enum
  */
-public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements ComboBoxModel<E> {
+public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E> {
     private final EnumComboBoxModel<E> delegateModel;
     private final E[] enumConstants;
     private E defaultValue;
-    private FilterAction action;
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
@@ -42,44 +39,10 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     }
 
     @Override
-    public JComponent createGUI() {
-        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
-        paramGUI = gui;
-        setParamGUIEnabledState();
-        return gui;
-    }
-
-    @Override
     public void randomize() {
-        Random rnd = new Random();
-
-        int randomIndex = rnd.nextInt(enumConstants.length);
-        setSelectedItem(enumConstants[randomIndex], false);
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
-
-    }
-
-    @Override
-    public ParamState copyState() {
-        return null;
-    }
-
-    @Override
-    public void setState(ParamState state) {
-
-    }
-
-    @Override
-    public boolean canBeAnimated() {
-        return false;
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
+        setSelectedItem(
+                RandomUtils.chooseFrom(enumConstants),
+                false);
     }
 
     @Override
@@ -143,15 +106,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractFilterParam implements
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        super.setAdjustmentListener(listener);
-        if (action != null) {
-            action.setAdjustmentListener(listener);
-        }
-    }
-
-    public EnumParam withAction(FilterAction action) {
-        this.action = action;
-        return this;
+    public String getResetToolTip() {
+        return super.getResetToolTip() + " to " + defaultValue.toString();
     }
 }

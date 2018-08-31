@@ -19,14 +19,18 @@ package pixelitor.tools;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.gui.ToolSettingsPanel;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -48,7 +52,19 @@ public class ToolTest {
     @Parameter
     public Tool tool;
 
-    @Parameters(name = "{index}: {0}")
+    @Parameter(value = 1)
+    public Alt alt;
+
+    @Parameter(value = 2)
+    public Ctrl ctrl;
+
+    @Parameter(value = 3)
+    public Shift shift;
+
+    @Parameter(value = 4)
+    public MouseButton mouseButton;
+
+    @Parameters(name = "{index}: tool = {0} Tool, alt = {1}, ctrl = {2}, shift = {3}, mouseButton = {4}")
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         Tools.CLONE.setState(CloneTool.State.CLONING);
 
@@ -61,10 +77,25 @@ public class ToolTest {
 //            tool.initSettingsPanel();
             SwingUtilities.invokeAndWait(tool::initSettingsPanel);
 
-            instances.add(new Object[]{tool});
+            // for each combination, create an independent test run
+            for (Alt alt : Alt.values()) {
+                for (Ctrl ctrl : Ctrl.values()) {
+                    for (Shift shift : Shift.values()) {
+                        for (MouseButton mouseButton : MouseButton.values()) {
+                            instances.add(new Object[]{tool, alt, ctrl, shift, mouseButton});
+                        }
+                    }
+                }
+            }
         }
 
         return instances;
+    }
+
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+        TestHelper.setupMockFgBgSelector();
     }
 
     @Before
@@ -72,7 +103,7 @@ public class ToolTest {
         tool.toolStarted();
         Composition comp = TestHelper.create2LayerComposition(true);
 
-        ic = TestHelper.setupAnActiveICFor(comp);
+        ic = comp.getIC();
     }
 
     @After
@@ -82,34 +113,20 @@ public class ToolTest {
 
     @Test
     public void simpleStroke() {
-        strokeMouseLeftRight();
+        stroke(alt, ctrl, shift, mouseButton);
 
-        // TODO space should also be tested
-    }
-
-    private void strokeMouseLeftRight() {
-        strokeAltYesNo(MouseButton.LEFT);
-        strokeAltYesNo(MouseButton.RIGHT);
-    }
-
-    private void strokeAltYesNo(MouseButton mouseButton) {
-        strokeCtrlYesNo(Alt.NO, mouseButton);
-        strokeCtrlYesNo(Alt.YES, mouseButton);
-    }
-
-    private void strokeCtrlYesNo(Alt alt, MouseButton mouseButton) {
-        strokeShiftYesNo(alt, Ctrl.NO, mouseButton);
-        strokeShiftYesNo(alt, Ctrl.YES, mouseButton);
-    }
-
-    private void strokeShiftYesNo(Alt alt, Ctrl ctrl, MouseButton mouseButton) {
-        stroke(alt, ctrl, Shift.NO, mouseButton);
-        stroke(alt, ctrl, Shift.YES, mouseButton);
+        // also test with space down
+        GlobalKeyboardWatch.setSpaceDown(true);
+        stroke(alt, ctrl, shift, mouseButton);
+        GlobalKeyboardWatch.setSpaceDown(false);
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
-        tool.dispatchMousePressed(TestHelper.createEvent(MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2), ic);
-        tool.dispatchMouseDragged(TestHelper.createEvent(MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4), ic);
-        tool.dispatchMouseReleased(TestHelper.createEvent(MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6), ic);
+        tool.handlerChain
+                .handleMousePressed(TestHelper.createEvent(ic, MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2));
+        tool.handlerChain
+                .handleMouseDragged(TestHelper.createEvent(ic, MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4));
+        tool.handlerChain
+                .handleMouseReleased(TestHelper.createEvent(ic, MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6));
     }
 }

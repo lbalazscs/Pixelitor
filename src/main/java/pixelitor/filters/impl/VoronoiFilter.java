@@ -24,10 +24,12 @@ import pixelitor.utils.ReseedSupport;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
 /**
  * Voronoi Diagram filter implementation
@@ -93,13 +95,14 @@ public class VoronoiFilter extends PointFilter {
         }
         double diameter = 2 * radius;
         Graphics2D g = img.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setColor(Color.BLACK);
         if (useImageColors) {
             g.setXORMode(Color.WHITE);
         }
         for (int i = 0; i < numPoints; i++) {
-            g.fill(new Ellipse2D.Double(xCoords[i] - radius, yCoords[i] - radius, diameter, diameter));
+            g.fill(new Ellipse2D.Double(xCoords[i] - radius, yCoords[i] - radius,
+                    diameter, diameter));
         }
         g.dispose();
     }
@@ -107,9 +110,13 @@ public class VoronoiFilter extends PointFilter {
     @Override
     public int filterRGB(int x, int y, int rgb) {
         int closestPointIndex = 0;
-        double fromHereToClosestSoFar = metric.distanceInt(xCoords[closestPointIndex], x, yCoords[closestPointIndex], y);
+        double fromHereToClosestSoFar = metric.distanceInt(
+                xCoords[closestPointIndex], x,
+                yCoords[closestPointIndex], y);
+
         for (int i = 0; i < numPoints; i++) {
-            double fromHereToPointI = metric.distanceInt(xCoords[i], x, yCoords[i], y);
+            double fromHereToPointI = metric.distanceInt(
+                    xCoords[i], x, yCoords[i], y);
             if (fromHereToPointI < fromHereToClosestSoFar) {
                 closestPointIndex = i;
                 fromHereToClosestSoFar = fromHereToPointI;
@@ -124,9 +131,13 @@ public class VoronoiFilter extends PointFilter {
      */
     private int nearestSiteDouble(double x, double y) {
         int closestPointIndex = 0;
-        double fromHereToClosestSoFar = metric.distanceDouble(xCoords[closestPointIndex], x, yCoords[closestPointIndex], y);
+        double fromHereToClosestSoFar = metric.distanceDouble(
+                xCoords[closestPointIndex], x,
+                yCoords[closestPointIndex], y);
+
         for (int i = 0; i < numPoints; i++) {
-            double fromHereToPointI = metric.distanceDouble(xCoords[i], x, yCoords[i], y);
+            double fromHereToPointI = metric.distanceDouble(
+                    xCoords[i], x, yCoords[i], y);
             if (fromHereToPointI < fromHereToClosestSoFar) {
                 closestPointIndex = i;
                 fromHereToClosestSoFar = fromHereToPointI;

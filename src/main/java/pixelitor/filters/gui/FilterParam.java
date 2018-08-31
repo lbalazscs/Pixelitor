@@ -20,7 +20,12 @@ package pixelitor.filters.gui;
 import java.awt.Rectangle;
 
 /**
- * A filter parameter that can be configured by the user
+ * The model for a filter parameter, which (unlike a button) holds
+ * some value.
+ *
+ * For practical reasons implementations of this are also found
+ * outside filters as models of GUI elements, but then only
+ * a subset of their functionality is used.
  */
 public interface FilterParam extends FilterSetting, Resettable {
 

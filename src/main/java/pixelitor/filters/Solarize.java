@@ -19,14 +19,11 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
-
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Solarize
@@ -43,18 +40,18 @@ public class Solarize extends ParametrizedFilter {
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
             new Value("Classic", TYPE_CLASSIC),
-            new Value("Upside Down Curve", TYPE_INVERTED)
-    }, IGNORE_RANDOMIZE);
+            new Value("Inverted", TYPE_INVERTED)
+    });
 
     public Solarize() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 redThreshold,
                 greenThreshold,
                 blueThreshold
-        ));
+        );
     }
 
     @Override

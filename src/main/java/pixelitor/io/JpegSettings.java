@@ -20,7 +20,7 @@ package pixelitor.io;
 /**
  * Settings for writing JPEG images
  */
-public class JpegSettings {
+public class JpegSettings extends SaveSettings {
     private final float quality;
     private final boolean progressive;
     private static final float DEFAULT_JPEG_QUALITY = 0.87f;

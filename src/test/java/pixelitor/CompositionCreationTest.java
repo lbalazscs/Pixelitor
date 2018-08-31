@@ -17,10 +17,12 @@
 
 package pixelitor;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.colors.FillType;
 import pixelitor.io.OpenRaster;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.io.OpenSave;
+import pixelitor.io.PXCFormat;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
@@ -31,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +41,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 public class CompositionCreationTest {
-    static {
-        TestHelper.initTesting();
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Test
@@ -47,26 +51,42 @@ public class CompositionCreationTest {
         Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasWidth()).isEqualTo(20);
-        assertThat(comp.getCanvasHeight()).isEqualTo(20);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(20);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(20);
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
     private static void testSingleLayerRead(File f) {
-        Composition comp = OpenSaveManager.createCompositionFromFile(f);
+        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(f);
+        checkLoadFuture(cf);
+
+        Composition comp = cf.join();
+
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
     }
 
+    private static void checkLoadFuture(CompletableFuture<Composition> cf) {
+        assertThat(cf)
+                .isNotCancelled()
+                .isNotCompletedExceptionally();
+        // usually isNotDone is also true, but since these are very
+        // small files, the reading could be finished by now
+    }
+
     private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        Composition comp = OpenSaveManager.createCompositionFromFile(f);
+        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(f);
+        checkLoadFuture(cf);
+
+        Composition comp = cf.join();
+        
         comp.checkInvariant();
         assertThat(comp.getNumLayers()).isEqualTo(2);
-        assertThat(comp.getCanvasWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasHeight()).isEqualTo(10);
+        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
+        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
         assertThat(comp.getCompositeImage()).isNotNull();
 
         Layer secondLayer = comp.getLayer(1);
@@ -144,7 +164,7 @@ public class CompositionCreationTest {
 
                 // write to tmp file
                 File tmp = File.createTempFile("pix_tmp", ".pxc");
-                OpenSaveManager.serializePXC(comp, tmp);
+                PXCFormat.write(comp, tmp);
 
                 // read back and test
                 testMultiLayerRead(tmp, extraChecks.get(i));

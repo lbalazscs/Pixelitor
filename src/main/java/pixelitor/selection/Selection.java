@@ -45,7 +45,8 @@ public class Selection {
     private ImageComponent ic;
     private Timer marchingAntsTimer;
 
-    // the shape that is currently drawn
+    // The shape that is currently drawn.
+    // The coordinates are in image space, relative to the canvas.
     private Shape shape;
 
     private static final double DASH_WIDTH = 1.0;
@@ -88,7 +89,7 @@ public class Selection {
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
             if(!hidden) {
-                dashPhase += 1.0f / ic.getViewScale();
+                dashPhase += 1.0f / (float) ic.getViewScale();
                 repaint();
             }
         });
@@ -117,10 +118,11 @@ public class Selection {
     }
 
     private void paintAnts(Graphics2D g2, Shape shape, float phase) {
+        // As the selection coordinates are in image space, this is
+        // called with a Graphics2D transformed into image space.
+        // The line width has to be scaled to compensate.
         double viewScale = ic.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
-
-        g2.setPaint(WHITE);
 
         float[] dash;
         if (viewScale == 1.0) { // the most common case
@@ -130,6 +132,7 @@ public class Selection {
             dash = new float[]{scaledDashLength, scaledDashLength};
         }
 
+        g2.setPaint(WHITE);
         Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
                 JOIN_ROUND, 0.0f, dash,
                 phase);
@@ -144,18 +147,6 @@ public class Selection {
         g2.draw(shape);
     }
 
-    /**
-     * Inverts the selection shape.
-     */
-    public void invert(Rectangle fullImage) {
-        if (shape != null) {
-            Area area = new Area(shape);
-            Area fullArea = new Area(fullImage);
-            fullArea.subtract(area);
-            shape = fullArea;
-        }
-    }
-
     public void die() {
         stopMarching();
         repaint();
@@ -164,17 +155,14 @@ public class Selection {
     }
 
     public void repaint() {
-//        Rectangle selBounds = shape.getBounds();
-//
-//        if(lastShape != null) {
-//            Rectangle r = lastShape.getBounds();
-//            selBounds = selBounds.union(r);
-//        }
-//
-//        component.repaint(selBounds.x, selBounds.y, selBounds.width + 1, selBounds.height + 1);
+//        if(shape != null && !hidden) {
+//             Rectangle selBounds = shape.getBounds();
+//             ic.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
 
-        // TODO the above optimization is not enough, the previous positions should be also considered for the
-        // case when the selection is shrinking while dragging...
+//             the above optimization is not enough, the previous positions should be also considered for the
+//             case when the selection is shrinking while dragging.
+//             But it does not seem to solve the pixel grid problem anyway
+//        }
 
         ic.repaint();
     }
@@ -184,11 +172,13 @@ public class Selection {
     }
 
     /**
-     * Intersects the selection shape with the composition bounds
+     * Restricts the selection shape to be within the canvas bounds.
+     * This must be always called for new or changed selections.
      *
      * @return true if something is still selected
      */
-    public boolean clipToCompSize(Composition comp) {
+    public boolean clipToCanvasSize(Composition comp) {
+        assert comp == ic.getComp();
         if (shape != null) {
             shape = comp.clipShapeToCanvasSize(shape);
 
@@ -206,7 +196,7 @@ public class Selection {
     /**
      * Returns the shape bounds of the selection
      * Like everything else in this class, this is in image coordinates
-     * (but relative to the composition, not to the image)
+     * (but relative to the canvas, not to the image)
      */
     public Rectangle getShapeBounds() {
         return shape.getBounds();
@@ -222,8 +212,15 @@ public class Selection {
         Shape backupShape = shape;
         shape = type.modify(oldArea, outlineArea);
 
-        SelectionChangeEdit edit = new SelectionChangeEdit("Modify Selection", ic.getComp(), backupShape);
-        History.addEdit(edit);
+        Composition comp = ic.getComp();
+        boolean stillSelection = clipToCanvasSize(comp);
+        if (stillSelection) {
+            SelectionChangeEdit edit = new SelectionChangeEdit(
+                    "Modify Selection", comp, backupShape);
+            History.addEdit(edit);
+        } else {
+            comp.deselect(true);
+        }
     }
 
     public Shape transform(AffineTransform at) {
@@ -234,7 +231,8 @@ public class Selection {
 
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
-        History.addEdit(new SelectionChangeEdit("Nudge Selection", ic.getComp(), backupShape));
+        History.addEdit(new SelectionChangeEdit(
+                "Nudge Selection", ic.getComp(), backupShape));
     }
 
     public boolean isHidden() {

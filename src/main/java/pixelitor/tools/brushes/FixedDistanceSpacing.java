@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.tools.brushes;
 
 /**
- * A spacing strategy that does not depend on the brush radius
+ *  A {@link SpacingStrategy} where the spacing between the dabs
+ *  is fixed, and does not depend on the brush radius
  */
 public class FixedDistanceSpacing implements SpacingStrategy {
     private final double distance;
@@ -28,7 +29,7 @@ public class FixedDistanceSpacing implements SpacingStrategy {
     }
 
     @Override
-    public double getSpacing(int radius) {
+    public double getSpacing(double radius) {
         return distance;
     }
 }

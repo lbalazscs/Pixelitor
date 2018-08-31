@@ -17,15 +17,16 @@
 
 package pixelitor.gui;
 
-import pixelitor.AppLogic;
 import pixelitor.Build;
+import pixelitor.Pixelitor;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
-import pixelitor.tools.ToolSettingsPanelContainer;
-import pixelitor.tools.ToolsPanel;
+import pixelitor.tools.Tools;
+import pixelitor.tools.gui.ToolSettingsPanelContainer;
+import pixelitor.tools.gui.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
@@ -53,14 +54,17 @@ public class PixelitorWindow extends JFrame {
         setupWindowClosing();
 
         addMenus();
-        addDesktopArea();
+        addImagesArea();
         addLayersAndHistograms();
         addToolsPanel();
+        Tools.setDefaultTool();
         addStatusBar();
 
         setupFrameIcons();
 
         GlobalKeyboardWatch.init();
+        GlobalKeyboardWatch.addBrushSizeActions();
+        GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
 
         AppPreferences.loadFramePosition(this);
         setVisible(true);
@@ -72,7 +76,7 @@ public class PixelitorWindow extends JFrame {
                 new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent we) {
-                        AppLogic.exitApp(PixelitorWindow.this);
+                        Pixelitor.exitApp(PixelitorWindow.this);
                     }
                 }
         );
@@ -83,8 +87,12 @@ public class PixelitorWindow extends JFrame {
         setJMenuBar(menuBar);
     }
 
-    private void addDesktopArea() {
-        add(Desktop.INSTANCE.getDesktopPane(), BorderLayout.CENTER);
+    public void addImagesArea() {
+        add(ImageArea.getUI(), BorderLayout.CENTER);
+    }
+
+    public void removeImagesArea(JComponent c) {
+        remove(c);
     }
 
     private void addLayersAndHistograms() {
@@ -210,7 +218,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * This method iconifies a frame; the maximized bits are not affected.
+     * Iconifies a frame; the maximized bits are not affected.
      */
     public void iconify() {
         int state = getExtendedState();
@@ -223,7 +231,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     /**
-     * This method deiconifies a frame; the maximized bits are not affected.
+     * Deiconifies a frame; the maximized bits are not affected.
      */
     public void deiconify() {
         int state = getExtendedState();

@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 
@@ -42,6 +42,6 @@ public class ShapeDabsBrushSettings extends DabsBrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        return new BrushSettingsPanel(this);
+        return new ShapeDabsBrushSettingsPanel(this);
     }
 }

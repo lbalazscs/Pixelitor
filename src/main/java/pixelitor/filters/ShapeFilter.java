@@ -17,19 +17,16 @@
 
 package pixelitor.filters;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -44,6 +41,8 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -86,16 +85,16 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     protected ShapeFilter() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
-                foreground,
+        setParams(
                 background,
+                foreground,
                 new DialogParam("Transform", center, scale),
                 strokeParam,
                 effectsParam
-        ));
+        );
 
         // disable effects if foreground is set to transparent
-        Utils.setupDisableOtherIf(foreground, effectsParam,
+        foreground.setupDisableOtherIf(effectsParam,
                 selectedValue -> selectedValue.getValue() == FG_TRANSPARENT);
     }
 
@@ -107,14 +106,14 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         dest = ImageUtils.createImageWithSameCM(src);
         Graphics2D g2 = dest.createGraphics();
 
-        int bgVal = background.getValue();
-        switch (bgVal) {
+        int bg = background.getValue();
+        switch (bg) {
             case BG_BLACK:
                 g2.setColor(BLACK);
                 g2.fillRect(0, 0, srcWidth, srcHeight);
                 break;
             case BG_TOOL:
-                g2.setColor(FgBgColors.getBG());
+                g2.setColor(getBGColor());
                 g2.fillRect(0, 0, srcWidth, srcHeight);
                 break;
             case BG_ORIGINAL:
@@ -125,13 +124,13 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 break;
         }
 
-        int fgVal = foreground.getValue();
-        switch (fgVal) {
+        int fg = foreground.getValue();
+        switch (fg) {
             case FG_WHITE:
                 g2.setColor(WHITE);
                 break;
             case FG_TOOL:
-                g2.setColor(FgBgColors.getFG());
+                g2.setColor(getFGColor());
                 break;
             case FG_GRADIENT:
                 float cx = srcWidth / 2.0f;
@@ -187,4 +186,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     }
 
     protected abstract Shape createShape(int width, int height);
+
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
+    }
 }

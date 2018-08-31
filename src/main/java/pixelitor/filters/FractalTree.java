@@ -22,7 +22,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
@@ -33,13 +32,16 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.BasicStroke.CAP_ROUND;
+import static java.awt.BasicStroke.JOIN_ROUND;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -93,7 +95,7 @@ public class FractalTree extends ParametrizedFilter {
     public FractalTree() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 iterations,
                 zoom,
                 randomnessParam,
@@ -103,7 +105,7 @@ public class FractalTree extends ParametrizedFilter {
                 width.setLinkable(false),
                 colors,
                 quality
-        ).withAction(ReseedSupport.createAction()));
+        ).withAction(ReseedSupport.createAction());
     }
 
     @Override
@@ -119,7 +121,7 @@ public class FractalTree extends ParametrizedFilter {
 
         Graphics2D g = dest.createGraphics();
         if (quality.getValue() == QUALITY_BETTER) {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         }
 
         int maxDepth = iterations.getValue();
@@ -143,7 +145,7 @@ public class FractalTree extends ParametrizedFilter {
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);
             float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / zoom.getDefaultValue();
-            widthLookup[depth] = new BasicStroke(zoomedStrokeWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+            widthLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
             // colors
             float where = ((float) depth) / iterations.getValue();
             int rgb = colors.getValue().getColor(1.0f - where);
@@ -166,7 +168,8 @@ public class FractalTree extends ParametrizedFilter {
         drawTreeCalls--;
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
-        drawTree(g, src.getWidth() / 2.0, src.getHeight(), 270 + calcAngleRandomness(rand), maxDepth, rand, c);
+        drawTree(g, src.getWidth() / 2.0, src.getHeight(),
+                270 + calcAngleRandomness(rand), maxDepth, rand, c);
 
         g.dispose();
         pt.finish();
@@ -174,7 +177,8 @@ public class FractalTree extends ParametrizedFilter {
         return dest;
     }
 
-    private void drawTree(Graphics2D g, double x1, double y1, double angle, int depth, Random rand, float c) {
+    private void drawTree(Graphics2D g, double x1, double y1,
+                          double angle, int depth, Random rand, float c) {
         if (depth == 0) {
             return;
         }
@@ -250,7 +254,9 @@ public class FractalTree extends ParametrizedFilter {
         return angle;
     }
 
-    private static void connectPoints(Graphics2D g, double x1, double y1, double x2, double y2, float c) {
+    private static void connectPoints(Graphics2D g,
+                                      double x1, double y1,
+                                      double x2, double y2, float c) {
         if (c == 0) {
             Line2D.Double line = new Line2D.Double(x1, y1, x2, y2);
             g.draw(line);
@@ -265,7 +271,7 @@ public class FractalTree extends ParametrizedFilter {
             double cx = x1 + dx / 2.0;
             double cy = y1 + dy / 2.0;
 
-            // We calculate only one Bezier control point,
+            // calculate only one Bezier control point,
             // and use it for both.
             // The normal vector is -dy, dx.
             double ctrlX = cx - dy * c;

@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.ColorHalftoneFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -42,11 +41,11 @@ public class JHColorHalftone extends ParametrizedFilter {
     public JHColorHalftone() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(dotRadius.withAdjustedRange(1.2),
+        setParams(dotRadius.withAdjustedRange(1.2),
                 cyanScreenAngle,
                 magentaScreenAngle,
                 yellowScreenAngle
-        ));
+        );
     }
 
     @Override

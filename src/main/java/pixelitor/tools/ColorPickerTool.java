@@ -17,17 +17,21 @@
 
 package pixelitor.tools;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.lang.String.format;
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
 
 /**
  * The color picker tool
@@ -37,9 +41,11 @@ public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
-        super('i', "Color Picker", "color_picker_tool_icon.png",
-                "click to pick the foreground color, Alt-click (or right-click) to pick the background color",
-                Cursors.CROSSHAIR, false, true, false, ClipStrategy.IMAGE_ONLY);
+        super("Color Picker", 'i', "color_picker_tool_icon.png",
+                "<b>click</b> to pick the foreground color, " +
+                        "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
+                Cursors.CROSSHAIR, false,
+                true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -49,24 +55,24 @@ public class ColorPickerTool extends Tool {
 
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
+    public void mousePressed(PMouseEvent e) {
+        sampleColor(e, e.isAltDown() || e.isRight());
     }
 
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        sampleColor(e, ic, e.isAltDown() || SwingUtilities.isRightMouseButton(e));
+    public void mouseDragged(PMouseEvent e) {
+        sampleColor(e, e.isAltDown() || e.isRight());
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-
+    public void mouseReleased(PMouseEvent e) {
     }
 
-    public void sampleColor(MouseEvent e, ImageComponent ic, boolean selectBackground) {
-        int x = (int) ic.componentXToImageSpace(e.getX());
-        int y = (int) ic.componentYToImageSpace(e.getY());
+    public void sampleColor(PMouseEvent e, boolean selectBackground) {
+        ImageComponent ic = e.getIC();
+        int x = (int) e.getImX();
+        int y = (int) e.getImY();
 
         BufferedImage img;
         boolean isGray = false;
@@ -75,9 +81,9 @@ public class ColorPickerTool extends Tool {
                 return;
             }
 
-            Drawable dr = ic.getComp().getActiveDrawable();
+            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             img = dr.getImage();
-            isGray = img.getType() == BufferedImage.TYPE_BYTE_GRAY;
+            isGray = img.getType() == TYPE_BYTE_GRAY;
 
             x -= dr.getTX();
             y -= dr.getTY();
@@ -94,9 +100,9 @@ public class ColorPickerTool extends Tool {
 
             Color sampledColor = new Color(rgb);
             if (selectBackground) {
-                FgBgColors.setBG(sampledColor);
+                setBGColor(sampledColor);
             } else {
-                FgBgColors.setFG(sampledColor);
+                setFGColor(sampledColor);
             }
         }
     }
@@ -113,7 +119,9 @@ public class ColorPickerTool extends Tool {
         } else {
             float[] hsbValues = Color.RGBtoHSB(r, g, b, null);
 
-            msg += String.format(", alpha = %d, red = %d, green = %d, blue = %d, hue = %.2f, saturation = %.2f, brightness = %.2f", a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
+            msg += format(", alpha = %d, red = %d, green = %d, blue = %d, " +
+                    "hue = %.2f, saturation = %.2f, brightness = %.2f",
+                    a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
         Messages.showInStatusBar(msg);

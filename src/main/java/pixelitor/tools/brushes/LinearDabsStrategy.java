@@ -17,21 +17,25 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.util.PPoint;
+
 /**
  * The simplest dabs strategy: it places the dabs along the lines
  * connecting the mouse events with a uniform spacing between them
  */
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
-    private double distanceFromLastDab = 0;
+    private double distFromLastDab = 0;
     private SpacingStrategy spacingStrategy;
     private AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
 
-    private double prevX = 0;
-    private double prevY = 0;
+    private PPoint prev;
 
-    public LinearDabsStrategy(DabsBrush brush, SpacingStrategy spacingStrategy, AngleSettings angleSettings, boolean refreshBrushForEachDab) {
+    public LinearDabsStrategy(DabsBrush brush,
+                              SpacingStrategy spacingStrategy,
+                              AngleSettings angleSettings,
+                              boolean refreshBrushForEachDab) {
         this.brush = brush;
         this.spacingStrategy = spacingStrategy;
         this.angleSettings = angleSettings;
@@ -39,32 +43,36 @@ public class LinearDabsStrategy implements DabsStrategy {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        brush.setupBrushStamp(x, y);
-        distanceFromLastDab = 0; // moved from reset()
+    public void onStrokeStart(PPoint p) {
+        brush.setupBrushStamp(p);
+        distFromLastDab = 0; // moved from reset()
 
-        prevX = x;
-        prevY = y;
+        prev = p;
         if (angleSettings.isAngleAware()) {
             // For angle-aware brushes we don't draw a dab in this
             // method because we have no angle information.
             // However, we manipulate the distance from the last dab
             // so that a dab is drawn soon
-            distanceFromLastDab = spacingStrategy.getSpacing(brush.getRadius()) * 0.8;
+            distFromLastDab = spacingStrategy.getSpacing(brush.getRadius()) * 0.8;
         } else {
-            brush.putDab(x, y, 0);
+            brush.putDab(p, 0);
         }
     }
 
     @Override
-    public void onNewStrokePoint(double endX, double endY) {
+    public void onNewStrokePoint(PPoint end) {
+        double endX = end.getImX();
+        double endY = end.getImY();
+        double prevX = prev.getImX();
+        double prevY = prev.getImY();
+
         double dx = endX - prevX;
         double dy = endY - prevY;
-        double lineDistance = Math.sqrt(dx * dx + dy * dy);
+        double lineDist = end.imDist(prev);
 
         double spacing = spacingStrategy.getSpacing(brush.getRadius());
-        double relativeSpacingDistance = spacing / lineDistance;
-        double initialRelativeSpacingDistance = (spacing - distanceFromLastDab) / lineDistance;
+        double relativeSpacingDist = spacing / lineDist;
+        double initialRelativeSpacingDist = (spacing - distFromLastDab) / lineDist;
 
         double theta = 0;
         if (angleSettings.isAngleAware()) {
@@ -74,32 +82,36 @@ public class LinearDabsStrategy implements DabsStrategy {
         double x = prevX, y = prevY;
         boolean drew = false;
 
-        for(double t = initialRelativeSpacingDistance; t < 1.0; t += relativeSpacingDistance) {
+        for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
             x = prevX + t * dx;
             y = prevY + t * dy;
+            PPoint p = PPoint.eagerFromIm(x, y, end.getIC());
 
             if(refreshBrushForEachDab) {
-                brush.setupBrushStamp(x, y);
+                brush.setupBrushStamp(p);
             }
 
             if (angleSettings.shouldJitterAngle()) {
-                theta = angleSettings.calculatePerturbedAngle(theta);
+                theta = angleSettings.calcJitteredAngle(theta);
             }
 
-            brush.putDab(x, y, theta);
+            // TODO perhaps this could be optimized if instead of putDab
+            // we called a special version that does not update the region
+            // and then we updated the region at the end
+            brush.putDab(p, theta);
             drew = true;
         }
 
         if(drew) {
             double remainingDx = (endX - x);
             double remainingDy = (endY - y);
-            distanceFromLastDab = Math.sqrt(remainingDx * remainingDx + remainingDy * remainingDy);
+            distFromLastDab = Math.sqrt(remainingDx * remainingDx
+                    + remainingDy * remainingDy);
         } else {
-            distanceFromLastDab += lineDistance;
+            distFromLastDab += lineDist;
         }
 
-        prevX = endX;
-        prevY = endY;
+        prev = end;
     }
 
     @Override
@@ -107,6 +119,5 @@ public class LinearDabsStrategy implements DabsStrategy {
         DabsBrushSettings settings = brush.getSettings();
         angleSettings = settings.getAngleSettings();
         spacingStrategy = settings.getSpacingStrategy();
-//        assert spacingStrategy.isValid();
     }
 }

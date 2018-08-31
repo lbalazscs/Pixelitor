@@ -17,7 +17,6 @@
 
 package pixelitor.filters.comp;
 
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
@@ -25,8 +24,8 @@ import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
-import pixelitor.selection.Selection;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -56,33 +55,19 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void process(Composition comp) {
-        MultiLayerBackup backup = new MultiLayerBackup(comp, getEditName(), changesCanvasDimensions);
+        MultiLayerBackup backup = new MultiLayerBackup(comp,
+                getEditName(), changesCanvasDimensions);
 
         Canvas canvas = comp.getCanvas();
-        AffineTransform canvasTX = createTransform(canvas);
+        comp.transformSelection(() -> createCanvasTX(canvas));
 
-        if (comp.hasSelection()) {
-            Selection selection = comp.getSelection();
-            selection.transform(canvasTX);
-        }
-
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                applyTx(contentLayer);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                applyTx(mask);
-            }
-        });
+        comp.forEachLayer(this::processLayer);
 
         MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup);
         History.addEdit(edit);
 
         if (changesCanvasDimensions) {
             changeCanvas(comp);
-            AppLogic.activeCompSizeChanged(comp);
         }
 
         // Only after the shared canvas size was updated
@@ -91,11 +76,22 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         comp.imageChanged(REPAINT, true);
     }
 
+    private void processLayer(Layer layer) {
+        if (layer instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) layer;
+            applyTx(contentLayer);
+        }
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
+            applyTx(mask);
+        }
+    }
+
     protected abstract void changeCanvas(Composition comp);
 
     protected abstract String getEditName();
 
     protected abstract void applyTx(ContentLayer contentLayer);
 
-    protected abstract AffineTransform createTransform(Canvas canvas);
+    protected abstract AffineTransform createCanvasTX(Canvas canvas);
 }

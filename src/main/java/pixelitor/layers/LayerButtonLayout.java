@@ -27,7 +27,7 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * A layout manager for a {@link LayerButton}
+ * The layout manager for a {@link LayerButton}
  */
 public class LayerButtonLayout implements LayoutManager {
     private Component nameEditor;
@@ -125,12 +125,12 @@ public class LayerButtonLayout implements LayoutManager {
 
             // lay out the mask
             if (maskLabel != null) {
-                // no need to add distance between layer and mask icons
+                // no need to add distance between the layer and mask icons
                 // because there will be a visual distance due to the borders
                 maskLabel.setBounds(startX, labelStartY, labelSize, labelSize);
                 startX += (labelSize + GAP);
             } else {
-                startX += GAP; // distance between layer icon and text field
+                startX += GAP; // the distance between the layer icon and the text field
             }
 
             int editorHeight = (int) nameEditor.getPreferredSize().getHeight();
@@ -157,7 +157,7 @@ public class LayerButtonLayout implements LayoutManager {
         height = newThumbSize + 2 * GAP;
 
         ImageComponents.onActiveIC(ic -> {
-            LayersContainer.showLayersPanel(ic.getLayersPanel());
+            //LayersContainer.showLayersFor(ic);
             ic.getComp().updateAllIconImages();
         });
     }

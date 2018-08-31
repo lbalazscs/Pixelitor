@@ -18,12 +18,11 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.gui.GlobalKeyboardWatch;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Cursor;
-import java.awt.event.MouseEvent;
 
 /**
  * Checks whether the current tool should behave as a hand tool
@@ -41,9 +40,9 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mousePressed(MouseEvent e, ImageComponent ic) {
+    boolean mousePressed(PMouseEvent e) {
         if (GlobalKeyboardWatch.isSpaceDown()) {
-            Tools.HAND.mousePressed(e, ic);
+            Tools.HAND.mousePressed(e);
             handToolForwarding = true;
             return true;
         }
@@ -55,9 +54,9 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseDragged(MouseEvent e, ImageComponent ic) {
+    boolean mouseDragged(PMouseEvent e) {
         if (handToolForwarding) {
-            Tools.HAND.mouseDragged(e, ic);
+            Tools.HAND.mouseDragged(e);
             return true;
         }
 
@@ -67,11 +66,11 @@ public class HandToolHandler extends ToolHandler {
     }
 
     @Override
-    boolean mouseReleased(MouseEvent e, ImageComponent ic) {
+    boolean mouseReleased(PMouseEvent e) {
         currentToolUsage = false;
 
         if (handToolForwarding) {
-            Tools.HAND.mouseReleased(e, ic);
+            Tools.HAND.mouseReleased(e);
             handToolForwarding = false;
 
             return true;
@@ -81,9 +80,9 @@ public class HandToolHandler extends ToolHandler {
     }
 
     public void spacePressed() {
-        if (!spaceDown) { // this is called all the time while the space is held down, but we are interested only in ist first call
+        if (!spaceDown) { // this is called all the time while the space is held down
             if (!currentToolUsage) {
-                ImageComponents.setCursorForAll(Tools.HAND.getCursor());
+                ImageComponents.setCursorForAll(Tools.HAND.getStartingCursor());
             }
         }
         spaceDown = true;

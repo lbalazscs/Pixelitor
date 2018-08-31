@@ -22,6 +22,8 @@ import pixelitor.layers.Layer;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+import static java.lang.String.format;
+
 /**
  * A PixelitorEdit that represents the renaming of a layer
  */
@@ -31,7 +33,7 @@ public class LayerRenameEdit extends PixelitorEdit {
     private final String nameAfter;
 
     public LayerRenameEdit(Layer layer, String nameBefore, String nameAfter) {
-        super(String.format("Rename Layer to \"%s\"", nameAfter), layer.getComp());
+        super(format("Rename Layer to \"%s\"", nameAfter), layer.getComp());
 
         this.layer = layer;
         this.nameBefore = nameBefore;
@@ -43,8 +45,6 @@ public class LayerRenameEdit extends PixelitorEdit {
         super.undo();
 
         layer.setName(nameBefore, false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -52,8 +52,6 @@ public class LayerRenameEdit extends PixelitorEdit {
         super.redo();
 
         layer.setName(nameAfter, false);
-
-        History.notifyMenus(this);
     }
 
     @Override

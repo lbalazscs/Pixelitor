@@ -21,8 +21,8 @@ import com.jhlabs.image.SparkleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
@@ -53,15 +53,17 @@ public class JHSparkle extends ParametrizedFilter {
     public JHSparkle() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        FilterAction reseed = ReseedSupport.createAction("", "Reseed Randomness");
+        randomness.setupEnableOtherIfNotZero(reseed);
+        setParams(
                 center,
                 lightOnly,
                 color,
                 nrOfRays,
                 radius.withAdjustedRange(1.0),
                 shine,
-                randomness
-        ).withAction(ReseedSupport.createAction()));
+                randomness.withAction(reseed)
+        );
     }
 
     @Override

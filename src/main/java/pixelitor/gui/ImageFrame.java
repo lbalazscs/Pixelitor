@@ -18,27 +18,31 @@
 package pixelitor.gui;
 
 import pixelitor.Canvas;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.beans.PropertyVetoException;
 
 /**
- * A JInternalFrame for displaying the compositions
+ * An {@link ImageWindow} used in the "internal frames" UI.
  */
-public class ImageFrame extends JInternalFrame implements InternalFrameListener {
+public class ImageFrame extends JInternalFrame
+        implements ImageWindow, InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
-    private static final int NIMBUS_VERTICAL_ADJUSTMENT = 38;
+    private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
     private final ImageComponent ic;
     private final JScrollPane scrollPane;
 
     public ImageFrame(ImageComponent ic, int locX, int locY) {
-        super(ic.createFrameTitle(), true, true, true, true);
+        super(ic.createTitleWithZoom(),
+                true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
         this.ic = ic;
@@ -47,16 +51,17 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         scrollPane = new JScrollPane(this.ic);
         this.add(scrollPane);
 
-        Dimension ps = ic.getPreferredSize();
-        setSize(locX, locY, (int) ps.getWidth(), (int) ps.getHeight());
         setLocation(locX, locY);
+        setToNaturalSize();
         this.setVisible(true);
     }
 
     @Override
     public void internalFrameActivated(InternalFrameEvent e) {
-        ImageComponents.activeImageHasChanged(ic);
-        ic.onActivation();
+        // We can get here as the result of a user click or as part
+        // of a programmatic activation, but it shouldn't matter as all
+        // activation takes place in the following method
+        ImageComponents.imageActivated(ic);
     }
 
     @Override
@@ -67,7 +72,7 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         if (!RandomGUITest.isRunning()) {
-            OpenSaveManager.warnAndCloseImage(ic);
+            ImageComponents.warnAndClose(ic);
         }
     }
 
@@ -89,37 +94,52 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
     public void internalFrameOpened(InternalFrameEvent e) {
     }
 
-    public void setToNaturalSize(int locX, int locY) {
-        Canvas canvas = ic.getCanvas();
-        int zoomedWidth = canvas.getZoomedWidth();
-        int zoomedHeight = canvas.getZoomedHeight();
-        setSize(locX, locY, zoomedWidth, zoomedHeight);
+    @Override
+    public void select() {
+        try {
+            setSelected(true);
+        } catch (PropertyVetoException e) {
+            Messages.showException(e);
+        }
     }
 
-    public void setSize(int locX, int locY, int width, int height) {
-        // if this is a simple resize, then locX and locY are -1
-        if (locX == -1) {
-            locX = getLocation().x;
-        }
-        if (locY == -1) {
-            locY = getLocation().y;
-        }
+    public void setToNaturalSize() {
+        Canvas canvas = ic.getCanvas();
+        int zoomedWidth = canvas.getCoWidth();
+        int zoomedHeight = canvas.getCoHeight();
+        setSize(zoomedWidth, zoomedHeight);
+    }
 
-        Dimension desktopSize = Desktop.INSTANCE.getDesktopSize();
+    @Override
+    public void setSize(int width, int height) {
+        Point loc = getLocation();
+        int locX = loc.x;
+        int locY = loc.y;
+
+        Dimension desktopSize = ImageArea.getSize();
         int maxWidth = Math.max(0, desktopSize.width - 20 - locX);
         int maxHeight = Math.max(0, desktopSize.height - 40 - locY);
 
         if (width > maxWidth) {
             width = maxWidth;
+
+            height += 15; // correction for the horizontal scrollbar
         }
         if (height > maxHeight) {
             height = maxHeight;
+
+            width += 15; // correction for the vertical scrollbar
+            if (width > maxWidth) { // check again
+                width = maxWidth;
+            }
         }
 
-        setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT, height + NIMBUS_VERTICAL_ADJUSTMENT);
+        super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT,
+                height + NIMBUS_VERTICAL_ADJUSTMENT);
     }
 
-    public void makeSureItIsVisible() {
+    @Override
+    public void ensurePositiveLocation() {
         Rectangle bounds = getBounds();
         if (bounds.x < 0 || bounds.y < 0) {
             int newX = bounds.x < 0 ? 0 : bounds.x;
@@ -128,8 +148,13 @@ public class ImageFrame extends JInternalFrame implements InternalFrameListener 
         }
     }
 
+    @Override
     public JScrollPane getScrollPane() {
         return scrollPane;
     }
-}
 
+    @Override
+    public void updateTitle(ImageComponent ic) {
+        setTitle(ic.createTitleWithZoom());
+    }
+}

@@ -65,9 +65,5 @@ public class SelectionChangeEdit extends PixelitorEdit {
         selection.setShape(backupShape);
 
         backupShape = tmp;
-
-        if (!embedded) {
-            History.notifyMenus(this);
-        }
     }
 }

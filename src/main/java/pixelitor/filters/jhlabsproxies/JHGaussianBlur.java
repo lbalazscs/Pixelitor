@@ -21,7 +21,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.GaussianFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -42,10 +41,10 @@ public class JHGaussianBlur extends ParametrizedFilter {
     public JHGaussianBlur() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 radius,
                 hpSharpening
-        ));
+        );
     }
 
     @Override
@@ -71,7 +70,7 @@ public class JHGaussianBlur extends ParametrizedFilter {
     }
 
     @Override
-    protected boolean createDefaultDestBuffer() {
+    protected boolean createDefaultDestImg() {
         return false;
     }
 

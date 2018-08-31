@@ -23,6 +23,7 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NORTH;
 
 /**
@@ -42,10 +43,12 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     public ImagePositionParamGUI(ImagePositionParam model, int defaultX, int defaultY) {
         this.model = model;
 
-        xSliderModel = new RangeParam("Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
-        ySliderModel = new RangeParam("Vertical Position (%)", 0, defaultY, 100, true, NORTH);
+        xSliderModel = new RangeParam(
+                "Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
+        ySliderModel = new RangeParam(
+                "Vertical Position (%)", 0, defaultY, 100, true, NORTH);
 
-        setBorder(BorderFactory.createTitledBorder(model.getName()));
+        setBorder(createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
 
         // add the image position selector
@@ -80,14 +83,16 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void onXSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeX(xSliderModel.getValue() / 100.0f, xSliderModel.getValueIsAdjusting());
+            model.setRelativeX(xSliderModel.getValueAsPercentage(),
+                    xSliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
     }
 
     private void onYSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeY(ySliderModel.getValue() / 100.0f, ySliderModel.getValueIsAdjusting());
+            model.setRelativeY(ySliderModel.getValueAsPercentage(),
+                    ySliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
     }
@@ -98,16 +103,19 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
      */
     public void updateSlidersFromModel() {
         slidersMovedByUser = false;
+
         int xValue = xSliderModel.getValue();
         int modelXValue = (int) (model.getRelativeX() * 100);
         if (modelXValue != xValue) {
             xSliderModel.setValue(modelXValue);
         }
+
         int yValue = ySliderModel.getValue();
         int modelYValue = (int) (model.getRelativeY() * 100);
         if (modelYValue != yValue) {
             ySliderModel.setValue(modelYValue);
         }
+
         slidersMovedByUser = true;
     }
 

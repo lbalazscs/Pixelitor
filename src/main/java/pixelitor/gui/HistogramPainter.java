@@ -21,7 +21,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Insets;
 
 import static java.awt.Color.BLACK;
 
@@ -33,20 +32,12 @@ public class HistogramPainter extends JComponent {
 
     private int[] values = null;
     private int maxValue = 0;
-    private Color color = null;
-    private final Insets insets;
+    private final Color color;
 
     public HistogramPainter(Color color) {
         this.color = color;
-        insets = getInsets();
 
-        setupPreferredSize();
-    }
-
-    private void setupPreferredSize() {
-        int width = 256 + insets.left + insets.right;
-        int height = PREFERRED_HEIGHT + insets.top + insets.bottom;
-        setPreferredSize(new Dimension(width, height));
+        setPreferredSize(new Dimension(257, PREFERRED_HEIGHT + 2));
     }
 
     /**
@@ -69,27 +60,29 @@ public class HistogramPainter extends JComponent {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (maxValue == 0) {
-            return;
-        }
-
-        int width = getWidth();
-        int height = getHeight();
 
         g.setColor(BLACK);
-        g.drawRect(0, 0, width - 1, height - 1);
+        g.drawRect(0, 0, 257, 102);
 
+        if (maxValue == 0) { // no image
+            return;
+        }
         if (values == null) {
             return;
         }
 
-        int x = insets.left;
+        int x = 0;
 
-        for (int value : values) {
-            int lineHeight = (int) (height * ((double) value / (double) maxValue));
-            g.setColor(color);
-            g.drawLine(x, (height - lineHeight), x, height);
+        g.setColor(color);
+        for (int i = 0; i < 256; i++) {
             x++;
+            int value = values[i];
+            if (value > 0) {
+                int lineHeight = (int) (PREFERRED_HEIGHT * ((double) value / (double) maxValue));
+                int yTop = 1 + PREFERRED_HEIGHT - lineHeight;
+                int yBottom = PREFERRED_HEIGHT + 1;
+                g.drawLine(x, yTop, x, yBottom);
+            }
         }
     }
 }

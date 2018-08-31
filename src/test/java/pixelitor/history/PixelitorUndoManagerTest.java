@@ -18,8 +18,9 @@
 package pixelitor.history;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import pixelitor.TestHelper;
+import pixelitor.Build;
 
 import javax.swing.*;
 
@@ -37,8 +38,9 @@ public class PixelitorUndoManagerTest {
     private PixelitorEdit edit1;
     private PixelitorEdit edit2;
 
-    static {
-        TestHelper.initTesting();
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
     }
 
     @Before

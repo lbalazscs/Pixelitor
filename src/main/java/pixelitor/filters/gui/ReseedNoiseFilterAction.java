@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.math.Noise;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import java.awt.event.ActionListener;
 
@@ -34,11 +34,13 @@ public class ReseedNoiseFilterAction extends FilterAction {
     }
 
     public ReseedNoiseFilterAction(String name) {
-        this(name, "<html>Reinitialize the randomness.<br>Has effect only if some randomness is enabled in the settings.");
+        this(name, "<html>Reinitialize the randomness." +
+                "<br>Has effect only if some randomness is enabled in the settings.");
     }
 
     public ReseedNoiseFilterAction(String name, String toolTip) {
-        super(name, e -> Noise.reseed(), IconUtils.getDice2Icon(), toolTip);
+        super(name, e -> Noise.reseed(),
+                Icons.getTwoDicesIcon(), toolTip, "reseed");
         setIgnoreFinalAnimationSettingMode(false);
     }
 
@@ -53,8 +55,10 @@ public class ReseedNoiseFilterAction extends FilterAction {
         this(name, "Reinitialize the randomness", actionListener);
     }
 
-    public ReseedNoiseFilterAction(String name, String toolTipText, ActionListener actionListener) {
-        super(name, actionListener, IconUtils.getDice2Icon(), toolTipText);
+    public ReseedNoiseFilterAction(String name, String toolTipText,
+                                   ActionListener actionListener) {
+        super(name, actionListener, Icons.getTwoDicesIcon(),
+                toolTipText, "reseed");
         setIgnoreFinalAnimationSettingMode(false);
     }
 }

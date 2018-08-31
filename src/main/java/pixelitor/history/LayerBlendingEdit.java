@@ -63,6 +63,5 @@ public class LayerBlendingEdit extends PixelitorEdit {
         BlendingMode tmp = layer.getBlendingMode();
         layer.setBlendingMode(backupBlendingMode, true, false, true);
         backupBlendingMode = tmp;
-        History.notifyMenus(this);
     }
 }

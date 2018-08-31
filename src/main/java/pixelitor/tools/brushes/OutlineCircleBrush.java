@@ -17,7 +17,8 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -29,13 +30,15 @@ import static java.awt.BasicStroke.JOIN_ROUND;
 /**
  * The "Circles" brush
  */
-public class OutlineCircleBrush extends StrokeBrush {
-    public OutlineCircleBrush(int radius) {
-        super(radius, StrokeType.OUTLINE, CAP_ROUND, JOIN_ROUND);
+public class OutlineCircleBrush extends OutlineBrush {
+    public OutlineCircleBrush(double radius, OutlineBrushSettings settings) {
+        super(settings, radius, CAP_ROUND, JOIN_ROUND);
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         Stroke savedStroke = targetG.getStroke();
 
         Shape circle = new Ellipse2D.Double(x - radius, y - radius, diameter, diameter);

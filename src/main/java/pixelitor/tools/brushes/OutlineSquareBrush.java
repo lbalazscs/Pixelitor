@@ -17,7 +17,8 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -29,13 +30,15 @@ import static java.awt.BasicStroke.JOIN_BEVEL;
 /**
  * The "Squares" brush
  */
-public class OutlineSquareBrush extends StrokeBrush {
-    public OutlineSquareBrush(int radius) {
-        super(radius, StrokeType.OUTLINE, CAP_SQUARE, JOIN_BEVEL);
+public class OutlineSquareBrush extends OutlineBrush {
+    public OutlineSquareBrush(double radius, OutlineBrushSettings settings) {
+        super(settings, radius, CAP_SQUARE, JOIN_BEVEL);
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
         Stroke savedStroke = targetG.getStroke();
 
         Shape rect = new Rectangle2D.Double(x - radius, y - radius, diameter, diameter);

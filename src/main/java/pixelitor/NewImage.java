@@ -18,37 +18,41 @@
 package pixelitor;
 
 import pixelitor.colors.FillType;
+import pixelitor.filters.Fill;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.IntTextField;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.gui.utils.ValidatedPanel;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
+import static java.lang.Integer.parseInt;
+import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.colors.FillType.TRANSPARENT;
 
 /**
- * Static utility methods related to creating new images
+ * Static methods for creating new images
  */
 public final class NewImage {
     private static int untitledCount = 1;
 
-    private static Dimension lastNew;
+    private static final Dimension lastSize = AppPreferences.getNewImageSize();
 
     private NewImage() {
     }
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        ImageComponents.addCompAsNewImage(comp);
+        ImageComponents.addAsNewImage(comp);
         return comp;
     }
 
@@ -63,40 +67,16 @@ public final class NewImage {
             return;
         }
         Color c = bg.getColor();
-        int imgWidth = img.getWidth();
-        int imgHeight = img.getHeight();
-        Graphics2D g = img.createGraphics();
-        g.setColor(c);
-        g.fillRect(0, 0, imgWidth, imgHeight);
-        g.dispose();
+        Fill.fillImage(img, c);
     }
 
     private static void showInDialog() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-
-        if(lastNew == null) {
-            //noinspection NonThreadSafeLazyInitialization
-            lastNew = AppPreferences.getNewImageSize();
-        }
-        NewImagePanel p = new NewImagePanel(lastNew.width, lastNew.height);
-        OKCancelDialog d = new OKCancelDialog(p, "New Image") {
-            @Override
-            public void okAction() {
-                int selectedWidth = p.getSelectedWidth();
-                int selectedHeight = p.getSelectedHeight();
-                FillType bg = p.getSelectedBackground();
-
-                String title = "Untitled" + untitledCount;
-                addNewImage(bg, selectedWidth, selectedHeight, title);
-                untitledCount++;
-
-                lastNew.width = selectedWidth;
-                lastNew.height = selectedHeight;
-
-                close();
-            }
-        };
-        d.setVisible(true);
+        NewImagePanel panel = new NewImagePanel();
+        new DialogBuilder()
+                .title("New Image")
+                .validatedContent(panel)
+                .okAction(panel::okPressedInDialog)
+                .show();
     }
 
     public static Action getAction() {
@@ -108,45 +88,81 @@ public final class NewImage {
         };
     }
 
-    public static Dimension getLastNew() {
-        return lastNew;
+    public static Dimension getLastSize() {
+        return lastSize;
     }
 
     /**
      * The GUI of the "New Image" dialog
      */
-    private static class NewImagePanel extends JPanel {
+    private static class NewImagePanel extends ValidatedPanel {
         private final JTextField widthTF;
         private final JTextField heightTF;
 
         private static final int BORDER_WIDTH = 5;
         private final JComboBox<FillType> backgroundSelector;
 
-        private NewImagePanel(int defaultWidth, int defaultHeight) {
+        private NewImagePanel() {
             setLayout(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(this);
 
             //noinspection SuspiciousNameCombination
-            setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
+            setBorder(createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
-            widthTF = new IntTextField(String.valueOf(defaultWidth));
-            widthTF.setName("widthTF");
-            gbh.addLabelWithControl("Width:", widthTF);
-
-            heightTF = new IntTextField(String.valueOf(defaultHeight));
-            heightTF.setName("heightTF");
-            gbh.addLabelWithControl("Height:", heightTF);
+            widthTF = addTextField("widthTF", "Width:",
+                    lastSize.width, gbh);
+            heightTF = addTextField("heightTF", "Height:",
+                    lastSize.height, gbh);
 
             backgroundSelector = new JComboBox(FillType.values());
-            gbh.addLabelWithControl("Fill:", backgroundSelector);
+            gbh.addLabelWithLastControl("Fill:", backgroundSelector);
+        }
+
+        private static JTextField addTextField(String name, String labelText,
+                                               int value, GridBagHelper gbh) {
+            JTextField tf = new JTextField(String.valueOf(value));
+            tf.setName(name);
+            gbh.addLabelWithTwoControls(labelText,
+                    TextFieldValidator.createIntOnlyLayerFor(tf),
+                    new JLabel("pixels"));
+            return tf;
+        }
+
+        @Override
+        public ValidationResult checkValidity() {
+            ValidationResult retVal = ValidationResult.ok();
+            try {
+                getSelectedWidth();
+            } catch (NumberFormatException e) {
+                retVal = retVal.addError("The width must be an integer.");
+            }
+            try {
+                getSelectedHeight();
+            } catch (NumberFormatException e) {
+                retVal = retVal.addError("The height must be an integer.");
+            }
+            return retVal;
+        }
+
+        private void okPressedInDialog() {
+            int selectedWidth = getSelectedWidth();
+            int selectedHeight = getSelectedHeight();
+            FillType bg = getSelectedBackground();
+
+            String title = "Untitled" + untitledCount;
+            addNewImage(bg, selectedWidth, selectedHeight, title);
+            untitledCount++;
+
+            lastSize.width = selectedWidth;
+            lastSize.height = selectedHeight;
         }
 
         private int getSelectedWidth() {
-            return Integer.parseInt(widthTF.getText());
+            return parseInt(widthTF.getText().trim());
         }
 
         private int getSelectedHeight() {
-            return Integer.parseInt(heightTF.getText());
+            return parseInt(heightTF.getText().trim());
         }
 
         private FillType getSelectedBackground() {

@@ -20,7 +20,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.FeedbackFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -44,14 +43,14 @@ public class JHVideoFeedback extends ParametrizedFilter {
     public JHVideoFeedback() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 iterations,
                 center,
                 zoom,
                 rotation,
                 startOpacity,
                 endOpacity
-        ));
+        );
     }
 
     @Override

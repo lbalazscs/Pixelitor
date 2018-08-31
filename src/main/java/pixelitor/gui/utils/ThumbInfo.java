@@ -19,6 +19,9 @@ package pixelitor.gui.utils;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Information associated with a thumbnail image
+ */
 public class ThumbInfo {
     private final BufferedImage thumb;
 

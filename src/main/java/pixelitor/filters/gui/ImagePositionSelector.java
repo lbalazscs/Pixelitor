@@ -37,7 +37,9 @@ import static java.awt.Color.WHITE;
 /**
  * The image selector part of an {@link ImagePositionParamGUI}
  */
-public class ImagePositionSelector extends JComponent implements MouseMotionListener, MouseListener {
+public class ImagePositionSelector extends JComponent
+        implements MouseMotionListener, MouseListener {
+
     private static final int CENTRAL_SQUARE_SIZE = 5;
 
     private final ImagePositionParamGUI parentGUI;
@@ -45,7 +47,8 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
     private BufferedImage thumb;
     private boolean enabled = true;
 
-    public ImagePositionSelector(ImagePositionParamGUI parentGUI, ImagePositionParam model, int size) {
+    public ImagePositionSelector(ImagePositionParamGUI parentGUI,
+                                 ImagePositionParam model, int size) {
         this.parentGUI = parentGUI;
         this.model = model;
         addMouseListener(this);
@@ -94,9 +97,13 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     private static void drawCentralSquare(Graphics2D g2, int x, int y) {
         g2.setColor(BLACK);
-        g2.draw(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE, CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
+        g2.draw(new Rectangle2D.Float(
+                x - CENTRAL_SQUARE_SIZE, y - CENTRAL_SQUARE_SIZE,
+                CENTRAL_SQUARE_SIZE * 2, CENTRAL_SQUARE_SIZE * 2));
         g2.setColor(WHITE);
-        g2.fill(new Rectangle2D.Float(x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1, CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
+        g2.fill(new Rectangle2D.Float(
+                x - CENTRAL_SQUARE_SIZE + 1, y - CENTRAL_SQUARE_SIZE + 1,
+                CENTRAL_SQUARE_SIZE * 2 - 1, CENTRAL_SQUARE_SIZE * 2 - 1));
     }
 
     @Override
@@ -113,7 +120,8 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
         float relativeX = ((float) mouseX) / thumb.getWidth();
         float relativeY = ((float) mouseY) / thumb.getHeight();
-        model.setRelativeValues(relativeX, relativeY, false, isAdjusting, true);
+        model.setRelativeValues(relativeX, relativeY,
+                false, isAdjusting, true);
 
         parentGUI.updateSlidersFromModel();
 
@@ -122,7 +130,6 @@ public class ImagePositionSelector extends JComponent implements MouseMotionList
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
     }
 
     @Override

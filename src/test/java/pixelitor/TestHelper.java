@@ -24,7 +24,6 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
@@ -36,16 +35,17 @@ import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
-import pixelitor.utils.Messages;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -53,6 +53,7 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -62,32 +63,15 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 public class TestHelper {
     private static final int TEST_WIDTH = 20;
     private static final int TEST_HEIGHT = 10;
-    private static final Component eventSource = new JPanel();
-    private static boolean initialized = false;
 
     // all coordinates and distances must be even here because of the resize test
-    private static final Rectangle standardTestSelectionShape = new Rectangle(4, 4, 8, 4);
-
-    static {
-        initTesting();
-    }
+    private static final Rectangle standardTestSelectionShape
+            = new Rectangle(4, 4, 8, 4);
 
     private TestHelper() {
     }
 
-    /**
-     * Initialize some static methods that must be done only once
-     */
-    public static void initTesting() {
-        if (!initialized) {
-            setupMockFgBgSelector();
-            Messages.setMessageHandler(new TestMessageHandler());
-            History.setUndoLevels(10);
-            initialized = true;
-        }
-    }
-
-    private static void setupMockFgBgSelector() {
+    public static void setupMockFgBgSelector() {
         FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
@@ -97,7 +81,6 @@ public class TestHelper {
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
         ImageLayer layer = new ImageLayer(comp, image, layerName, null);
-//        comp.addLayerNoGUI(layer);
 
         return layer;
     }
@@ -110,9 +93,10 @@ public class TestHelper {
 
     public static Composition createEmptyComposition() {
         Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        setupAnICFor(comp);
+        setupAMockICFor(comp);
 
         comp.setName("Test");
+        setupAMockICFor(comp);
 
         return comp;
     }
@@ -122,9 +106,10 @@ public class TestHelper {
 
         Canvas canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
         when(comp.getCanvas()).thenReturn(canvas);
-        when(comp.getCanvasBounds()).thenReturn(new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
-        when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
-        when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
+        when(comp.getCanvasImBounds()).thenReturn(
+                new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
+        when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
+        when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
 
         ImageComponent ic = mock(ImageComponent.class);
         when(ic.getComp()).thenReturn(comp);
@@ -143,24 +128,22 @@ public class TestHelper {
         ImageLayer layer1 = createImageLayer("layer 1", c);
         ImageLayer layer2 = createImageLayer("layer 2", c);
 
-        c.addLayerNoGUI(layer1);
-        c.addLayerNoGUI(layer2);
+        c.addLayerInInitMode(layer1);
+        c.addLayerInInitMode(layer2);
 
         if (addMasks) {
             layer1.addMask(REVEAL_ALL);
             layer2.addMask(REVEAL_ALL);
         }
 
-        // TODO it should not be necessary to call
-        // separately for both layers
-        NORMAL.activate(layer1);
-        NORMAL.activate(layer2);
+        NORMAL.activate(layer2, "test");
 
         assert layer2 == c.getActiveLayer();
         assert layer1 == c.getLayer(0);
         assert layer2 == c.getLayer(1);
 
         c.setDirty(false);
+        setupAMockICFor(c);
 
         return c;
     }
@@ -176,7 +159,7 @@ public class TestHelper {
     public static Layer createLayerOfClass(Class layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
-            layer = new ImageLayer(comp, "layer 1");
+            layer = ImageLayer.createEmpty(comp, "layer 1");
         } else if (layerClass.equals(TextLayer.class)) {
             layer = createTextLayer(comp, "layer 1");
         } else if (layerClass.equals(AdjustmentLayer.class)) {
@@ -187,7 +170,9 @@ public class TestHelper {
         return layer;
     }
 
-    public static MouseEvent createEvent(int id, Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+    public static PMouseEvent createEvent(ImageComponent ic, int id,
+                                          Alt alt, Ctrl ctrl, Shift shift,
+                                          MouseButton mouseButton, int x, int y) {
         int modifiers = 0;
         modifiers = alt.modify(modifiers);
         modifiers = ctrl.modify(modifiers);
@@ -198,7 +183,7 @@ public class TestHelper {
             popupTrigger = true;
         }
         //noinspection MagicConstant
-        return new MouseEvent(eventSource,
+        MouseEvent e = new MouseEvent(ic,
                 id,
                 System.currentTimeMillis(),
                 modifiers,
@@ -207,45 +192,62 @@ public class TestHelper {
                 1, // click count
                 popupTrigger
         );
+        return new PMouseEvent(e, ic);
     }
 
-    public static ImageComponent setupAnActiveICFor(Composition comp) {
-        ImageComponent ic = setupAnICFor(comp);
+    public static ImageComponent setupAMockICFor(Composition comp) {
+        ImageComponent ic = createMockICWithoutComp();
+
+        when(ic.getComp()).thenReturn(comp);
+        when(ic.activeIsDrawable()).thenAnswer(
+                invocation -> comp.activeIsDrawable());
+
+        comp.setIC(ic);
+
+        // set it to active only after the comp is set
+        // because the active ic should return non-null in ic.getComp()
         ImageComponents.setActiveIC(ic, false);
+
         return ic;
     }
 
-    public static ImageComponent setupAnICFor(Composition comp) {
+    public static ImageComponent createMockICWithoutComp() {
         ImageComponent ic = mock(ImageComponent.class);
 
-        when(ic.fromComponentToImageSpace(any())).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any(Rectangle.class))).then(returnsFirstArg());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
-        when(ic.fromImageToComponentSpace(any())).thenAnswer(invocation -> {
+        when(ic.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
-            return new Rectangle((int) in.getX(), (int) in.getY(), (int) in.getWidth(), (int) in.getHeight());
+            return new Rectangle(
+                    (int) in.getX(), (int) in.getY(),
+                    (int) in.getWidth(), (int) in.getHeight());
         });
+
+        when(ic.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
+        when(ic.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
+
+        Point fakeLocationOnScreen = new Point(0, 0);
+        when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
 
         Cursor cursor = Cursor.getDefaultCursor();
         when(ic.getCursor()).thenReturn(cursor);
 
-        when(ic.activeIsDrawable()).thenAnswer(
-                invocation -> comp.activeIsDrawable());
-
         JViewport parent = new JViewport();
         when(ic.getParent()).thenReturn(parent);
 
-        when(ic.getComp()).thenReturn(comp);
         when(ic.isMock()).thenReturn(true);
         when(ic.getMaskViewMode()).thenReturn(NORMAL);
-
-        comp.setIC(ic);
 
         return ic;
     }
 
-    public static void addSelectionRectTo(Composition comp, int x, int y, int width, int height) {
+    public static void addSelectionRectTo(Composition comp,
+                                          int x, int y, int width, int height) {
         Rectangle shape = new Rectangle(x, y, width, height);
         MockingDetails mockingDetails = mockingDetails(comp);
         if (mockingDetails.isMock()) {
@@ -257,13 +259,14 @@ public class TestHelper {
         }
     }
 
-    public static void moveLayer(Composition comp, boolean makeDuplicateLayer, int relativeX, int relativeY) {
+    public static void moveLayer(Composition comp,
+                                 boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(makeDuplicateLayer);
-        comp.moveActiveContentRelative(relativeX, relativeY);
+        comp.moveActiveContentRelative(relX, relY);
         comp.endMovement();
     }
 
-    public static void addRectangleSelection(Composition comp, Rectangle rect) {
+    private static void addRectangleSelection(Composition comp, Rectangle rect) {
 //        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
         Selection selection = new Selection(rect, comp.getIC());
         comp.setNewSelection(selection);
@@ -283,7 +286,8 @@ public class TestHelper {
         assertThat(shapeBounds).isEqualTo(expected);
     }
 
-    public static void setStandardTestTranslationToAllLayers(Composition comp, WithTranslation translation) {
+    public static void setStandardTestTranslationToAllLayers(Composition comp,
+                                                             WithTranslation translation) {
         comp.forEachContentLayer(contentLayer -> {
             // should be used on layers without translation
             int tx = contentLayer.getTX();
@@ -295,7 +299,9 @@ public class TestHelper {
         });
     }
 
-    public static void setStandardTestTranslation(Composition comp, ContentLayer layer, WithTranslation translation) {
+    public static void setStandardTestTranslation(Composition comp,
+                                                  ContentLayer layer,
+                                                  WithTranslation translation) {
         // Composition only allows to move the active layer
         // so if the given layer is not active, we need to activate it temporarily
         Layer activeLayerBefore = comp.getActiveLayer();

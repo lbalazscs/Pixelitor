@@ -76,7 +76,9 @@ public final class LookupFactory {
         return new ShortLookupTable(0, lookupData);
     }
 
-    public static LookupTable createLookupFrom3Arrays(short[] redMappings, short[] greenMappings, short[] blueMappings) {
+    public static LookupTable createLookupFrom3Arrays(
+            short[] redMappings, short[] greenMappings, short[] blueMappings) {
+
         short[][] lookupData = new short[3][256];
         lookupData[0] = redMappings;
         lookupData[1] = greenMappings;

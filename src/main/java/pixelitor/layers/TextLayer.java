@@ -20,14 +20,15 @@ package pixelitor.layers;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
-import pixelitor.filters.painters.TextAdjustmentsPanel;
 import pixelitor.filters.painters.TextSettings;
+import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TranslatedTextPainter;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
@@ -85,27 +86,25 @@ public class TextLayer extends ContentLayer {
         MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
 
         // don't add it yet to history, only after the user chooses to press OK
-        comp.addLayer(textLayer, false, null, true, false);
+        new LayerAdder(comp).add(textLayer);
 
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(textLayer);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Create Text Layer") {
-            @Override
-            protected void okAction() {
-                close();
-                textLayer.updateLayerName();
+        TextSettingsPanel p = new TextSettingsPanel(textLayer);
+        new DialogBuilder()
+                .content(p)
+                .owner(pw)
+                .title("Create Text Layer")
+                .okAction(() -> {
+                    textLayer.updateLayerName();
 
-                // now it is safe to add it to the history
-                NewLayerEdit newLayerEdit = new NewLayerEdit("New Text Layer", comp, textLayer, activeLayerBefore, oldViewMode);
-                History.addEdit(newLayerEdit);
-            }
-
-            @Override
-            protected void cancelAction() {
-                close();
-                comp.deleteLayer(textLayer, false, true);
-            }
-        };
-        d.setVisible(true);
+                    // now it is safe to add it to the history
+                    NewLayerEdit newLayerEdit = new NewLayerEdit(
+                            "New Text Layer", comp, textLayer,
+                            activeLayerBefore, oldViewMode);
+                    History.addEdit(newLayerEdit);
+                })
+                .cancelAction(() -> comp.deleteLayer(textLayer,
+                        false, true))
+                .show();
     }
 
     public void edit(PixelitorWindow pw) {
@@ -114,24 +113,15 @@ public class TextLayer extends ContentLayer {
         }
 
         TextSettings oldSettings = getSettings();
-        TextAdjustmentsPanel p = new TextAdjustmentsPanel(this);
-        OKCancelDialog d = new OKCancelDialog(p, pw, "Edit Text Layer") {
-            @Override
-            protected void okAction() {
-                close();
+        TextSettingsPanel p = new TextSettingsPanel(this);
 
-                commitSettings(oldSettings);
-            }
-
-            @Override
-            protected void cancelAction() {
-                close();
-
-                setSettings(oldSettings);
-                comp.imageChanged(Composition.ImageChangeActions.FULL);
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .content(p)
+                .owner(pw)
+                .title("Edit Text Layer")
+                .okAction(() -> commitSettings(oldSettings))
+                .cancelAction(() -> resetOldSettings(oldSettings))
+                .show();
     }
 
     public void commitSettings(TextSettings oldSettings) {
@@ -142,6 +132,11 @@ public class TextLayer extends ContentLayer {
                 oldSettings
         );
         History.addEdit(edit);
+    }
+
+    private void resetOldSettings(TextSettings oldSettings) {
+        setSettings(oldSettings);
+        comp.imageChanged();
     }
 
     @Override
@@ -158,7 +153,7 @@ public class TextLayer extends ContentLayer {
         d.setSettings(new TextSettings(settings));
 
         if (hasMask()) {
-            d.addMask(mask.duplicate(d));
+            d.addConfiguredMask(mask.duplicate(d));
         }
 
         return d;
@@ -177,16 +172,18 @@ public class TextLayer extends ContentLayer {
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);
 
-        comp.addLayer(newImageLayer, false, null, false, false);
+        new LayerAdder(comp)
+                .noRefresh()
+                .add(newImageLayer);
         comp.deleteLayer(this, false, true);
 
         return newImageLayer;
     }
 
     public BufferedImage createRasterizedImage() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
+        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
         Graphics2D g = img.createGraphics();
-        applyLayer(g, true, img);
+        applyLayer(g, img, true);
         g.dispose();
         return img;
     }
@@ -194,18 +191,18 @@ public class TextLayer extends ContentLayer {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         painter.setFillPaint(settings.getColor());
-        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
+        painter.paint(g, null, comp.getCanvasImWidth(), comp.getCanvasImHeight());
     }
 
     @Override
-    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
+    public BufferedImage applyLayer(Graphics2D g, BufferedImage imageSoFar, boolean firstVisibleLayer) {
         if (settings == null) {
             // the layer was just created, nothing to paint yet
             return imageSoFar;
         }
 
         // the text will be painted normally
-        return super.applyLayer(g, firstVisibleLayer, imageSoFar);
+        return super.applyLayer(g, imageSoFar, firstVisibleLayer);
     }
 
     @Override
@@ -285,7 +282,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+    public void resize(int targetWidth, int targetHeight) {
         // TODO
     }
 
@@ -297,8 +294,8 @@ public class TextLayer extends ContentLayer {
         // calculate the corresponding margins...
         int northMargin = (int) cropRect.getY();
         int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (canvas.getHeight() - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (canvas.getWidth() - cropRect.getWidth() - cropRect.getX());
+        int southMargin = (int) (canvas.getImHeight() - cropRect.getHeight() - cropRect.getY());
+        int eastMargin = (int) (canvas.getImWidth() - cropRect.getWidth() - cropRect.getX());
 
         // ...and do a negative enlargement
         enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);

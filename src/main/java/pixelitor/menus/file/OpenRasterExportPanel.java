@@ -19,16 +19,13 @@ package pixelitor.menus.file;
 
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenRaster;
-import pixelitor.io.OpenSaveManager;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * The configuration GUI for the export in OpenRaster format
@@ -45,10 +42,11 @@ public class OpenRasterExportPanel extends JPanel {
         return mergedLayersCB.isSelected();
     }
 
-    public static void showInDialog(JFrame parent) {
+    public static void showInDialog(JFrame owner) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
-            boolean exportAnyway = Dialogs.showYesNoQuestionDialog("Only one layer", comp.getName() + " has only one layer.\n" +
+            boolean exportAnyway = Dialogs.showYesNoQuestionDialog(
+                    "Only one layer", comp.getName() + " has only one layer.\n" +
                     "Are you sure that you want to export it in a layered format?");
             if(!exportAnyway) {
                 return;
@@ -56,22 +54,21 @@ public class OpenRasterExportPanel extends JPanel {
         }
 
         OpenRasterExportPanel p = new OpenRasterExportPanel();
-        OKCancelDialog d = new OKCancelDialog(p, parent, "Export OpenRaster", "Export", "Cancel", false) {
-            @Override
-            protected void okAction() {
-                close();
-                File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.oraFilter);
-                if(file != null) {
-                    boolean addMergedImage = p.exportMergedImage();
-                    try {
-                        OpenRaster.write(comp, file, addMergedImage);
-                        OpenSaveManager.afterSaveActions(comp, file, true);
-                    } catch (IOException e) {
-                        Messages.showException(e);
-                    }
-                }
-            }
-        };
-        d.setVisible(true);
+        new DialogBuilder()
+                .content(p)
+                .owner(owner)
+                .title("Export OpenRaster")
+                .okText("Export")
+                .okAction(() -> okPressedInDialog(comp, p))
+                .show();
+    }
+
+    private static void okPressedInDialog(Composition comp, OpenRasterExportPanel p) {
+        File file = FileChoosers.selectSaveFileForSpecificFormat(FileChoosers.oraFilter);
+        if (file != null) {
+            boolean addMergedImage = p.exportMergedImage();
+            Runnable saveTask = () -> OpenRaster.uncheckedWrite(comp, file, addMergedImage);
+            comp.saveAsync(saveTask, file, true);
+        }
     }
 }

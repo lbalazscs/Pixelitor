@@ -80,7 +80,6 @@ public class FastLookupOp implements BufferedImageOp {
                     int ug = (int) (g * f);
                     int ub = (int) (b * f);
 
-                    // TODO these checks shouldn't be necessary
                     if (ur > 255) {
                         ur = 255;
                     }

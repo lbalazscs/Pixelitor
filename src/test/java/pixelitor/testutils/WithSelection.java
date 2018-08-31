@@ -28,19 +28,19 @@ import java.awt.Rectangle;
 public enum WithSelection {
     YES {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
             TestHelper.setStandardTestSelection(comp);
             Rectangle selectionShape = TestHelper.getStandardTestSelectionShape();
             TestHelper.checkSelectionBounds(comp, selectionShape);
         }
     }, NO {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
             // do nothing
         }
     };
 
-    public abstract void init(Composition comp);
+    public abstract void setupFor(Composition comp);
 
     public boolean isYes() {
         return this == YES;

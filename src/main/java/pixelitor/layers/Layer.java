@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
-import pixelitor.AppLogic;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.Layers;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.AddLayerMaskEdit;
@@ -51,7 +51,7 @@ import java.util.List;
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static pixelitor.Composition.ImageChangeActions.FULL;
+import static java.lang.String.format;
 
 /**
  * The abstract superclass of all layer classes
@@ -73,21 +73,23 @@ public abstract class Layer implements Serializable {
 
     float opacity = 1.0f;
     BlendingMode blendingMode = BlendingMode.NORMAL;
+    protected boolean isAdjustment = false;
 
     // transient variables from here
     private transient LayerButton ui;
-    protected transient boolean isAdjustment = false;
     private transient List<LayerChangeListener> layerChangeListeners;
 
     /**
      * Whether the edited image is the layer image or
      * the layer mask image.
-     * This flag is logically independent from the showLayerMask
-     * flag in the image component.
+     * Related to {@link MaskViewMode}.
      */
     private transient boolean maskEditing = false;
 
     Layer(Composition comp, String name, Layer parent) {
+        assert comp != null;
+        assert name != null;
+
         this.comp = comp;
         this.name = name;
         this.parent = parent;
@@ -103,12 +105,18 @@ public abstract class Layer implements Serializable {
         layerChangeListeners = new ArrayList<>();
     }
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+
+        // defaults for transient fields
+        ui = null;
+        maskEditing = false;
+
         in.defaultReadObject();
         layerChangeListeners = new ArrayList<>();
 
-        // We create a layer button only for real layers.
-        // For layer masks, we share the button of the real layer.
+        // Creates a layer button only for real layers, because
+        // layer masks use the button of the real layer.
         if (parent == null) { // not mask
             ui = new LayerButton(this);
 
@@ -128,10 +136,13 @@ public abstract class Layer implements Serializable {
         }
 
         this.visible = newVisibility;
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         ui.setOpenEye(newVisibility);
 
-        History.addEdit(addToHistory, () -> new LayerVisibilityChangeEdit(comp, this, newVisibility));
+        if (addToHistory) {
+            History.addEdit(
+                    new LayerVisibilityChangeEdit(comp, this, newVisibility));
+        }
     }
 
     public LayerButton getUI() {
@@ -157,7 +168,7 @@ public abstract class Layer implements Serializable {
     }
 
     private void updateAfterBMorOpacityChange() {
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
         HistogramsPanel hp = HistogramsPanel.INSTANCE;
         if (hp.isShown()) {
@@ -165,7 +176,8 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setOpacity(float newOpacity, boolean updateGUI, boolean addToHistory, boolean updateImage) {
+    public void setOpacity(float newOpacity, boolean updateGUI,
+                           boolean addToHistory, boolean updateImage) {
         assert newOpacity <= 1.0f : "newOpacity = " + newOpacity;
         assert newOpacity >= 0.0f : "newOpacity = " + newOpacity;
 
@@ -173,7 +185,9 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        History.addEdit(addToHistory, () -> new LayerOpacityEdit(this, opacity));
+        if (addToHistory) {
+            History.addEdit(new LayerOpacityEdit(this, opacity));
+        }
 
         this.opacity = newOpacity;
 
@@ -185,8 +199,11 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public void setBlendingMode(BlendingMode mode, boolean updateGUI, boolean addToHistory, boolean updateImage) {
-        History.addEdit(addToHistory, () -> new LayerBlendingEdit(this, blendingMode));
+    public void setBlendingMode(BlendingMode mode, boolean updateGUI,
+                                boolean addToHistory, boolean updateImage) {
+        if (addToHistory) {
+            History.addEdit(new LayerBlendingEdit(this, blendingMode));
+        }
 
         this.blendingMode = mode;
         if (updateGUI) {
@@ -202,13 +219,16 @@ public abstract class Layer implements Serializable {
         String previousName = name;
         this.name = newName;
 
-        if (name.equals(previousName)) { // important because this might be called twice for a single rename
+        // important because this might be called twice for a single rename
+        if (name.equals(previousName)) {
             return;
         }
 
-        ui.changeNameProgrammatically(newName);
+        ui.setLayerName(newName);
 
-        History.addEdit(addToHistory, () -> new LayerRenameEdit(this, previousName, name));
+        if (addToHistory) {
+            History.addEdit(new LayerRenameEdit(this, previousName, name));
+        }
     }
 
     public String getName() {
@@ -223,24 +243,12 @@ public abstract class Layer implements Serializable {
         this.comp = comp;
     }
 
-    public void mergeDownOn(ImageLayer bellow) {
-        // TODO what about translations of the bellow layer
-
-        BufferedImage bellowImage = bellow.getImage();
-        Graphics2D g = bellowImage.createGraphics();
-        BufferedImage result = applyLayer(g, false, bellowImage);
-        if(result != null) {  // this was an adjustment
-            bellow.setImage(result);
-        }
-        g.dispose();
-    }
-
     public void makeActive(boolean addToHistory) {
         comp.setActiveLayer(this, addToHistory);
     }
 
-    boolean isActive() {
-        return comp.isActiveLayer(this);
+    public boolean isActive() {
+        return comp.isActive(this);
     }
 
     public boolean hasMask() {
@@ -250,18 +258,18 @@ public abstract class Layer implements Serializable {
     public void addMask(LayerMaskAddType addType) {
         if (mask != null) {
             Messages.showInfo("Has layer mask",
-                    String.format("The layer \"%s\" already has a layer mask.", getName()));
+                    format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
         Selection selection = comp.getSelection();
         if (addType.missingSelection(selection)) {
             Messages.showInfo("No selection",
-                    String.format("The composition \"%s\" has no selection.", comp.getName()));
+                    format("The composition \"%s\" has no selection.", comp.getName()));
             return;
         }
 
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
         BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
 
@@ -274,7 +282,8 @@ public abstract class Layer implements Serializable {
         addImageAsMask(bwMask, deselect, editName, false);
     }
 
-    public void addImageAsMask(BufferedImage bwMask, boolean deselect, String editName, boolean inheritTranslation) {
+    public void addImageAsMask(BufferedImage bwMask, boolean deselect,
+                               String editName, boolean inheritTranslation) {
         assert mask == null;
 
         mask = new LayerMask(comp, bwMask, this, inheritTranslation);
@@ -284,22 +293,23 @@ public abstract class Layer implements Serializable {
         // mask constructor already will try to update the image
         ui.addMaskIconLabel();
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
-        AppLogic.maskChanged(this);
+        Layers.maskAddedTo(this);
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
             Shape backupShape = comp.getSelectionShape();
             comp.deselect(false);
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
-                DeselectEdit deselectEdit = new DeselectEdit(comp, backupShape, "nested deselect");
+                DeselectEdit deselectEdit = new DeselectEdit(
+                        comp, backupShape, "nested deselect");
                 edit = new LinkedEdit(editName, comp, edit, deselectEdit);
             }
         }
 
         History.addEdit(edit);
-        MaskViewMode.EDIT_MASK.activate(comp, this);
+        MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
     }
 
     public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
@@ -314,14 +324,14 @@ public abstract class Layer implements Serializable {
      * Adds a mask that is already configured to be used
      * with this layer
      */
-    public void addMask(LayerMask mask) {
+    public void addConfiguredMask(LayerMask mask) {
         assert mask != null;
         assert mask.getParent() == this;
 
         this.mask = mask;
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         ui.addMaskIconLabel();
-        AppLogic.maskChanged(this);
+        Layers.maskAddedTo(this);
         mask.updateIconImage();
     }
 
@@ -332,31 +342,37 @@ public abstract class Layer implements Serializable {
         mask = null;
         maskEditing = false;
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
 
-        History.addEdit(addToHistory, () -> new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+        if (addToHistory) {
+            History.addEdit(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+        }
 
-        AppLogic.maskChanged(this);
+        Layers.maskDeletedFrom(this);
         ui.deleteMaskIconLabel();
 
-        MaskViewMode.NORMAL.activate(ic, this);
+        MaskViewMode.NORMAL.activate(ic, this, "mask deleted");
     }
 
     /**
-     * Applies the effect of this layer on the given Graphics2D or on the given BufferedImage.
-     * Adjustment layers and watermarked text layers change a BufferedImage, while other layers
-     * just paint on the graphics.
-     * If the BufferedImage is changed, the method returns the new image and null otherwise.
+     * Applies the effect of this layer on the given Graphics2D
+     * or on the given BufferedImage.
+     * Adjustment layers and watermarked text layers change the
+     * BufferedImage, while other layers just paint on the Graphics2D.
+     * If the BufferedImage is changed, this method returns the new image
+     * and null otherwise.
      */
-    public BufferedImage applyLayer(Graphics2D g, boolean firstVisibleLayer, BufferedImage imageSoFar) {
-        if (isAdjustment) { // adjustment layer or watermarked text layers
+    public BufferedImage applyLayer(Graphics2D g,
+                                    BufferedImage imageSoFar,
+                                    boolean firstVisibleLayer) {
+        if (isAdjustment) { // adjustment layer or watermarked text layer
             return adjustImageWithMasksAndBlending(imageSoFar, firstVisibleLayer);
         } else {
             if (!useMask()) {
                 setupDrawingComposite(g, firstVisibleLayer);
                 paintLayerOnGraphics(g, firstVisibleLayer);
             } else {
-                paintLayerOnGraphicsWithMask(firstVisibleLayer, g);
+                paintLayerOnGraphicsWithMask(g, firstVisibleLayer);
             }
         }
         return null;
@@ -372,16 +388,18 @@ public abstract class Layer implements Serializable {
      * The returned image is canvas-sized, and the masks and the
      * translations are taken into account
      */
-    private void paintLayerOnGraphicsWithMask(boolean firstVisibleLayer, Graphics2D g) {
+    private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
 //        Canvas canvas = comp.getCanvas();
 
         // 1. create the masked image
         // TODO the masked image should be cached
-        BufferedImage maskedImage = new BufferedImage(canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB);
+        BufferedImage maskedImage = new BufferedImage(
+                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
-        mig.drawImage(mask.getTransparencyImage(), mask.getTX(), mask.getTY(), null);
+        mig.drawImage(mask.getTransparencyImage(),
+                mask.getTX(), mask.getTY(), null);
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
@@ -393,7 +411,8 @@ public abstract class Layer implements Serializable {
     /**
      * Used by adjustment layers and watermarked text layers
      */
-    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar, boolean isFirstVisibleLayer) {
+    private BufferedImage adjustImageWithMasksAndBlending(BufferedImage imgSoFar,
+                                                          boolean isFirstVisibleLayer) {
         if (isFirstVisibleLayer) {
             return imgSoFar; // there's nothing we can do
         }
@@ -417,7 +436,7 @@ public abstract class Layer implements Serializable {
      */
     protected abstract BufferedImage actOnImageFromLayerBellow(BufferedImage src);
 
-    public abstract void resize(int targetWidth, int targetHeight, boolean progressiveBilinear);
+    public abstract void resize(int targetWidth, int targetHeight);
 
     /**
      * The given crop rectangle is given in image space,
@@ -464,7 +483,8 @@ public abstract class Layer implements Serializable {
      * according to the blending mode and opacity of the layer
      */
     public void setupDrawingComposite(Graphics2D g, boolean isFirstVisibleLayer) {
-        if (isFirstVisibleLayer) {  // the first visible layer is always painted with normal mode
+        if (isFirstVisibleLayer) {
+            // the first visible layer is always painted with normal mode
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, opacity));
         } else {
             Composite composite = blendingMode.getComposite(opacity);
@@ -534,11 +554,13 @@ public abstract class Layer implements Serializable {
         assert mask != null;
         this.maskEnabled = maskEnabled;
 
-        comp.imageChanged(FULL);
+        comp.imageChanged();
         mask.updateIconImage();
         notifyLayerChangeListeners();
 
-        History.addEdit(addToHistory, () -> new EnableLayerMaskEdit(comp, this));
+        if (addToHistory) {
+            History.addEdit(new EnableLayerMaskEdit(comp, this));
+        }
     }
 
     private boolean useMask() {

@@ -20,7 +20,6 @@ package pixelitor.filters;
 import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -49,8 +48,8 @@ public class Clouds extends ParametrizedFilter {
         reseed();
     }
 
-    private final RangeParam scale = new RangeParam("Zoom", 3, 100, 300);
-    private final RangeParam roughness = new RangeParam("Roughness (%)", 1, 50, 100);
+    private final RangeParam scaleParam = new RangeParam("Zoom", 3, 100, 300);
+    private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 1, 50, 100);
 
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
@@ -58,12 +57,12 @@ public class Clouds extends ParametrizedFilter {
     public Clouds() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
-                scale.withAdjustedRange(0.3),
-                roughness,
+        setParams(
+                scaleParam.withAdjustedRange(0.3),
+                roughnessParam,
                 color1,
                 color2
-        ).withAction(new ReseedNoiseFilterAction(e -> reseed())));
+        ).withAction(new ReseedNoiseFilterAction(e -> reseed()));
     }
 
     @Override
@@ -71,8 +70,8 @@ public class Clouds extends ParametrizedFilter {
         ProgressTracker pt = new StatusBarProgressTracker(NAME, src.getHeight());
 
         renderClouds(dest,
-                scale.getValueAsFloat(),
-                roughness.getValueAsPercentage(),
+                scaleParam.getValueAsFloat(),
+                roughnessParam.getValueAsPercentage(),
                 color1.getColor(),
                 color2.getColor(),
                 pt);
@@ -81,7 +80,9 @@ public class Clouds extends ParametrizedFilter {
         return dest;
     }
 
-    public static void renderClouds(BufferedImage dest, float scaleValue, float roughnessValue, Color c1, Color c2, ProgressTracker pt) {
+    public static void renderClouds(BufferedImage dest,
+                                    float scale, float roughness,
+                                    Color c1, Color c2, ProgressTracker pt) {
         int width = dest.getWidth();
         int height = dest.getHeight();
         int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -91,15 +92,17 @@ public class Clouds extends ParametrizedFilter {
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
-            Runnable lineTask = () -> calculateLine(scaleValue, roughnessValue, width, destData, color1, color2, finalY);
+            Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, color1, color2);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitForFutures(futures, pt);
     }
 
-    private static void calculateLine(float scaleValue, float roughnessValue, int width, int[] destData, int[] color1, int[] color2, int y) {
+    private static void calculateLine(float startingScale, float roughness,
+                                      int width, int y, int[] destData,
+                                      int[] color1, int[] color2) {
         for (int x = 0; x < width; x++) {
-            float scale = scaleValue;
+            float scale = startingScale;
             float noiseValue = 0.0f;
             float contribution = 1.0f;
 
@@ -109,7 +112,7 @@ public class Clouds extends ParametrizedFilter {
                 float n = perlinNoise2D(scaledX, scaledY);
                 noiseValue += contribution * n;
                 scale /= 2;
-                contribution *= roughnessValue;
+                contribution *= roughness;
             }
 
             noiseValue = (1.0f + noiseValue) / 2.0f;
@@ -119,7 +122,8 @@ public class Clouds extends ParametrizedFilter {
                 noiseValue = 1.0f;
             }
 
-            destData[x + y * width] = ImageUtils.lerpAndPremultiplyColorWithAlpha(noiseValue, color1, color2);
+            destData[x + y * width] = ImageUtils.lerpAndPremultiply(
+                    noiseValue, color1, color2);
         }
     }
 

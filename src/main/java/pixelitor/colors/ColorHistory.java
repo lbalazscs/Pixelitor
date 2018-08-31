@@ -20,6 +20,7 @@ package pixelitor.colors;
 import pixelitor.colors.palette.ColorSwatchButton;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -28,22 +29,60 @@ import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.swing.BorderFactory.createEmptyBorder;
+
 /**
  * A color history. There are separate histories
  * for the foreground, background and filter colors.
  */
 public class ColorHistory {
-    public static final ColorHistory FOREGROUND = new ColorHistory("Foreground Color History");
-    public static final ColorHistory BACKGROUND = new ColorHistory("Background Color History");
-    public static final ColorHistory FILTER = new ColorHistory("Filter Color History");
+    private final Type type;
+
+    enum Type {
+        FG("Foreground Color History") {
+        }, BG("Background Color History") {
+        }, FLT("Filter Color History") {
+            @Override
+            public String getHelpText() {
+                return createFilterColorHistoryHelp();
+            }
+        };
+
+        final String title;
+
+        Type(String title) {
+            this.title = title;
+        }
+
+        public String getDialogTitle() {
+            return title;
+        }
+
+        public String getHelpText() {
+            return createStandardHelp();
+        }
+
+        private String createStandardHelp() {
+            return "<html>" + title + ": " + ColorSwatchClickHandler.STANDARD_HTML_HELP;
+        }
+
+        private static String createFilterColorHistoryHelp() {
+            return "<html>Filter Color History: " + ColorSwatchClickHandler.FILTER_HTML_HELP;
+        }
+    }
+
+    public static final ColorHistory FOREGROUND = new ColorHistory(Type.FG);
+    public static final ColorHistory BACKGROUND = new ColorHistory(Type.BG);
+    public static final ColorHistory FILTER = new ColorHistory(Type.FLT);
 
     private static final int MAX_SIZE = 200;
 
     private final List<Color> colors;
     private final String dialogTitle;
 
-    private ColorHistory(String dialogTitle) {
-        this.dialogTitle = dialogTitle;
+    private ColorHistory(Type type) {
+        this.type = type;
+        dialogTitle = type.getDialogTitle();
         colors = new ArrayList<>();
     }
 
@@ -62,17 +101,20 @@ public class ColorHistory {
         int colorsInRow = 10;
         int rows = 1 + (numColors - 1) / colorsInRow;
         int cols = colorsInRow;
-        JPanel form = new JPanel(new GridLayout(rows, cols, 2, 2));
-        form.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        JPanel panel = new JPanel(new GridLayout(rows, cols, 2, 2));
+        panel.setBorder(createEmptyBorder(2, 2, 2, 2));
         for (Color color : colors) {
-            ColorSwatchButton swatch = new ColorSwatchButton(color, clickHandler, 0, 0);
-            form.add(swatch);
+            ColorSwatchButton swatch
+                    = new ColorSwatchButton(color, clickHandler, 0, 0);
+            panel.add(swatch);
         }
+
+        Messages.showInStatusBar(type.getHelpText());
 
         new DialogBuilder()
                 .title(dialogTitle)
-                .parent(window)
-                .form(form)
+                .owner(window)
+                .content(panel)
                 .notModal()
                 .noOKButton()
                 .noCancelButton()

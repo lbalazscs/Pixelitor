@@ -18,22 +18,27 @@
 package pixelitor.selection;
 
 import pixelitor.Composition;
+import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -41,14 +46,15 @@ import java.awt.event.ActionEvent;
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
 
 /**
- * Static methods for managing the selection actions
+ * Static methods for managing the actions that should be enabled
+ * only when there is a selection on the active composition.
  */
 public final class SelectionActions {
 
     private static final Action crop = new AbstractAction("Crop") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.selectionCropActiveImage();
+            Crop.selectionCropActiveImage();
         }
     };
 
@@ -68,31 +74,74 @@ public final class SelectionActions {
 
     private static final ShowHideAction showHide = new ShowHideSelectionAction();
 
-    private static final Action traceWithBrush = new TraceAction("Stroke with Current Brush", Tools.BRUSH);
-    private static final Action traceWithEraser = new TraceAction("Stroke with Current Eraser", Tools.ERASER);
+    private static final Action traceWithBrush = new TraceAction(
+            "Stroke with Current Brush", Tools.BRUSH);
+    private static final Action traceWithEraser = new TraceAction(
+            "Stroke with Current Eraser", Tools.ERASER);
+    private static final Action traceWithSmudge = new TraceAction(
+            "Stroke with Current Smudge", Tools.SMUDGE);
 
-    private static final Action modify = new MenuAction("Modify...") {
+    private static final Action convertToPath = new AbstractAction("Convert to Path") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            selectionToPath(comp, true);
+        }
+    };
+
+    public static void selectionToPath(Composition comp, boolean addToHistory) {
+        Shape shape = comp.getSelection().getShape();
+        Path oldActivePath = comp.getActivePath();
+        comp.deselect(false);
+        Path path = Shapes.shapeToPath(shape, comp.getIC());
+        Tools.PEN.setPath(path);
+        Tools.PEN.startEditing(false);
+        comp.setActivePath(path);
+        Tools.PEN.activate();
+
+        if (addToHistory) {
+            History.addEdit(new ConvertSelectionToPathEdit(comp, shape, oldActivePath));
+        }
+    }
+
+    private static final Action modify = new MenuAction("Modify Selection...") {
         @Override
         public void onClick() {
-            JPanel p = new JPanel(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(p);
+            JPanel panel = new JPanel(new GridBagLayout());
+            GridBagHelper gbh = new GridBagHelper(panel);
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
-            EnumParam<SelectionModifyType> type = new EnumParam<>("Type", SelectionModifyType.class);
+            EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
+
             gbh.addLabelWithControl("Amount", amount.createGUI());
             gbh.addLabelWithControl("Type", type.createGUI());
 
-            OKCancelDialog d = new OKCancelDialog(p, PixelitorWindow.getInstance(),
-                    "Modify Selection", "Change!", "Close") {
-                @Override
-                protected void okAction() {
-                    Selection selection = getActiveCompOrNull().getSelection();
-                    SelectionModifyType selectionModifyType = type.getSelected();
-                    selection.modify(selectionModifyType, amount.getValue());
-                }
-            };
-            d.setVisible(true);
+            new DialogBuilder()
+                    .content(panel)
+                    .title("Modify Selection")
+                    .okText("Change!")
+                    .cancelText("Close")
+                    .validator(d -> {
+                        modifySelection(type, amount);
+
+                        // always return false so that
+                        // the Change button does not close it
+                        return false;
+                    })
+                    .show();
         }
     };
+
+    private static void modifySelection(EnumParam<SelectionModifyType> type,
+                                        RangeParam amount) {
+        Selection selection = getActiveCompOrNull().getSelection();
+        SelectionModifyType selectionModifyType = type.getSelected();
+        if (selection != null) {
+            selection.modify(selectionModifyType, amount.getValue());
+        } else {
+            // TODO - we modified it so much that it disappeared
+            // at least the change button should be disabled
+        }
+    }
 
     static {
         setEnabled(false, null);
@@ -106,9 +155,10 @@ public final class SelectionActions {
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert comp == null || ImageComponents.getActiveCompOrNull() == comp;
 
         if (RandomGUITest.isRunning()) {
+            assert EventQueue.isDispatchThread() : "not EDT thread";
             if (comp != null) {
                 boolean hasSelection = comp.hasSelection();
                 if (hasSelection != b) {
@@ -122,10 +172,12 @@ public final class SelectionActions {
         crop.setEnabled(b);
         traceWithBrush.setEnabled(b);
         traceWithEraser.setEnabled(b);
+        traceWithSmudge.setEnabled(b);
         deselect.setEnabled(b);
         invert.setEnabled(b);
         showHide.setEnabled(b);
         modify.setEnabled(b);
+        convertToPath.setEnabled(b);
     }
 
     public static boolean areEnabled() {
@@ -144,6 +196,10 @@ public final class SelectionActions {
         return traceWithEraser;
     }
 
+    public static Action getTraceWithSmudge() {
+        return traceWithSmudge;
+    }
+
     public static Action getDeselect() {
         return deselect;
     }
@@ -156,12 +212,16 @@ public final class SelectionActions {
         return showHide;
     }
 
+    public static Action getConvertToPath() {
+        return convertToPath;
+    }
+
     public static Action getModify() {
         return modify;
     }
 
     /**
-     * Strokes a selection with the current brush or eraser
+     * Strokes a selection with an {@link AbstractBrushTool}
      */
     private static class TraceAction extends MenuAction {
         private final AbstractBrushTool brushTool;
@@ -173,19 +233,19 @@ public final class SelectionActions {
 
         @Override
         public void onClick() {
-            ImageComponents.onActiveComp(this::traceComp);
+            ImageComponents.onActiveComp(this::trace);
         }
 
-        private void traceComp(Composition comp) {
+        private void trace(Composition comp) {
             if (!comp.activeIsDrawable()) {
-                Messages.showNotImageLayerError();
+                Messages.showNotDrawableError();
                 return;
             }
 
             if (comp.hasSelection()) {
                 Shape shape = comp.getSelectionShape();
                 if (shape != null) {
-                    Drawable dr = comp.getActiveDrawable();
+                    Drawable dr = comp.getActiveDrawableOrThrow();
                     brushTool.trace(dr, shape);
                 }
             }

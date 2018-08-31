@@ -21,7 +21,6 @@ import com.jhlabs.image.DoGFilter;
 import pixelitor.filters.Invert;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -43,12 +42,12 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
     public JHDifferenceOfGaussians() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 radius1.withAdjustedRange(0.01),
                 radius2.withAdjustedRange(0.01),
                 normalize,
                 invert
-        ));
+        );
     }
 
     @Override

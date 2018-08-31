@@ -46,12 +46,12 @@ public class MultiLayerBackup {
      * This object needs to be created before the translations,
      * canvas changes or selection changes take place
      */
-    public MultiLayerBackup(Composition comp, String editName, boolean changesCanvasDimensions) {
+    public MultiLayerBackup(Composition comp, String editName, boolean canvasSizeChange) {
         this.comp = comp;
         this.editName = editName;
 
         // save canvas dimensions
-        if (changesCanvasDimensions) {
+        if (canvasSizeChange) {
             canvasChangeEdit = new CanvasChangeEdit(editName, comp);
         }
 

@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
@@ -26,8 +25,10 @@ import pixelitor.utils.ActiveImageChangeListener;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
+import static javax.swing.BorderFactory.createTitledBorder;
+
 /**
- * The part of the GUI that manages the layers of an image.
+ * The part of the GUI that manages the layers of a composition.
  */
 public class LayersContainer extends JPanel implements ActiveImageChangeListener {
     private LayersPanel layersPanel;
@@ -46,7 +47,7 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         JPanel southPanel = initSouthPanel();
         add(southPanel, BorderLayout.SOUTH);
 
-        setBorder(BorderFactory.createTitledBorder("Layers"));
+        setBorder(createTitledBorder("Layers"));
 
         ImageComponents.addActiveImageChangeListener(this);
     }
@@ -55,20 +56,20 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
 
-        southPanel.add(createButtonFromAction(AddNewLayerAction.INSTANCE, "addLayer"));
-        southPanel.add(createButtonFromAction(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
-        southPanel.add(createButtonFromAction(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
-        southPanel.add(createButtonFromAction(AddLayerMaskAction.INSTANCE, "addLayerMask"));
-        southPanel.add(createButtonFromAction(AddTextLayerAction.INSTANCE, "addTextLayer"));
+        southPanel.add(createButton(AddNewLayerAction.INSTANCE, "addLayer"));
+        southPanel.add(createButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
+        southPanel.add(createButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
+        southPanel.add(createButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
+        southPanel.add(createButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
         if (Build.enableAdjLayers) {
-            southPanel.add(createButtonFromAction(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+            southPanel.add(createButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 
         return southPanel;
     }
 
-    private static JButton createButtonFromAction(Action a, String name) {
+    private static JButton createButton(Action a, String name) {
         JButton button = new JButton(a);
         button.setHideActionText(true);
         button.setName(name);
@@ -76,6 +77,9 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
     }
 
     private void setLayersPanel(LayersPanel newLayersPanel) {
+        if (layersPanel == newLayersPanel) {
+            return;
+        }
         if (layersPanel != null) {
             scrollPane.remove(layersPanel);
         }
@@ -89,11 +93,7 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         // the layers pane of the imageComponent is set in
         // ImageComponent.onActivation()
     }
@@ -102,12 +102,8 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         return (INSTANCE.getParent() != null);
     }
 
-    /**
-     * Each image has its own LayersPanel object, and when a new image is activated, this
-     * method is called
-     */
-    public static void showLayersPanel(LayersPanel p) {
-        INSTANCE.setLayersPanel(p);
+    public static void showLayersFor(ImageComponent ic) {
+        INSTANCE.setLayersPanel(ic.getLayersPanel());
     }
 }
 

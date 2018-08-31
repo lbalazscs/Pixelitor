@@ -23,5 +23,34 @@ import javax.swing.*;
  * An object that checks the contents of a text field
  */
 public interface TextFieldValidator {
+    // the only non-static method in this interface
     ValidationResult check(JTextField textField);
+
+    static ValidationResult hasValidDouble(JTextField textField) {
+        String text = textField.getText().trim();
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            Double.parseDouble(text);
+        } catch (NumberFormatException ex) {
+            return ValidationResult.error(text + " is not a valid number.");
+        }
+        return ValidationResult.ok();
+    }
+
+    static ValidationResult hasValidInt(JTextField textField) {
+        String text = textField.getText().trim();
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            Integer.parseInt(text);
+        } catch (NumberFormatException ex) {
+            return ValidationResult.error(text + " is not a valid integer.");
+        }
+        return ValidationResult.ok();
+    }
+
+    static JLayer<JTextField> createIntOnlyLayerFor(JTextField textField) {
+        TFValidationLayerUI layerUI = new TFValidationLayerUI(
+                TextFieldValidator::hasValidInt);
+        return new JLayer<>(textField, layerUI);
+    }
 }

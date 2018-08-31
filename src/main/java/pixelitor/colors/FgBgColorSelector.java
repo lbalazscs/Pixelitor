@@ -20,9 +20,12 @@ package pixelitor.colors;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
+import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.RandomUtils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -71,8 +74,8 @@ public class FgBgColorSelector extends JLayeredPane {
 
         setupSize();
 
-        setFgColor(AppPreferences.loadFgColor());
-        setBgColor(AppPreferences.loadBgColor());
+        setFgColor(AppPreferences.loadFgColor(), false);
+        setBgColor(AppPreferences.loadBgColor(), false);
 
         setupKeyboardShortcuts();
     }
@@ -152,9 +155,9 @@ public class FgBgColorSelector extends JLayeredPane {
 
         ColorUtils.setupPasteColorPopupMenu(menu, pw, color -> {
             if (fg) {
-                setFgColor(color);
+                setFgColor(color, true);
             } else {
-                setBgColor(color);
+                setBgColor(color, true);
             }
         });
 
@@ -167,8 +170,8 @@ public class FgBgColorSelector extends JLayeredPane {
         resetToDefaultAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(BLACK);
-                setBgColor(WHITE);
+                setFgColor(BLACK, false);
+                setBgColor(WHITE, true);
             }
         };
         defaultsButton.addActionListener(resetToDefaultAction);
@@ -182,12 +185,12 @@ public class FgBgColorSelector extends JLayeredPane {
             public void actionPerformed(ActionEvent e) {
                 if (layerMaskEditing) {
                     Color tmpFgColor = maskFgColor;
-                    setFgColor(maskBgColor);
-                    setBgColor(tmpFgColor);
+                    setFgColor(maskBgColor, false);
+                    setBgColor(tmpFgColor, true);
                 } else {
                     Color tmpFgColor = fgColor;
-                    setFgColor(bgColor);
-                    setBgColor(tmpFgColor);
+                    setFgColor(bgColor, false);
+                    setBgColor(tmpFgColor, true);
                 }
             }
         };
@@ -200,20 +203,22 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(ColorUtils.createRandomColor(false));
-                setBgColor(ColorUtils.createRandomColor(false));
+                Color rndColor1 = RandomUtils.createRandomColor(false);
+                setFgColor(rndColor1, false);
+                Color rndColor2 = RandomUtils.createRandomColor(false);
+                setBgColor(rndColor2, true);
             }
         };
         randomizeButton.addActionListener(randomizeColorsAction);
     }
 
     private void setupSize() {
-        int preferredHorizontalSize = (int) (BIG_BUTTON_SIZE * 1.5);
-        int preferredVerticalSize = preferredHorizontalSize + SMALL_BUTTON_VERTICAL_SPACE;
-        Dimension preferredDim = new Dimension(preferredHorizontalSize, preferredVerticalSize);
-        setPreferredSize(preferredDim);
-        setMinimumSize(preferredDim);
-        setMaximumSize(preferredDim);
+        int preferredWidth = (int) (BIG_BUTTON_SIZE * 1.5);
+        int preferredHeight = preferredWidth + SMALL_BUTTON_VERTICAL_SPACE;
+        Dimension dim = new Dimension(preferredWidth, preferredHeight);
+        setPreferredSize(dim);
+        setMinimumSize(dim);
+        setMaximumSize(dim);
     }
 
     private JButton initButton(String toolTip, int size, int layer) {
@@ -233,7 +238,7 @@ public class FgBgColorSelector extends JLayeredPane {
         Color c = showColorPickerDialog(pw, "Set Background Color", selectedColor, false);
 
         if (c != null) { // OK was pressed
-            setBgColor(c);
+            setBgColor(c, true);
         }
     }
 
@@ -246,7 +251,7 @@ public class FgBgColorSelector extends JLayeredPane {
         Color c = showColorPickerDialog(pw, "Set Foreground Color", selectedColor, false);
 
         if (c != null) { // OK was pressed
-            setFgColor(c);
+            setFgColor(c, true);
         }
     }
 
@@ -258,7 +263,7 @@ public class FgBgColorSelector extends JLayeredPane {
         return layerMaskEditing ? maskBgColor : bgColor;
     }
 
-    public void setFgColor(Color c) {
+    public void setFgColor(Color c, boolean notifyListeners) {
         Color newColor;
         if (layerMaskEditing) {
             maskFgColor = ColorUtils.toGray(c);
@@ -270,9 +275,12 @@ public class FgBgColorSelector extends JLayeredPane {
 
         fgButton.setBackground(newColor);
         ColorHistory.FOREGROUND.add(newColor);
+        if (notifyListeners) {
+            Tools.fgBgColorsChanged();
+        }
     }
 
-    public void setBgColor(Color c) {
+    public void setBgColor(Color c, boolean notifyListeners) {
         Color newColor;
         if (layerMaskEditing) {
             maskBgColor = ColorUtils.toGray(c);
@@ -284,12 +292,15 @@ public class FgBgColorSelector extends JLayeredPane {
 
         bgButton.setBackground(newColor);
         ColorHistory.BACKGROUND.add(newColor);
+        if (notifyListeners) {
+            Tools.fgBgColorsChanged();
+        }
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalKeyboardWatch.addKeyboardShortCut('d', true, "reset", resetToDefaultAction);
-        GlobalKeyboardWatch.addKeyboardShortCut('x', true, "switch", swapColorsAction);
-        GlobalKeyboardWatch.addKeyboardShortCut('r', true, "randomize", randomizeColorsAction);
+        GlobalKeyboardWatch.add(MappedKey.fromChar('d', true, "reset", resetToDefaultAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('x', true, "switch", swapColorsAction));
+        GlobalKeyboardWatch.add(MappedKey.fromChar('r', true, "randomize", randomizeColorsAction));
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {
@@ -299,11 +310,11 @@ public class FgBgColorSelector extends JLayeredPane {
         if(oldValue != layerMaskEditing) {
             // force the redrawing of colors
             if (layerMaskEditing) {
-                setFgColor(maskFgColor);
-                setBgColor(maskBgColor);
+                setFgColor(maskFgColor, false);
+                setBgColor(maskBgColor, false);
             } else {
-                setFgColor(fgColor);
-                setBgColor(bgColor);
+                setFgColor(fgColor, false);
+                setBgColor(bgColor, false);
             }
         }
     }

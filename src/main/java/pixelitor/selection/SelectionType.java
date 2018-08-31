@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
-import pixelitor.tools.PMouseEvent;
-import pixelitor.tools.UserDrag;
+import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -30,23 +30,23 @@ import java.awt.geom.Rectangle2D;
  * Corresponds to the "Type" combo box in the Selection Tool.
  */
 public enum SelectionType {
-    RECTANGLE("Rectangle") {
+    RECTANGLE("Rectangle", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
-            return userDrag.createPositiveRect();
+            ImDrag imDrag = (ImDrag) mouseInfo;
+            return imDrag.createPositiveRect();
         }
-    }, ELLIPSE("Ellipse") {
+    }, ELLIPSE("Ellipse", true) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
-            Rectangle2D dr = userDrag.createPositiveRect();
+            ImDrag imDrag = (ImDrag) mouseInfo;
+            Rectangle2D dr = imDrag.createPositiveRect();
             return new Ellipse2D.Double(dr.getX(), dr.getY(), dr.getWidth(), dr.getHeight());
         }
-    }, LASSO("Freehand") {
+    }, LASSO("Freehand", false) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
-            UserDrag userDrag = (UserDrag) mouseInfo;
+            ImDrag imDrag = (ImDrag) mouseInfo;
             boolean createNew;
             if (oldShape == null) {
                 createNew = true;
@@ -58,17 +58,17 @@ public enum SelectionType {
 
             if (createNew) {
                 GeneralPath p = new GeneralPath();
-                p.moveTo(userDrag.getStartX(), userDrag.getStartY());
-                p.lineTo(userDrag.getEndX(), userDrag.getEndY());
+                p.moveTo(imDrag.getStartX(), imDrag.getStartY());
+                p.lineTo(imDrag.getEndX(), imDrag.getEndY());
                 return p;
             } else {
                 GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(userDrag.getEndX(), userDrag.getEndY());
+                gp.lineTo(imDrag.getEndX(), imDrag.getEndY());
 
                 return gp;
             }
         }
-    }, POLYGONAL_LASSO("Polygonal") {
+    }, POLYGONAL_LASSO("Polygonal", false) {
         @Override
         public Shape createShape(Object mouseInfo, Shape oldShape) {
             PMouseEvent pe = (PMouseEvent) mouseInfo;
@@ -83,11 +83,11 @@ public enum SelectionType {
 
             if (createNew) {
                 GeneralPath p = new GeneralPath();
-                p.moveTo(pe.getX(), pe.getY());
+                p.moveTo(pe.getImX(), pe.getImY());
                 return p;
             } else {
                 GeneralPath gp = (GeneralPath) oldShape;
-                gp.lineTo(pe.getX(), pe.getY());
+                gp.lineTo(pe.getImX(), pe.getImY());
 
                 return gp;
             }
@@ -96,11 +96,19 @@ public enum SelectionType {
 
     private final String guiName;
 
-    SelectionType(String guiName) {
+    // whether this selection type should display width and height info
+    private final boolean displayWH;
+
+    SelectionType(String guiName, boolean displayWH) {
         this.guiName = guiName;
+        this.displayWH = displayWH;
     }
 
     public abstract Shape createShape(Object mouseInfo, Shape oldShape);
+
+    public boolean displayWidthHeight() {
+        return displayWH;
+    }
 
     @Override
     public String toString() {

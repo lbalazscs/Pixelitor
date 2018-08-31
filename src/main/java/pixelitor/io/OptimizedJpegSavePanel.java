@@ -18,11 +18,18 @@
 package pixelitor.io;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.ImagePanel;
-import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.io.JpegOutput.ImageWithSize;
 import pixelitor.tools.HandToolSupport;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.JProgressBarTracker;
+import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressPanel;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -32,40 +39,45 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog
  */
 public class OptimizedJpegSavePanel extends JPanel {
+    private static final int GRID_HGAP = 10;
+    private static final int GRID_VGAP = 10;
     private final BufferedImage image;
     private ImagePanel optimized;
     private RangeParam qualityParam;
     private JLabel sizeLabel;
     private ImagePanel original;
     private JCheckBox progressiveCB;
+    private ProgressPanel progressPanel;
 
     private OptimizedJpegSavePanel(BufferedImage image) {
         this.image = image;
 
-        JPanel controlsPanel = createControlsPanel(); // must be constructed before the comparePanel
+        JPanel controlsPanel = createControlsPanel();
         JPanel comparePanel = createComparePanel(image);
 
         setLayout(new BorderLayout(3, 3));
         add(comparePanel, BorderLayout.CENTER);
         add(controlsPanel, BorderLayout.SOUTH);
+
+        updatePreview(true); // to set a first preview image
     }
 
     private JPanel createComparePanel(BufferedImage image) {
         JPanel comparePanel = new JPanel();
-        comparePanel.setLayout(new GridLayout(1, 2, 10, 10));
+        comparePanel.setLayout(new GridLayout(1, 2, GRID_HGAP, GRID_VGAP));
         Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
 
         original = createViewPanel(imageSize);
         original.setImage(image);
 
         optimized = createViewPanel(imageSize);
-        updateAfterPreview(); // to set a first preview image
 
         setupScrollPanes(comparePanel);
 
@@ -79,14 +91,13 @@ public class OptimizedJpegSavePanel extends JPanel {
         comparePanel.add(originalSP);
         comparePanel.add(optimizedSP);
 
-        optimizedSP.getVerticalScrollBar().setModel(originalSP.getVerticalScrollBar().getModel());
-        optimizedSP.getHorizontalScrollBar().setModel(originalSP.getHorizontalScrollBar().getModel());
+        GUIUtils.setupSharedScrollModels(originalSP, optimizedSP);
     }
 
     private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
         JScrollPane sp = new JScrollPane(original);
         HandToolSupport.addBehavior(sp);
-        sp.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        sp.setBorder(createTitledBorder(borderTitle));
 
         return sp;
     }
@@ -101,36 +112,50 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JPanel createControlsPanel() {
-        qualityParam = new RangeParam("JPEG Quality", 1, 60, 100);
-        qualityParam.setAdjustmentListener(this::updateAfterPreview);
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
+        p.add(new JLabel("Progressive:"));
+        progressiveCB = new JCheckBox("", false);
+        progressiveCB.addActionListener(e -> updatePreview(false));
+        p.add(progressiveCB);
 
-        SliderSpinner qualitySpinner = new SliderSpinner(qualityParam, WEST, false);
-        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        southPanel.add(qualitySpinner);
+        qualityParam = new RangeParam("  JPEG Quality", 1, 60, 100);
+        qualityParam.setAdjustmentListener(() -> updatePreview(false));
+        p.add(new SliderSpinner(qualityParam, WEST, false));
 
         sizeLabel = new JLabel();
-        southPanel.add(sizeLabel);
+        p.add(sizeLabel);
 
-        progressiveCB = new JCheckBox("Progressive", false);
-        progressiveCB.addActionListener(e -> updateAfterPreview());
-        southPanel.add(progressiveCB);
+        p.add(Box.createRigidArea(new Dimension(40, 10)));
 
-        return southPanel;
+        progressPanel = new ProgressPanel();
+        p.add(progressPanel);
+
+        return p;
     }
 
-    private void updateAfterPreview() {
+    private void updatePreview(boolean first) {
         JpegSettings settings = getSelectedSettings();
 
-        JpegOutput.ImageWithSize[] imageWithSize = new JpegOutput.ImageWithSize[1];
-        Runnable task = () -> imageWithSize[0] = JpegOutput.writeJPGtoPreviewImage(this.image, settings);
-        Utils.runWithBusyCursor(this, task);
+        ProgressTracker pt;
+        if (first) {
+            pt = new StatusBarProgressTracker("JPEG preview", 100);
+        } else {
+            pt = new JProgressBarTracker(progressPanel);
+        }
+        ImageWithSize imageWithSize = JpegOutput.writeJPGtoPreviewImage(
+                this.image, settings, pt);
 
-        BufferedImage newPreview = imageWithSize[0].getImage();
+        BufferedImage newPreview = imageWithSize.getImage();
         optimized.changeImage(newPreview);
 
-        int numBytes = imageWithSize[0].getSize();
-        sizeLabel.setText("Size: " + Utils.bytesToString(numBytes));
+        int numBytes = imageWithSize.getSize();
+        sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
+
+        if (first) {
+            // clear the message
+            Messages.showInStatusBar("");
+        }
     }
 
     private JpegSettings getSelectedSettings() {
@@ -140,18 +165,18 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     public static void showInDialog(BufferedImage image, JFrame frame) {
         BufferedImage rgbImage = ImageUtils.convertToRGB(image, false);
-
         OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
-        OKCancelDialog d = new OKCancelDialog(p, frame, "Save Optimized JPEG", "Save", "Cancel", false) {
-            @Override
-            protected void okAction() {
-                close();
-                JpegSettings settings = p.getSelectedSettings();
-                OpenSaveManager.saveJpegWithQuality(settings);
-            }
-        };
-        d.setVisible(true);
-    }
 
+        new DialogBuilder()
+                .content(p)
+                .owner(frame)
+                .title("Save Optimized JPEG")
+                .okText("Save")
+                .okAction(() -> {
+                    JpegSettings settings = p.getSelectedSettings();
+                    OpenSave.saveJpegWithQuality(settings);
+                })
+                .show();
+    }
 }
 

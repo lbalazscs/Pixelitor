@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.RandomUtils;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 
 /**
@@ -34,6 +36,10 @@ import static java.util.Comparator.comparing;
  */
 public class FilterUtils {
     private static final List<FilterAction> allFilters = new ArrayList<>();
+
+    // a performance optimization
+    private static final FilterAction[] EMPTY_FA_ARRAY = new FilterAction[0];
+
     private static Filter lastFilter = null;
 
     private FilterUtils() {
@@ -41,9 +47,15 @@ public class FilterUtils {
 
     // it returns an array because JComboBox does not accept Lists as constructor arguments
     public static FilterAction[] getAllFiltersSorted() {
-        FilterAction[] filters = allFilters.toArray(new FilterAction[allFilters.size()]);
+        FilterAction[] filters = allFilters.toArray(EMPTY_FA_ARRAY);
         Arrays.sort(filters, comparing(FilterAction::getName));
         return filters;
+    }
+
+    public static FilterAction[] getAnimationFilters() {
+        return allFilters.stream()
+                .filter(FilterAction::isAnimationFilter)
+                .toArray(FilterAction[]::new);
     }
 
     public static FilterAction[] getAnimationFiltersSorted() {
@@ -58,7 +70,7 @@ public class FilterUtils {
         FilterAction filterAction;
         do {
             // try a random filter until all conditions are true
-            filterAction = allFilters.get((int) (Math.random() * allFilters.size()));
+            filterAction = RandomUtils.chooseFrom(allFilters);
         } while (!conditions.test(filterAction.getFilter()));
 
         return filterAction.getFilter();
@@ -79,13 +91,16 @@ public class FilterUtils {
             return;
         }
         FilterUtils.lastFilter = lastFilter;
+        RepeatLast.INSTANCE.setActionName("Repeat " + lastFilter.getName());
     }
 
     public static Optional<Filter> getLastFilter() {
         return Optional.ofNullable(lastFilter);
     }
 
-    public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp, BufferedImage src, BufferedImage dest) {
+    public static BufferedImage runRGBPixelOp(RGBPixelOp pixelOp,
+                                              BufferedImage src,
+                                              BufferedImage dest) {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
@@ -113,6 +128,6 @@ public class FilterUtils {
         allFilters.forEach(FilterAction::getFilter);
 
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        System.out.println(String.format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
+        System.out.println(format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
     }
 }

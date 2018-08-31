@@ -24,8 +24,6 @@ import pixelitor.layers.TextLayer;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * A PixelitorEdit that represents the editing of a text layer
  */
@@ -65,8 +63,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
         layer.updateLayerName();
 
-        layer.getComp().imageChanged(FULL);
-        History.notifyMenus(this);
+        layer.getComp().imageChanged();
     }
 
     @Override

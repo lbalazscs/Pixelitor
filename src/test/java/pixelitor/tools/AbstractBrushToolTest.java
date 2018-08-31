@@ -19,23 +19,26 @@ package pixelitor.tools;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.gui.ImageComponent;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.util.PPoint;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -56,8 +59,9 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Drawable dr;
+    private ImageComponent ic;
 
-    @Parameters(name = "{index}: {0}, mask = {1}")
+    @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() {
         Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
         for (Tool tool : tools) {
@@ -73,10 +77,18 @@ public class AbstractBrushToolTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        TestHelper.setupMockFgBgSelector();
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         Composition comp = TestHelper.create2LayerComposition(false);
-        dr = comp.getActiveDrawable();
+        ic = comp.getIC();
+
+        dr = comp.getActiveDrawableOrThrow();
 
         origBrush = tool.getBrush();
         brushSpy = spy(origBrush);
@@ -98,15 +110,17 @@ public class AbstractBrushToolTest {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
-        verify(brushSpy).onStrokeStart(2.0, 2.0);
-        verify(brushSpy, times(5)).onNewStrokePoint(anyDouble(), anyDouble());
+        verify(brushSpy).startAt(any());
+        verify(brushSpy, times(5)).continueTo(any());
     }
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        tool.drawBrushStrokeProgrammatically(dr, new Point(2, 2), new Point(5, 5));
+        PPoint start = PPoint.eagerFromIm(2.0, 2.0, ic);
+        PPoint end = PPoint.eagerFromIm(5.0, 5.0, ic);
+        tool.drawBrushStrokeProgrammatically(dr, start, end);
 
-        verify(brushSpy).onStrokeStart(2.0, 2.0);
-        verify(brushSpy).onNewStrokePoint(5.0, 5.0);
+        verify(brushSpy).startAt(any());
+        verify(brushSpy).continueTo(any());
     }
 }

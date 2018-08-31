@@ -20,14 +20,16 @@ package pixelitor.gui.utils;
 import java.awt.Component;
 
 /**
- * Represents the result of a validation
+ * Represents the result of a validation.
+ * This is an immutable object.
  */
 public class ValidationResult {
     private final boolean valid;
     private final String errorMsg;
 
     // The OK result has no error message, therefore it can be shared
-    private static final ValidationResult okInstance = new ValidationResult(true, null);
+    private static final ValidationResult okInstance
+            = new ValidationResult(true, null);
 
     private ValidationResult(boolean valid, String errorMsg) {
         this.valid = valid;
@@ -75,11 +77,20 @@ public class ValidationResult {
         }
     }
 
-    public ValidationResult andTrue(boolean condition, String msg) {
-        return andFalse(!condition, msg);
+    public ValidationResult addError(String msg) {
+        if (valid) {
+            assert this == okInstance;
+            return new ValidationResult(false, msg);
+        } else {
+            return new ValidationResult(false, this.errorMsg + "\n" + msg);
+        }
     }
 
-    public ValidationResult andFalse(boolean condition, String msg) {
+    public ValidationResult addErrorIfNot(boolean condition, String msg) {
+        return addErrorIf(!condition, msg);
+    }
+
+    public ValidationResult addErrorIf(boolean condition, String msg) {
         if (valid) {
             assert this == okInstance;
             if (condition) {

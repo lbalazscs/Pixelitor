@@ -23,21 +23,20 @@ import pixelitor.gui.utils.SliderSpinner;
 
 import java.awt.Color;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
-
 /**
  * An EffectConfiguratorPanel that has a width parameter.
- * Most effect configurator panels need this as the superclass
+ * Most effect configurator panels use this as the superclass
  */
 public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final RangeParam widthRange;
     private final SliderSpinner widthSlider;
 
-    public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected, Color defaultColor, int defaultWidth) {
+    public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected,
+                                         Color defaultColor, int defaultWidth) {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
-        widthSlider = new SliderSpinner(widthRange, NONE, false);
+        widthSlider = SliderSpinner.simpleFrom(widthRange);
 
         gbh.addLabelWithControl("Width:", widthSlider);
 
@@ -62,8 +61,13 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
-        widthRange.reset(triggerAction);
+        widthRange.reset(trigger);
+    }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
     }
 }

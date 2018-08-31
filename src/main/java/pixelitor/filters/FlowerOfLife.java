@@ -34,11 +34,11 @@ import java.util.Set;
  * "Flower of Life" shape filter
  */
 public class FlowerOfLife extends ShapeFilter {
-    private final static int GRID_TYPE_TRIANGULAR = 1;
-    private final static int GRID_TYPE_SQUARE = 2;
-    private final static int GRID_TYPE_SQUARE_2 = 3;
+    private static final int GRID_TYPE_TRIANGULAR = 1;
+    private static final int GRID_TYPE_SQUARE = 2;
+    private static final int GRID_TYPE_SQUARE_2 = 3;
 
-    private static final double SQRT_2 = 1.4142135623730950488016887242097;
+    private static final double SQRT_2 = 1.4142135623730951;
 
     private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);
@@ -107,7 +107,7 @@ public class FlowerOfLife extends ShapeFilter {
 
         List<Circle> genTriangleGridNeighbors() {
             List<Circle> n = new ArrayList<>(6);
-            double rowHeight = r * 0.86602540378443864676372317075294; // sqrt(3)/2
+            double rowHeight = r * 0.8660254037844386; // sqrt(3)/2
             double halfRadius = r / 2;
             n.add(new Circle(cx + r, cy, r)); // right
             n.add(new Circle(cx - r, cy, r)); // left

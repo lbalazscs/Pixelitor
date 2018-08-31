@@ -18,11 +18,13 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
@@ -63,17 +65,22 @@ public class ContentLayerTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
         layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
-        comp.addLayerNoGUI(layer);
+        comp.addLayerInInitMode(layer);
 
         LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();
@@ -163,8 +170,8 @@ public class ContentLayerTest {
         Graphics2D g2 = TestHelper.createGraphics();
         BufferedImage image = TestHelper.createImage();
 
-        layer.applyLayer(g2, true, image);
-        layer.applyLayer(g2, false, image);
+        layer.applyLayer(g2, image, true);
+        layer.applyLayer(g2, image, false);
         iconUpdates.check(0, 0);
     }
 

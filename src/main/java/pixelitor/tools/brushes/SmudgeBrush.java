@@ -17,13 +17,15 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.colors.FgBgColors;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * The brush used by the Smudge Tool
@@ -34,8 +36,7 @@ public class SmudgeBrush extends CopyBrush {
      * the last mouse coordinates and puts the pixels to
      * the current coordinates.
      */
-    private double lastX;
-    private double lastY;
+    private PPoint last;
 
     /**
      * The strength in the GUI, actually the opacity of the brush
@@ -49,33 +50,33 @@ public class SmudgeBrush extends CopyBrush {
      */
     private boolean fingerPainting = false;
 
-    public SmudgeBrush(int radius, CopyBrushType type) {
+    public SmudgeBrush(double radius, CopyBrushType type) {
         super(radius, type, new FixedDistanceSpacing(1.0));
     }
 
-    public void setSource(BufferedImage sourceImage, double srcX, double srcY, float strength) {
+    public void setupFirstPoint(BufferedImage sourceImage, PPoint src, float strength) {
         this.sourceImage = sourceImage;
-        lastX = srcX;
-        lastY = srcY;
+        last = src;
         this.strength = strength;
         firstUsageInStroke = true;
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
         type.beforeDrawImage(g);
 
         if (firstUsageInStroke && fingerPainting) {
             // finger painting starts with the foreground color
-            g.setColor(FgBgColors.getFG());
-            g.fillRect(0, 0, diameter, diameter);
+            g.setColor(getFGColor());
+            int size = (int) diameter;
+            g.fillRect(0, 0, size, size);
         } else {
             // samples the source image at lastX, lastY into the brush image
             g.drawImage(sourceImage,
                     AffineTransform.getTranslateInstance(
-                            -lastX + radius,
-                            -lastY + radius), null);
+                            -last.getImX() + radius,
+                            -last.getImY() + radius), null);
         }
 
         type.afterDrawImage(g);
@@ -86,23 +87,27 @@ public class SmudgeBrush extends CopyBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
         AffineTransform transform = AffineTransform.getTranslateInstance(
-                x - radius,
-                y - radius
+                p.getImX() - radius,
+                p.getImY() - radius
         );
 
-        // TODO this does not handle transparency - the Smudge tool
-        // cannot smudge into transparent areas
-        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
+        // TODO SrcOver allows to smudge into transparent areas, but transparency
+        // cannot be smudged into non-transparent areas
+        // DstOver allows only smudging into transparent
+        targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
+
+// SrcAtop: cannot smudge into transparent areas
+//        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
+
 //        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
 
         targetG.drawImage(brushImage, transform, null);
 
-        lastX = x;
-        lastY = y;
+        last = p;
 
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 
     public void setFingerPainting(boolean fingerPainting) {
@@ -113,8 +118,8 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDouble("lastX", lastX);
-        node.addDouble("lastY", lastY);
+        node.addDouble("lastImX", last.getImX());
+        node.addDouble("lastImY", last.getImY());
         node.addFloat("strength", strength);
         node.addBoolean("firstUsageInStroke", firstUsageInStroke);
 

@@ -21,7 +21,6 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MirrorFilter;
 
@@ -49,12 +48,12 @@ public class Mirror extends ParametrizedFilter {
     public Mirror() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 center,
 //                angle,
                 edgeAction
-        ));
+        );
     }
 
     @Override

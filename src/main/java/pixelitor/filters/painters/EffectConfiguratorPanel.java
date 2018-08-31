@@ -36,7 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
  * A GUI for configuring an area effect
@@ -62,10 +62,10 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
 
-        setBorder(BorderFactory.createTitledBorder('"' + effectName + "\" Configuration"));
+        setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = new SliderSpinner(opacityRange, NONE, false);
+        SliderSpinner opacitySlider = SliderSpinner.simpleFrom(opacityRange);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
@@ -91,12 +91,14 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
         gbh = new GridBagHelper(this);
         gbh.addLabelWithControl("Enabled:", enabledCB);
-        gbh.addLabelWithControlNoFill("Color:", colorSwatch);
-        gbh.addLabelWithControlNoFill("Opacity:", opacitySlider);
+        gbh.addLabelWithControlNoStretch("Color:", colorSwatch);
+        gbh.addLabelWithControl("Opacity:", opacitySlider);
     }
 
     private void showColorDialog() {
-        Color selectedColor = ColorPicker.showDialog(PixelitorWindow.getInstance(), "Select Color", color, true);
+        Color selectedColor = ColorPicker.showDialog(
+                PixelitorWindow.getInstance(),
+                "Select Color", color, true);
         if (selectedColor != null) { // ok was pressed
             setColor(selectedColor, true);
         }
@@ -165,9 +167,9 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         enabledCB.setSelected(defaultEnabled);
-        setColor(defaultColor, triggerAction);
+        setColor(defaultColor, trigger);
     }
 
     public void setDefaultButton(DefaultButton defaultButton) {

@@ -17,18 +17,32 @@
 
 package pixelitor.utils;
 
-import pixelitor.MessageHandler;
+import pixelitor.Build;
+import pixelitor.gui.GUIMessageHandler;
 
 import java.io.File;
 
+import static java.lang.String.format;
+
+/**
+ * Static methods for status bar and dialog messages
+ */
 public class Messages {
     private static MessageHandler msgHandler;
 
-    private Messages() { // should not be instantiated
+    static {
+        try {
+            if (Build.isTesting()) {
+                msgHandler = new TestMessageHandler();
+            } else {
+                msgHandler = new GUIMessageHandler();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public static void setMessageHandler(MessageHandler messageHandler) {
-        Messages.msgHandler = messageHandler;
+    private Messages() { // should not be instantiated
     }
 
     public static void showInfo(String title, String message) {
@@ -37,6 +51,14 @@ public class Messages {
 
     public static void showError(String title, String message) {
         msgHandler.showError(title, message);
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    public static <T> T showExceptionOnEDT(Throwable e) {
+        msgHandler.showExceptionOnEDT(e);
+        // returns a null which can be a null of the desired type...:
+        // this way it fits into CompletableFuture.exceptionally
+        return null;
     }
 
     public static void showException(Throwable e) {
@@ -48,7 +70,13 @@ public class Messages {
     }
 
     public static void showFileSavedMessage(File file) {
-        String msg = "File " + file.getAbsolutePath() + " saved.";
+        String msg = "<html><b>" + file.getAbsolutePath() + "</b> was saved.";
+        showInStatusBar(msg);
+    }
+
+    public static void showFilesSavedMessage(int numFiles, File dir) {
+        assert dir.isDirectory();
+        String msg = numFiles + " files saved to " + dir.getAbsolutePath();
         showInStatusBar(msg);
     }
 
@@ -58,6 +86,10 @@ public class Messages {
 
     public static void showNotImageLayerError() {
         msgHandler.showNotImageLayerError();
+    }
+
+    public static void showNotDrawableError() {
+        msgHandler.showNotDrawableError();
     }
 
     public static MessageHandler getMessageHandler() {
@@ -70,7 +102,7 @@ public class Messages {
             msg = filterName + " took " + totalTime + " ms";
         } else {
             float seconds = totalTime / 1000.0f;
-            msg = String.format("%s took %.1f s", filterName, seconds);
+            msg = format("%s took %.1f s", filterName, seconds);
         }
         showInStatusBar(msg);
     }

@@ -18,7 +18,8 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.tools.ShapeType;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -31,16 +32,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * A {@link DabsBrush} where the dabs are filled shapes
  */
 public class ShapeDabsBrush extends DabsBrush {
-    public ShapeDabsBrush(int radius, ShapeType shapeType, SpacingStrategy spacingStrategy,
-                          AngleSettings angleSettings) {
-        super(radius, new ShapeDabsBrushSettings(
-                angleSettings,
-                spacingStrategy,
-                shapeType
-        ), false);
-    }
-
-    public ShapeDabsBrush(int radius, ShapeDabsBrushSettings settings) {
+    public ShapeDabsBrush(double radius, ShapeDabsBrushSettings settings) {
         super(radius, settings, false);
     }
 
@@ -51,7 +43,9 @@ public class ShapeDabsBrush extends DabsBrush {
     }
 
     @Override
-    public void putDab(double x, double y, double theta) {
+    public void putDab(PPoint p, double theta) {
+        double x = p.getImX();
+        double y = p.getImY();
         ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
         if (theta != 0) {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
@@ -62,11 +56,11 @@ public class ShapeDabsBrush extends DabsBrush {
             Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
-        updateComp((int) x, (int) y);
+        updateComp(p);
     }
 
     @Override
-    void setupBrushStamp(double x, double y) {
+    void setupBrushStamp(PPoint p) {
         // no setup is necessary for shape brushes
     }
 }

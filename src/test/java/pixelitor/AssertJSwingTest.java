@@ -32,10 +32,13 @@ import org.fest.util.Files;
 import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
+import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.Directories;
+import pixelitor.history.History;
+import pixelitor.io.Dirs;
+import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
@@ -43,14 +46,14 @@ import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.tools.BrushType;
-import pixelitor.tools.GradientColorType;
-import pixelitor.tools.GradientTool;
-import pixelitor.tools.GradientType;
-import pixelitor.tools.ShapeType;
-import pixelitor.tools.ShapesAction;
 import pixelitor.tools.Symmetry;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gradient.GradientColorType;
+import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.ShapesAction;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -72,15 +75,24 @@ import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.TestingMode.NO_MASK;
-import static pixelitor.utils.test.Assertions.canvasSizeIs;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
+import static pixelitor.gui.ImageComponents.assertNumOpenImagesIs;
+import static pixelitor.gui.ImageComponents.assertNumOpenImagesIsAtLeast;
+import static pixelitor.utils.test.Assertions.canvasImSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
 import static pixelitor.utils.test.Assertions.thereIsSelection;
+import static pixelitor.utils.test.Assertions.zoomIs;
 
-
+/**
+ * An automated GUI test which uses AssertJ-Swing.
+ * Note that this is not a unit test:
+ * depending on the configuration, it could run for hours.
+ */
 public class AssertJSwingTest {
-    private static final boolean verbose = true;
-    private static final boolean quick = false;
+    private static boolean verbose = false;
+    private static boolean quick = false;
 
     private static File baseTestingDir;
     private static File cleanerScript;
@@ -90,12 +102,13 @@ public class AssertJSwingTest {
     private static File batchFilterOutputDir;
 
     private Robot robot;
-    private static final int ROBOT_DELAY_MILLIS_DEFAULT = 100;
-    private static final int ROBOT_DELAY_MILLIS_SLOW = 500;
+    private static final int ROBOT_DELAY_DEFAULT = 100; // millis
+    private static final int ROBOT_DELAY_SLOW = 500; // millis
 
     private FrameFixture pw;
     private final Random random = new Random();
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm");
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = ThreadLocal
+            .withInitial(() -> new SimpleDateFormat("HH:mm"));
 
     private enum Randomize {YES, NO}
 
@@ -103,12 +116,13 @@ public class AssertJSwingTest {
 
     private TestingMode testingMode = NO_MASK;
 
-    // TODO for some reason, assertj-swing sees this dialog
-    // only the first time it is shown, this flag is a workaround
-    private boolean stokeSettingsSetup = false;
-
     public static void main(String[] args) {
         long startMillis = System.currentTimeMillis();
+
+        // enable quick mode with -Dquick=true
+        quick = "true".equals(System.getProperty("quick"));
+        // enable verbose mode with -Dverbose=true
+        verbose = "true".equals(System.getProperty("verbose"));
 
         initialize(args);
 
@@ -117,10 +131,10 @@ public class AssertJSwingTest {
 
         boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
-            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_SLOW);
+            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_SLOW);
 
-            test.testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-
+            //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
+            test.testExportLayerAnimation();
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -146,16 +160,15 @@ public class AssertJSwingTest {
 
     private static void initialize(String[] args) {
         processCLArguments(args);
-        cleanOutputs();
         checkTestingDirs();
-        Utils.checkThatAssertionsAreEnabled();
+        Utils.makeSureAssertionsAreEnabled();
     }
 
     private void reinitializeTesting() {
         if (ImageComponents.getNumOpenImages() > 0) {
             closeAll();
         }
-        openFile("a.jpg");
+        openFileWithDialog("a.jpg");
 
         pw.toggleButton("Shapes Tool Button").click();
         // make sure that action is set to fill
@@ -267,7 +280,7 @@ public class AssertJSwingTest {
         // the command line to slow it down
         String s = System.getProperty("robot.delay.millis");
         if (s == null) {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_MILLIS_DEFAULT);
+            robot.settings().delayBetweenEvents(ROBOT_DELAY_DEFAULT);
         } else {
             int delay = Integer.parseInt(s);
             robot.settings().delayBetweenEvents(delay);
@@ -286,8 +299,10 @@ public class AssertJSwingTest {
         // make sure we have a big internal frame for the tool tests
         keyboardActualPixels();
 
-        // test first because it can lead to problems on Linux
-        testSelectionToolAndMenus();
+        if (!JVM.isLinux) {
+            // TODO investigate - maybe just a vmware problem
+            testSelectionToolAndMenus();
+        }
 
         testMoveTool();
         testCropTool();
@@ -299,7 +314,7 @@ public class AssertJSwingTest {
         testPaintBucketTool();
         testColorPickerTool();
         testShapesTool();
-        testReload(); // file menu, but better here
+        testReload(); // file menu, but more practical to test it here
         testHandTool();
         testZoomTool();
 
@@ -356,10 +371,17 @@ public class AssertJSwingTest {
         assert checkConsistency();
 
         // test delete layer
+        layer2Button.requireSelected();
         deleteLayerButton.click();
         layer1Button.requireSelected();
         keyboardUndo();
-        layer2Button.requireSelected();
+
+        if (!JVM.isLinux) {
+            // On Linux this works, the un-deleted layer becomes
+            // active, the problem seems to be with AssertJ-Swing
+            layer2Button.requireSelected();
+        }
+
         keyboardRedo();
         layer1Button.requireSelected();
         testingMode.set(this);
@@ -377,56 +399,56 @@ public class AssertJSwingTest {
         // test visibility change
         LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
         layer1CopyButton.requireSelected();
-        assertThat(layer1CopyButton.hasOpenEye()).isTrue();
+        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
         layer1CopyButton.setOpenEye(false);
-        assertThat(layer1CopyButton.hasOpenEye()).isFalse();
+        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
         keyboardUndo();
-        assertThat(layer1CopyButton.hasOpenEye()).isTrue();
+        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
         keyboardRedo();
-        assertThat(layer1CopyButton.hasOpenEye()).isFalse();
+        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
 
-        findMenuItemByText("Lower Layer").click();
+        runMenuCommand("Lower Layer");
         keyboardUndoRedo();
 
-        findMenuItemByText("Raise Layer").click();
+        runMenuCommand("Raise Layer");
         keyboardUndoRedo();
 
-        findMenuItemByText("Layer to Bottom").click();
+        runMenuCommand("Layer to Bottom");
         keyboardUndoRedo();
 
-        findMenuItemByText("Layer to Top").click();
+        runMenuCommand("Layer to Top");
         keyboardUndoRedo();
 
-        findMenuItemByText("Lower Layer Selection").click();
+        runMenuCommand("Lower Layer Selection");
         keyboardUndoRedo();
 
-        findMenuItemByText("Raise Layer Selection").click();
+        runMenuCommand("Raise Layer Selection");
         keyboardUndoRedo();
 
         // doesn't do much without translation
-        findMenuItemByText("Layer to Canvas Size").click();
+        runMenuCommand("Layer to Canvas Size");
         keyboardUndoRedo();
 
-        findMenuItemByText("New Layer from Composite").click();
+        runMenuCommand("New Layer from Composite");
         keyboardUndoRedo();
         testingMode.set(this);
 
-        findMenuItemByText("Duplicate Layer").click();
+        runMenuCommand("Duplicate Layer");
         keyboardUndoRedo();
 
-        findMenuItemByText("Merge Down").click();
+        runMenuCommand("Merge Down");
         keyboardUndoRedo();
 
-        findMenuItemByText("Duplicate Layer").click();
+        runMenuCommand("Duplicate Layer");
         testingMode.set(this);
 
-        findMenuItemByText("Add New Layer").click();
+        runMenuCommand("Add New Layer");
         testingMode.set(this);
 
-        findMenuItemByText("Delete Layer").click();
+        runMenuCommand("Delete Layer");
         testingMode.set(this);
 
-        findMenuItemByText("Flatten Image").click();
+        runMenuCommand("Flatten Image");
         testingMode.set(this);
         assert checkConsistency();
 
@@ -457,32 +479,32 @@ public class AssertJSwingTest {
     private void testLayerMaskIconPopupMenus() {
         // test delete
         JPopupMenuFixture popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Delete").click();
+        clickPopupMenu(popupMenu, "Delete");
         keyboardUndoRedoUndo();
 
         // test apply
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Apply").click();
+        clickPopupMenu(popupMenu, "Apply");
         keyboardUndoRedoUndo();
 
         // test disable
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Disable").click();
+        clickPopupMenu(popupMenu, "Disable");
         keyboardUndoRedo();
 
         // test enable - after the redo we should find a menu item called "Enable"
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Enable").click();
+        clickPopupMenu(popupMenu, "Enable");
         keyboardUndoRedo();
 
         // test unlink
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Unlink").click();
+        clickPopupMenu(popupMenu, "Unlink");
         keyboardUndoRedo();
 
         // test link - after the redo we should find a menu item called "Link"
         popupMenu = pw.label("maskIcon").showPopupMenu();
-        findPopupMenuFixtureByText(popupMenu, "Link").click();
+        clickPopupMenu(popupMenu, "Link");
         keyboardUndoRedo();
     }
 
@@ -491,7 +513,7 @@ public class AssertJSwingTest {
             return;
         }
 
-        runMenuCommand("Mask from Color Range...");
+        runMenuCommand("Add from Color Range...");
 
         DialogFixture dialog = findDialogByTitle("Mask from Color Range");
 
@@ -502,6 +524,7 @@ public class AssertJSwingTest {
         // TODO
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         // delete the created layer mask
         runMenuCommand("Delete");
@@ -530,6 +553,7 @@ public class AssertJSwingTest {
                 .enterText("other text");
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
         keyboardUndoRedo();
         assert checkConsistency();
 
@@ -565,6 +589,7 @@ public class AssertJSwingTest {
         log(0, "testing the help menu");
 
         testTipOfTheDay();
+        testInternalState();
         testCheckForUpdate();
         testAbout();
 
@@ -572,12 +597,21 @@ public class AssertJSwingTest {
     }
 
     private void testTipOfTheDay() {
-        findMenuItemByText("Tip of the Day").click();
+        runMenuCommand("Tip of the Day");
         DialogFixture dialog = findDialogByTitle("Tip of the Day");
         findButtonByText(dialog, "Next >").click();
         findButtonByText(dialog, "Next >").click();
         findButtonByText(dialog, "< Back").click();
         findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
+    }
+
+    private void testInternalState() {
+        runMenuCommand("Internal State...");
+        DialogFixture dialog = findDialogByTitle("Internal State");
+        findButtonByText(dialog, "Copy as Text to the Clipboard").click();
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
     }
 
     private void testColors() {
@@ -605,10 +639,11 @@ public class AssertJSwingTest {
             dialog.resizeTo(new Dimension(700, 500));
         }
         dialog.close();
+        dialog.requireNotVisible();
     }
 
     private void testCheckForUpdate() {
-        findMenuItemByText("Check for Update...").click();
+        runMenuCommand("Check for Update...");
         try {
             findJOptionPane().buttonWithText("Close").click();
         } catch (org.assertj.swing.exception.ComponentLookupException e) {
@@ -618,16 +653,17 @@ public class AssertJSwingTest {
     }
 
     private void testAbout() {
-        findMenuItemByText("About").click();
-        DialogFixture aboutDialog = findDialogByTitle("About Pixelitor");
+        runMenuCommand("About");
+        DialogFixture dialog = findDialogByTitle("About Pixelitor");
 
-        JTabbedPaneFixture tabbedPane = aboutDialog.tabbedPane();
+        JTabbedPaneFixture tabbedPane = dialog.tabbedPane();
         tabbedPane.requireTabTitles("About", "Credits", "System Info");
         tabbedPane.selectTab("Credits");
         tabbedPane.selectTab("System Info");
         tabbedPane.selectTab("About");
 
-        aboutDialog.button("ok").click();
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void exit() {
@@ -662,7 +698,7 @@ public class AssertJSwingTest {
 
     private void testFade() {
         // test with own method so that a meaningful opacity can be set
-        findMenuItemByText("Fade Invert...").click();
+        runMenuCommand("Fade Invert...");
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
         dialog.slider().slideTo(75);
@@ -676,13 +712,60 @@ public class AssertJSwingTest {
     }
 
     private void testPreferences() {
+        log(1, "testing the preferences dialog");
+
         runMenuCommand("Preferences...");
-        DialogFixture d = findDialogByTitle("Preferences");
-        d.button("ok").click();
+        DialogFixture dialog = findDialogByTitle("Preferences");
+
+        // Test "Images In"
+        JComboBoxFixture uiChooser = dialog.comboBox("uiChooser");
+        if (ImageArea.getMode() == FRAMES) {
+            uiChooser.requireSelection("Internal Windows");
+            uiChooser.selectItem("Tabs");
+            uiChooser.selectItem("Internal Windows");
+        } else {
+            uiChooser.requireSelection("Tabs");
+            uiChooser.selectItem("Internal Windows");
+            uiChooser.selectItem("Tabs");
+        }
+
+        // Test "Layer/Mask Thumb Sizes"
+        JComboBoxFixture thumbSizeCB = dialog.comboBox("thumbSizeCB");
+        thumbSizeCB.selectItem(3);
+        thumbSizeCB.selectItem(0);
+
+        // Test "Undo/Redo Levels"
+        JTextComponentFixture undoLevelsTF = dialog.textBox("undoLevelsTF");
+        boolean undoWas5 = false;
+        if (undoLevelsTF.text().equals("5")) {
+            undoWas5 = true;
+        }
+        undoLevelsTF.deleteText().enterText("n");
+
+        // try to accept the dialog
+        dialog.button("ok").click();
+
+        expectAndCloseErrorDialog();
+
+        // correct the error
+        if (undoWas5) {
+            undoLevelsTF.deleteText().enterText("6");
+        } else {
+            undoLevelsTF.deleteText().enterText("5");
+        }
+
+        // try again
+        dialog.button("ok").click();
+
+        // this time the preferences dialog should close
+        dialog.requireNotVisible();
     }
 
     private void testImageMenu() {
         log(0, "testing the image menu");
+
+        assertNumOpenImagesIs(1);
+        assert numLayersIs(1);
 
         testDuplicateImage();
 
@@ -698,38 +781,46 @@ public class AssertJSwingTest {
     }
 
     private void testDuplicateImage() {
-        checkNumOpenImagesIs(1);
+        assertNumOpenImagesIs(1);
+
         runMenuCommand("Duplicate");
-        checkNumOpenImagesIs(2);
+        assertNumOpenImagesIs(2);
+
         closeOneOfTwo();
-        checkNumOpenImagesIs(1);
+        assertNumOpenImagesIs(1);
     }
 
     private void testResize() {
-        runMenuCommand("Resize...");
-        DialogFixture resizeDialog = findDialogByTitle("Resize");
-
-        JTextComponentFixture widthTF = resizeDialog.textBox("widthTF");
-        widthTF.deleteText().enterText("622");
-
-        // no need to also set the height, because
-        // constrain proportions is checked by default
-
-        resizeDialog.button("ok").click();
+        resize(622);
 
         keyboardUndoRedoUndo();
     }
 
+    private void resize(int targetWidth) {
+        runMenuCommand("Resize...");
+        DialogFixture dialog = findDialogByTitle("Resize");
+
+        JTextComponentFixture widthTF = dialog.textBox("widthTF");
+        widthTF.deleteText().enterText(String.valueOf(targetWidth));
+
+        // no need to also set the height, because
+        // constrain proportions is checked by default
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+    }
+
     private void testEnlargeCanvas() {
         runMenuCommand("Enlarge Canvas...");
-        DialogFixture enlargeDialog = findDialogByTitle("Enlarge Canvas");
+        DialogFixture dialog = findDialogByTitle("Enlarge Canvas");
 
-        enlargeDialog.slider("north").slideTo(100);
-        enlargeDialog.slider("west").slideTo(100);
-        enlargeDialog.slider("east").slideTo(100);
-        enlargeDialog.slider("south").slideTo(100);
+        dialog.slider("north").slideTo(100);
+        dialog.slider("west").slideTo(100);
+        dialog.slider("east").slideTo(100);
+        dialog.slider("south").slideTo(100);
 
-        enlargeDialog.button("ok").click();
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         keyboardUndoRedoUndo();
     }
@@ -752,23 +843,36 @@ public class AssertJSwingTest {
     }
 
     private void testCopyPaste() {
+        log(1, "testing copy-paste");
+
+        assertNumOpenImagesIs(1);
+        assert numLayersIs(1);
+
         runMenuCommand("Copy Layer");
         runMenuCommand("Paste as New Layer");
 
+        assert numLayersIs(2);
+
         runMenuCommand("Copy Composite");
         runMenuCommand("Paste as New Image");
+        assertNumOpenImagesIs(2);
 
         // close the pasted image
         runMenuCommand("Close");
+        assertNumOpenImagesIs(1);
 
-        // close the pasted layer
+        // delete the pasted layer
+        assert numLayersIs(2);
+        assert DeleteActiveLayerAction.INSTANCE.isEnabled();
         runMenuCommand("Delete Layer");
+        assert numLayersIs(1);
 
         testingMode.set(this);
     }
 
     private void testFileMenu() {
         log(0, "testing the file menu");
+        cleanOutputs();
 
         testNewImage();
         testSaveUnnamed();
@@ -786,17 +890,30 @@ public class AssertJSwingTest {
         testCloseAll();
 
         // open an image for the next test
-        openFile("a.jpg");
+        openFileWithDialog("a.jpg");
     }
 
     private void testNewImage() {
         log(1, "testing new image");
 
-        findMenuItemByText("New Image...").click();
-        DialogFixture newImageDialog = findDialogByTitle("New Image");
-        newImageDialog.textBox("widthTF").deleteText().enterText("611");
-        newImageDialog.textBox("heightTF").deleteText().enterText("411");
-        newImageDialog.button("ok").click();
+        runMenuCommand("New Image...");
+        DialogFixture dialog = findDialogByTitle("New Image");
+        dialog.textBox("widthTF").deleteText().enterText("611");
+        dialog.textBox("heightTF").deleteText().enterText("e");
+
+        // try to accept the dialog
+        dialog.button("ok").click();
+
+        expectAndCloseErrorDialog();
+
+        // correct the error
+        dialog.textBox("heightTF").deleteText().enterText("411");
+
+        // try again
+        dialog.button("ok").click();
+
+        // this time the dialog should close
+        dialog.requireNotVisible();
 
         testingMode.set(this);
     }
@@ -804,11 +921,11 @@ public class AssertJSwingTest {
     private void testFileOpen() {
         log(1, "testing file open");
 
-        findMenuItemByText("Open...").click();
+        runMenuCommand("Open...");
         JFileChooserFixture openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
 
-        openFile("b.jpg");
+        openFileWithDialog("b.jpg");
 
         assert checkConsistency();
     }
@@ -843,7 +960,6 @@ public class AssertJSwingTest {
     private void testExportOpenRaster() {
         log(1, "testing export openraster");
 
-        // precondition: the active image has only 1 layer
         assert numLayersIs(1);
 
         runMenuCommand("Export OpenRaster...");
@@ -866,9 +982,10 @@ public class AssertJSwingTest {
         assert numLayersIs(1);
 
         runMenuCommand("Export Layer Animation...");
+        // error dialog, because there is only one layer
         findJOptionPane().okButton().click();
-        addNewLayer();
 
+        addNewLayer();
         // this time it should work
         runMenuCommand("Export Layer Animation...");
         findDialogByTitle("Export Animated GIF").button("ok").click();
@@ -886,15 +1003,33 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Export Tweening Animation");
         dialog.comboBox().selectItem("Angular Waves");
         dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
+        dialog.requireVisible();
+
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // next
-        dialog.button("ok").click(); // render
+        dialog.requireVisible();
+
+        if (quick) {
+            dialog.textBox("numSecondsTF").deleteText().enterText("1");
+            dialog.textBox("fpsTF").deleteText().enterText("4");
+            dialog.label("numFramesLabel").requireText("4");
+        } else {
+            dialog.textBox("numSecondsTF").deleteText().enterText("3");
+            dialog.textBox("fpsTF").deleteText().enterText("5");
+            dialog.label("numFramesLabel").requireText("15");
+        }
+
+        dialog.button("ok").click(); // render button
+        dialog.requireVisible(); // still visible because of the validation error
 
         // say OK to the folder not empty question
         JOptionPaneFixture optionPane = findJOptionPane();
         optionPane.yesButton().click();
+        dialog.requireNotVisible();
 
         waitForProgressMonitorEnd();
 
@@ -903,20 +1038,21 @@ public class AssertJSwingTest {
 
     private void closeOneOfTwo() {
         log(1, "testing close one of two");
+        assertNumOpenImagesIs(2);
 
-        checkNumOpenImagesIs(2);
-        boolean dirty = ImageComponents.getActiveCompOrNull().isDirty();
+        Composition active = ImageComponents.getActiveCompOrNull();
+        boolean dirty = active.isDirty();
 
         runMenuCommand("Close");
 
-        // we might get a "Do you want to save changes" dialog
         if (dirty) {
+            // we get a "Do you want to save changes" dialog
             JOptionPaneFixture optionPane = findJOptionPane();
             JButtonMatcher matcher = JButtonMatcher.withText("Don't Save").andShowing();
             optionPane.button(matcher).click();
         }
 
-        checkNumOpenImagesIs(1);
+        assertNumOpenImagesIs(1);
 
         testingMode.set(this);
         assert checkConsistency();
@@ -925,11 +1061,10 @@ public class AssertJSwingTest {
     private void testCloseAll() {
         log(1, "testing close all");
 
-        assertThat(ImageComponents.getNumOpenImages() > 1);
+        assertNumOpenImagesIsAtLeast(1);
 
         closeAll();
-
-        assertThat(ImageComponents.getNumOpenImages() == 0);
+        assertNumOpenImagesIs(0);
 
         assert checkConsistency();
     }
@@ -937,14 +1072,15 @@ public class AssertJSwingTest {
     private void testBatchResize() {
         log(1, "testing batch resize");
 
-        Directories.setLastOpenDir(inputDir);
-        Directories.setLastSaveDir(batchResizeOutputDir);
+        Dirs.setLastOpen(inputDir);
+        Dirs.setLastSave(batchResizeOutputDir);
         runMenuCommand("Batch Resize...");
         DialogFixture dialog = findDialogByTitle("Batch Resize");
 
         dialog.textBox("widthTF").setText("200");
         dialog.textBox("heightTF").setText("200");
         dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         assert checkConsistency();
     }
@@ -952,8 +1088,8 @@ public class AssertJSwingTest {
     private void testBatchFilter() {
         log(1, "testing batch filter");
 
-        Directories.setLastOpenDir(inputDir);
-        Directories.setLastSaveDir(batchFilterOutputDir);
+        Dirs.setLastOpen(inputDir);
+        Dirs.setLastSave(batchFilterOutputDir);
 
         assertThat(ImageComponents.hasActiveImage()).isTrue();
         runMenuCommand("Batch Filter...");
@@ -963,6 +1099,7 @@ public class AssertJSwingTest {
         Utils.sleep(3, SECONDS);
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // start processing
+        dialog.requireNotVisible();
 
         waitForProgressMonitorEnd();
 
@@ -972,7 +1109,7 @@ public class AssertJSwingTest {
     private void testExportLayerToPNG() {
         log(1, "testing export layer to png");
 
-        Directories.setLastSaveDir(baseTestingDir);
+        Dirs.setLastSave(baseTestingDir);
         addNewLayer();
         runMenuCommand("Export Layers to PNG...");
         findDialogByTitle("Select Output Folder").button("ok").click();
@@ -984,24 +1121,26 @@ public class AssertJSwingTest {
     private void testAutoPaint() {
         log(0, "testing AutoPaint");
 
-        runWithSelectionAndTranslation(() -> {
-            for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
-                if (skipThis()) {
-                    continue;
-                }
-                if (tool == Tools.BRUSH) {
-                    for (String colorSetting : AutoPaint.ConfigPanel.COLOR_SETTINGS) {
-                        Events.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
-                        testAutoPaintWithTool(tool, colorSetting);
-                    }
-                } else {
-                    Events.postAssertJEvent("auto paint with " + tool);
-                    testAutoPaintWithTool(tool, null);
-                }
-            }
-        });
+        runWithSelectionAndTranslation(() -> testAutoPaintTask());
 
         assert checkConsistency();
+    }
+
+    private void testAutoPaintTask() {
+        for (Tool tool : AutoPaint.ALLOWED_TOOLS) {
+            if (skipThis()) {
+                continue;
+            }
+            if (tool == Tools.BRUSH) {
+                for (String colorSetting : AutoPaint.ConfigPanel.COLOR_SETTINGS) {
+                    Events.postAssertJEvent("auto paint with Brush, colorSetting = " + colorSetting);
+                    testAutoPaintWithTool(tool, colorSetting);
+                }
+            } else {
+                Events.postAssertJEvent("auto paint with " + tool);
+                testAutoPaintWithTool(tool, null);
+            }
+        }
     }
 
     private void testAutoPaintWithTool(Tool tool, String colorsSetting) {
@@ -1027,6 +1166,8 @@ public class AssertJSwingTest {
         }
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
+
         keyboardUndoRedoUndo();
     }
 
@@ -1056,6 +1197,8 @@ public class AssertJSwingTest {
             cb.uncheck();
         }
         dialog.button("ok").click();
+        dialog.requireNotVisible();
+
         testingMode.set(this);
 
         assert checkConsistency();
@@ -1073,6 +1216,9 @@ public class AssertJSwingTest {
 
     private void testViewMenu() {
         log(0, "testing the view menu");
+
+        assertNumOpenImagesIs(1);
+        assert numLayersIs(1);
 
         testZoomCommands();
 
@@ -1092,22 +1238,37 @@ public class AssertJSwingTest {
         runMenuCommand("Hide All");
         runMenuCommand("Show Hidden");
 
-        runMenuCommand("Cascade");
-        runMenuCommand("Tile");
+        if (ImageArea.getMode() == FRAMES) {
+            runMenuCommand("Cascade");
+            runMenuCommand("Tile");
+        }
 
         assert checkConsistency();
     }
 
     private void testZoomCommands() {
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         runMenuCommand("Zoom In");
+        assert zoomIs(startingZoom.zoomIn());
+
         runMenuCommand("Zoom Out");
-        runMenuCommand("Actual Pixels");
-        runMenuCommand("Fit Screen");
+        assert zoomIs(startingZoom.zoomIn().zoomOut());
+
+        runMenuCommand("Fit Space");
+        runMenuCommand("Fit Width");
+        runMenuCommand("Fit Height");
 
         ZoomLevel[] values = ZoomLevel.values();
         for (ZoomLevel zoomLevel : values) {
-            runMenuCommand(zoomLevel.toString());
+            if (!skipThis()) {
+                runMenuCommand(zoomLevel.toString());
+                assert zoomIs(zoomLevel);
+            }
         }
+
+        runMenuCommand("Actual Pixels");
+        assert zoomIs(ZoomLevel.Z100);
     }
 
     private void testHistory() {
@@ -1157,10 +1318,14 @@ public class AssertJSwingTest {
         redoButton.requireDisabled();
 
         dialog.close();
+        dialog.requireNotVisible();
     }
 
     private void testFilters() {
         log(0, "testing the filters");
+
+        assertNumOpenImagesIs(1);
+        assert numLayersIs(1);
 
         testColorBalance();
         testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1184,8 +1349,9 @@ public class AssertJSwingTest {
         testNoDialogFilter("Hue (with colors)");
         testNoDialogFilter("Saturation");
         testFilterWithDialog("Quantize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Posterize...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Posterize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Tritone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Color Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1281,7 +1447,8 @@ public class AssertJSwingTest {
                 "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
                 "Do Nothing", "Randomize");
         testFilterWithDialog("Custom 5x5 Convolution...", Randomize.NO,
-                Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur", "Find Horizontal Edges", "Find Vertical Edges",
+                Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur",
+                "Find Horizontal Edges", "Find Vertical Edges",
                 "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
                 "Do Nothing", "Randomize");
 
@@ -1306,7 +1473,7 @@ public class AssertJSwingTest {
     }
 
     private void testText() {
-        findMenuItemByText("Text...").click();
+        runMenuCommand("Text...");
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
         dialog.textBox("textTF").requireEditable().enterText("testing...");
@@ -1319,11 +1486,11 @@ public class AssertJSwingTest {
 // TODO test the advanced settings dialog
 
         findButtonByText(dialog, "OK").click();
-        keyboardUndoRedoUndo();
+        afterFilterRunActions("Text");
     }
 
     private void testRandomFilter() {
-        findMenuItemByText("Random Filter...").click();
+        runMenuCommand("Random Filter...");
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
         JButtonFixture nextRandomButton = findButtonByText(dialog, "Next Random Filter");
         JButtonFixture backButton = findButtonByText(dialog, "Back");
@@ -1346,11 +1513,8 @@ public class AssertJSwingTest {
         nextRandomButton.click();
 
         findButtonByText(dialog, "OK").click();
-        keyboardUndoRedoUndo();
-    }
 
-    private void runMenuCommand(String text) {
-        findMenuItemByText(text).click();
+        afterFilterRunActions("Random Filter");
     }
 
     private void testNoDialogFilter(String name) {
@@ -1361,19 +1525,21 @@ public class AssertJSwingTest {
 
         runMenuCommand(name);
 
-        keyboardUndoRedoUndo();
-
-        assert checkConsistency();
+        afterFilterRunActions(name);
     }
 
-    private void testFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
+    private void testFilterWithDialog(String name,
+                                      Randomize randomize,
+                                      Reseed reseed,
+                                      ShowOriginal checkShowOriginal,
+                                      String... extraButtonsToClick) {
         if (skipThis()) {
             return;
         }
         String nameWithoutDots = name.substring(0, name.length() - 3);
         log(1, "testing the filter " + nameWithoutDots);
 
-        findMenuItemByText(name).click();
+        runMenuCommand(name);
         DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
 
         for (String buttonText : extraButtonsToClick) {
@@ -1381,9 +1547,9 @@ public class AssertJSwingTest {
         }
 
         if (randomize == Randomize.YES) {
-            findButtonByText(dialog, "Randomize Settings").click();
-            findButtonByText(dialog, "Reset All").click();
-            findButtonByText(dialog, "Randomize Settings").click();
+            dialog.button("randomize").click();
+            dialog.button("resetAll").click();
+            dialog.button("randomize").click();
         }
 
         if (checkShowOriginal.isYes()) {
@@ -1392,14 +1558,51 @@ public class AssertJSwingTest {
         }
 
         if (reseed == Reseed.YES) {
-            findButtonByText(dialog, "Reseed").click();
+            dialog.button("reseed").click();
         }
 
         dialog.button("ok").click();
 
-        keyboardUndoRedoUndo();
+        afterFilterRunActions(nameWithoutDots);
+    }
+
+    private void afterFilterRunActions(String filterName) {
+        // it could happen that a filter returns the source image,
+        // and then nothing is put into the history
+        if (History.getLastEditName().equals(filterName)) {
+            keyboardUndoRedoUndo();
+        }
 
         assert checkConsistency();
+    }
+
+    private void stressTestFilterWithDialog(String name, Randomize randomize, Reseed reseed, boolean resizeToSmall) {
+        if (resizeToSmall) {
+            resize(200);
+            runMenuCommand("Zoom In");
+            runMenuCommand("Zoom In");
+        }
+
+        String nameWithoutDots = name.substring(0, name.length() - 3);
+        log(1, "testing the filter " + nameWithoutDots);
+
+        runMenuCommand(name);
+        DialogFixture dialog = WindowFinder.findDialog("filterDialog").using(robot);
+
+        int max = 1000;
+        for (int i = 0; i < max; i++) {
+            System.out.println("AssertJSwingTest stress testing " + nameWithoutDots + ": " + (i + 1) + " of " + max);
+            if (randomize == Randomize.YES) {
+                findButtonByText(dialog, "Randomize Settings").click();
+            }
+            if (reseed == Reseed.YES) {
+                findButtonByText(dialog, "Reseed").click();
+                findButtonByText(dialog, "Reseed").click();
+                findButtonByText(dialog, "Reseed").click();
+            }
+        }
+
+        dialog.button("ok").click();
     }
 
     private void testHandTool() {
@@ -1410,6 +1613,8 @@ public class AssertJSwingTest {
 
         moveRandom();
         dragRandom();
+
+        testAutoZoomButtons();
 
         assert checkConsistency();
     }
@@ -1422,7 +1627,13 @@ public class AssertJSwingTest {
 
         setupEffectsDialog();
 
-        for (ShapeType shapeType : ShapeType.values()) {
+        boolean stokeSettingsDialogTested = false;
+
+        ShapeType[] testedShapeTypes = quick
+                ? new ShapeType[]{ShapeType.RECTANGLE, ShapeType.CAT}
+                : ShapeType.values();
+
+        for (ShapeType shapeType : testedShapeTypes) {
             pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
             for (ShapesAction shapesAction : ShapesAction.values()) {
                 if (skipThis()) {
@@ -1432,9 +1643,9 @@ public class AssertJSwingTest {
                 pw.pressAndReleaseKeys(KeyEvent.VK_R);
 
                 if (shapesAction == ShapesAction.STROKE) { // stroke settings will be enabled here
-                    if (!stokeSettingsSetup) {
+                    if (!stokeSettingsDialogTested) {
                         setupStrokeSettingsDialog();
-                        stokeSettingsSetup = true;
+                        stokeSettingsDialogTested = true;
                     }
                 }
 
@@ -1469,6 +1680,7 @@ public class AssertJSwingTest {
         dialog.checkBox("enabledCB").check();
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void setupStrokeSettingsDialog() {
@@ -1478,6 +1690,7 @@ public class AssertJSwingTest {
         dialog.slider().slideTo(20);
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void testColorPickerTool() {
@@ -1486,9 +1699,9 @@ public class AssertJSwingTest {
         pw.toggleButton("Color Picker Tool Button").click();
         randomAltClick();
 
-        moveTo(300, 300);
+        moveTo(getExtraX() + 300, 300);
         pw.click();
-        dragTo(400, 400);
+        dragTo(getExtraX() + 400, 400);
 
         assert checkConsistency();
     }
@@ -1499,7 +1712,7 @@ public class AssertJSwingTest {
         pw.toggleButton("Paint Bucket Tool Button").click();
         randomAltClick();
 
-        moveTo(300, 300);
+        moveTo(getExtraX() + 300, 300);
         pw.click();
 
         keyboardUndoRedoUndo();
@@ -1517,6 +1730,8 @@ public class AssertJSwingTest {
         pw.toggleButton("Gradient Tool Button").click();
         randomAltClick();
 
+        int extraX = getExtraX();
+
         for (GradientType gradientType : GradientType.values()) {
             pw.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
@@ -1528,11 +1743,11 @@ public class AssertJSwingTest {
                     }
                     pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     pw.checkBox("gradientInvert").uncheck();
-                    moveTo(200, 200);
-                    dragTo(400, 400);
+                    moveTo(extraX + 200, 200);
+                    dragTo(extraX + 400, 400);
                     pw.checkBox("gradientInvert").check();
-                    moveTo(200, 200);
-                    dragTo(400, 400);
+                    moveTo(extraX + 200, 200);
+                    dragTo(extraX + 400, 400);
                 }
             }
         }
@@ -1553,9 +1768,31 @@ public class AssertJSwingTest {
         log(1, "testing the brush tool");
 
         pw.toggleButton("Brush Tool Button").click();
+
+        enableLazyMouse(false);
+        testBrushStrokes();
+
+        enableLazyMouse(true);
         testBrushStrokes();
 
         assert checkConsistency();
+    }
+
+    private void enableLazyMouse(boolean b) {
+        findButtonByText(pw, "Lazy Mouse...").click();
+        DialogFixture dialog = findDialogByTitle("Lazy Mouse");
+        if (b) {
+            dialog.checkBox().check();
+            dialog.slider("distSlider").requireEnabled();
+            dialog.slider("distSlider").slideToMinimum();
+            dialog.slider("spacingSlider").requireEnabled();
+        } else {
+            dialog.checkBox().uncheck();
+            dialog.slider("distSlider").requireDisabled();
+            dialog.slider("spacingSlider").requireDisabled();
+        }
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
     }
 
     private void testBrushStrokes() {
@@ -1601,10 +1838,12 @@ public class AssertJSwingTest {
 
         pw.toggleButton("Clone Stamp Tool Button").click();
 
-        testClone(false, false, 100);
-        testClone(false, true, 200);
-        testClone(true, false, 300);
-        testClone(true, true, 400);
+        int extraX = getExtraX();
+
+        testClone(false, false, extraX + 100);
+        testClone(false, true, extraX + 200);
+        testClone(true, false, extraX + 300);
+        testClone(true, true, extraX + 400);
 
         assert checkConsistency();
     }
@@ -1622,10 +1861,11 @@ public class AssertJSwingTest {
             pw.checkBox("sampleAllLayersCB").uncheck();
         }
 
-        moveTo(300, 300);
-
+        // set the source point
+        moveTo(getExtraX() + 300, 300);
         altClick();
 
+        // do some cloning
         moveTo(startX, 300);
         for (int i = 1; i <= 5; i++) {
             int x = startX + i * 10;
@@ -1650,50 +1890,73 @@ public class AssertJSwingTest {
     }
 
     private void testWithSimpleSelection() {
-        moveTo(200, 200);
-        dragTo(400, 400);
+        assert thereIsNoSelection();
+
+        int extraX = getExtraX();
+        int fromX = extraX + 200;
+        int fromY = 200;
+        moveTo(fromX, fromY);
+        int toX = extraX + 400;
+        int toY = 400;
+        dragTo(toX, toY);
+        assert thereIsSelection() : String.format(
+                "fromX = %d, fromY = %d, toX = %d, toY = %d%n", fromX, fromY, toX, toY);
+
         keyboardNudge();
+        assert thereIsSelection();
+
         keyboardUndoRedoUndo();
+
+        // only the nudge was undone
+        assert thereIsSelection();
 
         //pw.button("brushTraceButton").click();
         findButtonByText(pw, "Stroke with Current Brush").click();
 
         keyboardDeselect();
-        keyboardUndo(); // keyboardUndo deselection
-        keyboardUndo(); // keyboardUndo tracing
+        assert thereIsNoSelection();
+
+        keyboardUndo(); // undo deselection
+        assert thereIsSelection();
+
+        keyboardUndo(); // undo tracing
+
+        assert thereIsSelection();
     }
 
     private void testWithTwoEclipseSelections() {
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
 
+        int extraX = getExtraX();
         // replace current selection with the first ellipse
-        int e1X = 200;
+        int e1X = extraX + 200;
         int e1Y = 200;
         int e1Width = 200;
         int e1Height = 200;
         moveTo(e1X, e1Y);
         dragTo(e1X + e1Width, e1Y + e1Height);
+        assert thereIsSelection();
 
         // add second ellipse
         pw.comboBox("selectionInteractionCombo").selectItem("Add");
-        int e2X = 400;
+        int e2X = extraX + 400;
         int e2Y = 200;
         int e2Width = 100;
         int e2Height = 100;
         moveTo(e2X, e2Y);
         dragTo(e2X + e2Width, e2Y + e2Height);
+        assert thereIsSelection();
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         Canvas canvas = comp.getCanvas();
-        int origCanvasWidth = canvas.getWidth();
-        int origCanvasHeight = canvas.getHeight();
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        int origCanvasWidth = canvas.getImWidth();
+        int origCanvasHeight = canvas.getImHeight();
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
-        assert thereIsSelection();
         Selection selection = comp.getSelection();
         Rectangle selectionBounds = selection.getShapeBounds();
-        int selectionWidth = selectionBounds.width;
-        int selectionHeight = selectionBounds.height;
+        int selWidth = selectionBounds.width;
+        int selHeight = selectionBounds.height;
 
         //pw.button("eraserTraceButton").click();
         findButtonByText(pw, "Stroke with Current Eraser").click();
@@ -1701,19 +1964,19 @@ public class AssertJSwingTest {
         // crop using the "Crop" button in the selection tool
         assert thereIsSelection();
         findButtonByText(pw, "Crop").click();
-        assert canvasSizeIs(selectionWidth, selectionHeight);
+        assert canvasImSizeIs(selWidth, selHeight);
         assert thereIsNoSelection() : "selected after crop";
         keyboardUndoRedoUndo();
         assert thereIsSelection() : "no selection after crop undo";
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
         // crop from the menu
         runMenuCommand("Crop");
         assert thereIsNoSelection();
-        assert canvasSizeIs(selectionWidth, selectionHeight);
+        assert canvasImSizeIs(selWidth, selHeight);
         keyboardUndoRedoUndo();
         assert thereIsSelection();
-        assert canvasSizeIs(origCanvasWidth, origCanvasHeight);
+        assert canvasImSizeIs(origCanvasWidth, origCanvasHeight);
 
         testSelectionModifyMenu();
         assert thereIsSelection();
@@ -1722,17 +1985,19 @@ public class AssertJSwingTest {
         runMenuCommand("Stroke with Current Brush");
         runMenuCommand("Stroke with Current Eraser");
         assert thereIsSelection();
+
         runMenuCommand("Deselect");
         assert thereIsNoSelection();
     }
 
     private void testSelectionModifyMenu() {
-        runMenuCommand("Modify...");
+        runMenuCommand("Modify Selection...");
         DialogFixture dialog = findDialogByTitle("Modify Selection");
 
         findButtonByText(dialog, "Change!").click();
         findButtonByText(dialog, "Change!").click();
         findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
 
         keyboardUndoRedoUndo();
     }
@@ -1740,12 +2005,14 @@ public class AssertJSwingTest {
     private void testCropTool() {
         log(1, "testing the crop tool");
 
+        int extraX = getExtraX();
+
         pw.toggleButton("Crop Tool Button").click();
-        moveTo(200, 200);
-        dragTo(400, 400);
-        dragTo(450, 450);
-        moveTo(200, 200);
-        dragTo(150, 150);
+        moveTo(extraX + 200, 200);
+        dragTo(extraX + 400, 400);
+        dragTo(extraX + 450, 450);
+        moveTo(extraX + 200, 200);
+        dragTo(extraX + 150, 150);
         Utils.sleep(1, SECONDS);
 
         keyboardNudge();
@@ -1774,19 +2041,20 @@ public class AssertJSwingTest {
     }
 
     private void testMoveToolImpl(boolean altDrag) {
-        moveTo(400, 400);
+        int extraX = getExtraX();
+        moveTo(extraX + 400, 400);
         click();
         if (altDrag) {
-            altDragTo(300, 300);
+            altDragTo(extraX + 300, 300);
         } else {
             ImageComponent ic = ImageComponents.getActiveIC();
-            Drawable dr = ic.getComp().getActiveDrawable();
+            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             int tx = dr.getTX();
             int ty = dr.getTY();
             assert tx == 0 : "tx = " + tx;
             assert ty == 0 : "ty = " + tx;
 
-            dragTo(200, 300);
+            dragTo(extraX + 200, 300);
 
             tx = dr.getTX();
             ty = dr.getTY();
@@ -1806,25 +2074,38 @@ public class AssertJSwingTest {
 
     private void testZoomTool() {
         log(1, "testing the zoom tool");
-
         pw.toggleButton("Zoom Tool Button").click();
-        moveTo(300, 300);
+
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
+        moveTo(getRandomX(), getRandomY());
 
         click();
+        assert zoomIs(startingZoom.zoomIn());
         click();
+        assert zoomIs(startingZoom.zoomIn().zoomIn());
         altClick();
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut());
         altClick();
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
 
         testMouseWheelZooming();
         testControlPlusMinusZooming();
         testZoomControlAndNavigatorZooming();
+        testNavigatorRightClickPopupMenu();
+        testAutoZoomButtons();
 
         assert checkConsistency();
     }
 
     private void testControlPlusMinusZooming() {
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
         pressCtrlPlus(pw, 2);
+        assert zoomIs(startingZoom.zoomIn().zoomIn());
+
         pressCtrlMinus(pw, 2);
+        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
     }
 
     private void testZoomControlAndNavigatorZooming() {
@@ -1834,34 +2115,81 @@ public class AssertJSwingTest {
                 return s.getParent() == ZoomControl.INSTANCE;
             }
         });
+        ZoomLevel[] zoomLevels = ZoomLevel.values();
+
         slider.slideToMinimum();
+        assert zoomIs(zoomLevels[0]);
 
         findButtonByText(pw, "100%").click();
+        assert zoomIs(ZoomLevel.Z100);
+
         slider.slideToMaximum();
+        assert zoomIs(zoomLevels[zoomLevels.length - 1]);
+
         findButtonByText(pw, "Fit").click();
 
         runMenuCommand("Show Navigator...");
-        DialogFixture navigatorDialog = findDialogByTitle("Navigator");
-        navigatorDialog.resizeTo(new Dimension(500, 400));
+        DialogFixture navigator = findDialogByTitle("Navigator");
+        navigator.resizeTo(new Dimension(500, 400));
 
-        pressCtrlPlus(navigatorDialog, 4);
-        pressCtrlMinus(navigatorDialog, 2);
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+
+        pressCtrlPlus(navigator, 4);
+        ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
+        assert zoomIs(expectedZoomIn);
+
+        pressCtrlMinus(navigator, 2);
+        ZoomLevel expectedZoomOut = expectedZoomIn.zoomOut().zoomOut();
+        assert zoomIs(expectedZoomOut);
+        findButtonByText(pw, "Fit").click();
 
         // navigate
-        Dialog realDialog = navigatorDialog.target();
-        int mouseStartX = realDialog.getWidth() / 2;
-        int mouseStartY = realDialog.getHeight() / 2;
-        robot.moveMouse(realDialog, mouseStartX, mouseStartY);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(realDialog, mouseStartX - 30, mouseStartY + 30);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        int mouseStartX = navigator.target().getWidth() / 2;
+        int mouseStartY = navigator.target().getHeight() / 2;
 
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(realDialog, mouseStartX, mouseStartY);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        moveTo(navigator, mouseStartX, mouseStartY);
+        dragTo(navigator, mouseStartX - 30, mouseStartY + 30);
+        dragTo(navigator, mouseStartX, mouseStartY);
 
-        navigatorDialog.close();
-        findButtonByText(pw, "Fit").click();
+        navigator.close();
+        navigator.requireNotVisible();
+    }
+
+    private void testNavigatorRightClickPopupMenu() {
+        runMenuCommand("Show Navigator...");
+        DialogFixture navigator = findDialogByTitle("Navigator");
+        navigator.resizeTo(new Dimension(500, 400));
+
+        JPopupMenuFixture popupMenu = navigator.showPopupMenu();
+        clickPopupMenu(popupMenu, "Navigator Zoom: 100%");
+
+        popupMenu = navigator.showPopupMenu();
+        clickPopupMenu(popupMenu, "Navigator Zoom: 50%");
+
+        popupMenu = navigator.showPopupMenu();
+        clickPopupMenu(popupMenu, "Navigator Zoom: 25%");
+
+        popupMenu = navigator.showPopupMenu();
+        clickPopupMenu(popupMenu, "Navigator Zoom: 12.5%");
+
+        navigator.resizeTo(new Dimension(500, 400));
+        popupMenu = navigator.showPopupMenu();
+        clickPopupMenu(popupMenu, "View Box Color...");
+
+        DialogFixture colorSelector = findDialogByTitle("Navigator");
+        moveTo(colorSelector, 100, 150);
+        dragTo(colorSelector, 100, 300);
+        findButtonByText(colorSelector, "OK").click();
+
+        navigator.close();
+        navigator.requireNotVisible();
+    }
+
+    private void testAutoZoomButtons() {
+        findButtonByText(pw, "Actual Pixels").click();
+        findButtonByText(pw, "Fit Space").click();
+        findButtonByText(pw, "Fit Width").click();
+        findButtonByText(pw, "Fit Height").click();
     }
 
     private static void pressCtrlPlus(AbstractWindowFixture window, int times) {
@@ -1884,9 +2212,15 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
+        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
         ImageComponent ic = ImageComponents.getActiveIC();
+
         robot.rotateMouseWheel(ic, 2);
+        assert zoomIs(startingZoom.zoomOut());
+
         robot.rotateMouseWheel(ic, -2);
+        assert zoomIs(startingZoom.zoomOut().zoomIn());
+
         pw.releaseKey(VK_CONTROL);
     }
 
@@ -1908,6 +2242,10 @@ public class AssertJSwingTest {
     }
 
     private void keyboardUndoRedoUndo() {
+        if (History.getEditToBeUndoneName().equals("Delete Layer")) {
+            Thread.dumpStack();
+        }
+
         keyboardUndo();
         keyboardRedo();
         keyboardUndo();
@@ -1943,29 +2281,63 @@ public class AssertJSwingTest {
     }
 
     private void moveRandom() {
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         moveTo(x, y);
+    }
+
+    private int getExtraX() {
+        int extraX = 0;
+        if (ImageArea.getMode() == TABS) {
+            extraX = (int) ImageComponents.getActiveIC().getCanvasStartX();
+        }
+        return extraX;
+    }
+
+    private int getRandomX() {
+        if (ImageArea.getMode() == FRAMES) {
+            return 200 + random.nextInt(400);
+        } else {
+            return 400 + random.nextInt(500);
+        }
+    }
+
+    private int getRandomY() {
+        return 200 + random.nextInt(400);
     }
 
     private void shiftMoveClickRandom() {
         pw.pressKey(VK_SHIFT);
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         moveTo(x, y);
         click();
         pw.releaseKey(VK_SHIFT);
     }
 
     private void dragRandom() {
-        int x = 200 + random.nextInt(400);
-        int y = 200 + random.nextInt(400);
+        int x = getRandomX();
+        int y = getRandomY();
         dragTo(x, y);
     }
 
     private void dragTo(int x, int y) {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
         robot.moveMouse(x, y);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
+    private void moveTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.moveMouse(c, x, y);
+    }
+
+    private void dragTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.moveMouse(c, x, y);
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
@@ -1988,7 +2360,9 @@ public class AssertJSwingTest {
         return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<JDialog>(JDialog.class) {
             @Override
             protected boolean isMatching(JDialog dialog) {
-                return dialog.getTitle().equals(title);
+                // the visible condition is necessary because otherwise it finds
+                // dialogs that were not disposed, but hidden
+                return dialog.getTitle().equals(title) && dialog.isVisible();
             }
         }));
     }
@@ -2021,7 +2395,6 @@ public class AssertJSwingTest {
 
         return menuItemFixture;
     }
-
 
     private static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         JButtonFixture buttonFixture = container.button(
@@ -2072,7 +2445,6 @@ public class AssertJSwingTest {
         return buttonFixture;
     }
 
-
     private JOptionPaneFixture findJOptionPane() {
         return JOptionPaneFinder.findOptionPane().withTimeout(10, SECONDS).using(robot);
     }
@@ -2109,6 +2481,7 @@ public class AssertJSwingTest {
         runMenuCommand("Duplicate Layer");
         assert numLayersIs(numLayers + 1);
         keyboardInvert();
+        testingMode.set(this);
     }
 
     private static void checkTestingDirs() {
@@ -2116,9 +2489,6 @@ public class AssertJSwingTest {
         assertThat(inputDir).exists().isDirectory();
         assertThat(batchResizeOutputDir).exists().isDirectory();
         assertThat(batchFilterOutputDir).exists().isDirectory();
-
-        assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
-        assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
     }
 
     private void click() {
@@ -2142,6 +2512,9 @@ public class AssertJSwingTest {
         try {
             Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
             process.waitFor();
+
+            assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
+            assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -2211,19 +2584,19 @@ public class AssertJSwingTest {
             ImageComponent ic = ImageComponents.getActiveIC();
             if (ic.getZoomLevel() != ZoomLevel.Z100) {
                 // otherwise location on screen can lead to crazy results
-                runMenuCommand("100 %");
+                runMenuCommand("100%");
             }
 
             Canvas canvas = ic.getComp().getCanvas();
-            int width = canvas.getZoomedWidth();
-            int height = canvas.getZoomedHeight();
+            int width = canvas.getCoWidth();
+            int height = canvas.getCoHeight();
             Point onScreen = ic.getLocationOnScreen();
             moveTo(onScreen.x + width / 2, onScreen.y + height / 2);
             dragTo(onScreen.x + width, onScreen.y + height / 2);
         }
     }
 
-    public void deleteLayerMask() {
+    private void deleteLayerMask() {
         runMenuCommand("Delete");
     }
 
@@ -2238,6 +2611,7 @@ public class AssertJSwingTest {
                 .enterText("some text");
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
     }
 
     private void addAdjustmentLayer() {
@@ -2264,12 +2638,21 @@ public class AssertJSwingTest {
                 .releaseKey(VK_4).releaseKey(VK_CONTROL);
     }
 
-    private void openFile(String fileName) {
+    private void expectAndCloseErrorDialog() {
+        DialogFixture errorDialog = findDialogByTitle("Error");
+        findButtonByText(errorDialog, "OK").click();
+        errorDialog.requireNotVisible();
+    }
+
+    private void openFileWithDialog(String fileName) {
         JFileChooserFixture openDialog;
-        findMenuItemByText("Open...").click();
+        runMenuCommand("Open...");
         openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.selectFile(new File(inputDir, fileName));
         openDialog.approve();
+
+        // wait a bit to make sure that the async open completed
+        Utils.sleep(5, SECONDS);
 
         testingMode.set(this);
     }
@@ -2294,11 +2677,15 @@ public class AssertJSwingTest {
             }
         }
 
-        checkNumOpenImagesIs(0);
+        assertNumOpenImagesIs(0);
     }
 
-    private static void checkNumOpenImagesIs(int expected) {
-        assertThat(ImageComponents.getNumOpenImages()).isEqualTo(expected);
+    private void runMenuCommand(String text) {
+        findMenuItemByText(text).click();
+    }
+
+    private void clickPopupMenu(JPopupMenuFixture popupMenu, String delete) {
+        findPopupMenuFixtureByText(popupMenu, delete).click();
     }
 
     private static void processCLArguments(String[] args) {
@@ -2343,7 +2730,7 @@ public class AssertJSwingTest {
         new PixelitorEventListener().register();
 
         pw = WindowFinder.findFrame("frame0")
-                .withTimeout(15, SECONDS)
+                .withTimeout(20, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
     }
@@ -2353,12 +2740,14 @@ public class AssertJSwingTest {
             for (int i = 0; i < indentLevel; i++) {
                 System.out.print("    ");
             }
-            System.out.println(getCurrentTime() + ": " + msg + " (" + testingMode.toString() + ")");
+            System.out.println(getCurrentTime() + ": " + msg
+                    + " (" + testingMode.toString() + ", "
+                    + ImageArea.getMode() + ")");
         }
     }
 
     private static String getCurrentTime() {
-        return DATE_FORMAT.format(new Date());
+        return DATE_FORMAT.get().format(new Date());
     }
 
     public boolean checkConsistency() {

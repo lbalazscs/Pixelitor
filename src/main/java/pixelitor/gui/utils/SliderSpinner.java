@@ -34,6 +34,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 
 import static java.awt.Color.GRAY;
+import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
  * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
@@ -41,7 +42,9 @@ import static java.awt.Color.GRAY;
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
-    private Resettable resettableParam; // if set to non-null, its reset is called instead of the reset this object
+
+    // if set to non-null, its reset is called instead of the reset this object
+    private Resettable resettableParam;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
@@ -67,7 +70,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         this(model, leftColor, rightColor, TextPosition.BORDER, true);
     }
 
-    private SliderSpinner(RangeParam model, Color leftColor, Color rightColor, TextPosition textPosition, boolean addDefaultButton) {
+    private SliderSpinner(RangeParam model,
+                          Color leftColor, Color rightColor,
+                          TextPosition textPosition, boolean addDefaultButton) {
+
         setLayout(new BorderLayout());
         this.model = model;
 
@@ -78,50 +84,74 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (textPosition == TextPosition.BORDER) {
             if ((leftColor != null) && (rightColor != null)) {
                 Border gradientBorder = new GradientBorder(leftColor, rightColor);
-                this.setBorder(BorderFactory.createTitledBorder(gradientBorder, model.getName()));
+                this.setBorder(createTitledBorder(gradientBorder, model.getName()));
             } else {
-                this.setBorder(BorderFactory.createTitledBorder(model.getName()));
+                this.setBorder(createTitledBorder(model.getName()));
                 this.leftColor = GRAY;
                 this.rightColor = GRAY;
             }
         }
 
-        slider = new JSlider(model);
+        this.slider = createSlider(model);
         if (textPosition == TextPosition.BORDER) {
             setupTicks();
         }
-        slider.addChangeListener(this);
 
-        spinner = new JSpinner(new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1));
-        spinner.addChangeListener(this);
+        this.spinner = createSpinner(model);
 
-        label = new JLabel(model.getName() + ": ");
         if (textPosition == TextPosition.WEST) {
+            label = new JLabel(model.getName() + ": ");
             add(label, BorderLayout.WEST);
         } else if (textPosition == TextPosition.NORTH) {
+            label = new JLabel(model.getName() + ": ");
             add(label, BorderLayout.NORTH);
+        } else {
+            label = null;
         }
 
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        add(slider, BorderLayout.CENTER);
-        p.add(spinner);
+        add(this.slider, BorderLayout.CENTER);
+        p.add(this.spinner);
 
         if (addDefaultButton) {
-            defaultButton = new DefaultButton(resettableParam == null ? model : resettableParam);
-//            int spinnerHeight = (int) spinner.getPreferredSize().getHeight();
-//            defaultButton.setPreferredSize(new Dimension(spinnerHeight, spinnerHeight));
-            if (colorsUsed) {
-                defaultButton.setBackground(GRAY);
-            }
+            createDefaultButton(model);
             p.add(defaultButton);
         }
         add(p, BorderLayout.EAST);
 
 //        showTicksAsFloat();
+    }
+
+    private JSlider createSlider(RangeParam model) {
+        JSlider s = new JSlider(model);
+        s.addChangeListener(this);
+        return s;
+    }
+
+    private JSpinner createSpinner(RangeParam model) {
+        JSpinner s = new JSpinner(new SpinnerNumberModel(
+                model.getValue(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                1));
+        s.addChangeListener(this);
+        return s;
+    }
+
+    private void createDefaultButton(RangeParam model) {
+        defaultButton = new DefaultButton(resettableParam == null
+                ? model : resettableParam);
+        if (colorsUsed) {
+            defaultButton.setBackground(GRAY);
+        }
+    }
+
+    public static SliderSpinner simpleFrom(RangeParam model) {
+        return new SliderSpinner(model, TextPosition.NONE, false);
+    }
+
+    public static SliderSpinner simpleWithDefaultButton(RangeParam model) {
+        return new SliderSpinner(model, TextPosition.NONE, true);
     }
 
     public void setupTicks() {
@@ -239,7 +269,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             label.setEnabled(enabled);
         }
         if (defaultButton != null) {
-            defaultButton.setEnabled(enabled);
+            defaultButton.setEnabled(enabled && defaultButton.shouldBeEnabled());
         }
     }
 
@@ -264,5 +294,13 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     public void addChangeListener(ChangeListener listener) {
         slider.addChangeListener(listener);
+    }
+
+    // overridden so that AssertJSwing tests find the components easily
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+        slider.setName(name);
+        spinner.setName(name);
     }
 }

@@ -20,19 +20,10 @@ package pixelitor;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.history.DeleteLayerEdit;
-import pixelitor.history.DeselectEdit;
-import pixelitor.history.History;
-import pixelitor.history.ImageAndMaskEdit;
-import pixelitor.history.ImageEdit;
-import pixelitor.history.LayerOrderChangeEdit;
-import pixelitor.history.LayerSelectionChangeEdit;
-import pixelitor.history.LinkedEdit;
-import pixelitor.history.NewLayerEdit;
-import pixelitor.history.NotUndoableEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.history.TranslationEdit;
+import pixelitor.history.*;
+import pixelitor.io.IOThread;
+import pixelitor.io.OutputFormat;
+import pixelitor.io.SaveSettings;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
@@ -40,20 +31,26 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
+import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.Paths;
+import pixelitor.tools.util.PPoint;
+import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
+import pixelitor.utils.VisibleForTesting;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -62,20 +59,25 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
-import static pixelitor.io.FileExtensionUtils.stripExtension;
+import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
+import static pixelitor.Composition.LayerAdder.Position.TOP;
+import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.utils.Utils.createCopyName;
 
 /**
  * An image composition consisting of multiple layers
  */
 public class Composition implements Serializable {
-    // serialization is used for save in the pxc format
+    // serialization is used for saving in the pxc format
     private static final long serialVersionUID = 1L;
 
     // a counter for the names of new layers
@@ -85,28 +87,44 @@ public class Composition implements Serializable {
     private Layer activeLayer;
     private String name; // the file name or something like "Untitled 1"
 
-    private Canvas canvas;
+    private final Canvas canvas;
+    private Paths paths;
 
     //
     // the following variables are all transient, their state is not saved in PXC!
     //
     private transient File file;
     private transient boolean dirty = false;
-    private transient boolean compositeImageUpToDate = false;
-    private transient BufferedImage cachedCompositeImage = null;
+
+    private transient Lazy<BufferedImage> compositeImage
+            = Lazy.of(this::calculateCompositeImage);
+
     private transient ImageComponent ic;
 
     private transient Selection selection;
+
+    // a temporary, new selection which is currently built
+    // by dragging with a tool, but not finalized yet
     private transient Selection builtSelection;
 
-    // A Composition can be created either with one of the following static
-    // factory methods or through deserialization (pxc)
+    /**
+     * The constructor is private: a {@link Composition}
+     * can be created either with one of the static factory
+     * methods or through deserialization of pxc files
+     */
+    private Composition(Canvas canvas) {
+        this.canvas = canvas;
+    }
 
     /**
      * Creates a single-layered composition from the given image
      */
     public static Composition fromImage(BufferedImage img, File file, String name) {
-        assert img != null;
+        if (img == null) {
+            // a null image here means a decoding error,
+            // but not a program error
+            return null;
+        }
 
         img = ImageUtils.toSysCompatibleImage(img);
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
@@ -121,6 +139,7 @@ public class Composition implements Serializable {
             // one of the file and name arguments must be given
             throw new IllegalArgumentException("no name could be set");
         }
+        assert comp.getName() != null;
         return comp;
     }
 
@@ -150,22 +169,18 @@ public class Composition implements Serializable {
         compCopy.newLayerCount = orig.newLayerCount;
 
         if (orig.selection != null) {
-            compCopy.selection = new Selection(orig.selection, forUndo);
+            compCopy.setSelectionRef(new Selection(orig.selection, forUndo));
         }
         if (forUndo) {
             compCopy.dirty = orig.dirty;
             compCopy.file = orig.file;
             compCopy.name = orig.name;
             compCopy.ic = orig.ic;
-            compCopy.cachedCompositeImage = null;
-            compCopy.compositeImageUpToDate = false;
         } else {
             compCopy.dirty = true;
             compCopy.file = null;
             compCopy.name = createCopyName(stripExtension(orig.name));
             compCopy.ic = null;
-            compCopy.cachedCompositeImage = orig.cachedCompositeImage;
-            compCopy.compositeImageUpToDate = orig.compositeImageUpToDate;
         }
 
         assert compCopy.checkInvariant();
@@ -173,11 +188,15 @@ public class Composition implements Serializable {
         return compCopy;
     }
 
-    private Composition(Canvas canvas) {
-        this.canvas = canvas;
-    }
-
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // init transient variables
+        compositeImage = Lazy.of(this::calculateCompositeImage);
+        file = null; // will be set later
+        dirty = false;
+        ic = null; // will be set later
+        selection = null; // the selection is not saved
+        builtSelection = null;
+
         in.defaultReadObject();
 
         for (Layer layer : layerList) {
@@ -192,15 +211,19 @@ public class Composition implements Serializable {
         }
     }
 
-    /**
-     * Called when deserialized and when duplicated
-     */
+    public ImageComponent getIC() {
+        return ic;
+    }
+
     public void setIC(ImageComponent ic) {
         this.ic = ic;
         canvas.setIC(ic);
 
         if (selection != null) { // can happen when duplicating
             selection.setIC(ic);
+        }
+        if (paths != null) {
+            paths.setView(ic);
         }
     }
 
@@ -212,20 +235,16 @@ public class Composition implements Serializable {
         return canvas;
     }
 
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
+    public Rectangle getCanvasImBounds() {
+        return canvas.getImBounds();
     }
 
-    public Rectangle getCanvasBounds() {
-        return canvas.getBounds();
+    public int getCanvasImWidth() {
+        return canvas.getImWidth();
     }
 
-    public int getCanvasWidth() {
-        return canvas.getWidth();
-    }
-
-    public int getCanvasHeight() {
-        return canvas.getHeight();
+    public int getCanvasImHeight() {
+        return canvas.getImHeight();
     }
 
     public void setDirty(boolean dirty) {
@@ -257,71 +276,40 @@ public class Composition implements Serializable {
     }
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
-        ImageLayer newLayer = new ImageLayer(this, baseLayerImage, null, null);
+        ImageLayer newLayer = new ImageLayer(this, baseLayerImage,
+                generateNewLayerName(), null);
 
-        addLayerNoGUI(newLayer);
-        activeLayer = newLayer;
+        addLayerInInitMode(newLayer);
     }
 
     /**
-     * Adds a layer to the top without updating any GUI
+     * "Init mode" means that this is part of the composition construction,
+     * the layer is not added as a result of a user interaction
      */
-    public void addLayerNoGUI(Layer newLayer) {
-        layerList.add(newLayer); // adds it to top, ignoring the active layer position
-        setActiveLayer(newLayer, false);
-
-        // doesn't set the dirty flag because
-        // this method is used when adding the base layer
+    public void addLayerInInitMode(Layer newLayer) {
+        new LayerAdder(this).compInitMode().add(newLayer);
     }
 
     public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
-        ImageLayer newLayer = new ImageLayer(this, name);
-        addLayer(newLayer, true, "New Empty Layer", false, bellowActive);
+        ImageLayer newLayer = ImageLayer.createEmpty(this, name);
+        new LayerAdder(this)
+                .withHistory("New Empty Layer")
+                .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
+                .noRefresh()
+                .add(newLayer);
+
         newLayer.updateIconImage();
         return newLayer;
     }
 
-    public void addLayer(Layer newLayer, boolean addToHistory, String historyName,
-                         boolean updateHistogram, boolean bellowActive) {
-        int activeLayerIndex = layerList.indexOf(activeLayer);
-        int newLayerIndex;
-
-        if (activeLayerIndex == -1) { // no active layer yet
-            assert layerList.isEmpty();
-            newLayerIndex = 0;
-        } else {
-            if (bellowActive) {
-                newLayerIndex = activeLayerIndex;
-            } else {
-                newLayerIndex = activeLayerIndex + 1;
-            }
-        }
-
-        addLayer(newLayer, addToHistory, historyName, updateHistogram, newLayerIndex);
+    public void addPastedImageAsNewLayer(BufferedImage pastedImage) {
+        ImageLayer newLayer = ImageLayer.createFromPastedImage(pastedImage, this);
+        new LayerAdder(this)
+                .withHistory("New Pasted Layer")
+                .add(newLayer);
     }
 
-    /**
-     * Adds the specified layer at the specified layer position
-     */
-    public void addLayer(Layer newLayer, boolean addToHistory, String historyName, boolean updateHistogram, int newLayerIndex) {
-        Layer activeLayerBefore = activeLayer;
-        MaskViewMode oldViewMode = ic.getMaskViewMode();
-
-        layerList.add(newLayerIndex, newLayer);
-        setActiveLayer(newLayer, false);
-        ic.addLayerToGUI(newLayer, newLayerIndex);
-
-        History.addEdit(addToHistory, () -> new NewLayerEdit(historyName, this, newLayer, activeLayerBefore, oldViewMode));
-
-        if (updateHistogram) {
-            imageChanged(FULL); // if the histogram is updated, a repaint is also necessary
-        } else {
-            imageChanged(INVALIDATE_CACHE);
-        }
-        assert checkInvariant();
-    }
-
-    public void addLayersToGUI() {
+    public void addAllLayersToGUI() {
         assert checkInvariant();
 
         // when adding layer buttons the last layer always gets active
@@ -335,13 +323,14 @@ public class Composition implements Serializable {
 
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-//        setActiveLayer(layer, false);
         ic.addLayerToGUI(layer, layerIndex);
     }
 
     public void duplicateActiveLayer() {
         Layer duplicate = activeLayer.duplicate(false);
-        addLayer(duplicate, true, "Duplicate Layer", true, false);
+        new LayerAdder(this)
+                .withHistory("Duplicate Layer")
+                .add(duplicate);
         assert checkInvariant();
     }
 
@@ -352,33 +341,42 @@ public class Composition implements Serializable {
         if (activeIndex > 0 && activeLayer.isVisible()) {
             Layer bellow = layerList.get(activeIndex - 1);
             if (bellow instanceof ImageLayer && bellow.isVisible()) {
-                mergeActiveLayerToImageLayer(updateGUI, activeIndex, (ImageLayer) bellow);
+                mergeActiveLayerToImageLayer(activeIndex, (ImageLayer) bellow, updateGUI);
             }
         }
     }
 
-    private void mergeActiveLayerToImageLayer(boolean updateGUI, int activeIndex, ImageLayer target) {
-        // TODO for adjustment effects it is not necessary to copy
-        BufferedImage backupImage = ImageUtils.copyImage(target.getImage());
+    private void mergeActiveLayerToImageLayer(int activeIndex,
+                                              ImageLayer imageLayer,
+                                              boolean updateGUI) {
+        MaskViewMode maskViewModeBefore = ic.getMaskViewMode();
+        BufferedImage imageBefore = ImageUtils.copyImage(imageLayer.getImage());
 
-        activeLayer.mergeDownOn(target);
-        target.updateIconImage();
+        // apply the effect of the merged layer to the image of the image layer
+        BufferedImage bellowImage = imageLayer.getImage();
+        Graphics2D g = bellowImage.createGraphics();
+        g.translate(-imageLayer.getTX(), -imageLayer.getTY());
+        BufferedImage result = activeLayer.applyLayer(g, bellowImage, false);
+        if (result != null) {  // this was an adjustment
+            imageLayer.setImage(result);
+        }
+        g.dispose();
+
+        imageLayer.updateIconImage();
+
+        // keep the reference because after deleting the
+        // active merged layer, another layer will become active
         Layer mergedLayer = activeLayer;
 
         deleteActiveLayer(updateGUI, false);
 
-        // TODO the MaskViewMode should be restored like in TextLayerRasterizeEdit
-        PixelitorEdit edit = new LinkedEdit("Merge Down", this,
-                new ImageEdit("", this, target, backupImage, true, false),
-                new DeleteLayerEdit(this, mergedLayer, activeIndex)
-        );
-
-        History.addEdit(edit);
+        History.addEdit(new MergeDownEdit(this, mergedLayer,
+                imageLayer, imageBefore, maskViewModeBefore, activeIndex));
     }
 
-    private void deleteLayer(int layerIndex) {
+    private void deleteLayer(int layerIndex, boolean addToHistory) {
         Layer layer = layerList.get(layerIndex);
-        deleteLayer(layer, true, true);
+        deleteLayer(layer, addToHistory, true);
     }
 
     public void deleteActiveLayer(boolean updateGUI, boolean addToHistory) {
@@ -392,7 +390,9 @@ public class Composition implements Serializable {
 
         int layerIndex = layerList.indexOf(layerToBeDeleted);
 
-        History.addEdit(addToHistory, () -> new DeleteLayerEdit(this, layerToBeDeleted, layerIndex));
+        if (addToHistory) {
+            History.addEdit(new DeleteLayerEdit(this, layerToBeDeleted, layerIndex));
+        }
 
         layerList.remove(layerToBeDeleted);
 
@@ -408,34 +408,38 @@ public class Composition implements Serializable {
             LayerButton button = layerToBeDeleted.getUI();
             ic.deleteLayerButton(button);
 
-            if (isActiveComp()) {
-                AppLogic.numLayersChanged(this, layerList.size());
+            if (isActive()) {
+                Layers.numLayersChanged(this, layerList.size());
             }
 
-            imageChanged(FULL);
+            imageChanged();
         }
     }
 
     public void setActiveLayer(Layer newActiveLayer, boolean addToHistory) {
-        if (activeLayer != newActiveLayer) {
-            assert layerList.contains(newActiveLayer)
-                    : String.format("new active layer '%s' (%s) not in the layer list of '%s'",
-                    newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
-
-            Layer oldLayer = activeLayer;
-            activeLayer = newActiveLayer;
-
-            // notify UI
-            activeLayer.activateUI();
-            AppLogic.activeLayerChanged(newActiveLayer);
-
-            // notify history
-            History.addEdit(addToHistory, () -> new LayerSelectionChangeEdit(this, oldLayer, newActiveLayer));
-            assert checkInvariant();
+        if (activeLayer == newActiveLayer) {
+            return;
         }
+        assert layerList.contains(newActiveLayer)
+                : format("new active layer '%s' (%s) not in the layer list of '%s'",
+                newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
+
+        Layer oldLayer = activeLayer;
+        activeLayer = newActiveLayer;
+
+        // notify UI
+        activeLayer.activateUI();
+        Layers.activeLayerChanged(newActiveLayer);
+
+        if (addToHistory) {
+            History.addEdit(new LayerSelectionChangeEdit(
+                    this, oldLayer, newActiveLayer));
+        }
+
+        assert checkInvariant();
     }
 
-    public boolean isActiveLayer(Layer layer) {
+    public boolean isActive(Layer layer) {
         return layer == activeLayer;
     }
 
@@ -526,11 +530,15 @@ public class Composition implements Serializable {
         return null;
     }
 
+    public Optional<Drawable> getActiveDrawable() {
+        return Optional.ofNullable(getActiveDrawableOrNull());
+    }
+
     /**
-     * Returns the active mask or image layer
-     * This method assumes that the active layer is an image layer
+     * Returns the active mask or image layer.
+     * Calling this method assumes that the active layer is a Drawable.
      */
-    public Drawable getActiveDrawable() {
+    public Drawable getActiveDrawableOrThrow() {
         Drawable dr = getActiveDrawableOrNull();
         if (dr == null) {
             throw new IllegalStateException("The active layer is not an image layer or a mask, it is "
@@ -548,10 +556,10 @@ public class Composition implements Serializable {
         layer.startMovement();
     }
 
-    public void moveActiveContentRelative(double relativeX, double relativeY) {
+    public void moveActiveContentRelative(double relX, double relY) {
         Layer layer = getActiveMaskOrLayer();
-        layer.moveWhileDragging(relativeX, relativeY);
-        imageChanged(FULL);
+        layer.moveWhileDragging(relX, relY);
+        imageChanged();
     }
 
     public void endMovement() {
@@ -562,13 +570,13 @@ public class Composition implements Serializable {
             // We always should get here except if an adjustment
             // layer without a mask was moved.
             History.addEdit(edit);
-            imageChanged(FULL);
+            imageChanged();
         }
     }
 
-    public void flattenImage(boolean updateGUI) {
+    public void flattenImage(boolean updateGUI, boolean addToHistory) {
         if (updateGUI) {
-            assert isActiveComp();
+            assert isActive();
         }
 
         if (layerList.size() < 2) {
@@ -579,15 +587,18 @@ public class Composition implements Serializable {
         BufferedImage bi = getCompositeImage();
 
         Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
-        addLayer(flattenedLayer, false, null, false, numLayers); // add to the top
+        new LayerAdder(this)
+                .atIndex(numLayers) // add to the top
+                .noRefresh()
+                .add(flattenedLayer);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
-            deleteLayer(i);
+            deleteLayer(i, false);
         }
         if (updateGUI) {
-            AppLogic.numLayersChanged(this, 1);
-
-            // TODO should have a separate add to history argument?
+            Layers.numLayersChanged(this, 1);
+        }
+        if (addToHistory) {
             History.addEdit(new NotUndoableEdit("Flatten Image", this));
         }
     }
@@ -596,14 +607,14 @@ public class Composition implements Serializable {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex + 1, true);
+        changeLayerOrder(oldIndex, oldIndex + 1, true);
     }
 
     public void moveActiveLayerDown() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, oldIndex - 1, true);
+        changeLayerOrder(oldIndex, oldIndex - 1, true);
     }
 
     public void moveActiveLayerToTop() {
@@ -611,17 +622,17 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
-        swapLayers(oldIndex, newIndex, true);
+        changeLayerOrder(oldIndex, newIndex, true);
     }
 
     public void moveActiveLayerToBottom() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        swapLayers(oldIndex, 0, true);
+        changeLayerOrder(oldIndex, 0, true);
     }
 
-    public void swapLayers(int oldIndex, int newIndex, boolean addToHistory) {
+    public void changeLayerOrder(int oldIndex, int newIndex, boolean addToHistory) {
         if (newIndex < 0) {
             return;
         }
@@ -633,14 +644,16 @@ public class Composition implements Serializable {
         }
 
         Layer layer = layerList.get(oldIndex);
-        layerList.remove(layer);
+        layerList.remove(oldIndex);
         layerList.add(newIndex, layer);
 
-        ic.changeLayerOrderInTheGUI(oldIndex, newIndex);
-        imageChanged(FULL);
-        AppLogic.layerOrderChanged(this);
+        ic.changeLayerButtonOrder(oldIndex, newIndex);
+        imageChanged();
+        Layers.layerOrderChanged(this);
 
-        History.addEdit(addToHistory, () -> new LayerOrderChangeEdit(this, oldIndex, newIndex));
+        if (addToHistory) {
+            History.addEdit(new LayerOrderChangeEdit(this, oldIndex, newIndex));
+        }
     }
 
     public void moveLayerSelectionUp() {
@@ -669,22 +682,28 @@ public class Composition implements Serializable {
 
     public BufferedImage calculateCompositeImage() {
         // TODO why is this not working
-//        if(getNrLayers() == 1) {
-//            ImageLayer layer = (ImageLayer) getLayer(0); // must be
-//            return layer.getImage();
+//        if(layerList.size() == 1) {
+//            Layer firstLayer = layerList.get(0);
+//            if(firstLayer instanceof ImageLayer) {
+//                ImageLayer layer = (ImageLayer) firstLayer;
+//                if(!layer.isBigLayer()) {
+//                    return layer.getImage();
+//                }
+//                return layer.getCanvasSizedSubImage();
+//            }
 //        }
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
         BufferedImage imageSoFar = new BufferedImage(
-                canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
+                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;
         for (Layer layer : layerList) {
             if (layer.isVisible()) {
-                BufferedImage result = layer.applyLayer(g, firstVisibleLayer, imageSoFar);
-                if (result != null) { // this was an adjustment layer
+                BufferedImage result = layer.applyLayer(g, imageSoFar, firstVisibleLayer);
+                if (result != null) { // adjustment layer or watermarking text layer
                     imageSoFar = result;
                     if (g != null) {
                         g.dispose();
@@ -706,10 +725,20 @@ public class Composition implements Serializable {
         return retVal;
     }
 
-    public void updateRegion(double startX, double startY, double endX, double endY, int thickness) {
-        compositeImageUpToDate = false;
-        ic.updateRegion(startX, startY, endX, endY, thickness);
-        ic.updateNavigator(false);
+    public void updateRegion(PPoint start, PPoint end, double thickness) {
+        compositeImage.invalidate();
+        if (ic != null) { // during reload image it can be null
+            ic.updateRegion(start, end, thickness);
+            ic.updateNavigator(false);
+        }
+    }
+
+    public void updateRegion(PRectangle area) {
+        compositeImage.invalidate();
+        if (ic != null) { // during reload image it can be null
+            ic.updateRegion(area);
+            ic.updateNavigator(false);
+        }
     }
 
     public void dispose() {
@@ -719,42 +748,58 @@ public class Composition implements Serializable {
         }
     }
 
-    public void addNewLayerFromComposite(String newLayerName) {
-        ImageLayer newLayer = new ImageLayer(this, getCompositeImage(), newLayerName, null);
-        addLayer(newLayer, true, "New Layer from Composite", false, false);
-    }
+    public void addNewLayerFromComposite() {
+        ImageLayer newLayer = new ImageLayer(this,
+                getCompositeImage(), "Composite", null);
 
-    public ImageComponent getIC() {
-        return ic;
+        new LayerAdder(this)
+                .withHistory("New Layer from Composite")
+                .noRefresh()
+                .atIndex(layerList.size())
+                .add(newLayer);
     }
 
     public void paintSelection(Graphics2D g) {
-        boolean ruby = false;
+        boolean ruby = false; // feature to be added one day
         if (ruby) {
-            Shape allSelection = null;
-            if (builtSelection != null) {
-                allSelection = builtSelection.getShape();
-            }
-            if (selection != null) {
-                if (allSelection == null) {
-                    allSelection = selection.getShape();
-                } else {
-                    allSelection = SelectionInteraction.ADD.combine(allSelection, selection.getShape());
-                }
-            }
-            if (allSelection != null) {
-                Shape inverted = canvas.invertShape(allSelection);
-                g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
-                g.setColor(Color.RED);
-                g.fill(inverted);
-            }
+            paintSelectionAsRubyOverlay(g);
         } else {
-            if (builtSelection != null) {
-                builtSelection.paintMarchingAnts(g);
+            paintSelectionAsMarchingAnts(g);
+        }
+    }
+
+    private void paintSelectionAsRubyOverlay(Graphics2D g) {
+        Shape totalShape = calcTotalSelectionShape();
+        if (totalShape != null) {
+            Shape inverted = canvas.invertShape(totalShape);
+            g.setComposite(AlphaComposite.SrcOver.derive(0.5f));
+            g.setColor(Color.RED);
+            g.fill(inverted);
+        }
+    }
+
+    private Shape calcTotalSelectionShape() {
+        Shape totalShape = null;
+        if (builtSelection != null) {
+            totalShape = builtSelection.getShape();
+        }
+        if (selection != null) {
+            if (totalShape == null) {
+                totalShape = selection.getShape();
+            } else {
+                totalShape = SelectionInteraction.ADD.combine(
+                        totalShape, selection.getShape());
             }
-            if (selection != null) {
-                selection.paintMarchingAnts(g);
-            }
+        }
+        return totalShape;
+    }
+
+    private void paintSelectionAsMarchingAnts(Graphics2D g) {
+        if (builtSelection != null) {
+            builtSelection.paintMarchingAnts(g);
+        }
+        if (selection != null) {
+            selection.paintMarchingAnts(g);
         }
     }
 
@@ -769,28 +814,27 @@ public class Composition implements Serializable {
 
             boolean wasHidden = selection.isHidden();
             selection.die();
-            selection = null;
+            setSelectionRef(null);
 
-            if (isActiveComp()) {
+            if (isActive()) {
                 if (wasHidden) {
                     SelectionActions.getShowHide()
                             .setHideName();
                 }
-                SelectionActions.setEnabled(false, this);
+                if (!ic.isMock()) {
+                    SelectionActions.setEnabled(false, this);
+                }
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
+        if (Build.CURRENT.isDevelopment() && isActive()) {
+            ConsistencyChecks.selectionActionsEnabledCheck(this);
+        }
     }
 
     public Shape clipShapeToCanvasSize(Shape shape) {
-        assert shape != null;
-
-        Area compBounds = new Area(new Rectangle(0, 0, canvas.getWidth(), canvas.getHeight()));
-        Area result = new Area(shape);
-        result.intersect(compBounds);
-
-        return result;
+        return canvas.clipShapeToBounds(shape);
     }
 
     public DeselectEdit createDeselectEdit() {
@@ -805,6 +849,12 @@ public class Composition implements Serializable {
     public void onSelection(Consumer<Selection> action) {
         if (selection != null) {
             action.accept(selection);
+        }
+    }
+
+    public void transformSelection(Supplier<AffineTransform> at) {
+        if (selection != null) {
+            selection.transform(at.get());
         }
     }
 
@@ -827,30 +877,71 @@ public class Composition implements Serializable {
         this.builtSelection = selection;
     }
 
-    public void setSelection(Selection selection) {
+    // this is the "complete" method for setting a selection
+    // from shape in the sense that it handles
+    // everything: existing selections, history management
+    public PixelitorEdit setSelectionFromShapeComplete(Shape shape) {
+        PixelitorEdit edit;
+        shape = canvas.clipShapeToBounds(shape);
+        if (shape.getBounds().isEmpty()) {
+            // the new selection was outside the canvas
+            return null;
+        }
+
+        if (selection != null) {
+            Shape backupSelectionShape = selection.getShape();
+            selection.setShape(shape);
+            edit = new SelectionChangeEdit("Selection Change", this, backupSelectionShape);
+        } else {
+            setSelectionRef(createSelectionFromShape(shape));
+            edit = new NewSelectionEdit(this, selection.getShape());
+        }
+        return edit;
+    }
+
+    /**
+     * Changing the selection reference should be done only by using this method
+     * (in order to make debugging easier)
+     */
+    public void setSelectionRef(Selection selection) {
+//        if(this.selection != null && selection == null) {
+//            Thread.dumpStack();
+//        }
         this.selection = selection;
     }
 
     public void promoteSelection() {
         assert selection == null || !selection.isAlive() : "selection = " + selection;
         setNewSelection(builtSelection);
-        builtSelection = null;
+        setBuiltSelection(null);
     }
 
     public boolean hasSelection() {
         return (selection != null);
     }
 
-    public void applySelectionClipping(Graphics2D g2, AffineTransform at) {
+    @VisibleForTesting
+    public boolean hasBuiltSelection() {
+        return (builtSelection != null);
+    }
+
+    /**
+     * Returns true if visually there are marching ants,
+     * even if the selection is not yet finished
+     */
+    public boolean showsSelection() {
+        return (selection != null || builtSelection != null);
+    }
+
+    /**
+     * Sets the clip area on the given graphics according to the selection.
+     * It is assumed that the graphics is relative to the canvas:
+     * if it is coming from the image of an ImageLayer, then it must be
+     * translated before calling this.
+     */
+    public void applySelectionClipping(Graphics2D g2) {
         if (selection != null) {
-            Shape shape;
-            if (at != null) {
-                Path2D.Float pathShape = new Path2D.Float(selection.getShape());
-                pathShape.transform(at);
-                shape = pathShape;
-            } else { // relative to the composition
-                shape = selection.getShape();
-            }
+            Shape shape = selection.getShape();
             g2.setClip(shape);
         }
     }
@@ -865,34 +956,32 @@ public class Composition implements Serializable {
         }
     }
 
-    public void createSelectionFromShape(Shape selectionShape) {
+    public Selection createSelectionFromShape(Shape selectionShape) {
         if (selection != null) {
             throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection
                     .toString());
         }
         setNewSelection(new Selection(selectionShape, ic));
+        return selection;
     }
 
     public void setNewSelection(Selection selection) {
         assert selection != null;
-        this.selection = selection;
-        if (isActiveComp()) {
+        setSelectionRef(selection);
+        if (isActive() && !ic.isMock()) {
             SelectionActions.setEnabled(true, this);
         }
     }
 
     /**
-     * Returns the composite image which jas the same dimensions as the canvas.
+     * Returns the composite image, which has the same dimensions as the canvas.
      */
     public BufferedImage getCompositeImage() {
-        if (compositeImageUpToDate) {
-            return cachedCompositeImage; // this caching is useful for example when using the Color Picker Tool
-        }
+        return compositeImage.get();
+    }
 
-        cachedCompositeImage = calculateCompositeImage();
-
-        compositeImageUpToDate = true;
-        return cachedCompositeImage;
+    public void imageChanged() {
+        imageChanged(FULL);
     }
 
     public void imageChanged(ImageChangeActions actions) {
@@ -904,21 +993,21 @@ public class Composition implements Serializable {
      * and additional actions might be necessary
      */
     public void imageChanged(ImageChangeActions actions, boolean sizeChanged) {
-        compositeImageUpToDate = false;
+        compositeImage.invalidate();
 
-        if (actions.isRepaint()) {
+        if (actions.repaintNeeded()) {
             if (ic != null) {
                 ic.repaint();
                 ic.updateNavigator(sizeChanged);
             }
         }
 
-        if (actions.isUpdateHistogram()) {
+        if (actions.histogramChanged()) {
             HistogramsPanel.INSTANCE.updateFromCompIfShown(this);
         }
     }
 
-    private boolean isActiveComp() {
+    private boolean isActive() {
         return (ImageComponents.getActiveCompOrNull() == this);
     }
 
@@ -962,7 +1051,7 @@ public class Composition implements Serializable {
     public void dragFinished(Layer layer, int newIndex) {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
-        imageChanged(FULL);
+        imageChanged();
     }
 
     public void repaint() {
@@ -978,9 +1067,9 @@ public class Composition implements Serializable {
             Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);
             if (intersection.getBounds().isEmpty()) {
                 selection.die();
-                selection = null;
+                setSelectionRef(null);
             } else {
-                // the intersection needs to be translated
+                // the intersection has to be translated
                 // into the coordinate system of the new, cropped image
                 double txx = -cropRect.getX();
                 double txy = -cropRect.getY();
@@ -1006,6 +1095,86 @@ public class Composition implements Serializable {
         return true;
     }
 
+    public int getNumImageLayers() {
+        int count = 0;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int calcNumImages() {
+        int count = 0;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                count++;
+            }
+            if (layer.hasMask()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
+                                             boolean addToRecentMenus) {
+        OutputFormat outputFormat = saveSettings.getOutputFormat();
+        File file = saveSettings.getFile();
+
+        System.out.println("Composition::saveAsync: CALLED, file = " + file.getAbsolutePath());
+
+
+        Runnable saveTask = outputFormat.getSaveTask(this, saveSettings);
+        return saveAsync(saveTask, file, addToRecentMenus);
+    }
+
+    public CompletableFuture<Void> saveAsync(Runnable saveTask,
+                                             File file,
+                                             boolean addToRecentMenus) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        // set to not dirty already at the beginning of the saving process,
+        // so that subsequent closing does not trigger another, parallel save
+        setDirty(false);
+
+        return CompletableFuture
+                .runAsync(saveTask,
+                        IOThread.getExecutor())
+                .thenAcceptAsync(v -> afterSaveActions(file, addToRecentMenus),
+                        EventQueue::invokeLater)
+                .exceptionally(Messages::showExceptionOnEDT);
+    }
+
+    private void afterSaveActions(File file, boolean addToRecentMenus) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        setFile(file);
+        if (addToRecentMenus) {
+            RecentFilesMenu.getInstance().addFile(file);
+        }
+        Messages.showFileSavedMessage(file);
+    }
+
+    public Paths getPaths() {
+        return paths;
+    }
+
+    public Path getActivePath() {
+        if (paths != null) {
+            return paths.getActivePath();
+        }
+        return null;
+    }
+
+    public void setActivePath(Path path) {
+        if (paths == null) {
+            paths = new Paths();
+        }
+        paths.setActivePath(path);
+    }
+
     public enum ImageChangeActions {
         INVALIDATE_CACHE(false, false) {
         }, REPAINT(true, false) {
@@ -1021,11 +1190,11 @@ public class Composition implements Serializable {
             this.updateHistogram = updateHistogram;
         }
 
-        private boolean isRepaint() {
+        private boolean repaintNeeded() {
             return repaint;
         }
 
-        private boolean isUpdateHistogram() {
+        private boolean histogramChanged() {
             return updateHistogram;
         }
     }
@@ -1040,12 +1209,98 @@ public class Composition implements Serializable {
                 + ", dirty=" + dirty + '}';
     }
 
-    /**
-     * Includes only the layer names and which layer is active
-     */
-    public String toLayerNamesString() {
-        return layerList.stream()
-                .map((layer) -> layer == activeLayer ? "ACTIVE " + layer.getName() : layer.getName())
-                .collect(Collectors.joining(", ", "[", "]"));
+    public static class LayerAdder {
+        private final Composition comp;
+        private String historyName; // null if the add should not be added to history
+        private int newLayerIndex = -1;
+        private boolean refresh = true;
+
+        public enum Position {TOP, ABOVE_ACTIVE, BELLOW_ACTIVE}
+
+        private Position position = TOP;
+        private boolean compInit = false;
+
+        public LayerAdder(Composition comp) {
+            this.comp = comp;
+        }
+
+        public LayerAdder withHistory(String historyName) {
+            this.historyName = historyName;
+            return this;
+        }
+
+        public LayerAdder atPosition(Position position) {
+            this.position = position;
+            return this;
+        }
+
+        /**
+         * Used during composition initialization
+         */
+        public LayerAdder compInitMode() {
+            compInit = true;
+            return this;
+        }
+
+        /**
+         * Used when the composite image does not change
+         */
+        public LayerAdder noRefresh() {
+            refresh = false;
+            return this;
+        }
+
+        private void calcIndexBasedOnRelPosition() {
+            int activeLayerIndex = comp.getActiveLayerIndex();
+            if (activeLayerIndex == -1) { // no active layer yet
+                assert comp.layerList.isEmpty();
+                newLayerIndex = 0;
+            } else {
+                if (position == BELLOW_ACTIVE) {
+                    newLayerIndex = activeLayerIndex;
+                } else if (position == ABOVE_ACTIVE) {
+                    newLayerIndex = activeLayerIndex + 1;
+                } else {
+                    throw new IllegalStateException("position = " + position);
+                }
+            }
+        }
+
+        public LayerAdder atIndex(int newLayerIndex) {
+            this.newLayerIndex = newLayerIndex;
+            return this;
+        }
+
+        public void add(Layer newLayer) {
+            Layer activeLayerBefore = null;
+            MaskViewMode oldViewMode = null;
+            if (historyName != null) {
+                activeLayerBefore = comp.activeLayer;
+                oldViewMode = comp.ic.getMaskViewMode();
+            }
+
+            if (newLayerIndex == -1) { // no index was explicitly set
+                if (position == TOP) {
+                    newLayerIndex = comp.layerList.size();
+                } else {
+                    calcIndexBasedOnRelPosition();
+                }
+            }
+            comp.layerList.add(newLayerIndex, newLayer);
+            comp.setActiveLayer(newLayer, false);
+            if (!compInit) {
+                comp.setDirty(true);
+                comp.ic.addLayerToGUI(newLayer, newLayerIndex);
+
+                if (refresh) {
+                    comp.imageChanged();
+                }
+            }
+            if (historyName != null) {
+                History.addEdit(new NewLayerEdit(historyName,
+                        comp, newLayer, activeLayerBefore, oldViewMode));
+            }
+            assert comp.checkInvariant();
+        }
     }
 }

@@ -25,7 +25,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
@@ -36,11 +36,14 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.Optional;
-import java.util.function.Supplier;
+
+import static java.lang.String.format;
 
 /**
- * Static methods for managing history and undo/redo for all open images
+ * Static methods for managing history and undo/redo
  */
 public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
@@ -49,11 +52,16 @@ public class History {
     private static boolean ignoreEdits = false;
 
     static {
-        setUndoLevels(AppPreferences.loadUndoLevels());
+        if (Build.isTesting()) {
+            // make sure we have enough undo for the tests
+            setUndoLevels(15);
+        } else {
+            setUndoLevels(AppPreferences.loadUndoLevels());
+        }
     }
 
     public static final Action UNDO_ACTION = new MenuAction("Undo",
-            IconUtils.getUndoIcon(), AllowedLayerType.ANY) {
+            Icons.getUndoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.undo();
@@ -61,7 +69,7 @@ public class History {
     };
 
     public static final Action REDO_ACTION = new MenuAction("Redo",
-            IconUtils.getRedoIcon(), AllowedLayerType.ANY) {
+            Icons.getRedoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
             History.redo();
@@ -71,17 +79,8 @@ public class History {
     private History() {
     }
 
-    /**
-     * This is used to notify the menu items
-     */
     public static void notifyMenus(PixelitorEdit edit) {
         undoableEditSupport.postEdit(edit);
-    }
-
-    public static void addEdit(boolean addToHistory, Supplier<PixelitorEdit> supplier) {
-        if (addToHistory) {
-            addEdit(supplier.get());
-        }
     }
 
     public static void addEdit(PixelitorEdit edit) {
@@ -97,13 +96,51 @@ public class History {
             undoManager.discardAllEdits();
         }
 
-        numUndoneEdits = 0; // reset BEFORE posting, so that the fade menu item can become enabled
+        // reset BEFORE posting, so that the fade menu item can become enabled
+        numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
         if (Build.CURRENT != Build.FINAL) {
             Events.postAddToHistoryEvent(edit);
             ConsistencyChecks.checkAll(edit.getComp(), false);
         }
+    }
+
+    /**
+     * Save only the affected area for undo.
+     */
+    public static void addToolArea(Rectangle rect, BufferedImage origImage,
+                                   Drawable dr, boolean relativeToImage,
+                                   String toolName) {
+        assert rect.width > 0 : "rectangle.width = " + rect.width;
+        assert rect.height > 0 : "rectangle.height = " + rect.height;
+
+        if (!relativeToImage) {
+            // if the coordinates are relative to the canvas,
+            // translate them to be relative to the image
+            int dx = -dr.getTX();
+            int dy = -dr.getTY();
+            rect.translate(dx, dy);
+        }
+
+        rect = SwingUtilities.computeIntersection(0, 0,
+                origImage.getWidth(), origImage.getHeight(), // full image bounds
+                rect
+        );
+
+        assert (origImage != null);
+        if (rect.isEmpty()) {
+            return;
+        }
+
+        Composition comp = dr.getComp();
+
+        // we could also intersect with the selection bounds,
+        // but typically the extra savings would be minimal
+
+        PartialImageEdit edit = new PartialImageEdit(toolName, comp,
+                dr, origImage, rect, false);
+        addEdit(edit);
     }
 
     public static String getUndoPresentationName() {
@@ -120,10 +157,13 @@ public class History {
         }
 
         try {
-            numUndoneEdits++; // increase it before calling undoManager.undo() so that the result of undo is not fadeable
+            // increase it before calling undoManager.undo()
+            // so that the result of undo is not fadeable
+            numUndoneEdits++;
             undoManager.undo();
         } catch (CannotUndoException e) {
-            Messages.showInfo("No undo available", "No undo available, probably because the undo image was discarded in order to save memory");
+            Messages.showInfo("No undo available",
+                    "No undo available, probably because the undo image was discarded in order to save memory");
         }
     }
 
@@ -178,14 +218,28 @@ public class History {
     public static String getLastEditName() {
         PixelitorEdit lastEdit = undoManager.getLastEdit();
         if (lastEdit != null) {
-            return lastEdit.getPresentationName();
+            return lastEdit.getName();
+        }
+        return "";
+    }
+
+    @VisibleForTesting
+    public static PixelitorEdit getLastEdit() {
+        return undoManager.getLastEdit();
+    }
+
+    @VisibleForTesting
+    public static String getEditToBeUndoneName() {
+        PixelitorEdit edit = undoManager.getEditToBeUndone();
+        if (edit != null) {
+            return edit.getName();
         }
         return "";
     }
 
     /**
      * If the last edit in the history is a FadeableEdit for the given
-     * image layer, return it, otherwise return empty Optional
+     * image layer, return it, otherwise return an empty Optional
      */
     public static Optional<FadeableEdit> getPreviousEditForFade(Drawable dr) {
         if (numUndoneEdits > 0 || dr == null) {
@@ -239,11 +293,6 @@ public class History {
         undoManager.showHistory();
     }
 
-    // for debugging only
-    public static PixelitorEdit getLastEdit() {
-        return undoManager.getLastEdit();
-    }
-
     @VisibleForTesting
     public static void clear() {
         undoManager.discardAllEdits();
@@ -254,9 +303,8 @@ public class History {
     public static void assertNumEditsIs(int expected) {
         int numEdits = undoManager.getSize();
         if (numEdits != expected) {
-            throw new AssertionError(String.format(
-                    "Expected %d edits, but found %d",
-                    expected, numEdits));
+            throw new AssertionError(format(
+                    "Expected %d edits, but found %d", expected, numEdits));
         }
     }
 
@@ -264,9 +312,29 @@ public class History {
     public static void assertLastEditNameIs(String expected) {
         String lastEditName = undoManager.getLastEdit().getName();
         if (!lastEditName.equals(expected)) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "Expected '%s' as the last edit name, but found '%s'",
                     expected, lastEditName));
+        }
+    }
+
+    @VisibleForTesting
+    public static void assertEditToBeUndoneNameIs(String expected) {
+        String name = undoManager.getEditToBeUndone().getName();
+        if (!name.equals(expected)) {
+            throw new AssertionError(format(
+                    "Expected '%s' as the edit to be undone name, but found '%s'",
+                    expected, name));
+        }
+    }
+
+    @VisibleForTesting
+    public static void assertEditToBeRedoneNameIs(String expected) {
+        String name = undoManager.getEditToBeRedone().getName();
+        if (!name.equals(expected)) {
+            throw new AssertionError(format(
+                    "Expected '%s' as the edit to be redone name, but found '%s'",
+                    expected, name));
         }
     }
 

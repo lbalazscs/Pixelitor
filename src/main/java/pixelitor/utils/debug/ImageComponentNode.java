@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageFrame;
+import pixelitor.gui.ImageWindow;
 
 /**
  * A debugging node for an ImageComponent
@@ -41,21 +42,24 @@ public class ImageComponentNode extends DebugNode {
         int height = ic.getHeight();
         addInt("ic height", height);
 
-        ImageFrame frame = ic.getFrame();
-        int frameWidth = frame.getWidth();
-        addInt("frameWidth", frameWidth);
-        int frameHeight = frame.getHeight();
-        addInt("frameHeight", frameHeight);
+        ImageWindow imageWindow = ic.getImageWindow();
+        if (imageWindow instanceof ImageFrame) {
+            ImageFrame frame = (ImageFrame) imageWindow;
+            int frameWidth = frame.getWidth();
+            addInt("frameWidth", frameWidth);
+            int frameHeight = frame.getHeight();
+            addInt("frameHeight", frameHeight);
+        }
 
         addString("zoom level", ic.getZoomLevel().toString());
         Canvas canvas = ic.getCanvas();
-        int zoomedCanvasWidth = canvas.getZoomedWidth();
+        int zoomedCanvasWidth = canvas.getCoWidth();
         addInt("zoomedCanvasWidth", zoomedCanvasWidth);
-        int zoomedCanvasHeight = canvas.getZoomedHeight();
+        int zoomedCanvasHeight = canvas.getCoHeight();
         addInt("zoomedCanvasHeight", zoomedCanvasHeight);
 //        boolean bigCanvas = ic.isBigCanvas();
 //        addBooleanChild("bigCanvas", bigCanvas);
-        boolean optimizedDrawingEnabled = ic.getFrame().isOptimizedDrawingEnabled();
-        addBoolean("optimizedDrawingEnabled", optimizedDrawingEnabled);
+//        boolean optimizedDrawingEnabled = ic.getImageWindow().isOptimizedDrawingEnabled();
+//        addBoolean("optimizedDrawingEnabled", optimizedDrawingEnabled);
     }
 }

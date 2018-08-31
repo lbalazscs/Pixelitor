@@ -17,7 +17,6 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.colors.FgBgColors;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.Messages;
@@ -31,6 +30,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
+
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * The panel containing the color swatch buttons in rows and columns
@@ -153,19 +155,23 @@ public class PalettePanel extends JPanel {
     }
 
     public static void showFGVariationsDialog(PixelitorWindow pw) {
-        Color refColor = FgBgColors.getFG();
-        VariationsPalette palette = new VariationsPalette(refColor, "Foreground Color Variations");
+        Color refColor = getFGColor();
+        VariationsPalette palette = new VariationsPalette(refColor,
+                "Foreground Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showBGVariationsDialog(PixelitorWindow pw) {
-        Color refColor = FgBgColors.getBG();
-        VariationsPalette palette = new VariationsPalette(refColor, "Background Color Variations");
+        Color refColor = getBGColor();
+        VariationsPalette palette = new VariationsPalette(refColor,
+                "Background Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
-    public static void showFilterVariationsDialog(Window window, Color refColor, ColorSwatchClickHandler clickHandler) {
-        VariationsPalette palette = new VariationsPalette(refColor, "Filter Color Variations");
+    public static void showFilterVariationsDialog(Window window, Color refColor,
+                                                  ColorSwatchClickHandler clickHandler) {
+        VariationsPalette palette = new VariationsPalette(refColor,
+                "Filter Color Variations");
         showDialog(window, palette, clickHandler);
     }
 
@@ -179,7 +185,8 @@ public class PalettePanel extends JPanel {
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
-    public static void showDialog(Window window, Palette palette, ColorSwatchClickHandler clickHandler) {
+    public static void showDialog(Window window, Palette palette,
+                                  ColorSwatchClickHandler clickHandler) {
         assert window != null;
 
         PalettePanel palettePanel = new PalettePanel(palette, clickHandler);
@@ -192,8 +199,8 @@ public class PalettePanel extends JPanel {
 
         new DialogBuilder()
                 .title(palette.getDialogTitle())
-                .parent(window)
-                .form(form)
+                .owner(window)
+                .content(form)
                 .notModal()
                 .noOKButton()
                 .noCancelButton()

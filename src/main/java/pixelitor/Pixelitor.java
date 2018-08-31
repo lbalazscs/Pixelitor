@@ -22,42 +22,51 @@ import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.gui.GUIMessageHandler;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.io.OpenSaveManager;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.io.IOThread;
+import pixelitor.io.OpenSave;
 import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
-import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
+import pixelitor.tools.pen.Path;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.plaf.MenuBarUI;
 import java.awt.EventQueue;
-import java.awt.GraphicsEnvironment;
+import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.String.format;
 
 /**
  * The main class
  */
 public class Pixelitor {
-    /**
-     * Should not be instantiated
-     */
+
     private Pixelitor() {
+        // should not be instantiated
     }
 
     public static void main(String[] args) {
         // the app can be put into development mode by
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
-            Utils.checkThatAssertionsAreEnabled();
+            Utils.makeSureAssertionsAreEnabled();
             Build.CURRENT = Build.DEVELOPMENT;
         }
 
@@ -73,11 +82,6 @@ public class Pixelitor {
         EventQueue.invokeLater(() -> {
             try {
                 createAndShowGUI(args);
-
-                // Start this thread here because it is IO-intensive and
-                // it should not slow down the loading of the GUI
-                new Thread(Pixelitor::preloadFontNames)
-                        .start();
             } catch (Exception e) {
                 Dialogs.showExceptionDialog(e);
             }
@@ -89,92 +93,102 @@ public class Pixelitor {
         FastMath.cos(0.1);
     }
 
-    private static void preloadFontNames() {
-        GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        // the results are cached, no need to cache them here
-        localGE.getAvailableFontFamilyNames();
-    }
-
     private static void createAndShowGUI(String[] args) {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         setLookAndFeel();
-        Messages.setMessageHandler(new GUIMessageHandler());
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
 
-//        if (JVM.isMac) {
-//            setupMacMenuBar(pw);
-//        }
-
-        if (args.length > 0) {
-            openFilesGivenAsCLArguments(args);
-        }
-
         // Just to make 100% sure that at the end of GUI
         // initialization the focus is not grabbed by
         // a textfield and the keyboard shortcuts work properly
-        FgBgColors.getGUI()
-                .requestFocus();
+        FgBgColors.getGUI().requestFocus();
 
         TipsOfTheDay.showTips(pw, false);
+
+        // The IO-intensive pre-loading of fonts is scheduled
+        // to run after all the files have been opened,
+        // and on the same IO thread
+        openCLFilesAsync(args)
+                .thenRunAsync(Utils::preloadFontNames,
+                        IOThread.getExecutor())
+                .exceptionally(Messages::showExceptionOnEDT);
 
         afterStartTestActions(pw);
     }
 
-    // used to work but in newer Macs it doesn't
-    private static void setupMacMenuBar(PixelitorWindow pw) {
-        JMenuBar menuBar = pw.getJMenuBar();
-        try {
-            // this property is respected only by the Aqua look-and-feel...
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            // ...so set the look-and-feel for the menu only to Aqua
-
-            //noinspection ClassNewInstance
-            menuBar.setUI((MenuBarUI) Class.forName("com.apple.laf.AquaMenuBarUI")
-                    .newInstance());
-        } catch (Exception e) {
-            // ignore
-        }
-    }
-
     private static void setLookAndFeel() {
         try {
-            String lfClass = getLFClassName();
-            UIManager.setLookAndFeel(lfClass);
+//            // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/color.html
+//            UIManager.put("nimbusBase", new ColorUIResource(19, 111, 13));
+//            UIManager.put("nimbusBlueGrey", new ColorUIResource(5, 27, 111));
+//            UIManager.put("control", new ColorUIResource(111, 0, 18));
+
+            UIManager.setLookAndFeel(
+                    "javax.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (Exception e) {
             Dialogs.showExceptionDialog(e);
         }
     }
 
-    private static void openFilesGivenAsCLArguments(String[] args) {
+    /**
+     * Schedules the opening of the files given as command-line arguments
+     */
+    private static CompletableFuture<Void> openCLFilesAsync(String[] args) {
+        if (args.length == 0) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        List<CompletableFuture<?>> openedFiles = new ArrayList<>();
+
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {
-                OpenSaveManager.openFile(f);
+                openedFiles.add(OpenSave.openFileAsync(f));
             } else {
-                Messages.showError("File not found", "The file \"" + f.getAbsolutePath() + "\" does not exist");
+                Messages.showError("File not found",
+                        format("The file \"%s\" does not exist", f.getAbsolutePath()));
             }
+        }
+
+        return Utils.allOfList(openedFiles);
+    }
+
+    public static void exitApp(PixelitorWindow pw) {
+        if (ImageComponents.thereAreUnsavedChanges()) {
+            String msg = "There are unsaved changes. Are you sure you want to exit?";
+            if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
+                pw.setVisible(false);
+                AppPreferences.savePrefsAndExit();
+            }
+        } else {
+            pw.setVisible(false);
+            AppPreferences.savePrefsAndExit();
         }
     }
 
     /**
      * A possibility for automatic debugging or testing
      */
-    @SuppressWarnings("UnusedParameters")
     private static void afterStartTestActions(PixelitorWindow pw) {
         if (Build.CURRENT == Build.FINAL) {
             // in the final builds nothing should run
             return;
         }
 
+//        SplashImageCreator.saveManySplashImages();
+
+//        addTestPath();
+
+//        keepSwitchingToolsRandomly();
 //        startFilter(new Marble());
 
 //        Navigator.showInDialog(pw);
 
-//        clickTool(Tools.SELECTION);
-//        addMaskAndShowIt();
+//        Tools.PEN.activate();
+        //        addMaskAndShowIt();
 
 //        showAddTextLayerDialog();
 
@@ -188,7 +202,27 @@ public class Pixelitor {
 
 //        new TweenWizard().start(pw);
 
-//        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), KeyEvent.CTRL_MASK, KeyEvent.VK_T, 'T'));
+//        dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
+    }
+
+    private static void dispatchKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
+        int modifiers;
+        if (ctrl) {
+            modifiers = KeyEvent.CTRL_MASK;
+        } else {
+            modifiers = 0;
+        }
+        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED,
+                System.currentTimeMillis(), modifiers, keyCode, keyChar));
+    }
+
+    private static void addTestPath() {
+        Rectangle2D.Double shape = new Rectangle2D.Double(100, 100, 300, 100);
+
+        Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
+        Tools.PEN.setPath(path);
+        Tools.PEN.startEditing(false);
+        Tools.PEN.activate();
     }
 
     private static void showAddTextLayerDialog() {
@@ -200,16 +234,11 @@ public class Pixelitor {
         ImageComponent ic = ImageComponents.getActiveIC();
         Layer layer = ic.getComp()
                 .getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(ic, layer);
-    }
-
-    private static void clickTool(Tool tool) {
-        tool.getButton()
-                .doClick();
+        MaskViewMode.SHOW_MASK.activate(ic, layer, "after-start test");
     }
 
     private static void startFilter(Filter filter) {
-        filter.startOn(ImageComponents.getActiveDrawableOrNull());
+        filter.startOn(ImageComponents.getActiveDrawableOrThrow());
     }
 
     private static void addNewImage() {
@@ -218,15 +247,16 @@ public class Pixelitor {
                 .addMask(LayerMaskAddType.PATTERN);
     }
 
-    public static String getLFClassName() {
-        return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+    private static void keepSwitchingToolsRandomly() {
+        Runnable backgroundTask = () -> {
+            //noinspection InfiniteLoopStatement
+            while (true) {
+                Utils.sleep(1, TimeUnit.SECONDS);
 
-//        UIManager.LookAndFeelInfo[] lookAndFeels = UIManager.getInstalledLookAndFeels();
-//        for (UIManager.LookAndFeelInfo lookAndFeel : lookAndFeels) {
-//            if (lookAndFeel.getName().equals("Nimbus")) {
-//                return lookAndFeel.getClassName();
-//            }
-//        }
-//        return UIManager.getSystemLookAndFeelClassName();
+                Runnable changeToolOnEDTTask = () -> Tools.getRandomTool().activate();
+                GUIUtils.invokeAndWait(changeToolOnEDTTask);
+            }
+        };
+        new Thread(backgroundTask).start();
     }
 }

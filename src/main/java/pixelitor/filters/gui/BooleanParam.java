@@ -17,12 +17,16 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.RandomUtils;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
@@ -52,7 +56,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton);
+        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton, action);
         paramGUI = gui;
         setParamGUIEnabledState();
 
@@ -74,14 +78,44 @@ public class BooleanParam extends AbstractFilterParam {
                 false, IGNORE_RANDOMIZE);
     }
 
+    /**
+     * Sets up the automatic enabling of another {@link FilterSetting}
+     * depending on the checked state of this one.
+     */
+    public void setupEnableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
+        // disable by default
+        other.setEnabled(false, EnabledReason.APP_LOGIC);
+        addChangeListener(e -> {
+            if (condition.test(isChecked())) {
+                other.setEnabled(true, EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(false, EnabledReason.APP_LOGIC);
+            }
+        });
+    }
+
+    /**
+     * Sets up the automatic disabling of another {@link FilterSetting}
+     * depending on the checked state of this one.
+     */
+    public void setupDisableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
+        addChangeListener(e -> {
+            if (condition.test(isChecked())) {
+                other.setEnabled(false, EnabledReason.APP_LOGIC);
+            } else {
+                other.setEnabled(true, EnabledReason.APP_LOGIC);
+            }
+        });
+    }
+
     @Override
     public boolean isSetToDefault() {
         return (defaultValue == currentValue);
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setValue(defaultValue, true, triggerAction);
+    public void reset(boolean trigger) {
+        setValue(defaultValue, true, trigger);
     }
 
     @Override
@@ -92,7 +126,7 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            boolean randomValue = Math.random() > 0.5;
+            boolean randomValue = RandomUtils.nextBoolean();
             setValue(randomValue, true, false);
         }
     }
@@ -134,7 +168,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', currentValue = %s]",
+        return format("%s[name = '%s', currentValue = %s]",
                 getClass().getSimpleName(), getName(), currentValue);
     }
 

@@ -20,20 +20,20 @@ package pixelitor.filters;
 import pixelitor.ChangeReason;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayerMask;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.ChangeReason.REPEAT_LAST;
 
 /**
  * The superclass of all Pixelitor filters and color adjustments
@@ -43,7 +43,8 @@ public abstract class Filter implements Serializable {
 
     private transient FilterAction filterAction;
 
-    // used for making sure that there are no unnecessary filters triggered
+    // used for making sure that there are no
+    // unnecessary filter executions triggered
     public static long runCount = 0;
 
     protected Filter() {
@@ -55,17 +56,20 @@ public abstract class Filter implements Serializable {
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
-     * Should a default destination buffer be created before
-     * running the op or null can be passed and the op will take care of that
+     * Whether a default destination image should be created before
+     * running the filter. If this returns false,
+     * null will be passed and the filter will take care of that
      */
     @SuppressWarnings("WeakerAccess")
-    protected boolean createDefaultDestBuffer() {
+    protected boolean createDefaultDestImg() {
         return true;
     }
 
     /**
-     * The normal starting point, used when called in the menu
-     * Overwritten for filters with GUI
+     * The normal starting point, used when called from the menu.
+     * Overwritten for filters with GUI.
+     * Filters that work normally without a dialog can still have a
+     * dialog when invoked from places like "Random Filter"
      */
     public void startOn(Drawable dr) {
         startOn(dr, FILTER_WITHOUT_DIALOG);
@@ -76,18 +80,15 @@ public abstract class Filter implements Serializable {
     }
 
     public void run(Drawable dr, ChangeReason cr, Component busyCursorParent) {
-        String filterName = getName();
-
         long startTime = System.nanoTime();
 
         Runnable task = () -> transformAndHandleExceptions(dr, cr);
-        Utils.runWithBusyCursor(busyCursorParent, task);
+        GUIUtils.runWithBusyCursor(busyCursorParent, task);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
-        Messages.showPerformanceMessage(filterName, totalTime);
+        Messages.showPerformanceMessage(getName(), totalTime);
 
         FilterUtils.setLastFilter(this);
-        RepeatLast.INSTANCE.setActionName("Repeat " + filterName);
     }
 
     private void transformAndHandleExceptions(Drawable dr, ChangeReason cr) {
@@ -95,14 +96,7 @@ public abstract class Filter implements Serializable {
 
         try {
             if (dr == null) {
-                if (cr == REPEAT_LAST) {
-                    // TODO bug: the repeat last menu is not
-                    // always deactivated for text layers
-                    return;
-                } else {
-                    // all other cases should work
-                    throw new IllegalStateException("not image layer or mask");
-                }
+                throw new IllegalStateException("not image layer or mask");
             }
 
             BufferedImage src = dr.getFilterSourceImage();
@@ -145,7 +139,7 @@ public abstract class Filter implements Serializable {
 
     public BufferedImage transformImage(BufferedImage src) {
         boolean convertFromGray = false;
-        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) { // editing a mask
+        if (src.getType() == TYPE_BYTE_GRAY) { // editing a mask
             if (!supportsGray()) {
                 convertFromGray = true;
                 src = ImageUtils.toSysCompatibleImage(src);
@@ -153,7 +147,7 @@ public abstract class Filter implements Serializable {
         }
 
         BufferedImage dest = null;
-        if (createDefaultDestBuffer()) {
+        if (createDefaultDestImg()) {
             dest = ImageUtils.createImageWithSameCM(src);
         }
 

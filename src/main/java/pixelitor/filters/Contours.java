@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.EdgeFilter;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
@@ -32,12 +31,12 @@ import java.awt.image.BufferedImage;
 public class Contours extends ParametrizedFilter {
     public static final String NAME = "Contours";
 
-    private final RangeParam lineThickness = new RangeParam("Increase Line Thickness", 0, 0, 20);
+    private final RangeParam lineThickness = new RangeParam("Extra Line Thickness", 0, 0, 20);
 
     public Contours() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(lineThickness));
+        setParams(lineThickness);
     }
 
     @Override

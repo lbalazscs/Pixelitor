@@ -283,9 +283,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                 return outPixels;
 
             };
-            resultLines[finalY] = ThreadPool.submit(calculateLineTask);
+            resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(dst, width, resultLines, pt);
+        ThreadPool.waitForFutures2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;
@@ -336,9 +336,9 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                 return outPixels;
             };
 
-            resultLines[finalY] = ThreadPool.submit(calculateLineTask);
+            resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(dst, width, resultLines, pt);
+        ThreadPool.waitForFutures2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;

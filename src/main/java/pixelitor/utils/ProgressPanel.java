@@ -20,6 +20,7 @@ package pixelitor.utils;
 import javax.swing.*;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 
 /**
  * A panel that can show or hide a {@link JProgressBar}
@@ -51,11 +52,12 @@ public class ProgressPanel extends JPanel {
     }
 
     public void repaintOnEDT() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         // this code, together with the tracked code,
         // is supposed to run on the EDT, therefore
         // paintImmediately() instead of repaint()
-        progressBar.paintImmediately(0, 0, progressBar.getWidth(), progressBar.getHeight());
+        progressBar.paintImmediately(0, 0,
+                progressBar.getWidth(), progressBar.getHeight());
     }
 }

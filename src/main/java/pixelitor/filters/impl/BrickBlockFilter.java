@@ -27,19 +27,19 @@ import java.awt.image.BufferedImage;
  * Pixelates in brick-style.
  */
 public class BrickBlockFilter extends AbstractBufferedImageOp {
-    private int horizontalBlockSize = 10;
-    private int verticalBlockSize = 10;
+    private int horBlockSize = 10;
+    private int verBlockSize = 10;
 
     public BrickBlockFilter(String filterName) {
         super(filterName);
     }
 
-    public void setHorizontalBlockSize(int horizontalBlockSize) {
-        this.horizontalBlockSize = horizontalBlockSize;
+    public void setHorBlockSize(int horBlockSize) {
+        this.horBlockSize = horBlockSize;
     }
 
-    public void setVerticalBlockSize(int verticalBlockSize) {
-        this.verticalBlockSize = verticalBlockSize;
+    public void setVerBlockSize(int verBlockSize) {
+        this.verBlockSize = verBlockSize;
     }
 
     @Override
@@ -51,28 +51,33 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
             dst = createCompatibleDestImage(src, null);
         }
 
-        int[] pixels = new int[horizontalBlockSize * verticalBlockSize];
-        int[] smallPixels = new int[horizontalBlockSize * verticalBlockSize / 2];
+        int[] pixels = new int[horBlockSize * verBlockSize];
+        int[] smallPixels = new int[horBlockSize * verBlockSize / 2];
         int verticalCount = 0;
 
-        for (int y = 0; y < height; y += verticalBlockSize) {
+        for (int y = 0; y < height; y += verBlockSize) {
             verticalCount++;
 
             int hShift = 0;
             if ((verticalCount % 2) == 0) {
-                hShift = (horizontalBlockSize / 2);
-                replaceWithAverage(src, dst, width, height, smallPixels, y, 0, horizontalBlockSize / 2, verticalBlockSize);
+                hShift = (horBlockSize / 2);
+                replaceWithAverage(src, dst, width, height,
+                        smallPixels, 0, y, horBlockSize / 2, verBlockSize);
             }
 
-            for (int x = hShift; x < width; x += horizontalBlockSize) {
-                replaceWithAverage(src, dst, width, height, pixels, y, x, horizontalBlockSize, verticalBlockSize);
+            for (int x = hShift; x < width; x += horBlockSize) {
+                replaceWithAverage(src, dst, width, height,
+                        pixels, x, y, horBlockSize, verBlockSize);
             }
         }
 
         return dst;
     }
 
-    private static void replaceWithAverage(BufferedImage src, BufferedImage dst, int width, int height, int[] pixels, int y, int x, int hSize, int vSize) {
+    private static void replaceWithAverage(BufferedImage src, BufferedImage dst,
+                                           int width, int height,
+                                           int[] pixels, int x, int y,
+                                           int hSize, int vSize) {
         int w = Math.min(hSize, width - x);
         int h = Math.min(vSize, height - y);
         int t = w * h;

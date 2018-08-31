@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -34,23 +35,24 @@ public class OnePixelBrush extends AbstractBrush {
     }
 
     @Override
-    public void onStrokeStart(double x, double y) {
-        updateComp(x, y);
-        rememberPrevious(x, y);
+    public void startAt(PPoint p) {
+        super.startAt(p);
+        updateComp(p);
+        rememberPrevious(p);
 
         // make sure a pixel is changed without dragging
-        onNewStrokePoint(x, y);
+        continueTo(p);
     }
 
     @Override
-    public void onNewStrokePoint(double x, double y) {
+    public void continueTo(PPoint p) {
         if (!settings.hasAA()) {
             targetG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_OFF);
         }
 
-        targetG.drawLine((int) previousX, (int) previousY, (int) x, (int) y);
-        updateComp(x, y);
-        rememberPrevious(x, y);
+        previous.drawLineTo(p, targetG);
+        updateComp(p);
+        rememberPrevious(p);
     }
 
     @Override
@@ -60,5 +62,10 @@ public class OnePixelBrush extends AbstractBrush {
         node.addBoolean("Anti-aliasing", settings.hasAA());
 
         return node;
+    }
+
+    @Override
+    public double getPreferredSpacing() {
+        return 0;
     }
 }

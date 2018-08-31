@@ -38,7 +38,12 @@ public abstract class Wizard {
     private final int initialDialogHeight;
     protected final Drawable dr;
 
-    protected Wizard(WizardPage initialPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, Drawable dr) {
+    protected Wizard(WizardPage initialPage,
+                     String dialogTitle,
+                     String finishButtonText,
+                     int initialDialogWidth,
+                     int initialDialogHeight,
+                     Drawable dr) {
         this.wizardPage = initialPage;
         this.dialogTitle = dialogTitle;
         this.finishButtonText = finishButtonText;
@@ -62,7 +67,7 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
-                wizardPage.getPanel(Wizard.this, dr),
+                wizardPage.getPanel(this, dr),
                 dialogParent,
                 title,
                 "Next", "Cancel") {
@@ -75,47 +80,52 @@ public abstract class Wizard {
             }
 
             @Override
-            protected void okAction() { // "next" was pressed
-                if (!mayMoveForwardIfNextPressed(wizardPage, this)) {
-                    return;
-                }
-
-                // move forward
-                wizardPage.onMovingToTheNext(Wizard.this, dr);
-
-                if (!mayProceedAfterMovingForward(wizardPage, this)) {
-                    return;
-                }
-
-                WizardPage nextPage = wizardPage.getNext();
-                if (nextPage == null) { // dialog finished
-                    dispose();
-                    finalAction();
-                } else {
-                    JComponent panel = nextPage.getPanel(Wizard.this, dr);
-                    dialog.changeForm(panel);
-                    dialog.setHeaderMessage(nextPage.getHeaderText(Wizard.this));
-                    wizardPage = nextPage;
-
-                    if (wizardPage.getNext() == null) { // this is the last page
-                        setOKButtonText(finishButtonText);
-                    }
-                }
+            protected void okAction() {
+                nextPressed(dialog);
             }
         };
         dialog.setHeaderMessage(wizardPage.getHeaderText(this));
 
-        // it was packed already, but this is not correct because of the header message
+        // it is packed already, but not correctly, because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
         dialog.setSize(initialDialogWidth, initialDialogHeight);
 
-        GUIUtils.centerOnScreen(dialog);
-        dialog.setVisible(true);
+        GUIUtils.showDialog(dialog);
     }
 
-    protected abstract boolean mayMoveForwardIfNextPressed(WizardPage wizardPage, Component dialogParent);
+    private void nextPressed(OKCancelDialog dialog) {
+        if (!mayMoveForwardIfNextPressed(wizardPage, dialog)) {
+            return;
+        }
 
-    protected abstract boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent);
+        // move forward
+        wizardPage.onMovingToTheNext(this, dr);
+
+        if (!mayProceedAfterMovingForward(wizardPage, dialog)) {
+            return;
+        }
+
+        WizardPage nextPage = wizardPage.getNext();
+        if (nextPage == null) { // dialog finished
+            dialog.dispose();
+            finalAction();
+        } else {
+            JComponent panel = nextPage.getPanel(this, dr);
+            this.dialog.changeForm(panel);
+            this.dialog.setHeaderMessage(nextPage.getHeaderText(this));
+            wizardPage = nextPage;
+
+            if (wizardPage.getNext() == null) { // this is the last page
+                dialog.setOKButtonText(finishButtonText);
+            }
+        }
+    }
+
+    protected abstract boolean mayMoveForwardIfNextPressed(WizardPage wizardPage,
+                                                           Component dialogParent);
+
+    protected abstract boolean mayProceedAfterMovingForward(WizardPage wizardPage,
+                                                            Component dialogParent);
 
     protected abstract void finalAction();
 

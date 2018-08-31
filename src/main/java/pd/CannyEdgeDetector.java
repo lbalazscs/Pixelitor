@@ -1,6 +1,8 @@
 package pd;
 
 import net.jafama.FastMath;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -63,6 +65,8 @@ public class CannyEdgeDetector {
 	private float[] yConv;
 	private float[] xGradient;
 	private float[] yGradient;
+
+    private ProgressTracker pt;
 
 	// constructors
 
@@ -251,16 +255,36 @@ public class CannyEdgeDetector {
 	public void process() {
 		width = sourceImage.getWidth();
 		height = sourceImage.getHeight();
-		picsize = width * height;
+
+        // the number of computational units are experimental values
+        // that seem to work pretty well
+        pt = new StatusBarProgressTracker("Canny", width + 450);
+
+        picsize = width * height;
 		initArrays();
+
+        pt.unitsDone(10);
+
 		readLuminance();
-		if (contrastNormalized) normalizeContrast();
+
+        pt.unitsDone(50);
+
+        if (contrastNormalized) {
+            normalizeContrast();
+            pt.unitsDone(10);
+        }
+
 		computeGradients(gaussianKernelRadius, gaussianKernelWidth);
 		int low = Math.round(lowThreshold * MAGNITUDE_SCALE);
 		int high = Math.round( highThreshold * MAGNITUDE_SCALE);
 		performHysteresis(low, high);
-		thresholdEdges();
-		writeEdges(data);
+        pt.unitDone();
+
+        thresholdEdges();
+        pt.unitDone();
+
+        writeEdges(data);
+        pt.finish();
 	}
 
 	// private utility methods
@@ -303,6 +327,8 @@ public class CannyEdgeDetector {
 			diffKernel[kwidth] = g3 - g2;
 		}
 
+        pt.unitDone();
+
 		int initX = kwidth - 1;
 		int maxX = width - (kwidth - 1);
 		int initY = width * (kwidth - 1);
@@ -329,6 +355,8 @@ public class CannyEdgeDetector {
 
 		}
 
+        pt.unitsDone(200);
+
 		for (int x = initX; x < maxX; x++) {
 			for (int y = initY; y < maxY; y += width) {
 				float sum = 0f;
@@ -340,6 +368,8 @@ public class CannyEdgeDetector {
 			}
 
 		}
+
+        pt.unitsDone(100);
 
 		for (int x = kwidth; x < width - kwidth; x++) {
 			for (int y = initY; y < maxY; y += width) {
@@ -356,11 +386,14 @@ public class CannyEdgeDetector {
 
 		}
 
+        pt.unitsDone(100);
+
 		initX = kwidth;
 		maxX = width - kwidth;
 		initY = width * kwidth;
 		maxY = width * (height - kwidth);
 		for (int x = initX; x < maxX; x++) {
+            pt.unitDone();
 			for (int y = initY; y < maxY; y += width) {
 				int index = x + y;
 				int indexN = index - width;

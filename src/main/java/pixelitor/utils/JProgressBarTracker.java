@@ -17,8 +17,11 @@
 
 package pixelitor.utils;
 
+import pixelitor.gui.utils.GUIUtils;
+
 import javax.swing.*;
-import java.awt.Window;
+import java.awt.Container;
+import java.awt.EventQueue;
 
 /**
  * A {@link ProgressTracker} that tracks the progress by using an
@@ -29,27 +32,32 @@ import java.awt.Window;
  */
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
-    private final Window window;
+
+    private final Container topContainer;
 
     public JProgressBarTracker(ProgressPanel progressPanel) {
         super(100);
         this.progressPanel = progressPanel;
         progressPanel.setProgress(0);
 
-        window = SwingUtilities.getWindowAncestor(progressPanel);
+        // can be a window, but if progressPanel is not
+        // added yet to a window, the highest available
+        // GUI area will do
+        topContainer = GUIUtils.getTopContainer(progressPanel);
     }
 
     @Override
     void startProgressTracking() {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        window.setCursor(Cursors.BUSY);
+        topContainer.setCursor(Cursors.BUSY);
+
         progressPanel.showProgressBar();
     }
 
     @Override
     void updateProgressTracking(int percent) {
-        assert SwingUtilities.isEventDispatchThread();
+        assert EventQueue.isDispatchThread() : "not EDT thread";
 
         progressPanel.setProgress(percent);
 
@@ -60,6 +68,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
     void finishProgressTracking() {
         progressPanel.setProgress(100);
         progressPanel.hideProgressBar();
-        window.setCursor(Cursors.DEFAULT);
+
+        topContainer.setCursor(Cursors.DEFAULT);
     }
 }

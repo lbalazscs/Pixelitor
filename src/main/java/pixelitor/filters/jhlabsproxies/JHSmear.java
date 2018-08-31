@@ -22,11 +22,9 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
-import pixelitor.utils.Utils;
 
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -47,6 +45,7 @@ public class JHSmear extends ParametrizedFilter {
             new Value("Crosses", SmearFilter.CROSSES),
             new Value("Circles", SmearFilter.CIRCLES),
             new Value("Squares", SmearFilter.SQUARES),
+            new Value("Diamonds", SmearFilter.DIAMONDS),
     };
     private final IntChoiceParam shape = new IntChoiceParam("Shape", shapeChoices);
 
@@ -55,16 +54,16 @@ public class JHSmear extends ParametrizedFilter {
     public JHSmear() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 distance.withAdjustedRange(0.1),
                 shape.withAction(ReseedSupport.createAction()),
-                density,
                 angle,
+                density,
                 mix
-        ));
+        );
 
         // disable angle if the shape is not lines
-        Utils.setupDisableOtherIf(shape, angle,
+        shape.setupDisableOtherIf(angle,
                 selected -> selected.getValue() != SmearFilter.LINES);
     }
 

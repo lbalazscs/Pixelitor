@@ -18,18 +18,19 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
-import pixelitor.selection.Selection;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.utils.ImageUtils;
@@ -46,7 +47,6 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
@@ -77,6 +77,11 @@ public class ImageLayerTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         comp = TestHelper.createMockComposition();
@@ -86,13 +91,13 @@ public class ImageLayerTest {
         LayerButton ui = mock(LayerButton.class);
         layer.setUI(ui);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();
         }
 
-        withTranslation.init(layer);
+        withTranslation.setupFor(layer);
 
         int layerIconUpdatesAtStart = 0;
         if (withTranslation.isYes()) {
@@ -242,9 +247,9 @@ public class ImageLayerTest {
         assertThat(bounds).isNotNull();
 
         if (withTranslation == WithTranslation.NO) {
-            assertThat(bounds).isEqualTo(layer.canvas.getBounds());
+            assertThat(bounds).isEqualTo(layer.canvas.getImBounds());
         } else {
-            assertThat(bounds).isNotEqualTo(layer.canvas.getBounds());
+            assertThat(bounds).isNotEqualTo(layer.canvas.getImBounds());
         }
         iconUpdates.check(0, 0);
     }
@@ -277,8 +282,8 @@ public class ImageLayerTest {
         TmpDrawingLayer tmpDrawingLayer
                 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
         assertThat(tmpDrawingLayer).isNotNull();
-        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getWidth());
-        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getHeight());
+        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getImWidth());
+        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getImHeight());
 
         layer.mergeTmpDrawingLayerDown();
         iconUpdates.check(0, 0);
@@ -288,8 +293,8 @@ public class ImageLayerTest {
     public void test_createCompositionSizedTmpImage() {
         BufferedImage image = layer.createCanvasSizedTmpImage();
         assertThat(image).isNotNull();
-        assertThat(image.getWidth()).isEqualTo(layer.canvas.getWidth());
-        assertThat(image.getHeight()).isEqualTo(layer.canvas.getHeight());
+        assertThat(image.getWidth()).isEqualTo(layer.canvas.getImWidth());
+        assertThat(image.getHeight()).isEqualTo(layer.canvas.getImHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -298,8 +303,8 @@ public class ImageLayerTest {
         BufferedImage image = layer.getCanvasSizedSubImage();
         assertThat(image).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
-        assert image.getWidth() == canvas.getWidth();
-        assert image.getHeight() == canvas.getHeight();
+        assert image.getWidth() == canvas.getImWidth();
+        assert image.getHeight() == canvas.getImHeight();
         iconUpdates.check(0, 0);
     }
 
@@ -312,35 +317,15 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getImageOrSubImageIfSelected() {
-        BufferedImage imageTT = layer.getImageOrSubImageIfSelected(true, true);
-        assertThat(imageTT).isNotNull();
-
-        BufferedImage imageTF = layer.getImageOrSubImageIfSelected(true, false);
-        assertThat(imageTF).isNotNull();
-
-        BufferedImage imageFT = layer.getImageOrSubImageIfSelected(false, true);
-        assertThat(imageFT).isNotNull();
-
-        BufferedImage imageFF = layer.getImageOrSubImageIfSelected(false, false);
-        assertThat(imageFF).isNotNull();
-
-        iconUpdates.check(0, 0);
-        // TODO
-    }
-
-    @Test
-    public void test_getSelectionSizedPartFrom() {
-        Selection selection = mock(Selection.class);
-        when(selection.getShapeBounds()).thenReturn(new Rectangle(2, 2, 10, 10));
-
-        BufferedImage imageT = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, true);
+    public void test_getSelectedSubImage() {
+        BufferedImage imageT = layer.getSelectedSubImage(true);
         assertThat(imageT).isNotNull();
 
-        BufferedImage imageF = layer.getSelectionSizedPartFrom(TestHelper.createImage(), selection, false);
+        BufferedImage imageF = layer.getSelectedSubImage(false);
         assertThat(imageF).isNotNull();
 
         iconUpdates.check(0, 0);
+        // TODO
     }
 
     @Test
@@ -349,8 +334,8 @@ public class ImageLayerTest {
 
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();
-        assert image.getWidth() == canvas.getWidth();
-        assert image.getHeight() == canvas.getHeight();
+        assert image.getWidth() == canvas.getImWidth();
+        assert image.getHeight() == canvas.getImHeight();
         iconUpdates.check(0, 0);
     }
 

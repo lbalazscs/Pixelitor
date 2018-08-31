@@ -32,7 +32,12 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 
+/**
+ * Static, boolean-returning methods that
+ * can be conveniently used after the assert keyword
+ */
 public class Assertions {
     private Assertions() {
     }
@@ -84,14 +89,14 @@ public class Assertions {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public static boolean canvasSizeIs(int width, int height) {
+    public static boolean canvasImSizeIs(int width, int height) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException();
         }
         Canvas canvas = comp.getCanvas();
-        int actualWidth = canvas.getWidth();
-        int actualHeight = canvas.getHeight();
+        int actualWidth = canvas.getImWidth();
+        int actualHeight = canvas.getImHeight();
         if (actualWidth == width && actualHeight == height) {
             return true;
         } else {
@@ -121,7 +126,7 @@ public class Assertions {
         if (ic == null) {
             throw new IllegalStateException();
         }
-        return Tools.CROP.getCropRect().equals(new Rectangle(x, y, w, h));
+        return Tools.CROP.getCropRect().getCo().equals(new Rectangle(x, y, w, h));
     }
 
     public static boolean selectedToolIs(Tool expected) {
@@ -155,7 +160,23 @@ public class Assertions {
         return comp.getNumLayers() == expected;
     }
 
-    public static boolean numOpenImagesIs(int expected) {
-        return ImageComponents.getNumOpenImages() == expected;
+    public static boolean callingClassIs(String name) {
+        // it checks the caller of the caller
+        String callingClassName = new Exception().getStackTrace()[2].getClassName();
+        return callingClassName.contains(name);
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    public static boolean checkRasterMinimum(BufferedImage newImage) {
+        if (RandomGUITest.isRunning()) {
+            WritableRaster raster = newImage.getRaster();
+            if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
+                throw new
+                        IllegalArgumentException("Raster " + raster +
+                        " has minX or minY not equal to zero: "
+                        + raster.getMinX() + ' ' + raster.getMinY());
+            }
+        }
+        return true;
     }
 }

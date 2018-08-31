@@ -29,7 +29,7 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     private final JCheckBox checkBox;
     private DefaultButton defaultButton;
 
-    public BooleanParamGUI(BooleanParam model, boolean addDefaultButton) {
+    public BooleanParamGUI(BooleanParam model, boolean addDefaultButton, FilterAction extraAction) {
         this.model = model;
         setLayout(new FlowLayout(FlowLayout.LEFT));
         checkBox = new JCheckBox();
@@ -50,6 +50,11 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
             // listeners are called when the component is changed indirectly,
             // but not in the case of JCheckBox
             checkBox.addChangeListener(e -> defaultButton.updateIcon());
+        }
+
+        if (extraAction != null) {
+            add(Box.createHorizontalStrut(50));
+            add(extraAction.createGUI());
         }
     }
 

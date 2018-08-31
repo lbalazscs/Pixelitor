@@ -17,6 +17,8 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.filters.gui.FilterParam;
+
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
@@ -34,9 +36,15 @@ import static java.awt.GridBagConstraints.WEST;
  */
 public class GridBagHelper {
     private static final Insets insets = new Insets(2, 2, 2, 2);
-    private static final GridBagConstraints labelConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, EAST, NONE, insets, 0, 0);
-    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(0, 0, 1, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
-    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(0, 0, REMAINDER, 1, 0.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints labelConstraint = new GridBagConstraints(
+            0, 0, 1, 1,
+            0.0, 1.0, EAST, NONE, insets, 0, 0);
+    private static final GridBagConstraints nextControlConstraint = new GridBagConstraints(
+            0, 0, 1, 1,
+            1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
+    private static final GridBagConstraints nextLastControlConstraint = new GridBagConstraints(
+            0, 0, REMAINDER, 1,
+            1.0, 1.0, WEST, HORIZONTAL, insets, 0, 0);
 
     private final Container container;
     private int autoIncrementedGridY = 0;
@@ -70,9 +78,9 @@ public class GridBagHelper {
         addNextControl(c2);
     }
 
-    public void addLabelWithControlNoFill(String labelText, Component c) {
+    public void addLabelWithControlNoStretch(String labelText, Component c) {
         addLabel(labelText, 0, autoIncrementedGridY);
-        addControlNoFill(c);
+        addControlNoStretch(c);
         autoIncrementedGridY++;
     }
 
@@ -80,8 +88,8 @@ public class GridBagHelper {
         addLabelWithControl(text1, new JLabel(text2));
     }
 
-    public void addTwoControls(Component c1, Component c2) {
-        addTwoControls(c1, c2, autoIncrementedGridY);
+    public void addTwoComponents(Component c1, Component c2) {
+        addTwoComponents(c1, c2, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
 
@@ -92,10 +100,10 @@ public class GridBagHelper {
 
     public void addLabelWithControl(String labelText, Component c, int gridY) {
         JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-        addTwoControls(label, c, gridY);
+        addTwoComponents(label, c, gridY);
     }
 
-    private void addTwoControls(Component c1, Component c2, int gridY) {
+    private void addTwoComponents(Component c1, Component c2, int gridY) {
         labelConstraint.gridx = 0;
         labelConstraint.gridy = gridY;
         container.add(c1, labelConstraint);
@@ -107,9 +115,10 @@ public class GridBagHelper {
     }
 
     /**
-     * Adds the specified control to the right of the last label without stretching
+     * Adds the specified control to the right of the
+     * last label without stretching
      */
-    public void addControlNoFill(Component c) {
+    public void addControlNoStretch(Component c) {
         nextControlConstraint.gridx = labelConstraint.gridx + 1;
         nextControlConstraint.gridy = labelConstraint.gridy;
         nextControlConstraint.fill = NONE;
@@ -142,5 +151,22 @@ public class GridBagHelper {
         nextLastControlConstraint.gridx = 0;
         nextLastControlConstraint.gridy = row;
         container.add(c, nextLastControlConstraint);
+    }
+
+    public void addOnlyControl(Component c) {
+        nextLastControlConstraint.gridx = 0;
+        nextLastControlConstraint.gridy = autoIncrementedGridY;
+        autoIncrementedGridY++;
+
+        container.add(c, nextLastControlConstraint);
+    }
+
+    public void addParam(FilterParam param) {
+        int cols = param.getNumGridBagCols();
+        if (cols == 2) {
+            addLabelWithControl(param.getName(), param.createGUI());
+        } else if (cols == 1) {
+            addOnlyControl(param.createGUI());
+        }
     }
 }

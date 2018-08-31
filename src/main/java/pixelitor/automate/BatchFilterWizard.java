@@ -33,7 +33,8 @@ public class BatchFilterWizard extends Wizard {
     private Filter filter;
 
     public BatchFilterWizard(Drawable dr) {
-        super(SELECT_FILTER_AND_DIRS, "Batch Filter", "Start Processing", 490, 380, dr);
+        super(SELECT_FILTER_AND_DIRS, "Batch Filter",
+                "Start Processing", 490, 380, dr);
     }
 
     @Override
@@ -49,13 +50,12 @@ public class BatchFilterWizard extends Wizard {
     @Override
     protected void finalAction() {
         PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
-        boolean closeImagesAfterDone = true;
         String dialogTitle = "Batch Filter Progress";
 
         Automate.processEachFile(comp -> filter.run(
-                comp.getActiveDrawable(),
+                comp.getActiveDrawableOrThrow(),
                 BATCH_AUTOMATE, busyCursorParent),
-                closeImagesAfterDone, dialogTitle);
+                dialogTitle);
     }
 
     @Override

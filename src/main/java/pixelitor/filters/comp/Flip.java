@@ -51,7 +51,7 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createTransform(Canvas canvas) {
+    protected AffineTransform createCanvasTX(Canvas canvas) {
         return direction.getCanvasTX(canvas);
     }
 
@@ -68,7 +68,7 @@ public class Flip extends SimpleCompAction {
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
                 AffineTransform at = new AffineTransform();
-                at.translate(canvas.getWidth(), 0);
+                at.translate(canvas.getImWidth(), 0);
                 at.scale(-1, 1);
                 return at;
             }
@@ -89,7 +89,7 @@ public class Flip extends SimpleCompAction {
             @Override
             public AffineTransform getCanvasTX(Canvas canvas) {
                 AffineTransform at = new AffineTransform();
-                at.translate(0, canvas.getHeight());
+                at.translate(0, canvas.getImHeight());
                 at.scale(1, -1);
                 return at;
             }

@@ -18,11 +18,13 @@
 package pixelitor.layers;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -66,6 +68,11 @@ public class LayerTest {
         });
     }
 
+    @BeforeClass
+    public static void setupClass() {
+        Build.setTestingMode();
+    }
+
     @Before
     public void setUp() {
         comp = TestHelper.createEmptyComposition();
@@ -75,12 +82,12 @@ public class LayerTest {
         LayerButton ui = spy(layer.getUI());
         layer.setUI(ui);
 
-        comp.addLayerNoGUI(layer);
+        comp.addLayerInInitMode(layer);
 
         ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
-        comp.addLayerNoGUI(layer2);
+        comp.addLayerInInitMode(layer2);
 
-        withMask.init(layer);
+        withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();
@@ -91,10 +98,6 @@ public class LayerTest {
         comp.setActiveLayer(layer, true);
 
         assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
-
-        // TODO this should be automatic for all tests
-        // or should be avoidable
-        TestHelper.setupAnActiveICFor(comp);
 
         History.clear();
     }
@@ -207,14 +210,6 @@ public class LayerTest {
     }
 
     @Test
-    public void test_mergeDownOn() {
-        ImageLayer lower = TestHelper.createImageLayer("lower", comp);
-
-        layer.mergeDownOn(lower);
-        iconUpdates.check(0, 0);
-    }
-
-    @Test
     public void test_makeActive() {
         Layer layer2 = comp.getLayer(1);
         assertThat(layer2.isActive()).isFalse();
@@ -237,15 +232,15 @@ public class LayerTest {
     @Test
     public void test_resize() {
         Canvas canvas = layer.getComp().getCanvas();
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
 
-        layer.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight);
 
-        layer.resize(30, 25, true);
-        layer.resize(25, 30, false);
+        layer.resize(30, 25);
+        layer.resize(25, 30);
 
-        layer.resize(canvasWidth, canvasHeight, true);
+        layer.resize(canvasWidth, canvasHeight);
         iconUpdates.check(0, 0);
     }
 

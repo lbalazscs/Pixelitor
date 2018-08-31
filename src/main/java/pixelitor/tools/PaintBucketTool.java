@@ -18,79 +18,81 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.colors.FillType;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.colors.FillType.BACKGROUND;
-import static pixelitor.colors.FillType.FOREGROUND;
-import static pixelitor.colors.FillType.TRANSPARENT;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * A paint bucket tool.
+ * The paint bucket tool.
  */
 public class PaintBucketTool extends Tool {
+    private static final String ACTION_LOCAL = "Local";
+    private static final String ACTION_GLOBAL = "Global";
+
+    private static final String FILL_FOREGROUND = "Foreground Color";
+    private static final String FILL_BACKGROUND = "Background Color";
+    private static final String FILL_TRANSPARENT = "Transparent";
+    private static final String FILL_CLICKED = "Clicked Pixel Color";
+
     private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private JComboBox<FillType> fillComboBox;
+    private final JComboBox<String> fillComboBox = new JComboBox<>(
+            new String[]{FILL_FOREGROUND, FILL_BACKGROUND,
+                    FILL_TRANSPARENT, FILL_CLICKED}
+    );
+    private final JComboBox<String> actionCB = new JComboBox<>(
+            new String[]{ACTION_LOCAL, ACTION_GLOBAL});
 
     public PaintBucketTool() {
-        super('p', "Paint Bucket", "paint_bucket_tool_icon.png", "click to fill with the selected color",
-                Cursor.getDefaultCursor(), true, true, false, ClipStrategy.IMAGE_ONLY);
+        super("Paint Bucket", 'n',
+                "paint_bucket_tool_icon.png",
+                "<b>click</b> to fill with the selected color.",
+                Cursors.DEFAULT, true,
+                true, ClipStrategy.CANVAS);
     }
 
     @Override
     public void initSettingsPanel() {
         settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
-        fillComboBox = new JComboBox<>(new FillType[]{FOREGROUND, BACKGROUND, TRANSPARENT});
         settingsPanel.addWithLabel("Fill With:", fillComboBox);
-    }
-
-    private Color getFillColor() {
-        FillType fillType = getFillType();
-        return fillType.getColor();
-    }
-
-    private FillType getFillType() {
-        return (FillType) fillComboBox.getSelectedItem();
+        settingsPanel.addWithLabel("Action:", actionCB);
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
+    public void mousePressed(PMouseEvent e) {
         // do nothing
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
+    public void mouseDragged(PMouseEvent e) {
         // do nothing
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getEndX();
-        double y = userDrag.getEndY();
+    public void mouseReleased(PMouseEvent e) {
+        int x = (int) e.getImX();
+        int y = (int) e.getImY();
 
-        Composition comp = ic.getComp();
-        Drawable dr = comp.getActiveDrawable();
+        Composition comp = e.getComp();
+        Drawable dr = comp.getActiveDrawableOrThrow();
 
         int tx = dr.getTX();
         int ty = dr.getTY();
@@ -98,59 +100,98 @@ public class PaintBucketTool extends Tool {
         x -= tx;
         y -= ty;
 
-        AffineTransform translationTransform = null;
-        if (tx != 0 || ty != 0) {
-            translationTransform = AffineTransform.getTranslateInstance(-tx, -ty);
+        BufferedImage image = dr.getImage();
+
+        int imgHeight = image.getHeight();
+        int imgWidth = image.getWidth();
+        if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
+            return;
         }
 
-        BufferedImage image = dr.getImage();
-        BufferedImage original = ImageUtils.copyImage(image);
-        BufferedImage workingCopy = ImageUtils.copyImage(image);
+        BufferedImage backupForUndo = ImageUtils.copyImage(image);
+        boolean thereIsSelection = comp.hasSelection();
+        BufferedImage workingImage;
+        if (thereIsSelection) {
+            workingImage = ImageUtils.copyImage(image);
+        } else {
+            workingImage = image;
+        }
 
-        Color newColor = getFillColor();
+        String fill = (String) fillComboBox.getSelectedItem();
+        int rgbAtMouse = workingImage.getRGB(x, y);
+        int newRGB;
+        switch (fill) {
+            case FILL_FOREGROUND:
+                newRGB = getFGColor().getRGB();
+                break;
+            case FILL_BACKGROUND:
+                newRGB = getBGColor().getRGB();
+                break;
+            case FILL_TRANSPARENT:
+                newRGB = 0x00000000;
+                break;
+            case FILL_CLICKED:
+                newRGB = rgbAtMouse;
+                break;
+            default:
+                throw new IllegalStateException("fill = " + fill);
+        }
 
-        Rectangle replacedArea = scanlineFloodFill(workingCopy, (int) x, (int) y, newColor, toleranceParam.getValue());
+        Rectangle replacedArea;
+        String action = (String) actionCB.getSelectedItem();
+        int tolerance = toleranceParam.getValue();
+        switch (action) {
+            case ACTION_LOCAL:
+                replacedArea = scanlineFloodFill(workingImage,
+                        x, y, tolerance, rgbAtMouse, newRGB);
+                break;
+            case ACTION_GLOBAL:
+                globalReplaceColor(workingImage,
+                        tolerance, rgbAtMouse, newRGB);
+                replacedArea = new Rectangle(0, 0, imgWidth, imgHeight);
+                break;
+            default:
+                throw new IllegalStateException("action = " + action);
+        }
 
         if (replacedArea != null) { // something was replaced
-            ToolAffectedArea affectedArea = new ToolAffectedArea(dr, replacedArea, true);
-            saveSubImageForUndo(original, affectedArea);
+            History.addToolArea(replacedArea,
+                    backupForUndo, dr, true, getName());
 
-            Graphics2D g = image.createGraphics();
-            comp.applySelectionClipping(g, translationTransform);
-            g.setComposite(AlphaComposite.Src);
-            g.drawImage(workingCopy, 0, 0, null);
-            g.dispose();
+            if (thereIsSelection) {
+                Graphics2D g = image.createGraphics();
 
-            comp.imageChanged(FULL);
+                // the selection is relative to the canvas,
+                // so go to the canvas start
+                g.translate(-tx, -ty);
+                comp.applySelectionClipping(g);
+                g.translate(tx, ty); // go back
+
+                // makes "fill with transparency" possible
+                g.setComposite(AlphaComposite.Src);
+
+                g.drawImage(workingImage, 0, 0, null);
+                g.dispose();
+                workingImage.flush();
+            }
+            comp.imageChanged();
             dr.updateIconImage();
         }
-
-        workingCopy.flush();
     }
 
     /**
      * Uses the "Scanline fill" algorithm described at
      * http://en.wikipedia.org/wiki/Flood_fill
      */
-    private static Rectangle scanlineFloodFill(BufferedImage img, int x, int y, Color newColor, int tolerance) {
+    private static Rectangle scanlineFloodFill(BufferedImage img,
+                                               int x, int y, int tolerance,
+                                               int rgbAtMouse, int newRGB) {
         int minX = x;
         int maxX = x;
         int minY = y;
         int maxY = y;
-
         int imgHeight = img.getHeight();
         int imgWidth = img.getWidth();
-
-        if (x < 0 || x >= imgWidth || y < 0 || y >= imgHeight) {
-            return null;
-        }
-
-        int rgbToBeReplaced = img.getRGB(x, y);
-        int newRGB = newColor.getRGB();
-
-        if (rgbToBeReplaced == newRGB) {
-            return null;
-        }
 
         int[] pixels = ImageUtils.getPixelsAsArray(img);
 
@@ -161,7 +202,8 @@ public class PaintBucketTool extends Tool {
             checkedPixels[i] = false;
         }
 
-        Deque<Point> stack = new ArrayDeque<>(); // the double-ended queue is used as a simple LIFO stack
+        // the double-ended queue is used as a simple LIFO stack
+        Deque<Point> stack = new ArrayDeque<>();
         stack.push(new Point(x, y));
 
         while (!stack.isEmpty()) {
@@ -173,19 +215,22 @@ public class PaintBucketTool extends Tool {
             // find the last replaceable point to the left
             int scanlineMinX = x - 1;
             int offset = y * imgWidth;
-            while ((scanlineMinX >= 0) && similarColor(pixels[scanlineMinX + offset], rgbToBeReplaced, tolerance)) {
+            while ((scanlineMinX >= 0)
+                    && isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
                 scanlineMinX--;
             }
             scanlineMinX++;
 
             // find the last replaceable point to the right
             int scanlineMaxX = x + 1;
-            while ((scanlineMaxX < img.getWidth()) && similarColor(pixels[scanlineMaxX + offset], rgbToBeReplaced, tolerance)) {
+            while ((scanlineMaxX < img.getWidth())
+                    && isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
                 scanlineMaxX++;
             }
             scanlineMaxX--;
 
-            // set the minX, maxX, minY, maxY variables that will be used to calculate the affected area
+            // set the minX, maxX, minY, maxY variables
+            // that will be used to calculate the affected area
             if (scanlineMinX < minX) {
                 minX = scanlineMinX;
             }
@@ -207,7 +252,8 @@ public class PaintBucketTool extends Tool {
 
             // look upwards for new points to be inspected later
             if (y > 0) {
-                // if there are multiple pixels to be replaced that are horizontal neighbours,
+                // if there are multiple pixels to be replaced
+                // that are horizontal neighbours,
                 // only one of them has to be inspected later
                 boolean pointsInLine = false;
 
@@ -215,7 +261,8 @@ public class PaintBucketTool extends Tool {
 
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int upIndex = i + upOffset;
-                    boolean shouldBeReplaced = !checkedPixels[upIndex] && similarColor(pixels[upIndex], rgbToBeReplaced, tolerance);
+                    boolean shouldBeReplaced = !checkedPixels[upIndex]
+                            && isSimilar(pixels[upIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y - 1);
@@ -234,7 +281,8 @@ public class PaintBucketTool extends Tool {
 
                 for (int i = scanlineMinX; i <= scanlineMaxX; i++) {
                     int downIndex = i + downOffset;
-                    boolean shouldBeReplaced = !checkedPixels[downIndex] && similarColor(pixels[downIndex], rgbToBeReplaced, tolerance);
+                    boolean shouldBeReplaced = !checkedPixels[downIndex]
+                            && isSimilar(pixels[downIndex], rgbAtMouse, tolerance);
 
                     if (!pointsInLine && shouldBeReplaced) {
                         Point inspectLater = new Point(i, y + 1);
@@ -251,7 +299,18 @@ public class PaintBucketTool extends Tool {
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
-    private static boolean similarColor(int color1, int color2, int tolerance) {
+    private static void globalReplaceColor(BufferedImage img,
+                                           int tolerance,
+                                           int rgbAtMouse, int newRGB) {
+        int[] pixels = ImageUtils.getPixelsAsArray(img);
+        for (int i = 0; i < pixels.length; i++) {
+            if (isSimilar(pixels[i], rgbAtMouse, tolerance)) {
+                pixels[i] = newRGB;
+            }
+        }
+    }
+
+    private static boolean isSimilar(int color1, int color2, int tolerance) {
         if (color1 == color2) {
             return true;
         }
@@ -274,7 +333,8 @@ public class PaintBucketTool extends Tool {
         DebugNode node = super.getDebugNode();
 
         node.addInt("Tolerance", toleranceParam.getValue());
-        node.addQuotedString("Fill With", getFillType().toString());
+        node.addQuotedString("Fill With", (String) fillComboBox.getSelectedItem());
+        node.addQuotedString("Action", (String) actionCB.getSelectedItem());
 
         return node;
     }

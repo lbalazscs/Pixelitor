@@ -19,7 +19,6 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.GlowFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -39,10 +38,10 @@ public class JHGlow extends ParametrizedFilter {
     public JHGlow() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 amount,
                 softness
-        ));
+        );
     }
 
     @Override

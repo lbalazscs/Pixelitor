@@ -21,14 +21,14 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
-import pixelitor.gui.utils.OKCancelDialog;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
-import pixelitor.selection.Selection;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -59,30 +59,20 @@ public class EnlargeCanvas implements CompAction {
         String editName = "Enlarge Canvas";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        comp.forEachLayer(layer -> {
-            if (layer instanceof ContentLayer) {
-                ContentLayer contentLayer = (ContentLayer) layer;
-                contentLayer.enlargeCanvas(north, east, south, west);
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.enlargeCanvas(north, east, south, west);
-            }
-        });
+        comp.forEachLayer(this::processLayer);
 
-        Selection selection = comp.getSelection();
-        if (selection != null && (north > 0 || west > 0)) {
-            selection.transform(
-                    AffineTransform.getTranslateInstance(west, north));
+        if (north > 0 || west > 0) {
+            comp.transformSelection(
+                    () -> AffineTransform.getTranslateInstance(west, north));
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
         History.addEdit(edit);
 
         Canvas canvas = comp.getCanvas();
-        int newCanvasWidth = canvas.getWidth() + east + west;
-        int newCanvasHeight = canvas.getHeight() + north + south;
-        canvas.changeSize(newCanvasWidth, newCanvasHeight);
+        int newCanvasWidth = canvas.getImWidth() + east + west;
+        int newCanvasHeight = canvas.getImHeight() + north + south;
+        canvas.changeImSize(newCanvasWidth, newCanvasHeight);
 
         // update the icon images only after the shared canvas size was
         // enlarged, because they are based on the canvas-sized subimage
@@ -92,6 +82,17 @@ public class EnlargeCanvas implements CompAction {
 
         Messages.showInStatusBar("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
+    }
+
+    private void processLayer(Layer layer) {
+        if (layer instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) layer;
+            contentLayer.enlargeCanvas(north, east, south, west);
+        }
+        if (layer.hasMask()) {
+            LayerMask mask = layer.getMask();
+            mask.enlargeCanvas(north, east, south, west);
+        }
     }
 
     public static Action getAction() {
@@ -104,16 +105,16 @@ public class EnlargeCanvas implements CompAction {
     }
 
     private static void showInDialog() {
-        EnlargeCanvasPanel panel = new EnlargeCanvasPanel();
-        OKCancelDialog d = new OKCancelDialog(panel, "Enlarge Canvas") {
-            @Override
-            protected void okAction() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
-                new EnlargeCanvas(panel.getNorth(), panel.getEast(), panel.getSouth(), panel.getWest()).process(comp);
-                close();
-            }
-        };
-        d.setVisible(true);
+        EnlargeCanvasPanel p = new EnlargeCanvasPanel();
+        new DialogBuilder()
+                .title("Enlarge Canvas")
+                .content(p)
+                .okAction(() -> {
+                    Composition comp = ImageComponents.getActiveCompOrNull();
+                    new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
+                            .process(comp);
+                })
+                .show();
     }
 
     static class EnlargeCanvasPanel extends JPanel {

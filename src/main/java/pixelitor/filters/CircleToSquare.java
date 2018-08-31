@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.CircleToSquareFilter;
@@ -47,13 +46,13 @@ public class CircleToSquare extends ParametrizedFilter {
         showAffectedArea();
 
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius.withAdjustedRange(1.0),
                 amount,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

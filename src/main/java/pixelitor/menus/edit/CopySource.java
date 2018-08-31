@@ -72,7 +72,7 @@ public enum CopySource {
 
             // just to be sure that the bounds are inside the canvas
             bounds = SwingUtilities.computeIntersection(
-                    0, 0, comp.getCanvasWidth(), comp.getCanvasHeight(), // image bounds
+                    0, 0, comp.getCanvasImWidth(), comp.getCanvasImHeight(), // image bounds
                     bounds
             );
             if (bounds.isEmpty()) { // the selection was outside the image

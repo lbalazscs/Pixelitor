@@ -28,7 +28,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -53,7 +52,7 @@ public class ParamTest extends ParametrizedFilter {
     public ParamTest() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(getTestParams()));
+        setParams(getTestParams());
     }
 
     @Override

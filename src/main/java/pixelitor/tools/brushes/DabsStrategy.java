@@ -17,17 +17,19 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.util.PPoint;
+
 /**
- * A dabs strategy specifies the way the dabs of a
- * DabsBrush are placed in response to GUI events.
+ * Specifies the way the dabs of a {@link DabsBrush}
+ * are placed in response to mouse events.
  *
  * Unlike brush settings, these objects cannot be shared
  * between symmetry brushes, because they call back a specific brush.
  */
 public interface DabsStrategy {
-    void onStrokeStart(double x, double y);
+    void onStrokeStart(PPoint p);
 
-    void onNewStrokePoint(double x, double y);
+    void onNewStrokePoint(PPoint p);
 
     void settingsChanged();
 }

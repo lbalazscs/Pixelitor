@@ -18,23 +18,27 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.Composition.LayerAdder;
 import pixelitor.filters.Invert;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.ActiveImageChangeListener;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that adds a new adjustment layer.
+ * An Action that adds a new adjustment layer to the active composition.
  */
-public class AddAdjLayerAction extends AbstractAction implements ActiveImageChangeListener {
+public class AddAdjLayerAction extends AbstractAction
+        implements ActiveImageChangeListener {
+
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
-        super("Add Adjustment Layer", IconUtils.loadIcon("add_adj_layer.png"));
+        super("Add Adjustment Layer",
+                Icons.load("add_adj_layer.png"));
         putValue(Action.SHORT_DESCRIPTION, "Adds a new adjustment layer.");
         setEnabled(false);
         ImageComponents.addActiveImageChangeListener(this);
@@ -44,7 +48,10 @@ public class AddAdjLayerAction extends AbstractAction implements ActiveImageChan
     public void actionPerformed(ActionEvent e) {
         Composition comp = ImageComponents.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
-        comp.addLayer(adjustmentLayer, true, "New Adjustment Layer", true, false);
+
+        new LayerAdder(comp)
+                .withHistory("New Adjustment Layer")
+                .add(adjustmentLayer);
     }
 
     @Override
@@ -53,12 +60,7 @@ public class AddAdjLayerAction extends AbstractAction implements ActiveImageChan
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        setEnabled(true);
-    }
-
-    @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
         setEnabled(true);
     }
 }

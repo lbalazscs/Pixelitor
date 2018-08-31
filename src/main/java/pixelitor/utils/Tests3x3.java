@@ -28,6 +28,9 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.lang.String.format;
+
 /**
  * Support for testing with small (3x3) images,
  * where it is feasible to check every pixel
@@ -102,7 +105,7 @@ public class Tests3x3 {
     }
 
     public static BufferedImage getStandardMaskImage() {
-        BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage img = new BufferedImage(3, 3, TYPE_BYTE_GRAY);
         img.setRGB(0, 0, WHITE);
         img.setRGB(1, 0, WHITE);
         img.setRGB(2, 0, WHITE);
@@ -127,10 +130,10 @@ public class Tests3x3 {
             BufferedImage maskImg = getStandardMaskImage();
             Layer layer = comp.getLayer(0);
             LayerMask mask = new LayerMask(comp, maskImg, layer, false);
-            layer.addMask(mask);
+            layer.addConfiguredMask(mask);
         }
-        ImageComponents.addCompAsNewImage(comp);
-        comp.getIC().setZoom(ZoomLevel.Z6400, true, null);
+        ImageComponents.addAsNewImage(comp);
+        comp.getIC().setZoom(ZoomLevel.Z6400, null);
     }
 
     // creates expected results from actual ones for regression tests
@@ -138,7 +141,7 @@ public class Tests3x3 {
         String s = "BufferedImage getExpectedImageAfter OP() {\n";
         int width = actual.getWidth();
         int height = actual.getHeight();
-        s += String.format("BufferedImage img = ImageUtils.createCompatibleImage(%d, %d);\n",
+        s += format("BufferedImage img = ImageUtils.createCompatibleImage(%d, %d);\n",
                 width, height);
 
         for (int x = 0; x < width; x++) {
@@ -149,7 +152,7 @@ public class Tests3x3 {
                 int g = (rgb >>> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                s += String.format("    img.setRGB(%d, %d, toPackedInt(%d, %d, %d, %d));\n",
+                s += format("    img.setRGB(%d, %d, toPackedInt(%d, %d, %d, %d));\n",
                         x, y, a, r, g, b);
             }
         }
@@ -161,6 +164,6 @@ public class Tests3x3 {
     public static void dumpCompositeOfActive() {
         BufferedImage img = ImageComponents.getActiveCompOrNull().calculateCompositeImage();
         String actual = getExpectedFromActual(img);
-        System.out.println(String.format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
+        System.out.println(format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
     }
 }

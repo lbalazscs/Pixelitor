@@ -19,15 +19,16 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.EffectsPanel;
-import pixelitor.gui.utils.OKDialog;
+import pixelitor.gui.utils.DialogBuilder;
 
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Shape effects in a dialog
+ * A {@link FilterParam} for shape effects in a dialog
  */
 public class EffectsParam extends AbstractFilterParam {
     private EffectsPanel effectsPanel;
@@ -47,18 +48,21 @@ public class EffectsParam extends AbstractFilterParam {
             DefaultButton button = new DefaultButton(effectsPanel);
             effectsPanel.setDefaultButton(button);
 
-            ConfigureParamGUI configureParamGUI = new ConfigureParamGUI(owner -> {
-                OKDialog effectsDialog = new OKDialog(owner,
-                        "Effects", "Close");
-                effectsDialog.setupGUI(effectsPanel);
-                return effectsDialog;
-            }, button);
+            ConfigureParamGUI configureParamGUI = new ConfigureParamGUI(owner ->
+                    new DialogBuilder()
+                            .owner(owner)
+                            .title("Effects")
+                            .content(effectsPanel)
+                            .withScrollbars()
+                            .okText("Close")
+                            .noCancelButton()
+                            .build(), button);
 
             paramGUI = configureParamGUI;
             setParamGUIEnabledState();
             return configureParamGUI;
         } else {
-            effectsPanel.setBorder(BorderFactory.createTitledBorder("Effects"));
+            effectsPanel.setBorder(createTitledBorder("Effects"));
             return effectsPanel;
         }
     }
@@ -113,9 +117,9 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         if (effectsPanel != null) {
-            effectsPanel.reset(triggerAction);
+            effectsPanel.reset(trigger);
         }
     }
 }

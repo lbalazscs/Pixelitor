@@ -30,6 +30,8 @@ import pixelitor.utils.test.RandomGUITest;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static java.lang.String.format;
+
 /**
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
@@ -97,7 +99,7 @@ public abstract class DrawableAction extends AbstractAction {
             String firstName = isNoun ? "The " + name  : name;
             String secondName = isNoun ? "the " + name  : name;
 
-            String msg = String.format("The active layer \"%s\" is a text layer.\n" +
+            String msg = format("The active layer \"%s\" is a text layer.\n" +
                                 "%s needs pixels and cannot be used on text layers.\n" +
                                 "If you rasterize this text layer, you can use %s,\n" +
                                 "but the text will no longer be editable.",

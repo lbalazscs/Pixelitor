@@ -21,7 +21,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -48,13 +47,13 @@ public class JHLensOverImage extends ParametrizedFilter {
 
         showAffectedArea();
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius.withAdjustedRange(1.0),
                 refractionIndex,
 //                edgeAction,  // edge action doesn't create anything usable in this case
                 interpolation
-        ));
+        );
     }
 
     @Override

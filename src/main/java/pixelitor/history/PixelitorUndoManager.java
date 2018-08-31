@@ -33,7 +33,7 @@ import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
 /**
- * An undo manager that is also a list model for debugging history
+ * An undo manager which is also a list model for debugging history
  */
 public class PixelitorUndoManager extends UndoManager implements ListModel<PixelitorEdit> {
     private final HistoryListSelectionModel selectionModel;
@@ -51,21 +51,23 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
 
     public PixelitorUndoManager() {
         selectionModel = new HistoryListSelectionModel();
-        selectionModel.addListSelectionListener(e -> {
-            if (!manualSelectionChange) {
-                return;
-            }
+        selectionModel.addListSelectionListener(e -> selectionChanged());
+    }
 
-            // if the selection was changed by clicking on the JList
-            // in the history panel, then jump to the correct state
-            int selectedIndex = getSelectedIndex();
-            assert selectedIndex != -1;
-            PixelitorEdit newSelectedEdit = getElementAt(selectedIndex);
+    private synchronized void selectionChanged() {
+        if (!manualSelectionChange) {
+            return;
+        }
 
-            if (newSelectedEdit != selectedEdit) {
-                jumpTo(newSelectedEdit);
-            }
-        });
+        // if the selection was changed by clicking on the JList
+        // in the history panel, then jump to the correct state
+        int selectedIndex = getSelectedIndex();
+        assert selectedIndex != -1;
+        PixelitorEdit newSelectedEdit = getElementAt(selectedIndex);
+
+        if (newSelectedEdit != selectedEdit) {
+            jumpTo(newSelectedEdit);
+        }
     }
 
     /**
@@ -77,7 +79,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     }
 
     @Override
-    public boolean addEdit(UndoableEdit edit) {
+    public synchronized boolean addEdit(UndoableEdit edit) {
         assert edit instanceof PixelitorEdit;
 
         // 1. do the actual addEdit
@@ -96,7 +98,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     }
 
     @Override
-    public void undo() throws CannotUndoException {
+    public synchronized void undo() throws CannotUndoException {
         String editName = selectedEdit.getName();
 
         // 1. do the actual undo
@@ -122,7 +124,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     }
 
     @Override
-    public void redo() throws CannotRedoException {
+    public synchronized void redo() throws CannotRedoException {
         // 1. do the actual redo
         super.redo();
 
@@ -237,16 +239,16 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
             JList<PixelitorEdit> historyList = new JList<>(this);
             historyList.setSelectionModel(selectionModel);
 
-            historyDialog = new JDialog(PixelitorWindow.getInstance(), "History", false);
+            historyDialog = new JDialog(PixelitorWindow.getInstance(),
+                    "History", false);
             JPanel p = new HistoryPanel(this, historyList);
             historyDialog.getContentPane().add(p);
 
             historyDialog.setSize(200, 300);
-            GUIUtils.centerOnScreen(historyDialog);
         }
 
         if (!historyDialog.isVisible()) {
-            historyDialog.setVisible(true);
+            GUIUtils.showDialog(historyDialog);
         }
     }
 

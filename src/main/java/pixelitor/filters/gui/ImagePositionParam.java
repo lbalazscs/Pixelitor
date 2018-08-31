@@ -22,6 +22,7 @@ import com.jhlabs.image.ImageMath;
 import javax.swing.*;
 import java.awt.Rectangle;
 
+import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -38,12 +39,12 @@ public class ImagePositionParam extends AbstractFilterParam {
         super(name, ALLOW_RANDOMIZE);
     }
 
-    public ImagePositionParam(String name, float relativeX, float relativeY) {
+    public ImagePositionParam(String name, float relX, float relY) {
         super(name, ALLOW_RANDOMIZE);
-        this.relativeX = relativeX;
-        this.relativeY = relativeY;
-        defaultRelativeX  = relativeX;
-        defaultRelativeY = relativeY;
+        this.relativeX = relX;
+        this.relativeY = relY;
+        defaultRelativeX = relX;
+        defaultRelativeY = relY;
     }
 
     @Override
@@ -64,8 +65,8 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
-        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, triggerAction);
+    public void reset(boolean trigger) {
+        setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, trigger);
     }
 
     @Override
@@ -89,9 +90,9 @@ public class ImagePositionParam extends AbstractFilterParam {
         return relativeY;
     }
 
-    public void setRelativeValues(float relativeX, float relativeY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
-        this.relativeX = relativeX;
-        this.relativeY = relativeY;
+    public void setRelativeValues(float relX, float relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
+        this.relativeX = relX;
+        this.relativeY = relY;
         if (updateGUI && (paramGUI != null)) {
             paramGUI.updateGUI();
         }
@@ -133,9 +134,9 @@ public class ImagePositionParam extends AbstractFilterParam {
         private final double relativeX;
         private final double relativeY;
 
-        public IPPState(double relativeX, double relativeY) {
-            this.relativeX = relativeX;
-            this.relativeY = relativeY;
+        public IPPState(double relX, double relY) {
+            this.relativeX = relX;
+            this.relativeY = relY;
         }
 
         @Override
@@ -149,7 +150,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
+        return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
                 getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 }

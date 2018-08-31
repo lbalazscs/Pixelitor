@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.GridAdjustmentPanel;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.layers.Drawable;
 
@@ -50,12 +49,12 @@ public class JHFourColorGradient extends ParametrizedFilter {
     public JHFourColorGradient() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 northWestParam,
                 northEastParam,
                 southWestParam,
                 southEastParam
-        ));
+        );
     }
 
     @Override

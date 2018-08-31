@@ -40,17 +40,13 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.swapLayers(newLayerIndex, oldLayerIndex, false);
-
-        History.notifyMenus(this);
+        comp.changeLayerOrder(newLayerIndex, oldLayerIndex, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.swapLayers(oldLayerIndex, newLayerIndex, false);
-
-        History.notifyMenus(this);
+        comp.changeLayerOrder(oldLayerIndex, newLayerIndex, false);
     }
 }

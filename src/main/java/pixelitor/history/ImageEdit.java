@@ -26,8 +26,6 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 
-import static pixelitor.Composition.ImageChangeActions.FULL;
-
 /**
  * A PixelitorEdit that represents the changes made to an image.
  */
@@ -55,12 +53,25 @@ public class ImageEdit extends FadeableEdit {
         checkBackupDifferentFromActive();
     }
 
+    public static ImageEdit createEmbedded(Drawable dr) {
+        // If there is a selection, only the bounds of the selected area is saved.
+        BufferedImage copy = dr.getSelectedSubImage(true);
+
+        ImageEdit edit = new ImageEdit("", dr.getComp(),
+                dr, copy,
+                false, false);
+
+        edit.setEmbedded(true);
+
+        return edit;
+    }
+
+    // the backup should never be identical to the active image
+    // otherwise the backup might be also edited
     private void checkBackupDifferentFromActive() {
-        // the backup should never be identical to the active image
-        // otherwise the backup might be also edited
         BufferedImage layerImage = dr.getImage();
         if (layerImage == imgRef.get()) {
-            throw new IllegalStateException("backup BufferedImage is identical to the active one");
+            throw new IllegalStateException("backup image is identical to the active one");
         }
     }
 
@@ -95,7 +106,7 @@ public class ImageEdit extends FadeableEdit {
         if (ignoreSelection) {
             tmp = dr.getImage();
         } else {
-            tmp = dr.getImageOrSubImageIfSelected(false, true);
+            tmp = dr.getSelectedSubImage(false);
         }
         dr.changeImageUndoRedo(backupImage, ignoreSelection);
 
@@ -103,9 +114,8 @@ public class ImageEdit extends FadeableEdit {
         imgRef = new SoftReference<>(tmp);
 
         if(!embedded) {
-            comp.imageChanged(FULL);
+            comp.imageChanged();
             dr.updateIconImage();
-            History.notifyMenus(this);
         }
 
         checkBackupDifferentFromActive();
@@ -151,5 +161,4 @@ public class ImageEdit extends FadeableEdit {
 
         return node;
     }
-
 }

@@ -18,12 +18,15 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
 /**
  * A brush.
+ * The received coordinates correspond to the mouse events,
+ * they are not translated with the brush radius.
  */
 public interface Brush {
     /**
@@ -34,25 +37,45 @@ public interface Brush {
     /**
      * Sets the radius of the brush
      */
-    void setRadius(int radius);
+    void setRadius(double radius);
 
     /**
-     * The start of a new brush stroke
-     *
-     * @param x        the x of the mouse event (NOT translated with the radius)
-     * @param y        the y of the mouse event (NOT translated with the radius)
+     * Used to determine the area saved for the undo.
+     * Note that this can be bigger than the radius, because
+     * some brushes use randomness and paint outside their radius.
      */
-    void onStrokeStart(double x, double y);
+    double getActualRadius();
 
     /**
-     * A new drawing mouse event has been received
-     *
-     * @param x        the x of the mouse event (NOT translated with the radius)
-     * @param y        the y of the mouse event (NOT translated with the radius)
+     * The start of a new brush stroke.
      */
-    void onNewStrokePoint(double x, double y);
+    void startAt(PPoint p);
+
+    /**
+     * The brush stroke should be continued to the given point.
+     */
+    void continueTo(PPoint p);
+
+    /**
+     * The brush stroke should be connected by a straight line
+     * to the given point (usually because a shift-click happened)
+     */
+    void lineConnectTo(PPoint p);
+
+    /**
+     * The brush stroke should be finished.
+     */
+    void finish();
 
     default void dispose() {}
 
     DebugNode getDebugNode();
+
+    /**
+     * Returns the space between the dabs.
+     *
+     * If the brush doesn't use uniform spacing, it can return
+     * any spacing that looks good, or 0 to skip the decision.
+     */
+    double getPreferredSpacing();
 }

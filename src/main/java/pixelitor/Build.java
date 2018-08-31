@@ -17,7 +17,10 @@
 
 package pixelitor;
 
-import javax.swing.*;
+import pixelitor.utils.Lazy;
+import pixelitor.utils.Utils;
+
+import java.awt.EventQueue;
 
 /**
  * The type of the "build" - in development mode there are additional
@@ -29,6 +32,7 @@ public enum Build {
     };
 
     private final boolean development;
+    private static boolean testing = false;
 
     Build(boolean development) {
         this.development = development;
@@ -38,9 +42,10 @@ public enum Build {
 
     public static Build CURRENT = FINAL;
 
-    public static final String VERSION_NUMBER = "4.1.0";
+    public static final String VERSION_NUMBER = "4.2.0";
 
-    private static String fixTitle = null;
+    // Lazy because it should be calculated after the CURRENT is set.
+    private static final Lazy<String> fixTitle = Lazy.of(Build::calcFixTitle);
 
     public boolean isDevelopment() {
         return development;
@@ -50,17 +55,26 @@ public enum Build {
         return !development;
     }
 
-    public static String getPixelitorWindowFixTitle() {
-        assert SwingUtilities.isEventDispatchThread() : "not EDT thread";
-
-        if (fixTitle == null) {
-            //noinspection NonThreadSafeLazyInitialization
-            fixTitle = "Pixelitor " + Build.VERSION_NUMBER;
-            if (CURRENT != FINAL) {
-                fixTitle += " DEVELOPMENT " + System.getProperty("java.version");
-            }
+    private static String calcFixTitle() {
+        String s = "Pixelitor " + Build.VERSION_NUMBER;
+        if (CURRENT != FINAL) {
+            s += " DEVELOPMENT " + System.getProperty("java.version");
         }
+        return s;
+    }
 
-        return fixTitle;
+    public static String getPixelitorWindowFixTitle() {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        return fixTitle.get();
+    }
+
+    public static synchronized boolean isTesting() {
+        return testing;
+    }
+
+    public static void setTestingMode() {
+        testing = true;
+        Utils.makeSureAssertionsAreEnabled();
     }
 }

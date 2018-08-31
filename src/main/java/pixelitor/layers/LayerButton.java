@@ -19,9 +19,10 @@ package pixelitor.layers;
 
 import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.ThreadPool;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.VisibleForTesting;
 
@@ -32,13 +33,21 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
+import static javax.swing.BorderFactory.createCompoundBorder;
+import static javax.swing.BorderFactory.createLineBorder;
+import static javax.swing.BorderFactory.createMatteBorder;
+import static pixelitor.layers.LayerButtonLayout.thumbSize;
+import static pixelitor.utils.ImageUtils.createThumbnail;
+
 /**
- * The thing in the "Layers" part of the GUI that represents a layer in a composition
+ * The selectable and draggable component representing
+ * a layer in the "Layers" part of the GUI.
  */
 public class LayerButton extends JToggleButton {
-    private static final Icon OPEN_EYE_ICON = IconUtils.loadIcon("eye_open.png");
-    private static final Icon CLOSED_EYE_ICON = IconUtils.loadIcon("eye_closed.png");
-    private static final CheckerboardPainter checkerBoardPainter = ImageUtils.createCheckerboardPainter();
+    private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
+    private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
+    private static final CheckerboardPainter checkerBoardPainter
+            = ImageUtils.createCheckerboardPainter();
 
     private static final String uiClassID = "LayerButtonUI";
 
@@ -86,16 +95,20 @@ public class LayerButton extends JToggleButton {
             if (JVM.isMac) {
                 // seems to be a Mac-specific problem: with LineBorder,
                 // a one pixel wide line disappears
-                lightBorder = BorderFactory.createMatteBorder(1, 1, 1, 1, UNSELECTED_COLOR);
+                lightBorder = createMatteBorder(1, 1, 1, 1, UNSELECTED_COLOR);
             } else {
-                lightBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, 1);
+                lightBorder = createLineBorder(UNSELECTED_COLOR, 1);
             }
         }
 
-        private static final Border darkBorder = BorderFactory.createLineBorder(SELECTED_COLOR, 1);
-        private static final Border selectedBorder = BorderFactory.createCompoundBorder(lightBorder, darkBorder);
-        private static final Border unSelectedIconOnSelectedLayerBorder = BorderFactory.createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
-        private static final Border unSelectedIconOnUnselectedLayerBorder = BorderFactory.createLineBorder(UNSELECTED_COLOR, BORDER_WIDTH);
+        private static final Border darkBorder
+                = createLineBorder(SELECTED_COLOR, 1);
+        private static final Border selectedBorder
+                = createCompoundBorder(lightBorder, darkBorder);
+        private static final Border unSelectedIconOnSelectedLayerBorder
+                = createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
+        private static final Border unSelectedIconOnUnselectedLayerBorder
+                = createLineBorder(UNSELECTED_COLOR, BORDER_WIDTH);
 
         public abstract void activate(JLabel layer, JLabel mask);
     }
@@ -124,11 +137,11 @@ public class LayerButton extends JToggleButton {
         initLayerNameEditor(layer);
 
         if (layer instanceof TextLayer) {
-            Icon textLayerIcon = IconUtils.getTextLayerIcon();
+            Icon textLayerIcon = Icons.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
-            layerIconLabel.setToolTipText("Double-click to edit the text layer.");
+            layerIconLabel.setToolTipText("<html><b>Double-click</b> to edit the text layer.");
         } else if (layer instanceof AdjustmentLayer) {
-            Icon adjLayerIcon = IconUtils.getAdjLayerIcon();
+            Icon adjLayerIcon = Icons.getAdjLayerIcon();
             layerIconLabel = new JLabel(adjLayerIcon);
         } else {
             layerIconLabel = new JLabel("", null, CENTER);
@@ -139,7 +152,7 @@ public class LayerButton extends JToggleButton {
             public void mouseClicked(MouseEvent e) {
                 int clickCount = e.getClickCount();
                 if (clickCount == 1) {
-                    MaskViewMode.NORMAL.activate(layer);
+                    MaskViewMode.NORMAL.activate(layer, "layer icon clicked");
                 } else {
                     if (layer instanceof TextLayer) {
                         ((TextLayer) layer).edit(PixelitorWindow.getInstance());
@@ -186,7 +199,7 @@ public class LayerButton extends JToggleButton {
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
         visibilityCB.setSelected(true);
-        visibilityCB.setToolTipText("Click to hide/show this layer.");
+        visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.CHECKBOX);
 
@@ -201,19 +214,21 @@ public class LayerButton extends JToggleButton {
     }
 
     private void wireSelectionWithLayerActivation(Layer layer) {
-        addItemListener(e -> {
-            if (isSelected()) {
-                layer.makeActive(userInteraction);
-            } else {
-                nameEditor.disableEditing();
-                // Invoke later because we can get here in the middle
-                // of a new layer activation, when isSelected still
-                // returns false, but the layer will be selected during
-                // the same event processing.
-                SwingUtilities.invokeLater(() ->
-                        configureBorders(layer.isMaskEditing()));
-            }
-        });
+        addItemListener(e -> buttonSelectedOrDeselected(layer));
+    }
+
+    private void buttonSelectedOrDeselected(Layer layer) {
+        if (isSelected()) {
+            layer.makeActive(userInteraction);
+        } else {
+            nameEditor.disableEditing();
+            // Invoke later because we can get here in the middle
+            // of a new layer activation, when isSelected still
+            // returns false, but the layer will be selected during
+            // the same event processing.
+            SwingUtilities.invokeLater(() ->
+                    configureBorders(layer.isMaskEditing()));
+        }
     }
 
     public void setOpenEye(boolean newVisibility) {
@@ -221,7 +236,7 @@ public class LayerButton extends JToggleButton {
     }
 
     @VisibleForTesting
-    public boolean hasOpenEye() {
+    public boolean isEyeOpen() {
         return visibilityCB.isSelected();
     }
 
@@ -283,7 +298,7 @@ public class LayerButton extends JToggleButton {
         return visibilityCB.isSelected();
     }
 
-    public void changeNameProgrammatically(String newName) {
+    public void setLayerName(String newName) {
         nameEditor.setText(newName);
     }
 
@@ -298,31 +313,36 @@ public class LayerButton extends JToggleButton {
                 painter = checkerBoardPainter;
             }
 
-            BufferedImage thumb = ImageUtils.createThumbnail(img, LayerButtonLayout.thumbSize, painter);
+            BufferedImage thumb = createThumbnail(img, thumbSize, painter);
 
-            Runnable edt = () -> {
-                if (isMask) {
-                    if (!hasMaskIcon()) {
-                        return;
-                    }
-                    boolean disabledMask = !layer.getParent().isMaskEnabled();
-                    if (disabledMask) {
-                        ImageUtils.paintRedXOn(thumb);
-                    }
-                    maskIconLabel.setIcon(new ImageIcon(thumb));
-                } else {
-                    layerIconLabel.setIcon(new ImageIcon(thumb));
-                }
-                repaint();
-            };
-            SwingUtilities.invokeLater(edt);
+            SwingUtilities.invokeLater(() ->
+                    updateIconOnEDT(layer, isMask, thumb));
         };
-        new Thread(notEDT).start();
+        ThreadPool.submit(notEDT);
+    }
+
+    private void updateIconOnEDT(ImageLayer layer, boolean isMask, BufferedImage thumb) {
+        if (isMask) {
+            if (!hasMaskIcon()) {
+                return;
+            }
+            boolean disabledMask = !layer.getParent().isMaskEnabled();
+            if (disabledMask) {
+                ImageUtils.paintRedXOn(thumb);
+            }
+            maskIconLabel.setIcon(new ImageIcon(thumb));
+        } else {
+            layerIconLabel.setIcon(new ImageIcon(thumb));
+        }
+        repaint();
     }
 
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
-        maskIconLabel.setToolTipText("<html>Shift-click to disable/enable,<br>Alt-click to show mask/layer,<br>Right-click for more options");
+        maskIconLabel
+                .setToolTipText("<html><b>Shift-click</b> to disable/enable," +
+                        "<br><b>Alt-click</b> to show mask/layer," +
+                        "<br><b>Right-click</b> for more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel, "maskIcon");
@@ -333,37 +353,7 @@ public class LayerButton extends JToggleButton {
         maskIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                boolean altClick = e.isAltDown();
-                boolean shiftClick = e.isShiftDown();
-                if (altClick && shiftClick) {
-                    // shift-alt-click switches to RUBYLITH except when
-                    // it is already RUBYLITH
-                    ImageComponent ic = layer.getComp().getIC();
-                    if (ic.getMaskViewMode() == MaskViewMode.RUBYLITH) {
-                        MaskViewMode.EDIT_MASK.activate(ic, layer);
-                    } else {
-                        MaskViewMode.RUBYLITH.activate(ic, layer);
-                    }
-                } else if (altClick) {
-                    // alt-click switches to SHOW_MASK except when it
-                    // already is in SHOW_MASK
-                    ImageComponent ic = layer.getComp().getIC();
-                    if (ic.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
-                        MaskViewMode.EDIT_MASK.activate(ic, layer);
-                    } else {
-                        MaskViewMode.SHOW_MASK.activate(ic, layer);
-                    }
-                } else if (shiftClick) {
-                    // shift-click disables except when it is already disabled
-                    layer.setMaskEnabled(!layer.isMaskEnabled(), true);
-                } else {
-                    ImageComponent ic = layer.getComp().getIC();
-
-                    // don't change SHOW_MASK into EDIT_MASK
-                    if (ic.getMaskViewMode() == MaskViewMode.NORMAL) {
-                        MaskViewMode.EDIT_MASK.activate(layer);
-                    }
-                }
+                maskIconClicked(e);
             }
         });
 
@@ -375,6 +365,43 @@ public class LayerButton extends JToggleButton {
         }
 
         revalidate();
+    }
+
+    private void maskIconClicked(MouseEvent e) {
+        boolean altClick = e.isAltDown();
+        boolean shiftClick = e.isShiftDown();
+
+        if (altClick && shiftClick) {
+            String reason = "mask icon shift-alt-clicked";
+            // shift-alt-click switches to RUBYLITH except when
+            // it is already RUBYLITH
+            ImageComponent ic = layer.getComp().getIC();
+            if (ic.getMaskViewMode() == MaskViewMode.RUBYLITH) {
+                MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
+            } else {
+                MaskViewMode.RUBYLITH.activate(ic, layer, reason);
+            }
+        } else if (altClick) {
+            String reason = "mask icon alt-clicked";
+            // alt-click switches to SHOW_MASK except when it
+            // already is in SHOW_MASK
+            ImageComponent ic = layer.getComp().getIC();
+            if (ic.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
+                MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
+            } else {
+                MaskViewMode.SHOW_MASK.activate(ic, layer, reason);
+            }
+        } else if (shiftClick) {
+            // shift-click disables except when it is already disabled
+            layer.setMaskEnabled(!layer.isMaskEnabled(), true);
+        } else {
+            ImageComponent ic = layer.getComp().getIC();
+
+            // don't change SHOW_MASK into EDIT_MASK
+            if (ic.getMaskViewMode() == MaskViewMode.NORMAL) {
+                MaskViewMode.EDIT_MASK.activate(layer, "mask icon clicked");
+            }
+        }
     }
 
     public void deleteMaskIconLabel() {

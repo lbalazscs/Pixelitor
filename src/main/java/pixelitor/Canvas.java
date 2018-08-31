@@ -18,6 +18,7 @@
 package pixelitor;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.Symmetry;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -26,32 +27,33 @@ import java.awt.geom.Area;
 import java.io.Serializable;
 
 /**
- * The painting canvas represents the size of the composition.
+ * The canvas represents the size of the composition.
  * A layer can be bigger than the canvas if it is partially hidden.
  */
 public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
+    // implementation note: some non-transient field names are inconsistent
+    // with their getters, but they cannot be renamed without breaking
+    // serialization compatibility with old pxc files
+
+    // size in image space
     private int width;
     private int height;
 
+    // size in component space
     private int zoomedWidth;
     private int zoomedHeight;
 
     private transient ImageComponent ic;
 
-    // for consistency with Pixelitor 2.1.0
+    // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
 
-    /**
-     * If a Composition is deserialized, then this object is also deserialized,
-     * and later associated with the (transient!) ImageComponent
-     * In the case of a new image, this object is first created in ImageComponent
-     */
-    public Canvas(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public Canvas(int imWidth, int imHeight) {
+        this.width = imWidth;
+        this.height = imHeight;
     }
 
     public Canvas(Canvas orig) {
@@ -61,55 +63,97 @@ public class Canvas implements Serializable {
         this.zoomedHeight = orig.zoomedHeight;
     }
 
-    public int getWidth() {
-        return width;
+    /**
+     * Changes the size with values given in image space
+     */
+    public void changeImSize(int newImWidth, int newImHeight) {
+        width = newImWidth;
+        height = newImHeight;
+
+        // also update the component space values
+        recalcCoSize();
+
+        Canvas.activeCanvasImSizeChanged(this);
     }
 
-    public int getHeight() {
-        return height;
+    /**
+     * Recalculates the component-space (zoomed) size
+     */
+    public void recalcCoSize() {
+        double viewScale = ic.getViewScale();
+        zoomedWidth = (int) (viewScale * width);
+        zoomedHeight = (int) (viewScale * height);
+
+        ic.canvasCoSizeChanged();
     }
 
-    public Rectangle getBounds() {
+    /**
+     * Returns the bounds in image space, relative to the canvas
+     */
+    public Rectangle getImBounds() {
         return new Rectangle(0, 0, width, height);
     }
 
-    public void changeSize(int newWidth, int newHeight) {
-        width = newWidth;
-        height = newHeight;
-
-        double viewScale = ic.getViewScale();
-        zoomedWidth = (int) (viewScale * newWidth);
-        zoomedHeight = (int) (viewScale * newHeight);
-
-        ic.canvasSizeChanged();
+    /**
+     * Returns the width in image space
+     */
+    public int getImWidth() {
+        return width;
     }
 
-    public void changeZooming(double viewScale) {
-        zoomedWidth = (int) (viewScale * width);
-        zoomedHeight = (int) (viewScale * height);
+    /**
+     * Returns the height in image space
+     */
+    public int getImHeight() {
+        return height;
     }
 
-    public Dimension getZoomedSize() {
+    /**
+     * Returns the (zoomed) size in component space
+     */
+    public Dimension getCoSize() {
         return new Dimension(zoomedWidth, zoomedHeight);
     }
 
-    public int getZoomedWidth() {
+    /**
+     * Returns the (zoomed) width in component space
+     */
+    public int getCoWidth() {
         return zoomedWidth;
     }
 
-    public int getZoomedHeight() {
+    /**
+     * Returns the (zoomed) height in component space
+     */
+    public int getCoHeight() {
         return zoomedHeight;
     }
 
     public void setIC(ImageComponent ic) {
         this.ic = ic;
+        if (ic != null) {
+            recalcCoSize();
+        }
     }
 
     public Shape invertShape(Shape shape) {
         Area area = new Area(shape);
-        Area fullArea = new Area(getBounds());
+        Area fullArea = new Area(getImBounds());
         fullArea.subtract(area);
         return fullArea;
+    }
+
+    public Shape clipShapeToBounds(Shape shape) {
+        assert shape != null;
+
+        Area compBounds = new Area(getImBounds());
+        Area result = new Area(shape);
+        result.intersect(compBounds);
+        return result;
+    }
+
+    public static void activeCanvasImSizeChanged(Canvas canvas) {
+        Symmetry.setCanvas(canvas);
     }
 
     @Override

@@ -20,7 +20,6 @@ package pixelitor.filters;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.filters.lookup.LookupFactory;
@@ -56,9 +55,9 @@ public class ExtractChannel extends ParametrizedFilter {
     public ExtractChannel() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 channelParam,
-                bwParam));
+                bwParam);
     }
 
     @Override

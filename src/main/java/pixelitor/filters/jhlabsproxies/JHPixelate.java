@@ -21,7 +21,6 @@ import com.jhlabs.image.BlockFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
@@ -68,11 +67,11 @@ public class JHPixelate extends ParametrizedFilter {
     public JHPixelate() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 cellSizeParam.withAdjustedRange(0.2),
                 styleParam,
                 typeParam
-        ));
+        );
     }
 
     @Override
@@ -93,8 +92,8 @@ public class JHPixelate extends ParametrizedFilter {
                 if (brickBlockFilter == null) {
                     brickBlockFilter = new BrickBlockFilter(NAME);
                 }
-                brickBlockFilter.setHorizontalBlockSize(cellSize * 2);
-                brickBlockFilter.setVerticalBlockSize(cellSize);
+                brickBlockFilter.setHorBlockSize(cellSize * 2);
+                brickBlockFilter.setVerBlockSize(cellSize);
                 dest = brickBlockFilter.filter(src, dest);
             }
         }
@@ -139,7 +138,8 @@ public class JHPixelate extends ParametrizedFilter {
         g.fillRect(0, 0, width, height);
 
         if (type == TYPE_SQUARE) {
-            ImageUtils.drawGrid(GRAY, g, width, height, gapWidth, cellSize, gapWidth, cellSize, false);
+            ImageUtils.drawGrid(GRAY, g, width, height,
+                    gapWidth, cellSize, gapWidth, cellSize, false);
         } else if (type == TYPE_BRICK) {
             ImageUtils.drawBrickGrid(GRAY, g, cellSize, width, height);
         }

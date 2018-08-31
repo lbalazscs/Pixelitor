@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,29 +24,56 @@ import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Different tools can have different clipping requirements, which are
- * represented here
+ * How the clipping shape of {@link Graphics2D} is set when painting the
+ * active {@link ImageComponent}.
+ * Each tool has its own {@link ClipStrategy}.
  */
 public enum ClipStrategy {
+    /**
+     * The painting is allowed to leave the canvas,
+     * but not the internal frame.
+     * Necessary because the clipping was overridden previously
+     * in {@link ImageComponent}.
+     *
+     * TODO probably restoring Swing's original clip shape
+     * would have the same effect
+     */
     INTERNAL_FRAME {
         @Override
-        public void setClip(Graphics2D g, ImageComponent ic) {
-            // We are here in image space because g2 has the transforms applied.
-            // We are overriding the clip of g2, therefore we must manually
-            // make sure that we don't paint anything outside the internal frame.
-            // canvas.getBounds() is not reliable because the internal frame might be smaller
-            // so we have to use the view rectangle...
-            Rectangle componentSpaceViewRect = ic.getViewRect();
-            // ...but first get this to image space...
-            Rectangle2D imageSpaceViewRect = ic.fromComponentToImageSpace(componentSpaceViewRect);
-            g.setClip(imageSpaceViewRect);
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
+            // Note that the internal frame might be
+            // smaller than the ImageComponent when there are scrollbars,
+            // so we have to use the view rectangle:
+            Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
+
+            // We are in image space because g has the transforms applied.
+            Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
+            g.setClip(imageSpaceVisiblePart);
         }
-    }, IMAGE_ONLY {
+    },
+    /**
+     * The painting is not allowed to leave the canvas.
+     * This should be used if a tool only acts on the image,
+     * without helper handles that can be outside the canvas.
+     */
+    CANVAS {
         @Override
-        public void setClip(Graphics2D g, ImageComponent ic) {
-            // empty: the image clipping has been already set
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
+            // empty: the canvas clipping has been already set
+        }
+    },
+    /**
+     * The tool itself will set its own custom clipping.
+     */
+    CUSTOM {
+        @Override
+        public void setClipFor(Graphics2D g, ImageComponent ic) {
+            // empty: it will be set later in the tool
         }
     };
 
-    public abstract void setClip(Graphics2D g, ImageComponent ic);
+    /**
+     * Called when the active {@link ImageComponent} is painted
+     */
+    public abstract void setClipFor(Graphics2D g, ImageComponent ic);
 }

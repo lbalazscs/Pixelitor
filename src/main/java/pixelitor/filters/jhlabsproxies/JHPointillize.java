@@ -23,7 +23,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -54,7 +53,7 @@ public class JHPointillize extends ParametrizedFilter {
     public JHPointillize() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 gridSize.withAdjustedRange(0.2),
                 gridType,
                 randomness,
@@ -65,7 +64,7 @@ public class JHPointillize extends ParametrizedFilter {
         ).withAction(new ReseedNoiseFilterAction(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
-        })));
+        }));
     }
 
     @Override

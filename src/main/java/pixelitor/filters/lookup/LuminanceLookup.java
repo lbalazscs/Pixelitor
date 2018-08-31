@@ -22,9 +22,9 @@ package pixelitor.filters.lookup;
 public final class LuminanceLookup {
     private static final int TABLE_SIZE = 256;
 
-    private static final float RED_CONTRIBUTION = 0.2126f;
-    private static final float GREEN_CONTRIBUTION = 0.7152f;
-    private static final float BLUE_CONTRIBUTION = 0.0722f;
+    private static final float RED_CONTRIBUTION = 0.299f;
+    private static final float GREEN_CONTRIBUTION = 0.587f;
+    private static final float BLUE_CONTRIBUTION = 0.114f;
 
     private static final float[] redLumTable = new float[TABLE_SIZE];
     private static final float[] greenLumTable = new float[TABLE_SIZE];
@@ -42,14 +42,14 @@ public final class LuminanceLookup {
     private LuminanceLookup() {
     }
 
-    public static int getLuminosity(int r, int g, int b) {
-        return (int) (redLumTable[r] + greenLumTable[g] + blueLumTable[b]);
+    public static float from(int r, int g, int b) {
+        return redLumTable[r] + greenLumTable[g] + blueLumTable[b];
     }
 
-    public static int getLuminosity(int rgb) {
+    public static float from(int rgb) {
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
         int b = (rgb) & 0xFF;
-        return (int) (redLumTable[r] + greenLumTable[g] + blueLumTable[b]);
+        return redLumTable[r] + greenLumTable[g] + blueLumTable[b];
     }
 }

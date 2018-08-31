@@ -18,7 +18,8 @@
 package pixelitor.tools.brushes;
 
 import com.jhlabs.awt.WobbleStroke;
-import pixelitor.tools.StrokeType;
+import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.util.PPoint;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -29,13 +30,20 @@ import java.awt.geom.Ellipse2D;
 public class WobbleBrush extends StrokeBrush {
     private static final float SIZE_DIVIDING_FACTOR = 4.0f;
 
-    public WobbleBrush(int radius) {
+    public WobbleBrush(double radius) {
         super(radius, StrokeType.WOBBLE);
     }
 
     @Override
-    public void drawStartShape(double x, double y) {
-        float smallThickness = diameter / SIZE_DIVIDING_FACTOR;
+    public double getActualRadius() {
+        return 5.0 + radius * 1.5; // can be bigger because of the randomness
+    }
+
+    @Override
+    public void drawStartShape(PPoint p) {
+        double x = p.getImX();
+        double y = p.getImY();
+        float smallThickness = (float) (diameter / SIZE_DIVIDING_FACTOR);
 
         if(diameter != lastDiameter) {
             currentStroke = new WobbleStroke(0.5f, smallThickness, smallThickness);
@@ -47,11 +55,11 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public void drawLine(double startX, double startY, double endX, double endY) {
-        int savedRadius = radius;
-        radius = (int) (radius / SIZE_DIVIDING_FACTOR);
+    public void drawLine(PPoint start, PPoint end) {
+        double savedRadius = radius;
+        radius = radius / SIZE_DIVIDING_FACTOR;
 
-        super.drawLine(startX, startY, endX, endY);
+        super.drawLine(start, end);
 
         radius = savedRadius;
     }

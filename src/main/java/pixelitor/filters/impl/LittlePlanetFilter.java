@@ -42,7 +42,8 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         double r = Math.sqrt(dx * dx + dy * dy);
 
         double radius = srcHeight * zoom / 2;
-        double angle = Utils.transformAtan2AngleToIntuitive(FastMath.atan2(dy, dx)) + rotateResult;
+        double angle = Utils.atan2AngleToIntuitive(FastMath.atan2(dy, dx))
+                + rotateResult;
 
         if (angle > (2 * Math.PI)) {
             angle -= 2 * Math.PI;

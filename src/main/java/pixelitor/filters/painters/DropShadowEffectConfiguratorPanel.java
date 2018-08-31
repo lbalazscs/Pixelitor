@@ -28,10 +28,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
-
 /**
- * A GUI for configuring the "drop shadow" effect
+ * A GUI for configuring the "drop shadow" shape effect
  */
 public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     private final AngleParam angleParam;
@@ -44,7 +42,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
-        SliderSpinner distanceSlider = new SliderSpinner(distanceParam, NONE, false);
+        SliderSpinner distanceSlider = SliderSpinner.simpleFrom(distanceParam);
         gbh.addLabelWithControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
@@ -52,7 +50,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         gbh.addLabelWithControl("Angle:", angleSelector);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
-        SliderSpinner spreadSlider = new SliderSpinner(spreadParam, NONE, false);
+        SliderSpinner spreadSlider = SliderSpinner.simpleFrom(spreadParam);
         gbh.addLabelWithControl("Spread:", spreadSlider);
 
         ChangeListener changeListener = e -> updateDefaultButtonIcon();
@@ -73,7 +71,7 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
         double distance = distanceParam.getValueAsDouble();
         double angle = angleParam.getValueInRadians();
 
-        return Utils.calculateOffset(distance, angle);
+        return Utils.offsetFromPolar(distance, angle);
     }
 
 
@@ -91,14 +89,19 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         super.reset(false);
         angleParam.reset(false);
         distanceParam.reset(false);
         spreadParam.reset(false);
 
-        if (triggerAction && adjustmentListener != null) {
+        if (trigger && adjustmentListener != null) {
             adjustmentListener.paramAdjusted();
         }
+    }
+
+    @Override
+    public String getResetToolTip() {
+        return "Reset the default effect settings";
     }
 }

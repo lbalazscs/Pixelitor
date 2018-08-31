@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 
 /**
  * The abstract superclass for all edits in Pixelitor
@@ -29,14 +31,34 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     protected Composition comp;
     private final String name;
 
-    protected boolean embedded; // if true, this is not a standalone edit
+    // if true, this is part of another edit,
+    // not added to the history by itself
+    protected boolean embedded;
 
-    PixelitorEdit(String name, Composition comp) {
+    protected PixelitorEdit(String name, Composition comp) {
         assert comp != null;
         assert name != null;
 
         this.comp = comp;
         this.name = name;
+    }
+
+    @Override
+    public void undo() throws CannotUndoException {
+        super.undo();
+
+        if (!embedded) {
+            History.notifyMenus(this);
+        }
+    }
+
+    @Override
+    public void redo() throws CannotRedoException {
+        super.redo();
+
+        if (!embedded) {
+            History.notifyMenus(this);
+        }
     }
 
     public Composition getComp() {
@@ -55,10 +77,14 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         return name;
     }
 
-    /**
-     * Can be overridden to include more information
-     */
+    // same as the presentation name, but shorter method name...
+    public String getName() {
+        return name;
+    }
+
     public String getDebugName() {
+        // by default only the presentation name, but
+        // can be overridden to include more information
         return name;
     }
 
@@ -68,10 +94,6 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
     @Override
     public String toString() {
-        return name;
-    }
-
-    public String getName() {
         return name;
     }
 

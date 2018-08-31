@@ -19,7 +19,6 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MarbleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -37,6 +36,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
     private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
     private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
+    private final RangeParam time = new RangeParam("Time", 0, 0, 100);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
@@ -46,13 +46,14 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     public JHTurbulentDistortion() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 scale.withAdjustedRange(0.1),
                 amount.withAdjustedRange(0.07),
                 turbulence,
+                time,
                 edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override
@@ -64,6 +65,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
         filter.setTurbulence(turbulence.getValueAsPercentage());
         filter.setScale(scale.getValueAsFloat());
         filter.setAmount(amount.getValueAsFloat());
+        filter.setTime(time.getValueAsPercentage() * 5);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

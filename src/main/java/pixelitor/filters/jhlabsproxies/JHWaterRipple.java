@@ -20,7 +20,6 @@ import com.jhlabs.image.WaterFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -49,7 +48,7 @@ public class JHWaterRipple extends ParametrizedFilter {
 
         showAffectedArea();
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius.withAdjustedRange(1.0),
                 wavelength.withAdjustedRange(0.25),
@@ -57,7 +56,7 @@ public class JHWaterRipple extends ParametrizedFilter {
                 phase,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

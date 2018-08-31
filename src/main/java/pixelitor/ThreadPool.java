@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.ProgressTracker;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -39,15 +40,27 @@ public class ThreadPool {
     private ThreadPool() {
     }
 
+    /**
+     * Submits a task that doesn't return anything
+     */
     public static Future<?> submit(Runnable task) {
         return executorService.submit(task);
     }
 
-    public static <T> Future<T> submit(Callable<T> task) {
+    /**
+     * Submits a task that returns something, such as
+     * the calculated pixels in a line
+     */
+    public static <T> Future<T> submit2(Callable<T> task) {
         return executorService.submit(task);
     }
 
-    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+    /**
+     * Waits until all the given futures complete their
+     * computation, and updates the given
+     * {@link ProgressTracker} in the meantime.
+     */
+    public static void waitForFutures(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
 
         for (Future<?> future : futures) {
@@ -64,7 +77,26 @@ public class ThreadPool {
         }
     }
 
-    public static void waitForFutures2(BufferedImage dst, int width, Future<int[]>[] futures, ProgressTracker pt) {
+    // same as the above, but with array argument
+    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+        assert pt != null;
+
+        for (Future<?> future : futures) {
+            try {
+                future.get();
+                pt.unitDone();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Similar to waitForFutures, but works with futures
+     * that return an int array representing a line, and
+     * updates the given destination image with the new pixels.
+     */
+    public static void waitForFutures2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
         assert pt != null;
 
         try {
@@ -78,5 +110,9 @@ public class ThreadPool {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Executor getExecutor() {
+        return executorService;
     }
 }

@@ -37,7 +37,9 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     private ImageLayer layer;
     private final MaskViewMode oldMode;
 
-    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer, LayerMask oldMask, BufferedImage oldImage, MaskViewMode oldMode) {
+    public ApplyLayerMaskEdit(Composition comp, ImageLayer layer,
+                              LayerMask oldMask, BufferedImage oldImage,
+                              MaskViewMode oldMode) {
         super("Apply Layer Mask", comp);
 
         this.oldMode = oldMode;
@@ -51,11 +53,9 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.setImage(oldImage);
-        layer.addMask(oldMask);
-        oldMode.activate(comp, layer);
+        layer.addConfiguredMask(oldMask);
+        oldMode.activate(comp, layer, "apply mask undone");
         layer.updateIconImage();
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -64,8 +64,6 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         // the mask view mode is automatically set to normal
         oldImage = layer.applyLayerMask(false);
-
-        History.notifyMenus(this);
     }
 
     @Override

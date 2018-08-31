@@ -22,10 +22,10 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.BlurredEllipse;
+import pixelitor.utils.BlurredShape;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -43,21 +43,23 @@ public class JHFocus extends ParametrizedFilter {
     private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
+    private final IntChoiceParam shape = BlurredShape.getChoices();
 
     private FocusImpl filter;
 
     public JHFocus() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 center,
                 radius,
                 softness,
+                shape,
                 blurRadius,
                 numberOfIterations,
                 invert,
                 hpSharpening
-        ));
+        );
     }
 
     @Override
@@ -68,9 +70,9 @@ public class JHFocus extends ParametrizedFilter {
             return src;
         }
 
-        // TODO copied from JHBoxBlur, but is it necessary?
         if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
-            // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
+            // otherwise we can get ArrayIndexOutOfBoundsException
+            // in VariableBlurFilter.blur
             return src;
         }
 
@@ -90,12 +92,12 @@ public class JHFocus extends ParametrizedFilter {
 
         filter.setInverted(invert.isChecked());
 
-        // TODO unlike BoxBlurFilter, VariableBlurFilter supports only integer radii
         filter.setHRadius(blurRadius.getValueAsFloat(0));
         filter.setVRadius(blurRadius.getValueAsFloat(1));
 
         filter.setIterations(numberOfIterations.getValue());
         filter.setPremultiplyAlpha(false);
+        filter.setShape(shape.getValue());
 
         dest = filter.filter(src, dest);
 
@@ -115,7 +117,7 @@ public class JHFocus extends ParametrizedFilter {
         private double outerRadiusY;
         private boolean inverted;
 
-        private BlurredEllipse ellipse;
+        private BlurredShape shape;
 
         public FocusImpl(String filterName) {
             super(filterName);
@@ -136,22 +138,22 @@ public class JHFocus extends ParametrizedFilter {
 
         @Override
         protected float blurRadiusAt(int x, int y) {
-            double outside = ellipse.isOutside(x, y);
+            double outside = shape.isOutside(x, y);
             if (inverted) {
                 return (float) (1 - outside);
             }
             return (float) outside;
         }
 
-        @Override
-        public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-            ellipse = new BlurredEllipse(cx, cy,
-                    innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
-            return super.filter(src, dst);
-        }
-
         public void setInverted(boolean inverted) {
             this.inverted = inverted;
+        }
+
+        // must be called after the shape arguments!
+        public void setShape(int type) {
+            shape = BlurredShape.create(type, cx, cy,
+                    innerRadiusX, innerRadiusY,
+                    outerRadiusX, outerRadiusY);
         }
     }
 }

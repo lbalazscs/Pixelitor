@@ -24,16 +24,12 @@ import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
-
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
 
 /**
  * Cells filter based on the JHLabs CellularFilter
@@ -45,7 +41,8 @@ public class JHCells extends ParametrizedFilter {
     private static final int TYPE_GRID = 2;
     private static final int TYPE_STRANGE = 3;
 
-    private final GradientParam gradient = new GradientParam("Colors", BLACK, WHITE);
+    private final GradientParam gradient =
+            GradientParam.createBlackToWhite("Colors");
 
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
@@ -68,7 +65,7 @@ public class JHCells extends ParametrizedFilter {
     public JHCells() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        setParams(
                 type,
                 refineType,
                 gridType,
@@ -81,7 +78,7 @@ public class JHCells extends ParametrizedFilter {
         ).withAction(new ReseedNoiseFilterAction(e -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
-        })));
+        }));
     }
 
     @Override

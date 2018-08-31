@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -51,7 +50,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
 
         showAffectedArea();
 
-        setParamSet(new ParamSet(
+        setParams(
                 swirlAmount,
                 pinchBulgeAmount,
                 radius.withAdjustedRange(1.0),
@@ -60,7 +59,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
                 rotateResult,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

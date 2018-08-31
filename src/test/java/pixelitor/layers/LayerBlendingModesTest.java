@@ -51,10 +51,10 @@ public class LayerBlendingModesTest {
     @Before
     public void setUp() {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
-        TestHelper.setupAnICFor(comp);
+        TestHelper.setupAMockICFor(comp);
 
         this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
-        comp.addLayerNoGUI(upperLayer);
+        comp.addLayerInInitMode(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
 
@@ -196,7 +196,7 @@ public class LayerBlendingModesTest {
 
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
-        comp.addLayerNoGUI(invertAdjustment);
+        comp.addLayerInInitMode(invertAdjustment);
         assertThat(comp.getNumLayers()).isEqualTo(3);
         assertThat(getResultingColor()).isEqualTo(inverted);
 
@@ -215,7 +215,7 @@ public class LayerBlendingModesTest {
 
         // adding a no-op adjustment layer should change nothing
         AdjustmentLayer noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
-        comp.addLayerNoGUI(noOpAdjustment);
+        comp.addLayerInInitMode(noOpAdjustment);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
@@ -227,7 +227,7 @@ public class LayerBlendingModesTest {
         assertThat(comp.getNumLayers()).isEqualTo(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color
-        comp.addLayerNoGUI(alwaysUpperColorAdjustment);
+        comp.addLayerInInitMode(alwaysUpperColorAdjustment);
         alwaysUpperColorAdjustment.setBlendingMode(blendingMode, false, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -246,7 +246,7 @@ public class LayerBlendingModesTest {
         assertThat(comp.getNumLayers()).isEqualTo(1);
 
         // test with text layer
-        comp.addLayerNoGUI(upperColorTextLayer);
+        comp.addLayerInInitMode(upperColorTextLayer);
         upperColorTextLayer.setBlendingMode(blendingMode, false, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -265,7 +265,7 @@ public class LayerBlendingModesTest {
         assertThat(comp.getNumLayers()).isEqualTo(1);
 
         // merging down the upper layer should result in the expected color
-        comp.addLayerNoGUI(upperLayer);
+        comp.addLayerInInitMode(upperLayer);
         assertThat(comp.getNumLayers()).isEqualTo(2);
         upperLayer.setBlendingMode(blendingMode, false, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);

@@ -18,17 +18,18 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.AffectedArea;
+import pixelitor.tools.brushes.AffectedAreaTracker;
 import pixelitor.tools.brushes.CopyBrushType;
+import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SmudgeBrush;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
@@ -38,9 +39,12 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
  */
 public class SmudgeTool extends AbstractBrushTool {
     public SmudgeTool() {
-        super('u', "Smudge", "smudge_tool_icon.png",
-                "click and drag to smudge. Click and Shift-click to smudge along a line.", Cursors.HAND);
-        drawStrategy = DrawStrategy.DIRECT;
+        super("Smudge", 'k', "smudge_tool_icon.png",
+                "<b>click and drag</b> to smudge. " +
+                        "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
+                Cursors.HAND);
+
+        drawDestination = DrawDestination.DIRECT;
     }
 
     private final RangeParam strengthParam = new RangeParam("Strength", 1, 60, 100);
@@ -50,8 +54,19 @@ public class SmudgeTool extends AbstractBrushTool {
     @Override
     protected void initBrushVariables() {
         smudgeBrush = new SmudgeBrush(getRadius(), CopyBrushType.HARD);
-        brush = new BrushAffectedArea(smudgeBrush);
-        brushAffectedArea = (BrushAffectedArea) brush;
+        affectedArea = new AffectedArea();
+        brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
+    }
+
+    @Override
+    protected void setLazyBrush() {
+        if (lazyMouseCB.isSelected()) {
+            brush = new AffectedAreaTracker(
+                    new LazyMouseBrush(smudgeBrush),
+                    affectedArea);
+        } else {
+            brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
+        }
     }
 
     @Override
@@ -63,10 +78,15 @@ public class SmudgeTool extends AbstractBrushTool {
         addSizeSelector();
         addStrengthSelector();
         addFingerPaintingSelector();
+
+        settingsPanel.addSeparator();
+
+        addLazyMouseDialogButton();
     }
 
     private void addStrengthSelector() {
-        SliderSpinner strengthSelector = new SliderSpinner(strengthParam, WEST, false);
+        SliderSpinner strengthSelector = new SliderSpinner(
+                strengthParam, WEST, false);
         settingsPanel.add(strengthSelector);
     }
 
@@ -79,24 +99,22 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        Drawable dr = ic.getComp().getActiveDrawable();
+    public void mousePressed(PMouseEvent e) {
+        Drawable dr = e.getComp().getActiveDrawableOrThrow();
 
         // We could also pass the full image and the translation
         // and the smudge brush could always adjust the last sampling point
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        double x = userDrag.getStartX();
-        double y = userDrag.getStartY();
-        if (!e.isShiftDown()) { // not a line-click
-            initStroke(sourceImage, x, y);
+        if (!withLine(e)) { // not a line-click
+            initStroke(sourceImage, e);
         }
-        super.mousePressed(e, ic);
+        super.mousePressed(e);
     }
 
-    private void initStroke(BufferedImage sourceImage, double x, double y) {
-        smudgeBrush.setSource(sourceImage, x, y, strengthParam.getValueAsPercentage());
+    private void initStroke(BufferedImage sourceImage, PPoint p) {
+        smudgeBrush.setupFirstPoint(sourceImage, p, strengthParam.getValueAsPercentage());
     }
 
     @Override
@@ -105,10 +123,10 @@ public class SmudgeTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
         super.prepareProgrammaticBrushStroke(dr, start);
 
         BufferedImage sourceImg = dr.getCanvasSizedSubImage();
-        initStroke(sourceImg, start.x, start.y);
+        initStroke(sourceImg, start);
     }
 }

@@ -57,14 +57,14 @@ public class AdjustmentLayer extends Layer {
         AdjustmentLayer d = new AdjustmentLayer(comp, duplicateName, filter);
 
         if (hasMask()) {
-            d.addMask(mask.duplicate(d));
+            d.addConfiguredMask(mask.duplicate(d));
         }
 
         return d;
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight, boolean progressiveBilinear) {
+    public void resize(int targetWidth, int targetHeight) {
         // do nothing
     }
 

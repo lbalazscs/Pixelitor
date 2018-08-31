@@ -30,44 +30,42 @@ public class SubtaskProgressTracker implements ProgressTracker {
      */
     private final double ratio;
 
-    private double progress;
+    // the progress in the super task
+    private double totalProgress;
 
     public SubtaskProgressTracker(double ratio, ProgressTracker superTask) {
         this.ratio = ratio;
         this.superTask = superTask;
-        progress = 0.0;
+        totalProgress = 0.0;
     }
 
     @Override
     public void unitDone() {
-        progress += ratio;
+        totalProgress += ratio;
         update();
     }
 
     @Override
     public void unitsDone(int units) {
-        progress += (units * ratio);
+        totalProgress += (units * ratio);
         update();
     }
 
     private void update() {
-        if (progress < 1.0) {
-            return; // nothing to do
+        if (totalProgress < 1.0) {
+            return; // nothing to do as we don't have yet a super work unit
         }
-        if (progress < 2.0) {
-            // we are between 1.0 and 2.0, so
-            // we can subtract one
-            progress -= 1.0;
+        if (totalProgress < 2.0) {
+            totalProgress -= 1.0;
             superTask.unitDone();
             return;
         }
-        // unlikely case: we have more than 2.0 progress
 
-        // as long as these are positive numbers,
+        // as these are positive numbers,
         // there is no need for Math.floor()
-        int doneUnits = (int) progress;
+        int doneUnits = (int) totalProgress;
 
-        progress -= doneUnits;
+        totalProgress -= doneUnits;
         superTask.unitsDone(doneUnits);
     }
 

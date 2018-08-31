@@ -17,6 +17,8 @@
 
 package pixelitor.utils;
 
+import java.awt.EventQueue;
+
 /**
  * An abstract superclass for progress tracking classes which
  * show progress information after a time threshold has been exceeded.
@@ -31,10 +33,12 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     private int lastPercent = 0;
 
     private boolean showingProgress = false;
+    private final boolean runningOnEDT;
 
     protected ThresholdProgressTracker(int numComputationUnits) {
         this.numComputationUnits = numComputationUnits;
         startTime = System.currentTimeMillis();
+        runningOnEDT = EventQueue.isDispatchThread();
     }
 
     @Override
@@ -53,7 +57,11 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         if (!showingProgress) {
             double millis = System.currentTimeMillis() - startTime;
             if (millis > THRESHOLD_MILLIS) {
-                startProgressTracking();
+                if (runningOnEDT) {
+                    startProgressTracking();
+                } else {
+                    EventQueue.invokeLater(this::startProgressTracking);
+                }
                 showingProgress = true;
             }
         }
@@ -61,7 +69,11 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         if (showingProgress) {
             int percent = ((int) (finished * 100.0 / numComputationUnits));
             if (percent > lastPercent) {
-                updateProgressTracking(percent);
+                if (runningOnEDT) {
+                    updateProgressTracking(percent);
+                } else {
+                    EventQueue.invokeLater(() -> updateProgressTracking(percent));
+                }
                 lastPercent = percent;
             }
         }
@@ -70,7 +82,11 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
     @Override
     public void finish() {
         if (showingProgress) {
-            finishProgressTracking();
+            if (runningOnEDT) {
+                finishProgressTracking();
+            } else {
+                EventQueue.invokeLater(this::finishProgressTracking);
+            }
             showingProgress = false;
             lastPercent = 0;
         }

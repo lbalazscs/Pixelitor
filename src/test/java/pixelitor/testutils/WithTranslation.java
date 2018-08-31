@@ -27,7 +27,7 @@ import pixelitor.layers.ContentLayer;
 public enum WithTranslation {
     NO(0, 0) {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
             // do nothing
         }
 
@@ -37,12 +37,12 @@ public enum WithTranslation {
         }
 
         @Override
-        public void init(ContentLayer layer) {
+        public void setupFor(ContentLayer layer) {
             // do nothing
         }
     }, YES(-4, -4) {
         @Override
-        public void init(Composition comp) {
+        public void setupFor(Composition comp) {
             TestHelper.setStandardTestTranslationToAllLayers(comp, this);
         }
 
@@ -53,7 +53,7 @@ public enum WithTranslation {
         }
 
         @Override
-        public void init(ContentLayer layer) {
+        public void setupFor(ContentLayer layer) {
             layer.startMovement();
             layer.moveWhileDragging(-2, -2);
             layer.endMovement();
@@ -68,9 +68,9 @@ public enum WithTranslation {
         this.expectedTY = expectedTY;
     }
 
-    public abstract void init(Composition comp);
+    public abstract void setupFor(Composition comp);
 
-    public abstract void init(ContentLayer layer);
+    public abstract void setupFor(ContentLayer layer);
 
     public abstract void moveLayer(Composition comp);
 

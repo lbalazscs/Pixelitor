@@ -41,8 +41,6 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
         super.undo();
 
         layer.setVisible(!newVisibility, false);
-
-        History.notifyMenus(this);
     }
 
     @Override
@@ -50,8 +48,6 @@ public class LayerVisibilityChangeEdit extends PixelitorEdit {
         super.redo();
 
         layer.setVisible(newVisibility, false);
-
-        History.notifyMenus(this);
     }
 
     @Override

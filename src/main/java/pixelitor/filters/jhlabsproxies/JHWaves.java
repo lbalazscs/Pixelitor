@@ -21,7 +21,6 @@ import com.jhlabs.image.RippleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -44,14 +43,14 @@ public class JHWaves extends ParametrizedFilter {
     public JHWaves() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 wavelengthParam.withAdjustedRange(0.2),
                 amplitudeParam.withAdjustedRange(0.2),
                 waveType,
                 phaseParam,
                 edgeAction,
                 interpolation
-        ));
+        );
     }
 
     @Override

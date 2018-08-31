@@ -17,7 +17,7 @@
 
 package pixelitor.history;
 
-import pixelitor.utils.IconUtils;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -39,8 +39,8 @@ public class HistoryPanel extends JPanel {
         add(new JScrollPane(historyList), BorderLayout.CENTER);
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        Icon undoIcon = IconUtils.getUndoIcon();
-        Icon redoIcon = IconUtils.getRedoIcon();
+        Icon undoIcon = Icons.getUndoIcon();
+        Icon redoIcon = Icons.getRedoIcon();
 
         undoButton = createButton(undoIcon, "undo",
                 "AbstractUndoableEdit.undoText", History.UNDO_ACTION);

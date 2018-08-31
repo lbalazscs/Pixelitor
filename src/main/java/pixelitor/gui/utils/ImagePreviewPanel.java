@@ -17,8 +17,8 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.io.FileExtensionUtils;
-import pixelitor.utils.ImageUtils;
+import pixelitor.io.FileUtils;
+import pixelitor.io.TrackedIO;
 import pixelitor.utils.JProgressBarTracker;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressPanel;
@@ -75,7 +75,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         }
 
         String filePath = file.getAbsolutePath();
-        if (FileExtensionUtils.hasSupportedInputExt(file)) {
+        if (FileUtils.hasSupportedInputExt(file)) {
             createThumbImage(file, filePath);
             repaint();
         }
@@ -93,7 +93,7 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             int availableHeight = getHeight();
 
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
-            thumbInfo = ImageUtils.readSubsampledThumb(file, availableWidth, availableHeight, pt);
+            thumbInfo = TrackedIO.readSubsampledThumb(file, availableWidth, availableHeight, pt);
             thumbsCache.put(filePath, thumbInfo);
         } catch (Exception ex) {
             Messages.showException(ex);

@@ -17,9 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.ImageComponent;
-
-import java.awt.event.MouseEvent;
+import pixelitor.tools.util.PMouseEvent;
 
 /**
  * Can be used to handle the mouse events instead of the current tool.
@@ -35,44 +33,44 @@ public abstract class ToolHandler {
         successor = handler;
     }
 
-    public void handleMousePressed(MouseEvent e, ImageComponent ic) {
-        if (mousePressed(e, ic)) {
+    public void handleMousePressed(PMouseEvent e) {
+        if (mousePressed(e)) {
             return;
         }
 
         // forwards the mouse event to the next handler
-        successor.handleMousePressed(e, ic);
+        successor.handleMousePressed(e);
     }
 
     /**
      * Returns true if the event was handled and it should
      * not be forwarded to the next handler
      */
-    abstract boolean mousePressed(MouseEvent e, ImageComponent ic);
+    abstract boolean mousePressed(PMouseEvent e);
 
-    public void handleMouseDragged(MouseEvent e, ImageComponent ic) {
-        if (mouseDragged(e, ic)) {
+    public void handleMouseDragged(PMouseEvent e) {
+        if (mouseDragged(e)) {
             return;
         }
-        successor.handleMouseDragged(e, ic);
+        successor.handleMouseDragged(e);
     }
 
     /**
      * Returns true if the event was handled and it should
      * not be forwarded to the next handler
      */
-    abstract boolean mouseDragged(MouseEvent e, ImageComponent ic);
+    abstract boolean mouseDragged(PMouseEvent e);
 
-    public void handleMouseReleased(MouseEvent e, ImageComponent ic) {
-        if (mouseReleased(e, ic)) {
+    public void handleMouseReleased(PMouseEvent e) {
+        if (mouseReleased(e)) {
             return;
         }
-        successor.handleMouseReleased(e, ic);
+        successor.handleMouseReleased(e);
     }
 
     /**
      * Returns true if the event was handled and it should
      * not be forwarded to the next handler
      */
-    abstract boolean mouseReleased(MouseEvent e, ImageComponent ic);
+    abstract boolean mouseReleased(PMouseEvent e);
 }

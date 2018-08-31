@@ -19,18 +19,20 @@ package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
-import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.OKDialog;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.brushes.AffectedArea;
 import pixelitor.tools.brushes.Brush;
-import pixelitor.tools.brushes.BrushAffectedArea;
+import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SymmetryBrush;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.PPoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -38,9 +40,8 @@ import javax.swing.*;
 import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.GridBagLayout;
 import java.awt.Shape;
-import java.awt.event.MouseEvent;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
@@ -48,12 +49,13 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
+import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
- * Abstract superclass for tools like brush, erase, clone.
+ * Abstract base class for all brush-like tools.
  */
-public abstract class AbstractBrushTool extends Tool implements ActiveImageChangeListener {
+public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
@@ -61,25 +63,35 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     private boolean respectSelection = true; // false while tracing a selection
 
     private JComboBox<BrushType> typeSelector;
+    protected JCheckBox lazyMouseCB;
+    private JDialog lazyMouseDialog;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius", MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
+    private final RangeParam brushRadiusParam = new RangeParam("Radius",
+            MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
-    private final EnumComboBoxModel<Symmetry> symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
+    private final EnumComboBoxModel<Symmetry> symmetryModel
+            = new EnumComboBoxModel<>(Symmetry.class);
 
     protected Brush brush;
     private SymmetryBrush symmetryBrush;
-    protected BrushAffectedArea brushAffectedArea;
+    protected AffectedArea affectedArea;
 
-    private boolean firstMouseDown = true; // for the first click don't draw lines even if it is a shift-click
+    // for the first click it shouldn't draw lines even if it is a shift-click
+    // TODO this shouldn't be necessary, but there are problems
+    // (exception after a first shift-click) in the smudge brush without it
+    private boolean firstMouseDown = true;
+
     private JButton brushSettingsButton;
 
-    DrawStrategy drawStrategy;
+    private JDialog settingsDialog;
 
-    AbstractBrushTool(char activationKeyChar, String name, String iconFileName, String toolMessage, Cursor cursor) {
-        super(activationKeyChar, name, iconFileName, toolMessage,
-                cursor, true, true, false, ClipStrategy.IMAGE_ONLY);
-        ImageComponents.addActiveImageChangeListener(this);
+    DrawDestination drawDestination;
+
+    AbstractBrushTool(String name, char activationKeyChar,
+                      String iconFileName, String toolMessage, Cursor cursor) {
+        super(name, activationKeyChar, iconFileName, toolMessage,
+                cursor, true, true, ClipStrategy.CANVAS);
         initBrushVariables();
     }
 
@@ -87,25 +99,38 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         symmetryBrush = new SymmetryBrush(
                 this, BrushType.values()[0], getSymmetry(), getRadius());
         brush = symmetryBrush;
-        brushAffectedArea = symmetryBrush.getAffectedArea();
+        affectedArea = symmetryBrush.getAffectedArea();
+    }
+
+    // if initBrushVariables() is overridden,
+    // then this must also be overridden
+    protected void setLazyBrush() {
+        if (lazyMouseCB.isSelected()) {
+            // set the decorated brush
+            brush = new LazyMouseBrush(symmetryBrush);
+        } else {
+            // set the normal brush
+            brush = symmetryBrush;
+        }
     }
 
     protected void addTypeSelector() {
-        typeSelector = new JComboBox<>(BrushType.values());
-        settingsPanel.addWithLabel("Type:", typeSelector, "brushTypeSelector");
-        typeSelector.addActionListener(e -> {
-            closeToolDialog();
-
-            BrushType brushType = getBrushType();
-            symmetryBrush.brushTypeChanged(brushType, getRadius());
-
-            brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), FilterSetting.EnabledReason.APP_LOGIC);
-
-            brushSettingsButton.setEnabled(brushType.hasSettings());
-        });
+        BrushType[] brushTypes = BrushType.values();
+        typeSelector = new JComboBox<>(brushTypes);
+        settingsPanel.addWithLabel("Brush:", typeSelector, "brushTypeSelector");
+        typeSelector.addActionListener(e -> brushTypeChanged());
 
         // make sure all values are visible without a scrollbar
-        typeSelector.setMaximumRowCount(BrushType.values().length);
+        typeSelector.setMaximumRowCount(brushTypes.length);
+    }
+
+    private void brushTypeChanged() {
+        closeBrushSettingsDialog();
+
+        BrushType brushType = getBrushType();
+        symmetryBrush.brushTypeChanged(brushType, getRadius());
+        brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), APP_LOGIC);
+        brushSettingsButton.setEnabled(brushType.hasSettings());
     }
 
     protected void addSizeSelector() {
@@ -127,87 +152,138 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
                 e -> {
                     BrushType brushType = getBrushType();
                     JPanel p = brushType.getConfigPanel(this);
-                    toolDialog = new OKDialog(PixelitorWindow.getInstance(), p, "Brush Settings");
+                    settingsDialog = new DialogBuilder()
+                            .content(p)
+                            .title("Settings for the " + brushType.toString() + " Brush")
+                            .notModal()
+                            .withScrollbars()
+                            .okText("Close")
+                            .noCancelButton()
+                            .show();
                 });
 
         brushSettingsButton.setEnabled(false);
     }
 
-    @Override
-    public void mousePressed(MouseEvent e, ImageComponent ic) {
-        boolean withLine = withLine(e);
-        double x = userDrag.getStartX();
-        double y = userDrag.getStartY();
+    protected void addLazyMouseDialogButton() {
+        JButton button = new JButton("Lazy Mouse...");
+        button.addActionListener(e -> showLazyMouseDialog());
 
-        newMousePoint(ic.getComp().getActiveDrawable(), x, y, withLine);
+        settingsPanel.add(button);
+    }
+
+    private void showLazyMouseDialog() {
+        if (lazyMouseDialog != null) {
+            GUIUtils.showDialog(lazyMouseDialog);
+            return;
+        }
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        GridBagHelper gbh = new GridBagHelper(p);
+
+        boolean lazyMouseEnabledByDefault = false;
+        lazyMouseCB = new JCheckBox("", lazyMouseEnabledByDefault);
+        lazyMouseCB.addActionListener(e -> setLazyBrush());
+        gbh.addLabelWithControlNoStretch("Enabled:", lazyMouseCB);
+
+        RangeParam lazyMouseDist = LazyMouseBrush.createDistParam();
+        SliderSpinner distSlider = SliderSpinner.simpleFrom(lazyMouseDist);
+        distSlider.setName("distSlider");
+        distSlider.setEnabled(lazyMouseEnabledByDefault);
+        gbh.addLabelWithControl(lazyMouseDist.getName() + ":", distSlider);
+
+        RangeParam lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
+        SliderSpinner spacingSlider = SliderSpinner.simpleFrom(lazyMouseSpacing);
+        spacingSlider.setEnabled(lazyMouseEnabledByDefault);
+        spacingSlider.setName("spacingSlider");
+        gbh.addLabelWithControl(lazyMouseSpacing.getName() + ":", spacingSlider);
+
+        lazyMouseCB.addActionListener(e -> {
+            boolean enable = lazyMouseCB.isSelected();
+            distSlider.setEnabled(enable);
+            spacingSlider.setEnabled(enable);
+        });
+
+        lazyMouseDialog = new DialogBuilder()
+                .content(p)
+                .title("Lazy Mouse")
+                .notModal()
+                .willBeShownAgain()
+                .okText("Close")
+                .noCancelButton()
+                .show();
+    }
+
+    @Override
+    public void mousePressed(PMouseEvent e) {
+        boolean withLine = withLine(e);
         firstMouseDown = false;
 
+        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, withLine);
+
         if (withLine) {
-            brushAffectedArea.updateAffectedCoordinates(x, y);
+            affectedArea.updateWith(e);
         } else {
-            brushAffectedArea.initAffectedCoordinates(x, y);
+            affectedArea.initAt(e);
         }
     }
 
-    protected boolean withLine(MouseEvent e) {
+    protected boolean withLine(PMouseEvent e) {
+        // the first mousePressed event is not a line-connecting
+        // one, even if the shift key is down
         return !firstMouseDown && e.isShiftDown();
+//        return e.isShiftDown();
     }
 
     @Override
-    public void mouseDragged(MouseEvent e, ImageComponent ic) {
-        double x = userDrag.getEndX();
-        double y = userDrag.getEndY();
-
-        // at this point x and y are already scaled according to the zoom level
-        // (unlike e.getX(), e.getY())
-
-        newMousePoint(ic.getComp().getActiveDrawable(), x, y, false);
+    public void mouseDragged(PMouseEvent e) {
+        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
     }
 
     @Override
-    public void mouseReleased(MouseEvent e, ImageComponent ic) {
+    public void mouseReleased(PMouseEvent e) {
         if (graphics == null) {
             // we can get here if the mousePressed was an Alt-press, therefore
             // consumed by the color picker. Nothing was drawn, therefore
             // there is no need to save a backup, we can just return
-            // TODO is this true after all the refactorings?
             return;
         }
 
-        Composition comp = ic.getComp();
-        finishBrushStroke(comp.getActiveDrawable());
+        brush.finish();
+
+        Composition comp = e.getComp();
+        finishBrushStroke(comp.getActiveDrawableOrThrow());
     }
 
     private void finishBrushStroke(Drawable dr) {
-        int radius = getRadius();
-        ToolAffectedArea affectedArea = new ToolAffectedArea(dr,
-                brushAffectedArea.getRectangleAffectedByBrush(radius), false);
-        BufferedImage originalImage = drawStrategy.getOriginalImage(dr, this);
-        saveSubImageForUndo(originalImage, affectedArea);
+        BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
+        History.addToolArea(affectedArea.asRectangle(brush.getActualRadius()),
+                originalImage, dr,
+                false, getName());
 
         if (graphics != null) {
             graphics.dispose();
         }
         graphics = null;
 
-        drawStrategy.finishBrushStroke(dr);
+        drawDestination.finishBrushStroke(dr);
 
         dr.updateIconImage();
 
         dr.getComp().imageChanged(HISTOGRAM);
     }
 
-    public void drawBrushStrokeProgrammatically(Drawable dr, Point start, Point end) {
+    public void drawBrushStrokeProgrammatically(Drawable dr, PPoint start, PPoint end) {
         prepareProgrammaticBrushStroke(dr, start);
 
-        brush.onStrokeStart(start.x, start.y);
-        brush.onNewStrokePoint(end.x, end.y);
+        brush.startAt(start);
+        brush.continueTo(end);
 
         finishBrushStroke(dr);
     }
 
-    protected void prepareProgrammaticBrushStroke(Drawable dr, Point start) {
-        drawStrategy.prepareBrushStroke(dr);
+    protected void prepareProgrammaticBrushStroke(Drawable dr, PPoint start) {
+        drawDestination.prepareBrushStroke(dr);
         graphics = createGraphicsForNewBrushStroke(dr);
     }
 
@@ -217,10 +293,11 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     private Graphics2D createGraphicsForNewBrushStroke(Drawable dr) {
         Composition comp = dr.getComp();
         Composite composite = getComposite();
-        Graphics2D g = drawStrategy.createDrawGraphics(dr, composite);
+        Graphics2D g = drawDestination.createGraphics(dr, composite);
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initializeGraphics(g);
         if (respectSelection) {
-            comp.applySelectionClipping(g, null);
+            comp.applySelectionClipping(g);
         }
 
         brush.setTarget(comp, g);
@@ -242,19 +319,19 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     /**
      * Called from mousePressed, mouseDragged
      */
-    private void newMousePoint(Drawable dr, double x, double y, boolean connectClickWithLine) {
+    private void newMousePoint(Drawable dr, PPoint p, boolean lineConnect) {
         if (graphics == null) { // a new brush stroke has to be initialized
-            drawStrategy.prepareBrushStroke(dr);
+            drawDestination.prepareBrushStroke(dr);
             graphics = createGraphicsForNewBrushStroke(dr);
             graphics.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-            if (connectClickWithLine) {
-                brush.onNewStrokePoint(x, y);
+            if (lineConnect) {
+                brush.lineConnectTo(p);
             } else {
-                brush.onStrokeStart(x, y);
+                brush.startAt(p);
             }
         } else {
-            brush.onNewStrokePoint(x, y);
+            brush.continueTo(p);
         }
     }
 
@@ -263,9 +340,11 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         brush.setRadius(newRadius);
 
 //        int desiredImgSize = 2 * newRadius;
-//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(desiredImgSize, desiredImgSize);
+//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(
+//              desiredImgSize, desiredImgSize);
 //
-//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(cursorSize.width, cursorSize.height);
+//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(
+//              cursorSize.width, cursorSize.height);
 //        Graphics2D g = cursorImage.createGraphics();
 //        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 //        g.setColor(Color.RED);
@@ -290,11 +369,6 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     }
 
     @Override
-    public void newImageOpened(Composition comp) {
-        resetState();
-    }
-
-    @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
         resetState();
     }
@@ -311,11 +385,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         try {
             respectSelection = false;
 
-            drawStrategy.prepareBrushStroke(dr);
-
-            graphics = createGraphicsForNewBrushStroke(dr);
-
-            doTraceAfterSetup(shape);
+            doTrace(dr, shape);
 
             finishBrushStroke(dr);
         } finally {
@@ -323,32 +393,45 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
         }
     }
 
-    private void doTraceAfterSetup(Shape shape) {
-        int startingX = 0;
-        int startingY = 0;
+    private void doTrace(Drawable dr, Shape shape) {
+        ImageComponent ic = dr.getComp().getIC();
+        PPoint startingPoint = null;
 
-        PathIterator fpi = new FlatteningPathIterator(shape.getPathIterator(null), 1.0);
+        PathIterator fpi = new FlatteningPathIterator(
+                shape.getPathIterator(null), 1.0);
+
+//        MeasuredShape[] subpaths = MeasuredShape.getSubpaths(shape, 3.0f);
+//        GeneralPath gp = new GeneralPath();
+//        subpaths[0].writeShape(new GeneralPathWriter(gp));
+//        PathIterator fpi = gp.getPathIterator(null);
+
+        boolean brushStrokePrepared = false;
         float[] coords = new float[2];
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
-            int x = (int) coords[0];
-            int y = (int) coords[1];
-            brushAffectedArea.updateAffectedCoordinates(x, y);
+            double x = coords[0];
+            double y = coords[1];
+            PPoint p = PPoint.lazyFromIm(x, y, ic);
+            affectedArea.updateWith(p);
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    startingX = x;
-                    startingY = y;
-
-                    brush.onStrokeStart(x, y);
-
+                    // we can get here more than once if there are multiple subpaths!
+                    startingPoint = p;
+                    if (!brushStrokePrepared) {
+                        // TODO this should not be here, and it should not need
+                        // a point argument, but it is here because some hacks
+                        // in the clone and smudge tools need that point
+                        prepareProgrammaticBrushStroke(dr, p);
+                        brushStrokePrepared = true;
+                    }
+                    brush.startAt(p);
                     break;
                 case PathIterator.SEG_LINETO:
-                    brush.onNewStrokePoint(x, y);
-
+                    brush.continueTo(p);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    brush.onNewStrokePoint(startingX, startingY);
+                    brush.continueTo(startingPoint);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);
@@ -373,7 +456,8 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     protected int getRadius() {
         int value = brushRadiusParam.getValue();
 
-        // because of a JDK bug, sometimes it is possible to drag the slider to negative values
+        // because of a JDK bug (?), sometimes it is possible
+        // to drag the slider to negative values
         if (value < MIN_BRUSH_RADIUS) {
             value = MIN_BRUSH_RADIUS;
             brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
@@ -383,7 +467,7 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
     }
 
     @Override
-    protected boolean doColorPickerForwarding() {
+    public boolean doColorPickerForwarding() {
         return true;
     }
 
@@ -399,6 +483,40 @@ public abstract class AbstractBrushTool extends Tool implements ActiveImageChang
 
     private BrushType getBrushType() {
         return (BrushType) typeSelector.getSelectedItem();
+    }
+
+    // TODO indicate the size of the brush
+//    @Override
+//    public void paintOverImage(Graphics2D g2, Canvas canvas,
+//                               ImageComponent ic,
+//                               AffineTransform componentTransform,
+//                               AffineTransform imageTransform) {
+//        if(userDrag != null) {
+//            int x = userDrag.getCoEndX();
+//            int y = userDrag.getCoEndY();
+//            double radius = getRadius() * ic.getViewScale();
+//            double diameter = 2 * radius;
+//            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
+//                  diameter, diameter);
+//            g2.setStroke(stroke3);
+//            g2.setColor(Color.BLACK);
+//            g2.draw(shape);
+//            g2.setStroke(stroke1);
+//            g2.setColor(Color.WHITE);
+//            g2.draw(shape);
+//        }
+//    }
+//    private static final Stroke stroke3 = new BasicStroke(3);
+//    private static final Stroke stroke1 = new BasicStroke(1);
+
+    @Override
+    protected void closeToolDialogs() {
+        closeBrushSettingsDialog();
+        GUIUtils.closeDialog(lazyMouseDialog, false);
+    }
+
+    private void closeBrushSettingsDialog() {
+        GUIUtils.closeDialog(settingsDialog, true);
     }
 
     @Override

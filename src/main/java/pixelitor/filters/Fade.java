@@ -18,7 +18,6 @@
 package pixelitor.filters;
 
 import pixelitor.Composition;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.ImageComponents;
@@ -39,14 +38,10 @@ public class Fade extends ParametrizedFilter {
     );
 //    private BlendingModeParam blendingModeParam = new BlendingModeParam(BlendingMode.values());
 
-
     public Fade() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
-                opacityParam
-//                blendingModeParam
-        ));
+        setParams(opacityParam);
     }
 
     @Override
@@ -55,7 +50,7 @@ public class Fade extends ParametrizedFilter {
         assert History.canFade();
 
         BufferedImage previous = ImageComponents.getActiveComp()
-                .map(Composition::getActiveDrawable)
+                .flatMap(Composition::getActiveDrawable)
                 .flatMap(History::getPreviousEditForFade)
                 .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
                 .getBackupImage();
@@ -74,7 +69,8 @@ public class Fade extends ParametrizedFilter {
         opacityParam.setValue(newOpacity);
     }
 
-    public static BufferedImage fade(BufferedImage before, BufferedImage after, BufferedImage dest, RangeParam opacity) {
+    public static BufferedImage fade(BufferedImage before, BufferedImage after,
+                                     BufferedImage dest, RangeParam opacity) {
         if (opacity.getValue() == 100) {
             return after;
         }

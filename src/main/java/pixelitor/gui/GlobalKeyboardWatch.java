@@ -18,17 +18,30 @@
 package pixelitor.gui;
 
 import pixelitor.menus.view.ShowHideAllAction;
-import pixelitor.tools.ArrowKey;
-import pixelitor.tools.KeyboardObserver;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gui.ToolButton;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.KeyListener;
+import pixelitor.utils.Keys;
+import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.test.Events;
 
 import javax.swing.*;
 import java.awt.AWTEvent;
+import java.awt.AWTKeyStroke;
+import java.awt.Component;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
+import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
 
 /**
  * A global listener for keyboard events
@@ -37,14 +50,34 @@ public class GlobalKeyboardWatch {
     private static boolean spaceDown = false;
     private static boolean dialogActive = false;
     private static JComponent alwaysVisibleComponent;
-    private static KeyboardObserver observer;
+    private static KeyListener keyListener;
+
+    private static final List<MappedKey> mappedKeys = new ArrayList<>();
+
+    private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Tools.increaseActiveBrushSize();
+        }
+    };
+
+    private static final Action DECREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Tools.decreaseActiveBrushSize();
+        }
+    };
 
     private GlobalKeyboardWatch() {
+        // do not instantiate: only static utility methods
     }
 
     public static void init() {
-        // tab is the focus traversal key, it must be handled before it gets consumed
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+        // we want to use the tab key as "hide all", but
+        // tab is the focus traversal key, it must be
+        // handled before it gets consumed
+        KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        keyboardFocusManager.addKeyEventDispatcher(e -> {
             int id = e.getID();
             if (id == KeyEvent.KEY_PRESSED) {
                 keyPressed(e);
@@ -53,19 +86,33 @@ public class GlobalKeyboardWatch {
             }
             return false;
         });
+
+        // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
+        // so that they can be used to switch between tabs/internal frames
+        Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
+                .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
+        forwardKeys = new HashSet<>(forwardKeys); // make modifiable
+        forwardKeys.remove(Keys.CTRL_TAB);
+        keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
+
+        Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
+                .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
+        backwardKeys = new HashSet<>(backwardKeys); // make modifiable
+        backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
+        keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
     }
 
     private static void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_TAB:
-                if (!dialogActive) {
+                if (!dialogActive && !e.isControlDown()) {
                     ShowHideAllAction.INSTANCE.actionPerformed(null);
                 }
                 break;
             case KeyEvent.VK_SPACE:
                 if (!dialogActive) {
-                    observer.spacePressed();
+                    keyListener.spacePressed();
                     spaceDown = true;
                     e.consume();
                 }
@@ -76,41 +123,41 @@ public class GlobalKeyboardWatch {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (!dialogActive && observer.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_ESCAPE:
                 if (!dialogActive) {
-                    observer.escPressed();
+                    keyListener.escPressed();
                 }
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    observer.altPressed();
+                    keyListener.altPressed();
                 }
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    observer.shiftPressed();
+                    keyListener.shiftPressed();
                 }
                 break;
         }
@@ -120,17 +167,17 @@ public class GlobalKeyboardWatch {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_SPACE:
-                observer.spaceReleased();
+                keyListener.spaceReleased();
                 spaceDown = false;
                 break;
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
-                    observer.altReleased();
+                    keyListener.altReleased();
                 }
                 break;
             case KeyEvent.VK_SHIFT:
                 if (!dialogActive) {
-                    observer.shiftReleased();
+                    keyListener.shiftReleased();
                 }
                 break;
         }
@@ -138,6 +185,11 @@ public class GlobalKeyboardWatch {
 
     public static boolean isSpaceDown() {
         return spaceDown;
+    }
+
+    @VisibleForTesting
+    public static void setSpaceDown(boolean spaceDown) {
+        GlobalKeyboardWatch.spaceDown = spaceDown;
     }
 
     /**
@@ -152,74 +204,96 @@ public class GlobalKeyboardWatch {
         GlobalKeyboardWatch.alwaysVisibleComponent = alwaysVisibleComponent;
     }
 
-    public static void addKeyboardShortCut(char activationChar, boolean caseInsensitive, String actionMapKey, Action action) {
-        InputMap inputMap = alwaysVisibleComponent.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    public static void add(MappedKey key) {
+        // since the "always visible component" can change, we only
+        // store the keys, and re-register them after every change
+        mappedKeys.add(key);
+    }
 
-        if (caseInsensitive) {
-            char activationLC = Character.toLowerCase(activationChar);
-            char activationUC = Character.toUpperCase(activationChar);
+    public static void registerKeysOnAlwaysVisibleComponent() {
+        InputMap inputMap = alwaysVisibleComponent.getInputMap(
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = alwaysVisibleComponent.getActionMap();
 
-            inputMap.put(KeyStroke.getKeyStroke(activationLC), actionMapKey);
-            inputMap.put(KeyStroke.getKeyStroke(activationUC), actionMapKey);
-        } else {
-            inputMap.put(KeyStroke.getKeyStroke(activationChar), actionMapKey);
+        for (MappedKey key : mappedKeys) {
+            key.registerOn(inputMap, actionMap);
+        }
+    }
+
+    public static void addBrushSizeActions() {
+        GlobalKeyboardWatch.add(
+                MappedKey.fromChar(']', false,
+                        "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
+        GlobalKeyboardWatch.add(
+                MappedKey.fromChar('[', false,
+                        "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
+    }
+
+    public static void registerDebugMouseWatching(boolean postEvents) {
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            MouseEvent e = (MouseEvent) event;
+            String componentDescr = getComponentDescription(e);
+            String msg = null;
+            if (e.getID() == MouseEvent.MOUSE_CLICKED) {
+                msg = "CLICKED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", click count = " + e.getClickCount()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+                msg = "DRAGGED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
+                msg = "PRESSED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
+                msg = "RELEASED"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
+                msg = "WHEEL"
+                        + " x = " + e.getX() + ", y = " + e.getY()
+                        + ", comp = " + componentDescr;
+            }
+            if (msg != null) {
+                if (e.isShiftDown()) {
+                    msg = "shift! " + msg;
+                }
+                if (e.isAltDown()) {
+                    msg = "alt! " + msg;
+                }
+                if (e.isControlDown()) {
+                    msg = "ctrl! " + msg;
+                }
+                if (e.isPopupTrigger()) {
+                    msg = "popup! " + msg;
+                }
+                if (postEvents) {
+                    Events.postMouseEvent(msg);
+                } else {
+                    System.out.println(msg);
+                }
+            }
+        }, AWTEvent.MOUSE_EVENT_MASK
+                | AWTEvent.MOUSE_MOTION_EVENT_MASK
+                | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+    }
+
+    private static String getComponentDescription(MouseEvent e) {
+        Component c = e.getComponent();
+        String descr = c.getClass().getSimpleName();
+        if (c instanceof ImageComponent) {
+            descr += "(name = " + c.getName() + ")";
+        } else if (c instanceof ToolButton) {
+            ToolButton b = (ToolButton) c;
+            descr += "(name = " + b.getTool().getName() + ")";
         }
 
-        alwaysVisibleComponent.getActionMap().put(actionMapKey, action);
+        return descr;
     }
 
-    public static void addKeyboardShortCut(KeyStroke keyStroke, String actionMapKey, Action action) {
-        InputMap inputMap = alwaysVisibleComponent.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(keyStroke, actionMapKey);
-        alwaysVisibleComponent.getActionMap().put(actionMapKey, action);
-    }
-
-    public static void registerBrushSizeActions() {
-        Action increaseActiveBrushSizeAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Tools.increaseActiveBrushSize();
-            }
-        };
-
-        Action decreaseActiveBrushSizeAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Tools.decreaseActiveBrushSize();
-            }
-        };
-
-        GlobalKeyboardWatch.addKeyboardShortCut(']', false, "increment", increaseActiveBrushSizeAction);
-        GlobalKeyboardWatch.addKeyboardShortCut('[', false, "decrement", decreaseActiveBrushSizeAction);
-    }
-
-    public static void registerDebugMouseWatching() {
-        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
-            MouseEvent m = (MouseEvent) event;
-            String compClass = m.getComponent().getClass().getName();
-            if (m.getID() == MouseEvent.MOUSE_CLICKED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_CLICKED x = " + m.getX() + ", y = " + m.getY() + ", click count = " + m.getClickCount() + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_DRAGGED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_DRAGGED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_PRESSED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_PRESSED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
-            } else if (m.getID() == MouseEvent.MOUSE_RELEASED) {
-                System.out.println("GlobalKeyboardWatch:MOUSE_RELEASED x = " + m.getX() + ", y = " + m.getY() + ", comp class = " + compClass);
-            }
-        }, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
-    }
-
-    // TODO this kind of global listening might be better
-//    public static void registerMouseWheelWatching() {
-//        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-//            @Override
-//            public void eventDispatched(AWTEvent e) {
-//            }
-//        }, AWTEvent.MOUSE_WHEEL_EVENT_MASK);
-//    }
-
-
-    public static void setObserver(KeyboardObserver observer) {
-        GlobalKeyboardWatch.observer = observer;
+    public static void setKeyListener(KeyListener keyListener) {
+        GlobalKeyboardWatch.keyListener = keyListener;
     }
 }

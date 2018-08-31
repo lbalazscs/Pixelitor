@@ -45,10 +45,8 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        layer.addMask(oldMask);
-        oldMode.activate(comp, layer);
-
-        History.notifyMenus(this);
+        layer.addConfiguredMask(oldMask);
+        oldMode.activate(comp, layer, "delete mask undone");
     }
 
     @Override
@@ -56,8 +54,6 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.redo();
 
         layer.deleteMask(false);
-
-        History.notifyMenus(this);
     }
 
     @Override

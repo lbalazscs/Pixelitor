@@ -22,7 +22,6 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -63,7 +62,9 @@ public class JHPlasma extends ParametrizedFilter {
     public JHPlasma() {
         super(ShowOriginal.NO);
 
-        setParamSet(new ParamSet(
+        type.setupEnableOtherIf(gradient,
+                v -> v.getValue() == GRADIENT_COLORS);
+        setParams(
                 turbulence,
                 type,
                 gradient
@@ -71,7 +72,7 @@ public class JHPlasma extends ParametrizedFilter {
             if (filter != null) {
                 filter.randomize();
             }
-        })));
+        }));
     }
 
     @Override

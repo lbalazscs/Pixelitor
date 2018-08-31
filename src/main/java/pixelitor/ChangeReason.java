@@ -27,7 +27,7 @@ public enum ChangeReason {
 
     // can't be called "PREVIEW", because it gets
     // confused with the ImageLayer's PREVIEW state
-    // because of the static imports...
+    // after static imports...
     PREVIEWING(false, true) {
 
     }, PERFORMANCE_TEST(false, false) {

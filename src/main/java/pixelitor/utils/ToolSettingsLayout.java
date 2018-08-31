@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Laszlo Balazs-Csiki
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,17 @@
 
 package pixelitor.utils;
 
+import pixelitor.tools.gui.ToolSettingsPanel;
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.LayoutManager;
 
 /**
- * Similar to a left-aligned FlowLayout, but
+ * The layout manager used in {@link ToolSettingsPanel}
+ *
+ * It is similar to a left-aligned FlowLayout, but
  * the components are centered vertically
  */
 public class ToolSettingsLayout implements LayoutManager {

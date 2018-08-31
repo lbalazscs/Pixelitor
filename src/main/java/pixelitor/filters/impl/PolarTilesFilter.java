@@ -49,12 +49,14 @@ public class PolarTilesFilter extends CenteredTransformFilter {
         }
 
         if (numADivisions > 0) {
-            double angleShift = FastMath.tan(randomShift + t + angle * numADivisions / 2) * curvature * (numADivisions / 4.0) / r;
+            double tan = FastMath.tan(randomShift + t + angle * numADivisions / 2);
+            double angleShift = tan * curvature * (numADivisions / 4.0) / r;
             angle += angleShift;
         }
 
         if (numRDivisions > 0) {
-            double rShift = FastMath.tan(3 * randomShift + r / srcWidth * 2 * Math.PI * numRDivisions) * numRDivisions * curvature / 2;
+            double tan = FastMath.tan(3 * randomShift + r / srcWidth * 2 * Math.PI * numRDivisions);
+            double rShift = tan * numRDivisions * curvature / 2;
             r += rShift;
         }
 

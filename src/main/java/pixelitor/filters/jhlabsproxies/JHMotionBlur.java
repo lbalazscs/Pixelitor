@@ -27,7 +27,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -106,21 +105,21 @@ public class JHMotionBlur extends ParametrizedFilter {
         this.mode = mode;
 
         if(mode == MOTION_BLUR) {
-            setParamSet(new ParamSet(
+            setParams(
                     distance,
                     angle,
                     method,
                     hpSharpening
-            ));
+            );
 
         } else if(mode == SPIN_ZOOM_BLUR) {
-            setParamSet(new ParamSet(
+            setParams(
                     rotation,
                     zoom,
                     center,
                     method,
                     hpSharpening
-            ));
+            );
         } else {
             throw new IllegalStateException("should not get here");
         }

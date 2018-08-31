@@ -21,7 +21,6 @@ import com.jhlabs.image.SwimFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
@@ -47,7 +46,7 @@ public class JHUnderWater extends ParametrizedFilter {
     public JHUnderWater() {
         super(ShowOriginal.YES);
 
-        setParamSet(new ParamSet(
+        setParams(
                 amount.withAdjustedRange(0.1),
                 scale.withAdjustedRange(0.3),
                 stretch,
@@ -55,7 +54,7 @@ public class JHUnderWater extends ParametrizedFilter {
                 time,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction()));
+        ).withAction(new ReseedNoiseFilterAction());
     }
 
     @Override

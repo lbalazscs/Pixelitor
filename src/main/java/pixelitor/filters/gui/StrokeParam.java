@@ -18,18 +18,18 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.OKDialog;
-import pixelitor.tools.ShapeType;
-import pixelitor.tools.StrokeType;
-import pixelitor.tools.shapestool.BasicStrokeCap;
-import pixelitor.tools.shapestool.BasicStrokeJoin;
-import pixelitor.tools.shapestool.StrokeSettingsPanel;
+import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.tools.shapes.BasicStrokeCap;
+import pixelitor.tools.shapes.BasicStrokeJoin;
+import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.shapes.StrokeSettingsPanel;
+import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.Stroke;
+import java.awt.Window;
 import java.util.Arrays;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -41,12 +41,13 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
     // controls in the Stroke Settings dialog
-    private final EnumParam<BasicStrokeCap> strokeCapParam = new EnumParam<>("", BasicStrokeCap.class);
-    private final EnumParam<BasicStrokeJoin> strokeJoinParam = new EnumParam<>("", BasicStrokeJoin.class);
-    private final EnumParam<StrokeType> strokeTypeParam = new EnumParam<>("", StrokeType.class);
-    private final EnumParam<ShapeType> shapeTypeParam = new EnumParam<>("", ShapeType.class);
+    private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam("");
+    private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam("");
+    private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam("");
+    private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam("");
     private final BooleanParam dashedParam = new BooleanParam("", false);
     private DefaultButton defaultButton;
+    private JComponent previewer;
 
     private final FilterParam[] allParams = {strokeWidthParam,
             strokeCapParam, strokeJoinParam,
@@ -60,11 +61,8 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
-        paramGUI = new ConfigureParamGUI(owner -> {
-            JDialog dialog = createSettingsDialogForFilter(owner);
-            GUIUtils.centerOnScreen(dialog);
-            return dialog;
-        }, defaultButton);
+        paramGUI = new ConfigureParamGUI(
+                this::createSettingsDialog, defaultButton);
 
         setParamGUIEnabledState();
         return (JComponent) paramGUI;
@@ -74,6 +72,9 @@ public class StrokeParam extends AbstractFilterParam {
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         ParamAdjustmentListener decoratedListener = () -> {
             updateDefaultButtonState();
+            if (previewer != null) {
+                previewer.repaint();
+            }
             listener.paramAdjusted();
         };
 
@@ -84,6 +85,7 @@ public class StrokeParam extends AbstractFilterParam {
         strokeCapParam.setAdjustmentListener(decoratedListener);
         strokeJoinParam.setAdjustmentListener(decoratedListener);
 
+        // decorated twice
         shapeTypeParam.setAdjustmentListener(() -> {
             ShapeType selectedItem = shapeTypeParam.getSelected();
             StrokeType.SHAPE.setShapeType(selectedItem);
@@ -102,22 +104,24 @@ public class StrokeParam extends AbstractFilterParam {
         return strokeTypeParam.getSelected();
     }
 
-    public JDialog createSettingsDialogForShapesTool() {
-        JFrame owner = PixelitorWindow.getInstance();
-        JPanel p = createStrokeSettingsPanel();
-        return new OKDialog(owner, p, "Stroke Settings", "Close");
+    public JDialog createSettingsDialog() {
+        return createSettingsDialog(PixelitorWindow.getInstance());
     }
 
-    private JDialog createSettingsDialogForFilter(JDialog owner) {
-        JPanel p = createStrokeSettingsPanel();
-        OKDialog d = new OKDialog(owner, "Stroke Settings", "Close");
-        d.setupGUI(p);
-        return d;
+    private JDialog createSettingsDialog(Window owner) {
+        return new DialogBuilder()
+                .owner(owner)
+                .title("Stroke Settings")
+                .notModal()
+                .content(createStrokeSettingsPanel())
+                .withScrollbars()
+                .noCancelButton()
+                .okText("Close")
+                .build();
     }
 
     private JPanel createStrokeSettingsPanel() {
-        return new StrokeSettingsPanel(strokeWidthParam, strokeCapParam,
-                strokeJoinParam, strokeTypeParam, dashedParam, shapeTypeParam);
+        return new StrokeSettingsPanel(this);
     }
 
     public Stroke createStroke() {
@@ -128,7 +132,7 @@ public class StrokeParam extends AbstractFilterParam {
             dashFloats = new float[]{2 * strokeWidth, 2 * strokeWidth};
         }
 
-        return getStrokeType().getStroke(
+        return getStrokeType().createStroke(
                 strokeWidth,
                 strokeCapParam.getSelected().getValue(),
                 strokeJoinParam.getSelected().getValue(),
@@ -173,16 +177,16 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void reset(boolean triggerAction) {
+    public void reset(boolean trigger) {
         for (FilterParam param : allParams) {
+            // trigger only once, later
             param.reset(false);
         }
-        if (triggerAction) {
+        if (trigger) {
             adjustmentListener.paramAdjusted();
+            // the default button state is updated
+            // in the decorated adjustment listener
         } else {
-            // this class updates the default button state
-            // simply by putting a decorator on the adjustment
-            // listeners, no this needs to be called here manually
             updateDefaultButtonState();
         }
     }
@@ -191,6 +195,34 @@ public class StrokeParam extends AbstractFilterParam {
         if (defaultButton != null) {
             defaultButton.updateIcon();
         }
+    }
+
+    public RangeParam getStrokeWidthParam() {
+        return strokeWidthParam;
+    }
+
+    public EnumParam<BasicStrokeCap> getStrokeCapParam() {
+        return strokeCapParam;
+    }
+
+    public EnumParam<BasicStrokeJoin> getStrokeJoinParam() {
+        return strokeJoinParam;
+    }
+
+    public EnumParam<StrokeType> getStrokeTypeParam() {
+        return strokeTypeParam;
+    }
+
+    public EnumParam<ShapeType> getShapeTypeParam() {
+        return shapeTypeParam;
+    }
+
+    public BooleanParam getDashedParam() {
+        return dashedParam;
+    }
+
+    public void setPreviewer(JComponent previewer) {
+        this.previewer = previewer;
     }
 
     public void addDebugNodeInfo(DebugNode node) {
