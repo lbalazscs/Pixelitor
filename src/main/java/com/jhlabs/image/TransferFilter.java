@@ -16,7 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.*;
 import java.awt.image.*;
 
 public abstract class TransferFilter extends PointFilter {
@@ -26,7 +25,6 @@ public abstract class TransferFilter extends PointFilter {
     
     public TransferFilter(String filterName) {
         super(filterName);
-//        canFilterIndexColorModel = true;
     }
 
     public int filterRGB(int x, int y, int rgb) {

@@ -16,9 +16,6 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.*;
-import java.awt.image.*;
-
 public class Curve {
     public float[] x;
     public float[] y;
@@ -31,18 +28,6 @@ public class Curve {
     public Curve( Curve curve ) {
         x = (float[])curve.x.clone();
         y = (float[])curve.y.clone();
-    }
-
-    public int findKnotPos( float kx) {
-
-        int numKnots = x.length;
-        for ( int i = 0; i < numKnots; i++ ) {
-            if (x[i] > kx ) {
-                return i;
-            }
-        }
-
-        return numKnots;
     }
 
     public int addKnot( float kx, float ky ) {
@@ -71,7 +56,19 @@ public class Curve {
         y = ny;
         return pos;
     }
-    
+
+    public int findKnotPos( float kx) {
+
+        int numKnots = x.length;
+        for ( int i = 0; i < numKnots; i++ ) {
+            if (x[i] > kx ) {
+                return i;
+            }
+        }
+
+        return numKnots;
+    }
+
     public void removeKnot( int n ) {
         int numKnots = x.length;
         if ( numKnots <= 2 )
@@ -118,9 +115,9 @@ public class Curve {
         ny[numKnots+1] = ny[numKnots];
 
         int[] table = new int[256];
-        for (int i = 0; i < 1024; i++) {
-            float f = i/1024.0f;
-            int x = (int)(255 * ImageMath.spline( f, nx.length, nx ) + 0.5f);
+        for (int i = 0; i < 2048; i++) {
+            float f = i/2048.0f;
+            int x = (int)(255 * ImageMath.splineClamped( f, nx.length, nx ) + 0.5f);
             int y = (int)(255 * ImageMath.spline( f, nx.length, ny ) + 0.5f);
             x = ImageMath.clamp( x, 0, 255 );
             y = ImageMath.clamp( y, 0, 255 );

@@ -538,6 +538,44 @@ public class ImageMath {
     }
 
     /**
+     * Compute a Catmull-Rom spline.
+     * @param x the input parameter
+     * @param numKnots the number of knots in the spline
+     * @param knots the array of knots
+     * @return the spline value
+     */
+    public static float splineClamped(float x, int numKnots, float[] knots) {
+        int span;
+        int numSpans = numKnots - 3;
+        float k0, k1, k2, k3;
+        float c0, c1, c2, c3;
+
+        if (numSpans < 1) {
+            throw new IllegalArgumentException("Too few knots in spline");
+        }
+
+        x = clamp(x, 0, 1) * numSpans;
+        span = (int) x;
+        if (span > numKnots - 4) {
+            span = numKnots - 4;
+        }
+        x -= span;
+
+        k0 = knots[span];
+        k1 = knots[span + 1];
+        k2 = knots[span + 2];
+        k3 = knots[span + 3];
+
+        c3 = m00 * k0 + m01 * k1 + m02 * k2 + m03 * k3;
+        c2 = m10 * k0 + m11 * k1 + m12 * k2 + m13 * k3;
+        c1 = m20 * k0 + m21 * k1 + m22 * k2 + m23 * k3;
+        c0 = m30 * k0 + m31 * k1 + m32 * k2 + m33 * k3;
+
+        float result = ((c3 * x + c2) * x + c1) * x + c0;
+        return result < k1 ? k1 : (result > k2 ? k2 : result);
+    }
+
+    /**
      * Compute a Catmull-Rom spline, but with variable knot spacing.
      *
      * @param x        the input parameter
