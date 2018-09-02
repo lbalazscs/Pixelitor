@@ -46,19 +46,19 @@ public class Gradient {
     private final GradientType type;
     private final CycleMethod cycleMethod;
     private final GradientColorType colorType;
-    private final boolean inverted;
+    private final boolean reverted;
     private final BlendingMode blendingMode;
     private final float opacity;
 
     public Gradient(ImDrag imDrag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
-                    boolean inverted, BlendingMode blendingMode, float opacity) {
+                    boolean reverted, BlendingMode blendingMode, float opacity) {
         assert !imDrag.isClick();
         this.imDrag = imDrag;
         this.type = type;
         this.cycleMethod = cycleMethod;
         this.colorType = colorType;
-        this.inverted = inverted;
+        this.reverted = reverted;
         this.blendingMode = blendingMode;
         this.opacity = opacity;
     }
@@ -83,8 +83,8 @@ public class Gradient {
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        Color startColor = colorType.getStartColor(inverted);
-        Color endColor = colorType.getEndColor(inverted);
+        Color startColor = colorType.getStartColor(reverted);
+        Color endColor = colorType.getEndColor(reverted);
         assert startColor != null;
         assert endColor != null;
         Color[] colors = {startColor, endColor};
@@ -122,8 +122,8 @@ public class Gradient {
         return colorType;
     }
 
-    public boolean isInverted() {
-        return inverted;
+    public boolean isReverted() {
+        return reverted;
     }
 
     public BlendingMode getBlendingMode() {

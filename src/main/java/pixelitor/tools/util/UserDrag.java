@@ -17,8 +17,8 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
@@ -36,10 +36,10 @@ public class UserDrag {
     private boolean dragging;
 
     // The coordinates in the component (mouse) space.
-    private int coStartX;
-    private int coEndX;
-    private int coStartY;
-    private int coEndY;
+    private double coStartX;
+    private double coEndX;
+    private double coStartY;
+    private double coEndY;
 
     // The coordinates in the image space.
     private double imStartX;
@@ -47,12 +47,12 @@ public class UserDrag {
     private double imEndX;
     private double imEndY;
 
-    private int prevCoEndX;
-    private int prevCoEndY;
+    private double prevCoEndX;
+    private double prevCoEndY;
 
     private boolean startAdjusted = false;
 
-    private ImageComponent ic;
+    private View view;
 
     private boolean constrainPoints = false;
     private boolean startFromCenter = false;
@@ -61,22 +61,22 @@ public class UserDrag {
     public UserDrag() {
     }
 
-    public void setStart(PMouseEvent e) {
-        assert e.getIC() != null;
+    public void setStart(PPoint e) {
+        assert e.getView() != null;
         assert ImageComponents.isActive(e.getIC());
 
-        this.ic = e.getIC();
+        this.view = e.getView();
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
-        imStartX = ic.componentXToImageSpace(coStartX);
-        imStartY = ic.componentYToImageSpace(coStartY);
+        imStartX = view.componentXToImageSpace(coStartX);
+        imStartY = view.componentYToImageSpace(coStartY);
     }
 
-    public void setEnd(PMouseEvent e) {
-        if (this.ic != e.getIC()) {
+    public void setEnd(PPoint e) {
+        if (this.view != e.getView()) {
             // in some exceptional situations it can happen that the
-            // ic changes without a mousePressed event, so simulate one
+            // view changes without a mousePressed event, so simulate one
             setStart(e);
         }
 
@@ -85,34 +85,34 @@ public class UserDrag {
 
         if (constrainPoints) {
             Point2D constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
-            coEndX = (int) constrainedEnd.getX();
-            coEndY = (int) constrainedEnd.getY();
+            coEndX = constrainedEnd.getX();
+            coEndY = constrainedEnd.getY();
         }
 
-        imEndX = ic.componentXToImageSpace(coEndX);
-        imEndY = ic.componentYToImageSpace(coEndY);
+        imEndX = view.componentXToImageSpace(coEndX);
+        imEndY = view.componentYToImageSpace(coEndY);
 
         dragging = true;
         startAdjusted = false;
     }
 
     // returns the start x coordinate in component space
-    public int getCoStartX() {
+    public double getCoStartX() {
         return coStartX;
     }
 
     // returns the start y coordinate in component space
-    public int getCoStartY() {
+    public double getCoStartY() {
         return coStartY;
     }
 
     // returns the end x coordinate in component space
-    public int getCoEndX() {
+    public double getCoEndX() {
         return coEndX;
     }
 
     // returns the end y coordinate in component space
-    public int getCoEndY() {
+    public double getCoEndY() {
         return coEndY;
     }
 
@@ -140,14 +140,14 @@ public class UserDrag {
     }
 
     public void adjustStartForSpaceDownDrag() {
-        int dx = coEndX - prevCoEndX;
-        int dy = coEndY - prevCoEndY;
+        double dx = coEndX - prevCoEndX;
+        double dy = coEndY - prevCoEndY;
 
         coStartX += dx;
         coStartY += dy;
 
-        imStartX = ic.componentXToImageSpace(coStartX);
-        imStartY = ic.componentYToImageSpace(coStartY);
+        imStartX = view.componentXToImageSpace(coStartX);
+        imStartY = view.componentYToImageSpace(coStartY);
 
         startAdjusted = true;
     }
@@ -165,11 +165,14 @@ public class UserDrag {
     }
 
     public Rectangle toCoRect() {
-        return new Rectangle(coStartX, coStartY, coEndX - coStartX, coEndY - coStartY);
+        // TODO keep double precision
+        return new Rectangle((int) coStartX, (int) coStartY,
+                (int) (coEndX - coStartX),
+                (int) (coEndY - coStartY));
     }
 
     public PRectangle toPosPRect() {
-        return PRectangle.positiveFromCo(toCoRect(), ic);
+        return PRectangle.positiveFromCo(toCoRect(), view);
     }
 
     public double calcImDist() {
@@ -179,8 +182,16 @@ public class UserDrag {
     }
 
     public double calcIntuitiveAngle() {
-        double angle = Math.atan2(coEndY - coStartY, coEndX - coStartX);
+        double angle = calcAngle();
         return Utils.atan2AngleToIntuitive(angle);
+    }
+
+    protected double calcAngle() {
+        return Math.atan2(coEndY - coStartY, coEndX - coStartX);
+    }
+
+    protected double calcReversedAngle() {
+        return Math.atan2(coStartY - coEndY, coStartX - coEndX);
     }
 
     public void displayWidthHeight(Graphics2D g) {
@@ -191,50 +202,50 @@ public class UserDrag {
 
         DragDisplay dd = new DragDisplay(g);
 
-        int widthY;
+        float widthY;
         if (imHeight >= 0) {
             // display the width info bellow the mouse
-            widthY = coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.ONE_LINER_BG_HEIGHT;
+            widthY = (float) (coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.ONE_LINER_BG_HEIGHT);
         } else {
             // display the width info above the mouse
-            widthY = coEndY - MOUSE_DISPLAY_DISTANCE;
+            widthY = (float) (coEndY - MOUSE_DISPLAY_DISTANCE);
         }
-        int widthX = coStartX + (coEndX - coStartX) / 2 - DragDisplay.BG_WIDTH / 2;
+        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - DragDisplay.BG_WIDTH / 2);
         dd.drawOneLine(widthInfo, widthX, widthY);
 
-        int heightX;
+        float heightX;
         if (imWidth >= 0) {
             // display the height info on the right side of the mouse
-            heightX = coEndX + MOUSE_DISPLAY_DISTANCE;
+            heightX = (float) (coEndX + MOUSE_DISPLAY_DISTANCE);
         } else {
             // display the height info on the left side of the mouse
-            heightX = coEndX - DragDisplay.BG_WIDTH - MOUSE_DISPLAY_DISTANCE;
+            heightX = (float) (coEndX - DragDisplay.BG_WIDTH - MOUSE_DISPLAY_DISTANCE);
         }
-        int heightY = coStartY + (coEndY - coStartY) / 2 + DragDisplay.ONE_LINER_BG_HEIGHT / 2;
+        float heightY = (float) (coStartY + (coEndY - coStartY) / 2.0f + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
         dd.drawOneLine(heightInfo, heightX, heightY);
 
         if (startAdjusted) {
             String xInfo = "x = " + (int) imStartX + " px";
             String yInfo = "y = " + (int) imStartY + " px";
-            int startInfoX;
+            float startInfoX;
             // can be smaller because of the rounded rectangle
             // and because it is at a distance in both dimensions
             int mouseDist = MOUSE_DISPLAY_DISTANCE / 2;
             if (imWidth >= 0) {
                 // display the start info to the left of the start
-                startInfoX = coStartX - DragDisplay.BG_WIDTH - mouseDist;
+                startInfoX = (float) (coStartX - DragDisplay.BG_WIDTH - mouseDist);
             } else {
                 // display the start info to the right of the start
-                startInfoX = coStartX + mouseDist;
+                startInfoX = (float) (coStartX + mouseDist);
             }
 
-            int startInfoY;
+            float startInfoY;
             if (imHeight >= 0) {
                 // display the start info info above the start
-                startInfoY = this.coStartY - mouseDist;
+                startInfoY = (float) (this.coStartY - mouseDist);
             } else {
                 // display the start info info bellow the start
-                startInfoY = this.coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT;
+                startInfoY = (float) (this.coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
             }
 
             dd.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
@@ -260,8 +271,8 @@ public class UserDrag {
         }
 
         DragDisplay dd = new DragDisplay(g);
-        int x = coEndX + 30;
-        int y = coEndY - 20;
+        float x = (float) (coEndX + 30);
+        float y = (float) (coEndY - 20);
 
         dd.drawTwoLines(dxString, dyString, x, y);
 
@@ -277,10 +288,10 @@ public class UserDrag {
         int dragDistance = (int) calcImDist();
         String distInfo = "d = " + dragDistance + " px";
 
-        int coDx = coEndX - coStartX;
-        int coDy = coEndY - coStartY;
+        double coDx = coEndX - coStartX;
+        double coDy = coEndY - coStartY;
 
-        int x;
+        double x;
         boolean xDistIsSmall = false;
         if (coDx >= DragDisplay.BG_WIDTH) {
             // display it on the right side of the mouse
@@ -291,11 +302,11 @@ public class UserDrag {
         } else {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
-            x = coEndX - DragDisplay.BG_WIDTH / 2
-                    + (int) ((DragDisplay.BG_WIDTH / 2 + MOUSE_DISPLAY_DISTANCE)
+            x = coEndX - DragDisplay.BG_WIDTH / 2.0
+                    + ((DragDisplay.BG_WIDTH / 2.0 + MOUSE_DISPLAY_DISTANCE)
                     * coDx / (double) DragDisplay.BG_WIDTH);
         }
-        int y;
+        double y;
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
         if (xDistIsSmall) {
             // if the x distance is small, don't try to smoothly interpolate
@@ -310,11 +321,11 @@ public class UserDrag {
             y = coEndY + MOUSE_DISPLAY_DISTANCE + DragDisplay.TWO_LINER_BG_HEIGHT;
         } else {
             // display it so that it has no sudden jumps
-            y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2
-                    + (int) ((DragDisplay.TWO_LINER_BG_HEIGHT / 2 + MOUSE_DISPLAY_DISTANCE)
+            y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
+                    + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
                     * coDy / (double) DragDisplay.TWO_LINER_BG_HEIGHT);
         }
-        dd.drawTwoLines(angleInfo, distInfo, x, y);
+        dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 
         dd.finish();
     }

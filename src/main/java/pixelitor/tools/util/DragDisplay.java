@@ -24,6 +24,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.RoundRectangle2D;
 
 public class DragDisplay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
@@ -50,24 +51,26 @@ public class DragDisplay {
         g.setClip(null);
     }
 
-    private void drawBg(int x, int y, int height) {
+    private void drawBg(float x, float y, int height) {
         g.setComposite(BG_COMPOSITE);
         g.setColor(Color.BLACK);
-        g.fillRoundRect(x, y - height, BG_WIDTH, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+        RoundRectangle2D rect = new RoundRectangle2D.Float(
+                x, y - height, BG_WIDTH, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+        g.fill(rect);
         g.setColor(Color.WHITE);
-        g.drawRoundRect(x, y - height, BG_WIDTH, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+        g.draw(rect);
         g.setComposite(origComposite);
     }
 
     /**
      * x and y are the bottom left coordinates of the background rectangle
      */
-    public void drawOneLine(String s, int x, int y) {
+    public void drawOneLine(String s, float x, float y) {
         drawBg(x, y, ONE_LINER_BG_HEIGHT);
         g.drawString(s, x + BG_TEXT_HOR_DIST, y - BG_TEXT_VER_DIST);
     }
 
-    public void drawTwoLines(String s1, String s2, int x, int y) {
+    public void drawTwoLines(String s1, String s2, float x, float y) {
         drawBg(x, y, TWO_LINER_BG_HEIGHT);
         g.drawString(s1, x + BG_TEXT_HOR_DIST, y - 23 - BG_TEXT_VER_DIST);
         g.drawString(s2, x + BG_TEXT_HOR_DIST, y - BG_TEXT_VER_DIST);

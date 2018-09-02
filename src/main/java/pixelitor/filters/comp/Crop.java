@@ -21,6 +21,8 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.guides.Guides;
+import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -58,8 +60,18 @@ public class Crop implements CompAction {
             // empty selection, can't do anything useful
             return;
         }
+        Guides guides = comp.getGuides();
+        Guides newGuides = null;
+        if (guides != null) {
+            newGuides = guides.copyForCrop(imCropRect);
+            comp.setGuides(newGuides);
+        }
 
         MultiLayerBackup backup = new MultiLayerBackup(comp, "Crop", true);
+        if (guides != null) {
+            GuidesChangeEdit gce = new GuidesChangeEdit(comp, guides, newGuides);
+            backup.setGuidesChangeEdit(gce);
+        }
 
         if (selectionCrop) {
             assert comp.hasSelection();

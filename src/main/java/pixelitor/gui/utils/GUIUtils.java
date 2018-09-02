@@ -103,6 +103,11 @@ public final class GUIUtils {
 
     public static JPanel arrangeParamsInVerticalGridBag(Iterable<FilterParam> params) {
         JPanel p = new JPanel();
+        arrangeParamsInVerticalGridBag(p, params);
+        return p;
+    }
+
+    public static void arrangeParamsInVerticalGridBag(JPanel p, Iterable<FilterParam> params) {
         p.setLayout(new GridBagLayout());
 
         int row = 0;
@@ -121,7 +126,6 @@ public final class GUIUtils {
 
             row++;
         }
-        return p;
     }
 
     public static Container getTopContainer(Container c) {

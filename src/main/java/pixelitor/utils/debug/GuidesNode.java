@@ -15,30 +15,27 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.pen;
+package pixelitor.utils.debug;
 
-import pixelitor.gui.ImageComponent;
-import pixelitor.tools.util.PMouseEvent;
+import pixelitor.guides.Guides;
 
-import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
+import java.util.List;
 
-public interface PenToolMode {
-    void mousePressed(PMouseEvent e);
+public class GuidesNode extends DebugNode {
+    public GuidesNode(Guides guides) {
+        this("Guides", guides);
+    }
 
-    void mouseDragged(PMouseEvent e);
+    private GuidesNode(String name, Guides guides) {
+        super(name, guides);
 
-    void mouseReleased(PMouseEvent e);
-
-    // return true if needs repainting
-    boolean mouseMoved(MouseEvent e, ImageComponent ic);
-
-    void paint(Graphics2D g);
-
-    void setPath(Path path);
-
-    String getToolMessage();
-
-    PathBuilder BUILD = PathBuilder.INSTANCE;
-    PathEditor EDIT = PathEditor.INSTANCE;
+        List<Double> horizontals = guides.getHorizontals();
+        for (Double h : horizontals) {
+            addDouble("horizontal", h);
+        }
+        List<Double> verticals = guides.getVerticals();
+        for (Double v : verticals) {
+            addDouble("vertical", v);
+        }
+    }
 }

@@ -79,8 +79,8 @@ public abstract class Tool implements KeyListener {
         return false;
     }
 
-    public String getToolMessage() {
-        return toolMessage;
+    public String getStatusBarMessage() {
+        return "<html>" + name + " Tool: " + toolMessage;
     }
 
     public void mouseClicked(PMouseEvent e) {

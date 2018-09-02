@@ -134,7 +134,7 @@ public class AssertJSwingTest {
             test.robot.settings().delayBetweenEvents(ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            test.testExportLayerAnimation();
+            test.testPenTool();
         } else {
             TestingMode[] testingModes = getTestingModes();
             String target = getTarget();
@@ -313,6 +313,7 @@ public class AssertJSwingTest {
         testGradientTool();
         testPaintBucketTool();
         testColorPickerTool();
+        testPenTool();
         testShapesTool();
         testReload(); // file menu, but more practical to test it here
         testHandTool();
@@ -1121,7 +1122,7 @@ public class AssertJSwingTest {
     private void testAutoPaint() {
         log(0, "testing AutoPaint");
 
-        runWithSelectionAndTranslation(() -> testAutoPaintTask());
+        runWithSelectionAndTranslation(this::testAutoPaintTask);
 
         assert checkConsistency();
     }
@@ -1238,6 +1239,8 @@ public class AssertJSwingTest {
         runMenuCommand("Hide All");
         runMenuCommand("Show Hidden");
 
+        testGuides();
+
         if (ImageArea.getMode() == FRAMES) {
             runMenuCommand("Cascade");
             runMenuCommand("Tile");
@@ -1269,6 +1272,34 @@ public class AssertJSwingTest {
 
         runMenuCommand("Actual Pixels");
         assert zoomIs(ZoomLevel.Z100);
+    }
+
+    private void testGuides() {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+
+        runMenuCommand("Add Horizontal Guide...");
+        DialogFixture dialog = findDialogByTitle("Add Horizontal Guide");
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+        assertThat(comp.getGuides().getHorizontals()).containsExactly(0.5);
+        assertThat(comp.getGuides().getVerticals()).isEmpty();
+
+        runMenuCommand("Add Vertical Guide...");
+        dialog = findDialogByTitle("Add Vertical Guide");
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+        assertThat(comp.getGuides().getHorizontals()).containsExactly(0.5);
+        assertThat(comp.getGuides().getVerticals()).containsExactly(0.5);
+
+        runMenuCommand("Add Grid Guides...");
+        dialog = findDialogByTitle("Add Grid Guides");
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+        assertThat(comp.getGuides().getHorizontals()).containsExactly(0.25, 0.5, 0.75);
+        assertThat(comp.getGuides().getVerticals()).containsExactly(0.25, 0.5, 0.75);
+
+        runMenuCommand("Clear Guides");
+        assertThat(comp.getGuides()).isNull();
     }
 
     private void testHistory() {
@@ -1354,14 +1385,12 @@ public class AssertJSwingTest {
         testFilterWithDialog("Color Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Tritone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Color Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Dither...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Foreground Color");
         testNoDialogFilter("Background Color");
         testNoDialogFilter("Transparent");
         testFilterWithDialog("Color Wheel...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Four Color Gradient...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Starburst...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
         testFilterWithDialog("Box Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Focus...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
@@ -1419,10 +1448,14 @@ public class AssertJSwingTest {
         testFilterWithDialog("Voronoi Diagram...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Fractal Tree...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
 
+        testFilterWithDialog("Checker Pattern...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Starburst...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+
         testFilterWithDialog("Mystic Rose...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Lissajous Curve...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Spirograph...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Flower of Life...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Grid...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
         testFilterWithDialog("Crystallize...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
         testFilterWithDialog("Pointillize...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
@@ -1440,6 +1473,9 @@ public class AssertJSwingTest {
         testFilterWithDialog("Canny...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Drop Shadow...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("2D Transitions...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Striped Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Concentric Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
         testFilterWithDialog("Custom 3x3 Convolution...", Randomize.NO,
                 Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
@@ -1564,6 +1600,7 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
 
         afterFilterRunActions(nameWithoutDots);
+        dialog.requireNotVisible();
     }
 
     private void afterFilterRunActions(String filterName) {
@@ -1706,6 +1743,35 @@ public class AssertJSwingTest {
         assert checkConsistency();
     }
 
+    private void testPenTool() {
+        log(1, "testing the pen tool");
+
+        pw.toggleButton("Pen Tool Button").click();
+        pw.button("toSelectionButton").requireDisabled();
+
+        moveTo(getExtraX() + 200, 300);
+
+        dragTo(getExtraX() + 200, 500);
+        moveTo(getExtraX() + 300, 500);
+        dragTo(getExtraX() + 300, 300);
+
+        moveTo(getExtraX() + 200, 300);
+        click();
+
+        // should be closed already
+        ctrlClick();
+
+        pw.button("toSelectionButton").requireEnabled();
+        pw.button("toSelectionButton").click();
+
+        pw.button("toPathButton").requireEnabled();
+        pw.button("toPathButton").click();
+
+        // TODO edit mode, trace path etc.
+
+        assert checkConsistency();
+    }
+
     private void testPaintBucketTool() {
         log(1, "testing the paint bucket tool");
 
@@ -1742,10 +1808,10 @@ public class AssertJSwingTest {
                         continue;
                     }
                     pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
-                    pw.checkBox("gradientInvert").uncheck();
+                    pw.checkBox("gradientRevert").uncheck();
                     moveTo(extraX + 200, 200);
                     dragTo(extraX + 400, 400);
-                    pw.checkBox("gradientInvert").check();
+                    pw.checkBox("gradientRevert").check();
                     moveTo(extraX + 200, 200);
                     dragTo(extraX + 400, 400);
                 }
@@ -1772,6 +1838,7 @@ public class AssertJSwingTest {
         enableLazyMouse(false);
         testBrushStrokes();
 
+        // this freezes when running with coverage??
         enableLazyMouse(true);
         testBrushStrokes();
 
@@ -2508,6 +2575,13 @@ public class AssertJSwingTest {
         robot.releaseKey(VK_ALT);
     }
 
+    private void ctrlClick() {
+        robot.pressKey(VK_CONTROL);
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseKey(VK_CONTROL);
+    }
+
     private static void cleanOutputs() {
         try {
             Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
@@ -2579,7 +2653,7 @@ public class AssertJSwingTest {
             // draw a radial gradient
             pw.toggleButton("Gradient Tool Button").click();
             pw.comboBox("gradientTypeSelector").selectItem(GradientType.RADIAL.toString());
-            pw.checkBox("gradientInvert").check();
+            pw.checkBox("gradientRevert").check();
 
             ImageComponent ic = ImageComponents.getActiveIC();
             if (ic.getZoomLevel() != ZoomLevel.Z100) {
@@ -2733,6 +2807,15 @@ public class AssertJSwingTest {
                 .withTimeout(20, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
+
+        // wait even after the frame is shown to
+        // make sure that the image is also loaded
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        while (comp == null) {
+            System.out.println("AssertJSwingTest::setUp: waiting for the image to be loaded...");
+            Utils.sleep(1, SECONDS);
+            comp = ImageComponents.getActiveCompOrNull();
+        }
     }
 
     private void log(int indentLevel, String msg) {

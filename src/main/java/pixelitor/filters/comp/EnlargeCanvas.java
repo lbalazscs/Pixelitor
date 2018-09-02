@@ -23,6 +23,8 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.guides.Guides;
+import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -57,7 +59,19 @@ public class EnlargeCanvas implements CompAction {
     @Override
     public void process(Composition comp) {
         String editName = "Enlarge Canvas";
+
+        Guides guides = comp.getGuides();
+        Guides newGuides = null;
+        if (guides != null) {
+            newGuides = guides.copyForEnlargedCanvas(north, east, south, west);
+            comp.setGuides(newGuides);
+        }
+
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
+        if (guides != null) {
+            GuidesChangeEdit gce = new GuidesChangeEdit(comp, guides, newGuides);
+            backup.setGuidesChangeEdit(gce);
+        }
 
         comp.forEachLayer(this::processLayer);
 
@@ -67,6 +81,7 @@ public class EnlargeCanvas implements CompAction {
         }
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
+
         History.addEdit(edit);
 
         Canvas canvas = comp.getCanvas();

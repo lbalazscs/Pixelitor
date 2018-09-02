@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 
@@ -39,6 +40,8 @@ public class MultiLayerEdit extends PixelitorEdit {
     private TranslationEdit translationEdit;
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
+    private GuidesChangeEdit guidesChangeEdit;
+
     private final boolean undoable;
 
     public MultiLayerEdit(String name, Composition comp, MultiLayerBackup backup) {
@@ -52,19 +55,20 @@ public class MultiLayerEdit extends PixelitorEdit {
             undoable = false;
         }
 
-        if(undoable) {
+        if (undoable) {
             this.canvasChangeEdit = backup.getCanvasChangeEdit();
             this.translationEdit = backup.getTranslationEdit();
+            this.guidesChangeEdit = backup.getGuidesChangeEdit();
 
             BufferedImage maskImage = null;
             if (layer.hasMask()) {
                 maskImage = layer.getMask().getImage();
             }
-            if(layer instanceof ImageLayer) {
+            if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 BufferedImage layerImage = imageLayer.getImage();
                 imageEdit = backup.createImageEdit(layerImage, maskImage);
-            } else if(layer.hasMask()){
+            } else if (layer.hasMask()) {
                 // if we have a text layer with a mask, we can still
                 // create an ImageEdit for the mask
                 imageEdit = backup.createImageEditForMaskOnly(maskImage);
@@ -129,7 +133,7 @@ public class MultiLayerEdit extends PixelitorEdit {
     }
 
     private void doTheUndo() {
-        if(imageEdit != null) {
+        if (imageEdit != null) {
             imageEdit.undo();
         }
         if (translationEdit != null) {
@@ -147,10 +151,13 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (deselectEdit != null) {
             deselectEdit.undo();
         }
+        if (guidesChangeEdit != null) {
+            guidesChangeEdit.undo();
+        }
     }
 
     private void doTheRedo() {
-        if(imageEdit != null) {
+        if (imageEdit != null) {
             imageEdit.redo();
         }
         if (translationEdit != null) {
@@ -168,6 +175,9 @@ public class MultiLayerEdit extends PixelitorEdit {
         if (deselectEdit != null) {
             deselectEdit.redo();
         }
+        if (guidesChangeEdit != null) {
+            guidesChangeEdit.redo();
+        }
     }
 
     private void dumpState() {
@@ -176,8 +186,8 @@ public class MultiLayerEdit extends PixelitorEdit {
 
     private void updateGUI() {
         comp.imageChanged(FULL, true);
-        if(layer instanceof ImageLayer) {
-            ((ImageLayer)layer).updateIconImage();
+        if (layer instanceof ImageLayer) {
+            ((ImageLayer) layer).updateIconImage();
         }
         if (layer.hasMask()) {
             layer.getMask().updateIconImage();

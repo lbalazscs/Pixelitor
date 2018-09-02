@@ -20,6 +20,7 @@ package pixelitor.tools.util;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
@@ -35,32 +36,32 @@ import java.awt.geom.Line2D;
  * {@link ImageComponent} and the image zooming into account.
  */
 public abstract class PPoint {
-    ImageComponent ic;
+    View view;
 
     // All the coordinates are initialized in subclasses
     // coordinates in image space
     protected double imX;
     protected double imY;
     // coordinates in component (MouseEvent) space
-    protected int coX;
-    protected int coY;
+    protected double coX;
+    protected double coY;
 
-    protected PPoint(ImageComponent ic) {
-        assert ic != null;
-        this.ic = ic;
+    protected PPoint(View view) {
+        assert view != null;
+        this.view = view;
     }
 
     /**
      * Returns the x coordinate in component space
      */
-    public int getCoX() {
+    public double getCoX() {
         return coX;
     }
 
     /**
      * Returns the y coordinate in component space
      */
-    public int getCoY() {
+    public double getCoY() {
         return coY;
     }
 
@@ -79,19 +80,23 @@ public abstract class PPoint {
     }
 
     public ImageComponent getIC() {
-        return ic;
+        return (ImageComponent) view;
+    }
+
+    public View getView() {
+        return view;
     }
 
     public PPoint mirrorVertically(int compWidth) {
-        return new EagerImage(ic, compWidth - getImX(), getImY());
+        return new EagerImage(view, compWidth - getImX(), getImY());
     }
 
     public PPoint mirrorHorizontally(int compHeight) {
-        return new EagerImage(ic, getImX(), compHeight - getImY());
+        return new EagerImage(view, getImX(), compHeight - getImY());
     }
 
     public PPoint mirrorBoth(int compWidth, int compHeight) {
-        return new EagerImage(ic, compWidth - getImX(), compHeight - getImY());
+        return new EagerImage(view, compWidth - getImX(), compHeight - getImY());
     }
 
     public void drawLineTo(PPoint end, Graphics2D g) {
@@ -131,24 +136,24 @@ public abstract class PPoint {
         return Math.sqrt(coDistSq(other));
     }
 
-    public static PPoint lazyFromCo(int x, int y, ImageComponent ic) {
+    public static PPoint lazyFromCo(double x, double y, View ic) {
         return new Lazy(ic, x, y);
     }
 
-    public static PPoint eagerFromCo(int x, int y, ImageComponent ic) {
+    public static PPoint eagerFromCo(double x, double y, View ic) {
         return new Eager(ic, x, y);
     }
 
-    public static PPoint eagerFromIm(double imX, double imY, ImageComponent ic) {
+    public static PPoint eagerFromIm(double imX, double imY, View ic) {
         return new EagerImage(ic, imX, imY);
     }
 
-    public static PPoint lazyFromIm(double imX, double imY, ImageComponent ic) {
+    public static PPoint lazyFromIm(double imX, double imY, View ic) {
         return new LazyImage(ic, imX, imY);
     }
 
     public Composition getComp() {
-        return ic.getComp();
+        return ((ImageComponent) view).getComp();
     }
 
     /**
@@ -160,7 +165,7 @@ public abstract class PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public Lazy(ImageComponent ic, int x, int y) {
+        public Lazy(View ic, double x, double y) {
             super(ic);
             coX = x;
             coY = y;
@@ -170,7 +175,7 @@ public abstract class PPoint {
         @Override
         public double getImX() {
             if (!xConverted) {
-                imX = ic.componentXToImageSpace(coX);
+                imX = view.componentXToImageSpace(coX);
                 xConverted = true;
             }
             return imX;
@@ -179,7 +184,7 @@ public abstract class PPoint {
         @Override
         public double getImY() {
             if (!yConverted) {
-                imY = ic.componentYToImageSpace(coY);
+                imY = view.componentYToImageSpace(coY);
                 yConverted = true;
             }
             return imY;
@@ -191,7 +196,7 @@ public abstract class PPoint {
      * space coordinates to image space coordinates immediately
      */
     public static class Eager extends PPoint {
-        public Eager(ImageComponent ic, int x, int y) {
+        public Eager(View ic, double x, double y) {
             super(ic);
             coX = x;
             coY = y;
@@ -204,7 +209,7 @@ public abstract class PPoint {
      * A {@link PPoint} eagerly initialized with image-space coordinates
      */
     private static class EagerImage extends PPoint {
-        public EagerImage(ImageComponent ic, double imX, double imY) {
+        public EagerImage(View ic, double imX, double imY) {
             super(ic);
             this.imX = imX;
             this.imY = imY;
@@ -220,7 +225,7 @@ public abstract class PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public LazyImage(ImageComponent ic, double imX, double imY) {
+        public LazyImage(View ic, double imX, double imY) {
             super(ic);
             this.imX = imX;
             this.imY = imY;
@@ -228,18 +233,18 @@ public abstract class PPoint {
         }
 
         @Override
-        public int getCoX() {
+        public double getCoX() {
             if (!xConverted) {
-                this.coX = (int) ic.imageXToComponentSpace(imX);
+                this.coX = view.imageXToComponentSpace(imX);
                 xConverted = true;
             }
             return coX;
         }
 
         @Override
-        public int getCoY() {
+        public double getCoY() {
             if (!yConverted) {
-                this.coY = (int) ic.imageYToComponentSpace(imY);
+                this.coY = view.imageYToComponentSpace(imY);
                 yConverted = true;
             }
             return coY;

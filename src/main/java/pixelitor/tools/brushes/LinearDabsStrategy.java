@@ -85,7 +85,7 @@ public class LinearDabsStrategy implements DabsStrategy {
         for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
             x = prevX + t * dx;
             y = prevY + t * dy;
-            PPoint p = PPoint.eagerFromIm(x, y, end.getIC());
+            PPoint p = PPoint.eagerFromIm(x, y, end.getView());
 
             if(refreshBrushForEachDab) {
                 brush.setupBrushStamp(p);

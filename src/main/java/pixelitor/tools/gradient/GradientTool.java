@@ -66,7 +66,7 @@ public class GradientTool extends DragTool {
     private JComboBox<GradientColorType> colorTypeSelector;
     private JComboBox<GradientType> typeSelector;
     private JComboBox<String> cycleMethodSelector;
-    private JCheckBox invertCheckBox;
+    private JCheckBox revertCheckBox;
     private BlendingModePanel blendingModePanel;
 
     private Gradient lastGradient;
@@ -90,7 +90,7 @@ public class GradientTool extends DragTool {
         settingsPanel.addSeparator();
 
         addColorTypeSelector();
-        addInvertCheckBox();
+        addRevertCheckBox();
 
         settingsPanel.addSeparator();
 
@@ -120,10 +120,10 @@ public class GradientTool extends DragTool {
                 colorTypeSelector, "gradientColorTypeSelector");
     }
 
-    private void addInvertCheckBox() {
-        invertCheckBox = new JCheckBox();
-        invertCheckBox.addActionListener(e -> regenerateGradient(true));
-        settingsPanel.addWithLabel("Invert: ", invertCheckBox, "gradientInvert");
+    private void addRevertCheckBox() {
+        revertCheckBox = new JCheckBox();
+        revertCheckBox.addActionListener(e -> regenerateGradient(true));
+        settingsPanel.addWithLabel("Revert: ", revertCheckBox, "gradientRevert");
     }
 
     private void addBlendingModePanel() {
@@ -158,8 +158,8 @@ public class GradientTool extends DragTool {
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
         if (handles != null) {
             DraggablePoint handle = handles.handleWasHit(x, y);
             if (handle != null) {
@@ -177,8 +177,8 @@ public class GradientTool extends DragTool {
 
         if (activeHandle != null) {
             // draw the handles
-            int x = e.getCoX();
-            int y = e.getCoY();
+            double x = e.getCoX();
+            double y = e.getCoY();
             activeHandle.mouseDragged(x, y, e.isShiftDown());
         } else {
             // if we are dragging a new gradient from scratch,
@@ -196,8 +196,8 @@ public class GradientTool extends DragTool {
         }
         ImDrag imDrag;
         if (activeHandle != null) { // a handle was dragged
-            int x = e.getCoX();
-            int y = e.getCoY();
+            double x = e.getCoX();
+            double y = e.getCoY();
             activeHandle.mouseReleased(x, y, e.isShiftDown());
             if (!activeHandle.handleContains(x, y)) {
                 // we can get here if the handle has a
@@ -206,7 +206,7 @@ public class GradientTool extends DragTool {
                 activeHandle = null;
             }
 
-            imDrag = handles.toImDrag(e.getIC());
+            imDrag = handles.toImDrag(e.getView());
             if (imDrag.isClick()) {
                 return;
             }
@@ -214,7 +214,7 @@ public class GradientTool extends DragTool {
             imDrag = userDrag.toImDrag();
             handles = new GradientHandles(
                     userDrag.getCoStartX(), userDrag.getCoStartY(),
-                    userDrag.getCoEndX(), userDrag.getCoEndY(), e.getIC());
+                    userDrag.getCoEndX(), userDrag.getCoEndY(), e.getView());
         }
 
         Composition comp = e.getComp();
@@ -304,7 +304,7 @@ public class GradientTool extends DragTool {
     private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory) {
         Gradient gradient = new Gradient(imDrag,
                 getType(), getCycleType(), getGradientColorType(),
-                invertCheckBox.isSelected(),
+                revertCheckBox.isSelected(),
                 blendingModePanel.getBlendingMode(),
                 blendingModePanel.getOpacity());
 
@@ -400,7 +400,7 @@ public class GradientTool extends DragTool {
         typeSelector.setSelectedItem(gradient.getType());
         cycleMethodSelector.setSelectedItem(
                 cycleMethodAsString(gradient.getCycleMethod()));
-        invertCheckBox.setSelected(gradient.isInverted());
+        revertCheckBox.setSelected(gradient.isReverted());
         blendingModePanel.setBlendingMode(gradient.getBlendingMode());
         blendingModePanel.setOpacity(gradient.getOpacity());
 
@@ -420,7 +420,7 @@ public class GradientTool extends DragTool {
         node.addString("Type", getType().toString());
         node.addString("Cycling", getCycleType().toString());
         node.addQuotedString("Color", getGradientColorType().toString());
-        node.addBoolean("Invert", invertCheckBox.isSelected());
+        node.addBoolean("Invert", revertCheckBox.isSelected());
         node.addFloat("Opacity", blendingModePanel.getOpacity());
         node.addQuotedString("Blending Mode",
                 blendingModePanel.getBlendingMode().toString());

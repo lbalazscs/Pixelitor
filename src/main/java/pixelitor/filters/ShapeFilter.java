@@ -55,9 +55,10 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private static final int BG_TOOL = 4;
 
     private static final int FG_WHITE = 5;
-    private static final int FG_TOOL = 6;
-    private static final int FG_GRADIENT = 7;
-    private static final int FG_TRANSPARENT = 8;
+    private static final int FG_BLACK = 6;
+    private static final int FG_TOOL = 7;
+    private static final int FG_GRADIENT = 8;
+    private static final int FG_TRANSPARENT = 9;
 
     private static final Color DARK_GREEN = new Color(0, 120, 0);
     private static final Color PURPLE = new Color(155, 0, 155);
@@ -69,13 +70,14 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             new Value("Black", BG_BLACK),
             new Value("Original Image", BG_ORIGINAL),
             new Value("Transparent", BG_TRANSPARENT),
-            new Value("Tool Background", BG_TOOL),
+            new Value("Background Color", BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
     private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Value[]{
             new Value("White", FG_WHITE),
+            new Value("Black", FG_BLACK),
             new Value("Radial Gradient", FG_GRADIENT),
-            new Value("Tool Foreground", FG_TOOL),
+            new Value("Foreground Color", FG_TOOL),
             new Value("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 
@@ -128,6 +130,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         switch (fg) {
             case FG_WHITE:
                 g2.setColor(WHITE);
+                break;
+            case FG_BLACK:
+                g2.setColor(BLACK);
                 break;
             case FG_TOOL:
                 g2.setColor(getFGColor());

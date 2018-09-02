@@ -21,7 +21,6 @@ import com.bric.util.JVM;
 import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -146,21 +145,21 @@ public class CloneTool extends BlendingModeBrushTool {
         double y = e.getImY();
 
         if (e.isAltDown() || e.isRight()) {
-            setCloningSource(e.getIC(), x, y);
+            setCloningSource(e);
         } else {
             boolean notWithLine = !withLine(e);
 
             if (state == NO_SOURCE) {
-                handleUndefinedSource(e.getIC(), x, y);
+                handleUndefinedSource(e);
                 return;
             }
-            startNewCloningStroke(x, y, notWithLine);
+            startNewCloningStroke(e, notWithLine);
 
             super.mousePressed(e);
         }
     }
 
-    private void startNewCloningStroke(double x, double y, boolean notWithLine) {
+    private void startNewCloningStroke(PPoint p, boolean notWithLine) {
         state = CLONING;
 
         float scaleAbs = scaleParam.getValueAsPercentage();
@@ -172,7 +171,7 @@ public class CloneTool extends BlendingModeBrushTool {
 
         // when drawing with line, a mouse press should not change the destination
         if (notWithLine) {
-            cloneBrush.setCloningDestPoint(x, y);
+            cloneBrush.setCloningDestPoint(p);
         }
     }
 
@@ -184,11 +183,11 @@ public class CloneTool extends BlendingModeBrushTool {
         }
     }
 
-    private void handleUndefinedSource(ImageComponent ic, double x, double y) {
+    private void handleUndefinedSource(PMouseEvent e) {
         if (RandomGUITest.isRunning()) {
             // special case: do not show dialogs for RandomGUITest,
             // just act as if this was an alt-click
-            setCloningSource(ic, x, y);
+            setCloningSource(e);
         } else {
             String msg = "<html>Define a source point first with " +
                     "<b>Alt-Click</b> or with <b>right-click</b>.";
@@ -200,18 +199,21 @@ public class CloneTool extends BlendingModeBrushTool {
         }
     }
 
-    private void setCloningSource(ImageComponent ic, double x, double y) {
+    private void setCloningSource(PPoint e) {
+        Composition comp = e.getComp();
         BufferedImage sourceImage;
         int dx = 0;
         int dy = 0;
         if (sampleAllLayers) {
-            sourceImage = ic.getComp().getCompositeImage();
+            sourceImage = comp.getCompositeImage();
         } else {
-            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
+            Drawable dr = comp.getActiveDrawableOrThrow();
             sourceImage = dr.getImage();
             dx = -dr.getTX();
             dy = -dr.getTY();
         }
+        double x = e.getImX();
+        double y = e.getImY();
         cloneBrush.setSource(sourceImage, x + dx, y + dy);
         state = SOURCE_DEFINED_FIRST_STROKE;
     }
@@ -246,8 +248,8 @@ public class CloneTool extends BlendingModeBrushTool {
         int sourceX = RandomUtils.nextInt(canvasWidth);
         int sourceY = RandomUtils.nextInt(canvasHeight);
 
-        setCloningSource(comp.getIC(), sourceX, sourceY);
-        startNewCloningStroke(start.getImX(), start.getImY(), true);
+        setCloningSource(PPoint.eagerFromIm(sourceX, sourceY, comp.getIC()));
+        startNewCloningStroke(start, true);
     }
 
     @Override

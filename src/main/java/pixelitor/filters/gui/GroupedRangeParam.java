@@ -245,7 +245,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
-            rangeParams[i].setValueAsDouble(value);
+            rangeParams[i].setValueNoGUI(value);
         }
     }
 

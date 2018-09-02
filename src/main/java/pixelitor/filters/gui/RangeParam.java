@@ -123,14 +123,25 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void linkWith(RangeParam other, BooleanSupplier condition) {
         this.addChangeListener(e -> {
             if (condition.getAsBoolean()) {
-                other.setValueNoTrigger(this.getValue());
+                other.setValueNoTrigger(this.getValueAsDouble());
             }
         });
         other.addChangeListener(e -> {
             if (condition.getAsBoolean()) {
-                this.setValueNoTrigger(other.getValue());
+                this.setValueNoTrigger(other.getValueAsDouble());
             }
         });
+    }
+
+    /**
+     * Synchronizes the value of this object with the value of another
+     * {@link RangeParam} so that there is a constant multiplier between the values.
+     */
+    public void linkWith(RangeParam other, double multiplier) {
+        this.addChangeListener(e -> other.setValueNoTrigger(
+                this.getValueAsDouble() * multiplier));
+        other.addChangeListener(e -> this.setValueNoTrigger(
+                other.getValueAsDouble() / multiplier));
     }
 
     @Override
@@ -231,11 +242,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         setValue(n, true);
     }
 
-    public void setValueNoTrigger(int n) {
+    public void setValueNoTrigger(double n) {
         setValue(n, false);
     }
 
-    public void setValue(int n, boolean trigger) {
+    public void setValue(double n, boolean trigger) {
         if (n > maxValue) {
             n = maxValue;
         }
@@ -245,11 +256,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         if (value != n) {
             value = n;
-            fireStateChanged();
+            fireStateChanged(); // update the GUI
             if (!adjusting) {
                 if (trigger) {
                     if (adjustmentListener != null) {
-                        adjustmentListener.paramAdjusted();
+                        adjustmentListener.paramAdjusted(); // run the filter
                     }
                 }
             }
@@ -260,7 +271,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * This is only used programmatically while tweening, therefore
      * it never triggers the filter or the GUI
      */
-    public void setValueAsDouble(double d) {
+    public void setValueNoGUI(double d) {
         value = d;
     }
 

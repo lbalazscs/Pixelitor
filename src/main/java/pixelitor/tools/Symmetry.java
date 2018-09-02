@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Canvas;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PPoint;
 
@@ -166,16 +166,16 @@ public enum Symmetry {
             double relX = x - compCenterX;
             double relY = compCenterY - y; // calculate in upwards looking coords
 
-            ImageComponent ic = p.getIC();
+            View view = p.getView();
 
-            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            PPoint p1 = getRotatedPoint1(view, relX, relY);
             brush.startAt(1, p1);
 
-            PPoint p2 = getRotatedPoint2(ic, relX, relY);
+            PPoint p2 = getRotatedPoint2(view, relX, relY);
             brush.startAt(2, p2);
         }
 
-        private PPoint getRotatedPoint1(ImageComponent ic, double relX, double relY) {
+        private PPoint getRotatedPoint1(View view, double relX, double relY) {
             // coordinates rotated with 120 degrees
             double rotX = relX * cos120 - relY * sin120;
             double rotY = relX * sin120 + relY * cos120;
@@ -183,10 +183,10 @@ public enum Symmetry {
             // translate back to the original coordinate system
             double finalX = compCenterX + rotX;
             double finalY = compCenterY - rotY;
-            return PPoint.eagerFromIm(finalX, finalY, ic);
+            return PPoint.eagerFromIm(finalX, finalY, view);
         }
 
-        private PPoint getRotatedPoint2(ImageComponent ic, double relX, double relY) {
+        private PPoint getRotatedPoint2(View view, double relX, double relY) {
             // coordinates rotated with 240 degrees
             double rotX = relX * cos240 - relY * sin240;
             double rotY = relX * sin240 + relY * cos240;
@@ -194,7 +194,7 @@ public enum Symmetry {
             // translate back to the original coordinate system
             double finalX = compCenterX + rotX;
             double finalY = compCenterY - rotY;
-            return PPoint.eagerFromIm(finalX, finalY, ic);
+            return PPoint.eagerFromIm(finalX, finalY, view);
         }
 
         @Override
@@ -207,12 +207,12 @@ public enum Symmetry {
             double relX = x - compCenterX;
             double relY = compCenterY - y; // calculate in upwards looking coords
 
-            ImageComponent ic = p.getIC();
+            View view = p.getView();
 
-            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            PPoint p1 = getRotatedPoint1(view, relX, relY);
             brush.continueTo(1, p1);
 
-            PPoint p2 = getRotatedPoint2(ic, relX, relY);
+            PPoint p2 = getRotatedPoint2(view, relX, relY);
             brush.continueTo(2, p2);
         }
 
@@ -226,12 +226,12 @@ public enum Symmetry {
             double relX = x - compCenterX;
             double relY = compCenterY - y; // calculate in upwards looking coords
 
-            ImageComponent ic = p.getIC();
+            View view = p.getView();
 
-            PPoint p1 = getRotatedPoint1(ic, relX, relY);
+            PPoint p1 = getRotatedPoint1(view, relX, relY);
             brush.lineConnectTo(1, p1);
 
-            PPoint p2 = getRotatedPoint2(ic, relX, relY);
+            PPoint p2 = getRotatedPoint2(view, relX, relY);
             brush.lineConnectTo(2, p2);
         }
 

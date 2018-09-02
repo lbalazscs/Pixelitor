@@ -19,8 +19,10 @@ package pixelitor.filters.jhlabsproxies;
 
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 public class JHCustomHalftone extends JHMaskedHalftone {
     public static final String NAME = "Custom Halftone";
@@ -35,7 +37,12 @@ public class JHCustomHalftone extends JHMaskedHalftone {
 
     @Override
     protected BufferedImage createMaskImage(BufferedImage src) {
-        Composition comp = ImageComponents.findCompositionByName("Untitled1").get();
-        return comp.getCompositeImage();
+        Optional<Composition> opt = ImageComponents.findCompositionByName("Untitled1");
+        if (opt.isPresent()) {
+            return opt.get().getCompositeImage();
+        }
+        // to avoid exceptions if in an auto test
+        // this is selected as a random filter
+        return ImageUtils.copyImage(src);
     }
 }

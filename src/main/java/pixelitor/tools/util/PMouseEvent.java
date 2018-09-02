@@ -39,7 +39,7 @@ public class PMouseEvent extends PPoint.Lazy {
     }
 
     public JViewport getViewport() {
-        return (JViewport) ic.getParent();
+        return (JViewport) getIC().getParent();
     }
 
     public MouseEvent getOrigEvent() {
@@ -91,6 +91,6 @@ public class PMouseEvent extends PPoint.Lazy {
     }
 
     public void repaint() {
-        ic.repaint();
+        view.repaint();
     }
 }

@@ -29,8 +29,8 @@ import java.awt.event.MouseEvent;
 
 import static org.mockito.Mockito.mock;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.INITIAL;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
 
 public class PathBuilderTest {
@@ -48,9 +48,9 @@ public class PathBuilderTest {
         Graphics2D g = mock(Graphics2D.class);
 
         Path path = new Path(comp);
-        PathBuilder pb = new PathBuilder();
+        PathBuilder pb = PenToolMode.BUILD;
         pb.setPath(path);
-        pb.assertStateIs(INITIAL);
+        pb.assertStateIs(BEFORE_SUBPATH);
 
         // start the curve
         pb.mousePressed(createPMouseEvent(10, 10));

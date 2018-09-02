@@ -29,12 +29,16 @@ import java.awt.event.MouseEvent;
  * A pen tool interaction mode where a path can be edited
  */
 public class PathEditor implements PenToolMode {
+    public static final PathEditor INSTANCE = new PathEditor();
+    public static final String EDIT_HELP_MESSAGE =
+            "<html>Pen Tool Edit Mode: " +
+                    "<b>drag</b> the anchor and control points. " +
+                    "<b>Right-click</b> the anchor points for options. " +
+                    "<b>Alt-drag</b> to pull out handles.";
     private Path path;
     private DraggablePoint activeDraggablePoint;
 
-    public PathEditor(Path path) {
-        assert path != null;
-        this.path = path;
+    private PathEditor() {
     }
 
     @Override
@@ -46,8 +50,8 @@ public class PathEditor implements PenToolMode {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
 
         DraggablePoint draggablePoint = path.handleWasHit(x, y, e.isAltDown());
         if (draggablePoint != null) {
@@ -59,8 +63,8 @@ public class PathEditor implements PenToolMode {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
 
         if (activeDraggablePoint != null) {
             activeDraggablePoint.mouseDragged(x, y);
@@ -69,13 +73,13 @@ public class PathEditor implements PenToolMode {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
 
         if (activeDraggablePoint != null) {
             if (e.isPopupTrigger() && activeDraggablePoint instanceof AnchorPoint) {
                 AnchorPoint ap = (AnchorPoint) activeDraggablePoint;
-                ap.showPopup(x, y);
+                ap.showPopup((int) x, (int) y);
             } else {
                 activeDraggablePoint.mouseReleased(x, y);
                 activeDraggablePoint
@@ -107,5 +111,15 @@ public class PathEditor implements PenToolMode {
     @Override
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        return "Edit";
+    }
+
+    @Override
+    public String getToolMessage() {
+        return EDIT_HELP_MESSAGE;
     }
 }

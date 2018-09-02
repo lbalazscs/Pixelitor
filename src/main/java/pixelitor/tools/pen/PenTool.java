@@ -31,6 +31,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -48,22 +49,18 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * The Pen Tool
  */
 public class PenTool extends Tool {
-    private static final String MODE_BUILD = "Build";
-    private static final String MODE_EDIT = "Edit";
 
-    private JComboBox<String> modeChooser;
+    private JComboBox<PenToolMode> modeChooser;
     private final AbstractAction toSelectionAction;
 
     private Path path;
-    private PenToolMode mode = new PathBuilder();
+    private PenToolMode mode = PenToolMode.BUILD;
     private boolean ignoreModeChooserAction = false;
     private AbstractAction dumpAction;
 
     public PenTool() {
         super("Pen", 'p', "pen_tool_icon.png",
-                "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
-                        "<b>Ctrl-click</b> or close the path to finish. " +
-                        "Press <b>Esc</b> to start from scratch.",
+                "", // getStatusBarMessage() is overridden
                 Cursors.DEFAULT, false, true,
                 ClipStrategy.INTERNAL_FRAME);
         toSelectionAction = new AbstractAction("Convert to Selection") {
@@ -72,7 +69,91 @@ public class PenTool extends Tool {
                 convertToSelection(true);
             }
         };
-        toSelectionAction.setEnabled(false);
+        enableConvertToSelection(false);
+    }
+
+    @Override
+    public void initSettingsPanel() {
+        modeChooser = new JComboBox<>(new PenToolMode[]{
+                PenToolMode.BUILD, PenToolMode.EDIT});
+        modeChooser.addActionListener(e -> onModeChooserAction());
+        settingsPanel.addWithLabel("Mode:", modeChooser);
+
+        settingsPanel.addButton(toSelectionAction, "toSelectionButton",
+                "Convert the active path to a selection");
+
+        if (Build.CURRENT.isDevelopment()) {
+            dumpAction = new AbstractAction("dump") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    path.dump();
+                }
+            };
+            settingsPanel.addButton(dumpAction);
+        }
+    }
+
+    private void onModeChooserAction() {
+        if (ignoreModeChooserAction) {
+            return;
+        }
+        if (getSelectedMode() == PenToolMode.BUILD) {
+            resetStateToInitial();
+            Messages.showInStatusBar("<html>Pen Tool: " + PathBuilder.BUILDER_HELP_MESSAGE);
+        } else {
+            startEditing(true, true);
+            Messages.showInStatusBar("<html>Pen Tool: " + PathEditor.EDIT_HELP_MESSAGE);
+        }
+    }
+
+    public void startEditing(boolean pathWasBuiltInteractively,
+                             boolean calledFromModeChooser) {
+        if (!hasPath()) {
+            EventQueue.invokeLater(() -> {
+                if (!RandomGUITest.isRunning()) {
+                    Dialogs.showInfoDialog("No Path", "There is no path to edit.");
+                }
+                modeChooser.setSelectedItem(PenToolMode.BUILD);
+            });
+            return;
+        }
+
+        if (!calledFromModeChooser) {
+            modeChooser.setSelectedItem(PenToolMode.EDIT);
+        }
+
+        path.changeTypesForEditing(pathWasBuiltInteractively);
+        mode = PenToolMode.EDIT;
+        mode.setPath(path);
+        enableConvertToSelection(true);
+        ImageComponents.repaintActive();
+    }
+
+    @Override
+    public void resetStateToInitial() {
+        ignoreModeChooserAction = true;
+        modeChooser.setSelectedItem(PenToolMode.BUILD);
+        ignoreModeChooserAction = false;
+
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        Path p = null;
+        if (comp != null) {
+            p = comp.getActivePath();
+        }
+        setPath(p);
+        enableConvertToSelection(p != null);
+
+        mode = PenToolMode.BUILD;
+        ImageComponents.repaintActive();
+    }
+
+    @Override
+    public String getStatusBarMessage() {
+        return getSelectedMode().getToolMessage();
+    }
+
+    private PenToolMode getSelectedMode() {
+        return (PenToolMode) modeChooser.getSelectedItem();
     }
 
     private void convertToSelection(boolean addToHistory) {
@@ -95,70 +176,6 @@ public class PenTool extends Tool {
         if (addToHistory) {
             History.addEdit(new ConvertPathToSelectionEdit(comp, oldPath, selectionEdit));
         }
-    }
-
-    @Override
-    public void initSettingsPanel() {
-        modeChooser = new JComboBox<>(new String[]{MODE_BUILD, MODE_EDIT});
-        modeChooser.addActionListener(e -> onModeChooserAction());
-        settingsPanel.addWithLabel("Mode:", modeChooser);
-
-        settingsPanel.addButton(toSelectionAction,
-                "Convert the active path to a selection");
-
-        if (Build.CURRENT.isDevelopment()) {
-            dumpAction = new AbstractAction("dump") {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    path.dump();
-                }
-            };
-            settingsPanel.addButton(dumpAction);
-        }
-    }
-
-    private void onModeChooserAction() {
-        if (ignoreModeChooserAction) {
-            return;
-        }
-        if (modeChooser.getSelectedItem().equals("Build")) {
-            resetStateToInitial();
-        } else {
-            startEditing(true);
-        }
-    }
-
-    public void startEditing(boolean pathWasBuiltInteractively) {
-        if (!hasPath()) {
-            EventQueue.invokeLater(() -> {
-                if (!RandomGUITest.isRunning()) {
-                    Dialogs.showInfoDialog("No Path", "There is no path to edit.");
-                }
-                modeChooser.setSelectedItem(MODE_BUILD);
-            });
-            return;
-        }
-
-        ignoreModeChooserAction = true;
-        modeChooser.setSelectedItem(MODE_EDIT);
-        ignoreModeChooserAction = false;
-
-        path.changeTypesForEditing(pathWasBuiltInteractively);
-        mode = new PathEditor(path);
-        toSelectionAction.setEnabled(true);
-        ImageComponents.repaintActive();
-    }
-
-    @Override
-    public void resetStateToInitial() {
-        ignoreModeChooserAction = true;
-        modeChooser.setSelectedItem(MODE_BUILD);
-        ignoreModeChooserAction = false;
-
-        toSelectionAction.setEnabled(false);
-        setPath(null);
-        mode = new PathBuilder();
-        ImageComponents.repaintActive();
     }
 
     @Override
@@ -251,5 +268,9 @@ public class PenTool extends Tool {
     public void setBuilderState(PathBuilder.State state) {
         PathBuilder pb = (PathBuilder) mode;
         pb.setState(state);
+    }
+
+    public void enableConvertToSelection(boolean b) {
+        toSelectionAction.setEnabled(b);
     }
 }

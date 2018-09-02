@@ -72,22 +72,21 @@ public class CropBox {
     // ratio width/height of the selected area
     private double aspectRatio = 0;
 
-    public CropBox(PRectangle rect, ImageComponent ic) {
+    public CropBox(PRectangle rect, View view) {
         this.rect = rect;
 
-        upperLeft = new CropHandle("NW", Cursor.NW_RESIZE_CURSOR, ic);
-        upper = new CropHandle("N", Cursor.N_RESIZE_CURSOR, ic);
-        upperRight = new CropHandle("NE", Cursor.NE_RESIZE_CURSOR, ic);
-        right = new CropHandle("E", Cursor.E_RESIZE_CURSOR, ic);
-        left = new CropHandle("W", Cursor.W_RESIZE_CURSOR, ic);
-        lowerLeft = new CropHandle("SW", Cursor.SW_RESIZE_CURSOR, ic);
-        lower = new CropHandle("S", Cursor.S_RESIZE_CURSOR, ic);
-        lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, ic);
+        upperLeft = new CropHandle("NW", Cursor.NW_RESIZE_CURSOR, view);
+        upper = new CropHandle("N", Cursor.N_RESIZE_CURSOR, view);
+        upperRight = new CropHandle("NE", Cursor.NE_RESIZE_CURSOR, view);
+        right = new CropHandle("E", Cursor.E_RESIZE_CURSOR, view);
+        left = new CropHandle("W", Cursor.W_RESIZE_CURSOR, view);
+        lowerLeft = new CropHandle("SW", Cursor.SW_RESIZE_CURSOR, view);
+        lower = new CropHandle("S", Cursor.S_RESIZE_CURSOR, view);
+        lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, view);
 
         handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
                 right, upper, lower, left);
         update(rect);
-
     }
 
     public void setUseAspectRatio(boolean useAspectRatio) {
@@ -126,10 +125,10 @@ public class CropBox {
      *
      * @return true if cursor was set on any handle, false otherwise
      */
-    public boolean setCursorForPoint(int x, int y, ImageComponent c) {
+    public boolean setCursorForPoint(double x, double y, View view) {
         for (CropHandle handle : handles) {
             if (handle.handleContains(x, y)) {
-                c.setCursor(handle.getCursor());
+                view.setCursor(handle.getCursor());
                 return true;
             }
         }
@@ -155,10 +154,10 @@ public class CropBox {
     }
 
     public void mousePressed(PMouseEvent e) {
-        ImageComponent ic = e.getIC();
+        View view = e.getView();
         dragStart = e.getPoint();
         dragStartRect = new Rectangle(rect.getCo());
-        dragStartCursorType = ic.getCursor().getType();
+        dragStartCursorType = view.getCursor().getType();
         aspectRatio = TransformHelper.calcAspectRatio(rect.getCo());
 
         if (TransformHelper.isResizeMode(dragStartCursorType)) {
@@ -180,7 +179,9 @@ public class CropBox {
         // reset rect
         // TODO is this necessary?
         rect.getCo().setRect(dragStartRect);
-        Point mouseOffset = new Point(e.getCoX() - dragStart.x, e.getCoY() - dragStart.y);
+        Point mouseOffset = new Point(
+                (int) (e.getCoX() - dragStart.x),
+                (int) (e.getCoY() - dragStart.y));
 
         if (transformMode == MODE_RESIZE) {
             TransformHelper.resize(rect.getCo(), dragStartCursorType, mouseOffset);
@@ -196,7 +197,7 @@ public class CropBox {
         update(rect);
 
         rect.makeCoPositive();
-        rect.recalcIm(e.getIC());
+        rect.recalcIm(e.getView());
     }
 
     public void mouseReleased(PMouseEvent e) {
@@ -204,7 +205,7 @@ public class CropBox {
         // positive width and height (required for Rectangle.contain testing)
         rect.makeCoPositive();
         update(rect);
-        setCursorForPoint(e.getCoX(), e.getCoY(), e.getIC());
+        setCursorForPoint(e.getCoX(), e.getCoY(), e.getView());
 
         adjusting = false;
         transformMode = MODE_NONE;
