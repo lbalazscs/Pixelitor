@@ -40,7 +40,7 @@ public class RotationHandle extends DraggablePoint {
     }
 
     @Override
-    public void mousePressed(int x, int y) {
+    public void mousePressed(double x, double y) {
         super.mousePressed(x, y); // sets dragStartX, dragStartY
         Point2D c = box.getCenter();
 
@@ -63,10 +63,5 @@ public class RotationHandle extends DraggablePoint {
         box.setAngle(angle);
 
         box.rotate(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
-    }
-
-    @Override
-    public void mouseReleased(int x, int y) {
-        super.mouseReleased(x, y);
     }
 }

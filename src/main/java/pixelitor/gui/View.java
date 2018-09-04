@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -50,4 +51,8 @@ public interface View {
     AffineTransform getComponentToImageTransform();
 
     void repaint();
+
+    Cursor getCursor();
+
+    void setCursor(Cursor cursor);
 }

@@ -76,7 +76,7 @@ public class Path implements Serializable {
         }
     }
 
-    public DraggablePoint handleWasHit(int x, int y, boolean altDown) {
+    public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
         for (SubPath sp : subPaths) {
             DraggablePoint hit = sp.handleWasHit(x, y, altDown);
             if (hit != null) {
@@ -128,7 +128,7 @@ public class Path implements Serializable {
         activeSubPath.close(addToHistory);
     }
 
-    public void finalizeMovingPoint(int x, int y, boolean finishSubPath) {
+    public void finalizeMovingPoint(double x, double y, boolean finishSubPath) {
         activeSubPath.finalizeMovingPoint(x, y, finishSubPath);
     }
 
@@ -252,5 +252,9 @@ public class Path implements Serializable {
         for (SubPath subPath : subPaths) {
             subPath.setView(view);
         }
+    }
+
+    public void finishActiveSubpath() {
+        activeSubPath.setFinished(true);
     }
 }

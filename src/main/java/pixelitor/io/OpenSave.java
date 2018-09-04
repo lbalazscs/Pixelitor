@@ -83,7 +83,8 @@ public class OpenSave {
         return CompletableFuture.supplyAsync(
                 () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
                 .handle((img, e) -> handleDecodingError(file, img, e))
-                .thenApply(img -> Composition.fromImage(img, file, null));
+                .thenApplyAsync(img -> Composition.fromImage(img, file, null),
+                        EventQueue::invokeLater);
     }
 
     private static BufferedImage handleDecodingError(File file,

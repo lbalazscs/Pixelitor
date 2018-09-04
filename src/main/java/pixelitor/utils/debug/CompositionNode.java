@@ -18,6 +18,7 @@
 package pixelitor.utils.debug;
 
 import pixelitor.Composition;
+import pixelitor.guides.Guides;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
@@ -45,6 +46,13 @@ public class CompositionNode extends DebugNode {
             addBoolean("Paths", false);
         } else {
             add(new PathsNode(paths));
+        }
+
+        Guides guides = comp.getGuides();
+        if (guides == null) {
+            addBoolean("Guides", false);
+        } else {
+            add(new GuidesNode(guides));
         }
 
         addInt("numLayers", comp.getNumLayers());

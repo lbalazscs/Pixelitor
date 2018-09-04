@@ -67,8 +67,9 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
-    public JButton addButton(Action action, String toolTip) {
+    public JButton addButton(Action action, String name, String toolTip) {
         JButton button = new JButton(action);
+        button.setName(name);
         button.setToolTipText(toolTip);
         add(button);
         return button;

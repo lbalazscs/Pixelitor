@@ -20,6 +20,8 @@ package pixelitor;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.guides.Guides;
+import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
 import pixelitor.io.IOThread;
 import pixelitor.io.OutputFormat;
@@ -89,6 +91,7 @@ public class Composition implements Serializable {
 
     private final Canvas canvas;
     private Paths paths;
+    private Guides guides;
 
     //
     // the following variables are all transient, their state is not saved in PXC!
@@ -903,7 +906,7 @@ public class Composition implements Serializable {
      * Changing the selection reference should be done only by using this method
      * (in order to make debugging easier)
      */
-    public void setSelectionRef(Selection selection) {
+    private void setSelectionRef(Selection selection) {
 //        if(this.selection != null && selection == null) {
 //            Thread.dumpStack();
 //        }
@@ -1121,13 +1124,12 @@ public class Composition implements Serializable {
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
         OutputFormat outputFormat = saveSettings.getOutputFormat();
-        File file = saveSettings.getFile();
+        File f = saveSettings.getFile();
 
-        System.out.println("Composition::saveAsync: CALLED, file = " + file.getAbsolutePath());
-
+        System.out.println("Composition::saveAsync: CALLED, file = " + f.getAbsolutePath());
 
         Runnable saveTask = outputFormat.getSaveTask(this, saveSettings);
-        return saveAsync(saveTask, file, addToRecentMenus);
+        return saveAsync(saveTask, f, addToRecentMenus);
     }
 
     public CompletableFuture<Void> saveAsync(Runnable saveTask,
@@ -1173,6 +1175,39 @@ public class Composition implements Serializable {
             paths = new Paths();
         }
         paths.setActivePath(path);
+    }
+
+    public Guides getGuides() {
+        return guides;
+    }
+
+    public void setGuides(Guides guides) {
+//        if (guides != null) {
+//            System.out.println("Composition::setGuides: guide name = " + guides.getName());
+//        }
+        this.guides = guides;
+    }
+
+    public void clearGuides() {
+        if (guides == null) {
+            return;
+        }
+        History.addEdit(new GuidesChangeEdit(this, guides, null));
+        setGuides(null);
+        repaint();
+    }
+
+    public void drawGuides(Graphics2D g) {
+        if (guides == null) {
+            return;
+        }
+        guides.draw(g);
+    }
+
+    public void coCoordsChanged() {
+        if (guides != null) {
+            guides.coCoordsChanged();
+        }
     }
 
     public enum ImageChangeActions {

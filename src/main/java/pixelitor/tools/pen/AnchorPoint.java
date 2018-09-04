@@ -62,7 +62,7 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public AnchorPoint(PPoint p) {
-        this(p.getCoX(), p.getCoY(), p.getIC());
+        this(p.getCoX(), p.getCoY(), p.getView());
     }
 
     public AnchorPoint(AnchorPoint other, boolean copyControlPositions) {
@@ -121,7 +121,8 @@ public class AnchorPoint extends DraggablePoint {
         ctrlIn.translateOnlyThis(dx, dy);
     }
 
-    public DraggablePoint handleOrCtrlHandleWasHit(int x, int y, boolean altDown) {
+    public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,
+                                                   boolean altDown) {
         if (altDown) {
             // check the control handles first so that
             // retracted handles can be dragged out with Alt-drag
@@ -207,12 +208,12 @@ public class AnchorPoint extends DraggablePoint {
         JPopupMenu p = new JPopupMenu();
         AnchorPointType.addTypePopupItems(this, p);
         p.addSeparator();
-        p.add(new AbstractAction("Dump") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AnchorPoint.this.dump();
-            }
-        });
+//        p.add(new AbstractAction("Dump") {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                AnchorPoint.this.dump();
+//            }
+//        });
         p.add(new AbstractAction("Delete Point") {
             @Override
             public void actionPerformed(ActionEvent e) {

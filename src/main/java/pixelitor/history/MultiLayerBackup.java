@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -34,6 +35,7 @@ public class MultiLayerBackup {
     private Layer layer;
     private CanvasChangeEdit canvasChangeEdit;
     private TranslationEdit translationEdit;
+    private GuidesChangeEdit guidesChangeEdit;
     private final Shape backupShape;
 
     // Saved before the change, but the edit is
@@ -155,5 +157,14 @@ public class MultiLayerBackup {
         DeselectEdit edit = new DeselectEdit(comp, backupShape, editName);
         edit.setEmbedded(true);
         return edit;
+    }
+
+    public void setGuidesChangeEdit(GuidesChangeEdit guidesChangeEdit) {
+        this.guidesChangeEdit = guidesChangeEdit;
+        guidesChangeEdit.setEmbedded(true);
+    }
+
+    public GuidesChangeEdit getGuidesChangeEdit() {
+        return guidesChangeEdit;
     }
 }

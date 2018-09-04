@@ -64,6 +64,7 @@ public class SubPath implements Serializable {
     private AnchorPoint last;
 
     private boolean closed = false;
+    private boolean finished = false;
 
     private static final ToDoubleFunction<DraggablePoint> TO_CO_X = p -> p.x;
     private static final ToDoubleFunction<DraggablePoint> TO_CO_Y = p -> p.y;
@@ -97,7 +98,7 @@ public class SubPath implements Serializable {
         moving = p;
     }
 
-    public void finalizeMovingPoint(int x, int y, boolean finishSubPath) {
+    public void finalizeMovingPoint(double x, double y, boolean finishSubPath) {
         moving.setLocation(x, y);
         moving.calcImCoords();
         anchorPoints.add(moving);
@@ -202,6 +203,10 @@ public class SubPath implements Serializable {
     }
 
     public void paintHandlesForBuilding(Graphics2D g, PathBuilder.State state) {
+        assert checkConsistency();
+        if (finished) {
+            return;
+        }
         int numPoints = getNumPoints();
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             if (numPoints > 1) {
@@ -228,6 +233,7 @@ public class SubPath implements Serializable {
     }
 
     public void paintHandlesForEditing(Graphics2D g) {
+        assert checkConsistency();
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             boolean paintIn = true;
@@ -246,7 +252,7 @@ public class SubPath implements Serializable {
         }
     }
 
-    public DraggablePoint handleWasHit(int x, int y, boolean altDown) {
+    public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
         for (AnchorPoint point : anchorPoints) {
             DraggablePoint draggablePoint = point.handleOrCtrlHandleWasHit(x, y, altDown);
             if (draggablePoint != null) {
@@ -276,16 +282,29 @@ public class SubPath implements Serializable {
             last = anchorPoints.get(indexOfLast - 1);
         }
         moving = null; // can be ignored in this case
-        closed = true;
+        setClosed(true);
 
         if (addToHistory) {
             History.addEdit(new CloseSubPathEdit(comp, this));
         }
     }
 
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+
+        // A closed subpath is always also finished,
+        // a re-opened (in case of undo) subpath is also unfinished.
+        // A subpath can be finished without being closed.
+        setFinished(closed);
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
     public void undoClosing() {
         moving = new AnchorPoint(first, false);
-        closed = false;
+        setClosed(false);
     }
 
     public boolean isClosed() {
@@ -401,5 +420,21 @@ public class SubPath implements Serializable {
         if (moving != null) {
             moving.setView(view);
         }
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    public boolean checkConsistency() {
+        checkWiring();
+        if (closed) {
+            if (!finished) {
+                throw new IllegalStateException("closed but not finished");
+            }
+        }
+        if (finished) {
+            if (moving != null) {
+                throw new IllegalStateException("finished, but moving");
+            }
+        }
+        return true;
     }
 }

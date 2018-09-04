@@ -834,20 +834,6 @@ public class ImageUtils {
         return image;
     }
 
-    public static BufferedImage getGridImageOnTransparentBackground(Color color,
-                                                                    int maxX, int maxY,
-                                                                    int hWidth, int hSpacing,
-                                                                    int vWidth, int vSpacing,
-                                                                    boolean emptyIntersections) {
-        // create transparent image
-        BufferedImage img = new BufferedImage(maxX, maxY, TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        drawGrid(color, g, maxX, maxY,
-                hWidth, hSpacing, vWidth, vSpacing, emptyIntersections);
-        g.dispose();
-        return img;
-    }
-
     public static void drawGrid(Color color, Graphics2D g,
                                 int maxX, int maxY,
                                 int hWidth, int hSpacing,
@@ -880,6 +866,7 @@ public class ImageUtils {
         if (hWidth > 0) {
             for (int y = 0; y < maxY; y += vSpacing) {
                 int startY = y - halfVWidth;
+                //noinspection SuspiciousNameCombination
                 g.fillRect(0, startY, maxX, vWidth);
             }
         }

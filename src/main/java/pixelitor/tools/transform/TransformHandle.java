@@ -53,7 +53,7 @@ public class TransformHandle extends DraggablePoint {
     }
 
     @Override
-    public void mousePressed(int x, int y) {
+    public void mousePressed(double x, double y) {
         super.mousePressed(x, y); // sets dragStartX, dragStartY
         sin = box.getSin();
         cos = box.getCos();
@@ -83,12 +83,6 @@ public class TransformHandle extends DraggablePoint {
         horNeighbor.setLocation(horOrigX - ody * sin, horOrigY + ody * cos);
 
         box.handlePositionsChanged();
-    }
-
-    @Override
-    public void mouseReleased(int x, int y) {
-        super.mouseReleased(x, y);
-
     }
 
     public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {

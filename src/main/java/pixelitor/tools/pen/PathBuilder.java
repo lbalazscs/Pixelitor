@@ -18,45 +18,48 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
+import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.FINISHED;
-import static pixelitor.tools.pen.PathBuilder.State.INITIAL;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
 
 /**
  * A pen tool interaction mode where a path can be built from scratch
  */
 public class PathBuilder implements PenToolMode {
+    public static final PathBuilder INSTANCE = new PathBuilder();
+    public static final String BUILDER_HELP_MESSAGE =
+            "<html>Pen Tool Build Mode: " +
+                    "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
+                    "<b>Ctrl-click</b> or close the path to finish. " +
+                    "Press <b>Esc</b> to start from scratch.";
+
     public enum State {
-        INITIAL {
+        // the initial state, and also the state after a subpath is finished
+        BEFORE_SUBPATH {
         }, DRAGGING_THE_CONTROL_OF_LAST {
         }, MOVING_TO_NEXT_CURVE_POINT {
-        }, FINISHED {
         }
     }
 
-//    private int lastMousePressX;
-//    private int lastMousePressY;
-
     private State state;
 
-    //    private SubPath activeSubPath;
     private Path path;
 
-    public PathBuilder() {
-        state = INITIAL;
+    private PathBuilder() {
+        setState(BEFORE_SUBPATH);
     }
 
     @Override
     public void setPath(Path path) {
         this.path = path;
         if (path == null) {
-            state = INITIAL;
+            setState(BEFORE_SUBPATH);
         }
     }
 
@@ -66,30 +69,29 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        if (state == FINISHED) {
-            return;
-        }
+        assert state == BEFORE_SUBPATH
+                || state == MOVING_TO_NEXT_CURVE_POINT : "state = " + state;
 
-        if (e.isControlDown()) {
-            finishByCtrlClick(e);
-            return;
-        }
-
-        assert state == INITIAL
-                || state == MOVING_TO_NEXT_CURVE_POINT
-                || state == FINISHED : "state = " + state;
-
-        if (state == INITIAL) {
+        if (state == BEFORE_SUBPATH) {
             // only add a point if previously we were
             // in the initial mode. Normally points
             // are added in mouseReleased
             AnchorPoint p = new AnchorPoint(e);
 
             path.startNewSubPath(p, true);
-//            this.activeSubPath = path.getActiveSubpath();
         } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
-            int x = e.getCoX();
-            int y = e.getCoY();
+            if (e.isControlDown()) {
+                // TODO should check whether we pressed the mouse over a visible
+                // anchor point or a control point, and if yes, move them
+
+                // TODO similarly, Alt-Click should mean breaking the control handle
+
+                finishByCtrlClick(e);
+                return;
+            }
+
+            double x = e.getCoX();
+            double y = e.getCoY();
             AnchorPoint first = path.getFirst();
             if (shouldBeClosed(first, x, y)) {
                 first.setActive(false);
@@ -105,20 +107,23 @@ public class PathBuilder implements PenToolMode {
         assert path.checkWiring();
     }
 
-    private boolean shouldBeClosed(AnchorPoint first, int x, int y) {
+    private boolean shouldBeClosed(AnchorPoint first, double x, double y) {
         return first.handleContains(x, y)
-                && path.getNumPointsInActiveSubpath() > 2;
+                && path.getNumPointsInActiveSubpath() >= 2;
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        if (state == FINISHED) {
+        if (state == BEFORE_SUBPATH) {
+            // normally it should not happen, but in some rare cases
+            // a dragged event comes without a preceding pressed event
             return;
         }
+
         assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
         ControlPoint ctrlOut = path.getLast().ctrlOut;
         ctrlOut.setLocation(x, y);
 
@@ -127,12 +132,12 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        if (state == FINISHED) {
+        if (state == BEFORE_SUBPATH) {
             return;
         }
 
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
 
         assert state == DRAGGING_THE_CONTROL_OF_LAST : "state = " + state;
 
@@ -140,14 +145,14 @@ public class PathBuilder implements PenToolMode {
         ctrlOut.setLocation(x, y);
         ctrlOut.afterMouseReleasedActions();
 
-        path.setMoving(new AnchorPoint(x, y, e.getIC()));
+        path.setMoving(new AnchorPoint(x, y, e.getView()));
         setState(MOVING_TO_NEXT_CURVE_POINT);
         assert path.checkWiring();
     }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
-        if (state == INITIAL || state == FINISHED) {
+        if (state == BEFORE_SUBPATH) {
             return false;
         }
 
@@ -178,8 +183,8 @@ public class PathBuilder implements PenToolMode {
     }
 
     private void finishByCtrlClick(PMouseEvent e) {
-        int x = e.getCoX();
-        int y = e.getCoY();
+        double x = e.getCoX();
+        double y = e.getCoY();
 
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             ControlPoint p = path.getLast().ctrlOut;
@@ -191,12 +196,26 @@ public class PathBuilder implements PenToolMode {
         finish(e);
     }
 
+    // A subpath can be finished either by closing it or by ctrl-clicking.
+    // Either way, we end up in this method.
     private void finish(PMouseEvent e) {
-        setState(FINISHED);
+        path.finishActiveSubpath();
+        setState(BEFORE_SUBPATH);
         e.getComp().setActivePath(path);
+        Tools.PEN.enableConvertToSelection(true);
     }
 
     public void assertStateIs(State s) {
         assert state == s : "state = " + state;
+    }
+
+    @Override
+    public String toString() {
+        return "Build";
+    }
+
+    @Override
+    public String getToolMessage() {
+        return BUILDER_HELP_MESSAGE;
     }
 }

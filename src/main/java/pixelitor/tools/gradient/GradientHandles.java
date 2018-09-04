@@ -19,10 +19,10 @@ package pixelitor.tools.gradient;
 
 import pixelitor.Build;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
@@ -44,13 +44,16 @@ public class GradientHandles {
         this(start.getX(), start.getY(), end.getX(), end.getY(), view);
     }
 
-    public GradientHandles(double startX, double startY, double endX, double endY, View view) {
+    public GradientHandles(double startX, double startY,
+                           double endX, double endY, View view) {
         this.view = view;
         Color defaultColor = Color.WHITE;
         Color activeColor = Color.RED;
 
-        start = new GradientDefiningPoint("start", startX, startY, view, defaultColor, activeColor);
-        end = new GradientDefiningPoint("end", endX, endY, view, defaultColor, activeColor);
+        start = new GradientDefiningPoint("start", startX, startY, view,
+                defaultColor, activeColor, this);
+        end = new GradientDefiningPoint("end", endX, endY, view,
+                defaultColor, activeColor, this);
         middle = new GradientCenterPoint(start, end, view, defaultColor, activeColor);
 
         end.setOther(start);
@@ -59,7 +62,7 @@ public class GradientHandles {
         start.setCenter(middle);
     }
 
-    public DraggablePoint handleWasHit(int x, int y) {
+    public DraggablePoint handleWasHit(double x, double y) {
         if (end.handleContains(x, y)) {
             return end;
         }
@@ -80,14 +83,38 @@ public class GradientHandles {
         middle.paintHandle(g);
     }
 
-    public ImDrag toImDrag(ImageComponent ic) {
-        double startX = ic.componentXToImageSpace(start.x);
-        double startY = ic.componentYToImageSpace(start.y);
-        double endX = ic.componentXToImageSpace(end.x);
-        double endY = ic.componentYToImageSpace(end.y);
+    public ImDrag toImDrag(View view) {
+        double startX = view.componentXToImageSpace(start.x);
+        double startY = view.componentYToImageSpace(start.y);
+        double endX = view.componentXToImageSpace(end.x);
+        double endY = view.componentYToImageSpace(end.y);
 
         ImDrag imDrag = new ImDrag(startX, startY, endX, endY);
         return imDrag;
+    }
+
+    public UserDrag toUserDrag(GradientDefiningPoint movingPoint) {
+        UserDrag ud;
+        if (movingPoint == end) {
+            ud = new UserDrag();
+            ud.setStart(start.asPPoint());
+            ud.setEnd(end.asPPoint());
+        } else if (movingPoint == start) {
+            // if the user is moving the start point, then return
+            // an UserDrag that points backwards, but calculates
+            // the forward angle
+            ud = new UserDrag() {
+                @Override
+                protected double calcAngle() {
+                    return super.calcReversedAngle();
+                }
+            };
+            ud.setStart(end.asPPoint());
+            ud.setEnd(start.asPPoint());
+        } else {
+            throw new IllegalStateException("movingPoint = " + movingPoint);
+        }
+        return ud;
     }
 
     public void coCoordsChanged(View view) {

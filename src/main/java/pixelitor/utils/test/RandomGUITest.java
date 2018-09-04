@@ -46,6 +46,8 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.guides.AddGuidesSupport;
+import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddNewLayerAction;
@@ -1035,6 +1037,24 @@ public class RandomGUITest {
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
 
+    private static void randomGuides() {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        float v = rand.nextFloat();
+        if (v < 0.2) {
+            comp.clearGuides();
+            return;
+        }
+        AddGuidesSupport guidesSupport = new AddGuidesSupport(comp, false);
+        Guides guides = guidesSupport.createEmptyGuides();
+        if (rand.nextBoolean()) {
+            guides.addHorRelative(rand.nextFloat());
+        } else {
+            guides.addVerRelative(rand.nextFloat());
+        }
+        guides.regenerateLines();
+        guidesSupport.set(guides, false);
+    }
+
     private static void reload(Robot r) {
         if (rand.nextFloat() < 0.1) {
             Composition comp = ImageComponents.getActiveCompOrNull();
@@ -1066,7 +1086,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(3, RandomGUITest::changeImageArea);
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
         weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
-        weightedCaller.registerCallback(25, RandomGUITest::randomTween);
+        weightedCaller.registerCallback(5, RandomGUITest::randomTween);
         weightedCaller.registerCallback(10, RandomGUITest::randomFitTo);
         weightedCaller.registerCallback(3, () -> randomKey(r));
         weightedCaller.registerCallback(1, () -> reload(r));
@@ -1090,8 +1110,9 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
         weightedCaller.registerCallback(3, RandomGUITest::randomTool);
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
-        weightedCaller.registerCallback(7, RandomGUITest::randomNewTextLayer);
-        weightedCaller.registerCallback(7, RandomGUITest::randomTextLayerRasterize);
+        weightedCaller.registerCallback(5, RandomGUITest::randomNewTextLayer);
+        weightedCaller.registerCallback(5, RandomGUITest::randomTextLayerRasterize);
+        weightedCaller.registerCallback(17, RandomGUITest::randomGuides);
 
         if (Build.enableAdjLayers) {
             weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);

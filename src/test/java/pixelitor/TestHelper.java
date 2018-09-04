@@ -61,8 +61,8 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 
 public class TestHelper {
-    private static final int TEST_WIDTH = 20;
-    private static final int TEST_HEIGHT = 10;
+    public static final int TEST_WIDTH = 20;
+    public static final int TEST_HEIGHT = 10;
 
     // all coordinates and distances must be even here because of the resize test
     private static final Rectangle standardTestSelectionShape
@@ -113,6 +113,7 @@ public class TestHelper {
 
         ImageComponent ic = mock(ImageComponent.class);
         when(ic.getComp()).thenReturn(comp);
+        when(ic.getCanvas()).thenReturn(canvas);
         when(ic.isMock()).thenReturn(true);
         when(ic.getMaskViewMode()).thenReturn(NORMAL);
         when(comp.getIC()).thenReturn(ic);

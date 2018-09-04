@@ -18,22 +18,28 @@
 package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
 /**
  * Either a gradient start point or a gradient end point
  */
 public class GradientDefiningPoint extends DraggablePoint {
+    private final GradientHandles gradientHandles;
     private GradientDefiningPoint other;
     private GradientCenterPoint center;
 
     public GradientDefiningPoint(String name, double x, double y,
-                                 View view, Color color, Color activeColor) {
+                                 View view, Color color, Color activeColor,
+                                 GradientHandles gradientHandles) {
         super(name, x, y, view, color, activeColor);
+        this.gradientHandles = gradientHandles;
     }
 
     public void setOther(GradientDefiningPoint other) {
@@ -66,5 +72,14 @@ public class GradientDefiningPoint extends DraggablePoint {
     protected void afterMouseReleasedActions() {
         calcImCoords();
         center.calcImCoords();
+    }
+
+    @Override
+    public void paintHandle(Graphics2D g) {
+        super.paintHandle(g);
+        if (dragging && isActive()) {
+            UserDrag ud = gradientHandles.toUserDrag(this);
+            DragDisplayType.ANGLE_DIST.draw(g, ud);
+        }
     }
 }

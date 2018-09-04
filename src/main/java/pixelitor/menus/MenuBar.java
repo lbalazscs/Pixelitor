@@ -46,11 +46,13 @@ import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.Navigator;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.PreferencesPanel;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.OpenSave;
@@ -885,10 +887,10 @@ public class MenuBar extends JMenuBar {
         PMenu sub = new PMenu("Shapes");
 
         sub.addFilter("Flower of Life", FlowerOfLife::new);
+        sub.addFilter("Grid", RenderGrid::new);
         sub.addFilter("Lissajous Curve", Lissajous::new);
         sub.addFilter("Mystic Rose", MysticRose::new);
         sub.addFilter("Spirograph", Spirograph::new);
-        sub.addFilter("Grid", RenderGrid::new);
 
         return sub;
     }
@@ -896,6 +898,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderGeometrySubmenu() {
         PMenu sub = new PMenu("Geometry");
 
+        sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
         sub.addFilter(Starburst.NAME, Starburst::new);
 
         return sub;
@@ -1022,6 +1025,40 @@ public class MenuBar extends JMenuBar {
             repaintAll();
         });
         viewMenu.add(showPixelGridMI);
+
+        viewMenu.addSeparator();
+
+        viewMenu.addAction(new MenuAction("Add Horizontal Guide...") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                Guides.showAddSingleGuideDialog(comp, true);
+            }
+        });
+
+        viewMenu.addAction(new MenuAction("Add Vertical Guide...") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                Guides.showAddSingleGuideDialog(comp, false);
+            }
+        });
+
+        viewMenu.addAction(new MenuAction("Add Grid Guides...") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                Guides.showAddGridDialog(comp);
+            }
+        });
+
+        viewMenu.addAction(new MenuAction("Clear Guides") {
+            @Override
+            public void onClick() {
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                comp.clearGuides();
+            }
+        });
 
         viewMenu.addSeparator();
 
@@ -1340,8 +1377,6 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(XYZTest.NAME, XYZTest::new);
         sub.addFilter(Droste.NAME, Droste::new);
         sub.addFilter(Sphere3D.NAME, Sphere3D::new);
-        sub.addFilter("Grid", RenderGrid::new);
-        sub.addFilter(JHCheckerFilter.NAME, JHCheckerFilter::new);
 
         return sub;
     }

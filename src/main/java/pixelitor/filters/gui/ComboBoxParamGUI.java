@@ -35,6 +35,9 @@ public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI
         assert model instanceof Resettable;
 
         comboBox = new JComboBox<>(model);
+        // make sure all values are visible without a scrollbar
+        comboBox.setMaximumRowCount(model.getSize());
+
         comboBox.addActionListener(this);
 
         // workaround for nimbus bug

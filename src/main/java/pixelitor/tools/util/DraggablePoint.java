@@ -53,8 +53,8 @@ public class DraggablePoint extends Point2D.Double {
     public double imX;
     public double imY;
 
-    protected int dragStartX;
-    protected int dragStartY;
+    protected double dragStartX;
+    protected double dragStartY;
 
     protected double origX;
     protected double origY;
@@ -67,6 +67,9 @@ public class DraggablePoint extends Point2D.Double {
 
     // transient: it has to be reset after deserialization
     protected transient View view;
+
+    // TODO not reliable, currently isActive is also checked
+    protected boolean dragging = false;
 
     private Shape shape;
     private Shape shadow;
@@ -149,13 +152,14 @@ public class DraggablePoint extends Point2D.Double {
         }
     }
 
-    public void mousePressed(int x, int y) {
+    public void mousePressed(double x, double y) {
         dragStartX = x;
         dragStartY = y;
         // since the handle has a certain size, the point location
         // and the drag start location are not necessarily the same
         origX = this.x;
         origY = this.y;
+        dragging = true;
     }
 
     public void mouseDragged(double x, double y) {
@@ -164,9 +168,10 @@ public class DraggablePoint extends Point2D.Double {
         double newX = origX + dx;
         double newY = origY + dy;
         setLocation(newX, newY);
+        dragging = true;
     }
 
-    public void mouseDragged(int x, int y, boolean constrained) {
+    public void mouseDragged(double x, double y, boolean constrained) {
         double dx = x - dragStartX;
         double dy = y - dragStartY;
         double newX = origX + dx;
@@ -176,16 +181,19 @@ public class DraggablePoint extends Point2D.Double {
         } else {
             setLocation(newX, newY);
         }
+        dragging = true;
     }
 
-    public void mouseReleased(int x, int y) {
+    public void mouseReleased(double x, double y) {
         mouseDragged(x, y);
         afterMouseReleasedActions();
+        dragging = false;
     }
 
-    public void mouseReleased(int x, int y, boolean constrained) {
+    public void mouseReleased(double x, double y, boolean constrained) {
         mouseDragged(x, y, constrained);
         afterMouseReleasedActions();
+        dragging = false;
     }
 
     protected void afterMouseReleasedActions() {
@@ -261,6 +269,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public Point2D getLocationCopy() {
         return new Point2D.Double(x, y);
+    }
+
+    public PPoint asPPoint() {
+        return PPoint.lazyFromCo(x, y, view);
     }
 
     // this is supposed to be called after a mouse released event

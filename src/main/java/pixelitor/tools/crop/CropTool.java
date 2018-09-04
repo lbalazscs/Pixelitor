@@ -262,9 +262,9 @@ public class CropTool extends DragTool {
                 }
 
                 Rectangle r = userDrag.toCoRect();
-                PRectangle rect = PRectangle.positiveFromCo(r, e.getIC());
+                PRectangle rect = PRectangle.positiveFromCo(r, e.getView());
 
-                cropBox = new CropBox(rect, e.getIC());
+                cropBox = new CropBox(rect, e.getView());
 
                 state = TRANSFORM;
                 break;

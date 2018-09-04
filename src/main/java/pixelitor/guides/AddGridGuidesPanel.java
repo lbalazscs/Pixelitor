@@ -1,0 +1,67 @@
+/*
+ * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package pixelitor.guides;
+
+import pixelitor.filters.gui.GroupedRangeParam;
+import pixelitor.filters.gui.ParamAdjustmentListener;
+
+import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+class AddGridGuidesPanel extends JPanel {
+    private final GroupedRangeParam divisions = new GroupedRangeParam(
+            "Divisions", 1, 4, 50, false);
+    private final AddGuidesSupport guidesSupport;
+
+    public AddGridGuidesPanel(AddGuidesSupport guidesSupport) {
+        this.guidesSupport = guidesSupport;
+        setLayout(new BorderLayout());
+        add(divisions.createGUI(), BorderLayout.CENTER);
+
+        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        southPanel.add(new JLabel(guidesSupport.getClearText()));
+        southPanel.add(guidesSupport.createClearCB());
+        add(southPanel, BorderLayout.SOUTH);
+
+        ParamAdjustmentListener updatePreview = () -> applyGuides(true);
+        divisions.setAdjustmentListener(updatePreview);
+        guidesSupport.setAdjustmentListener(updatePreview);
+        updatePreview.paramAdjusted(); // set initial preview
+    }
+
+    public void applyGuides(boolean preview) {
+        Guides guides = guidesSupport.createEmptyGuides();
+
+        int horDivisions = getNumHorDivisions();
+        int verDivisions = getNumVerDivisions();
+        guides.addRelativeGrid(horDivisions, verDivisions);
+        guides.regenerateLines();
+        guides.setName(String.format("horDivisions = %d, verDivisions = %d%n", horDivisions, verDivisions));
+
+        guidesSupport.set(guides, preview);
+    }
+
+    private int getNumHorDivisions() {
+        return divisions.getValue(0);
+    }
+
+    private int getNumVerDivisions() {
+        return divisions.getValue(1);
+    }
+}

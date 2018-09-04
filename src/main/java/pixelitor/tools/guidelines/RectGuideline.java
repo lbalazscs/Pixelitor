@@ -17,14 +17,12 @@
 
 package pixelitor.tools.guidelines;
 
-import java.awt.BasicStroke;
+import pixelitor.guides.Guides;
+
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.tools.guidelines.RectGuidelineType.DIAGONALS;
@@ -36,9 +34,6 @@ import static pixelitor.tools.guidelines.RectGuidelineType.RULE_OF_THIRDS;
  */
 public class RectGuideline {
 
-    private final Stroke outerStroke = new BasicStroke(1,
-            CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0);
-    private final Stroke innerStroke = new BasicStroke(3);
     private Graphics2D g2;
 
     public void draw(Rectangle2D rect, RectGuidelineType type, Graphics2D g2)
@@ -57,17 +52,17 @@ public class RectGuideline {
         }
     }
 
-    private void drawLines(Line2D.Double[] lines)
+    private void drawLines(Line2D[] lines)
     {
-        g2.setStroke(innerStroke);
+        g2.setStroke(Guides.INNER_STROKE);
         g2.setColor(BLACK);
-        for (Line2D.Double line : lines) {
+        for (Line2D line : lines) {
             g2.draw(line);
         }
 
-        g2.setStroke(outerStroke);
+        g2.setStroke(Guides.OUTER_STROKE);
         g2.setColor(WHITE);
-        for (Line2D.Double line : lines) {
+        for (Line2D line : lines) {
             g2.draw(line);
         }
     }
@@ -77,7 +72,7 @@ public class RectGuideline {
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
         double x1, x2, y1, y2;
-        Line2D.Double[] lines = new Line2D.Double[4];
+        Line2D[] lines = new Line2D.Double[4];
 
         // vertical lines
         x1 = (rect.getX() + sectionWidth);
@@ -111,7 +106,7 @@ public class RectGuideline {
     private void drawDiagonals(Rectangle2D rect)
     {
         double x1, x2, y1, y2;
-        Line2D.Double[] lines = new Line2D.Double[4];
+        Line2D[] lines = new Line2D.Double[4];
 
         if (rect.getWidth() >= rect.getHeight()) {
             y1 = rect.getY();

@@ -95,7 +95,7 @@ public final class SelectionActions {
         comp.deselect(false);
         Path path = Shapes.shapeToPath(shape, comp.getIC());
         Tools.PEN.setPath(path);
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startEditing(false, false);
         comp.setActivePath(path);
         Tools.PEN.activate();
 

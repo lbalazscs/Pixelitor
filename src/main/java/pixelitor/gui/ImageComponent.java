@@ -350,6 +350,8 @@ public class ImageComponent extends JComponent
         // restore the original transform
         g2.setTransform(componentTransform);
 
+        comp.drawGuides(g2);
+
         if (ImageComponents.isActive(this)) {
             currentTool.paintOverImage(g2, canvas, this,
                     componentTransform, imageTransform);
@@ -418,19 +420,19 @@ public class ImageComponent extends JComponent
      * Repaints only a region of the image
      */
     public void updateRegion(PPoint start, PPoint end, double thickness) {
-        int startX = start.getCoX();
-        int startY = start.getCoY();
-        int endX = end.getCoX();
-        int endY = end.getCoY();
+        double startX = start.getCoX();
+        double startY = start.getCoY();
+        double endX = end.getCoX();
+        double endY = end.getCoY();
 
         // make sure that the start coordinates are smaller
         if (endX < startX) {
-            int tmp = startX;
+            double tmp = startX;
             startX = endX;
             endX = tmp;
         }
         if (endY < startY) {
-            int tmp = startY;
+            double tmp = startY;
             startY = endY;
             endY = tmp;
         }
@@ -439,15 +441,16 @@ public class ImageComponent extends JComponent
         // it still needs to be converted into component space
         thickness = viewScale * thickness;
 
-        startX = (int) (startX - thickness);
-        endX = (int) (endX + thickness);
-        startY = (int) (startY - thickness);
-        endY = (int) (endY + thickness);
+        startX = startX - thickness;
+        endX = endX + thickness;
+        startY = startY - thickness;
+        endY = endY + thickness;
 
-        int repWidth = endX - startX;
-        int repHeight = endY - startY;
+        double repWidth = endX - startX;
+        double repHeight = endY - startY;
 
-        repaint(startX, startY, repWidth, repHeight);
+        repaint((int) startX, (int) startY,
+                (int) repWidth, (int) repHeight);
     }
 
     /**
@@ -630,6 +633,7 @@ public class ImageComponent extends JComponent
         if (ImageComponents.isActive(this)) {
             Tools.coCoordsChanged(this);
         }
+        comp.coCoordsChanged();
 
         imToCo.invalidate();
         coToIm.invalidate();
