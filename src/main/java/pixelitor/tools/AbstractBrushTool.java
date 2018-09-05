@@ -148,21 +148,24 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addBrushSettingsButton() {
-        brushSettingsButton = settingsPanel.addButton("Brush Settings",
-                e -> {
-                    BrushType brushType = getBrushType();
-                    JPanel p = brushType.getConfigPanel(this);
-                    settingsDialog = new DialogBuilder()
-                            .content(p)
-                            .title("Settings for the " + brushType.toString() + " Brush")
-                            .notModal()
-                            .withScrollbars()
-                            .okText("Close")
-                            .noCancelButton()
-                            .show();
-                });
+        brushSettingsButton = settingsPanel.addButton(
+                "Brush Settings",
+                e -> brushSettingsButtonPressed());
 
         brushSettingsButton.setEnabled(false);
+    }
+
+    private void brushSettingsButtonPressed() {
+        BrushType brushType = getBrushType();
+        JPanel p = brushType.getConfigPanel(this);
+        settingsDialog = new DialogBuilder()
+                .content(p)
+                .title("Settings for the " + brushType.toString() + " Brush")
+                .notModal()
+                .withScrollbars()
+                .okText("Close")
+                .noCancelButton()
+                .show();
     }
 
     protected void addLazyMouseDialogButton() {

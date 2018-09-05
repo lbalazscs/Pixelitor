@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR_POINT;
 
 public class PathBuilderTest {
     private ImageComponent ic;
@@ -49,7 +49,7 @@ public class PathBuilderTest {
 
         Path path = new Path(comp);
         PathBuilder pb = PenToolMode.BUILD;
-        pb.setPath(path);
+        pb.setPath(path, "test");
         pb.assertStateIs(BEFORE_SUBPATH);
 
         // start the curve
@@ -81,7 +81,7 @@ public class PathBuilderTest {
 
         // release to set the final value of the control point
         pb.mouseReleased(createPMouseEvent(50, 10));
-        pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
+        pb.assertStateIs(MOVING_TO_NEXT_ANCHOR_POINT);
         assertThat(sp).numPointsIs(1);
         pb.paint(g);
         assertThat(firstAnchorPoint.ctrlOut)
@@ -90,13 +90,13 @@ public class PathBuilderTest {
 
         // move down towards the second path point
         pb.mouseMoved(createMouseEvent(50, 20), ic);
-        pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
+        pb.assertStateIs(MOVING_TO_NEXT_ANCHOR_POINT);
         pb.paint(g);
         pb.mouseMoved(createMouseEvent(50, 30), ic);
-        pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
+        pb.assertStateIs(MOVING_TO_NEXT_ANCHOR_POINT);
         pb.paint(g);
         pb.mouseMoved(createMouseEvent(50, 40), ic);
-        pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
+        pb.assertStateIs(MOVING_TO_NEXT_ANCHOR_POINT);
         assertThat(sp).numPointsIs(1);
         pb.paint(g);
 
@@ -124,7 +124,7 @@ public class PathBuilderTest {
 
         // release to fix the control points
         pb.mouseReleased(createPMouseEvent(90, 50));
-        pb.assertStateIs(MOVING_TO_NEXT_CURVE_POINT);
+        pb.assertStateIs(MOVING_TO_NEXT_ANCHOR_POINT);
         assertThat(sp).numPointsIs(2);
         pb.paint(g);
         assertThat(secondPoint.ctrlOut)

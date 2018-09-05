@@ -46,7 +46,6 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.guides.AddGuidesSupport;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.AddLayerMaskAction;
@@ -79,6 +78,7 @@ import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
 import java.awt.AWTException;
@@ -93,6 +93,7 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -119,14 +120,14 @@ public class RandomGUITest {
     private static final Random rand = new Random();
 
     // set to null to select random tools
-    private static final Tool preferredTool = Tools.BRUSH;
+    private static final Tool preferredTool = Tools.PEN;
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
     private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT
             = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
 
-    private static boolean keepRunning = true;
+    private static volatile boolean keepRunning = true;
 
     private static final WeightedCaller weightedCaller = new WeightedCaller();
     private static final boolean PRINT_MEMORY = false;
@@ -354,20 +355,59 @@ public class RandomGUITest {
         r.mouseRelease(BUTTON1_MASK);
     }
 
-    private static void click(Robot r) {
-        log(Tools.getCurrent().getName() + " Tool click");
+    private static void randomClick(Robot r) {
+        String modifiers = "";
+        boolean rightClick = rand.nextFloat() < 0.2;
+        if (rightClick) {
+            modifiers = Ansi.yellow("right-") + modifiers;
+        }
+        boolean shiftClick = rand.nextBoolean();
+        if (shiftClick) {
+            r.keyPress(VK_SHIFT);
+            r.delay(50);
+            modifiers = Ansi.blue("shift-") + modifiers;
+        }
+        boolean altClick = rand.nextBoolean();
+        if (altClick) {
+            r.keyPress(VK_ALT);
+            r.delay(50);
+            modifiers = Ansi.green("alt-") + modifiers;
+        }
+        boolean ctrlClick = rand.nextBoolean();
+        if (ctrlClick) {
+            r.keyPress(VK_CONTROL);
+            r.delay(50);
+            modifiers = Ansi.red("ctrl-") + modifiers;
+        }
+        String msg = Tools.getCurrent().getName() + " Tool " + modifiers + "click";
+//        System.out.printf("RandomGUITest::randomClick: msg = '%s'%n", msg);
+        log(msg);
 
-        r.mousePress(BUTTON1_MASK);
+        if (rightClick) {
+            r.mousePress(BUTTON3_MASK);
+        } else {
+            r.mousePress(BUTTON1_MASK);
+        }
         r.delay(50);
-        r.mouseRelease(BUTTON1_MASK);
-    }
 
-    private static void randomRightClick(Robot r) {
-        log(Tools.getCurrent().getName() + " Tool right click");
-
-        r.mousePress(BUTTON3_MASK);
+        if (rightClick) {
+            r.mouseRelease(BUTTON3_MASK);
+        } else {
+            r.mouseRelease(BUTTON1_MASK);
+        }
         r.delay(50);
-        r.mouseRelease(BUTTON3_MASK);
+        if (ctrlClick) {
+            r.keyRelease(VK_CONTROL);
+            r.delay(50);
+        }
+        if (altClick) {
+            r.keyRelease(VK_ALT);
+            r.delay(50);
+        }
+        if (shiftClick) {
+            r.keyRelease(VK_SHIFT);
+            r.delay(50);
+        }
     }
 
     private static void randomColors() {
@@ -915,7 +955,11 @@ public class RandomGUITest {
     private static void randomTool() {
         Tool tool;
         if (preferredTool != null) {
-            tool = preferredTool;
+            if (rand.nextBoolean()) {
+                tool = preferredTool;
+            } else {
+                tool = Tools.getRandomTool();
+            }
         } else {
             tool = Tools.getRandomTool();
 
@@ -1044,15 +1088,13 @@ public class RandomGUITest {
             comp.clearGuides();
             return;
         }
-        AddGuidesSupport guidesSupport = new AddGuidesSupport(comp, false);
-        Guides guides = guidesSupport.createEmptyGuides();
-        if (rand.nextBoolean()) {
-            guides.addHorRelative(rand.nextFloat());
-        } else {
-            guides.addVerRelative(rand.nextFloat());
-        }
-        guides.regenerateLines();
-        guidesSupport.set(guides, false);
+        new Guides.Builder(comp, false).build(false, guides -> {
+            if (rand.nextBoolean()) {
+                guides.addHorRelative(rand.nextFloat());
+            } else {
+                guides.addVerRelative(rand.nextFloat());
+            }
+        });
     }
 
     private static void reload(Robot r) {
@@ -1061,6 +1103,18 @@ public class RandomGUITest {
             if (comp.getFile() != null) {
                 log("f5 reload");
                 pressKey(r, VK_F5);
+            }
+        }
+    }
+
+    // to prevent paths growing too large
+    private static void setPathsToNull() {
+        List<ImageComponent> icList = ImageComponents.getICList();
+        ImageComponent activeIC = ImageComponents.getActiveIC();
+        for (ImageComponent ic : icList) {
+            // don't touch the active, as its path might be edited just now
+            if (ic != activeIC) {
+                ic.getComp().setActivePath(null);
             }
         }
     }
@@ -1075,8 +1129,7 @@ public class RandomGUITest {
         // random move
         weightedCaller.registerCallback(10, () -> randomMove(r));
         weightedCaller.registerCallback(70, () -> randomDrag(r));
-        weightedCaller.registerCallback(5, () -> click(r));
-        weightedCaller.registerCallback(1, () -> randomRightClick(r));
+        weightedCaller.registerCallback(5, () -> randomClick(r));
         weightedCaller.registerCallback(2, RandomGUITest::repeat);
         weightedCaller.registerCallback(1, RandomGUITest::randomUndoRedo);
         weightedCaller.registerCallback(1, RandomGUITest::randomCrop);
@@ -1108,11 +1161,12 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::randomPaste);
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
-        weightedCaller.registerCallback(3, RandomGUITest::randomTool);
+        weightedCaller.registerCallback(10, RandomGUITest::randomTool);
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
         weightedCaller.registerCallback(5, RandomGUITest::randomNewTextLayer);
         weightedCaller.registerCallback(5, RandomGUITest::randomTextLayerRasterize);
-        weightedCaller.registerCallback(17, RandomGUITest::randomGuides);
+        weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
+        weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);
 
         if (Build.enableAdjLayers) {
             weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);

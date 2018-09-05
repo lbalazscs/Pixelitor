@@ -80,17 +80,15 @@ public class AnchorPoint extends DraggablePoint {
     public void paintHandles(Graphics2D g, boolean paintIn, boolean paintOut) {
         boolean ctrlOutActive = ctrlOut.isActive();
         boolean ctrlInActive = ctrlIn.isActive();
-        boolean ctrlOutRetracted = ctrlOut.isRetracted();
-        boolean ctrlInRetracted = ctrlIn.isRetracted();
 
-        if (paintIn && !ctrlInRetracted) {
+        if (paintIn && !ctrlIn.isRetracted()) {
             Line2D.Double lineIn = new Line2D.Double(x, y, ctrlIn.x, ctrlIn.y);
             Shapes.drawVisible(g, lineIn);
             if (!ctrlInActive) {
                 ctrlIn.paintHandle(g);
             }
         }
-        if (paintOut && !ctrlOutRetracted) {
+        if (paintOut && !ctrlOut.isRetracted()) {
             Line2D.Double lineOut = new Line2D.Double(x, y, ctrlOut.x, ctrlOut.y);
             Shapes.drawVisible(g, lineOut);
             if (!ctrlOutActive) {
@@ -100,7 +98,8 @@ public class AnchorPoint extends DraggablePoint {
 
         paintHandle(g);
 
-        // paint active control points on the top, even if they are retracted
+        // the active control handles should be painted after (over) the anchor handle,
+        // even if they are retracted, otherwise it looks wrong when dragging them out
         if (ctrlOutActive) {
             ctrlOut.paintHandle(g);
         } else if (ctrlInActive) {
@@ -229,7 +228,7 @@ public class AnchorPoint extends DraggablePoint {
         p.show((JComponent) view, x, y);
     }
 
-    private void retractHandles() {
+    public void retractHandles() {
         ctrlIn.retract();
         ctrlOut.retract();
         setType(SYMMETRIC);

@@ -35,6 +35,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 
 /**
@@ -51,8 +52,12 @@ public class Path implements Serializable {
     private final Composition comp;
     private SubPath activeSubPath;
 
+    private static long debugCounter = 0;
+    private final String id; // for debugging
+
     public Path(Composition comp) {
         this.comp = comp;
+        id = "P" + (debugCounter++);
     }
 
     @VisibleForTesting
@@ -132,12 +137,12 @@ public class Path implements Serializable {
         activeSubPath.finalizeMovingPoint(x, y, finishSubPath);
     }
 
-    public int getNumPointsInActiveSubpath() {
-        return activeSubPath.getNumPoints();
+    public int getNumAnchorPointsInActiveSubpath() {
+        return activeSubPath.getNumAnchorPoints();
     }
 
-    public void setMoving(AnchorPoint point) {
-        activeSubPath.setMoving(point);
+    public void setMoving(AnchorPoint point, String reason) {
+        activeSubPath.setMoving(point, reason);
     }
 
     public AnchorPoint getMoving() {
@@ -254,7 +259,34 @@ public class Path implements Serializable {
         }
     }
 
-    public void finishActiveSubpath() {
-        activeSubPath.setFinished(true);
+    public void finishActiveSubpath(String reason) {
+        activeSubPath.setFinished(true, reason);
+    }
+
+    public boolean hasMovingPoint() {
+        return activeSubPath.hasMovingPoint();
+    }
+
+    public int getNumSubpaths() {
+        return subPaths.size();
+    }
+
+    public SubPath getSubPath(int index) {
+        return subPaths.get(index);
+    }
+
+    @VisibleForTesting
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        String s = getId() + " ";
+        s += subPaths
+                .stream()
+                .map(SubPath::getId)
+                .collect(joining(",", "[", "]"));
+        return s;
     }
 }

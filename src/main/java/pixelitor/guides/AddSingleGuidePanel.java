@@ -28,36 +28,41 @@ import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The GUI for adding a single (horizontal or vertical) guide
+ */
 public class AddSingleGuidePanel extends JPanel {
-    private final AddGuidesSupport guidesSupport;
-    private final boolean horizontal;
+    private final Guides.Builder builder;
+    private final boolean horizontal; // horizontal or vertical
 
     private final RangeParam percents;
-    private final RangeParam pixels;
 
-    public AddSingleGuidePanel(AddGuidesSupport guidesSupport, boolean horizontal) {
-        this.guidesSupport = guidesSupport;
+    public AddSingleGuidePanel(Guides.Builder builder, boolean horizontal) {
+        this.builder = builder;
         this.horizontal = horizontal;
-        Canvas canvas = guidesSupport.getComp().getCanvas();
+
+        Canvas canvas = builder.getCanvas();
         int maxSize = horizontal ? canvas.getImWidth() : canvas.getImHeight();
         percents = new RangeParam("Position %", 0, 50, 100);
-        pixels = new RangeParam("Position Pixels", 0, maxSize / 2, maxSize);
+        RangeParam pixels = new RangeParam("Position Pixels", 0, maxSize / 2, maxSize);
         percents.linkWith(pixels, maxSize / 100.0);
 
-        BooleanParam clearExisting = guidesSupport.getClearExisting();
+        BooleanParam clearExisting = builder.getClearExisting();
         List<FilterParam> params = Arrays.asList(percents, pixels, clearExisting);
         GUIUtils.arrangeParamsInVerticalGridBag(this, params);
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
         percents.setAdjustmentListener(updatePreview);
         pixels.setAdjustmentListener(updatePreview);
-        guidesSupport.setAdjustmentListener(updatePreview);
+        builder.setAdjustmentListener(updatePreview);
         updatePreview.paramAdjusted(); // set initial preview
     }
 
     public void createGuides(boolean preview) {
-        Guides guides = guidesSupport.createEmptyGuides();
+        builder.build(preview, this::setup);
+    }
 
+    private void setup(Guides guides) {
         float percentage = percents.getValueAsPercentage();
         if (horizontal) {
             guides.addHorRelative(percentage);
@@ -66,8 +71,5 @@ public class AddSingleGuidePanel extends JPanel {
             guides.addVerRelative(percentage);
             guides.setName(String.format("vertical at %.2f", percentage));
         }
-        guides.regenerateLines();
-
-        guidesSupport.set(guides, preview);
     }
 }

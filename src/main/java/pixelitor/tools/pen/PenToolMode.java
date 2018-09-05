@@ -19,6 +19,8 @@ package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.PathNode;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -35,10 +37,30 @@ public interface PenToolMode {
 
     void paint(Graphics2D g);
 
-    void setPath(Path path);
+    Path getPath();
+
+    void setPath(Path path, String reason);
 
     String getToolMessage();
 
+    void modeStarted();
+
+    void modeEnded();
+
+    default DebugNode createDebugNode() {
+        DebugNode node = new DebugNode("PenToolMode " + toString(), this);
+
+        Path path = getPath();
+        if (path != null) {
+            node.add(new PathNode(path));
+        } else {
+            node.addBoolean("Has Path", false);
+        }
+
+        return node;
+    }
+
+    // enum-like variables to make the code more readable
     PathBuilder BUILD = PathBuilder.INSTANCE;
     PathEditor EDIT = PathEditor.INSTANCE;
 }

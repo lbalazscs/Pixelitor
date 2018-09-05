@@ -25,6 +25,8 @@ import pixelitor.tools.util.PMouseEvent;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
+import static pixelitor.tools.util.DraggablePoint.activePoint;
+
 /**
  * A pen tool interaction mode where a path can be edited
  */
@@ -36,7 +38,6 @@ public class PathEditor implements PenToolMode {
                     "<b>Right-click</b> the anchor points for options. " +
                     "<b>Alt-drag</b> to pull out handles.";
     private Path path;
-    private DraggablePoint activeDraggablePoint;
 
     private PathEditor() {
     }
@@ -55,7 +56,6 @@ public class PathEditor implements PenToolMode {
 
         DraggablePoint draggablePoint = path.handleWasHit(x, y, e.isAltDown());
         if (draggablePoint != null) {
-            activeDraggablePoint = draggablePoint;
             draggablePoint.setActive(true);
             draggablePoint.mousePressed(x, y);
         }
@@ -66,8 +66,8 @@ public class PathEditor implements PenToolMode {
         double x = e.getCoX();
         double y = e.getCoY();
 
-        if (activeDraggablePoint != null) {
-            activeDraggablePoint.mouseDragged(x, y);
+        if (activePoint != null) {
+            activePoint.mouseDragged(x, y);
         }
     }
 
@@ -76,13 +76,13 @@ public class PathEditor implements PenToolMode {
         double x = e.getCoX();
         double y = e.getCoY();
 
-        if (activeDraggablePoint != null) {
-            if (e.isPopupTrigger() && activeDraggablePoint instanceof AnchorPoint) {
-                AnchorPoint ap = (AnchorPoint) activeDraggablePoint;
+        if (activePoint != null) {
+            if (e.isPopupTrigger() && activePoint instanceof AnchorPoint) {
+                AnchorPoint ap = (AnchorPoint) activePoint;
                 ap.showPopup((int) x, (int) y);
             } else {
-                activeDraggablePoint.mouseReleased(x, y);
-                activeDraggablePoint
+                activePoint.mouseReleased(x, y);
+                activePoint
                         .createMovedEdit(e.getComp())
                         .ifPresent(History::addEdit);
             }
@@ -96,12 +96,10 @@ public class PathEditor implements PenToolMode {
         DraggablePoint hitPoint = path.handleWasHit(x, y, e.isAltDown());
         if (hitPoint != null) {
             hitPoint.setActive(true);
-            activeDraggablePoint = hitPoint;
             return true;
         } else {
-            if (activeDraggablePoint != null) {
-                activeDraggablePoint.setActive(false);
-                activeDraggablePoint = null;
+            if (activePoint != null) {
+                activePoint.setActive(false);
                 return true;
             }
         }
@@ -109,17 +107,34 @@ public class PathEditor implements PenToolMode {
     }
 
     @Override
-    public void setPath(Path path) {
-        this.path = path;
+    public Path getPath() {
+        return path;
     }
 
     @Override
-    public String toString() {
-        return "Edit";
+    public void setPath(Path path, String reason) {
+//        System.out.printf("PathEditor::setPath: reason = '%s'%n", reason);
+        assert path != null : "null path because " + reason;
+        this.path = path;
     }
 
     @Override
     public String getToolMessage() {
         return EDIT_HELP_MESSAGE;
+    }
+
+    @Override
+    public void modeStarted() {
+
+    }
+
+    @Override
+    public void modeEnded() {
+
+    }
+
+    @Override
+    public String toString() {
+        return "Edit";
     }
 }

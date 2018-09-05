@@ -24,6 +24,7 @@ import pixelitor.tools.pen.history.AddAnchorPointEdit;
 import pixelitor.tools.pen.history.CloseSubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 
 import java.awt.Graphics2D;
@@ -36,7 +37,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR_POINT;
 
 /**
  * A subpath within a {@link Path}
@@ -49,6 +50,9 @@ import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
  */
 public class SubPath implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private static long debugCounter = 0;
+    private final String id; // for debugging
 
     private final List<AnchorPoint> anchorPoints = new ArrayList<>();
     private final Composition comp;
@@ -73,6 +77,7 @@ public class SubPath implements Serializable {
 
     public SubPath(Composition comp) {
         this.comp = comp;
+        id = "SP" + (debugCounter++);
     }
 
     public void addFirstPoint(AnchorPoint p) {
@@ -94,7 +99,10 @@ public class SubPath implements Serializable {
         last = p;
     }
 
-    public void setMoving(AnchorPoint p) {
+    public void setMoving(AnchorPoint p, String reason) {
+//        if (p == null && moving != null) {
+//            System.out.printf(id + ": setMoving to null: reason = '%s'%n", reason);
+//        }
         moving = p;
     }
 
@@ -104,13 +112,16 @@ public class SubPath implements Serializable {
         anchorPoints.add(moving);
         moving.setPath(this);
         last = moving;
-        moving = null;
+        setMoving(null, "finalizeMovingPoint (finishSubPath = " + finishSubPath + ")");
 
         History.addEdit(new AddAnchorPointEdit(
                 comp, this, last, finishSubPath));
     }
 
     public AnchorPoint getMoving() {
+        if (moving == null) {
+            System.out.println("SubPath::getMoving: returning NULL in " + id);
+        }
         return moving;
     }
 
@@ -122,7 +133,7 @@ public class SubPath implements Serializable {
         return last;
     }
 
-    public int getNumPoints() {
+    public int getNumAnchorPoints() {
         return anchorPoints.size();
     }
 
@@ -204,10 +215,16 @@ public class SubPath implements Serializable {
 
     public void paintHandlesForBuilding(Graphics2D g, PathBuilder.State state) {
         assert checkConsistency();
+
+        // paint first all anchor points, without the handles
+        for (AnchorPoint point : anchorPoints) {
+            point.paintHandle(g);
+        }
+
         if (finished) {
             return;
         }
-        int numPoints = getNumPoints();
+        int numPoints = getNumAnchorPoints();
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             if (numPoints > 1) {
                 last.paintHandles(g, true, true);
@@ -219,7 +236,7 @@ public class SubPath implements Serializable {
                     Shapes.drawVisible(g, line);
                 }
             }
-        } else if (state == MOVING_TO_NEXT_CURVE_POINT) {
+        } else if (state == MOVING_TO_NEXT_ANCHOR_POINT) {
             boolean paintIn = true;
             if (numPoints <= 2) {
                 paintIn = false;
@@ -234,6 +251,7 @@ public class SubPath implements Serializable {
 
     public void paintHandlesForEditing(Graphics2D g) {
         assert checkConsistency();
+
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             boolean paintIn = true;
@@ -281,7 +299,7 @@ public class SubPath implements Serializable {
             // make sure we have a valid last reference
             last = anchorPoints.get(indexOfLast - 1);
         }
-        moving = null; // can be ignored in this case
+        setMoving(null, "close");
         setClosed(true);
 
         if (addToHistory) {
@@ -295,15 +313,18 @@ public class SubPath implements Serializable {
         // A closed subpath is always also finished,
         // a re-opened (in case of undo) subpath is also unfinished.
         // A subpath can be finished without being closed.
-        setFinished(closed);
+        setFinished(closed, "setClosed(" + closed + ")");
     }
 
-    public void setFinished(boolean finished) {
+    public void setFinished(boolean finished, String reason) {
         this.finished = finished;
+        if (finished) {
+            setMoving(null, "finished (" + reason + ")");
+        }
     }
 
     public void undoClosing() {
-        moving = new AnchorPoint(first, false);
+        setMoving(new AnchorPoint(first, false), "undoClosing");
         setClosed(false);
     }
 
@@ -409,7 +430,7 @@ public class SubPath implements Serializable {
         last = anchorPoints.get(indexOfLast - 1);
 
         if (moving == null) { // when undoing a finished subpath
-            moving = removed;
+            setMoving(removed, "deleteLast");
         }
     }
 
@@ -436,5 +457,19 @@ public class SubPath implements Serializable {
             }
         }
         return true;
+    }
+
+    public boolean hasMovingPoint() {
+        return moving != null;
+    }
+
+    @VisibleForTesting
+    public String getId() {
+        return id;
+    }
+
+    @VisibleForTesting
+    public boolean isFinished() {
+        return finished;
     }
 }

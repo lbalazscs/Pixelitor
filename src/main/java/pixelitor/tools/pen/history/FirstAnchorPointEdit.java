@@ -37,7 +37,7 @@ public class FirstAnchorPointEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Tools.PEN.setPath(null);
+        Tools.PEN.setPath(null, "FirstAnchorPointEdit.undo");
         comp.repaint();
     }
 
@@ -45,7 +45,7 @@ public class FirstAnchorPointEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        Tools.PEN.setPath(path);
+        Tools.PEN.setPath(path, "FirstAnchorPointEdit.redo");
         comp.repaint();
     }
 }

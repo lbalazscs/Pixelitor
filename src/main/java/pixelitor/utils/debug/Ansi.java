@@ -34,31 +34,27 @@ public class Ansi {
     private Ansi() {
     }
 
-    public static String red(String s) {
-        return RED + s + RESET;
-    }
-
     public static String red(Object o) {
-        return RED + o.toString() + RESET;
+        return RED + o + RESET;
     }
 
-    public static String green(String s) {
-        return GREEN + s + RESET;
+    public static String green(Object o) {
+        return GREEN + o + RESET;
     }
 
-    public static String blue(String s) {
-        return BLUE + s + RESET;
+    public static String blue(Object o) {
+        return BLUE + o + RESET;
     }
 
-    public static String yellow(String s) {
-        return YELLOW + s + RESET;
+    public static String yellow(Object o) {
+        return YELLOW + o + RESET;
     }
 
-    public static String purple(String s) {
-        return PURPLE + s + RESET;
+    public static String purple(Object o) {
+        return PURPLE + o + RESET;
     }
 
-    public static String cyan(String s) {
-        return CYAN + s + RESET;
+    public static String cyan(Object o) {
+        return CYAN + o + RESET;
     }
 }

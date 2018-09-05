@@ -420,7 +420,7 @@ public class GradientTool extends DragTool {
         node.addString("Type", getType().toString());
         node.addString("Cycling", getCycleType().toString());
         node.addQuotedString("Color", getGradientColorType().toString());
-        node.addBoolean("Invert", revertCheckBox.isSelected());
+        node.addBoolean("Revert", revertCheckBox.isSelected());
         node.addFloat("Opacity", blendingModePanel.getOpacity());
         node.addQuotedString("Blending Mode",
                 blendingModePanel.getBlendingMode().toString());

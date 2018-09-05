@@ -20,18 +20,15 @@ package pixelitor.tools.gui;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Icons;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * The button that activates a tool
  */
-public class ToolButton extends JToggleButton implements ActionListener {
+public class ToolButton extends JToggleButton {
     private final Tool tool;
 
     public ToolButton(Tool tool) {
@@ -57,19 +54,12 @@ public class ToolButton extends JToggleButton implements ActionListener {
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(true);
         setRolloverEnabled(false);
-        addActionListener(this);
+        addActionListener(e -> Tools.changeTo(tool));
 
         int size = 44; // the icons are 30*30
 
         Dimension preferredSize = new Dimension(size, size);
         setPreferredSize(preferredSize);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        Tools.changeTo(tool);
-
-        Messages.showInStatusBar(tool.getStatusBarMessage());
     }
 
     public Tool getTool() {

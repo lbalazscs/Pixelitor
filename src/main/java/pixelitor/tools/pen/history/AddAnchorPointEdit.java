@@ -27,7 +27,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_CURVE_POINT;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR_POINT;
 
 public class AddAnchorPointEdit extends PixelitorEdit {
     private final SubPath subPath;
@@ -49,7 +49,7 @@ public class AddAnchorPointEdit extends PixelitorEdit {
         super.undo();
 
         subPath.deleteLast();
-        Tools.PEN.setBuilderState(MOVING_TO_NEXT_CURVE_POINT);
+        Tools.PEN.setBuilderState(MOVING_TO_NEXT_ANCHOR_POINT, "AddAnchorPointEdit.undo");
         comp.repaint();
     }
 
@@ -59,7 +59,7 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
         subPath.addPoint(anchorPoint);
         if (finishSubPath) {
-            Tools.PEN.setBuilderState(BEFORE_SUBPATH);
+            Tools.PEN.setBuilderState(BEFORE_SUBPATH, "AddAnchorPointEdit.redo");
         }
         comp.repaint();
     }

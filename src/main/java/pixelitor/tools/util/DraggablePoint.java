@@ -63,7 +63,7 @@ public class DraggablePoint extends Point2D.Double {
     private final Color activeColor;
 
     //    private boolean active = false;
-    private static DraggablePoint activePoint = null;
+    public static DraggablePoint activePoint = null;
 
     // transient: it has to be reset after deserialization
     protected transient View view;
@@ -211,14 +211,17 @@ public class DraggablePoint extends Point2D.Double {
      * image space coordinates so that they adapt to the view.
      */
     public void restoreCoordsFromImSpace(View view) {
-        assert this.view == view;
+        if (this.view != view) {
+            // TODO what to do in the rare cases when the view changes?
+            this.view = view;
+        }
+
         double newX = view.imageXToComponentSpace(imX);
         double newY = view.imageYToComponentSpace(imY);
         setLocationOnlyForThis(newX, newY);
     }
 
     public void setActive(boolean active) {
-//        this.active = active;
         if (active) {
             DraggablePoint.activePoint = this;
         } else {

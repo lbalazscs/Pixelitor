@@ -26,6 +26,7 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
 
 import java.awt.event.MouseEvent;
@@ -86,6 +87,8 @@ public class Tools {
         newTool.toolStarted();
         EventDispatcher.toolChanged(previousTool, newTool);
         ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newTool);
+
+        Messages.showInStatusBar(newTool.getStatusBarMessage());
     }
 
     public static Tool[] getAll() {

@@ -19,8 +19,11 @@ package pixelitor.guides;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.filters.gui.BooleanParam;
+import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.history.History;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.BasicStroke;
@@ -31,12 +34,18 @@ import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_BEVEL;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 
+/**
+ * Represents a set of guides.
+ * Objects of this class should be mutated only while building,
+ * for any changes a new instance should be built.
+ */
 public class Guides implements Serializable {
     public static final Stroke OUTER_STROKE = new BasicStroke(1,
             CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0);
@@ -52,7 +61,8 @@ public class Guides implements Serializable {
 
     private String name;
 
-    public Guides(Composition comp) {
+    @VisibleForTesting
+    Guides(Composition comp) {
         this.comp = comp;
     }
 
@@ -104,26 +114,26 @@ public class Guides implements Serializable {
     }
 
     public static void showAddGridDialog(Composition comp) {
-        AddGuidesSupport guidesSupport = new AddGuidesSupport(comp, true);
-        AddGridGuidesPanel panel = new AddGridGuidesPanel(guidesSupport);
+        Builder builder = new Builder(comp, true);
+        AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
         new DialogBuilder()
                 .title("Add Grid Guides")
                 .content(panel)
-                .okAction(() -> panel.applyGuides(false))
-                .cancelAction(guidesSupport::resetOldGuides)
+                .okAction(() -> panel.createGuides(false))
+                .cancelAction(builder::resetOldGuides)
                 .show();
     }
 
     public static void showAddSingleGuideDialog(Composition comp,
                                                 boolean horizontal) {
-        AddGuidesSupport guidesSupport = new AddGuidesSupport(comp, false);
-        AddSingleGuidePanel panel = new AddSingleGuidePanel(guidesSupport, horizontal);
+        Builder builder = new Builder(comp, false);
+        AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
         String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
         new DialogBuilder()
                 .title(dialogTitle)
                 .content(panel)
                 .okAction(() -> panel.createGuides(false))
-                .cancelAction(guidesSupport::resetOldGuides)
+                .cancelAction(builder::resetOldGuides)
                 .show();
     }
 
@@ -194,13 +204,7 @@ public class Guides implements Serializable {
         return verticals;
     }
 
-    public void clear() {
-        horizontals.clear();
-        verticals.clear();
-        lines.clear();
-    }
-
-    public void regenerateLines() {
+    private void regenerateLines() {
         int width = comp.getCanvasImWidth();
         int height = comp.getCanvasImHeight();
         ImageComponent ic = comp.getIC();
@@ -246,7 +250,7 @@ public class Guides implements Serializable {
         regenerateLines();
     }
 
-    public void copyValuesFrom(Guides other) {
+    private void copyValuesFrom(Guides other) {
         assert other != null;
         horizontals.addAll(other.horizontals);
         verticals.addAll(other.verticals);
@@ -258,5 +262,55 @@ public class Guides implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Code that is common for building both single-line and grid guides.
+     * Designed primarily for dialog sessions with previews.
+     */
+    public static class Builder {
+        private final BooleanParam clearExisting;
+        private final Composition comp;
+        private final Guides oldGuides;
+
+        public Builder(Composition comp, boolean clearByDefault) {
+            this.comp = comp;
+            oldGuides = comp.getGuides();
+            clearExisting = new BooleanParam("Clear Existing Guides", clearByDefault);
+        }
+
+        public void build(boolean preview, Consumer<Guides> setup) {
+            Guides guides = new Guides(comp);
+            boolean useExisting = !clearExisting.isChecked();
+            if (useExisting && oldGuides != null) {
+                guides.copyValuesFrom(oldGuides);
+            }
+
+            setup.accept(guides);
+
+            guides.regenerateLines();
+            comp.setGuides(guides);
+            comp.repaint();
+            if (!preview) {
+                History.addEdit(new GuidesChangeEdit(comp, oldGuides, guides));
+            }
+        }
+
+        public void resetOldGuides() {
+            comp.setGuides(oldGuides);
+            comp.repaint();
+        }
+
+        public BooleanParam getClearExisting() {
+            return clearExisting;
+        }
+
+        public void setAdjustmentListener(ParamAdjustmentListener updatePreview) {
+            clearExisting.setAdjustmentListener(updatePreview);
+        }
+
+        public Canvas getCanvas() {
+            return comp.getCanvas();
+        }
     }
 }

@@ -17,6 +17,7 @@
 
 package pixelitor.guides;
 
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 
@@ -27,34 +28,34 @@ import java.awt.FlowLayout;
 class AddGridGuidesPanel extends JPanel {
     private final GroupedRangeParam divisions = new GroupedRangeParam(
             "Divisions", 1, 4, 50, false);
-    private final AddGuidesSupport guidesSupport;
+    private final Guides.Builder builder;
 
-    public AddGridGuidesPanel(AddGuidesSupport guidesSupport) {
-        this.guidesSupport = guidesSupport;
+    public AddGridGuidesPanel(Guides.Builder builder) {
+        this.builder = builder;
         setLayout(new BorderLayout());
         add(divisions.createGUI(), BorderLayout.CENTER);
 
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        southPanel.add(new JLabel(guidesSupport.getClearText()));
-        southPanel.add(guidesSupport.createClearCB());
+        BooleanParam clearExisting = builder.getClearExisting();
+        southPanel.add(new JLabel(clearExisting.getName() + ": "));
+        southPanel.add(clearExisting.createGUI());
         add(southPanel, BorderLayout.SOUTH);
 
-        ParamAdjustmentListener updatePreview = () -> applyGuides(true);
+        ParamAdjustmentListener updatePreview = () -> createGuides(true);
         divisions.setAdjustmentListener(updatePreview);
-        guidesSupport.setAdjustmentListener(updatePreview);
+        builder.setAdjustmentListener(updatePreview);
         updatePreview.paramAdjusted(); // set initial preview
     }
 
-    public void applyGuides(boolean preview) {
-        Guides guides = guidesSupport.createEmptyGuides();
+    public void createGuides(boolean preview) {
+        builder.build(preview, this::setup);
+    }
 
+    private void setup(Guides guides) {
         int horDivisions = getNumHorDivisions();
         int verDivisions = getNumVerDivisions();
         guides.addRelativeGrid(horDivisions, verDivisions);
-        guides.regenerateLines();
         guides.setName(String.format("horDivisions = %d, verDivisions = %d%n", horDivisions, verDivisions));
-
-        guidesSupport.set(guides, preview);
     }
 
     private int getNumHorDivisions() {
