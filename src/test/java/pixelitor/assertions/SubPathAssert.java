@@ -71,7 +71,7 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
     public SubPathAssert numPointsIs(int expected) {
         isNotNull();
 
-        int numPoints = actual.getNumPoints();
+        int numPoints = actual.getNumAnchorPoints();
         if (numPoints != expected) {
             throw new AssertionError("numPoints is " + numPoints + ", expecting " + expected);
         }

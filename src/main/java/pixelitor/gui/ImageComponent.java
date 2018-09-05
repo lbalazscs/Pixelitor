@@ -205,6 +205,12 @@ public class ImageComponent extends JComponent
 
     @Override
     public void mousePressed(MouseEvent e) {
+//        String msg = Utils.debugMouseModifiers(e);
+//        if(!msg.isEmpty()) {
+//            System.out
+//                    .println("ImageComponent::mousePressed: " + msg + "press");
+//        }
+
         Tools.EventDispatcher.mousePressed(e, this);
     }
 

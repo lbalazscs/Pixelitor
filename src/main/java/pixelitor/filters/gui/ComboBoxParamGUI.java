@@ -20,14 +20,12 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Displays a JComboBox as the GUI for an
  * {@link IntChoiceParam} or an {@link EnumParam}
  */
-public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI {
+public class ComboBoxParamGUI extends JPanel implements ParamGUI {
     private final JComboBox<IntChoiceParam.Value> comboBox;
     private final DefaultButton defaultButton;
 
@@ -37,8 +35,6 @@ public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI
         comboBox = new JComboBox<>(model);
         // make sure all values are visible without a scrollbar
         comboBox.setMaximumRowCount(model.getSize());
-
-        comboBox.addActionListener(this);
 
         // workaround for nimbus bug
         Dimension origPS = comboBox.getPreferredSize();
@@ -62,6 +58,8 @@ public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI
             add(comboBox);
             add(defaultButton);
         }
+
+        comboBox.addActionListener(e -> defaultButton.updateIcon());
     }
 
     @Override
@@ -74,12 +72,6 @@ public class ComboBoxParamGUI extends JPanel implements ActionListener, ParamGUI
         comboBox.setEnabled(enabled);
         defaultButton.setEnabled(enabled);
         super.setEnabled(enabled);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-//        model.setSelectedItem(comboBox.getSelectedItem());
-        defaultButton.updateIcon();
     }
 
     @Override

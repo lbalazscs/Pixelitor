@@ -23,6 +23,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -38,6 +39,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -493,6 +495,27 @@ public final class Utils {
 
     public static <T> CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
+    }
+
+    public static String debugMouseModifiers(MouseEvent e) {
+        boolean altDown = e.isAltDown();
+        boolean controlDown = e.isControlDown();
+        boolean shiftDown = e.isShiftDown();
+        boolean rightMouse = SwingUtilities.isRightMouseButton(e);
+        StringBuilder msg = new StringBuilder(25);
+        if (controlDown) {
+            msg.append(Ansi.red("ctrl-"));
+        }
+        if (altDown) {
+            msg.append(Ansi.green("alt-"));
+        }
+        if (shiftDown) {
+            msg.append(Ansi.blue("shift-"));
+        }
+        if (rightMouse) {
+            msg.append(Ansi.yellow("right-"));
+        }
+        return msg.toString();
     }
 }
 
