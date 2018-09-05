@@ -35,6 +35,7 @@ import pixelitor.filters.comp.EnlargeCanvas;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
+import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.filters.gui.ResizePanel;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.levels.Levels;
@@ -653,6 +654,8 @@ public class MenuBar extends JMenuBar {
                 .add();
         colorsMenu.buildFilter("Levels", Levels::new)
                 .withKey(CTRL_L)
+                .add();
+        colorsMenu.buildFilter(ToneCurvesFilter.NAME, ToneCurvesFilter::new)
                 .add();
         colorsMenu.buildFilter(BrightnessContrast.NAME, BrightnessContrast::new)
                 .add();
