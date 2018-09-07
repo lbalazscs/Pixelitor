@@ -116,18 +116,31 @@ public class MultiLayerBackup {
 
         ImageLayer imageLayer = (ImageLayer) layer;
 
-        if (currentImage == backupImage && backupMaskImage == currentMaskImage) {
-
-            // for enlarge canvas with big layer it can happen that
-            // the image does not need to be changed at all
-            return null;
+        if (currentImage == backupImage) {
+            if (backupMaskImage == currentMaskImage) {
+                // For enlarge canvas with big layer it can happen that neither the
+                // image nor the mask was not changed, and then no image edit is needed.
+                // Note that these are independent conditions because
+                // the initial size of a mask is the canvas size.
+                return null;
+            } else if (backupMaskImage != null) {
+                // the image layer size is always bigger or equal than the mask size,
+                // therefore it can happen that only the mask changed, therefore
+                // create an edit only for the mask
+                ImageEdit edit = new ImageEdit(editName, comp, imageLayer.getMask(),
+                        backupMaskImage, true, false);
+                edit.setEmbedded(true);
+                return edit;
+            }
         }
 
         ImageEdit edit;
         if (backupMaskImage != null) {
+            // edit for the image and the mask
             edit = new ImageAndMaskEdit(editName, comp, imageLayer,
                     backupImage, backupMaskImage, false);
         } else {
+            // edit only for the image as there is no mask
             edit = new ImageEdit(editName, comp, imageLayer,
                     backupImage, true, false);
         }

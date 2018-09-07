@@ -256,7 +256,7 @@ public class TestHelper {
             when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
         } else {
-            comp.createSelectionFromShape(shape);
+            comp.setSelectionFromShape(shape);
         }
     }
 
@@ -268,9 +268,7 @@ public class TestHelper {
     }
 
     private static void addRectangleSelection(Composition comp, Rectangle rect) {
-//        comp.startSelection(SelectionType.RECTANGLE, SelectionInteraction.ADD);
-        Selection selection = new Selection(rect, comp.getIC());
-        comp.setNewSelection(selection);
+        comp.setSelectionRef(new Selection(rect, comp.getIC()));
     }
 
     public static void setStandardTestSelection(Composition comp) {

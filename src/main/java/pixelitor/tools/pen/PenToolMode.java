@@ -17,7 +17,9 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.PathNode;
@@ -43,9 +45,17 @@ public interface PenToolMode {
 
     String getToolMessage();
 
-    void modeStarted();
+    default void modeStarted(Path path) {
+        setPath(path, "modeStarted");
+    }
 
-    void modeEnded();
+    default void modeEnded() {
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (comp != null) {
+            comp.setActivePath(getPath());
+            comp.repaint();
+        }
+    }
 
     default DebugNode createDebugNode() {
         DebugNode node = new DebugNode("PenToolMode " + toString(), this);

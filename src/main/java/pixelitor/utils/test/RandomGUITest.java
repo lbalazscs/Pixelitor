@@ -325,6 +325,7 @@ public class RandomGUITest {
     }
 
     private static void log(String msg) {
+//        System.out.println(msg);
         Events.postRandomTestEvent(msg);
     }
 
@@ -337,28 +338,31 @@ public class RandomGUITest {
     }
 
     private static void randomDrag(Robot r) {
+        Tool tool = Tools.getCurrent();
         Point randomPoint = generateRandomPoint();
         int x = randomPoint.x;
         int y = randomPoint.y;
-        Tool tool = Tools.getCurrent();
         String stateInfo = tool.getStateInfo();
         if (stateInfo == null) {
             stateInfo = "";
         } else {
-            stateInfo = "(" + stateInfo + ")";
+            stateInfo = " (" + stateInfo + ")";
         }
-
-        log(tool.getName() + " Tool " + stateInfo + " drag to (" + x + ", " + y + ')');
-
-        r.mousePress(BUTTON1_MASK);
-        r.mouseMove(x, y);
-        r.mouseRelease(BUTTON1_MASK);
+        String modifiers = doWithModifiers(r, () -> r.mouseMove(x, y));
+        log(tool.getName() + " Tool" + stateInfo + " " + modifiers
+                + "drag to (" + x + ", " + y + ')');
     }
 
     private static void randomClick(Robot r) {
+        String modifiers = doWithModifiers(r, null);
+        String msg = Tools.getCurrent().getName() + " Tool " + modifiers + "click";
+        log(msg);
+    }
+
+    private static String doWithModifiers(Robot r, Runnable action) {
         String modifiers = "";
-        boolean rightClick = rand.nextFloat() < 0.2;
-        if (rightClick) {
+        boolean rightMouse = rand.nextFloat() < 0.2;
+        if (rightMouse) {
             modifiers = Ansi.yellow("right-") + modifiers;
         }
         boolean shiftClick = rand.nextBoolean();
@@ -379,18 +383,20 @@ public class RandomGUITest {
             r.delay(50);
             modifiers = Ansi.red("ctrl-") + modifiers;
         }
-        String msg = Tools.getCurrent().getName() + " Tool " + modifiers + "click";
-//        System.out.printf("RandomGUITest::randomClick: msg = '%s'%n", msg);
-        log(msg);
 
-        if (rightClick) {
+        if (rightMouse) {
             r.mousePress(BUTTON3_MASK);
         } else {
             r.mousePress(BUTTON1_MASK);
         }
         r.delay(50);
 
-        if (rightClick) {
+        if (action != null) {
+            action.run();
+            r.delay(50);
+        }
+
+        if (rightMouse) {
             r.mouseRelease(BUTTON3_MASK);
         } else {
             r.mouseRelease(BUTTON1_MASK);
@@ -408,6 +414,7 @@ public class RandomGUITest {
             r.keyRelease(VK_SHIFT);
             r.delay(50);
         }
+        return modifiers;
     }
 
     private static void randomColors() {
@@ -789,7 +796,6 @@ public class RandomGUITest {
                 action = new Flip(VERTICAL);
                 break;
         }
-
 
         executeAction(action);
     }

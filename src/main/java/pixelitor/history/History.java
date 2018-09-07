@@ -38,6 +38,7 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEditSupport;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -358,5 +359,15 @@ public class History {
         node.addBoolean("Can repeat", History.canRepeatOperation());
 
         return node;
+    }
+
+    @VisibleForTesting
+    public static void dump() {
+        undoManager.dump();
+    }
+
+    @VisibleForTesting
+    public static List<String> asStringList() {
+        return undoManager.asStringList();
     }
 }

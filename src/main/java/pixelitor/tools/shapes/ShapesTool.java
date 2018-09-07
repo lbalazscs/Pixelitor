@@ -386,7 +386,7 @@ public class ShapesTool extends DragTool {
                 // update the selection shape
                 selection.setShape(selectionShape);
             } else {
-                comp.createSelectionFromShape(selectionShape);
+                comp.setSelectionFromShape(selectionShape);
             }
         }
     }

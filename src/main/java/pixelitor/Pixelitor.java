@@ -220,8 +220,9 @@ public class Pixelitor {
         Rectangle2D.Double shape = new Rectangle2D.Double(100, 100, 300, 100);
 
         Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
-        Tools.PEN.setPath(path, "startup test");
-        Tools.PEN.startEditing(false, false);
+        ImageComponents.getActiveCompOrNull().setActivePath(path);
+
+        Tools.PEN.startEditing(path, false, false);
         Tools.PEN.activate();
     }
 

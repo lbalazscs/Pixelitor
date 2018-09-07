@@ -26,15 +26,13 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR_POINT;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
 
 public class CloseSubPathEdit extends PixelitorEdit {
     private final SubPath subPath;
 
     public CloseSubPathEdit(Composition comp, SubPath subPath) {
-        // TODO change name when building multiple
-        // subpaths becomes possible
-        super("Close Path", comp);
+        super("Close Subpath", comp);
         this.subPath = subPath;
     }
 
@@ -43,7 +41,7 @@ public class CloseSubPathEdit extends PixelitorEdit {
         super.undo();
 
         subPath.undoClosing();
-        Tools.PEN.setBuilderState(MOVING_TO_NEXT_ANCHOR_POINT, "CloseSubPathEdit.undo");
+        Tools.PEN.setBuilderState(MOVING_TO_NEXT_ANCHOR, "CloseSubPathEdit.undo");
         comp.repaint();
     }
 

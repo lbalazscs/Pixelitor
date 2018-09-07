@@ -363,7 +363,7 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     protected void toolStarted() {
         super.toolStarted();
-        resetState();
+        resetStateToInitial();
     }
 
     @Override
@@ -373,10 +373,11 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        resetState();
+        resetStateToInitial();
     }
 
-    private void resetState() {
+    @Override
+    public void resetStateToInitial() {
         firstMouseDown = true;
         respectSelection = true;
     }
@@ -392,7 +393,7 @@ public abstract class AbstractBrushTool extends Tool {
 
             finishBrushStroke(dr);
         } finally {
-            resetState();
+            resetStateToInitial();
         }
     }
 

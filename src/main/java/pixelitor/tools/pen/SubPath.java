@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR_POINT;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
 
 /**
  * A subpath within a {@link Path}
@@ -106,16 +106,17 @@ public class SubPath implements Serializable {
         moving = p;
     }
 
-    public void finalizeMovingPoint(double x, double y, boolean finishSubPath) {
+    public AnchorPoint addMovingPointAsAnchor(double x, double y, boolean finishSubPath) {
         moving.setLocation(x, y);
         moving.calcImCoords();
         anchorPoints.add(moving);
         moving.setPath(this);
         last = moving;
-        setMoving(null, "finalizeMovingPoint (finishSubPath = " + finishSubPath + ")");
+        setMoving(null, "addMovingPointAsAnchor (finishSubPath = " + finishSubPath + ")");
 
         History.addEdit(new AddAnchorPointEdit(
                 comp, this, last, finishSubPath));
+        return last;
     }
 
     public AnchorPoint getMoving() {
@@ -180,7 +181,7 @@ public class SubPath implements Serializable {
             }
             prev = curr;
         }
-        if (moving != null) {
+        if (moving != null && PenToolMode.BUILD.showRubberBand()) {
             gp.curveTo(
                     toX.applyAsDouble(last.ctrlOut),
                     toY.applyAsDouble(last.ctrlOut),
@@ -236,7 +237,7 @@ public class SubPath implements Serializable {
                     Shapes.drawVisible(g, line);
                 }
             }
-        } else if (state == MOVING_TO_NEXT_ANCHOR_POINT) {
+        } else if (state == MOVING_TO_NEXT_ANCHOR) {
             boolean paintIn = true;
             if (numPoints <= 2) {
                 paintIn = false;
@@ -307,7 +308,7 @@ public class SubPath implements Serializable {
         }
     }
 
-    public void setClosed(boolean closed) {
+    private void setClosed(boolean closed) {
         this.closed = closed;
 
         // A closed subpath is always also finished,
@@ -424,12 +425,12 @@ public class SubPath implements Serializable {
         anchorPoints.remove(index);
     }
 
-    public void deleteLast() {
+    public void deleteLast(boolean setRemovedAsMoving) {
         int indexOfLast = anchorPoints.size() - 1;
         AnchorPoint removed = anchorPoints.remove(indexOfLast);
         last = anchorPoints.get(indexOfLast - 1);
 
-        if (moving == null) { // when undoing a finished subpath
+        if (setRemovedAsMoving) { // when undoing a finished subpath
             setMoving(removed, "deleteLast");
         }
     }
@@ -444,7 +445,7 @@ public class SubPath implements Serializable {
     }
 
     @SuppressWarnings("SameReturnValue")
-    public boolean checkConsistency() {
+    private boolean checkConsistency() {
         checkWiring();
         if (closed) {
             if (!finished) {

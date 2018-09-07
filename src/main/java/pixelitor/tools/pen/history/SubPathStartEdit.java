@@ -20,24 +20,37 @@ package pixelitor.tools.pen.history;
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
+import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PenToolMode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-public class FirstAnchorPointEdit extends PixelitorEdit {
-    private final Path path;
+import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
 
-    public FirstAnchorPointEdit(Composition comp, Path path) {
-        super("Path Start", comp);
+public class SubPathStartEdit extends PixelitorEdit {
+    private final Path path;
+    private final AnchorPoint point;
+    private final boolean wasFirst;
+
+    public SubPathStartEdit(Composition comp, Path path, AnchorPoint point, boolean wasFirst) {
+        super("Subpath Start", comp);
         this.path = path;
+        this.point = point;
+        this.wasFirst = wasFirst;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Tools.PEN.setPath(null, "FirstAnchorPointEdit.undo");
+        boolean noMoreLeft = path.deleteLastSubPath();
+        assert wasFirst == noMoreLeft;
+        if (noMoreLeft) {
+            Tools.PEN.setPath(null, "SubPathStartEdit.undo");
+        }
+        PenToolMode.BUILD.setState(BEFORE_SUBPATH, "SubPathStartEdit.undo");
         comp.repaint();
     }
 
@@ -45,7 +58,10 @@ public class FirstAnchorPointEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        Tools.PEN.setPath(path, "FirstAnchorPointEdit.redo");
+        path.startNewSubPath(point, false);
+        if (wasFirst) {
+            Tools.PEN.setPath(path, "SubPathStartEdit.redo");
+        }
         comp.repaint();
     }
 }

@@ -35,6 +35,7 @@ import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
+import pixelitor.tools.pen.Path;
 import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
@@ -104,6 +105,15 @@ public class ImageComponents {
     public static Composition getActiveCompOrNull() {
         if (activeIC != null) {
             return activeIC.getComp();
+        }
+
+        // there is no open image
+        return null;
+    }
+
+    public static Path getActivePathOrNull() {
+        if (activeIC != null) {
+            return activeIC.getComp().getActivePath();
         }
 
         // there is no open image
@@ -230,6 +240,7 @@ public class ImageComponents {
 
         Composition comp = ic.getComp();
         setActiveIC(ic, false);
+        SelectionActions.setEnabled(comp.hasSelection(), comp);
         ic.activateUI(true);
 
         for (ActiveImageChangeListener listener : activeICChangeListeners) {
@@ -239,7 +250,6 @@ public class ImageComponents {
         Layer layer = comp.getActiveLayer();
         Layers.activeLayerChanged(layer);
 
-        SelectionActions.setEnabled(comp.hasSelection(), comp);
         ZoomMenu.zoomChanged(ic.getZoomLevel());
 
         Canvas.activeCanvasImSizeChanged(comp.getCanvas());

@@ -45,6 +45,6 @@ public class NewSelectionEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.createSelectionFromShape(newShape);
+        comp.setSelectionFromShape(newShape);
     }
 }
