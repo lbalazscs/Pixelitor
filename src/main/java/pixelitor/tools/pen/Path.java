@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.tools.pen.history.FirstAnchorPointEdit;
+import pixelitor.tools.pen.history.SubPathStartEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
@@ -107,17 +107,36 @@ public class Path implements Serializable {
         return path;
     }
 
-    public void startNewSubPath(AnchorPoint first, boolean addToHistory) {
+    public void startNewSubPath(AnchorPoint point, boolean addToHistory) {
         activeSubPath = new SubPath(comp);
         subPaths.add(activeSubPath);
-        activeSubPath.addFirstPoint(first);
+        activeSubPath.addFirstPoint(point);
 
         if (addToHistory) {
-            History.addEdit(new FirstAnchorPointEdit(comp, this));
+            boolean wasFirst = subPaths.size() == 1;
+            History.addEdit(new SubPathStartEdit(comp, this, point, wasFirst));
         }
     }
 
-    public void addPoint(AnchorPoint ap) {
+    /**
+     * Returns true if there are no more subpaths left
+     */
+    public boolean deleteLastSubPath() {
+        int lastIndex = subPaths.size() - 1;
+        assert activeSubPath == subPaths.get(lastIndex);
+
+        // this should be called only for undo
+        assert activeSubPath.getNumAnchorPoints() == 1;
+
+        subPaths.remove(lastIndex);
+        if (lastIndex == 0) {
+            return true;
+        }
+        activeSubPath = subPaths.get(lastIndex - 1);
+        return false;
+    }
+
+    private void addPoint(AnchorPoint ap) {
         activeSubPath.addPoint(ap);
     }
 
@@ -133,8 +152,8 @@ public class Path implements Serializable {
         activeSubPath.close(addToHistory);
     }
 
-    public void finalizeMovingPoint(double x, double y, boolean finishSubPath) {
-        activeSubPath.finalizeMovingPoint(x, y, finishSubPath);
+    public AnchorPoint addMovingPointAsAnchor(double x, double y, boolean finishSubPath) {
+        return activeSubPath.addMovingPointAsAnchor(x, y, finishSubPath);
     }
 
     public int getNumAnchorPointsInActiveSubpath() {

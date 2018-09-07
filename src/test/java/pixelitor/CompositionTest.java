@@ -632,8 +632,7 @@ public class CompositionTest {
 
         // set a selection
         Rectangle originalSelectionRect = new Rectangle(3, 3, 4, 4);
-        Selection selection = new Selection(originalSelectionRect, comp.getIC());
-        comp.setNewSelection(selection);
+        comp.setSelectionRef(new Selection(originalSelectionRect, comp.getIC()));
 
         assertThat(comp).hasSelection();
         assertThat(comp.getSelection())
@@ -660,11 +659,11 @@ public class CompositionTest {
     }
 
     @Test
-    public void testCreateSelectionFromShape() {
+    public void testSetSelectionFromShape() {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle rect = new Rectangle(3, 3, 5, 5);
-        comp.createSelectionFromShape(rect);
+        comp.setSelectionFromShape(rect);
 
         comp.checkInvariant();
         assertThat(comp).hasSelection();

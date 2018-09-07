@@ -32,6 +32,7 @@ import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
@@ -94,9 +95,9 @@ public final class SelectionActions {
         Path oldActivePath = comp.getActivePath();
         comp.deselect(false);
         Path path = Shapes.shapeToPath(shape, comp.getIC());
-        Tools.PEN.setPath(path, "selectionToPath");
-        Tools.PEN.startEditing(false, false);
         comp.setActivePath(path);
+        PenToolMode.EDIT.setPath(path, "selectionToPath");
+        Tools.PEN.startEditing(path, false, false);
         Tools.PEN.activate();
 
         if (addToHistory) {

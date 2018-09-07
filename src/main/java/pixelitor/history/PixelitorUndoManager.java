@@ -31,6 +31,9 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * An undo manager which is also a list model for debugging history
@@ -294,5 +297,20 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
         }
 
         return node;
+    }
+
+    @VisibleForTesting
+    public void dump() {
+        for (int i = 0; i < getSize(); i++) {
+            PixelitorEdit edit = getElementAt(i);
+            System.out.println(edit);
+        }
+    }
+
+    @VisibleForTesting
+    public List<String> asStringList() {
+        return edits.stream()
+                .map(UndoableEdit::getPresentationName)
+                .collect(toList());
     }
 }

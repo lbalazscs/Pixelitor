@@ -32,7 +32,7 @@ import static pixelitor.tools.util.DraggablePoint.activePoint;
  */
 public class PathEditor implements PenToolMode {
     public static final PathEditor INSTANCE = new PathEditor();
-    public static final String EDIT_HELP_MESSAGE =
+    private static final String EDIT_HELP_MESSAGE =
             "<html>Pen Tool Edit Mode: " +
                     "<b>drag</b> the anchor and control points. " +
                     "<b>Right-click</b> the anchor points for options. " +
@@ -121,16 +121,6 @@ public class PathEditor implements PenToolMode {
     @Override
     public String getToolMessage() {
         return EDIT_HELP_MESSAGE;
-    }
-
-    @Override
-    public void modeStarted() {
-
-    }
-
-    @Override
-    public void modeEnded() {
-
     }
 
     @Override

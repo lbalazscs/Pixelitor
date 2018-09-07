@@ -98,6 +98,9 @@ public final class ConsistencyChecks {
     }
 
     public static void selectionActionsEnabledCheck(Composition comp) {
+        if (!comp.isActive()) {
+            return;
+        }
         if (comp.hasSelection()) {
             if (!SelectionActions.areEnabled()) {
                 throw new IllegalStateException(comp.getName()

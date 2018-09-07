@@ -48,6 +48,26 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
         return this;
     }
 
+    public SubPathAssert isFinished() {
+        isNotNull();
+
+        if (!actual.isFinished()) {
+            throw new AssertionError("not finished");
+        }
+
+        return this;
+    }
+
+    public SubPathAssert isNotFinished() {
+        isNotNull();
+
+        if (actual.isFinished()) {
+            throw new AssertionError("finished");
+        }
+
+        return this;
+    }
+
     public SubPathAssert firstIsActive() {
         isNotNull();
 

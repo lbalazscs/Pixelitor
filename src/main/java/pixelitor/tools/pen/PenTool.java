@@ -32,7 +32,6 @@ import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.PathNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -51,11 +50,13 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class PenTool extends Tool {
 
-    private JComboBox<PenToolMode> modeChooser;
+    private final JComboBox<PenToolMode> modeChooser = new JComboBox<>(
+            new PenToolMode[]{PenToolMode.BUILD, PenToolMode.EDIT});
     private final AbstractAction toSelectionAction;
 
-    private Path path;
     private PenToolMode mode = PenToolMode.BUILD;
+
+    private JCheckBox rubberBandCB;
 
     public PenTool() {
         super("Pen", 'p', "pen_tool_icon.png",
@@ -73,43 +74,44 @@ public class PenTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        modeChooser = new JComboBox<>(new PenToolMode[]{
-                PenToolMode.BUILD, PenToolMode.EDIT});
         modeChooser.addActionListener(e -> onModeChooserAction());
         settingsPanel.addWithLabel("Mode:", modeChooser);
 
         settingsPanel.addButton(toSelectionAction, "toSelectionButton",
                 "Convert the active path to a selection");
+
+        rubberBandCB = new JCheckBox("", true);
+        rubberBandCB.addActionListener(e ->
+                PenToolMode.BUILD.setShowRubberBand(rubberBandCB.isSelected()));
+        settingsPanel.addWithLabel("Rubber Band: ", rubberBandCB, "rubberBandCB");
     }
 
     private void onModeChooserAction() {
+        Path path = ImageComponents.getActivePathOrNull();
         if (getSelectedMode() == PenToolMode.BUILD) {
-            startBuilding();
-            Messages.showInStatusBar("<html>Pen Tool: " + PathBuilder.BUILDER_HELP_MESSAGE);
+            startBuilding(path);
         } else {
-            startEditing(true, true);
-            Messages.showInStatusBar("<html>Pen Tool: " + PathEditor.EDIT_HELP_MESSAGE);
+            startEditing(path, true, true);
         }
     }
 
-    private void startBuilding() {
-        changeMode(PenToolMode.BUILD);
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        Path p = null;
-        if (comp != null) {
-            p = comp.getActivePath();
-        }
-        setPath(p, "startBuilding");
-        enableConvertToSelection(p != null);
+    private void startBuilding(Path path) {
+        changeMode(PenToolMode.BUILD, path);
+        enableConvertToSelection(path != null);
         ImageComponents.repaintActive();
     }
 
-    public void startEditing(boolean pathWasBuiltInteractively,
+    public void startEditing(Path path, boolean pathWasBuiltInteractively,
                              boolean calledFromModeChooser) {
-        if (!hasPath()) {
+        if (path == null) {
             EventQueue.invokeLater(() -> {
                 if (!RandomGUITest.isRunning()) {
-                    Dialogs.showInfoDialog("No Path", "There is no path to edit.");
+                    Dialogs.showInfoDialog("No Path",
+                            "<html>There is no path to edit. " +
+                                    "You can create a path<ul>" +
+                                    "<li>in build mode</li>" +
+                                    "<li>by converting a selection into a path</li>" +
+                                    "</ul>");
                 }
                 modeChooser.setSelectedItem(PenToolMode.BUILD);
             });
@@ -121,15 +123,14 @@ public class PenTool extends Tool {
         }
 
         path.changeTypesForEditing(pathWasBuiltInteractively);
-        changeMode(PenToolMode.EDIT);
-        mode.setPath(path, "PT.startEditing");
+        changeMode(PenToolMode.EDIT, path);
         enableConvertToSelection(true);
         ImageComponents.repaintActive();
     }
 
     @Override
     public void resetStateToInitial() {
-        modeChooser.setSelectedItem(PenToolMode.BUILD);
+        setPath(ImageComponents.getActivePathOrNull(), "resetStateToInitial");
     }
 
     @Override
@@ -141,7 +142,8 @@ public class PenTool extends Tool {
         return (PenToolMode) modeChooser.getSelectedItem();
     }
 
-    public void convertToSelection(boolean addToHistory) {
+    private void convertToSelection(boolean addToHistory) {
+        Path path = mode.getPath();
         Path oldPath = path;
 
         Shape shape = path.toImageSpaceShape();
@@ -165,10 +167,6 @@ public class PenTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        if (path == null) {
-            assert mode instanceof PathBuilder;
-            setPath(new Path(e.getComp()), "PT.mousePressed");
-        }
         mode.mousePressed(e);
     }
 
@@ -202,6 +200,7 @@ public class PenTool extends Tool {
 
     @Override
     public void coCoordsChanged(ImageComponent ic) {
+        Path path = mode.getPath();
         if (path != null) {
             path.coCoordsChanged(ic);
         }
@@ -218,45 +217,30 @@ public class PenTool extends Tool {
         if (path == null) {  // undo
             modeChooser.setSelectedItem(PenToolMode.BUILD);
         }
-        this.path = path;
-        mode.setPath(this.path, "PT.setPath(" + reason + ")");
-    }
-
-    public boolean hasPath() {
-        return path != null;
+        mode.setPath(path, "PT.setPath(" + reason + ")");
     }
 
     @Override
     protected void toolStarted() {
         super.toolStarted();
 
+        Path compPath = null;
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp != null) {
-            Path path = comp.getActivePath();
-            if (path == null && mode == PenToolMode.EDIT) {
+            compPath = comp.getActivePath();
+            if (compPath == null && mode == PenToolMode.EDIT) {
                 modeChooser.setSelectedItem(PenToolMode.BUILD);
             }
-            setPath(path, "toolStarted");
+            mode.setPath(compPath, "toolStarted");
             comp.repaint();
         }
-        mode.modeStarted();
+        mode.modeStarted(compPath);
     }
 
     @Override
     protected void toolEnded() {
         super.toolEnded();
         mode.modeEnded();
-
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        if (comp != null) {
-            comp.setActivePath(path);
-        }
-
-//        changeMode(PenToolMode.BUILD); // to make sure that edit mode has never null path
-//        setPath(null, "toolEnded");
-        if (comp != null) {
-            comp.repaint();
-        }
     }
 
     // this is called only by the undo mechanism
@@ -275,13 +259,14 @@ public class PenTool extends Tool {
     // This method should not be called directly, only through
     // the combo box event handler. Otherwise the mode and the
     // the combo box get out of sync.
-    private void changeMode(PenToolMode mode) {
+    private void changeMode(PenToolMode mode, Path path) {
         if (this.mode != mode) {
 //            System.out.println("PenTool::changeMode: " + red(this.mode) + " => " + green(mode));
             this.mode.modeEnded();
-            mode.modeStarted();
+            mode.modeStarted(path);
         }
         this.mode = mode;
+        Messages.showInStatusBar(mode.getToolMessage());
     }
 
     @Override
@@ -289,11 +274,6 @@ public class PenTool extends Tool {
         DebugNode node = super.getDebugNode();
 
         node.add(mode.createDebugNode());
-        if (path != null) {
-            node.add(new PathNode(path));
-        } else {
-            node.addBoolean("Has Path", false);
-        }
 
         return node;
     }

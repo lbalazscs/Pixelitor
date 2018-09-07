@@ -195,5 +195,9 @@ public class Tools {
                 newTool.handlerChain.handleMousePressed(lastEvent);
             }
         }
+
+        public static boolean isMouseDown() {
+            return mouseDown;
+        }
     }
 }

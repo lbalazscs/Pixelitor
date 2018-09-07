@@ -821,11 +821,7 @@ public class Composition implements Serializable {
 
             if (isActive()) {
                 if (wasHidden) {
-                    SelectionActions.getShowHide()
-                            .setHideName();
-                }
-                if (!ic.isMock()) {
-                    SelectionActions.setEnabled(false, this);
+                    SelectionActions.getShowHide().setHideName();
                 }
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
@@ -896,7 +892,7 @@ public class Composition implements Serializable {
             selection.setShape(shape);
             edit = new SelectionChangeEdit("Selection Change", this, backupSelectionShape);
         } else {
-            setSelectionRef(createSelectionFromShape(shape));
+            setSelectionFromShape(shape);
             edit = new NewSelectionEdit(this, selection.getShape());
         }
         return edit;
@@ -906,16 +902,17 @@ public class Composition implements Serializable {
      * Changing the selection reference should be done only by using this method
      * (in order to make debugging easier)
      */
-    private void setSelectionRef(Selection selection) {
-//        if(this.selection != null && selection == null) {
-//            Thread.dumpStack();
-//        }
+    void setSelectionRef(Selection selection) {
         this.selection = selection;
+        if (isActive()) {
+            SelectionActions.setEnabled(selection != null, this);
+        }
     }
 
     public void promoteSelection() {
         assert selection == null || !selection.isAlive() : "selection = " + selection;
-        setNewSelection(builtSelection);
+        assert builtSelection != null;
+        setSelectionRef(builtSelection);
         setBuiltSelection(null);
     }
 
@@ -959,21 +956,12 @@ public class Composition implements Serializable {
         }
     }
 
-    public Selection createSelectionFromShape(Shape selectionShape) {
+    public void setSelectionFromShape(Shape shape) {
         if (selection != null) {
-            throw new IllegalStateException("createSelectionFromShape called while there was a selection: " + selection
+            throw new IllegalStateException("setSelectionFromShape called while there was a selection: " + selection
                     .toString());
         }
-        setNewSelection(new Selection(selectionShape, ic));
-        return selection;
-    }
-
-    public void setNewSelection(Selection selection) {
-        assert selection != null;
-        setSelectionRef(selection);
-        if (isActive() && !ic.isMock()) {
-            SelectionActions.setEnabled(true, this);
-        }
+        setSelectionRef(new Selection(shape, ic));
     }
 
     /**
@@ -1010,7 +998,7 @@ public class Composition implements Serializable {
         }
     }
 
-    private boolean isActive() {
+    public boolean isActive() {
         return (ImageComponents.getActiveCompOrNull() == this);
     }
 

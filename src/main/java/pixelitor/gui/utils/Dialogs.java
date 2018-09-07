@@ -187,12 +187,14 @@ public class Dialogs {
             return;
         }
 
+        RandomGUITest.stop();
+
         if (e instanceof OutOfMemoryError) {
             showOutOfMemoryDialog((OutOfMemoryError) e);
             return;
         }
 
-        System.err.printf("Exception in the thread '%s'%n", thread.getName());
+        System.err.printf("\nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
         e.printStackTrace();
         showMoreDevelopmentInfo(e);
 
@@ -233,7 +235,6 @@ public class Dialogs {
         // the event dumps
         Utils.sleep(2, TimeUnit.SECONDS);
 
-        RandomGUITest.stop();
         Events.dumpForActiveComp();
         Toolkit.getDefaultToolkit().beep();
         playWarningSound();

@@ -134,6 +134,7 @@ public class ImageComponent extends JComponent
 
                 // call explicitly with the new comp, because at this point oldComp
                 // is not the active comp anymore, so deselect didn't call it
+                assert !comp.hasSelection();
                 SelectionActions.setEnabled(false, comp);
             } else {
                 edit = replaceEdit;
