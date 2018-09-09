@@ -150,9 +150,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return imageLayer;
     }
 
-    public static ImageLayer createFromPastedImage(BufferedImage pastedImage,
-                                                   Composition comp) {
-        ImageLayer layer = new ImageLayer(comp, "Pasted Layer", null);
+    /**
+     * Creates an image layer from an external (pasted or drag-and-dropped)
+     * image, which can have a different size than the canvas.
+     */
+    public static ImageLayer createFromExternalImage(BufferedImage pastedImage,
+                                                     Composition comp,
+                                                     String layerName) {
+        ImageLayer layer = new ImageLayer(comp, layerName, null);
         requireNonNull(pastedImage);
 
         int canvasWidth = comp.getCanvasImWidth();

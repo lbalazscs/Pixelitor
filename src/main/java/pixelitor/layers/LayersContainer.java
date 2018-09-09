@@ -20,12 +20,15 @@ package pixelitor.layers;
 import pixelitor.Build;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.io.DropListener;
 import pixelitor.utils.ActiveImageChangeListener;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.dnd.DropTarget;
 
 import static javax.swing.BorderFactory.createTitledBorder;
+import static pixelitor.io.DropListener.OpenStrategy.NEW_LAYERS;
 
 /**
  * The part of the GUI that manages the layers of a composition.
@@ -50,6 +53,8 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
         setBorder(createTitledBorder("Layers"));
 
         ImageComponents.addActiveImageChangeListener(this);
+
+        new DropTarget(this, new DropListener(NEW_LAYERS));
     }
 
     private static JPanel initSouthPanel() {

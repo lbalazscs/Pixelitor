@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
+import static pixelitor.io.DropListener.OpenStrategy.NEW_IMAGES;
 
 /**
  * Represents the area of the app where the edited images are.
@@ -89,7 +90,7 @@ public class ImageArea {
         JComponent component = (JComponent) ui;
         GlobalKeyboardWatch.setAlwaysVisibleComponent(component);
         GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
-        new DropTarget(component, new DropListener());
+        new DropTarget(component, new DropListener(NEW_IMAGES));
     }
 
     public static JComponent getUI() {
