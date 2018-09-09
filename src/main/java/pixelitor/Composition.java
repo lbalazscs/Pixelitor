@@ -305,10 +305,10 @@ public class Composition implements Serializable {
         return newLayer;
     }
 
-    public void addPastedImageAsNewLayer(BufferedImage pastedImage) {
-        ImageLayer newLayer = ImageLayer.createFromPastedImage(pastedImage, this);
+    public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String historyName) {
+        ImageLayer newLayer = ImageLayer.createFromExternalImage(image, this, layerName);
         new LayerAdder(this)
-                .withHistory("New Pasted Layer")
+                .withHistory(historyName)
                 .add(newLayer);
     }
 

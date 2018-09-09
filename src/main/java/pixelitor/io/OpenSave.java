@@ -118,6 +118,15 @@ public class OpenSave {
         Messages.showError("Error", msg);
     }
 
+    public static CompletableFuture<Void> loadFileAndAddAsNewImageLayer(File file, Composition comp) {
+        return CompletableFuture.supplyAsync(
+                () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
+                .handle((img, e) -> handleDecodingError(file, img, e))
+                .thenAcceptAsync(image -> comp.addExternalImageAsNewLayer(
+                        image, file.getName(), "Dropped Layer"),
+                        EventQueue::invokeLater);
+    }
+
     private static CompletableFuture<Composition> loadLayered(File selectedFile,
                                                               String type) {
         Callable<Composition> loadTask;
@@ -204,8 +213,16 @@ public class OpenSave {
         File[] files = FileUtils.listSupportedInputFilesIn(dir);
         if (files != null) {
             for (File file : files) {
-                // make sure only one file is read at a time
-                openFileAsync(file).join();
+                openFileAsync(file);
+            }
+        }
+    }
+
+    public static void addAsLayersAllImagesInDir(File dir, Composition comp) {
+        File[] files = FileUtils.listSupportedInputFilesIn(dir);
+        if (files != null) {
+            for (File file : files) {
+                loadFileAndAddAsNewImageLayer(file, comp);
             }
         }
     }

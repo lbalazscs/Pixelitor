@@ -17,6 +17,8 @@
 
 package pixelitor.io;
 
+import pixelitor.Composition;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
@@ -34,10 +36,58 @@ import java.util.List;
 import static java.lang.String.format;
 
 /**
- * Manages external files dropped on the image area
+ * Manages external files drag-and-dropped on the app
  */
 public class DropListener extends DropTargetAdapter {
-    public DropListener() {
+    private final OpenStrategy openStrategy;
+
+    public enum OpenStrategy {
+        NEW_IMAGES {
+            @Override
+            public void handleDrop(List<File> list) {
+                for (File file : list) {
+                    if (file.isDirectory()) {
+                        String question = format("You have dropped the folder \"%s\".\n " +
+                                "Do you want to open all image files inside it?", file.getName());
+
+                        if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+                            OpenSave.openAllImagesInDir(file);
+                        }
+                    } else if (file.isFile()) {
+                        OpenSave.openFileAsync(file);
+                    }
+                }
+            }
+        }, NEW_LAYERS {
+            @Override
+            public void handleDrop(List<File> list) {
+                Composition comp = ImageComponents.getActiveCompOrNull();
+                if (comp == null) {
+                    NEW_IMAGES.handleDrop(list);
+                    return;
+                }
+
+                for (File file : list) {
+                    if (file.isDirectory()) {
+                        String question = format("You have dropped the folder \"%s\".\n" +
+                                "Do you want all image files inside it to be added as layers to "
+                                + comp.getName() + "?", file.getName());
+
+                        if (Dialogs.showYesNoQuestionDialog("Question", question)) {
+                            OpenSave.addAsLayersAllImagesInDir(file, comp);
+                        }
+                    } else if (file.isFile()) {
+                        OpenSave.loadFileAndAddAsNewImageLayer(file, comp);
+                    }
+                }
+            }
+        };
+
+        public abstract void handleDrop(List<File> list);
+    }
+
+    public DropListener(OpenStrategy openStrategy) {
+        this.openStrategy = openStrategy;
     }
 
     @Override
@@ -65,6 +115,7 @@ public class DropListener extends DropTargetAdapter {
         for (DataFlavor flavor : flavors) {
             if (flavor.equals(DataFlavor.imageFlavor)) {
                 // it is unclear how this could be used
+                e.rejectDrop();
                 return;
             }
             if (flavor.isFlavorJavaFileListType()) {
@@ -74,7 +125,7 @@ public class DropListener extends DropTargetAdapter {
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
-                    dropFiles(list);
+                    openStrategy.handleDrop(list);
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Messages.showException(ex);
                     e.rejectDrop();
@@ -86,20 +137,5 @@ public class DropListener extends DropTargetAdapter {
 
         // DataFlavor not recognized
         e.rejectDrop();
-    }
-
-    private static void dropFiles(List<File> list) {
-        for (File file : list) {
-            if (file.isDirectory()) {
-                String question = format("You have dropped the folder \"%s\". " +
-                        "Do you want to open all image files inside it?", file.getName());
-
-                if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                    OpenSave.openAllImagesInDir(file);
-                }
-            } else if (file.isFile()) {
-                OpenSave.openFileAsync(file);
-            }
-        }
     }
 }

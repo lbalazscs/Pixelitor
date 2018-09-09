@@ -42,7 +42,8 @@ public enum PasteDestination {
         @Override
         void addImage(BufferedImage pastedImage) {
             Composition comp = ImageComponents.getActiveCompOrNull();
-            comp.addPastedImageAsNewLayer(pastedImage);
+            comp.addExternalImageAsNewLayer(pastedImage,
+                    "Pasted Layer", "New Pasted Layer");
         }
     }, NEW_IMAGE {
         private int pastedCount = 1;
