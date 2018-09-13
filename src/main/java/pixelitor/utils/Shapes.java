@@ -32,6 +32,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -52,7 +53,7 @@ public class Shapes {
      * in image coordinates, to a {@link Path}
      */
     public static Path shapeToPath(Shape shape, ImageComponent ic) {
-        Path path = new Path(ic.getComp());
+        Path path = new Path(ic.getComp(), false);
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];
         while (!it.isDone()) {
@@ -252,5 +253,72 @@ public class Shapes {
                 (p1.getX() + p2.getX()) / 2.0,
                 (p1.getY() + p2.getY()) / 2.0
         );
+    }
+
+    public static void debugPathIterator(Shape shape) {
+        PathIterator it = shape.getPathIterator(null);
+        double[] coords = new double[6];
+        while (!it.isDone()) {
+            int type = it.currentSegment(coords);
+
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                    System.out.println("MOVE TO " + Arrays.toString(coords));
+                    break;
+                case PathIterator.SEG_LINETO:
+                    System.out.println("LINE TO " + Arrays.toString(coords));
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    System.out.println("QUAD TO " + Arrays.toString(coords));
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    System.out.println("CUBIC TO " + Arrays.toString(coords));
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    System.out.println("CLOSE " + Arrays.toString(coords));
+                    break;
+                default:
+                    throw new IllegalArgumentException("type = " + type);
+            }
+
+            it.next();
+        }
+    }
+
+    /**
+     * Returns true if the two shapes have identical path iterators
+     */
+    public static boolean pathIteratorIsEqual(Shape s1, Shape s2, double tolerance) {
+        PathIterator it1 = s1.getPathIterator(null);
+        PathIterator it2 = s2.getPathIterator(null);
+
+        double[] coords1 = new double[6];
+        double[] coords2 = new double[6];
+
+        while (!it1.isDone()) {
+            if (it2.isDone()) {
+                return false;
+            }
+
+            int type1 = it1.currentSegment(coords1);
+            int type2 = it2.currentSegment(coords2);
+            if (type1 != type2) {
+                return false;
+            }
+
+            for (int i = 0; i < 6; i++) {
+                if (Math.abs(coords1[i] - coords2[i]) > tolerance) {
+                    return false;
+                }
+            }
+
+            it1.next();
+            it2.next();
+        }
+
+        if (!it2.isDone()) {
+            return false;
+        }
+        return true;
     }
 }

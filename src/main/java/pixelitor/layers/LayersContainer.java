@@ -28,7 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.dnd.DropTarget;
 
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.io.DropListener.OpenStrategy.NEW_LAYERS;
+import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
 
 /**
  * The part of the GUI that manages the layers of a composition.

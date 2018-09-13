@@ -20,48 +20,37 @@ package pixelitor.tools.pen.history;
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.AnchorPoint;
-import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.SubPath;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
 
-public class SubPathStartEdit extends PixelitorEdit {
-    private final Path path;
-    private final AnchorPoint point;
-    private final boolean wasFirst;
+/**
+ * Created when a subpath is finished by ctrl-click
+ */
+public class FinishSubPathEdit extends PixelitorEdit {
+    private final SubPath subPath;
 
-    public SubPathStartEdit(Composition comp, Path path, AnchorPoint point, boolean wasFirst) {
-        super("Subpath Start", comp);
-        this.path = path;
-        this.point = point;
-        this.wasFirst = wasFirst;
+    public FinishSubPathEdit(Composition comp, SubPath subPath) {
+        super("Finish Subpath", comp);
+        this.subPath = subPath;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        boolean noMoreLeft = path.deleteLastSubPath();
-        assert wasFirst == noMoreLeft;
-        if (noMoreLeft) {
-            Tools.PEN.setPath(null, "SubPathStartEdit.undo");
-        }
-        Tools.PEN.setBuilderState(BEFORE_SUBPATH, "SubPathStartEdit.undo");
-        comp.repaint();
+        Tools.PEN.setPathBuildingInProgressState("FinishSubPathEdit.undo");
+        subPath.setFinished(false, "FinishSubPathEdit.undo");
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        path.startNewSubPath(point, false);
-        if (wasFirst) {
-            Tools.PEN.setPath(path, "SubPathStartEdit.redo");
-        }
-        Tools.PEN.setPathBuildingInProgressState("SubPathStartEdit.redo");
-        comp.repaint();
+        Tools.PEN.setBuilderState(BEFORE_SUBPATH, "FinishSubPathEdit.redo");
+        subPath.setFinished(true, "FinishSubPathEdit.redo");
     }
 }

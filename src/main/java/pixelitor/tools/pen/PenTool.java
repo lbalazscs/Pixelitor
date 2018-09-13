@@ -44,6 +44,10 @@ import java.awt.geom.AffineTransform;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.PenToolMode.BUILD;
+import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
  * The Pen Tool
@@ -51,12 +55,14 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 public class PenTool extends Tool {
 
     private final JComboBox<PenToolMode> modeChooser = new JComboBox<>(
-            new PenToolMode[]{PenToolMode.BUILD, PenToolMode.EDIT});
-    private final AbstractAction toSelectionAction;
+            new PenToolMode[]{BUILD, EDIT});
 
-    private PenToolMode mode = PenToolMode.BUILD;
+    private final AbstractAction toSelectionAction;
+    private final AbstractAction traceAction;
 
     private JCheckBox rubberBandCB;
+
+    private PenToolMode mode = BUILD;
 
     public PenTool() {
         super("Pen", 'p', "pen_tool_icon.png",
@@ -69,7 +75,13 @@ public class PenTool extends Tool {
                 convertToSelection(true);
             }
         };
-        enableConvertToSelection(false);
+        traceAction = new AbstractAction("Trace...") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TracePathPanel.showInDialog(mode.getPath());
+            }
+        };
+        enableActionsBasedOnFinishedPath(false);
     }
 
     @Override
@@ -77,31 +89,42 @@ public class PenTool extends Tool {
         modeChooser.addActionListener(e -> onModeChooserAction());
         settingsPanel.addWithLabel("Mode:", modeChooser);
 
+        rubberBandCB = new JCheckBox("", true);
+        rubberBandCB.addActionListener(e ->
+                BUILD.setShowRubberBand(rubberBandCB.isSelected()));
+        settingsPanel.addWithLabel("Show Rubber Band: ", rubberBandCB, "rubberBandCB");
+
         settingsPanel.addButton(toSelectionAction, "toSelectionButton",
                 "Convert the active path to a selection");
 
-        rubberBandCB = new JCheckBox("", true);
-        rubberBandCB.addActionListener(e ->
-                PenToolMode.BUILD.setShowRubberBand(rubberBandCB.isSelected()));
-        settingsPanel.addWithLabel("Rubber Band: ", rubberBandCB, "rubberBandCB");
+//        settingsPanel.addButton(traceAction, "traceAction",
+//                "Trace the path with a stroke or with a tool");
+    }
+
+    public void setModeChooserCombo(PenToolMode mode) {
+        modeChooser.setSelectedItem(mode);
     }
 
     private void onModeChooserAction() {
         Path path = ImageComponents.getActivePathOrNull();
-        if (getSelectedMode() == PenToolMode.BUILD) {
-            startBuilding(path);
+        if (getSelectedMode() == BUILD) {
+            startBuilding(path, true);
         } else {
-            startEditing(path, true, true);
+            startEditing(path, true);
         }
     }
 
-    private void startBuilding(Path path) {
-        changeMode(PenToolMode.BUILD, path);
-        enableConvertToSelection(path != null);
+    private void startBuilding(Path path,
+                               boolean calledFromModeChooser) {
+        if (!calledFromModeChooser) {
+            setModeChooserCombo(EDIT);
+        }
+        changeMode(BUILD, path);
+        enableActionsBasedOnFinishedPath(path != null);
         ImageComponents.repaintActive();
     }
 
-    public void startEditing(Path path, boolean pathWasBuiltInteractively,
+    public void startEditing(Path path,
                              boolean calledFromModeChooser) {
         if (path == null) {
             EventQueue.invokeLater(() -> {
@@ -113,19 +136,32 @@ public class PenTool extends Tool {
                                     "<li>by converting a selection into a path</li>" +
                                     "</ul>");
                 }
-                modeChooser.setSelectedItem(PenToolMode.BUILD);
+                setModeChooserCombo(BUILD);
             });
             return;
         }
 
         if (!calledFromModeChooser) {
-            modeChooser.setSelectedItem(PenToolMode.EDIT);
+            setModeChooserCombo(EDIT);
         }
 
-        path.changeTypesForEditing(pathWasBuiltInteractively);
-        changeMode(PenToolMode.EDIT, path);
-        enableConvertToSelection(true);
+        path.changeTypesForEditing();
+        changeMode(EDIT, path);
+        enableActionsBasedOnFinishedPath(true);
         ImageComponents.repaintActive();
+    }
+
+    // This method should not be called directly,
+    // otherwise the mode and the the combo box get out of sync.
+    private void changeMode(PenToolMode mode, Path path) {
+        if (this.mode != mode) {
+//            System.out.println("PenTool::changeMode: " + red(this.mode) + " => " + green(mode));
+//            Thread.dumpStack();
+            this.mode.modeEnded();
+            mode.modeStarted(path);
+        }
+        this.mode = mode;
+        Messages.showInStatusBar(mode.getToolMessage());
     }
 
     @Override
@@ -157,11 +193,16 @@ public class PenTool extends Tool {
         }
 
         comp.setActivePath(null);
-        resetStateToInitial();
+        PenToolMode oldMode = mode;
+        if (mode == EDIT) {
+            startBuilding(null, false);
+        }
+        setPath(null, "convertToSelection");
         Tools.SELECTION.activate();
 
         if (addToHistory) {
-            History.addEdit(new ConvertPathToSelectionEdit(comp, oldPath, selectionEdit));
+            History.addEdit(new ConvertPathToSelectionEdit(
+                    comp, oldPath, selectionEdit, oldMode));
         }
     }
 
@@ -194,7 +235,6 @@ public class PenTool extends Tool {
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
         mode.paint(g2);
     }
 
@@ -206,16 +246,11 @@ public class PenTool extends Tool {
         }
     }
 
-    @Override
-    public void escPressed() {
-// TODO what should Esc do? Certainly not resetting the state, because
-// this would ruin the undo stack
-//        resetStateToInitial();
-    }
-
     public void setPath(Path path, String reason) {
         if (path == null) {  // undo
-            modeChooser.setSelectedItem(PenToolMode.BUILD);
+            if (mode == EDIT) {
+                throw new IllegalStateException("The path cannot be null in Edit mode");
+            }
         }
         mode.setPath(path, "PT.setPath(" + reason + ")");
     }
@@ -228,8 +263,8 @@ public class PenTool extends Tool {
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp != null) {
             compPath = comp.getActivePath();
-            if (compPath == null && mode == PenToolMode.EDIT) {
-                modeChooser.setSelectedItem(PenToolMode.BUILD);
+            if (compPath == null && mode == EDIT) {
+                startBuilding(null, false);
             }
             mode.setPath(compPath, "toolStarted");
             comp.repaint();
@@ -245,28 +280,29 @@ public class PenTool extends Tool {
 
     // this is called only by the undo mechanism
     public void setBuilderState(PathBuilder.State state, String reason) {
-        if (mode != PenToolMode.BUILD) {
-            modeChooser.setSelectedItem(PenToolMode.BUILD);
+        if (mode != BUILD) {
+            // if a build action is undone now, but the mode is
+            // not build anymore, then change back
+            startBuilding(mode.getPath(), false);
         }
         PathBuilder pb = (PathBuilder) mode;
         pb.setState(state, reason);
     }
 
-    public void enableConvertToSelection(boolean b) {
-        toSelectionAction.setEnabled(b);
+    // this is called only by the undo mechanism
+    public void setPathBuildingInProgressState(String reason) {
+        boolean mouseDown = Tools.EventDispatcher.isMouseDown();
+        reason += ("(mouseDown = " + mouseDown + ")");
+        if (mouseDown) {
+            setBuilderState(DRAGGING_THE_CONTROL_OF_LAST, reason);
+        } else {
+            setBuilderState(MOVING_TO_NEXT_ANCHOR, reason);
+        }
     }
 
-    // This method should not be called directly, only through
-    // the combo box event handler. Otherwise the mode and the
-    // the combo box get out of sync.
-    private void changeMode(PenToolMode mode, Path path) {
-        if (this.mode != mode) {
-//            System.out.println("PenTool::changeMode: " + red(this.mode) + " => " + green(mode));
-            this.mode.modeEnded();
-            mode.modeStarted(path);
-        }
-        this.mode = mode;
-        Messages.showInStatusBar(mode.getToolMessage());
+    public void enableActionsBasedOnFinishedPath(boolean b) {
+        toSelectionAction.setEnabled(b);
+        traceAction.setEnabled(b);
     }
 
     @Override

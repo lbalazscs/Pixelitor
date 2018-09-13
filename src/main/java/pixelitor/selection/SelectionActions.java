@@ -97,7 +97,7 @@ public final class SelectionActions {
         Path path = Shapes.shapeToPath(shape, comp.getIC());
         comp.setActivePath(path);
         PenToolMode.EDIT.setPath(path, "selectionToPath");
-        Tools.PEN.startEditing(path, false, false);
+        Tools.PEN.startEditing(path, false);
         Tools.PEN.activate();
 
         if (addToHistory) {

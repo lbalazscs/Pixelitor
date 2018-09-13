@@ -62,7 +62,8 @@ public class StrokeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
         paramGUI = new ConfigureParamGUI(
-                this::createSettingsDialog, defaultButton);
+                owner -> createSettingsDialog(this, owner)
+                , defaultButton);
 
         setParamGUIEnabledState();
         return (JComponent) paramGUI;
@@ -105,23 +106,19 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public JDialog createSettingsDialog() {
-        return createSettingsDialog(PixelitorWindow.getInstance());
+        return createSettingsDialog(this, PixelitorWindow.getInstance());
     }
 
-    private JDialog createSettingsDialog(Window owner) {
+    public static JDialog createSettingsDialog(StrokeParam param, Window owner) {
         return new DialogBuilder()
                 .owner(owner)
                 .title("Stroke Settings")
                 .notModal()
-                .content(createStrokeSettingsPanel())
+                .content(new StrokeSettingsPanel(param))
                 .withScrollbars()
                 .noCancelButton()
                 .okText("Close")
                 .build();
-    }
-
-    private JPanel createStrokeSettingsPanel() {
-        return new StrokeSettingsPanel(this);
     }
 
     public Stroke createStroke() {
