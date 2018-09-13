@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
-import static pixelitor.io.DropListener.OpenStrategy.NEW_IMAGES;
+import static pixelitor.io.DropListener.Destination.NEW_IMAGES;
 
 /**
  * Represents the area of the app where the edited images are.

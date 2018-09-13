@@ -17,39 +17,37 @@
 
 package pixelitor.tools.pen.history;
 
-import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.tools.Tools;
-import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.SubPath;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
-
-public class SubPathStartEdit extends PixelitorEdit {
+public class SubPathEdit extends PixelitorEdit {
+    private final SubPath before;
+    private final SubPath after;
     private final Path path;
-    private final AnchorPoint point;
-    private final boolean wasFirst;
+    private final int index;
 
-    public SubPathStartEdit(Composition comp, Path path, AnchorPoint point, boolean wasFirst) {
-        super("Subpath Start", comp);
-        this.path = path;
-        this.point = point;
-        this.wasFirst = wasFirst;
+    public SubPathEdit(String name, SubPath before, SubPath after) {
+        super(name, after.getComp());
+
+        this.before = before;
+        this.after = after;
+        this.path = after.getPath();
+        this.index = path.indexOf(after);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        boolean noMoreLeft = path.deleteLastSubPath();
-        assert wasFirst == noMoreLeft;
-        if (noMoreLeft) {
-            Tools.PEN.setPath(null, "SubPathStartEdit.undo");
-        }
-        Tools.PEN.setBuilderState(BEFORE_SUBPATH, "SubPathStartEdit.undo");
+        // the zoom might have changed
+        before.coCoordsChanged(comp.getIC());
+
+        path.changeSubPath(index, before);
+
         comp.repaint();
     }
 
@@ -57,11 +55,11 @@ public class SubPathStartEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        path.startNewSubPath(point, false);
-        if (wasFirst) {
-            Tools.PEN.setPath(path, "SubPathStartEdit.redo");
-        }
-        Tools.PEN.setPathBuildingInProgressState("SubPathStartEdit.redo");
+        // the zoom might have changed
+        after.coCoordsChanged(comp.getIC());
+
+        path.changeSubPath(index, after);
+
         comp.repaint();
     }
 }

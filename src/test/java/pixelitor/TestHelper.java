@@ -111,11 +111,9 @@ public class TestHelper {
         when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
         when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
 
-        ImageComponent ic = mock(ImageComponent.class);
+        ImageComponent ic = createMockICWithoutComp();
         when(ic.getComp()).thenReturn(comp);
         when(ic.getCanvas()).thenReturn(canvas);
-        when(ic.isMock()).thenReturn(true);
-        when(ic.getMaskViewMode()).thenReturn(NORMAL);
         when(comp.getIC()).thenReturn(ic);
 
         when(comp.getSelection()).thenReturn(null);

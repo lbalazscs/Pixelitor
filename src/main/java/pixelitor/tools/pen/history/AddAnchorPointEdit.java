@@ -21,47 +21,28 @@ import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.AnchorPoint;
-import pixelitor.tools.pen.PathBuilder;
 import pixelitor.tools.pen.SubPath;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
-import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
-
 public class AddAnchorPointEdit extends PixelitorEdit {
     private final SubPath subPath;
     private final AnchorPoint anchorPoint;
-    private final boolean finishSubPath;
 
     public AddAnchorPointEdit(Composition comp,
                               SubPath subPath,
-                              AnchorPoint anchorPoint,
-                              boolean finishSubPath) {
+                              AnchorPoint anchorPoint) {
         super("Add Anchor Point", comp);
         this.subPath = subPath;
         this.anchorPoint = anchorPoint;
-        this.finishSubPath = finishSubPath;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        boolean mouseDown = Tools.EventDispatcher.isMouseDown();
-        subPath.deleteLast(finishSubPath && !mouseDown);
-        if (finishSubPath) {
-            PathBuilder.State prevState;
-            if (mouseDown) {
-                prevState = DRAGGING_THE_CONTROL_OF_LAST;
-            } else {
-                prevState = MOVING_TO_NEXT_ANCHOR;
-            }
-            Tools.PEN.setBuilderState(prevState, "AddAnchorPointEdit.undo");
-            subPath.setFinished(false, "AddAnchorPointEdit.undo");
-        }
+        subPath.deleteLast();
 
         comp.repaint();
     }
@@ -71,10 +52,9 @@ public class AddAnchorPointEdit extends PixelitorEdit {
         super.redo();
 
         subPath.addPoint(anchorPoint);
-        if (finishSubPath) {
-            Tools.PEN.setBuilderState(BEFORE_SUBPATH, "AddAnchorPointEdit.redo");
-            subPath.setFinished(true, "AddAnchorPointEdit.redo");
-        }
+
+        Tools.PEN.setPathBuildingInProgressState("AddAnchorPointEdit.redo");
+
         comp.repaint();
     }
 }

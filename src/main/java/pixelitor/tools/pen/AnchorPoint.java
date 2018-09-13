@@ -18,6 +18,8 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.View;
+import pixelitor.history.History;
+import pixelitor.tools.pen.history.SubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
@@ -39,7 +41,10 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 public class AnchorPoint extends DraggablePoint {
     public final ControlPoint ctrlIn;
     public final ControlPoint ctrlOut;
-    private SubPath path;
+    private SubPath subPath;
+
+    private static long debugCounter = 0;
+    private final String id; // for debugging
 
     private AnchorPointType type = SYMMETRIC;
 
@@ -59,15 +64,18 @@ public class AnchorPoint extends DraggablePoint {
                 CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
+
+        id = "AP" + (debugCounter++);
     }
 
     public AnchorPoint(PPoint p) {
         this(p.getCoX(), p.getCoY(), p.getView());
     }
 
-    public AnchorPoint(AnchorPoint other, boolean copyControlPositions) {
+    public AnchorPoint(AnchorPoint other, SubPath subPath,
+                       boolean copyControlPositions) {
         this(other.x, other.y, other.view);
-        this.path = other.path;
+        this.subPath = subPath;
         this.type = other.type;
         if (copyControlPositions) {
             this.ctrlIn.x = other.ctrlIn.x;
@@ -219,6 +227,23 @@ public class AnchorPoint extends DraggablePoint {
                 AnchorPoint.this.delete();
             }
         });
+
+        if (subPath.isSingle()) {
+            p.add(new AbstractAction("Delete Path") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    subPath.deletePath();
+                }
+            });
+        } else {
+            p.add(new AbstractAction("Delete Subpath") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    subPath.delete();
+                }
+            });
+        }
+
         p.add(new AbstractAction("Retract Handles") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -235,8 +260,8 @@ public class AnchorPoint extends DraggablePoint {
         view.repaint();
     }
 
-    public void setPath(SubPath path) {
-        this.path = path;
+    public void setSubPath(SubPath subPath) {
+        this.subPath = subPath;
     }
 
     @Override
@@ -246,8 +271,11 @@ public class AnchorPoint extends DraggablePoint {
         ctrlOut.setView(view);
     }
 
-    private void delete() {
-        path.deletePoint(this);
+    public void delete() {
+        SubPath backup = this.subPath.copyForUndo();
+        this.subPath.deletePoint(this);
+        History.addEdit(new SubPathEdit("Delete Anchor Point",
+                backup, subPath));
         view.repaint();
     }
 
@@ -256,5 +284,10 @@ public class AnchorPoint extends DraggablePoint {
         System.out.println("    " + toColoredString());
         System.out.println("    " + ctrlIn.toColoredString());
         System.out.println("    " + ctrlOut.toColoredString());
+    }
+
+    @Override
+    public String toString() {
+        return id;
     }
 }

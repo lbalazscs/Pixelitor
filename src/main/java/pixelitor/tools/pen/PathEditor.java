@@ -114,7 +114,6 @@ public class PathEditor implements PenToolMode {
     @Override
     public void setPath(Path path, String reason) {
 //        System.out.printf("PathEditor::setPath: reason = '%s'%n", reason);
-        assert path != null : "null path because " + reason;
         this.path = path;
     }
 

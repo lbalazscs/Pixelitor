@@ -50,10 +50,14 @@ public interface PenToolMode {
     }
 
     default void modeEnded() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        if (comp != null) {
-            comp.setActivePath(getPath());
-            comp.repaint();
+        Path path = getPath();
+        if (path != null) {
+            Composition comp = ImageComponents.getActiveCompOrNull();
+            if (comp != null) {
+                comp.setActivePath(path);
+                comp.repaint();
+            }
+            setPath(null, "modeEnded");
         }
     }
 

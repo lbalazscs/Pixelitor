@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.SubPathStartEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
@@ -54,10 +55,22 @@ public class Path implements Serializable {
 
     private static long debugCounter = 0;
     private final String id; // for debugging
+    private final boolean builtInteractively;
 
-    public Path(Composition comp) {
+    public Path(Composition comp, boolean builtInteractively) {
         this.comp = comp;
+        this.builtInteractively = builtInteractively;
         id = "P" + (debugCounter++);
+    }
+
+    public Path copyForUndo() {
+        Path copy = new Path(comp, builtInteractively);
+        for (SubPath sp : subPaths) {
+            copy.subPaths.add(sp.copyForUndo());
+        }
+        int activeIndex = subPaths.indexOf(activeSubPath);
+        copy.activeSubPath = copy.subPaths.get(activeIndex);
+        return copy;
     }
 
     @VisibleForTesting
@@ -108,7 +121,7 @@ public class Path implements Serializable {
     }
 
     public void startNewSubPath(AnchorPoint point, boolean addToHistory) {
-        activeSubPath = new SubPath(comp);
+        activeSubPath = new SubPath(this, comp);
         subPaths.add(activeSubPath);
         activeSubPath.addFirstPoint(point);
 
@@ -152,8 +165,8 @@ public class Path implements Serializable {
         activeSubPath.close(addToHistory);
     }
 
-    public AnchorPoint addMovingPointAsAnchor(double x, double y, boolean finishSubPath) {
-        return activeSubPath.addMovingPointAsAnchor(x, y, finishSubPath);
+    public AnchorPoint addMovingPointAsAnchor(double x, double y) {
+        return activeSubPath.addMovingPointAsAnchor(x, y);
     }
 
     public int getNumAnchorPointsInActiveSubpath() {
@@ -162,6 +175,10 @@ public class Path implements Serializable {
 
     public void setMoving(AnchorPoint point, String reason) {
         activeSubPath.setMoving(point, reason);
+    }
+
+    public void setMovingLocation(double x, double y, boolean nullOK) {
+        activeSubPath.setMovingLocation(x, y, nullOK);
     }
 
     public AnchorPoint getMoving() {
@@ -188,9 +205,9 @@ public class Path implements Serializable {
         }
     }
 
-    public void changeTypesForEditing(boolean pathWasBuiltInteractively) {
+    public void changeTypesForEditing() {
         for (SubPath sp : subPaths) {
-            sp.changeTypesForEditing(pathWasBuiltInteractively);
+            sp.changeTypesForEditing(builtInteractively);
         }
     }
 
@@ -292,6 +309,29 @@ public class Path implements Serializable {
 
     public SubPath getSubPath(int index) {
         return subPaths.get(index);
+    }
+
+    public void delete(SubPath subPath) {
+        subPaths.removeIf(sp -> sp == subPath);
+        comp.repaint();
+        // TODO history
+    }
+
+    public void delete() {
+        comp.setActivePath(null);
+        Tools.PEN.setPath(null, "Path.delete");
+        comp.repaint();
+        // TODO history
+    }
+
+    public int indexOf(SubPath subPath) {
+        return subPaths.indexOf(subPath);
+    }
+
+    public void changeSubPath(int index, SubPath subPath) {
+        assert activeSubPath == subPaths.get(index);
+        subPaths.set(index, subPath);
+        activeSubPath = subPath;
     }
 
     @VisibleForTesting

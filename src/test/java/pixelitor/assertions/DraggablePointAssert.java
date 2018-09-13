@@ -90,4 +90,20 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
 
         return this;
     }
+
+    // can be called only on a ControlPoint
+    public DraggablePointAssert isNotRetracted() {
+        isNotNull();
+
+        if (!(actual instanceof ControlPoint)) {
+            throw new AssertionError("This is not an ControlPoint");
+        }
+
+        ControlPoint cp = (ControlPoint) actual;
+        if (cp.isRetracted()) {
+            throw new AssertionError("retracted");
+        }
+
+        return this;
+    }
 }

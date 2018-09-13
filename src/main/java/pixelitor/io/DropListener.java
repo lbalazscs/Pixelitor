@@ -39,9 +39,15 @@ import static java.lang.String.format;
  * Manages external files drag-and-dropped on the app
  */
 public class DropListener extends DropTargetAdapter {
-    private final OpenStrategy openStrategy;
+    private final Destination destination;
 
-    public enum OpenStrategy {
+    /**
+     * Determines what happens with the dropped files
+     */
+    public enum Destination {
+        /**
+         * Open the dropped files as new images
+         */
         NEW_IMAGES {
             @Override
             public void handleDrop(List<File> list) {
@@ -58,11 +64,17 @@ public class DropListener extends DropTargetAdapter {
                     }
                 }
             }
-        }, NEW_LAYERS {
+        },
+        /**
+         * Open the dropped files as new image layers in the active composition
+         */
+        NEW_LAYERS {
             @Override
             public void handleDrop(List<File> list) {
                 Composition comp = ImageComponents.getActiveCompOrNull();
                 if (comp == null) {
+                    // if there is no active composition,
+                    // fall back to opening the files as new images
                     NEW_IMAGES.handleDrop(list);
                     return;
                 }
@@ -86,8 +98,8 @@ public class DropListener extends DropTargetAdapter {
         public abstract void handleDrop(List<File> list);
     }
 
-    public DropListener(OpenStrategy openStrategy) {
-        this.openStrategy = openStrategy;
+    public DropListener(Destination destination) {
+        this.destination = destination;
     }
 
     @Override
@@ -125,7 +137,7 @@ public class DropListener extends DropTargetAdapter {
                 try {
                     @SuppressWarnings("unchecked")
                     List<File> list = (List<File>) transferable.getTransferData(flavor);
-                    openStrategy.handleDrop(list);
+                    destination.handleDrop(list);
                 } catch (UnsupportedFlavorException | IOException ex) {
                     Messages.showException(ex);
                     e.rejectDrop();

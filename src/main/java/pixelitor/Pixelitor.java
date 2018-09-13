@@ -222,7 +222,7 @@ public class Pixelitor {
         Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
         ImageComponents.getActiveCompOrNull().setActivePath(path);
 
-        Tools.PEN.startEditing(path, false, false);
+        Tools.PEN.startEditing(path, false);
         Tools.PEN.activate();
     }
 

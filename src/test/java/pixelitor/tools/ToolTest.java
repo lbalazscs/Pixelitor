@@ -31,6 +31,7 @@ import pixelitor.TestHelper;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.util.PMouseEvent;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
@@ -122,11 +123,41 @@ public class ToolTest {
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
-        tool.handlerChain
-                .handleMousePressed(TestHelper.createEvent(ic, MOUSE_PRESSED, alt, ctrl, shift, mouseButton, 2, 2));
-        tool.handlerChain
-                .handleMouseDragged(TestHelper.createEvent(ic, MOUSE_DRAGGED, alt, ctrl, shift, mouseButton, 4, 4));
-        tool.handlerChain
-                .handleMouseReleased(TestHelper.createEvent(ic, MOUSE_RELEASED, alt, ctrl, shift, mouseButton, 6, 6));
+        // stroke with all the modifiers
+        press(alt, ctrl, shift, mouseButton, 2, 2);
+        drag(alt, ctrl, shift, mouseButton, 3, 3);
+        release(alt, ctrl, shift, mouseButton, 4, 4);
+
+        // press the modifiers, but release them before finishing
+        press(alt, ctrl, shift, mouseButton, 2, 2);
+        drag(alt, ctrl, shift, mouseButton, 3, 3);
+        release(Alt.NO, Ctrl.NO, Shift.NO, mouseButton, 4, 4);
+
+        // start without the modifiers, but finish with them
+        press(Alt.NO, Ctrl.NO, Shift.NO, mouseButton, 2, 2);
+        drag(alt, ctrl, shift, mouseButton, 3, 3);
+        release(alt, ctrl, shift, mouseButton, 4, 4);
+
+        // do a simple click
+        press(alt, ctrl, shift, mouseButton, 1, 1);
+        release(alt, ctrl, shift, mouseButton, 1, 1);
+    }
+
+    private void press(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_PRESSED,
+                alt, ctrl, shift, mouseButton, x, y);
+        tool.handlerChain.handleMousePressed(e);
+    }
+
+    private void drag(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_DRAGGED,
+                alt, ctrl, shift, mouseButton, x, y);
+        tool.handlerChain.handleMouseDragged(e);
+    }
+
+    private void release(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_RELEASED,
+                alt, ctrl, shift, mouseButton, x, y);
+        tool.handlerChain.handleMouseReleased(e);
     }
 }

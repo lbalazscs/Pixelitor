@@ -23,19 +23,20 @@ import pixelitor.history.History;
 import pixelitor.tools.pen.history.AddAnchorPointEdit;
 import pixelitor.tools.pen.history.CloseSubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.ToDoubleFunction;
 
+import static java.util.stream.Collectors.joining;
+import static pixelitor.tools.pen.PathBuilder.State.CTRL_DRAGGING_PREVIOUS;
 import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
 import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
 
@@ -55,6 +56,7 @@ public class SubPath implements Serializable {
     private final String id; // for debugging
 
     private final List<AnchorPoint> anchorPoints = new ArrayList<>();
+    private final Path path;
     private final Composition comp;
     // The curve point which is currently moving while the path is being built
     private AnchorPoint moving;
@@ -75,14 +77,34 @@ public class SubPath implements Serializable {
     private static final ToDoubleFunction<DraggablePoint> TO_IM_X = p -> p.imX;
     private static final ToDoubleFunction<DraggablePoint> TO_IM_Y = p -> p.imY;
 
-    public SubPath(Composition comp) {
+    public SubPath(Path path, Composition comp) {
+        this.path = path;
         this.comp = comp;
         id = "SP" + (debugCounter++);
     }
 
+    public SubPath copyForUndo() {
+        SubPath copy = new SubPath(path, comp);
+        copy.closed = closed;
+        copy.finished = finished;
+
+        for (AnchorPoint point : anchorPoints) {
+            AnchorPoint ap = new AnchorPoint(point, copy, true);
+            ap.calcImCoords();
+            ap.ctrlOut.calcImCoords();
+            ap.ctrlIn.calcImCoords();
+            copy.anchorPoints.add(ap);
+        }
+
+        copy.first = copy.anchorPoints.get(0);
+        copy.last = copy.anchorPoints.get(anchorPoints.size() - 1);
+        assert moving == null; // used in edit mode
+        return copy;
+    }
+
     public void addFirstPoint(AnchorPoint p) {
         anchorPoints.add(p);
-        p.setPath(this);
+        p.setSubPath(this);
         first = p;
         last = p;
     }
@@ -95,7 +117,7 @@ public class SubPath implements Serializable {
             return;
         }
         anchorPoints.add(p);
-        p.setPath(this);
+        p.setSubPath(this);
         last = p;
     }
 
@@ -106,23 +128,34 @@ public class SubPath implements Serializable {
         moving = p;
     }
 
-    public AnchorPoint addMovingPointAsAnchor(double x, double y, boolean finishSubPath) {
+    public void setMovingLocation(double x, double y, boolean nullOK) {
+        if (moving != null) {
+            moving.setLocation(x, y);
+        } else {
+            if (!nullOK) {
+                throw new IllegalStateException("no moving in " + path);
+            }
+        }
+    }
+
+
+    public AnchorPoint addMovingPointAsAnchor(double x, double y) {
         moving.setLocation(x, y);
         moving.calcImCoords();
         anchorPoints.add(moving);
-        moving.setPath(this);
+        moving.setSubPath(this);
         last = moving;
-        setMoving(null, "addMovingPointAsAnchor (finishSubPath = " + finishSubPath + ")");
+        setMoving(null, "addMovingPointAsAnchor");
 
         History.addEdit(new AddAnchorPointEdit(
-                comp, this, last, finishSubPath));
+                comp, this, last));
         return last;
     }
 
     public AnchorPoint getMoving() {
-        if (moving == null) {
-            System.out.println("SubPath::getMoving: returning NULL in " + id);
-        }
+//        if (moving == null) {
+//            System.out.println("SubPath::getMoving: returning NULL in " + id);
+//        }
         return moving;
     }
 
@@ -152,8 +185,7 @@ public class SubPath implements Serializable {
                             ToDoubleFunction<DraggablePoint> toX,
                             ToDoubleFunction<DraggablePoint> toY) {
 
-        // TODO maybe a Path should be created only when there is at least one node
-        if (first == null) {
+        if (anchorPoints.isEmpty()) {
             return;
         }
 
@@ -226,25 +258,17 @@ public class SubPath implements Serializable {
             return;
         }
         int numPoints = getNumAnchorPoints();
-        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            if (numPoints > 1) {
-                last.paintHandles(g, true, true);
-            } else {
-                // special case: only one point, no shape
-                if (!last.samePositionAs(last.ctrlOut)) {
-                    Line2D.Double line = new Line2D.Double(
-                            last.x, last.y, last.ctrlOut.x, last.ctrlOut.y);
-                    Shapes.drawVisible(g, line);
-                }
+        if (state == DRAGGING_THE_CONTROL_OF_LAST
+                || state == CTRL_DRAGGING_PREVIOUS) {
+            last.paintHandles(g, true, true);
+
+            if (numPoints >= 2) {
+                AnchorPoint lastButOne = anchorPoints.get(numPoints - 2);
+                lastButOne.paintHandles(g, false, true);
             }
         } else if (state == MOVING_TO_NEXT_ANCHOR) {
-            boolean paintIn = true;
-            if (numPoints <= 2) {
-                paintIn = false;
-            }
-            last.paintHandles(g, paintIn, true);
-            if (first.isActive()) {
-//                first.paintHandle(g);
+            last.paintHandles(g, true, true);
+            if (first.isActive()) { // the mouse is closing position
                 first.paintHandles(g, true, false);
             }
         }
@@ -253,29 +277,16 @@ public class SubPath implements Serializable {
     public void paintHandlesForEditing(Graphics2D g) {
         assert checkConsistency();
 
-        int numPoints = anchorPoints.size();
-        for (int i = 0; i < numPoints; i++) {
-            boolean paintIn = true;
-            boolean paintOut = true;
-            if (!closed && (i == 0)) {
-                // don't paint the in control handle for the first point
-                paintIn = false;
-            }
-            if (!closed && (i == numPoints - 1)) {
-                // don't paint the out control handle for the last point
-                paintOut = false;
-            }
-
-            AnchorPoint point = anchorPoints.get(i);
-            point.paintHandles(g, paintIn, paintOut);
+        for (AnchorPoint point : anchorPoints) {
+            point.paintHandles(g, true, true);
         }
     }
 
     public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
-        for (AnchorPoint point : anchorPoints) {
-            DraggablePoint draggablePoint = point.handleOrCtrlHandleWasHit(x, y, altDown);
-            if (draggablePoint != null) {
-                return draggablePoint;
+        for (AnchorPoint anchor : anchorPoints) {
+            DraggablePoint point = anchor.handleOrCtrlHandleWasHit(x, y, altDown);
+            if (point != null) {
+                return point;
             }
         }
         return null;
@@ -325,7 +336,7 @@ public class SubPath implements Serializable {
     }
 
     public void undoClosing() {
-        setMoving(new AnchorPoint(first, false), "undoClosing");
+        setMoving(new AnchorPoint(first, this, false), "undoClosing");
         setClosed(false);
     }
 
@@ -403,6 +414,8 @@ public class SubPath implements Serializable {
     }
 
     public void deletePoint(AnchorPoint ap) {
+//        System.out.println("SubPath::deletePoint: deleting " + ap + " from " + this);
+
         boolean wasFirst = ap == first;
         boolean wasLast = ap == last;
         // don't use List.remove, because it uses equals
@@ -414,25 +427,31 @@ public class SubPath implements Serializable {
                 break;
             }
         }
-        if (wasFirst) {
-            assert index == 0;
-            first = anchorPoints.get(index + 1);
-        }
-        if (wasLast) {
-            assert index == anchorPoints.size() - 1;
-            last = anchorPoints.get(index - 1);
-        }
+
         anchorPoints.remove(index);
+        if (anchorPoints.isEmpty()) {
+            first = null;
+            last = null;
+        } else {
+            if (wasFirst) {
+                assert index == 0;
+                first = anchorPoints.get(0);
+            }
+            if (wasLast) {
+                assert index == anchorPoints.size();
+                last = anchorPoints.get(index - 1);
+            }
+        }
     }
 
-    public void deleteLast(boolean setRemovedAsMoving) {
+    public void deleteLast() {
         int indexOfLast = anchorPoints.size() - 1;
         AnchorPoint removed = anchorPoints.remove(indexOfLast);
         last = anchorPoints.get(indexOfLast - 1);
-
-        if (setRemovedAsMoving) { // when undoing a finished subpath
-            setMoving(removed, "deleteLast");
-        }
+//
+//        if (setRemovedAsMoving) { // when undoing a finished subpath
+//            setMoving(removed, "deleteLast");
+//        }
     }
 
     public void setView(View view) {
@@ -472,5 +491,53 @@ public class SubPath implements Serializable {
     @VisibleForTesting
     public boolean isFinished() {
         return finished;
+    }
+
+    /**
+     * Return whether this subpath is the only subpath in the parent path
+     */
+    public boolean isSingle() {
+        return path.getNumSubpaths() == 1;
+    }
+
+    public void delete() {
+        path.delete(this);
+    }
+
+    public void deletePath() {
+        path.delete();
+    }
+
+    public Composition getComp() {
+        return comp;
+    }
+
+    public Path getPath() {
+        return path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubPath subPath = (SubPath) o;
+        return Objects.equals(id, subPath.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return id + anchorPoints
+                .stream()
+                .map(AnchorPoint::toString)
+                .collect(joining(",", " [", "]"));
     }
 }
