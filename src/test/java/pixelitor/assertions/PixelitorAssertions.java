@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.util.DraggablePoint;
 
@@ -61,5 +62,10 @@ public class PixelitorAssertions extends Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static PathAssert assertThat(Path actual) {
         return new PathAssert(actual);
+    }
+
+    @org.assertj.core.util.CheckReturnValue
+    public static PenToolAssert assertThat(PenTool actual) {
+        return new PenToolAssert(actual);
     }
 }

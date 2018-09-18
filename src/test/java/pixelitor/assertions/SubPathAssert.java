@@ -18,7 +18,11 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
+import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.tools.util.DraggablePoint;
+
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * Custom AssertJ assertions for {@link SubPath} objects.
@@ -88,13 +92,59 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
         return this;
     }
 
-    public SubPathAssert numPointsIs(int expected) {
+    public SubPathAssert numAnchorsIs(int expected) {
         isNotNull();
 
-        int numPoints = actual.getNumAnchorPoints();
+        int numPoints = actual.getNumAnchors();
         if (numPoints != expected) {
             throw new AssertionError("numPoints is " + numPoints + ", expecting " + expected);
         }
+
+        return this;
+    }
+
+    public SubPathAssert isConsistent() {
+        isNotNull();
+
+        actual.checkConsistency();
+
+        return this;
+    }
+
+    public SubPathAssert firstAnchorIsAt(double x, double y) {
+        isNotNull();
+
+        AnchorPoint anchor = actual.getAnchor(0);
+        assertThat(anchor).isAt(x, y);
+
+        return this;
+    }
+
+    public SubPathAssert hasMoving() {
+        isNotNull();
+
+        if (!actual.hasMovingPoint()) {
+            throw new AssertionError("has no moving");
+        }
+
+        return this;
+    }
+
+    public SubPathAssert hasNoMoving() {
+        isNotNull();
+
+        if (actual.hasMovingPoint()) {
+            throw new AssertionError("has moving");
+        }
+
+        return this;
+    }
+
+    public SubPathAssert movingIsAt(double x, double y) {
+        isNotNull();
+
+        DraggablePoint moving = actual.getMoving();
+        assertThat(moving).isAt(x, y);
 
         return this;
     }

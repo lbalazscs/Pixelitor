@@ -19,7 +19,6 @@ package pixelitor.tools.pen.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.tools.Tools;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.SubPath;
 
@@ -53,7 +52,7 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
         subPath.addPoint(anchorPoint);
 
-        Tools.PEN.setPathBuildingInProgressState("AddAnchorPointEdit.redo");
+        subPath.getPath().setBuildingInProgressState("AddAnchorPointEdit.redo");
 
         comp.repaint();
     }

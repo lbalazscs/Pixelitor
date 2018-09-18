@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.HandleMovedEdit;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -76,6 +77,8 @@ public class DraggablePoint extends Point2D.Double {
     private static final Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
 
     public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
+        assert view != null;
+
         this.name = name;
         this.x = x;
         this.y = y;
@@ -118,10 +121,13 @@ public class DraggablePoint extends Point2D.Double {
         return new Rectangle.Double(startX, startY, size, size);
     }
 
+    /**
+     * This implementation constrains it relative to its former position.
+     * Subclasses can choose a different pivot point by overriding this method.
+     */
     public void setConstrainedLocation(double mouseX, double mouseY) {
-        // can be implemented only in subclasses,
-        // but we don't want to make this class abstract
-        throw new UnsupportedOperationException();
+        Point2D p = Utils.constrainEndPoint(dragStartX, dragStartY, mouseX, mouseY);
+        setLocation(p.getX(), p.getY());
     }
 
     public void translate(double dx, double dy) {
@@ -286,13 +292,17 @@ public class DraggablePoint extends Point2D.Double {
 
         Point2D before = new Point2D.Double(origX, origY);
         HandleMovedEdit edit = new HandleMovedEdit(
-                "Handle Moved", this, before, comp);
+                "Move Handle", this, before, comp);
         return Optional.of(edit);
     }
 
     // used only after deserializing from a pxc file
     public void setView(View view) {
         this.view = view;
+    }
+
+    public View getView() {
+        return view;
     }
 
     @Override

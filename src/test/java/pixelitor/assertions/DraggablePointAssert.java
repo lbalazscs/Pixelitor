@@ -38,7 +38,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dy = Math.abs(actual.y - y);
         if ((dx > 0.1) || (dy > 0.1)) {
             throw new AssertionError(String.format(
-                    "found (%.2f, %.2f) instead of the expected (%.2f, %.2f)",
+                    "found (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
                     actual.x, actual.y, x, y));
         }
 
@@ -52,7 +52,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dImY = Math.abs(actual.imY - y);
         if (dImX > 2 || dImY > 2) {
             throw new AssertionError(String.format(
-                    "found image coords (%.2f, %.2f) instead of the expected (%.2f, %.2f)",
+                    "found image coords (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
                     actual.imX, actual.imY, x, y));
         }
 
@@ -85,7 +85,10 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
 
         ControlPoint cp = (ControlPoint) actual;
         if (!cp.isRetracted()) {
-            throw new AssertionError("not retracted");
+            AnchorPoint anchor = cp.getAnchor();
+            throw new AssertionError(String.format(
+                    "Not retracted: control is at (%.1f, %.1f), anchor is at (%.1f, %.1f)",
+                    cp.getX(), cp.getY(), anchor.getX(), anchor.getY()));
         }
 
         return this;
@@ -102,6 +105,26 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         ControlPoint cp = (ControlPoint) actual;
         if (cp.isRetracted()) {
             throw new AssertionError("retracted");
+        }
+
+        return this;
+    }
+
+    public DraggablePointAssert isActive() {
+        isNotNull();
+
+        if (!actual.isActive()) {
+            throw new AssertionError("not active");
+        }
+
+        return this;
+    }
+
+    public DraggablePointAssert isNotActive() {
+        isNotNull();
+
+        if (actual.isActive()) {
+            throw new AssertionError("active");
         }
 
         return this;

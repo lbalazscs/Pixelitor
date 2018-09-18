@@ -17,6 +17,7 @@
 
 package pixelitor.selection;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.History;
@@ -62,6 +63,11 @@ public class Selection {
 
         this.shape = shape;
         this.ic = ic;
+
+        // hack to prevent unit tests from starting the marching
+        if (Build.isTesting()) {
+            frozen = true;
+        }
 
         startMarching();
     }

@@ -45,6 +45,10 @@ public class ConvertSelectionToPathEdit extends PixelitorEdit {
         assert !comp.hasSelection();
 
         comp.setActivePath(oldPath);
+        if (Tools.PEN.isActive()) {
+            Tools.PEN.setPath(oldPath);
+        }
+        
         comp.setSelectionFromShape(oldSelectionShape);
         Tools.SELECTION.activate();
     }

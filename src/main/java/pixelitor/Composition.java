@@ -1074,6 +1074,9 @@ public class Composition implements Serializable {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariant() {
         if (layerList.isEmpty()) {
+            if (Build.isTesting()) {
+                return true;
+            }
             throw new IllegalStateException("no layer in " + getName());
         }
         if (activeLayer == null) {
@@ -1159,6 +1162,10 @@ public class Composition implements Serializable {
     }
 
     public void setActivePath(Path path) {
+        if (path != null && path.getComp() != this) {
+            throw new IllegalArgumentException();
+        }
+
         if (paths == null) {
             paths = new Paths();
         }
@@ -1222,14 +1229,24 @@ public class Composition implements Serializable {
         }
     }
 
+    public String toPathDebugString() {
+        return "Composition{name='" + name + '\''
+                + ", active = " + isActive()
+                + ", path = " + getActivePath()
+                + '}';
+    }
+
     @Override
     public String toString() {
         return "Composition{name='" + name + '\''
+                + ", active = " + isActive()
+                + ", path = " + getActivePath()
                 + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
                 + ", layerList=" + layerList
                 + ", canvas=" + canvas
                 + ", selection=" + selection
-                + ", dirty=" + dirty + '}';
+                + ", dirty=" + dirty
+                + '}';
     }
 
     public static class LayerAdder {

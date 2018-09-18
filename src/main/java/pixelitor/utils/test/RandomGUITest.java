@@ -137,6 +137,8 @@ public class RandomGUITest {
 
     private static boolean running = false;
 
+    private static final boolean verbose = "true".equals(System.getProperty("verbose"));
+
     /**
      * Utility class with static methods
      */
@@ -325,7 +327,9 @@ public class RandomGUITest {
     }
 
     private static void log(String msg) {
-//        System.out.println(msg);
+        if (verbose) {
+            System.out.println(msg);
+        }
         Events.postRandomTestEvent(msg);
     }
 
@@ -584,7 +588,7 @@ public class RandomGUITest {
         int randomIndex = rand.nextInt(keyEvents.length);
         int keyEvent = keyEvents[randomIndex];
 
-        log("key = " + keyEvent);
+        log("random key: " + keyEvent);
         pressKey(r, keyEvent);
     }
 
@@ -729,6 +733,7 @@ public class RandomGUITest {
     }
 
     private static void changeImageArea() {
+        log("changeImageArea");
         ImageArea.changeUI();
     }
 
@@ -1091,13 +1096,16 @@ public class RandomGUITest {
         Composition comp = ImageComponents.getActiveCompOrNull();
         float v = rand.nextFloat();
         if (v < 0.2) {
+            log("clear guides");
             comp.clearGuides();
             return;
         }
         new Guides.Builder(comp, false).build(false, guides -> {
             if (rand.nextBoolean()) {
+                log("add relative horizontal guide");
                 guides.addHorRelative(rand.nextFloat());
             } else {
+                log("add relative vertical guide");
                 guides.addVerRelative(rand.nextFloat());
             }
         });
@@ -1107,14 +1115,15 @@ public class RandomGUITest {
         if (rand.nextFloat() < 0.1) {
             Composition comp = ImageComponents.getActiveCompOrNull();
             if (comp.getFile() != null) {
-                log("f5 reload");
-                pressKey(r, VK_F5);
+                log("f12 reload");
+                pressKey(r, VK_F12);
             }
         }
     }
 
     // to prevent paths growing too large
     private static void setPathsToNull() {
+        log("setPathsToNull");
         List<ImageComponent> icList = ImageComponents.getICList();
         ImageComponent activeIC = ImageComponents.getActiveIC();
         for (ImageComponent ic : icList) {
@@ -1123,6 +1132,8 @@ public class RandomGUITest {
                 ic.getComp().setActivePath(null);
             }
         }
+        // history is in an inconsistent state now
+        History.clear();
     }
 
     private static void dispatchKey(int keyCode, char keyChar, int mask) {

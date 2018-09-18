@@ -19,12 +19,16 @@ package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.history.History;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
+import static pixelitor.tools.pen.AnchorPointType.CUSP;
+import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
+import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
@@ -36,8 +40,8 @@ public class PathEditor implements PenToolMode {
             "<html>Pen Tool Edit Mode: " +
                     "<b>drag</b> the anchor and control points. " +
                     "<b>Right-click</b> the anchor points for options. " +
-                    "<b>Alt-drag</b> to pull out handles.";
-    private Path path;
+                    "<b>Alt-drag</b> pulls out or breaks handles, " +
+                    "<b>Shift</b> constrains angles.";
 
     private PathEditor() {
     }
@@ -54,10 +58,31 @@ public class PathEditor implements PenToolMode {
         double x = e.getCoX();
         double y = e.getCoY();
 
-        DraggablePoint draggablePoint = path.handleWasHit(x, y, e.isAltDown());
-        if (draggablePoint != null) {
-            draggablePoint.setActive(true);
-            draggablePoint.mousePressed(x, y);
+        boolean altDown = e.isAltDown();
+        DraggablePoint hit = path.handleWasHit(x, y, altDown);
+        if (hit != null) {
+            if (altDown) {
+                if (hit instanceof ControlPoint) {
+                    ControlPoint cp = (ControlPoint) hit;
+                    if (cp.isRetracted()) {
+                        cp.getAnchor().setType(SYMMETRIC);
+                    } else {
+                        cp.getAnchor().setType(CUSP);
+                    }
+                    cp.setActive(true);
+                    cp.mousePressed(x, y);
+                } else if (hit instanceof AnchorPoint) {
+                    AnchorPoint ap = (AnchorPoint) hit;
+                    ap.retractHandles();
+                    ap.setType(SYMMETRIC);
+                    ap.ctrlOut.setActive(true);
+                    ap.ctrlOut.mousePressed(x, y);
+                }
+            } else {
+                // Alt is not down, normal editing
+                hit.setActive(true);
+                hit.mousePressed(x, y);
+            }
         }
     }
 
@@ -67,7 +92,7 @@ public class PathEditor implements PenToolMode {
         double y = e.getCoY();
 
         if (activePoint != null) {
-            activePoint.mouseDragged(x, y);
+            activePoint.mouseDragged(x, y, e.isShiftDown());
         }
     }
 
@@ -81,7 +106,7 @@ public class PathEditor implements PenToolMode {
                 AnchorPoint ap = (AnchorPoint) activePoint;
                 ap.showPopup((int) x, (int) y);
             } else {
-                activePoint.mouseReleased(x, y);
+                activePoint.mouseReleased(x, y, e.isShiftDown());
                 activePoint
                         .createMovedEdit(e.getComp())
                         .ifPresent(History::addEdit);
@@ -93,9 +118,9 @@ public class PathEditor implements PenToolMode {
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
         int x = e.getX();
         int y = e.getY();
-        DraggablePoint hitPoint = path.handleWasHit(x, y, e.isAltDown());
-        if (hitPoint != null) {
-            hitPoint.setActive(true);
+        DraggablePoint hit = path.handleWasHit(x, y, e.isAltDown());
+        if (hit != null) {
+            hit.setActive(true);
             return true;
         } else {
             if (activePoint != null) {
@@ -107,19 +132,13 @@ public class PathEditor implements PenToolMode {
     }
 
     @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path, String reason) {
-//        System.out.printf("PathEditor::setPath: reason = '%s'%n", reason);
-        this.path = path;
-    }
-
-    @Override
     public String getToolMessage() {
         return EDIT_HELP_MESSAGE;
+    }
+
+    @Override
+    public void start() {
+        Tools.PEN.startEditing(false);
     }
 
     @Override

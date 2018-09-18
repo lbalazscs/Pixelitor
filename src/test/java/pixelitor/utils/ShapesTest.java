@@ -19,6 +19,7 @@ package pixelitor.utils;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
 import pixelitor.testutils.ShapeChecker;
@@ -32,14 +33,15 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
+import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 public class ShapesTest {
     private ImageComponent ic;
 
     @Before
     public void setup() {
-        ic = TestHelper.createMockICWithoutComp();
+        Composition comp = TestHelper.createEmptyComposition();
+        ic = TestHelper.setupAMockICFor(comp);
     }
 
     @Test
@@ -72,7 +74,7 @@ public class ShapesTest {
         checkEllipsePath(path.getActiveSubpath());
     }
 
-    private void checkRectangleShape(Shape s) {
+    private static void checkRectangleShape(Shape s) {
         ShapeChecker checker = new ShapeChecker(s);
         checker.assertNumMoveTosWas(1);
         checker.assertNumLineTosWas(4);
@@ -81,33 +83,33 @@ public class ShapesTest {
         checker.assertNumClosesWas(1);
     }
 
-    private void checkRectanglePath(SubPath sp) {
+    private static void checkRectanglePath(SubPath sp) {
         assertThat(sp)
-                .numPointsIs(4)
+                .numAnchorsIs(4)
                 .isClosed();
 
-        AnchorPoint p1 = sp.getPoint(0);
+        AnchorPoint p1 = sp.getAnchor(0);
         assertThat(p1).isAt(2, 2);
         assertThat(p1.ctrlOut).isRetracted();
         assertThat(p1.ctrlIn).isRetracted();
 
-        AnchorPoint p2 = sp.getPoint(1);
+        AnchorPoint p2 = sp.getAnchor(1);
         assertThat(p2).isAt(12, 2);
         assertThat(p2.ctrlOut).isRetracted();
         assertThat(p2.ctrlIn).isRetracted();
 
-        AnchorPoint p3 = sp.getPoint(2);
+        AnchorPoint p3 = sp.getAnchor(2);
         assertThat(p3).isAt(12, 12);
         assertThat(p3.ctrlOut).isRetracted();
         assertThat(p3.ctrlIn).isRetracted();
 
-        AnchorPoint p4 = sp.getPoint(3);
+        AnchorPoint p4 = sp.getAnchor(3);
         assertThat(p4).isAt(2, 12);
         assertThat(p4.ctrlOut).isRetracted();
         assertThat(p4.ctrlIn).isRetracted();
     }
 
-    private void checkEllipseShape(Shape s) {
+    private static void checkEllipseShape(Shape s) {
         ShapeChecker checker = new ShapeChecker(s);
         checker.assertNumMoveTosWas(1);
         checker.assertNumLineTosWas(0);
@@ -116,29 +118,29 @@ public class ShapesTest {
         checker.assertNumClosesWas(1);
     }
 
-    private void checkEllipsePath(SubPath sp) {
+    private static void checkEllipsePath(SubPath sp) {
         assertThat(sp)
-                .numPointsIs(4)
+                .numAnchorsIs(4)
                 .isClosed();
 
-        AnchorPoint p1 = sp.getPoint(0);
+        AnchorPoint p1 = sp.getAnchor(0);
         assertThat(p1)
                 .isAt(12, 7)
-                .anchorPointTypeIs(SMOOTH);
+                .anchorPointTypeIs(SYMMETRIC);
         assertThat(p1.ctrlOut).isAt(12, 9.76);
         assertThat(p1.ctrlIn).isAt(12, 4.24);
 
-        AnchorPoint p2 = sp.getPoint(1);
+        AnchorPoint p2 = sp.getAnchor(1);
         assertThat(p2).isAt(7, 12);
         assertThat(p2.ctrlOut).isAt(4.24, 12.00);
         assertThat(p2.ctrlIn).isAt(9.76, 12);
 
-        AnchorPoint p3 = sp.getPoint(2);
+        AnchorPoint p3 = sp.getAnchor(2);
         assertThat(p3).isAt(2, 7);
         assertThat(p3.ctrlOut).isAt(2, 4.24);
         assertThat(p3.ctrlIn).isAt(2, 9.76);
 
-        AnchorPoint p4 = sp.getPoint(3);
+        AnchorPoint p4 = sp.getAnchor(3);
         assertThat(p4).isAt(7, 2);
         assertThat(p4.ctrlOut).isAt(9.76, 2);
         assertThat(p4.ctrlIn).isAt(4.24, 2);

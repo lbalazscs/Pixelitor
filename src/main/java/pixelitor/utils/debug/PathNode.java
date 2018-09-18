@@ -30,6 +30,7 @@ public class PathNode extends DebugNode {
 
         int numSubpaths = path.getNumSubpaths();
         addInt("Number of Subpaths", numSubpaths);
+        addString("Build State", path.getBuildState().toString());
 
         SubPath activeSubpath = path.getActiveSubpath();
         for (int i = 0; i < numSubpaths; i++) {

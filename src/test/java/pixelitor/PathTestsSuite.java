@@ -15,24 +15,25 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils.debug;
+package pixelitor;
 
-import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.Paths;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import pixelitor.tools.ToolTest;
+import pixelitor.tools.pen.PathBuilderTest;
+import pixelitor.tools.pen.PathTest;
+import pixelitor.tools.pen.PenToolTest;
 
-public class PathsNode extends DebugNode {
-    public PathsNode(Paths paths) {
-        this("Paths", paths);
-    }
-
-    public PathsNode(String name, Paths paths) {
-        super(name, paths);
-
-        Path activePath = paths.getActivePath();
-        if (activePath != null) {
-            add(new PathNode(activePath));
-        } else {
-            addBoolean("has active path", false);
-        }
-    }
+/**
+ * All the tests that are related to paths
+ */
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+        PathBuilderTest.class,
+        PathTest.class,
+        PenToolTest.class,
+        ToolTest.class,
+})
+public class PathTestsSuite {
+    // empty
 }

@@ -54,7 +54,8 @@ public class Tools {
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
 
-    public static Tool currentTool = BRUSH;
+    // leave it set to null so that the first changeTo initializes the default tool
+    public static Tool currentTool;
 
     static {
         ImageComponents.addActiveImageChangeListener(new ActiveImageChangeListener() {
@@ -81,14 +82,20 @@ public class Tools {
     }
 
     public static void changeTo(Tool newTool) {
+        // showing the message could be useful even if the tool didn't change
+        Messages.showInStatusBar(newTool.getStatusBarMessage());
+
         Tool previousTool = Tools.currentTool;
-        previousTool.toolEnded();
+        if (previousTool == newTool) {
+            return;
+        }
+        if (previousTool != null) {
+            previousTool.toolEnded();
+            EventDispatcher.toolChanged(previousTool, newTool);
+        }
         Tools.currentTool = newTool;
         newTool.toolStarted();
-        EventDispatcher.toolChanged(previousTool, newTool);
         ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newTool);
-
-        Messages.showInStatusBar(newTool.getStatusBarMessage());
     }
 
     public static Tool[] getAll() {

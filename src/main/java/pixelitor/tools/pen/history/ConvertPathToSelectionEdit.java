@@ -48,8 +48,8 @@ public class ConvertPathToSelectionEdit extends PixelitorEdit {
         selectionEdit.undo();
         comp.setActivePath(path);
 
+        Tools.PEN.setPath(path);
         Tools.PEN.setModeChooserCombo(mode);
-        Tools.PEN.setPath(path, "ConvertPathToSelectionEdit.undo");
         Tools.PEN.activate();
     }
 

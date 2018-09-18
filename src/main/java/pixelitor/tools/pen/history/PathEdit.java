@@ -19,10 +19,52 @@ package pixelitor.tools.pen.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PenToolMode;
+
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 
 public class PathEdit extends PixelitorEdit {
-    protected PathEdit(String name, Composition comp, Path before, Path after) {
+    private final Path before;
+    private final Path after;
+    private final PenToolMode modeBefore;
+
+    public PathEdit(String name, Composition comp, Path before, Path after) {
         super(name, comp);
+        this.before = before;
+        this.after = after;
+        modeBefore = Tools.PEN.getMode();
+    }
+
+    @Override
+    public void undo() throws CannotUndoException {
+        super.undo();
+
+        setPath(before);
+    }
+
+    @Override
+    public void redo() throws CannotRedoException {
+        super.redo();
+
+        setPath(after);
+    }
+
+    private void setPath(Path path) {
+        comp.setActivePath(path);
+
+        if (Tools.PEN.isActive()) {
+            Tools.PEN.setPath(path);
+            if (path == null) {
+                Tools.PEN.startBuilding(false);
+            } else if (Tools.PEN.getMode() != modeBefore) {
+                // if the path is not null, return
+                // to the mode before the edit
+                modeBefore.start();
+            }
+            comp.repaint();
+        }
     }
 }

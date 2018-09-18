@@ -17,14 +17,16 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.history.SubPathStartEdit;
+import pixelitor.tools.pen.history.PathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
@@ -38,6 +40,9 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 
 /**
  * A path contains the same information as a {@link PathIterator},
@@ -55,22 +60,33 @@ public class Path implements Serializable {
 
     private static long debugCounter = 0;
     private final String id; // for debugging
-    private final boolean builtInteractively;
+    private BuildState buildState;
+    private BuildState prevBuildState;
+    private PenToolMode preferredPenToolMode;
 
-    public Path(Composition comp, boolean builtInteractively) {
+    public Path(Composition comp) {
         this.comp = comp;
-        this.builtInteractively = builtInteractively;
+        comp.setActivePath(this);
         id = "P" + (debugCounter++);
+        buildState = BuildState.NO_INTERACTION;
     }
 
     public Path copyForUndo() {
-        Path copy = new Path(comp, builtInteractively);
+        Path copy = new Path(comp);
         for (SubPath sp : subPaths) {
-            copy.subPaths.add(sp.copyForUndo());
+            copy.subPaths.add(sp.copyForUndo(copy));
         }
         int activeIndex = subPaths.indexOf(activeSubPath);
         copy.activeSubPath = copy.subPaths.get(activeIndex);
         return copy;
+    }
+
+    public PenToolMode getPreferredPenToolMode() {
+        return preferredPenToolMode;
+    }
+
+    public void setPreferredPenToolMode(PenToolMode preferredPenToolMode) {
+        this.preferredPenToolMode = preferredPenToolMode;
     }
 
     @VisibleForTesting
@@ -78,11 +94,15 @@ public class Path implements Serializable {
         return activeSubPath;
     }
 
-    public void paintForBuilding(Graphics2D g, PathBuilder.State state) {
+    public Composition getComp() {
+        return comp;
+    }
+
+    public void paintForBuilding(Graphics2D g) {
         Shapes.drawVisible(g, toComponentSpaceShape());
 
         for (SubPath sp : subPaths) {
-            sp.paintHandlesForBuilding(g, state);
+            sp.paintHandlesForBuilding(g, buildState);
         }
     }
 
@@ -120,17 +140,6 @@ public class Path implements Serializable {
         return path;
     }
 
-    public void startNewSubPath(AnchorPoint point, boolean addToHistory) {
-        activeSubPath = new SubPath(this, comp);
-        subPaths.add(activeSubPath);
-        activeSubPath.addFirstPoint(point);
-
-        if (addToHistory) {
-            boolean wasFirst = subPaths.size() == 1;
-            History.addEdit(new SubPathStartEdit(comp, this, point, wasFirst));
-        }
-    }
-
     /**
      * Returns true if there are no more subpaths left
      */
@@ -139,7 +148,7 @@ public class Path implements Serializable {
         assert activeSubPath == subPaths.get(lastIndex);
 
         // this should be called only for undo
-        assert activeSubPath.getNumAnchorPoints() == 1;
+        assert activeSubPath.getNumAnchors() == 1;
 
         subPaths.remove(lastIndex);
         if (lastIndex == 0) {
@@ -149,8 +158,9 @@ public class Path implements Serializable {
         return false;
     }
 
-    private void addPoint(AnchorPoint ap) {
-        activeSubPath.addPoint(ap);
+    public void addSubPath(SubPath subPath) {
+        subPaths.add(subPath);
+        activeSubPath = subPath;
     }
 
     public AnchorPoint getFirst() {
@@ -161,53 +171,63 @@ public class Path implements Serializable {
         return activeSubPath.getLast();
     }
 
-    public void close(boolean addToHistory) {
-        activeSubPath.close(addToHistory);
+    public AnchorPoint addMovingPointAsAnchor() {
+        return activeSubPath.addMovingPointAsAnchor();
     }
 
-    public AnchorPoint addMovingPointAsAnchor(double x, double y) {
-        return activeSubPath.addMovingPointAsAnchor(x, y);
+    public void setMoving(MovingPoint point) {
+        activeSubPath.setMoving(point);
     }
 
-    public int getNumAnchorPointsInActiveSubpath() {
-        return activeSubPath.getNumAnchorPoints();
-    }
-
-    public void setMoving(AnchorPoint point, String reason) {
-        activeSubPath.setMoving(point, reason);
+    public MovingPoint getMoving() {
+        return activeSubPath.getMoving();
     }
 
     public void setMovingLocation(double x, double y, boolean nullOK) {
         activeSubPath.setMovingLocation(x, y, nullOK);
     }
 
-    public AnchorPoint getMoving() {
-        return activeSubPath.getMoving();
-    }
-
-    @SuppressWarnings("SameReturnValue")
-    public boolean checkWiring() {
-        for (SubPath sp : subPaths) {
-            sp.checkWiring();
-        }
-        return true;
-    }
-
     public void dump() {
+        checkConsistency();
+        System.out.println("Path " + toString());
         for (SubPath sp : subPaths) {
             if (sp.isClosed()) {
-                System.out.println("New closed subpath");
+                System.out.println("New closed subpath " + sp.getId());
             } else {
-                System.out.println("New unclosed subpath");
+                System.out.println("New unclosed subpath" + sp.getId());
             }
 
             sp.dump();
         }
     }
 
-    public void changeTypesForEditing() {
+    /**
+     * Checks whether all the objects are wired together correctly
+     */
+    @SuppressWarnings("SameReturnValue")
+    public boolean checkConsistency() {
+        for (SubPath subPath : subPaths) {
+            if (subPath.getPath() != this) {
+                throw new IllegalStateException("wrong parent in subpath " + subPath);
+            }
+            if (subPath.getComp() != comp) {
+                throw new IllegalStateException("wrong comp in subpath " + subPath);
+            }
+
+            subPath.checkConsistency();
+        }
+        return true;
+    }
+
+    public void mergeOverlappingAnchors() {
         for (SubPath sp : subPaths) {
-            sp.changeTypesForEditing(builtInteractively);
+            sp.mergeOverlappingAnchors();
+        }
+    }
+
+    public void setHeuristicTypes() {
+        for (SubPath sp : subPaths) {
+            sp.setHeuristicTypes();
         }
     }
 
@@ -217,76 +237,24 @@ public class Path implements Serializable {
         }
     }
 
-    public void startNewSubpath(double x, double y, ImageComponent ic) {
-        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, ic));
+    public SubPath startNewSubpath(double x, double y, ImageComponent ic) {
+        SubPath sp = startNewSubpath();
+        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, ic), sp);
         first.setType(SMOOTH);
-        startNewSubPath(first, false);
+        sp.addFirstPoint(first, false);
+        return sp;
     }
 
-    public void addLine(double newX, double newY, ImageComponent ic) {
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
-        AnchorPoint ap = new AnchorPoint(newX, newY, ic);
-        addPoint(ap);
+    public SubPath startNewSubPath(AnchorPoint point, boolean addToHistory) {
+        SubPath sp = startNewSubpath();
+        sp.addFirstPoint(point, addToHistory);
+        return sp;
     }
 
-    public void addCubicCurve(double c1x, double c1y,
-                              double c2x, double c2y,
-                              double newX, double newY, ImageComponent ic) {
-        ControlPoint lastOut = getLast().ctrlOut;
-        c1x = ic.imageXToComponentSpace(c1x);
-        c1y = ic.imageYToComponentSpace(c1y);
-        lastOut.setLocationOnlyForThis(c1x, c1y);
-        lastOut.afterMovingActionsForThis();
-
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
-        AnchorPoint next = new AnchorPoint(newX, newY, ic);
-        addPoint(next);
-        next.setType(SMOOTH);
-
-        c2x = ic.imageXToComponentSpace(c2x);
-        c2y = ic.imageYToComponentSpace(c2y);
-        ControlPoint nextIn = next.ctrlIn;
-        nextIn.setLocationOnlyForThis(c2x, c2y);
-        nextIn.afterMovingActionsForThis();
-    }
-
-    public void addQuadCurve(double cx, double cy,
-                             double newX, double newY, ImageComponent ic) {
-        cx = ic.imageXToComponentSpace(cx);
-        cy = ic.imageYToComponentSpace(cy);
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
-        AnchorPoint last = getLast();
-
-        // convert the quadratic bezier (with one control point)
-        // into a cubic one (with two control points), see
-        // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
-        double qp1x = cx;
-        double qp1y = cy;
-        double qp0x = last.x;
-        double qp0y = last.y;
-        double qp2x = newX;
-        double qp2y = newY;
-
-        double twoThirds = 2.0 / 3.0;
-        double cp1x = qp0x + twoThirds * (qp1x - qp0x);
-        double cp1y = qp0y + twoThirds * (qp1y - qp0y);
-        double cp2x = qp2x + twoThirds * (qp1x - qp2x);
-        double cp2y = qp2y + twoThirds * (qp1y - qp2y);
-
-        ControlPoint lastOut = last.ctrlOut;
-        lastOut.setLocationOnlyForThis(cp1x, cp1y);
-        lastOut.afterMovingActionsForThis();
-
-        AnchorPoint next = new AnchorPoint(newX, newY, ic);
-        addPoint(next);
-        next.setType(SMOOTH);
-
-        ControlPoint nextIn = next.ctrlIn;
-        nextIn.setLocationOnlyForThis(cp2x, cp2y);
-        nextIn.afterMovingActionsForThis();
+    public SubPath startNewSubpath() {
+        activeSubPath = new SubPath(this, comp);
+        subPaths.add(activeSubPath);
+        return activeSubPath;
     }
 
     public void setView(View view) {
@@ -295,8 +263,8 @@ public class Path implements Serializable {
         }
     }
 
-    public void finishActiveSubpath(String reason) {
-        activeSubPath.setFinished(true, reason);
+    public void finishActiveSubpath() {
+        activeSubPath.setFinished(true);
     }
 
     public boolean hasMovingPoint() {
@@ -312,16 +280,29 @@ public class Path implements Serializable {
     }
 
     public void delete(SubPath subPath) {
+        Path backup = copyForUndo();
         subPaths.removeIf(sp -> sp == subPath);
+        assert subPaths.size() >= 1; // should never be called for the last subpath
+        activeSubPath = subPaths.get(subPaths.size() - 1);
         comp.repaint();
-        // TODO history
+
+        PathEdit edit = new PathEdit("Delete Subpath", comp, backup, this);
+        History.addEdit(edit);
     }
 
     public void delete() {
         comp.setActivePath(null);
-        Tools.PEN.setPath(null, "Path.delete");
+
+        assert Tools.PEN.isActive();
+
+        // create the edit before the actual removing
+        // so that it can it can remember the pen tool mode
+        PathEdit edit = new PathEdit("Delete Path", comp, this, null);
+
+        Tools.PEN.removePath();
         comp.repaint();
-        // TODO history
+
+        History.addEdit(edit);
     }
 
     public int indexOf(SubPath subPath) {
@@ -332,6 +313,66 @@ public class Path implements Serializable {
         assert activeSubPath == subPaths.get(index);
         subPaths.set(index, subPath);
         activeSubPath = subPath;
+    }
+
+    public BuildState getBuildState() {
+        return buildState;
+    }
+
+    public void setBuildState(BuildState newState, String reason) {
+        if (this.buildState == newState) {
+            return;
+        }
+        if (Build.CURRENT.isDevelopment()) {
+            Messages.showInStatusBar("<html><font color=red>" + buildState
+                    + "</font> \u21e8 <font color=#004E00>" + newState
+                    + "</font> (" + reason + ")");
+        }
+
+        prevBuildState = buildState;
+
+        if (newState == MOVING_TO_NEXT_ANCHOR) {
+            if (!hasMovingPoint()) {
+                MovingPoint m = PenToolMode.BUILD.createMovingAtLastMouseLoc(activeSubPath);
+                setMoving(m);
+            }
+        }
+
+        this.buildState = newState;
+    }
+
+    public BuildState getPrevBuildState() {
+        return prevBuildState;
+    }
+
+    // called only by the undo/redo mechanism
+    public void setBuildingInProgressState(String reason) {
+        boolean mouseDown = Tools.EventDispatcher.isMouseDown();
+        if (mouseDown) {
+            setBuildState(DRAGGING_THE_CONTROL_OF_LAST, reason);
+        } else {
+            setBuildState(MOVING_TO_NEXT_ANCHOR, reason);
+        }
+    }
+
+    void finishByCtrlClick(Composition comp) {
+        BuildState state = getBuildState();
+        assert state == MOVING_TO_NEXT_ANCHOR
+                || state == MOVE_EDITING_PREVIOUS : "state = " + state;
+
+        activeSubPath.finishByCtrlClick(comp);
+    }
+
+    // return true if it could be closed
+    boolean tryClosing(double x, double y, Composition comp) {
+        return activeSubPath.tryClosing(x, y, comp);
+    }
+
+    @VisibleForTesting
+    public void assertStateIs(BuildState state) {
+        if (buildState != state) {
+            throw new AssertionError("Expected " + state + ", found " + buildState);
+        }
     }
 
     @VisibleForTesting
@@ -345,6 +386,16 @@ public class Path implements Serializable {
         s += subPaths
                 .stream()
                 .map(SubPath::getId)
+                .collect(joining(",", "[", "]"));
+        return s;
+    }
+
+    // also includes the anchor point positions
+    public String toDetailedString() {
+        String s = getId() + " ";
+        s += subPaths
+                .stream()
+                .map(SubPath::toDetailedString)
                 .collect(joining(",", "[", "]"));
         return s;
     }

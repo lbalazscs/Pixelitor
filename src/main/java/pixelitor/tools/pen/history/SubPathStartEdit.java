@@ -20,24 +20,25 @@ package pixelitor.tools.pen.history;
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.SubPath;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
+// TODO perhaps it would be simpler to use the generic PathEdit instead of this
 public class SubPathStartEdit extends PixelitorEdit {
     private final Path path;
-    private final AnchorPoint point;
-    private final boolean wasFirst;
+    private final boolean wasFirstSP;
+    private final SubPath subPath;
 
-    public SubPathStartEdit(Composition comp, Path path, AnchorPoint point, boolean wasFirst) {
+    public SubPathStartEdit(Composition comp, Path path, SubPath subPath) {
         super("Subpath Start", comp);
         this.path = path;
-        this.point = point;
-        this.wasFirst = wasFirst;
+        this.wasFirstSP = path.getNumSubpaths() == 1;
+        this.subPath = subPath;
     }
 
     @Override
@@ -45,11 +46,11 @@ public class SubPathStartEdit extends PixelitorEdit {
         super.undo();
 
         boolean noMoreLeft = path.deleteLastSubPath();
-        assert wasFirst == noMoreLeft;
+        assert wasFirstSP == noMoreLeft;
         if (noMoreLeft) {
-            Tools.PEN.setPath(null, "SubPathStartEdit.undo");
+            Tools.PEN.removePath();
         }
-        Tools.PEN.setBuilderState(BEFORE_SUBPATH, "SubPathStartEdit.undo");
+        path.setBuildState(NO_INTERACTION, "SubPathStartEdit.undo");
         comp.repaint();
     }
 
@@ -57,11 +58,13 @@ public class SubPathStartEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        path.startNewSubPath(point, false);
-        if (wasFirst) {
-            Tools.PEN.setPath(path, "SubPathStartEdit.redo");
+        path.addSubPath(subPath);
+        subPath.setFinished(false);
+        if (wasFirstSP) {
+            comp.setActivePath(path);
+            Tools.PEN.setPath(path);
         }
-        Tools.PEN.setPathBuildingInProgressState("SubPathStartEdit.redo");
+        path.setBuildingInProgressState("SubPathStartEdit.redo");
         comp.repaint();
     }
 }

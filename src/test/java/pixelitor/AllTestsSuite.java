@@ -28,6 +28,7 @@ import pixelitor.filters.gui.ParamSetTest;
 import pixelitor.filters.gui.ParamStateTest;
 import pixelitor.filters.gui.RangeParamTest;
 import pixelitor.filters.levels.LevelsTest;
+import pixelitor.guides.GuidesTest;
 import pixelitor.history.PixelitorUndoManagerTest;
 import pixelitor.layers.ContentLayerTest;
 import pixelitor.layers.ImageLayerTest;
@@ -35,9 +36,11 @@ import pixelitor.layers.LayerBlendingModesTest;
 import pixelitor.layers.LayerTest;
 import pixelitor.layers.TextLayerTest;
 import pixelitor.tools.AbstractBrushToolTest;
-import pixelitor.tools.ToolTest;
+import pixelitor.tools.gradient.GradientHandlesTest;
 import pixelitor.tools.guidelines.RectGuidelineTest;
+import pixelitor.tools.transform.TransformBoxTest;
 import pixelitor.transform.TransformHelperTest;
+import pixelitor.utils.ShapesTest;
 import pixelitor.utils.TrackedIOTest;
 import pixelitor.utils.UtilsTest;
 
@@ -61,11 +64,13 @@ import pixelitor.utils.UtilsTest;
 
         AbstractBrushToolTest.class,
         BooleanParamTest.class,
+        CompositionCreationTest.class,
         CompositionTest.class,
         ContentLayerTest.class,
         FilterParamTest.class,
+        GradientHandlesTest.class,
+        GuidesTest.class,
         ImageLayerTest.class,
-        TrackedIOTest.class,
         IntChoiceParamTest.class,
         LayerBlendingModesTest.class,
         LayerTest.class,
@@ -77,11 +82,12 @@ import pixelitor.utils.UtilsTest;
         RandomFilterSourceTest.class,
         RangeParamTest.class,
         RectGuidelineTest.class,
+        ShapesTest.class,
         TextLayerTest.class,
-        ToolTest.class,
+        TrackedIOTest.class,
+        TransformBoxTest.class,
         TransformHelperTest.class,
-        UtilsTest.class,
-})
+        UtilsTest.class,})
 public class AllTestsSuite {
     // empty
 }

@@ -31,7 +31,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class PathTest {
     private ImageComponent ic;
@@ -52,23 +52,22 @@ public class PathTest {
         Rectangle shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, ic);
         SubPath sp = path.getActiveSubpath();
-        int numPoints = sp.getNumAnchorPoints();
-        assertThat(numPoints == 4).isTrue();
-        sp.getPoint(3).delete(); // delete last
-        sp.getPoint(2).delete(); // delete last
-        sp.getPoint(0).delete(); // delete first
-        sp.getPoint(0).delete(); // delete first (and last)
-        assertThat(path.getActiveSubpath().getNumAnchorPoints()).isEqualTo(0);
+        assertThat(sp).numAnchorsIs(4);
+        sp.getAnchor(3).delete(); // delete last
+        sp.getAnchor(2).delete(); // delete last
+        sp.getAnchor(0).delete(); // delete first
+        sp.getAnchor(0).delete(); // delete first (and last)
+        assertThat(path.getActiveSubpath()).numAnchorsIs(0);
 
         History.undo();
         History.undo();
         // check the active subpath because the undo replaced
         // the subpath reference in the path
-        assertThat(path.getActiveSubpath().getNumAnchorPoints()).isEqualTo(2);
+        assertThat(path.getActiveSubpath()).numAnchorsIs(2);
 
         History.redo();
         History.redo();
-        assertThat(path.getActiveSubpath().getNumAnchorPoints()).isEqualTo(0);
+        assertThat(path.getActiveSubpath()).numAnchorsIs(0);
     }
 
     @Test

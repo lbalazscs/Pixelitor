@@ -19,11 +19,13 @@ package pixelitor.tools.pen;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
 
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 
 /**
  * A control point of a {@link AnchorPoint}
@@ -56,6 +58,13 @@ public class ControlPoint extends DraggablePoint {
         anchor.getType().setLocationOfOtherControl(x, y, anchor, sibling);
 
         super.setLocation(x, y);
+    }
+
+    @Override
+    public void setConstrainedLocation(double mouseX, double mouseY) {
+        // constrain it relative to the anchor
+        Point2D p = Utils.constrainEndPoint(anchor.x, anchor.y, mouseX, mouseY);
+        setLocation(p.getX(), p.getY());
     }
 
     @Override
@@ -122,5 +131,13 @@ public class ControlPoint extends DraggablePoint {
     void retract() {
         setLocationOnlyForThis(anchor.x, anchor.y);
         rememberedDistFromAnchor = 0;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        super.setActive(active);
+        if (active) {
+            AnchorPoint.recentlyEditedPoint = anchor;
+        }
     }
 }

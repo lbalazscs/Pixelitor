@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.GlobalKeyboardWatch;
@@ -243,6 +244,10 @@ public abstract class Tool implements KeyListener {
         resetStateToInitial();
     }
 
+    public void compReplaced(Composition oldComp, Composition newComp) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
     public void resetStateToInitial() {
         // empty instead of abstract for the convenience of subclasses
     }
@@ -263,6 +268,15 @@ public abstract class Tool implements KeyListener {
     }
 
     public void activate() {
-        getButton().doClick();
+        if (toolButton != null) {
+            toolButton.doClick();
+        } else {
+            assert Build.isTesting();
+            Tools.changeTo(this);
+        }
+    }
+
+    public boolean isActive() {
+        return Tools.currentIs(this);
     }
 }

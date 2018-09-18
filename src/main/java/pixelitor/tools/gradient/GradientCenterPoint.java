@@ -19,10 +19,8 @@ package pixelitor.tools.gradient;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.Utils;
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
 
 /**
  * The point at the half distance between the gradient
@@ -55,13 +53,6 @@ public class GradientCenterPoint extends DraggablePoint {
         // also move the start and end points
         start.translateOnlyThis(dx, dy);
         end.translateOnlyThis(dx, dy);
-    }
-
-    @Override
-    public void setConstrainedLocation(double mouseX, double mouseY) {
-        // constrain it relative to its former position
-        Point2D p = Utils.constrainEndPoint(dragStartX, dragStartY, mouseX, mouseY);
-        setLocation(p.getX(), p.getY());
     }
 
     @Override

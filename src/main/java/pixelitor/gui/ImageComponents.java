@@ -23,7 +23,6 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.io.IOThread;
 import pixelitor.io.OpenSave;
 import pixelitor.layers.Drawable;
@@ -118,6 +117,13 @@ public class ImageComponents {
 
         // there is no open image
         return null;
+    }
+
+    public static void setActivePath(Path path) {
+        if (activeIC == null) {
+            throw new IllegalStateException();
+        }
+        activeIC.getComp().setActivePath(path);
     }
 
     public static Optional<Composition> getActiveComp() {
@@ -281,7 +287,11 @@ public class ImageComponents {
     }
 
     public static void reloadActiveFromFileAsync() {
-        Composition comp = activeIC.getComp();
+        // save a reference to the active image, because this will take
+        // a while and another image might become active in the meantime
+        ImageComponent ic = activeIC;
+
+        Composition comp = ic.getComp();
         File file = comp.getFile();
         if (file == null) {
             String msg = format(
@@ -301,31 +311,17 @@ public class ImageComponents {
             return;
         }
 
+        // prevents starting a new reload on the EDT while an asynchronous
+        // reload is already scheduled or running on the IO thread
         if (IOThread.isProcessing(file)) {
             return;
         }
 
         OpenSave.loadCompFromFileAsync(file)
-                .thenAcceptAsync(ImageComponents::replaceJustReloadedComp,
+                .thenAcceptAsync(ic::replaceJustReloadedComp,
                         EventQueue::invokeLater)
                 .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
                 .exceptionally(Messages::showExceptionOnEDT);
-    }
-
-    private static void replaceJustReloadedComp(Composition newComp) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
-
-        PixelitorEdit edit = activeIC.replaceComp(newComp,
-                MaskViewMode.NORMAL, true);
-
-        assert edit != null;
-        History.addEdit(edit);
-
-        String msg = format(
-                "The image '%s' was reloaded from the file %s.",
-                newComp.getName(), newComp.getFile().getAbsolutePath());
-        Messages.showInStatusBar(msg);
-        activeIC.repaint();
     }
 
     public static void duplicateActive() {

@@ -432,41 +432,41 @@ public final class Utils {
         return asInt;
     }
 
-    public static Point2D constrainEndPoint(double startX, double startY, double endX, double endY) {
-        double dx = endX - startX;
-        double dy = endY - startY;
+    public static Point2D constrainEndPoint(double relX, double relY, double mouseX, double mouseY) {
+        double dx = mouseX - relX;
+        double dy = mouseY - relY;
 
         double adx = Math.abs(dx);
         double ady = Math.abs(dy);
 
         if (adx > 2 * ady) {
-            endY = startY;
+            mouseY = relY; // constrain to 0 or 180 degrees
         } else if (ady > 2 * adx) {
-            endX = startX;
+            mouseX = relX; // constrain to 90 or 270 degrees
         } else {
             if (dx > 0) {
                 if (dy > 0) {
                     double avg = (dx + dy) / 2.0;
-                    endX = startX + avg;
-                    endY = startY + avg;
+                    mouseX = relX + avg;
+                    mouseY = relY + avg; // 315 degrees
                 } else {
                     double avg = (dx - dy) / 2.0;
-                    endX = startX + avg;
-                    endY = startY - avg;
+                    mouseX = relX + avg;
+                    mouseY = relY - avg; // 45 degrees
                 }
             } else { // dx <= 0
                 if (dy > 0) {
                     double avg = (-dx + dy) / 2.0;
-                    endX = startX - avg;
-                    endY = startY + avg;
+                    mouseX = relX - avg;
+                    mouseY = relY + avg; // 225 degrees
                 } else {
                     double avg = (-dx - dy) / 2.0;
-                    endX = startX - avg;
-                    endY = startY - avg;
+                    mouseX = relX - avg;
+                    mouseY = relY - avg; // 135 degrees
                 }
             }
         }
-        return new Point2D.Double(endX, endY);
+        return new Point2D.Double(mouseX, mouseY);
     }
 
     /**
