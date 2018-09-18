@@ -35,6 +35,7 @@ import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
 import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.test.Assertions;
 
@@ -50,6 +51,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_MOVED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,9 +97,11 @@ public class TestHelper {
     }
 
     public static Composition createEmptyComposition() {
-        Composition comp = Composition.createEmpty(TEST_WIDTH, TEST_HEIGHT);
-        setupAMockICFor(comp);
+        return createEmptyComposition(TEST_WIDTH, TEST_HEIGHT);
+    }
 
+    public static Composition createEmptyComposition(int width, int height) {
+        Composition comp = Composition.createEmpty(width, height);
         comp.setName("Test");
         setupAMockICFor(comp);
 
@@ -142,7 +149,6 @@ public class TestHelper {
         assert layer2 == c.getLayer(1);
 
         c.setDirty(false);
-        setupAMockICFor(c);
 
         return c;
     }
@@ -169,12 +175,19 @@ public class TestHelper {
         return layer;
     }
 
-    public static PMouseEvent createEvent(ImageComponent ic, int id,
-                                          Alt alt, Ctrl ctrl, Shift shift,
-                                          MouseButton mouseButton, int x, int y) {
+    public static PMouseEvent createPEvent(int x, int y, int id,
+                                           Ctrl ctrl, Alt alt, Shift shift,
+                                           MouseButton mouseButton, ImageComponent ic) {
+        MouseEvent e = createEvent(x, y, id, ctrl, alt, shift, mouseButton, ic);
+        return new PMouseEvent(e, ic);
+    }
+
+    public static MouseEvent createEvent(int x, int y, int id,
+                                         Ctrl ctrl, Alt alt, Shift shift,
+                                         MouseButton mouseButton, ImageComponent ic) {
         int modifiers = 0;
-        modifiers = alt.modify(modifiers);
         modifiers = ctrl.modify(modifiers);
+        modifiers = alt.modify(modifiers);
         modifiers = shift.modify(modifiers);
         modifiers = mouseButton.modify(modifiers);
         boolean popupTrigger = false;
@@ -182,7 +195,7 @@ public class TestHelper {
             popupTrigger = true;
         }
         //noinspection MagicConstant
-        MouseEvent e = new MouseEvent(ic,
+        return new MouseEvent(ic,
                 id,
                 System.currentTimeMillis(),
                 modifiers,
@@ -191,7 +204,6 @@ public class TestHelper {
                 1, // click count
                 popupTrigger
         );
-        return new PMouseEvent(e, ic);
     }
 
     public static ImageComponent setupAMockICFor(Composition comp) {
@@ -319,5 +331,49 @@ public class TestHelper {
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore, false);
         }
+    }
+
+    public static void press(int x, int y, ImageComponent ic) {
+        press(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    }
+
+    public static void press(int x, int y,
+                             Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+        MouseEvent e = createEvent(x, y, MOUSE_PRESSED,
+                ctrl, alt, shift, MouseButton.LEFT, ic);
+        Tools.EventDispatcher.mousePressed(e, ic);
+    }
+
+    public static void drag(int x, int y, ImageComponent ic) {
+        drag(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    }
+
+    public static void drag(int x, int y,
+                            Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+        MouseEvent e = createEvent(x, y, MOUSE_DRAGGED,
+                ctrl, alt, shift, MouseButton.LEFT, ic);
+        Tools.EventDispatcher.mouseDragged(e, ic);
+    }
+
+    public static void release(int x, int y, ImageComponent ic) {
+        release(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    }
+
+    public static void release(int x, int y,
+                               Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+        MouseEvent e = createEvent(x, y, MOUSE_RELEASED,
+                ctrl, alt, shift, MouseButton.LEFT, ic);
+        Tools.EventDispatcher.mouseReleased(e, ic);
+    }
+
+    public static void move(int x, int y, ImageComponent ic) {
+        move(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    }
+
+    public static void move(int x, int y,
+                            Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+        MouseEvent e = createEvent(x, y, MOUSE_MOVED,
+                ctrl, alt, shift, MouseButton.LEFT, ic);
+        Tools.EventDispatcher.mouseMoved(e, ic);
     }
 }

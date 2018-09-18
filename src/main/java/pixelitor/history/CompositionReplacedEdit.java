@@ -36,7 +36,9 @@ public class CompositionReplacedEdit extends PixelitorEdit {
                                    Composition oldComp, Composition newComp,
                                    MaskViewMode oldMode) {
         super(name, oldComp);
-        assert oldComp.getFile().equals(newComp.getFile());
+        assert oldComp.getFile().equals(newComp.getFile())
+                : "old file = " + oldComp.getFile()
+                + ", new file = " + newComp.getFile();
 
         this.newComp = newComp;
         this.oldMode = oldMode;

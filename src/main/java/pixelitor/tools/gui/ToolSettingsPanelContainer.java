@@ -50,7 +50,9 @@ public final class ToolSettingsPanelContainer extends JPanel {
         int count = getComponentCount();
         for (int i = 0; i < count; i++) {
             ToolSettingsPanel tsp = (ToolSettingsPanel) getComponent(i);
-            GUIUtils.randomizeGUIWidgetsOn(tsp);
+            if (tsp.isVisible()) {
+                GUIUtils.randomizeGUIWidgetsOn(tsp);
+            }
         }
     }
 }

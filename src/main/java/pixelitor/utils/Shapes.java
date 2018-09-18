@@ -19,6 +19,8 @@ package pixelitor.utils;
 
 import pixelitor.gui.ImageComponent;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.pen.SubPath;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -53,9 +55,13 @@ public class Shapes {
      * in image coordinates, to a {@link Path}
      */
     public static Path shapeToPath(Shape shape, ImageComponent ic) {
-        Path path = new Path(ic.getComp(), false);
+        Path path = new Path(ic.getComp());
+        path.setPreferredPenToolMode(PenToolMode.EDIT);
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];
+
+        SubPath lastSubPath = null;
+
         while (!it.isDone()) {
             int type = it.currentSegment(coords);
             double x = coords[0];
@@ -67,19 +73,19 @@ public class Shapes {
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    path.startNewSubpath(x, y, ic);
+                    lastSubPath = path.startNewSubpath(x, y, ic);
                     break;
                 case PathIterator.SEG_LINETO:
-                    path.addLine(x, y, ic);
+                    lastSubPath.addLine(x, y, ic);
                     break;
                 case PathIterator.SEG_QUADTO:
-                    path.addQuadCurve(x, y, xx, yy, ic);
+                    lastSubPath.addQuadCurve(x, y, xx, yy, ic);
                     break;
                 case PathIterator.SEG_CUBICTO:
-                    path.addCubicCurve(x, y, xx, yy, xxx, yyy, ic);
+                    lastSubPath.addCubicCurve(x, y, xx, yy, xxx, yyy, ic);
                     break;
                 case PathIterator.SEG_CLOSE:
-                    path.close(false);
+                    lastSubPath.close(false);
                     break;
                 default:
                     throw new IllegalArgumentException("type = " + type);
@@ -87,7 +93,10 @@ public class Shapes {
 
             it.next();
         }
-        assert path.checkWiring();
+
+        path.mergeOverlappingAnchors();
+        path.setHeuristicTypes();
+        assert path.checkConsistency();
         return path;
     }
 

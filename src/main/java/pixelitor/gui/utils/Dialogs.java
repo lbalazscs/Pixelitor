@@ -187,6 +187,9 @@ public class Dialogs {
             return;
         }
 
+        System.err.printf("\nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
+        e.printStackTrace();
+
         RandomGUITest.stop();
 
         if (e instanceof OutOfMemoryError) {
@@ -194,8 +197,6 @@ public class Dialogs {
             return;
         }
 
-        System.err.printf("\nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
-        e.printStackTrace();
         showMoreDevelopmentInfo(e);
 
         if (e instanceof CompletionException) {

@@ -25,6 +25,7 @@ import pixelitor.Layers;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.DeselectEdit;
+import pixelitor.history.History;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
@@ -42,6 +43,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
+import pixelitor.utils.Messages;
 import pixelitor.utils.debug.ImageComponentNode;
 import pixelitor.utils.test.Assertions;
 
@@ -62,6 +64,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
+import static java.lang.String.format;
 
 /**
  * The GUI component that shows a composition
@@ -111,6 +114,22 @@ public class ImageComponent extends JComponent
         addListeners();
     }
 
+    void replaceJustReloadedComp(Composition newComp) {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        PixelitorEdit edit = replaceComp(newComp,
+                MaskViewMode.NORMAL, true);
+
+        assert edit != null;
+        History.addEdit(edit);
+
+        String msg = format(
+                "The image '%s' was reloaded from the file %s.",
+                newComp.getName(), newComp.getFile().getAbsolutePath());
+        Messages.showInStatusBar(msg);
+        repaint();
+    }
+
     public PixelitorEdit replaceComp(Composition newComp,
                                      MaskViewMode newMaskViewMode,
                                      boolean addToHistory) {
@@ -152,6 +171,8 @@ public class ImageComponent extends JComponent
 
         newMaskViewMode.activate(this, comp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
+
+        Tools.currentTool.compReplaced(oldComp, newComp);
 
         return edit;
     }

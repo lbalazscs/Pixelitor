@@ -18,10 +18,14 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.AddAnchorPointEdit;
 import pixelitor.tools.pen.history.CloseSubPathEdit;
+import pixelitor.tools.pen.history.FinishSubPathEdit;
+import pixelitor.tools.pen.history.SubPathStartEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
@@ -36,17 +40,18 @@ import java.util.Objects;
 import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
-import static pixelitor.tools.pen.PathBuilder.State.CTRL_DRAGGING_PREVIOUS;
-import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * A subpath within a {@link Path}
- * <p>
+ *
  * It is a composite Bezier curve: a series of Bezier curves
  * joined end to end where the last point of one curve
  * coincides with the starting point of the next curve.
- * <p>
+ *
  * https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve
  */
 public class SubPath implements Serializable {
@@ -55,11 +60,11 @@ public class SubPath implements Serializable {
     private static long debugCounter = 0;
     private final String id; // for debugging
 
-    private final List<AnchorPoint> anchorPoints = new ArrayList<>();
+    private List<AnchorPoint> anchorPoints = new ArrayList<>();
+    private MovingPoint moving;
+
     private final Path path;
     private final Composition comp;
-    // The curve point which is currently moving while the path is being built
-    private AnchorPoint moving;
 
     // The curve point which was added first
     // Relevant for closing
@@ -78,13 +83,15 @@ public class SubPath implements Serializable {
     private static final ToDoubleFunction<DraggablePoint> TO_IM_Y = p -> p.imY;
 
     public SubPath(Path path, Composition comp) {
+        assert path != null;
+        assert comp != null;
         this.path = path;
         this.comp = comp;
         id = "SP" + (debugCounter++);
     }
 
-    public SubPath copyForUndo() {
-        SubPath copy = new SubPath(path, comp);
+    public SubPath copyForUndo(Path copyParent) {
+        SubPath copy = new SubPath(copyParent, comp);
         copy.closed = closed;
         copy.finished = finished;
 
@@ -102,11 +109,15 @@ public class SubPath implements Serializable {
         return copy;
     }
 
-    public void addFirstPoint(AnchorPoint p) {
+    public void addFirstPoint(AnchorPoint p, boolean addToHistory) {
         anchorPoints.add(p);
-        p.setSubPath(this);
+//        p.setRecentlyEdited();
         first = p;
         last = p;
+
+        if (addToHistory) {
+            History.addEdit(new SubPathStartEdit(comp, path, this));
+        }
     }
 
     // not used in the builder, only when converting from external shape
@@ -117,15 +128,25 @@ public class SubPath implements Serializable {
             return;
         }
         anchorPoints.add(p);
-        p.setSubPath(this);
         last = p;
     }
 
-    public void setMoving(AnchorPoint p, String reason) {
-//        if (p == null && moving != null) {
-//            System.out.printf(id + ": setMoving to null: reason = '%s'%n", reason);
-//        }
+    // not used in the builder, only in tests
+    public void addPoint(double x, double y) {
+        AnchorPoint ap = new AnchorPoint(x, y, comp.getIC(), this);
+        addPoint(ap);
+    }
+
+    public void setMoving(MovingPoint p) {
+        if (finished && p != null) {
+            throw new IllegalStateException();
+        }
         moving = p;
+    }
+
+    @VisibleForTesting
+    public MovingPoint getMoving() {
+        return moving;
     }
 
     public void setMovingLocation(double x, double y, boolean nullOK) {
@@ -138,25 +159,16 @@ public class SubPath implements Serializable {
         }
     }
 
-
-    public AnchorPoint addMovingPointAsAnchor(double x, double y) {
-        moving.setLocation(x, y);
-        moving.calcImCoords();
-        anchorPoints.add(moving);
-        moving.setSubPath(this);
-        last = moving;
-        setMoving(null, "addMovingPointAsAnchor");
+    public AnchorPoint addMovingPointAsAnchor() {
+        AnchorPoint ap = moving.toAnchor();
+        anchorPoints.add(ap);
+//        ap.setRecentlyEdited();
+        last = ap;
+        setMoving(null);
 
         History.addEdit(new AddAnchorPointEdit(
                 comp, this, last));
         return last;
-    }
-
-    public AnchorPoint getMoving() {
-//        if (moving == null) {
-//            System.out.println("SubPath::getMoving: returning NULL in " + id);
-//        }
-        return moving;
     }
 
     public AnchorPoint getFirst() {
@@ -167,7 +179,7 @@ public class SubPath implements Serializable {
         return last;
     }
 
-    public int getNumAnchorPoints() {
+    public int getNumAnchors() {
         return anchorPoints.size();
     }
 
@@ -213,14 +225,16 @@ public class SubPath implements Serializable {
             }
             prev = curr;
         }
-        if (moving != null && PenToolMode.BUILD.showRubberBand()) {
+        if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showRubberBand()) {
+            double movingX = toX.applyAsDouble(moving);
+            double movingY = toY.applyAsDouble(moving);
             gp.curveTo(
                     toX.applyAsDouble(last.ctrlOut),
                     toY.applyAsDouble(last.ctrlOut),
-                    toX.applyAsDouble(moving.ctrlIn),
-                    toY.applyAsDouble(moving.ctrlIn),
-                    toX.applyAsDouble(moving),
-                    toY.applyAsDouble(moving));
+                    movingX, // the "ctrl in" of the moving is "retracted"
+                    movingY, // the "ctrl in" of the moving is "retracted"
+                    movingX,
+                    movingY);
         }
 
         if (closed) {
@@ -246,30 +260,51 @@ public class SubPath implements Serializable {
         }
     }
 
-    public void paintHandlesForBuilding(Graphics2D g, PathBuilder.State state) {
+    public void paintHandlesForBuilding(Graphics2D g, BuildState state) {
         assert checkConsistency();
 
         // paint first all anchor points, without the handles
-        for (AnchorPoint point : anchorPoints) {
-            point.paintHandle(g);
+        int numPoints = anchorPoints.size();
+        for (int i = 0; i < numPoints; i++) {
+            AnchorPoint point = anchorPoints.get(i);
+            if (point.isRecentlyEdited()) {
+                // except when any of the anchor or its controls were recently edited
+                point.paintHandles(g, true, true);
+
+                // also paint the "out" handle of the previous point...
+                if (i > 0) {
+                    AnchorPoint prev = anchorPoints.get(i - 1);
+                    prev.paintHandles(g, false, true);
+                } else if (closed) {
+                    AnchorPoint prev = anchorPoints.get(numPoints - 1);
+                    prev.paintHandles(g, false, true);
+                }
+
+                // ...and the "in" handle of the next point
+                if (i < numPoints - 1) {
+                    AnchorPoint next = anchorPoints.get(i + 1);
+                    next.paintHandles(g, true, false);
+                } else if (closed) {
+                    AnchorPoint next = anchorPoints.get(0);
+                    next.paintHandles(g, true, false);
+                }
+            } else {
+                point.paintHandle(g);
+            }
         }
 
         if (finished) {
             return;
         }
-        int numPoints = getNumAnchorPoints();
+
+        // paint some extra handles if not finished
         if (state == DRAGGING_THE_CONTROL_OF_LAST
-                || state == CTRL_DRAGGING_PREVIOUS) {
+                || state == MOVING_TO_NEXT_ANCHOR) {
             last.paintHandles(g, true, true);
 
             if (numPoints >= 2) {
                 AnchorPoint lastButOne = anchorPoints.get(numPoints - 2);
                 lastButOne.paintHandles(g, false, true);
-            }
-        } else if (state == MOVING_TO_NEXT_ANCHOR) {
-            last.paintHandles(g, true, true);
-            if (first.isActive()) { // the mouse is closing position
-                first.paintHandles(g, true, false);
             }
         }
     }
@@ -284,60 +319,117 @@ public class SubPath implements Serializable {
 
     public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
         for (AnchorPoint anchor : anchorPoints) {
-            DraggablePoint point = anchor.handleOrCtrlHandleWasHit(x, y, altDown);
-            if (point != null) {
-                return point;
+            DraggablePoint hit = anchor.handleOrCtrlHandleWasHit(x, y, altDown);
+            if (hit != null) {
+                return hit;
             }
         }
         return null;
     }
 
-    public void close(boolean addToHistory) {
+    /**
+     * This is a workaround for a JDK bug: when a path is created from shapes,
+     * often two almost-overlapping anchors are created instead of one.
+     */
+    public void mergeOverlappingAnchors() {
+        List<AnchorPoint> newPoints = new ArrayList<>();
         int numPoints = anchorPoints.size();
-
-        // this condition doesn't occur while building a path interactively,
-        // only when converting from closed Shape objects
-        boolean lastIsFirst = numPoints > 1 && last.samePositionAs(first);
-        if (lastIsFirst) {
-            assert last != first;
-
-            // the last added point is identical to the first, so remove it
-            int indexOfLast = numPoints - 1;
-            anchorPoints.remove(indexOfLast);
-
-            // copy the the useful info
-            first.ctrlIn.copyPositionFrom(last.ctrlIn);
-
-            // make sure we have a valid last reference
-            last = anchorPoints.get(indexOfLast - 1);
+        int index = 0;
+        boolean mergedWithFirst = false;
+        while (index < numPoints) {
+            AnchorPoint current = anchorPoints.get(index);
+            AnchorPoint next;
+            boolean comparingWithFirst = false;
+            if (index < numPoints - 1) {
+                next = anchorPoints.get(index + 1);
+            } else if (closed) {
+                next = anchorPoints.get(0);
+                comparingWithFirst = true;
+            } else {
+                // reached the last point, and it is not closed
+                break;
+            }
+            if (tryMerging(current, next)) {
+                if (comparingWithFirst) {
+                    mergedWithFirst = true;
+                }
+                index++; // skip the next
+            }
+            newPoints.add(current);
+            index++; // advance the while loop
         }
-        setMoving(null, "close");
+        if (mergedWithFirst) {
+            // We could simply remove the first point, but for some unit
+            // tests it is important that the first point remains first
+            // even if the shape is closed.
+            // Remove the last and set it as first
+            AnchorPoint removedLast = newPoints.remove(newPoints.size() - 1);
+            newPoints.set(0, removedLast);
+        }
+        anchorPoints = newPoints;
+        first = anchorPoints.get(0);
+        last = anchorPoints.get(anchorPoints.size() - 1);
+    }
+
+    private boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
+        if (ap1.samePositionAs(ap2, 1.0)) {
+            assert ap1.ctrlOut.isRetracted();
+            assert ap2.ctrlIn.isRetracted();
+            // we will keep the first, so copy the out ctrl of the second to the first
+            ap1.ctrlOut.copyPositionFrom(ap2.ctrlOut);
+            return true;
+        }
+        return false;
+    }
+
+    public void close(boolean addToHistory) {
+        assert !closed;
+
+//        int numPoints = anchorPoints.size();
+//        // this condition doesn't occur while building a path interactively,
+//        // only when converting from closed Shape objects
+//        boolean lastIsFirst = numPoints > 1 && last.samePositionAs(first);
+//        if (lastIsFirst) {
+//            assert last != first;
+//
+//            // the last added point is identical to the first, so remove it
+//            int indexOfLast = numPoints - 1;
+//            anchorPoints.remove(indexOfLast);
+//
+//            // copy the the useful info
+//            first.ctrlIn.copyPositionFrom(last.ctrlIn);
+//
+//            // make sure we have a valid last reference
+//            last = anchorPoints.get(indexOfLast - 1);
+//        }
+        setMoving(null);
         setClosed(true);
+        finish(comp, "closing");
 
         if (addToHistory) {
             History.addEdit(new CloseSubPathEdit(comp, this));
         }
+
+        // the controls of the first anchor should not be visible after
+        // closing just because the anchor is activated during closing
+        AnchorPoint.recentlyEditedPoint = null;
     }
 
     private void setClosed(boolean closed) {
         this.closed = closed;
-
-        // A closed subpath is always also finished,
-        // a re-opened (in case of undo) subpath is also unfinished.
-        // A subpath can be finished without being closed.
-        setFinished(closed, "setClosed(" + closed + ")");
     }
 
-    public void setFinished(boolean finished, String reason) {
+    public void setFinished(boolean finished) {
         this.finished = finished;
         if (finished) {
-            setMoving(null, "finished (" + reason + ")");
+            setMoving(null);
         }
     }
 
     public void undoClosing() {
-        setMoving(new AnchorPoint(first, this, false), "undoClosing");
         setClosed(false);
+        setFinished(false);
+        setMoving(PenToolMode.BUILD.createMovingAtLastMouseLoc(this));
     }
 
     public boolean isClosed() {
@@ -362,6 +454,11 @@ public class SubPath implements Serializable {
             AnchorPoint point = anchorPoints.get(i);
             ControlPoint ctrlIn = point.ctrlIn;
             ControlPoint ctrlOut = point.ctrlOut;
+            if (point.getSubPath() != this) {
+                throw new IllegalStateException("wrong subpath in point " + i
+                        + ": anchor subpath is " + point.getSubPath()
+                        + ", this is " + this);
+            }
             if (ctrlIn.getAnchor() != point) {
                 throw new IllegalStateException("ctrlIn problem in point " + i);
             }
@@ -381,6 +478,32 @@ public class SubPath implements Serializable {
         return true;
     }
 
+    @SuppressWarnings("SameReturnValue")
+    public boolean checkConsistency() {
+        checkWiring();
+
+        if (first != anchorPoints.get(0)) {
+            throw new IllegalStateException("bad first");
+        }
+        if (last != anchorPoints.get(anchorPoints.size() - 1)) {
+            throw new IllegalStateException("bad last");
+        }
+
+        if (closed) {
+            if (!finished) {
+                throw new IllegalStateException(
+                        "subpath " + this + " is closed but not finished");
+            }
+        }
+        if (finished) {
+            if (moving != null) {
+                throw new IllegalStateException(
+                        "subpath " + this + " is finished, but moving");
+            }
+        }
+        return true;
+    }
+
     public void dump() {
         int numPoints = anchorPoints.size();
         PrintStream out = System.out;
@@ -389,33 +512,29 @@ public class SubPath implements Serializable {
         }
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
-            out.print(Ansi.purple("Point " + i + ": "));
+            out.print(Ansi.purple("Point " + i + " (" + point.getId() + "): "));
             if (point == first) {
                 out.print("first ");
             }
             if (point == last) {
                 out.print("last ");
             }
-            if (point == moving) {
-                out.print("moving ");
-            }
             point.dump();
         }
+        out.print(Ansi.purple("Moving: ") + moving);
     }
 
-    public AnchorPoint getPoint(int index) {
+    public AnchorPoint getAnchor(int index) {
         return anchorPoints.get(index);
     }
 
-    public void changeTypesForEditing(boolean pathWasBuiltInteractively) {
+    public void setHeuristicTypes() {
         for (AnchorPoint point : anchorPoints) {
-            point.changeTypeForEditing(pathWasBuiltInteractively);
+            point.setHeuristicType();
         }
     }
 
     public void deletePoint(AnchorPoint ap) {
-//        System.out.println("SubPath::deletePoint: deleting " + ap + " from " + this);
-
         boolean wasFirst = ap == first;
         boolean wasLast = ap == last;
         // don't use List.remove, because it uses equals
@@ -463,29 +582,8 @@ public class SubPath implements Serializable {
         }
     }
 
-    @SuppressWarnings("SameReturnValue")
-    private boolean checkConsistency() {
-        checkWiring();
-        if (closed) {
-            if (!finished) {
-                throw new IllegalStateException("closed but not finished");
-            }
-        }
-        if (finished) {
-            if (moving != null) {
-                throw new IllegalStateException("finished, but moving");
-            }
-        }
-        return true;
-    }
-
     public boolean hasMovingPoint() {
         return moving != null;
-    }
-
-    @VisibleForTesting
-    public String getId() {
-        return id;
     }
 
     @VisibleForTesting
@@ -516,6 +614,110 @@ public class SubPath implements Serializable {
         return path;
     }
 
+    private boolean shouldBeClosed(double x, double y) {
+        return first.handleContains(x, y)
+                && getNumAnchors() >= 2;
+    }
+
+    // return true if it could be closed
+    boolean tryClosing(double x, double y, Composition comp) {
+        if (shouldBeClosed(x, y)) {
+            first.setActive(false);
+            close(true);
+            return true;
+        }
+        return false;
+    }
+
+    void finishByCtrlClick(Composition comp) {
+        assert comp == this.comp
+                : "comp = " + comp.toPathDebugString()
+                + ", this.comp = " + this.comp.toPathDebugString();
+
+        History.addEdit(new FinishSubPathEdit(comp, this));
+        finish(comp, "ctrl-click");
+    }
+
+    // A subpath can be finished either by closing it or by ctrl-clicking.
+    // Either way, we end up in this method.
+    public void finish(Composition comp, String reason) {
+        assert comp == this.comp
+                : "comp = " + comp.toPathDebugString()
+                + ", this.comp = " + this.comp.toPathDebugString();
+        assert !finished;
+
+        setFinished(true);
+        path.setBuildState(NO_INTERACTION, "finish(" + reason + ")");
+        comp.setActivePath(path);
+        Tools.PEN.enableActionsBasedOnFinishedPath(true);
+    }
+
+    public void addLine(double newX, double newY, ImageComponent ic) {
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint ap = new AnchorPoint(newX, newY, ic, this);
+        addPoint(ap);
+    }
+
+    public void addCubicCurve(double c1x, double c1y,
+                              double c2x, double c2y,
+                              double newX, double newY, ImageComponent ic) {
+        ControlPoint lastOut = getLast().ctrlOut;
+        c1x = ic.imageXToComponentSpace(c1x);
+        c1y = ic.imageYToComponentSpace(c1y);
+        lastOut.setLocationOnlyForThis(c1x, c1y);
+        lastOut.afterMovingActionsForThis();
+
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint next = new AnchorPoint(newX, newY, ic, this);
+        addPoint(next);
+        next.setType(SMOOTH);
+
+        c2x = ic.imageXToComponentSpace(c2x);
+        c2y = ic.imageYToComponentSpace(c2y);
+        ControlPoint nextIn = next.ctrlIn;
+        nextIn.setLocationOnlyForThis(c2x, c2y);
+        nextIn.afterMovingActionsForThis();
+    }
+
+    public void addQuadCurve(double cx, double cy,
+                             double newX, double newY, ImageComponent ic) {
+        cx = ic.imageXToComponentSpace(cx);
+        cy = ic.imageYToComponentSpace(cy);
+        newX = ic.imageXToComponentSpace(newX);
+        newY = ic.imageYToComponentSpace(newY);
+        AnchorPoint last = getLast();
+
+        // convert the quadratic bezier (with one control point)
+        // into a cubic one (with two control points), see
+        // https://stackoverflow.com/questions/3162645/convert-a-quadratic-bezier-to-a-cubic
+        double qp1x = cx;
+        double qp1y = cy;
+        double qp0x = last.x;
+        double qp0y = last.y;
+        double qp2x = newX;
+        double qp2y = newY;
+
+        double twoThirds = 2.0 / 3.0;
+        double cp1x = qp0x + twoThirds * (qp1x - qp0x);
+        double cp1y = qp0y + twoThirds * (qp1y - qp0y);
+        double cp2x = qp2x + twoThirds * (qp1x - qp2x);
+        double cp2y = qp2y + twoThirds * (qp1y - qp2y);
+
+        ControlPoint lastOut = last.ctrlOut;
+        lastOut.setLocationOnlyForThis(cp1x, cp1y);
+        lastOut.afterMovingActionsForThis();
+
+        AnchorPoint next = new AnchorPoint(newX, newY, ic, this);
+        addPoint(next);
+        next.setType(SMOOTH);
+
+        ControlPoint nextIn = next.ctrlIn;
+        nextIn.setLocationOnlyForThis(cp2x, cp2y);
+        nextIn.afterMovingActionsForThis();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -533,8 +735,21 @@ public class SubPath implements Serializable {
         return Objects.hash(id);
     }
 
+    @VisibleForTesting
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
+        return id + anchorPoints
+                .stream()
+                .map(AnchorPoint::getId)
+                .collect(joining(",", " [", "]"));
+    }
+
+    // also includes the anchor point positions
+    public String toDetailedString() {
         return id + anchorPoints
                 .stream()
                 .map(AnchorPoint::toString)

@@ -52,4 +52,12 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
 
         return this;
     }
+
+    public PathAssert isConsistent() {
+        isNotNull();
+
+        actual.checkConsistency();
+
+        return this;
+    }
 }

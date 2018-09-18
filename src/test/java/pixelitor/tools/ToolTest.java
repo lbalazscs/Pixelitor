@@ -30,7 +30,9 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.GlobalKeyboardWatch;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.util.PMouseEvent;
 
 import javax.swing.*;
@@ -78,7 +80,7 @@ public class ToolTest {
 //            tool.initSettingsPanel();
             SwingUtilities.invokeAndWait(tool::initSettingsPanel);
 
-            // for each combination, create an independent test run
+            // for each combination create an independent test run
             for (Alt alt : Alt.values()) {
                 for (Ctrl ctrl : Ctrl.values()) {
                     for (Shift shift : Shift.values()) {
@@ -101,15 +103,16 @@ public class ToolTest {
 
     @Before
     public void setUp()  {
-        tool.toolStarted();
+        PenTool.path = null;
         Composition comp = TestHelper.create2LayerComposition(true);
-
         ic = comp.getIC();
+        tool.toolStarted();
     }
 
     @After
     public void tearDown() {
         tool.toolEnded();
+        ImageComponents.setActiveIC(null, false);
     }
 
     @Test
@@ -144,20 +147,20 @@ public class ToolTest {
     }
 
     private void press(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_PRESSED,
-                alt, ctrl, shift, mouseButton, x, y);
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, ic
+        );
         tool.handlerChain.handleMousePressed(e);
     }
 
     private void drag(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_DRAGGED,
-                alt, ctrl, shift, mouseButton, x, y);
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, ic
+        );
         tool.handlerChain.handleMouseDragged(e);
     }
 
     private void release(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createEvent(ic, MOUSE_RELEASED,
-                alt, ctrl, shift, mouseButton, x, y);
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, ic
+        );
         tool.handlerChain.handleMouseReleased(e);
     }
 }

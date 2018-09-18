@@ -17,34 +17,32 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.history.FinishSubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Messages;
-import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
-import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.PathBuilder.State.BEFORE_SUBPATH;
-import static pixelitor.tools.pen.PathBuilder.State.CTRL_DRAGGING_PREVIOUS;
-import static pixelitor.tools.pen.PathBuilder.State.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.PathBuilder.State.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
+import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
+import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
- * A pen tool interaction mode where a path can be built from scratch
+ * A pen tool interaction mode where a path can be built from scratch.
+ * The path can also be edited, but only by using modifier keys
  */
 public class PathBuilder implements PenToolMode {
+    // The last mouse positions. Important when the moving point
+    // has to be restored after an undo
     private double lastX;
     private double lastY;
 
@@ -53,87 +51,23 @@ public class PathBuilder implements PenToolMode {
             "<html>Pen Tool Build Mode: " +
                     "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
                     "<b>Ctrl-click</b> or close the path to finish. " +
-                    "<b>Ctrl-drag</b> points to move them, " +
-                    "<b>Alt-drag</b> handles to break them.";
+                    "<b>Ctrl-drag</b> moves points, " +
+                    "<b>Alt-drag</b> breaks handles, " +
+                    "<b>Shift</b> constrains angles.";
 
-    public enum State {
-        // the initial state, and also the state after a subpath is finished
-        BEFORE_SUBPATH(false),
-        DRAGGING_THE_CONTROL_OF_LAST(true),
-        MOVING_TO_NEXT_ANCHOR(false),
-        CTRL_DRAGGING_PREVIOUS(true);
-
-        private final boolean dragging;
-
-        State(boolean dragging) {
-            this.dragging = dragging;
-        }
-
-        public boolean isDragging() {
-            return dragging;
-        }
-    }
-
-    private State state;
-    private State prevState;
-
-    private Path path;
-
-    private boolean rubberBand = true;
 
     private PathBuilder() {
-        setState(BEFORE_SUBPATH, "constructor");
-    }
-
-    @Override
-    public Path getPath() {
-        return path;
-    }
-
-    @Override
-    public void setPath(Path path, String reason) {
-//        if (this.path != path) {
-//            System.out.println("PB.setPath: "
-//                    + red(this.path) + " => " + green(path)
-//                    + "(" + reason + ")");
-//        }
-        if (this.path != path || path == null) {
-            setState(BEFORE_SUBPATH, "PB.setPath to " + path + " (" + reason + ")");
-        }
-        this.path = path;
-    }
-
-    public void setState(State state, String reason) {
-        if (this.state == state) {
-            return;
-        }
-//            System.out.println("PB.setState: " + red(this.state)
-//                    + " => " + green(state) + " (" + reason + "), path = " + path);
-        if (Build.CURRENT.isDevelopment()) {
-            Messages.showInStatusBar("<html><font color=red>" + this.state
-                    + "</font><font size=+1> \u21e8 </font><font color=#004E00>" + state
-                    + "</font> (" + reason + ")");
-        }
-        if (state == MOVING_TO_NEXT_ANCHOR) {
-            if (path == null) {
-                throw new IllegalStateException("no path, change: "
-                        + this.state + " => " + state
-                        + ", reason = " + reason);
-            }
-            if (!path.hasMovingPoint()) {
-                ImageComponent ic = ImageComponents.getActiveIC();
-                path.setMoving(new AnchorPoint(lastX, lastY, ic), reason);
-            }
-        }
-
-        prevState = this.state;
-        this.state = state;
     }
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        assert state == BEFORE_SUBPATH
-                || state == MOVING_TO_NEXT_ANCHOR : "state = " + state;
+        if (path == null) {
+            path = new Path(e.getComp());
+            path.setPreferredPenToolMode(this);
+        }
+
+        BuildState state = path.getBuildState();
+        assert state.isMoving() : "state = " + state;
 
         double x = e.getCoX();
         double y = e.getCoY();
@@ -142,67 +76,44 @@ public class PathBuilder implements PenToolMode {
         boolean altDown = e.isAltDown();
         boolean controlDown = e.isControlDown();
 
-        if (state == BEFORE_SUBPATH) {
-            if (path == null) {
-                Path p = new Path(e.getComp(), true);
-                setPath(p, "mousePressed");
+        if (state == NO_INTERACTION) {
+            if (controlDown) {
+                if (handleCtrlPressHitBeforeSubpath(x, y, altDown)) {
+                    return;
+                }
+            } else if (altDown) {
+                if (handleAltPressHitBeforeSubpath(x, y)) {
+                    return;
+                }
+            }
+
+            // only add a point directly if previously we were
+            // in the NO_INTERACTION state. Normally points
+            // are added by finalizing (in mousePressed)
+            // the moving point (created in mouseReleased)
+            SubPath sp = path.startNewSubpath();
+            AnchorPoint ap = new AnchorPoint(e, sp);
+            sp.addFirstPoint(ap, true);
+            ap.ctrlOut.mousePressed(x, y);
+        } else if (state.isMoving()) {
+            if (state == MOVING_TO_NEXT_ANCHOR) {
+                assert path.hasMovingPoint();
             }
 
             if (controlDown) {
-                // if we are over an old point, just move it
-                DraggablePoint point = path.handleWasHit(x, y, altDown);
-                if (point != null) {
-                    if (point instanceof ControlPoint) {
-                        // if the old point is a control point, then the opposite
-                        // point should move smoothly, not symmetrically
-                        ControlPoint cp = (ControlPoint) point;
-                        cp.getAnchor().setType(SMOOTH);
-                    }
-                    startMovingPrevious(x, y, point, "ctrl-press in BEFORE_SUBPATH");
-                    return;
-                }
-            }
-            if (altDown) {
-                // if alt is down, then break control points
-                DraggablePoint point = path.handleWasHit(x, y, altDown);
-                if (point != null) {
-                    if (point instanceof ControlPoint) {
-                        breakTheControlAndStartMovingIt(x, y, point);
-                        return;
-                    }
-                }
-            }
-
-            // only add a point if previously we were
-            // in the BEFORE_SUBPATH state. Normally points
-            // are added in mouseReleased
-            AnchorPoint p = new AnchorPoint(e);
-
-            path.startNewSubPath(p, true);
-        } else if (state == MOVING_TO_NEXT_ANCHOR) {
-            assert path.hasMovingPoint();
-
-            if (controlDown) {
-                DraggablePoint point = path.handleWasHit(x, y, altDown);
-                if (point != null) {
-                    startMovingPrevious(x, y, point, "ctrl-click on previous");
-                    return;
-                } else {
-                    // control is down, but nothing was hit
-                    finishByCtrlClick(e);
-                    return;
-                }
+                handleCtrlPressInMovingState(e, x, y, altDown);
+                return;
             }
 
             boolean altDownNothingHit = false;
             if (altDown) {
-                DraggablePoint point = path.handleWasHit(x, y, altDown);
-                if (point != null) {
-                    if (point instanceof ControlPoint) {
-                        breakTheControlAndStartMovingIt(x, y, point);
+                DraggablePoint hit = path.handleWasHit(x, y, altDown);
+                if (hit != null) {
+                    if (hit instanceof ControlPoint) {
+                        breakAndStartMoving(x, y, (ControlPoint) hit);
                         return;
-                    } else if (point instanceof AnchorPoint) {
-                        startDraggingOutNewHandles(x, y, (AnchorPoint) point);
+                    } else if (hit instanceof AnchorPoint) {
+                        startDraggingOutNewHandles(x, y, (AnchorPoint) hit);
                         return;
                     }
                 } else {
@@ -210,64 +121,91 @@ public class PathBuilder implements PenToolMode {
                 }
             }
 
-            if (tryClosing(x, y, e.getComp())) {
+            if (path.tryClosing(x, y, e.getComp())) {
                 return;
             } else {
                 // fix the final position of the moved curve point
-                AnchorPoint ap = path.addMovingPointAsAnchor(x, y);
+                path.getMoving().mouseReleased(x, y, e.isShiftDown());
+                AnchorPoint ap = path.addMovingPointAsAnchor();
                 if (altDownNothingHit) {
                     ap.setType(CUSP);
                 }
+                ap.ctrlOut.mousePressed(x, y);
             }
         }
-        setState(DRAGGING_THE_CONTROL_OF_LAST, "mousePressed");
-        assert path.checkWiring();
+        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST, "mousePressed");
+        assert path.checkConsistency();
     }
 
-    private void startDraggingOutNewHandles(double x, double y, AnchorPoint point) {
-        AnchorPoint ap = point;
-        ap.retractHandles();
-        // drag the retracted handles out
-        ap.setType(SYMMETRIC);
-        startMovingPrevious(x, y, ap.ctrlOut, "alt-drag out handles of previous");
-    }
-
-    private void breakTheControlAndStartMovingIt(double x, double y, DraggablePoint point) {
-        // alt-press on an anchor point should break the handle
-        ControlPoint cp = (ControlPoint) point;
-        cp.getAnchor().setType(CUSP);
-        // after breaking, move it as usual
-        startMovingPrevious(x, y, point, "alt-click on previous");
-    }
-
-    private void startMovingPrevious(double x, double y, DraggablePoint point, String s) {
-        // if the mouse was ctrl-pressed over
-        // a visible anchor or control point, move it
-        point.setActive(true);
-        point.mousePressed(x, y);
-        setState(CTRL_DRAGGING_PREVIOUS, s);
-    }
-
-    // return true if it could be closed
-    private boolean tryClosing(double x, double y, Composition comp) {
-        AnchorPoint first = path.getFirst();
-        if (shouldBeClosed(first, x, y)) {
-            first.setActive(false);
-            path.close(true);
-            finish(comp, "closing");
+    private boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
+        // if we are over an old point, just move it
+        DraggablePoint hit = path.handleWasHit(x, y, altDown);
+        if (hit != null) {
+            startMovingPrevious(x, y, hit);
             return true;
         }
         return false;
     }
 
-    private boolean shouldBeClosed(AnchorPoint first, double x, double y) {
-        return first.handleContains(x, y)
-                && path.getNumAnchorPointsInActiveSubpath() >= 2;
+    private boolean handleAltPressHitBeforeSubpath(double x, double y) {
+        // if only alt is down, then break control points
+        DraggablePoint hit = path.handleWasHit(x, y, true);
+        if (hit != null) {
+            if (hit instanceof ControlPoint) {
+                breakAndStartMoving(x, y, (ControlPoint) hit);
+                return true;
+            } else if (hit instanceof AnchorPoint) {
+                startDraggingOutNewHandles(x, y, (AnchorPoint) hit);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
+        DraggablePoint hit = path.handleWasHit(x, y, altDown);
+        if (hit != null) {
+            startMovingPrevious(x, y, hit);
+            return;
+        } else {
+            // control is down, but nothing was hit
+            path.finishByCtrlClick(e.getComp());
+            return;
+        }
+    }
+
+    private void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
+        ap.retractHandles();
+        // drag the retracted handles out
+        ap.setType(SYMMETRIC);
+        startMovingPrevious(x, y, ap.ctrlOut);
+    }
+
+    private void breakAndStartMoving(double x, double y, ControlPoint cp) {
+        if (!cp.isRetracted()) {
+            // alt-press on an anchor point should break the handle
+            cp.getAnchor().setType(CUSP);
+        } else {
+            // except when it is retracted: then drag out symmetrically
+            cp.getAnchor().setType(SYMMETRIC);
+        }
+        // after breaking, move it as usual
+        startMovingPrevious(x, y, cp);
+    }
+
+    private void startMovingPrevious(double x, double y, DraggablePoint point) {
+        point.setActive(true);
+        point.mousePressed(x, y);
+        path.setBuildState(DRAG_EDITING_PREVIOUS, "startMovingPrevious");
     }
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        if (state == BEFORE_SUBPATH) {
+        if (path == null) {
+            return;
+        }
+        BuildState state = path.getBuildState();
+        if (state == NO_INTERACTION) {
             // normally it should not happen, but in some rare cases
             // a dragged event comes without a preceding pressed event
             return;
@@ -279,8 +217,8 @@ public class PathBuilder implements PenToolMode {
         lastX = x;
         lastY = y;
 
-        if (state == CTRL_DRAGGING_PREVIOUS) {
-            activePoint.mouseDragged(x, y);
+        if (state == DRAG_EDITING_PREVIOUS) {
+            activePoint.mouseDragged(x, y, e.isShiftDown());
             path.setMovingLocation(x, y, true);
             return;
         }
@@ -293,14 +231,18 @@ public class PathBuilder implements PenToolMode {
             last.setType(SYMMETRIC);
         }
         ControlPoint ctrlOut = last.ctrlOut;
-        ctrlOut.setLocation(x, y);
+        ctrlOut.mouseDragged(x, y, e.isShiftDown());
 
-        setState(DRAGGING_THE_CONTROL_OF_LAST, "mouseDragged");
+        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST, "mouseDragged");
     }
 
     @Override
     public void mouseReleased(PMouseEvent e) {
-        if (state == BEFORE_SUBPATH) {
+        if (path == null) {
+            return;
+        }
+        BuildState state = path.getBuildState();
+        if (state == NO_INTERACTION) {
             return;
         }
         assert state.isDragging() : "state = " + state;
@@ -310,45 +252,90 @@ public class PathBuilder implements PenToolMode {
         lastX = x;
         lastY = y;
 
-        if (state == CTRL_DRAGGING_PREVIOUS) {
-            activePoint.mouseReleased(x, y);
+        if (state == DRAG_EDITING_PREVIOUS) {
+            activePoint.mouseReleased(x, y, e.isShiftDown());
             activePoint
                     .createMovedEdit(e.getComp())
                     .ifPresent(History::addEdit);
-            // after this brief interruption, return to the previous state
-            setState(prevState, "mouseReleased in CTRL_DRAGGING_PREVIOUS");
+            // after the dragging is finished, determine the next state
+            if (path.getPrevBuildState() == NO_INTERACTION) {
+                path.setBuildState(NO_INTERACTION, "mouseReleased in DRAG_EDITING_PREVIOUS");
+            } else {
+                if (e.isControlDown() || e.isAltDown()) {
+                    path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseReleased in DRAG_EDITING_PREVIOUS");
+                } else {
+                    path.setBuildState(MOVING_TO_NEXT_ANCHOR, "mouseReleased in DRAG_EDITING_PREVIOUS");
+                }
+            }
+
             return;
         } else if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            ControlPoint ctrlOut = path.getLast().ctrlOut;
-            ctrlOut.setLocation(x, y);
-            ctrlOut.afterMouseReleasedActions();
-            path.setMoving(new AnchorPoint(x, y, e.getView()), "mouseReleased");
+            // finalize the dragged out control of the last anchor
+            AnchorPoint last = path.getLast();
+            ControlPoint ctrlOut = last.ctrlOut;
+            ctrlOut.mouseReleased(x, y, e.isShiftDown());
+            if (!ctrlOut.isRetracted()) {
+                last.changeTypeFromSymToSmooth();
+            }
+
+            // initialize the moving point for the next state
+            SubPath sp = path.getActiveSubpath();
+            MovingPoint moving = new MovingPoint(x, y, last);
+            moving.mousePressed(x, y);
+            sp.setMoving(moving);
         }
 
-        setState(MOVING_TO_NEXT_ANCHOR, "mouseReleased");
-        assert path.checkWiring();
+        if (e.isControlDown() || e.isAltDown()) {
+            path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseReleased");
+        } else {
+            path.setBuildState(MOVING_TO_NEXT_ANCHOR, "mouseReleased");
+        }
+
+        assert path.checkConsistency();
     }
 
     @Override
     public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
-        if (state == BEFORE_SUBPATH) {
+        if (path == null) {
             return false;
         }
-
-        assert state == MOVING_TO_NEXT_ANCHOR : "state = " + state;
+        BuildState state = path.getBuildState();
+        assert state.isMoving() : "state = " + state;
 
         int x = e.getX();
         int y = e.getY();
         lastX = x;
         lastY = y;
 
-        path.setMovingLocation(x, y, false);
+        boolean altDown = e.isAltDown();
+        boolean controlDown = e.isControlDown();
+        if (controlDown || altDown) {
+            if (state != NO_INTERACTION) {
+                path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseMoved ctrl or alt");
+            }
 
-        AnchorPoint first = path.getFirst();
-        if (first.handleContains(x, y)) {
-            first.setActive(true);
+            DraggablePoint hit = path.handleWasHit(x, y, altDown);
+            if (hit != null) {
+                hit.setActive(true);
+            } else {
+                DraggablePoint.activePoint = null;
+            }
         } else {
-            first.setActive(false);
+            if (state == NO_INTERACTION) {
+                return false;
+            }
+
+            path.setBuildState(MOVING_TO_NEXT_ANCHOR, "simple mouseMoved");
+
+            // when the mouse is moved, the moving point is conceptually dragged
+            path.getMoving().mouseDragged(x, y, e.isShiftDown());
+
+            AnchorPoint first = path.getFirst();
+            if (first.handleContains(x, y)) {
+                first.setActive(true);
+            } else {
+                DraggablePoint.activePoint = null;
+            }
         }
 
         return true;
@@ -357,25 +344,8 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void paint(Graphics2D g) {
         if (path != null) {
-            path.paintForBuilding(g, state);
+            path.paintForBuilding(g);
         }
-    }
-
-    private void finishByCtrlClick(PMouseEvent e) {
-        assert state == MOVING_TO_NEXT_ANCHOR : "state = " + state;
-
-        History.addEdit(new FinishSubPathEdit(e.getComp(), path.getActiveSubpath()));
-        finish(e.getComp(), "ctrl-click");
-    }
-
-    // A subpath can be finished either by closing it or by ctrl-clicking.
-    // Either way, we end up in this method.
-    private void finish(Composition comp, String reason) {
-        String r = "finish(" + reason + ")";
-        path.finishActiveSubpath(r);
-        setState(BEFORE_SUBPATH, r);
-        comp.setActivePath(path);
-        Tools.PEN.enableActionsBasedOnFinishedPath(true);
     }
 
     @Override
@@ -384,38 +354,39 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
+    public void start() {
+        Tools.PEN.startBuilding(false);
+    }
+
+    @Override
     public void modeEnded() {
         if (path != null) {
-            path.finishActiveSubpath("PB.modeEnded");
-            setState(BEFORE_SUBPATH, "PB.modeEnded");
+            path.finishActiveSubpath();
+            path.setBuildState(NO_INTERACTION, "PB.modeEnded");
         } else {
-            assertStateIs(BEFORE_SUBPATH);
+            assertStateIs(NO_INTERACTION);
         }
         PenToolMode.super.modeEnded();
     }
 
-    public void assertStateIs(State s) {
-        assert state == s : "state = " + state;
+    public void assertStateIs(BuildState s) {
+        if (path == null) {
+            if (s != NO_INTERACTION) {
+                throw new IllegalStateException("null path");
+            }
+        } else {
+            if (path.getBuildState() != s) {
+                throw new IllegalStateException("state = " + path.getBuildState());
+            }
+        }
     }
 
-    public boolean showRubberBand() {
-        return rubberBand;
-    }
-
-    public void setShowRubberBand(boolean showRubberBand) {
-        this.rubberBand = showRubberBand;
+    public MovingPoint createMovingAtLastMouseLoc(SubPath sp) {
+        return new MovingPoint(lastX, lastY, sp.getLast());
     }
 
     @Override
     public String toString() {
         return "Build";
-    }
-
-    @Override
-    public DebugNode createDebugNode() {
-        DebugNode node = PenToolMode.super.createDebugNode();
-        node.addString("State", state.toString());
-
-        return node;
     }
 }

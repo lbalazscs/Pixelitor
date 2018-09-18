@@ -272,6 +272,11 @@ public class GradientTool extends DragTool {
     }
 
     @Override
+    public void compReplaced(Composition oldComp, Composition newComp) {
+        hideHandles(newComp.getIC());
+    }
+
+    @Override
     public void escPressed() {
         if (handles != null) {
             Composition comp = ImageComponents.getActiveCompOrNull();

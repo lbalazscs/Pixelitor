@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Build;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.pen.history.SubPathEdit;
@@ -41,7 +42,7 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 public class AnchorPoint extends DraggablePoint {
     public final ControlPoint ctrlIn;
     public final ControlPoint ctrlOut;
-    private SubPath subPath;
+    private final SubPath subPath;
 
     private static long debugCounter = 0;
     private final String id; // for debugging
@@ -55,8 +56,11 @@ public class AnchorPoint extends DraggablePoint {
     private static final Color CTRL_OUT_COLOR = Color.WHITE;
     private static final Color CTRL_OUT_ACTIVE_COLOR = Color.RED;
 
-    public AnchorPoint(double x, double y, View view) {
+    public static AnchorPoint recentlyEditedPoint = null;
+
+    public AnchorPoint(double x, double y, View view, SubPath subPath) {
         super("anchor", x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
+        this.subPath = subPath;
 
         ctrlIn = new ControlPoint("ctrlIn", x, y, view, this,
                 CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
@@ -68,20 +72,17 @@ public class AnchorPoint extends DraggablePoint {
         id = "AP" + (debugCounter++);
     }
 
-    public AnchorPoint(PPoint p) {
-        this(p.getCoX(), p.getCoY(), p.getView());
+    public AnchorPoint(PPoint p, SubPath subPath) {
+        this(p.getCoX(), p.getCoY(), p.getView(), subPath);
     }
 
     public AnchorPoint(AnchorPoint other, SubPath subPath,
                        boolean copyControlPositions) {
-        this(other.x, other.y, other.view);
-        this.subPath = subPath;
+        this(other.x, other.y, other.view, subPath);
         this.type = other.type;
         if (copyControlPositions) {
-            this.ctrlIn.x = other.ctrlIn.x;
-            this.ctrlIn.y = other.ctrlIn.y;
-            this.ctrlOut.x = other.ctrlOut.x;
-            this.ctrlOut.y = other.ctrlOut.y;
+            this.ctrlIn.copyPositionFrom(other.ctrlIn);
+            this.ctrlOut.copyPositionFrom(other.ctrlOut);
         }
     }
 
@@ -131,7 +132,7 @@ public class AnchorPoint extends DraggablePoint {
     public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,
                                                    boolean altDown) {
         if (altDown) {
-            // check the control handles first so that
+            // check the control handles first, so that
             // retracted handles can be dragged out with Alt-drag
             if (ctrlOut.handleContains(x, y)) {
                 return ctrlOut;
@@ -172,7 +173,13 @@ public class AnchorPoint extends DraggablePoint {
         this.type = type;
     }
 
-    public void changeTypeForEditing(boolean pathWasBuiltInteractively) {
+    public void changeTypeFromSymToSmooth() {
+        if (type == SYMMETRIC) { // set to smooth only if it wasn't broken
+            setType(SMOOTH);
+        }
+    }
+
+    public void setHeuristicType() {
         boolean inRetracted = ctrlIn.isRetracted(1.0);
         boolean outRetracted = ctrlOut.isRetracted(1.0);
 
@@ -180,9 +187,8 @@ public class AnchorPoint extends DraggablePoint {
             // so that they can be easily dragged out
             type = SYMMETRIC;
         } else if (inRetracted || outRetracted) {
+            // so that dragging out the retraced doesn't cause surprises
             type = CUSP;
-        } else if (pathWasBuiltInteractively) {
-            type = SMOOTH;
         } else {
             type = calcHeuristicType();
         }
@@ -214,28 +220,40 @@ public class AnchorPoint extends DraggablePoint {
     public void showPopup(int x, int y) {
         JPopupMenu p = new JPopupMenu();
         AnchorPointType.addTypePopupItems(this, p);
+
         p.addSeparator();
-//        p.add(new AbstractAction("Dump") {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                AnchorPoint.this.dump();
-//            }
-//        });
-        p.add(new AbstractAction("Delete Point") {
+
+        p.add(new AbstractAction("Retract Handles") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnchorPoint.this.delete();
+                AnchorPoint.this.retractHandles();
             }
         });
 
-        if (subPath.isSingle()) {
-            p.add(new AbstractAction("Delete Path") {
+        p.addSeparator();
+
+        if (Build.CURRENT.isDevelopment()) {
+            p.add(new AbstractAction("Dump") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    subPath.deletePath();
+                    AnchorPoint.this.dump();
                 }
             });
-        } else {
+        }
+
+        boolean singleSubPath = subPath.isSingle();
+        boolean isLastPoint = singleSubPath && subPath.getNumAnchors() == 1;
+
+        if (!isLastPoint) {
+            p.add(new AbstractAction("Delete Point") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    AnchorPoint.this.delete();
+                }
+            });
+        }
+
+        if (!singleSubPath) {
             p.add(new AbstractAction("Delete Subpath") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -244,12 +262,13 @@ public class AnchorPoint extends DraggablePoint {
             });
         }
 
-        p.add(new AbstractAction("Retract Handles") {
+        p.add(new AbstractAction("Delete Path") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnchorPoint.this.retractHandles();
+                subPath.deletePath();
             }
         });
+
         p.show((JComponent) view, x, y);
     }
 
@@ -260,10 +279,6 @@ public class AnchorPoint extends DraggablePoint {
         view.repaint();
     }
 
-    public void setSubPath(SubPath subPath) {
-        this.subPath = subPath;
-    }
-
     @Override
     public void setView(View view) {
         super.setView(view);
@@ -272,11 +287,27 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void delete() {
-        SubPath backup = this.subPath.copyForUndo();
+        SubPath backup = this.subPath.copyForUndo(subPath.getPath());
         this.subPath.deletePoint(this);
         History.addEdit(new SubPathEdit("Delete Anchor Point",
                 backup, subPath));
         view.repaint();
+    }
+
+    public boolean isRecentlyEdited() {
+        return this == recentlyEditedPoint;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        super.setActive(active);
+        if (active) {
+            recentlyEditedPoint = this;
+        }
+    }
+
+    public SubPath getSubPath() {
+        return subPath;
     }
 
     public void dump() {
@@ -286,8 +317,13 @@ public class AnchorPoint extends DraggablePoint {
         System.out.println("    " + ctrlOut.toColoredString());
     }
 
+    public String getId() {
+        return id;
+    }
+
+    // also includes the anchor point positions
     @Override
     public String toString() {
-        return id;
+        return id + "(" + x + ", " + y + ")";
     }
 }
