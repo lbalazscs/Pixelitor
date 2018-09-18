@@ -22,6 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.selection.Selection;
+import pixelitor.tools.SelectionTool;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.SubPath;
@@ -67,5 +68,10 @@ public class PixelitorAssertions extends Assertions {
     @org.assertj.core.util.CheckReturnValue
     public static PenToolAssert assertThat(PenTool actual) {
         return new PenToolAssert(actual);
+    }
+
+    @org.assertj.core.util.CheckReturnValue
+    public static SelectionToolAssert assertThat(SelectionTool actual) {
+        return new SelectionToolAssert(actual);
     }
 }

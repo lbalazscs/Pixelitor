@@ -28,8 +28,11 @@ import pixelitor.history.History;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 
-import static org.junit.Assert.assertTrue;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.history.History.redo;
+import static pixelitor.history.History.undo;
+import static pixelitor.selection.SelectionInteraction.REPLACE;
+import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
@@ -64,10 +67,19 @@ public class PenToolTest {
         createSimpleClosedPathInBuildMode();
 
         Tools.PEN.convertToSelection(true);
-        assertTrue(Tools.SELECTION.isActive());
-        History.undo();
-        assertThat(Tools.PEN).isActive().modeIs(BUILD);
-        History.redo();
+        assertThat(Tools.SELECTION).isActive();
+        assertThat(comp).hasSelection();
+
+        undo("Convert Path to Selection");
+        assertThat(Tools.PEN)
+                .isActive()
+                .modeIs(BUILD) // return to BUILD mode!
+                .hasPath();
+        assertThat(comp).doesNotHaveSelection();
+
+        redo("Convert Path to Selection");
+        assertThat(Tools.SELECTION).isActive();
+        assertThat(comp).hasSelection();
     }
 
     @Test
@@ -77,15 +89,28 @@ public class PenToolTest {
         assertThat(Tools.PEN).isActive().modeIs(EDIT);
 
         Tools.PEN.convertToSelection(true);
-        assertTrue(Tools.SELECTION.isActive());
-        History.undo();
-        assertThat(Tools.PEN).isActive().modeIs(EDIT);
-        History.redo();
+        assertThat(Tools.SELECTION).isActive();
+        assertThat(comp).hasSelection();
+
+        undo("Convert Path to Selection");
+        assertThat(Tools.PEN)
+                .isActive()
+                .modeIs(EDIT) // return to EDIT mode!
+                .hasPath();
+        assertThat(comp).doesNotHaveSelection();
+
+        redo("Convert Path to Selection");
+        assertThat(Tools.SELECTION).isActive();
+        assertThat(comp).hasSelection();
     }
 
     @Test
     public void testConvertSelectionToPath() {
         Tools.changeTo(Tools.SELECTION);
+        assertThat(Tools.SELECTION)
+                .isActive()
+                .selectionTypeIs(RECTANGLE)
+                .interactionIs(REPLACE);
 
         // build a quick rectangular selection by dragging
         press(100, 100);
@@ -101,11 +126,11 @@ public class PenToolTest {
                 .hasPath();
         assertThat(comp).doesNotHaveSelection();
 
-        History.undo();
-        assertTrue(Tools.SELECTION.isActive());
+        undo("Convert Selection to Path");
+        assertThat(Tools.SELECTION).isActive();
         assertThat(comp).hasSelection();
 
-        History.redo();
+        redo("Convert Selection to Path");
         assertThat(Tools.PEN)
                 .isActive()
                 .modeIs(EDIT)
@@ -118,7 +143,6 @@ public class PenToolTest {
         // create a 2-point path in build mode
         Tools.PEN.startBuilding(false);
         click(100, 100);
-
         click(200, 100);
 
         Path path = PenTool.path;
@@ -134,7 +158,6 @@ public class PenToolTest {
                 .modeIs(EDIT);
 
         // drag the first point downwards
-        assertThat(firstAnchor).isAt(100, 100);
         press(100, 100);
         release(100, 200);
         assertThat(firstAnchor).isAt(100, 200);
@@ -289,16 +312,6 @@ public class PenToolTest {
                 .numAnchorsIs(3);
 
         return sp;
-    }
-
-    private static void undo(String editName) {
-        History.assertEditToBeUndoneNameIs(editName);
-        History.undo();
-    }
-
-    private static void redo(String editName) {
-        History.assertEditToBeRedoneNameIs(editName);
-        History.redo();
     }
 
     private void click(int x, int y) {

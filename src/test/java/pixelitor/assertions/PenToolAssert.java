@@ -17,25 +17,16 @@
 
 package pixelitor.assertions;
 
-import org.assertj.core.api.AbstractAssert;
-import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.PenToolMode;
 
-public class PenToolAssert extends AbstractAssert<PenToolAssert, PenTool> {
+/**
+ * Custom AssertJ assertions for {@link PenTool} objects.
+ */
+public class PenToolAssert extends ToolAssert<PenToolAssert, PenTool> {
     public PenToolAssert(PenTool actual) {
         super(actual, PenToolAssert.class);
-    }
-
-    public PenToolAssert isActive() {
-        isNotNull();
-
-        if (Tools.currentTool != actual) {
-            throw new AssertionError("is not active");
-        }
-
-        return this;
     }
 
     public PenToolAssert hasPath() {
