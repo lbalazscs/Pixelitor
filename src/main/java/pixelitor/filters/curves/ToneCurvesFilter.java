@@ -14,7 +14,7 @@ import java.awt.image.BufferedImage;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesFilter extends FilterWithGUI {
-    public static final String NAME = "Tone Curves";
+    public static final String NAME = "Curves";
 
     private CurvesFilter filter;
     private ToneCurves curves;
