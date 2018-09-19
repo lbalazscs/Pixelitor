@@ -16,6 +16,7 @@ import java.util.EventListener;
 public class ToneCurvesPanel extends JPanel implements MouseMotionListener, MouseListener {
     public ToneCurves toneCurves = new ToneCurves();
     private int mouseKnotIndex = -1;
+    private int mouseKnotIndexDeleted = -1;
     private BufferedImage img;
     private EventListenerList actionListenerList = new EventListenerList();
 
@@ -27,9 +28,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         addMouseMotionListener(this);
         addMouseListener(this);
 
-        this.getWidth();
-        this.getHeight();
-        img = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB );
+        img = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
 
         toneCurves.setG2D(img.createGraphics());
         toneCurves.setSize(img.getWidth(), img.getHeight());
@@ -88,8 +87,22 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     public void mouseDragged(MouseEvent e) {
         if (mouseKnotIndex >= 0) {
             Point.Float mousePos = getNormalizedMousePos(e);
-            toneCurves.getActiveCurve().setKnotPosition(mouseKnotIndex, mousePos);
+            if (toneCurves.getActiveCurve().isDraggedOff(mouseKnotIndex, mousePos)) {
+                toneCurves.getActiveCurve().deleteKnot(mouseKnotIndex);
+                mouseKnotIndexDeleted = mouseKnotIndex;
+                mouseKnotIndex = -1;
+            } else {
+                toneCurves.getActiveCurve().setKnotPosition(mouseKnotIndex, mousePos);
+            }
+
             stateChanged();
+        } else if (mouseKnotIndexDeleted >= 0) {
+            Point.Float mousePos = getNormalizedMousePos(e);
+            if (toneCurves.getActiveCurve().isDraggedIn(mouseKnotIndexDeleted, mousePos)) {
+                mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, false);
+                mouseKnotIndexDeleted = -1;
+                stateChanged();
+            }
         }
     }
 
@@ -117,7 +130,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
         if (mouseKnotIndex < 0) {
             e.consume();
-            mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos);
+            mouseKnotIndex = toneCurves.getActiveCurve().addKnot(mousePos, true);
             stateChanged();
         }
     }

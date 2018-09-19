@@ -66,7 +66,7 @@ public class ToneCurve {
         p.y = ImageMath.clamp(p.y, 0, 1);
     }
 
-    public int addKnot(Point.Float p) {
+    public int addKnot(Point.Float p, boolean allowReplace) {
         // clamp to boundaries [0,1]
         clampPoint(p);
 
@@ -80,13 +80,15 @@ public class ToneCurve {
 
         // if point is too close to next/prev knot -> replace the nearest
         // this protect against placing two knots too close to each other
-        int prevIndex = index-1;
-        if (isClose(p, new Point.Float(curve.x[prevIndex], curve.y[prevIndex]))) {
-            setKnotPosition(prevIndex, p);
-            return prevIndex;
-        } else if (isClose(p, new Point.Float(curve.x[index], curve.y[index]))) {
-            setKnotPosition(index, p);
-            return index;
+        if (allowReplace) {
+            int prevIndex = index-1;
+            if (isClose(p, new Point.Float(curve.x[prevIndex], curve.y[prevIndex]))) {
+                setKnotPosition(prevIndex, p);
+                return prevIndex;
+            } else if (isClose(p, new Point.Float(curve.x[index], curve.y[index]))) {
+                setKnotPosition(index, p);
+                return index;
+            }
         }
 
         // check for max knot limit
@@ -99,9 +101,14 @@ public class ToneCurve {
     }
 
     public void deleteKnot(int index) {
-        if (index <= 0 || index >= curve.x.length -1) {
+        if (index < 0 || index > curve.x.length -1) {
             return;
         }
+
+        if (curve.x.length <= 2) {
+            return;
+        }
+
         isDirty = true;
         curve.removeKnot(index);
     }
@@ -118,20 +125,11 @@ public class ToneCurve {
             return;
         }
 
-        if (index == 0) {
-            // first point can't change x axis
-            p.x = 0.0F;
-        } else if(index == lastIndex) {
-            // last point can't change x axis
-            p.x = 1.0F;
-        } else {
-            // check prev/next index
-            // this protect against moving knot too close to each other
-            if (p.x < curve.x[index-1]) {
-                p.x = curve.x[index-1] + 0.001F;
-            } else if (p.x > curve.x[index+1]) {
-                p.x = curve.x[index+1] - 0.001F;
-            }
+        // check prev/next index - knots cannot change they index
+        if (index > 0 && p.x < curve.x[index-1]) {
+            p.x = curve.x[index-1];
+        } else if (index < lastIndex && p.x > curve.x[index+1]) {
+            p.x = curve.x[index+1];
         }
 
         curve.x[index] = ImageMath.clamp(p.x, 0, 1);
@@ -139,8 +137,42 @@ public class ToneCurve {
         isDirty = true;
     }
 
+    /**
+     * Check if point p is out of index range (check prev/next knot)
+     * @param index knot index
+     * @param p normalized point data
+     */
+    public boolean isDraggedOff(int index, Point.Float p) {
+        if (index <=0 || index >= curve.x.length - 1) {
+            return false;
+        }
+
+        if (p.x > curve.x[index+1] + 0.02F || p.x < curve.x[index-1] - 0.02F) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if point p is allowed to put at given index
+     * @param index knot index
+     * @param p normalized point data
+     */
+    public boolean isDraggedIn(int index, Point.Float p) {
+        if (index <=0 || index > curve.x.length - 1) {
+            return false;
+        }
+
+        if (p.x < curve.x[index] && p.x > curve.x[index-1]) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean isOver(Point.Float p, Point.Float q)  {
-        if(Math.abs(p.x - q.x) < KNOT_RADIUS) {
+        if (Math.abs(p.x - q.x) < KNOT_RADIUS) {
             return Math.abs(p.y - q.y) < KNOT_RADIUS;
         }
         return false;
