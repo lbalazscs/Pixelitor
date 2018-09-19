@@ -341,8 +341,9 @@ public class CropTool extends DragTool {
             g2.setClip(componentSpaceVisiblePart);
 
             // draw guidelines
-            RectGuidelineType guidelineType = (RectGuidelineType) guidesSelector.getSelectedItem();
-            rectGuideline.draw(cropRect.getCo(), guidelineType, g2);
+            rectGuideline.setType((RectGuidelineType) guidesSelector.getSelectedItem());
+            rectGuideline.setOrientation(0);
+            rectGuideline.draw(cropRect.getCo(), g2);
 
             cropBox.paintHandles(g2);
         }

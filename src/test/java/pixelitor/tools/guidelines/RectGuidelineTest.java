@@ -20,28 +20,28 @@ package pixelitor.tools.guidelines;
 import org.junit.Test;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.refEq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RectGuidelineTest {
 
     private RectGuideline rectGuideline;
 
     @Test
-    public void draw_GuideLineType_NONE() {
+    public void draw_Type_NONE() {
 
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 30);
         Graphics2D g2 = mock(Graphics2D.class);
 
         rectGuideline = new RectGuideline();
-        rectGuideline.draw(rect, RectGuidelineType.NONE, g2);
+        rectGuideline.setType(RectGuidelineType.NONE);
+        rectGuideline.draw(rect, g2);
 
         verify(g2, never()).draw(any(Line2D.class));
     }
@@ -54,7 +54,8 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
 
         rectGuideline = new RectGuideline();
-        rectGuideline.draw(rect, RectGuidelineType.RULE_OF_THIRDS, g2);
+        rectGuideline.setType(RectGuidelineType.RULE_OF_THIRDS);
+        rectGuideline.draw(rect, g2);
 
         verify(g2, times(2)).draw(refEq(new Line2D.Double(30, 0, 30, 12)));
         verify(g2, times(2)).draw(refEq(new Line2D.Double(60, 0, 60, 12)));
@@ -69,7 +70,8 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
 
         rectGuideline = new RectGuideline();
-        rectGuideline.draw(rect, RectGuidelineType.GOLDEN_SECTIONS, g2);
+        rectGuideline.setType(RectGuidelineType.GOLDEN_SECTIONS);
+        rectGuideline.draw(rect, g2);
 
         double phi = 1.618;
         double sectionWidth = rect.getWidth() / phi;
@@ -89,7 +91,8 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
 
         rectGuideline = new RectGuideline();
-        rectGuideline.draw(rect, RectGuidelineType.DIAGONALS, g2);
+        rectGuideline.setType(RectGuidelineType.DIAGONALS);
+        rectGuideline.draw(rect, g2);
 
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 12, 12)));
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 12, 12, 0)));
@@ -105,11 +108,128 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
 
         rectGuideline = new RectGuideline();
-        rectGuideline.draw(rect, RectGuidelineType.DIAGONALS, g2);
+        rectGuideline.setType(RectGuidelineType.DIAGONALS);
+        rectGuideline.draw(rect, g2);
 
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 12, 12)));
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 12, 12, 0)));
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 90, 12, 90 - 12)));
         verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 90 - 12, 12, 90)));
+    }
+
+    @Test
+    public void draw_Type_TRIANGLES_top_left_to_bottom_down()
+    {
+
+        // orientation: 0 (diagonal line from top left to bottom down)
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.TRIANGLES);
+        rectGuideline.setOrientation(0);
+        rectGuideline.draw(rect, g2);
+
+        Point.Double p = new Point.Double(5,5);
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 10, 10)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 10, p.x, p.y)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(10, 0, p.x, p.y)));
+    }
+
+    @Test
+    public void draw_Type_TRIANGLES_bottom_down_to_top_left()
+    {
+        // orientation: 1 (diagonal line from bottom down to top left)
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.TRIANGLES);
+        rectGuideline.setOrientation(1);
+        rectGuideline.draw(rect, g2);
+
+        Point.Double p = new Point.Double(5,5);
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 10, 10, 0)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, p.x, p.y)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(10, 10, p.x, p.y)));
+    }
+
+    @Test
+    public void draw_Type_GRID_less_than_2xSize()
+    {
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 90);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.GRID);
+        rectGuideline.draw(rect, g2);
+
+        // cross at the center (gridSize: 50)
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(45, 0, 45, 90)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 45, 90, 45)));
+        // total
+        verify(g2, atMost(4)).draw(any());
+    }
+
+    @Test
+    public void draw_Type_GRID_exact_2xSize()
+    {
+        // gridSize: 50 (one cross at the center if size less than 2xSize)
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 100, 100);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.GRID);
+        rectGuideline.draw(rect, g2);
+
+        // cross at the center (gridSize: 50)
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(50, 0, 50, 100)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 50, 100, 50)));
+        // sides horizontal
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 100, 0)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 100, 100, 100)));
+        // sides vertical
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 0, 100)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(100, 0, 100, 100)));
+        // total
+        verify(g2, atMost(12)).draw(any());
+    }
+
+    @Test
+    public void draw_Type_GRID_more_than_2xSize()
+    {
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 102, 102);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.GRID);
+        rectGuideline.draw(rect, g2);
+
+        // cross at the center (gridSize: 50)
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(51, 0, 51, 102)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 51, 102, 51)));
+        // sides horizontal
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 1, 102, 1)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 101, 102, 101)));
+        // sides vertical
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(1, 0, 1, 102)));
+        verify(g2, times(2)).draw(refEq(new Line2D.Double(101, 0, 101, 102)));
+        // total
+        verify(g2, atMost(12)).draw(any());
+    }
+
+    @Test
+    public void draw_Type_SPIRAL_orientation_0()
+    {
+        // orientation: 0 (spiral that starts from bottom left)
+        Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
+        Graphics2D g2 = mock(Graphics2D.class);
+
+        rectGuideline = new RectGuideline();
+        rectGuideline.setType(RectGuidelineType.GOLDEN_SPIRAL);
+        rectGuideline.setOrientation(0);
+        rectGuideline.draw(rect, g2);
+
+        verify(g2, atMost(2*11)).draw(any(Arc2D.Double.class));
     }
 }
