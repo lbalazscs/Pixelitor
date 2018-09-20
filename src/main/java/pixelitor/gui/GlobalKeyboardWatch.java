@@ -160,6 +160,8 @@ public class GlobalKeyboardWatch {
                     keyListener.shiftPressed();
                 }
                 break;
+            default:
+                keyListener.otherKeyPressed(e);
         }
     }
 

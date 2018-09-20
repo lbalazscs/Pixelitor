@@ -34,6 +34,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
@@ -214,6 +215,11 @@ public abstract class Tool implements KeyListener {
             ImageComponents.setCursorForAll(cursor);
         }
         altDown = false;
+    }
+
+    @Override
+    public void otherKeyPressed(KeyEvent e) {
+        // empty instead of abstract for the convenience of subclasses
     }
 
     @Override

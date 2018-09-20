@@ -43,6 +43,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
@@ -140,7 +141,9 @@ public class CropTool extends DragTool {
 
     private void addGuidesSelector() {
         guidesSelector = new JComboBox<>(RectGuidelineType.values());
-        guidesSelector.setToolTipText("Composition guides");
+        guidesSelector.setToolTipText("<html>Composition guides." +
+                "<br><br>Press <b>O</b> to select the next guide." +
+                "<br>Press <b>Shift-O</b> to change the orientation.");
         guidesSelector.setMaximumRowCount(guidesSelector.getItemCount());
 //        guidesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
         guidesSelector.addActionListener(e -> ImageComponents.repaintActive());
@@ -342,7 +345,6 @@ public class CropTool extends DragTool {
 
             // draw guidelines
             rectGuideline.setType((RectGuidelineType) guidesSelector.getSelectedItem());
-            rectGuideline.setOrientation(0);
             rectGuideline.draw(cropRect.getCo(), g2);
 
             cropBox.paintHandles(g2);
@@ -466,6 +468,41 @@ public class CropTool extends DragTool {
         }
 
         cropBox.setUseAspectRatio(false);
+    }
+
+    @Override
+    public void otherKeyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            executeCropCommand();
+            e.consume();
+        } else if (e.getKeyCode() == KeyEvent.VK_O) {
+            if (e.isShiftDown()) {
+                // Shift-O: change the orientation
+                // within the current composition guide family
+                if (state == TRANSFORM) {
+                    int o = rectGuideline.getOrientation();
+                    rectGuideline.setOrientation(o + 1);
+                    ImageComponents.repaintActive();
+                    e.consume();
+                }
+            } else {
+                // O: advance to the next composition guide
+                selectTheNextCompositionGuide();
+                e.consume();
+            }
+        }
+    }
+
+    private void selectTheNextCompositionGuide() {
+        int index = guidesSelector.getSelectedIndex();
+        int itemCount = guidesSelector.getItemCount();
+        int nextIndex;
+        if (index == itemCount - 1) {
+            nextIndex = 0;
+        } else {
+            nextIndex = index + 1;
+        }
+        guidesSelector.setSelectedIndex(nextIndex);
     }
 
     @Override
