@@ -819,8 +819,7 @@ public class PathBuilderTest {
     }
 
     private void undo(String edit, BuildState state) {
-        History.assertEditToBeUndoneNameIs(edit);
-        History.undo();
+        History.undo(edit);
         checkState(state);
         if (PenTool.path != null) {
             PenTool.path.checkConsistency();
@@ -828,8 +827,7 @@ public class PathBuilderTest {
     }
 
     private void redo(String edit, BuildState state) {
-        History.assertEditToBeRedoneNameIs(edit);
-        History.redo();
+        History.redo(edit);
         checkState(state);
         if (PenTool.path != null) {
             PenTool.path.checkConsistency();

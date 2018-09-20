@@ -17,6 +17,8 @@
 
 package pixelitor.tools.util;
 
+import java.awt.event.KeyEvent;
+
 public interface KeyListener {
     void spacePressed();
 
@@ -36,4 +38,6 @@ public interface KeyListener {
     void shiftPressed();
 
     void shiftReleased();
+
+    void otherKeyPressed(KeyEvent e);
 }

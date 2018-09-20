@@ -370,4 +370,16 @@ public class History {
     public static List<String> asStringList() {
         return undoManager.asStringList();
     }
+
+    @VisibleForTesting
+    public static void undo(String editName) {
+        assertEditToBeUndoneNameIs(editName);
+        undo();
+    }
+
+    @VisibleForTesting
+    public static void redo(String editName) {
+        assertEditToBeRedoneNameIs(editName);
+        redo();
+    }
 }

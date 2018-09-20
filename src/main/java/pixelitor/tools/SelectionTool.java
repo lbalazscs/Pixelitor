@@ -32,6 +32,7 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -287,11 +288,13 @@ public class SelectionTool extends DragTool {
         }
     }
 
-    private SelectionType getSelectionType() {
+    @VisibleForTesting
+    public SelectionType getSelectionType() {
         return (SelectionType) typeCombo.getSelectedItem();
     }
 
-    private SelectionInteraction getCurrentInteraction() {
+    @VisibleForTesting
+    public SelectionInteraction getCurrentInteraction() {
         return (SelectionInteraction) interactionCombo.getSelectedItem();
     }
 

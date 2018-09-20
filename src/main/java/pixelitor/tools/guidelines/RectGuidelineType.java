@@ -24,7 +24,10 @@ public enum RectGuidelineType {
     NONE("None"),
     RULE_OF_THIRDS("Rule of Thirds"),
     GOLDEN_SECTIONS("Golden Sections"),
-    DIAGONALS("Diagonal Lines");
+    GOLDEN_SPIRAL("Golden Spiral"),
+    DIAGONALS("Diagonal Lines"),
+    TRIANGLES("Triangles"),
+    GRID("Grid");
 
     private final String guiName;
 

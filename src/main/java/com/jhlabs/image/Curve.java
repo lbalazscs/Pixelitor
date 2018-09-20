@@ -115,6 +115,25 @@ public class Curve {
         ny[numKnots+1] = ny[numKnots];
 
         int[] table = new int[256];
+
+        // if first knot is > 0 fill the table with y position
+        if (nx[0] > 0) {
+            int nxStart = (int)(nx[0] * 255);
+            int nyStart = (int)(ny[0] * 255);
+            for (int i = 0; i <= nxStart; i++) {
+                table[i] = nyStart;
+            }
+        }
+
+        // if last knot is < 1 fill the table with y position
+        if (nx[numKnots] < 1) {
+            int nxStart = (int)(nx[numKnots] * 255);
+            int nyStart = (int)(ny[numKnots] * 255);
+            for (int i = nxStart; i <= 255; i++) {
+                table[i] = nyStart;
+            }
+        }
+
         for (int i = 0; i < 2048; i++) {
             float f = i/2048.0f;
             int x = (int)(255 * ImageMath.splineClamped( f, nx.length, nx ) + 0.5f);

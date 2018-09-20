@@ -48,7 +48,19 @@ public class LayerButtonFixture extends JToggleButtonFixture {
         }
     }
 
-    public boolean isEyeOpen() {
+    private boolean isEyeOpen() {
         return ((LayerButton) target()).isEyeOpen();
+    }
+
+    public void requireOpenEye() {
+        if (!isEyeOpen()) {
+            throw new AssertionError("eye not open");
+        }
+    }
+
+    public void requireClosedEye() {
+        if (isEyeOpen()) {
+            throw new AssertionError("open eye");
+        }
     }
 }

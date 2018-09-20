@@ -73,12 +73,16 @@ import java.util.Random;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.TestingMode.NO_MASK;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.gui.ImageComponents.assertNumOpenImagesIs;
 import static pixelitor.gui.ImageComponents.assertNumOpenImagesIsAtLeast;
+import static pixelitor.selection.SelectionInteraction.ADD;
+import static pixelitor.selection.SelectionInteraction.REPLACE;
+import static pixelitor.selection.SelectionType.ELLIPSE;
+import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.utils.test.Assertions.canvasImSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
@@ -87,8 +91,8 @@ import static pixelitor.utils.test.Assertions.zoomIs;
 
 /**
  * An automated GUI test which uses AssertJ-Swing.
- * Note that this is not a unit test:
- * depending on the configuration, it could run for hours.
+ * This is not a unit test: the app as a whole is tested from the user
+ * perspective, and depending on the configuration, it could run for hours.
  */
 public class AssertJSwingTest {
     private static boolean verbose = false;
@@ -127,16 +131,16 @@ public class AssertJSwingTest {
         initialize(args);
 
         AssertJSwingTest test = new AssertJSwingTest();
-        test.setUp();
+        test.startApp();
 
         boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
-            test.robot.settings().delayBetweenEvents(ROBOT_DELAY_SLOW);
+            test.delayBetweenEvents(ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
             test.testPenTool();
         } else {
-            TestingMode[] testingModes = getTestingModes();
+            TestingMode[] testingModes = decideUsedTestingModes();
             String target = getTarget();
 
             for (int i = 0; i < testingModes.length; i++) {
@@ -160,7 +164,6 @@ public class AssertJSwingTest {
 
     private static void initialize(String[] args) {
         processCLArguments(args);
-        checkTestingDirs();
         Utils.makeSureAssertionsAreEnabled();
     }
 
@@ -184,16 +187,17 @@ public class AssertJSwingTest {
         return target;
     }
 
-    private static TestingMode[] getTestingModes() {
-        TestingMode[] testingModes;
-        String testModeProp = System.getProperty("test.mode");
-        if (testModeProp == null || testModeProp.equals("all")) {
-            testingModes = TestingMode.values();
+    private static TestingMode[] decideUsedTestingModes() {
+        TestingMode[] usedTestingModes;
+        String testMode = System.getProperty("test.mode");
+        if (testMode == null || testMode.equals("all")) {
+            usedTestingModes = TestingMode.values();
         } else {
-            TestingMode mode = TestingMode.valueOf(testModeProp);
-            testingModes = new TestingMode[]{mode};
+            // if a specific test mode was configured, test only that
+            TestingMode mode = TestingMode.valueOf(testMode);
+            usedTestingModes = new TestingMode[]{mode};
         }
-        return testingModes;
+        return usedTestingModes;
     }
 
     /**
@@ -210,7 +214,7 @@ public class AssertJSwingTest {
     private void testTarget(TestingMode testingMode, String target) {
         this.testingMode = testingMode;
         testingMode.set(this);
-        setupRobotSpeed();
+        setupDelayBetweenEvents();
 
         System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
                 target, testingMode, getCurrentTime());
@@ -275,16 +279,20 @@ public class AssertJSwingTest {
         testLayers();
     }
 
-    private void setupRobotSpeed() {
+    private void setupDelayBetweenEvents() {
         // for example -Drobot.delay.millis=500 could be added to
         // the command line to slow it down
         String s = System.getProperty("robot.delay.millis");
         if (s == null) {
-            robot.settings().delayBetweenEvents(ROBOT_DELAY_DEFAULT);
+            delayBetweenEvents(ROBOT_DELAY_DEFAULT);
         } else {
             int delay = Integer.parseInt(s);
-            robot.settings().delayBetweenEvents(delay);
+            delayBetweenEvents(delay);
         }
+    }
+
+    private void delayBetweenEvents(int millis) {
+        robot.settings().delayBetweenEvents(millis);
     }
 
     private void testDevelopMenu() {
@@ -296,7 +304,7 @@ public class AssertJSwingTest {
     private void testTools() {
         log(0, "testing the tools");
 
-        // make sure we have a big internal frame for the tool tests
+        // make sure we have a big enough canvas for the tool tests
         keyboardActualPixels();
 
         if (!JVM.isLinux) {
@@ -399,14 +407,16 @@ public class AssertJSwingTest {
 
         // test visibility change
         LayerButtonFixture layer1CopyButton = findLayerButton("layer 1 copy");
-        layer1CopyButton.requireSelected();
-        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
+        layer1CopyButton.requireOpenEye();
+
         layer1CopyButton.setOpenEye(false);
-        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
+        layer1CopyButton.requireClosedEye();
+
         keyboardUndo();
-        assertThat(layer1CopyButton.isEyeOpen()).isTrue();
+        layer1CopyButton.requireOpenEye();
+
         keyboardRedo();
-        assertThat(layer1CopyButton.isEyeOpen()).isFalse();
+        layer1CopyButton.requireClosedEye();
 
         runMenuCommand("Lower Layer");
         keyboardUndoRedo();
@@ -518,8 +528,7 @@ public class AssertJSwingTest {
 
         DialogFixture dialog = findDialogByTitle("Mask from Color Range");
 
-        Point onScreen = dialog.target().getLocationOnScreen();
-        moveTo(onScreen.x + 100, onScreen.y + 100);
+        moveTo(dialog, 100, 100);
         click();
 
         // TODO
@@ -1736,9 +1745,9 @@ public class AssertJSwingTest {
         pw.toggleButton("Color Picker Tool Button").click();
         randomAltClick();
 
-        moveTo(getExtraX() + 300, 300);
+        moveTo(300, 300);
         pw.click();
-        dragTo(getExtraX() + 400, 400);
+        dragTo(400, 400);
 
         assert checkConsistency();
     }
@@ -1749,13 +1758,13 @@ public class AssertJSwingTest {
         pw.toggleButton("Pen Tool Button").click();
         pw.button("toSelectionButton").requireDisabled();
 
-        moveTo(getExtraX() + 200, 300);
+        moveTo(200, 300);
 
-        dragTo(getExtraX() + 200, 500);
-        moveTo(getExtraX() + 300, 500);
-        dragTo(getExtraX() + 300, 300);
+        dragTo(200, 500);
+        moveTo(300, 500);
+        dragTo(300, 300);
 
-        moveTo(getExtraX() + 200, 300);
+        moveTo(200, 300);
         click();
 
         // should be closed already
@@ -1778,7 +1787,7 @@ public class AssertJSwingTest {
         pw.toggleButton("Paint Bucket Tool Button").click();
         randomAltClick();
 
-        moveTo(getExtraX() + 300, 300);
+        moveTo(300, 300);
         pw.click();
 
         keyboardUndoRedoUndo();
@@ -1796,8 +1805,6 @@ public class AssertJSwingTest {
         pw.toggleButton("Gradient Tool Button").click();
         randomAltClick();
 
-        int extraX = getExtraX();
-
         for (GradientType gradientType : GradientType.values()) {
             pw.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
@@ -1809,11 +1816,11 @@ public class AssertJSwingTest {
                     }
                     pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
                     pw.checkBox("gradientRevert").uncheck();
-                    moveTo(extraX + 200, 200);
-                    dragTo(extraX + 400, 400);
+                    moveTo(200, 200);
+                    dragTo(400, 400);
                     pw.checkBox("gradientRevert").check();
-                    moveTo(extraX + 200, 200);
-                    dragTo(extraX + 400, 400);
+                    moveTo(200, 200);
+                    dragTo(400, 400);
                 }
             }
         }
@@ -1905,12 +1912,10 @@ public class AssertJSwingTest {
 
         pw.toggleButton("Clone Stamp Tool Button").click();
 
-        int extraX = getExtraX();
-
-        testClone(false, false, extraX + 100);
-        testClone(false, true, extraX + 200);
-        testClone(true, false, extraX + 300);
-        testClone(true, true, extraX + 400);
+        testClone(false, false, 100);
+        testClone(false, true, 200);
+        testClone(true, false, 300);
+        testClone(true, true, 400);
 
         assert checkConsistency();
     }
@@ -1929,7 +1934,7 @@ public class AssertJSwingTest {
         }
 
         // set the source point
-        moveTo(getExtraX() + 300, 300);
+        moveTo(300, 300);
         altClick();
 
         // do some cloning
@@ -1949,6 +1954,10 @@ public class AssertJSwingTest {
         keyboardActualPixels();
 
         pw.toggleButton("Selection Tool Button").click();
+        assertThat(Tools.SELECTION)
+                .isActive()
+                .selectionTypeIs(RECTANGLE)
+                .interactionIs(REPLACE);
         randomAltClick();
 
         // TODO test poly selection
@@ -1959,15 +1968,9 @@ public class AssertJSwingTest {
     private void testWithSimpleSelection() {
         assert thereIsNoSelection();
 
-        int extraX = getExtraX();
-        int fromX = extraX + 200;
-        int fromY = 200;
-        moveTo(fromX, fromY);
-        int toX = extraX + 400;
-        int toY = 400;
-        dragTo(toX, toY);
-        assert thereIsSelection() : String.format(
-                "fromX = %d, fromY = %d, toX = %d, toY = %d%n", fromX, fromY, toX, toY);
+        moveTo(200, 200);
+        dragTo(400, 400);
+        assert thereIsSelection();
 
         keyboardNudge();
         assert thereIsSelection();
@@ -1993,10 +1996,12 @@ public class AssertJSwingTest {
 
     private void testWithTwoEclipseSelections() {
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
+        assertThat(Tools.SELECTION)
+                .selectionTypeIs(ELLIPSE)
+                .interactionIs(REPLACE);
 
-        int extraX = getExtraX();
         // replace current selection with the first ellipse
-        int e1X = extraX + 200;
+        int e1X = 200;
         int e1Y = 200;
         int e1Width = 200;
         int e1Height = 200;
@@ -2006,7 +2011,10 @@ public class AssertJSwingTest {
 
         // add second ellipse
         pw.comboBox("selectionInteractionCombo").selectItem("Add");
-        int e2X = extraX + 400;
+        assertThat(Tools.SELECTION)
+                .selectionTypeIs(ELLIPSE)
+                .interactionIs(ADD);
+        int e2X = 400;
         int e2Y = 200;
         int e2Width = 100;
         int e2Height = 100;
@@ -2072,14 +2080,12 @@ public class AssertJSwingTest {
     private void testCropTool() {
         log(1, "testing the crop tool");
 
-        int extraX = getExtraX();
-
         pw.toggleButton("Crop Tool Button").click();
-        moveTo(extraX + 200, 200);
-        dragTo(extraX + 400, 400);
-        dragTo(extraX + 450, 450);
-        moveTo(extraX + 200, 200);
-        dragTo(extraX + 150, 150);
+        moveTo(200, 200);
+        dragTo(400, 400);
+        dragTo(450, 450);
+        moveTo(200, 200);
+        dragTo(150, 150);
         Utils.sleep(1, SECONDS);
 
         keyboardNudge();
@@ -2108,11 +2114,10 @@ public class AssertJSwingTest {
     }
 
     private void testMoveToolImpl(boolean altDrag) {
-        int extraX = getExtraX();
-        moveTo(extraX + 400, 400);
+        moveTo(400, 400);
         click();
         if (altDrag) {
-            altDragTo(extraX + 300, 300);
+            altDragTo(300, 300);
         } else {
             ImageComponent ic = ImageComponents.getActiveIC();
             Drawable dr = ic.getComp().getActiveDrawableOrThrow();
@@ -2121,7 +2126,7 @@ public class AssertJSwingTest {
             assert tx == 0 : "tx = " + tx;
             assert ty == 0 : "ty = " + tx;
 
-            dragTo(extraX + 200, 300);
+            dragTo(200, 300);
 
             tx = dr.getTX();
             ty = dr.getTY();
@@ -2343,8 +2348,39 @@ public class AssertJSwingTest {
         pw.pressKey(VK_SHIFT).pressKey(VK_RIGHT).releaseKey(VK_RIGHT).releaseKey(VK_SHIFT);
     }
 
+    // move relative to the canvas
     private void moveTo(int x, int y) {
+        x += getExtraX();
         robot.moveMouse(x, y);
+    }
+
+    // drag relative to the canvas
+    private void dragTo(int x, int y) {
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        moveTo(x, y);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
+    // move relative to the given dialog
+    private void moveTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.moveMouse(c, x, y);
+    }
+
+    // drag relative to the given dialog
+    private void dragTo(DialogFixture dialog, int x, int y) {
+        Dialog c = dialog.target();
+
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.moveMouse(c, x, y);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
+    private void altDragTo(int x, int y) {
+        pw.pressKey(VK_ALT);
+        dragTo(x, y);
+        pw.releaseKey(VK_ALT);
     }
 
     private void moveRandom() {
@@ -2386,32 +2422,6 @@ public class AssertJSwingTest {
         int x = getRandomX();
         int y = getRandomY();
         dragTo(x, y);
-    }
-
-    private void dragTo(int x, int y) {
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(x, y);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
-    }
-
-    private void moveTo(DialogFixture dialog, int x, int y) {
-        Dialog c = dialog.target();
-
-        robot.moveMouse(c, x, y);
-    }
-
-    private void dragTo(DialogFixture dialog, int x, int y) {
-        Dialog c = dialog.target();
-
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.moveMouse(c, x, y);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
-    }
-
-    private void altDragTo(int x, int y) {
-        pw.pressKey(VK_ALT);
-        dragTo(x, y);
-        pw.releaseKey(VK_ALT);
     }
 
     private JMenuItemFixture findMenuItemByText(String guiName) {
@@ -2549,13 +2559,6 @@ public class AssertJSwingTest {
         assert numLayersIs(numLayers + 1);
         keyboardInvert();
         testingMode.set(this);
-    }
-
-    private static void checkTestingDirs() {
-        assertThat(baseTestingDir).exists().isDirectory();
-        assertThat(inputDir).exists().isDirectory();
-        assertThat(batchResizeOutputDir).exists().isDirectory();
-        assertThat(batchFilterOutputDir).exists().isDirectory();
     }
 
     private void click() {
@@ -2768,15 +2771,16 @@ public class AssertJSwingTest {
             System.exit(1);
         }
         baseTestingDir = new File(args[0]);
-        if (!baseTestingDir.exists()) {
-            System.err.printf("Base testing dir '%s' does not exist.%n",
-                    baseTestingDir.getAbsolutePath());
-            System.exit(1);
-        }
+        assertThat(baseTestingDir).exists().isDirectory();
 
         inputDir = new File(baseTestingDir, "input");
+        assertThat(inputDir).exists().isDirectory();
+
         batchResizeOutputDir = new File(baseTestingDir, "batch_resize_output");
+        assertThat(batchResizeOutputDir).exists().isDirectory();
+
         batchFilterOutputDir = new File(baseTestingDir, "batch_filter_output");
+        assertThat(batchFilterOutputDir).exists().isDirectory();
 
         String cleanerScriptExt;
         if (JVM.isWindows) {
@@ -2793,7 +2797,7 @@ public class AssertJSwingTest {
         }
     }
 
-    public void setUp() {
+    private void startApp() {
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
         ApplicationLauncher
@@ -2844,6 +2848,7 @@ public class AssertJSwingTest {
 
     private boolean skipThis() {
         if (quick) {
+            // in quick mode only execute 10% of the repetitive tests
             return random.nextDouble() > 0.1;
         } else {
             return false;
