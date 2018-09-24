@@ -24,10 +24,12 @@ import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
 
+import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * Two or more range params that are grouped and can be linked.
+ * Two or more {@link RangeParam} objects that are grouped visually in the GUI
+ * and can be linked to move together.
  */
 public class GroupedRangeParam extends AbstractFilterParam {
     private final RangeParam[] rangeParams;
@@ -36,21 +38,21 @@ public class GroupedRangeParam extends AbstractFilterParam {
     private boolean linkable = true; // whether a "Linked" checkbox appears
 
     /**
-     * 2 linked params: "Horizontal" and "Vertical", linked by default
+     * Two linked params: "Horizontal" and "Vertical", with shared min/max/default values
      */
     public GroupedRangeParam(String name, int min, int def, int max) {
         this(name, min, def, max, true);
     }
 
     /**
-     * 2 linked params: "Horizontal" and "Vertical"
+     * Two params: "Horizontal" and "Vertical", with shared min/max/default values
      */
     public GroupedRangeParam(String name, int min, int def, int max, boolean linked) {
         this(name, "Horizontal", "Vertical", min, def, max, linked);
     }
 
     /**
-     * 2 linked params
+     * Two params with custom names and shared min/max/default values
      */
     public GroupedRangeParam(String name, String firstChildName, String secondChildName,
                              int min, int def, int max, boolean linked) {
@@ -58,13 +60,18 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     /**
-     * Any number of linked params
+     * Any number of params with shared min/max/default values
      */
     public GroupedRangeParam(String name, String[] childNames,
                              int min, int def, int max, boolean linked) {
         this(name, createParams(childNames, min, def, max), linked);
     }
 
+    /**
+     * The most generic constructor: any number of params that can differ
+     * in their min/max/default values (but linking makes sense only if they
+     * have the same ranges).
+     */
     public GroupedRangeParam(String name, RangeParam[] params, boolean linked) {
         super(name, ALLOW_RANDOMIZE);
         rangeParams = params;
@@ -103,7 +110,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     private void onParamChange(RangeParam param) {
         if (isLinked()) {
-            // set the value of every other param to the value of the current param
+            // set the value of every other param to the value of the changed param
             for (RangeParam other : rangeParams) {
                 if (other != param) {
                     int newValue = param.getValue();
@@ -228,6 +235,15 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public boolean canBeAnimated() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        String rangeStrings = Arrays.stream(rangeParams)
+                .map(RangeParam::toString)
+                .collect(joining(",", "[", "]"));
+
+        return getClass().getSimpleName() + rangeStrings;
     }
 
     @Override

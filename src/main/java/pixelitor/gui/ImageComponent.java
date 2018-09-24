@@ -97,7 +97,7 @@ public class ImageComponent extends JComponent
 
     private Navigator navigator;
 
-    public static boolean showPixelGrid = false;
+    private static boolean showPixelGrid = false;
 
     public ImageComponent(Composition comp) {
         assert comp != null;
@@ -387,14 +387,17 @@ public class ImageComponent extends JComponent
 
         g2.setClip(canvasClip);
 
-        if (showPixelGrid && zoomLevel.allowPixelGrid() && !comp.showsSelection()) {
-//        if (showPixelGrid && zoomLevel.allowPixelGrid()) {
-            // for some reason this very slow if there is a selection visible
-            // and the pixel grid might not be shown anyway
+        if (showPixelGrid && showPixelGridIfEnabled()) {
             drawPixelGrid(g2);
         }
 
         g2.setClip(originalClip);
+    }
+
+    public boolean showPixelGridIfEnabled() {
+        // for some reason the pixel grid is very slow if there is
+        // a selection visible and the pixel grid might not be shown anyway
+        return zoomLevel.allowPixelGrid() && !comp.showsSelection();
     }
 
     private void drawPixelGrid(Graphics2D g2) {
@@ -420,6 +423,13 @@ public class ImageComponent extends JComponent
         for (double i = skipHor * pixelSize; i < endY; i += pixelSize) {
             int y = (int) (canvasStartY + i);
             g2.drawLine(startX, y, endX, y);
+        }
+    }
+
+    public static void setShowPixelGrid(boolean showPixelGrid) {
+        ImageComponent.showPixelGrid = showPixelGrid;
+        if (showPixelGrid) {
+            ImageComponents.pixelGridEnabled();
         }
     }
 

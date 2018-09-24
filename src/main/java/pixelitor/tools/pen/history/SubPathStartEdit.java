@@ -22,6 +22,8 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.PathNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -36,6 +38,9 @@ public class SubPathStartEdit extends PixelitorEdit {
 
     public SubPathStartEdit(Composition comp, Path path, SubPath subPath) {
         super("Subpath Start", comp);
+
+        assert path != null;
+
         this.path = path;
         this.wasFirstSP = path.getNumSubpaths() == 1;
         this.subPath = subPath;
@@ -59,12 +64,24 @@ public class SubPathStartEdit extends PixelitorEdit {
         super.redo();
 
         path.addSubPath(subPath);
-        subPath.setFinished(false);
+        path.setBuildingInProgressState("SubPathStartEdit.redo");
+//        subPath.undoFinishing("SubPathStartEdit.redo");
         if (wasFirstSP) {
             comp.setActivePath(path);
-            Tools.PEN.setPath(path);
+            if (comp.isActive()) {
+                Tools.PEN.setPath(path);
+            }
         }
-        path.setBuildingInProgressState("SubPathStartEdit.redo");
         comp.repaint();
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.addBoolean("wasFirstSP", wasFirstSP);
+        node.add(new PathNode(path));
+
+        return node;
     }
 }

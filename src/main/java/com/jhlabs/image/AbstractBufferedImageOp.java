@@ -47,6 +47,7 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
 
     protected AbstractBufferedImageOp(String filterName) {
         this.filterName = filterName;
+        assert filterName != null;
     }
 
     public void setProgressTracker(ProgressTracker pt) {

@@ -20,11 +20,11 @@ package pixelitor.tools.pen.history;
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.PathNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
 /**
  * Created when a subpath is finished by ctrl-click
@@ -41,15 +41,22 @@ public class FinishSubPathEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        subPath.setFinished(false);
-        subPath.getPath().setBuildingInProgressState("FinishSubPathEdit.undo");
+        subPath.undoFinishing("FinishSubPathEdit.undo");
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        subPath.getPath().setBuildState(NO_INTERACTION, "FinishSubPathEdit.redo");
-        subPath.setFinished(true);
+        subPath.finish(comp, "FinishSubPathEdit.redo", false);
+    }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.add(new PathNode(subPath.getPath()));
+
+        return node;
     }
 }

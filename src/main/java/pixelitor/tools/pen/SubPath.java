@@ -371,7 +371,7 @@ public class SubPath implements Serializable {
         last = anchorPoints.get(anchorPoints.size() - 1);
     }
 
-    private boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
+    private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
         if (ap1.samePositionAs(ap2, 1.0)) {
             assert ap1.ctrlOut.isRetracted();
             assert ap2.ctrlIn.isRetracted();
@@ -404,7 +404,10 @@ public class SubPath implements Serializable {
 //        }
         setMoving(null);
         setClosed(true);
-        finish(comp, "closing");
+
+        // since a closing edit is added,
+        // it is not necessary to also add a finish edit
+        finish(comp, "closing", false);
 
         if (addToHistory) {
             History.addEdit(new CloseSubPathEdit(comp, this));
@@ -419,7 +422,7 @@ public class SubPath implements Serializable {
         this.closed = closed;
     }
 
-    public void setFinished(boolean finished) {
+    private void setFinished(boolean finished) {
         this.finished = finished;
         if (finished) {
             setMoving(null);
@@ -430,6 +433,12 @@ public class SubPath implements Serializable {
         setClosed(false);
         setFinished(false);
         setMoving(PenToolMode.BUILD.createMovingAtLastMouseLoc(this));
+    }
+
+    public void undoFinishing(String reason) {
+        assert finished : "was not finished";
+        setFinished(false);
+        path.setBuildingInProgressState(reason);
     }
 
     public boolean isClosed() {
@@ -634,13 +643,13 @@ public class SubPath implements Serializable {
                 : "comp = " + comp.toPathDebugString()
                 + ", this.comp = " + this.comp.toPathDebugString();
 
-        History.addEdit(new FinishSubPathEdit(comp, this));
-        finish(comp, "ctrl-click");
+        finish(comp, "ctrl-click", true);
     }
 
     // A subpath can be finished either by closing it or by ctrl-clicking.
     // Either way, we end up in this method.
-    public void finish(Composition comp, String reason) {
+    public void finish(Composition comp, String reason, boolean addToHistory) {
+
         assert comp == this.comp
                 : "comp = " + comp.toPathDebugString()
                 + ", this.comp = " + this.comp.toPathDebugString();
@@ -650,6 +659,10 @@ public class SubPath implements Serializable {
         path.setBuildState(NO_INTERACTION, "finish(" + reason + ")");
         comp.setActivePath(path);
         Tools.PEN.enableActionsBasedOnFinishedPath(true);
+
+        if (addToHistory) {
+            History.addEdit(new FinishSubPathEdit(comp, this));
+        }
     }
 
     public void addLine(double newX, double newY, ImageComponent ic) {

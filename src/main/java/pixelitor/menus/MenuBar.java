@@ -129,7 +129,6 @@ import static pixelitor.gui.ImageComponents.onActiveImageLayer;
 import static pixelitor.gui.ImageComponents.onActiveTextLayer;
 import static pixelitor.gui.ImageComponents.reloadActiveFromFileAsync;
 import static pixelitor.gui.ImageComponents.repaintActive;
-import static pixelitor.gui.ImageComponents.repaintAll;
 import static pixelitor.gui.ImageComponents.warnAndCloseActive;
 import static pixelitor.gui.ImageComponents.warnAndCloseAll;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
@@ -471,13 +470,13 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addActionWithKey(new GetImageAction(
+        sub.addAction(new GetImageAction(
                 "Add from Color Range", true, false) {
             @Override
             protected void process(Layer layer, BufferedImage image) {
                 MaskFromColorRangePanel.showInDialog(layer, image);
             }
-        }, CTRL_M);
+        });
 
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
@@ -656,6 +655,7 @@ public class MenuBar extends JMenuBar {
                 .withKey(CTRL_L)
                 .add();
         colorsMenu.buildFilter(ToneCurvesFilter.NAME, ToneCurvesFilter::new)
+                .withKey(CTRL_M)
                 .add();
         colorsMenu.buildFilter(BrightnessContrast.NAME, BrightnessContrast::new)
                 .add();
@@ -1020,10 +1020,8 @@ public class MenuBar extends JMenuBar {
         });
 
         JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
-        showPixelGridMI.addActionListener(e -> {
-            ImageComponent.showPixelGrid = showPixelGridMI.getState();
-            repaintAll();
-        });
+        showPixelGridMI.addActionListener(e ->
+                ImageComponent.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 
         viewMenu.addSeparator();
@@ -1331,7 +1329,7 @@ public class MenuBar extends JMenuBar {
         sub.buildAction(new MenuAction("Random GUI Test") {
             @Override
             public void onClick() {
-                RandomGUITest.runTest();
+                RandomGUITest.start();
             }
         }).alwaysEnabled().withKey(CTRL_R).add();
 

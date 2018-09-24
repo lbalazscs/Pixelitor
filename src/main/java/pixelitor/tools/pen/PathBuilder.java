@@ -137,7 +137,7 @@ public class PathBuilder implements PenToolMode {
         assert path.checkConsistency();
     }
 
-    private boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
+    private static boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
         // if we are over an old point, just move it
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
@@ -162,7 +162,7 @@ public class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
+    private static void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
             startMovingPrevious(x, y, hit);
@@ -174,14 +174,14 @@ public class PathBuilder implements PenToolMode {
         }
     }
 
-    private void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
+    private static void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
         ap.retractHandles();
         // drag the retracted handles out
         ap.setType(SYMMETRIC);
         startMovingPrevious(x, y, ap.ctrlOut);
     }
 
-    private void breakAndStartMoving(double x, double y, ControlPoint cp) {
+    private static void breakAndStartMoving(double x, double y, ControlPoint cp) {
         if (!cp.isRetracted()) {
             // alt-press on an anchor point should break the handle
             cp.getAnchor().setType(CUSP);
@@ -193,7 +193,7 @@ public class PathBuilder implements PenToolMode {
         startMovingPrevious(x, y, cp);
     }
 
-    private void startMovingPrevious(double x, double y, DraggablePoint point) {
+    private static void startMovingPrevious(double x, double y, DraggablePoint point) {
         point.setActive(true);
         point.mousePressed(x, y);
         path.setBuildState(DRAG_EDITING_PREVIOUS, "startMovingPrevious");
@@ -360,16 +360,15 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void modeEnded() {
-        if (path != null) {
-            path.finishActiveSubpath();
-            path.setBuildState(NO_INTERACTION, "PB.modeEnded");
+        if (path != null && !path.getActiveSubpath().isFinished()) {
+            path.finishActiveSubpath("PB.modeEnded");
         } else {
             assertStateIs(NO_INTERACTION);
         }
         PenToolMode.super.modeEnded();
     }
 
-    public void assertStateIs(BuildState s) {
+    private static void assertStateIs(BuildState s) {
         if (path == null) {
             if (s != NO_INTERACTION) {
                 throw new IllegalStateException("null path");

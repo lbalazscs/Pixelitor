@@ -816,7 +816,7 @@ public class ImageUtils {
         g.fillOval(softness, softness, size - 2 * softness, size - 2 * softness);
         g.dispose();
 
-        BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1, null);
+        BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1, "Blur");
         blur.setProgressTracker(ProgressTracker.NULL_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
 

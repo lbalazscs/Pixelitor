@@ -62,7 +62,7 @@ public class Path implements Serializable {
     private final String id; // for debugging
     private BuildState buildState;
     private BuildState prevBuildState;
-    private PenToolMode preferredPenToolMode;
+    private transient PenToolMode preferredPenToolMode;
 
     public Path(Composition comp) {
         this.comp = comp;
@@ -263,8 +263,8 @@ public class Path implements Serializable {
         }
     }
 
-    public void finishActiveSubpath() {
-        activeSubPath.setFinished(true);
+    public void finishActiveSubpath(String reason) {
+        activeSubPath.finish(comp, reason, true);
     }
 
     public boolean hasMovingPoint() {

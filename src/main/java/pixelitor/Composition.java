@@ -226,7 +226,9 @@ public class Composition implements Serializable {
             selection.setIC(ic);
         }
         if (paths != null) {
-            paths.setView(ic);
+            if (ic != null) { // ic can be null when reloading
+                paths.setView(ic);
+            }
         }
     }
 

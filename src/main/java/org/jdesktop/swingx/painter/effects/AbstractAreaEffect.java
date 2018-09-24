@@ -47,6 +47,9 @@ import java.awt.image.BufferedImage;
 public class AbstractAreaEffect implements AreaEffect {
     private static final boolean debug = false;
 
+    // for compatibility with pixelitor versions before 4.2.0
+    private static final long serialVersionUID = -9104855683480422662L;
+
     /**
      * Creates a new instance of AreaEffect
      */
@@ -60,6 +63,7 @@ public class AbstractAreaEffect implements AreaEffect {
         setShapeMasked(true);
     }
 
+    @Override
     public void apply(Graphics2D g, Shape clipShape, int width, int height) {
         // opacity support added by lbalazscs
         Composite savedComposite = g.getComposite();
@@ -370,7 +374,9 @@ public class AbstractAreaEffect implements AreaEffect {
     public void setRenderInsideShape(boolean renderInsideShape) {
         boolean oldRenderInsideShape = this.renderInsideShape;
         this.renderInsideShape = renderInsideShape;
-        propertyChangeSupport.firePropertyChange("renderInsideShape", new Boolean(oldRenderInsideShape), new Boolean(renderInsideShape));
+        propertyChangeSupport.firePropertyChange("renderInsideShape",
+                Boolean.valueOf(oldRenderInsideShape),
+                Boolean.valueOf(renderInsideShape));
     }
 
     /**
@@ -420,7 +426,9 @@ public class AbstractAreaEffect implements AreaEffect {
     public void setShouldFillShape(boolean shouldFillShape) {
         boolean oldShouldFillShape = this.shouldFillShape;
         this.shouldFillShape = shouldFillShape;
-        propertyChangeSupport.firePropertyChange("shouldFillShape", new Boolean(oldShouldFillShape), new Boolean(shouldFillShape));
+        propertyChangeSupport.firePropertyChange("shouldFillShape",
+                Boolean.valueOf(oldShouldFillShape),
+                Boolean.valueOf(shouldFillShape));
     }
 
     /**
@@ -445,7 +453,9 @@ public class AbstractAreaEffect implements AreaEffect {
     public void setShapeMasked(boolean shapeMasked) {
         boolean oldShapeMasked = this.shapeMasked;
         this.shapeMasked = shapeMasked;
-        propertyChangeSupport.firePropertyChange("shapeMasked", new Boolean(oldShapeMasked), new Boolean(shapeMasked));
+        propertyChangeSupport.firePropertyChange("shapeMasked",
+                Boolean.valueOf(oldShapeMasked),
+                Boolean.valueOf(shapeMasked));
     }
 
     private float opacity = 1.0f;

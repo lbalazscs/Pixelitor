@@ -28,6 +28,7 @@ import pixelitor.history.History;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 
+import static org.junit.Assert.assertTrue;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
@@ -57,6 +58,7 @@ public class PenToolTest {
         assertThat(Tools.PEN)
                 .isActive()
                 .hasNoPath()
+                .pathActionAreNotEnabled()
                 .modeIs(BUILD);
 
         History.clear();
@@ -236,11 +238,11 @@ public class PenToolTest {
         path.startNewSubpath(10, 20, ic);
         SubPath sp1 = path.getActiveSubpath();
         sp1.addPoint(20, 10);
-        sp1.finish(comp, "test");
+        sp1.finish(comp, "test", false);
         path.startNewSubpath(100, 20, ic);
         SubPath sp2 = path.getActiveSubpath();
         sp2.addPoint(100, 120);
-        sp2.finish(comp, "test");
+        sp2.finish(comp, "test", false);
 
         // there are no edits yet, because this was not created with the build API
         History.assertNumEditsIs(0);
@@ -290,6 +292,10 @@ public class PenToolTest {
     }
 
     private SubPath createSimpleClosedPathInBuildMode() {
+        assertThat(Tools.PEN)
+                .hasNoPath()
+                .pathActionAreNotEnabled();
+
         Tools.PEN.startBuilding(false);
 
         // add first anchor point
@@ -304,8 +310,39 @@ public class PenToolTest {
         // close by clicking on the first point
         click(100, 100);
 
+        assertThat(Tools.PEN)
+                .hasPath()
+                .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
+
         SubPath sp = PenTool.path.getSubPath(0);
+        assertThat(sp)
+                .isClosed()
+                .isFinished()
+                .numAnchorsIs(3);
+
+        // undo everything
+        History.undo("Close Subpath");
+        History.undo("Add Anchor Point");
+        History.undo("Add Anchor Point");
+        History.undo("Subpath Start");
+
+        assertThat(Tools.PEN)
+                .hasNoPath()
+                .pathActionAreNotEnabled();
+
+        // redo everything
+        History.redo("Subpath Start");
+        History.redo("Add Anchor Point");
+        History.redo("Add Anchor Point");
+        History.redo("Close Subpath");
+
+        assertThat(Tools.PEN)
+                .hasPath()
+                .pathActionAreEnabled();
+        assertThat(PenTool.path).numSubPathsIs(1);
+
+        assertTrue(sp == PenTool.path.getSubPath(0));
         assertThat(sp)
                 .isClosed()
                 .isFinished()

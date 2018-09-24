@@ -35,6 +35,7 @@ public class StatusBarProgressTracker extends ThresholdProgressTracker {
 
     public StatusBarProgressTracker(String name, int numComputationUnits) {
         super(numComputationUnits);
+        assert name != null;
 
         this.name = name + ":";
     }
