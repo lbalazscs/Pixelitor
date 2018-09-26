@@ -101,6 +101,10 @@ public class ImageArea {
         return mode;
     }
 
+    public static boolean currentModeIs(Mode m) {
+        return getMode() == m;
+    }
+
     public static void changeUI() {
         if (mode == TABS) {
             changeUI(FRAMES);

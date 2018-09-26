@@ -55,6 +55,7 @@ import static java.util.stream.Collectors.joining;
 import static javax.swing.JOptionPane.CANCEL_OPTION;
 import static javax.swing.JOptionPane.NO_OPTION;
 import static javax.swing.JOptionPane.YES_OPTION;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
 
 /**
  * Static methods for maintaining the list of open ImageComponent objects
@@ -485,5 +486,38 @@ public class ImageComponents {
         for (ImageComponent ic : tmpCopy) {
             warnAndClose(ic);
         }
+    }
+
+    public static void pixelGridEnabled() {
+        if (ImageArea.currentModeIs(FRAMES)) {
+            if (isAnyPixelGridVisibleIfEnabled()) {
+                repaintAll();
+            } else {
+                showPixelGridHelp();
+            }
+        } else { // Tabs: check only the current ic
+            ImageComponent ic = getActiveIC();
+            if (ic.showPixelGridIfEnabled()) {
+                ic.repaint();
+            } else {
+                showPixelGridHelp();
+            }
+        }
+    }
+
+    private static boolean isAnyPixelGridVisibleIfEnabled() {
+        for (ImageComponent ic : icList) {
+            if (ic.showPixelGridIfEnabled()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void showPixelGridHelp() {
+        Messages.showInfo("Pixel Grid",
+                "The pixel grid consists of lines between the pixels,\n" +
+                        "and is shown only if the zoom is at least 1600%\n" +
+                        "and there is no selection.");
     }
 }

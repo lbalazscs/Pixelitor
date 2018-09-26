@@ -144,7 +144,7 @@ public class TextSettings implements Serializable {
         textPainter.paint(g, this, width, height);
         g.dispose();
 
-        dest = ImageUtils.bumpMap(src, bumpImage, null);
+        dest = ImageUtils.bumpMap(src, bumpImage, "Watermarking");
         return dest;
     }
 

@@ -149,7 +149,7 @@ public class AssertJSwingTest {
 
                 if (i < testingModes.length - 1) {
                     // we have another round to go
-                    test.reinitializeTesting();
+                    test.resetState();
                 }
             }
         }
@@ -167,12 +167,23 @@ public class AssertJSwingTest {
         Utils.makeSureAssertionsAreEnabled();
     }
 
-    private void reinitializeTesting() {
+    private void resetState() {
         if (ImageComponents.getNumOpenImages() > 0) {
             closeAll();
         }
         openFileWithDialog("a.jpg");
 
+        resetSelectTool();
+        resetShapesTool();
+    }
+
+    private void resetSelectTool() {
+        pw.toggleButton("Selection Tool Button").click();
+        pw.comboBox("selectionTypeCombo").selectItem("Rectangle");
+        pw.comboBox("selectionInteractionCombo").selectItem("Replace");
+    }
+
+    private void resetShapesTool() {
         pw.toggleButton("Shapes Tool Button").click();
         // make sure that action is set to fill
         // in order to enable the effects button
@@ -729,7 +740,7 @@ public class AssertJSwingTest {
 
         // Test "Images In"
         JComboBoxFixture uiChooser = dialog.comboBox("uiChooser");
-        if (ImageArea.getMode() == FRAMES) {
+        if (ImageArea.currentModeIs(FRAMES)) {
             uiChooser.requireSelection("Internal Windows");
             uiChooser.selectItem("Tabs");
             uiChooser.selectItem("Internal Windows");
@@ -1250,7 +1261,7 @@ public class AssertJSwingTest {
 
         testGuides();
 
-        if (ImageArea.getMode() == FRAMES) {
+        if (ImageArea.currentModeIs(FRAMES)) {
             runMenuCommand("Cascade");
             runMenuCommand("Tile");
         }
@@ -1772,9 +1783,11 @@ public class AssertJSwingTest {
 
         pw.button("toSelectionButton").requireEnabled();
         pw.button("toSelectionButton").click();
+        assertThat(Tools.SELECTION).isActive();
 
         pw.button("toPathButton").requireEnabled();
         pw.button("toPathButton").click();
+        assertThat(Tools.PEN).isActive();
 
         // TODO edit mode, trace path etc.
 
@@ -2389,16 +2402,16 @@ public class AssertJSwingTest {
         moveTo(x, y);
     }
 
-    private int getExtraX() {
+    private static int getExtraX() {
         int extraX = 0;
-        if (ImageArea.getMode() == TABS) {
+        if (ImageArea.currentModeIs(TABS)) {
             extraX = (int) ImageComponents.getActiveIC().getCanvasStartX();
         }
         return extraX;
     }
 
     private int getRandomX() {
-        if (ImageArea.getMode() == FRAMES) {
+        if (ImageArea.currentModeIs(FRAMES)) {
             return 200 + random.nextInt(400);
         } else {
             return 400 + random.nextInt(500);
@@ -2761,7 +2774,7 @@ public class AssertJSwingTest {
         findMenuItemByText(text).click();
     }
 
-    private void clickPopupMenu(JPopupMenuFixture popupMenu, String delete) {
+    private static void clickPopupMenu(JPopupMenuFixture popupMenu, String delete) {
         findPopupMenuFixtureByText(popupMenu, delete).click();
     }
 

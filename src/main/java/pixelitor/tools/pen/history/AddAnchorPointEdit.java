@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.SubPath;
+import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.PathNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -35,6 +37,8 @@ public class AddAnchorPointEdit extends PixelitorEdit {
         super("Add Anchor Point", comp);
         this.subPath = subPath;
         this.anchorPoint = anchorPoint;
+
+        assert !subPath.isFinished();
     }
 
     @Override
@@ -52,8 +56,19 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
         subPath.addPoint(anchorPoint);
 
+        assert !subPath.isFinished();
         subPath.getPath().setBuildingInProgressState("AddAnchorPointEdit.redo");
 
         comp.repaint();
     }
+
+    @Override
+    public DebugNode getDebugNode() {
+        DebugNode node = super.getDebugNode();
+
+        node.add(new PathNode(subPath.getPath()));
+
+        return node;
+    }
+
 }

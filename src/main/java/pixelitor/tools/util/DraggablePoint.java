@@ -219,6 +219,7 @@ public class DraggablePoint extends Point2D.Double {
     public void restoreCoordsFromImSpace(View view) {
         if (this.view != view) {
             // TODO what to do in the rare cases when the view changes?
+            assert view != null;
             this.view = view;
         }
 
@@ -298,6 +299,7 @@ public class DraggablePoint extends Point2D.Double {
 
     // used only after deserializing from a pxc file
     public void setView(View view) {
+        assert view != null;
         this.view = view;
     }
 

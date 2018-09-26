@@ -26,6 +26,7 @@ import pixelitor.utils.CachedFloatRandom;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 
@@ -93,6 +94,12 @@ public class SprayBrush extends AbstractBrush {
     }
 
     private void sprayOnce() {
+        ImageComponent ic = comp.getIC();
+        if (ic == null) {
+            // can happen if the composition was reloaded while spraying
+            return;
+        }
+
         double minX = Double.MAX_VALUE;
         double minY = Double.MAX_VALUE;
         double maxX = Double.MIN_VALUE;
@@ -106,11 +113,14 @@ public class SprayBrush extends AbstractBrush {
             updateTheMaxRadius(dx, dy);
 
             if (randomOpacity) {
+                Composite composite;
+                float strength = rnd.nextFloat();
                 if (isEraser) {
-                    targetG.setComposite(AlphaComposite.DstOut.derive(rnd.nextFloat()));
+                    composite = AlphaComposite.DstOut.derive(strength);
                 } else {
-                    targetG.setComposite(AlphaComposite.SrcOver.derive(rnd.nextFloat()));
+                    composite = AlphaComposite.SrcOver.derive(strength);
                 }
+                targetG.setComposite(composite);
             }
 
             double shapeRadius = nextShapeRadius();
@@ -131,7 +141,6 @@ public class SprayBrush extends AbstractBrush {
                 minY = y;
             }
         }
-        ImageComponent ic = comp.getIC();
         PRectangle area = PRectangle.fromIm(
                 minX - maxShapeRadius,
                 minY - maxShapeRadius,

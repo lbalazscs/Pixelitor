@@ -82,8 +82,6 @@ import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
 import java.awt.AWTException;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -108,6 +106,7 @@ import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * An automatic test using java.awt.Robot, which performs
@@ -121,6 +120,12 @@ public class RandomGUITest {
 
     // set to null to select random tools
     private static final Tool preferredTool = Tools.PEN;
+
+    // set to null to select random filters
+//    private static final Filter preferredFilter = new Magnify();
+//    private static final ParametrizedFilter preferredTweenFilter = (ParametrizedFilter) preferredFilter;
+    private static final Filter preferredFilter = null;
+    private static final ParametrizedFilter preferredTweenFilter = null;
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
@@ -139,13 +144,16 @@ public class RandomGUITest {
 
     private static final boolean verbose = "true".equals(System.getProperty("verbose"));
 
+    private static Rectangle startBounds;
+    private static final boolean isLinux = JVM.isLinux;
+
     /**
      * Utility class with static methods
      */
     private RandomGUITest() {
     }
 
-    public static void runTest() {
+    public static void start() {
         if (Build.CURRENT != Build.DEVELOPMENT) {
             Messages.showError("Error", "Build is not DEVELOPMENT");
             return;
@@ -155,6 +163,7 @@ public class RandomGUITest {
             return;
         }
         running = true;
+        startBounds = getWindowBounds();
 
         PixelitorWindow.getInstance().setAlwaysOnTop(true);
 
@@ -185,7 +194,7 @@ public class RandomGUITest {
             }
         }));
 
-        System.out.printf("RandomGUITest.runTest CALLED at %s, the '%s' key stops, the '%s' key exits.%n",
+        System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
                 DATE_FORMAT.get().format(new Date()),
                 stopKeyStroke.getKeyChar(), exitKeyStroke.getKeyChar());
 
@@ -241,9 +250,7 @@ public class RandomGUITest {
                     }
 
                     if (!GUIUtils.appHasFocus()) {
-                        if (JVM.isWindows) { // might be some "upgrade to windows 10" window
-                            tryToActivateWindow(3);
-                        }
+                        tryToRegainWindowFocus(3);
 
                         if (!GUIUtils.appHasFocus()) {
                             System.out.println("\nRandomGUITest app focus lost.");
@@ -283,7 +290,7 @@ public class RandomGUITest {
         };
     }
 
-    private static void tryToActivateWindow(int attempts) {
+    private static void tryToRegainWindowFocus(int attempts) {
         if (attempts <= 0) {
             return;
         }
@@ -299,24 +306,54 @@ public class RandomGUITest {
             return;
         } else {
             Utils.sleep(1, TimeUnit.SECONDS);
-            tryToActivateWindow(attempts - 1);
+            tryToRegainWindowFocus(attempts - 1);
         }
     }
 
+    private static Rectangle getWindowBounds() {
+        return PixelitorWindow.getInstance().getBounds();
+//        Container contentPane = PixelitorWindow.getInstance().getContentPane();
+//        return contentPane.getBounds();
+    }
+
+    // generates a random point within the main window relative to the screen
     private static Point generateRandomPoint() {
-        Container contentPane = PixelitorWindow.getInstance().getContentPane();
-        Dimension winDim = contentPane.getSize();
-        Point locationOnScreen = contentPane.getLocationOnScreen();
+        Rectangle windowBounds = getWindowBounds();
+        if (!windowBounds.equals(startBounds)) {
+            // Window moved. Shouldn't happen, but as a workaround
+            // restore it to the starting state
+            System.out.println("restoring the original window size " + startBounds);
+            PixelitorWindow.getInstance().setBounds(startBounds);
 
-        int safetyGapX = 5;
-        int safetyGapY = 5;
+//            stop();
+//            throw new IllegalStateException("windowBounds = " + windowBounds
+//                    + ", startBounds = " + startBounds);
+        }
 
-        int minX = locationOnScreen.x + safetyGapX;
-        int minY = locationOnScreen.y + safetyGapY;
-        int maxX = locationOnScreen.x + winDim.width - 2 * minX;
-        int maxY = locationOnScreen.y + winDim.height - 2 * minY;
+        int safetyGapLeft = 10;
+        int safetyGapRight = 10;
+        int safetyGapTop = 130;
+        int safetyGapBottom = 10;
 
-        Point randomPoint = new Point(minX + rand.nextInt(maxX), minY + rand.nextInt(maxY));
+        int minX = windowBounds.x + safetyGapLeft;
+        int minY = windowBounds.y + safetyGapTop;
+        int maxX = windowBounds.x + windowBounds.width - safetyGapRight;
+        int maxY = windowBounds.y + windowBounds.height - safetyGapBottom;
+
+        if (maxX <= 0 || maxY <= 0) {
+            // probably the mouse was moved, and the window is too small
+            System.out.printf("RandomGUITest::generateRandomPoint: " +
+                            "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
+                            "windowBounds = %s%n",
+                    minX, minY, maxX, maxY,
+                    windowBounds.toString());
+            stop();
+            throw new IllegalStateException("small window");
+        }
+
+        Point randomPoint = new Point(
+                RandomUtils.intInRange(minX, maxX),
+                RandomUtils.intInRange(minY, maxY));
         return randomPoint;
     }
 
@@ -369,20 +406,21 @@ public class RandomGUITest {
         if (rightMouse) {
             modifiers = Ansi.yellow("right-") + modifiers;
         }
-        boolean shiftClick = rand.nextBoolean();
-        if (shiftClick) {
+        boolean shiftDown = rand.nextBoolean();
+        if (shiftDown) {
             r.keyPress(VK_SHIFT);
             r.delay(50);
             modifiers = Ansi.blue("shift-") + modifiers;
         }
-        boolean altClick = rand.nextBoolean();
-        if (altClick) {
+        // don't generate Alt-movements on Linux, because it can drag the window
+        boolean altDown = isLinux ? false : rand.nextBoolean();
+        if (altDown) {
             r.keyPress(VK_ALT);
             r.delay(50);
             modifiers = Ansi.green("alt-") + modifiers;
         }
-        boolean ctrlClick = rand.nextBoolean();
-        if (ctrlClick) {
+        boolean ctrlDown = rand.nextBoolean();
+        if (ctrlDown) {
             r.keyPress(VK_CONTROL);
             r.delay(50);
             modifiers = Ansi.red("ctrl-") + modifiers;
@@ -406,15 +444,15 @@ public class RandomGUITest {
             r.mouseRelease(BUTTON1_MASK);
         }
         r.delay(50);
-        if (ctrlClick) {
+        if (ctrlDown) {
             r.keyRelease(VK_CONTROL);
             r.delay(50);
         }
-        if (altClick) {
+        if (altDown) {
             r.keyRelease(VK_ALT);
             r.delay(50);
         }
-        if (shiftClick) {
+        if (shiftDown) {
             r.keyRelease(VK_SHIFT);
             r.delay(50);
         }
@@ -432,9 +470,14 @@ public class RandomGUITest {
             return;
         }
 
-        Filter f = FilterUtils.getRandomFilter(filter ->
-                (!(filter instanceof Fade)) &&
-                        (!(filter instanceof RandomFilter)));
+        Filter f;
+        if (preferredFilter == null) {
+            f = FilterUtils.getRandomFilter(filter ->
+                    (!(filter instanceof Fade)) &&
+                            (!(filter instanceof RandomFilter)));
+        } else {
+            f = preferredFilter;
+        }
 
         String filterName = f.getName();
         log("filter: " + filterName);
@@ -455,11 +498,13 @@ public class RandomGUITest {
                 if (f instanceof ParametrizedFilter) {
                     ParamSet paramSet = ((ParametrizedFilter) f).getParamSet();
                     System.out.println(format(
-                            "RandomGUITest::randomFilter: name = %s, width = %d, height = %d, params = %s",
+                            "RandomGUITest::randomFilter: filterName = %s, " +
+                                    "src.width = %d, src.height = %d, params = %s",
                             filterName, src.getWidth(), src.getHeight(), paramSet.toString()));
                 } else {
                     System.out.println(format(
-                            "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
+                            "RandomGUITest::randomFilter: filterName = %s, " +
+                                    "src.width = %d, src.height = %d",
                             filterName, src.getWidth(), src.getHeight()));
                 }
                 throw e;
@@ -579,7 +624,7 @@ public class RandomGUITest {
             VK_Z,
             VK_X,
             VK_Y,
-            VK_ALT, VK_TAB,
+            VK_TAB,
             VK_COMMA, VK_HOME,
             VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN
     };
@@ -719,7 +764,7 @@ public class RandomGUITest {
     }
 
     private static void arrangeWindows() {
-        if (ImageArea.getMode() == ImageArea.Mode.TABS) {
+        if (ImageArea.currentModeIs(TABS)) {
             return;
         }
         double r = Math.random();
@@ -1076,6 +1121,11 @@ public class RandomGUITest {
     }
 
     private static ParametrizedFilter getRandomTweenFilter() {
+        if (preferredTweenFilter != null) {
+            assert !preferredTweenFilter.excludedFromAnimation();
+            assert preferredTweenFilter.getParamSet().canBeAnimated();
+            return preferredTweenFilter;
+        }
         FilterAction[] filterActions = FilterUtils.getAnimationFilters();
         FilterAction filterAction = RandomUtils.chooseFrom(filterActions);
         return (ParametrizedFilter) filterAction.getFilter();

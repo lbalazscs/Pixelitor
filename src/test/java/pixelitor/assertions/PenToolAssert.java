@@ -73,4 +73,24 @@ public class PenToolAssert extends ToolAssert<PenToolAssert, PenTool> {
 
         return this;
     }
+
+    public PenToolAssert pathActionAreEnabled() {
+        isNotNull();
+
+        if (!actual.arePathActionsEnabled()) {
+            throw new AssertionError("not enabled");
+        }
+
+        return this;
+    }
+
+    public PenToolAssert pathActionAreNotEnabled() {
+        isNotNull();
+
+        if (actual.arePathActionsEnabled()) {
+            throw new AssertionError("enabled");
+        }
+
+        return this;
+    }
 }

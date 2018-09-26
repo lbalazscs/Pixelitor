@@ -58,6 +58,7 @@ public class PenTool extends Tool {
 
     private final AbstractAction toSelectionAction;
     private final AbstractAction traceAction;
+    private final AbstractAction dumpPathAction;
 
     private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
     private final JCheckBox rubberBandCB = new JCheckBox("", true);
@@ -86,6 +87,13 @@ public class PenTool extends Tool {
                 TracePathPanel.showInDialog(path);
             }
         };
+        dumpPathAction = new AbstractAction("Dump") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                assert path != null;
+                path.dump();
+            }
+        };
         enableActionsBasedOnFinishedPath(false);
     }
 
@@ -109,9 +117,7 @@ public class PenTool extends Tool {
 //                "Trace the path with a stroke or with a tool");
 
         if (Build.CURRENT.isDevelopment()) {
-            JButton dumpButton = new JButton("dump");
-            dumpButton.addActionListener(e -> path.dump());
-            settingsPanel.add(dumpButton);
+            settingsPanel.addButton(dumpPathAction);
         }
     }
 
@@ -367,6 +373,7 @@ public class PenTool extends Tool {
     public void removePath() {
         PenTool.path = null;
         ImageComponents.setActivePath(null);
+        enableActionsBasedOnFinishedPath(false);
         if (mode == EDIT) {
             startBuilding(false);
         }
@@ -380,9 +387,16 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
+    // TODO enable them while building, as soon as the path != null
     public void enableActionsBasedOnFinishedPath(boolean b) {
         toSelectionAction.setEnabled(b);
         traceAction.setEnabled(b);
+        dumpPathAction.setEnabled(b);
+    }
+
+    @VisibleForTesting
+    public boolean arePathActionsEnabled() {
+        return toSelectionAction.isEnabled();
     }
 
     public boolean showRubberBand() {

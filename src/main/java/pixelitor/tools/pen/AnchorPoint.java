@@ -29,6 +29,7 @@ import pixelitor.utils.debug.Ansi;
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Line2D;
 
@@ -269,7 +270,14 @@ public class AnchorPoint extends DraggablePoint {
             }
         });
 
-        p.show((JComponent) view, x, y);
+        try {
+            p.show((JComponent) view, x, y);
+        } catch (IllegalComponentStateException e) {
+            // ignore: happens in RandomGUITest, but works OK otherwise
+            // ("component must be showing on the screen to determine its location")
+            // probably related to the always-on-top state of RandomGUITest,
+            // see https://bugs.openjdk.java.net/browse/JDK-8179665
+        }
     }
 
     public void retractHandles() {
