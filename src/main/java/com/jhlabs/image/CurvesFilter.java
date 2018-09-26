@@ -22,10 +22,11 @@ public class CurvesFilter extends TransferFilter {
 
     public CurvesFilter(String filterName) {
         super(filterName);
-        curves = new Curve[3];
+        curves = new Curve[4];
         curves[0] = new Curve();
         curves[1] = new Curve();
         curves[2] = new Curve();
+        curves[3] = new Curve();
     }
     
     protected void initialize() {
@@ -33,9 +34,20 @@ public class CurvesFilter extends TransferFilter {
         if ( curves.length == 1 )
             rTable = gTable = bTable = curves[0].makeTable();
         else {
-            rTable = curves[0].makeTable();
-            gTable = curves[1].makeTable();
-            bTable = curves[2].makeTable();
+            rTable = new int[256];
+            gTable = new int[256];
+            bTable = new int[256];
+
+            int[] r = curves[0].makeTable();
+            int[] g = curves[1].makeTable();
+            int[] b = curves[2].makeTable();
+            int[] rgb = curves[3].makeTable();
+
+            for (int x = 0; x <= 255; x++) {
+                rTable[x] = ImageMath.clamp(r[rgb[x]], 0, 255);
+                gTable[x] = ImageMath.clamp(g[rgb[x]], 0, 255);
+                bTable[x] = ImageMath.clamp(b[rgb[x]], 0, 255);
+            }
         }
     }
 
@@ -43,14 +55,15 @@ public class CurvesFilter extends TransferFilter {
         curves = new Curve[] { curve };
         initialized = false;
     }
-    
-    public void setCurves( Curve[] curves ) {
-        if ( curves == null || (curves.length != 1 && curves.length != 3) )
-            throw new IllegalArgumentException( "Curves must be length 1 or 3" );
-        this.curves = curves;
+
+    public void setCurves(Curve rgb, Curve r, Curve g, Curve b) {
         initialized = false;
+        curves[0] = r;
+        curves[1] = g;
+        curves[2] = b;
+        curves[3] = rgb;
     }
-    
+
     public Curve[] getCurves() {
         return curves;
     }
