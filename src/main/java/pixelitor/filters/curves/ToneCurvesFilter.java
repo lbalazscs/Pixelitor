@@ -37,16 +37,12 @@ public class ToneCurvesFilter extends FilterWithGUI {
             return src;
         }
 
-        if (this.curves.getActiveCurve().curveType == ToneCurveType.RGB) {
-            Curve curve = this.curves.getActiveCurve().curve;
-            filter.setCurve(curve);
-        } else {
-            Curve[] curves = new Curve[3];
-            curves[0] = this.curves.getCurve(ToneCurveType.RED).curve;
-            curves[1] = this.curves.getCurve(ToneCurveType.GREEN).curve;
-            curves[2] = this.curves.getCurve(ToneCurveType.BLUE).curve;
-            filter.setCurves(curves);
-        }
+        filter.setCurves(
+            this.curves.getCurve(ToneCurveType.RGB).curve,
+            this.curves.getCurve(ToneCurveType.RED).curve,
+            this.curves.getCurve(ToneCurveType.GREEN).curve,
+            this.curves.getCurve(ToneCurveType.BLUE).curve
+        );
 
         dest = filter.filter(src, dest);
         return dest;
