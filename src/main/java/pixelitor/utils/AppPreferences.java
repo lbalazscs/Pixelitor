@@ -22,6 +22,7 @@ import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.layers.LayerButtonLayout;
@@ -35,9 +36,7 @@ import pixelitor.menus.view.ShowHideToolsAction;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GraphicsEnvironment;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Window;
 import java.io.File;
 import java.util.prefs.Preferences;
@@ -129,8 +128,7 @@ public final class AppPreferences {
         int width = mainNode.getInt(FRAME_WIDTH_KEY, 0);
         int height = mainNode.getInt(FRAME_HEIGHT_KEY, 0);
 
-        Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getMaximumWindowBounds();
+        Dimension screen = GUIUtils.getMaxWindowSize();
 
         if ((width <= 0) || (height <= 0)) {
             width = screen.width;

@@ -34,6 +34,7 @@ import java.awt.FlowLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -58,8 +59,7 @@ public final class GUIUtils {
     }
 
     public static void centerOnScreen(Component component) {
-        Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                .getMaximumWindowBounds();
+        Dimension screen = getMaxWindowSize();
         Dimension window = component.getSize();
 
         if (window.height > screen.height) {
@@ -76,6 +76,23 @@ public final class GUIUtils {
 
         // if it was bigger than the screen, restrict it to screen size
         component.setSize(window);
+    }
+
+    public static Dimension getMaxWindowSize() {
+        Rectangle bounds;
+        try {
+            // use this because it takes into account areas
+            // like the taskbar, but it can throw
+            // a "Window must not be zero" if there are 3 monitors
+            // on Linux with some newer Java versions, see
+            // https://github.com/lbalazscs/Pixelitor/issues/15
+            bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    .getMaximumWindowBounds();
+        } catch (Exception e) {
+            return Toolkit.getDefaultToolkit().getScreenSize();
+        }
+
+        return new Dimension(bounds.width, bounds.height);
     }
 
     /**
