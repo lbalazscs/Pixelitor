@@ -70,6 +70,13 @@ public class PenTool extends Tool {
 
     private boolean rubberBand = true;
 
+    private static final Action traceWithBrush = new TraceAction(
+            "Stroke with Current Brush", Tools.BRUSH);
+    private static final Action traceWithEraser = new TraceAction(
+            "Stroke with Current Eraser", Tools.ERASER);
+    private static final Action traceWithSmudge = new TraceAction(
+            "Stroke with Current Smudge", Tools.SMUDGE);
+
     public PenTool() {
         super("Pen", 'p', "pen_tool_icon.png",
                 "", // getStatusBarMessage() is overridden
@@ -90,7 +97,7 @@ public class PenTool extends Tool {
         dumpPathAction = new AbstractAction("Dump") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                assert path != null;
+                assert hasPath();
                 path.dump();
             }
         };
@@ -116,6 +123,10 @@ public class PenTool extends Tool {
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
 
+        settingsPanel.addButton(traceWithBrush);
+        settingsPanel.addButton(traceWithEraser);
+        settingsPanel.addButton(traceWithSmudge);
+        
         if (Build.CURRENT.isDevelopment()) {
             settingsPanel.addButton(dumpPathAction);
         }
@@ -147,7 +158,7 @@ public class PenTool extends Tool {
             ignoreModeChooser = false;
         }
         changeMode(BUILD, path);
-        enableActionsBasedOnFinishedPath(path != null);
+        enableActionsBasedOnFinishedPath(hasPath());
         ImageComponents.repaintActive();
 
         assert checkPathConsistency();
@@ -273,7 +284,7 @@ public class PenTool extends Tool {
 
     @Override
     public void coCoordsChanged(ImageComponent ic) {
-        if (path != null) {
+        if (hasPath()) {
             path.coCoordsChanged(ic);
         }
     }
@@ -317,17 +328,20 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
-    private static boolean checkPathConsistency() {
+    public static boolean checkPathConsistency() {
         assert path == ImageComponents.getActivePathOrNull()
                 : "tool path = " + path + ", active path = " + ImageComponents.getActivePathOrNull();
         Composition activeComp = ImageComponents.getActiveCompOrNull();
         if (activeComp == null) {
             return true;
         }
-        if (path != null && path.getComp() != activeComp) {
+        if (hasPath() && path.getComp() != activeComp) {
             throw new IllegalStateException("foreign path " + path
                     + ", path comp = " + path.getComp().toPathDebugString()
                     + ", active comp = " + activeComp.toPathDebugString());
+        }
+        if (hasPath()) {
+            path.checkConsistency();
         }
         return true;
     }
@@ -401,6 +415,22 @@ public class PenTool extends Tool {
 
     public boolean showRubberBand() {
         return rubberBand && mode == BUILD;
+    }
+
+    public static boolean hasPath() {
+        return path != null;
+    }
+
+    public static Action getTraceWithBrush() {
+        return traceWithBrush;
+    }
+
+    public static Action getTraceWithEraser() {
+        return traceWithEraser;
+    }
+
+    public static Action getTraceWithSmudge() {
+        return traceWithSmudge;
     }
 
     @Override

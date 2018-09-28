@@ -55,7 +55,7 @@ public class Shapes {
      * in image coordinates, to a {@link Path}
      */
     public static Path shapeToPath(Shape shape, ImageComponent ic) {
-        Path path = new Path(ic.getComp());
+        Path path = new Path(ic.getComp(), true);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];

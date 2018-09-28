@@ -73,6 +73,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
+import pixelitor.tools.pen.PenTool;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
@@ -807,16 +808,23 @@ public class RandomGUITest {
     }
 
     private static void traceWithCurrentBrush() {
-        if (SelectionActions.areEnabled()) {
+        if (Tools.PEN.hasPath()) {
             log("trace with current brush");
-            executeAction(SelectionActions.getTraceWithBrush());
+            executeAction(PenTool.getTraceWithBrush());
         }
     }
 
     private static void traceWithCurrentEraser() {
         if (SelectionActions.areEnabled()) {
             log("trace with current eraser");
-            executeAction(SelectionActions.getTraceWithEraser());
+            executeAction(PenTool.getTraceWithEraser());
+        }
+    }
+
+    private static void traceWithCurrentSmudge() {
+        if (SelectionActions.areEnabled()) {
+            log("trace with current smudge");
+            executeAction(PenTool.getTraceWithSmudge());
         }
     }
 
@@ -1218,6 +1226,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::invertSelection);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentBrush);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
+        weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentSmudge);
         weightedCaller.registerCallback(1, RandomGUITest::randomRotateFlip);
         weightedCaller.registerCallback(5, RandomGUITest::activateRandomIC);
         weightedCaller.registerCallback(1, RandomGUITest::layerOrderChange);

@@ -52,7 +52,7 @@ public interface PenToolMode {
     }
 
     default void modeEnded() {
-        if (path != null) {
+        if (PenTool.hasPath()) {
             Composition comp = ImageComponents.getActiveCompOrNull();
             if (comp != null) {
                 comp.repaint();
@@ -63,7 +63,7 @@ public interface PenToolMode {
     default DebugNode createDebugNode() {
         DebugNode node = new DebugNode("PenToolMode " + toString(), this);
 
-        if (path != null) {
+        if (PenTool.hasPath()) {
             node.add(new PathNode(path));
         } else {
             node.addBoolean("Has Path", false);

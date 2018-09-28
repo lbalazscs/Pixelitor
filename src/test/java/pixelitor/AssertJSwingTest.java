@@ -322,6 +322,7 @@ public class AssertJSwingTest {
             // TODO investigate - maybe just a vmware problem
             testSelectionToolAndMenus();
         }
+        testPenTool();
 
         testMoveTool();
         testCropTool();
@@ -332,7 +333,6 @@ public class AssertJSwingTest {
         testGradientTool();
         testPaintBucketTool();
         testColorPickerTool();
-        testPenTool();
         testShapesTool();
         testReload(); // file menu, but more practical to test it here
         testHandTool();
@@ -1787,7 +1787,17 @@ public class AssertJSwingTest {
 
         pw.button("toPathButton").requireEnabled();
         pw.button("toPathButton").click();
-        assertThat(Tools.PEN).isActive();
+        assertThat(Tools.PEN)
+                .isActive()
+                .hasPath()
+                .isConsistent();
+
+        findButtonByText(pw, "Stroke with Current Smudge").click();
+        keyboardUndoRedo();
+        findButtonByText(pw, "Stroke with Current Eraser").click();
+        keyboardUndoRedo();
+        findButtonByText(pw, "Stroke with Current Brush").click();
+        keyboardUndoRedo();
 
         // TODO edit mode, trace path etc.
 
@@ -1993,16 +2003,11 @@ public class AssertJSwingTest {
         // only the nudge was undone
         assert thereIsSelection();
 
-        //pw.button("brushTraceButton").click();
-        findButtonByText(pw, "Stroke with Current Brush").click();
-
         keyboardDeselect();
         assert thereIsNoSelection();
 
         keyboardUndo(); // undo deselection
         assert thereIsSelection();
-
-        keyboardUndo(); // undo tracing
 
         assert thereIsSelection();
     }
@@ -2046,9 +2051,6 @@ public class AssertJSwingTest {
         int selWidth = selectionBounds.width;
         int selHeight = selectionBounds.height;
 
-        //pw.button("eraserTraceButton").click();
-        findButtonByText(pw, "Stroke with Current Eraser").click();
-
         // crop using the "Crop" button in the selection tool
         assert thereIsSelection();
         findButtonByText(pw, "Crop").click();
@@ -2070,8 +2072,6 @@ public class AssertJSwingTest {
         assert thereIsSelection();
 
         runMenuCommand("Invert Selection");
-        runMenuCommand("Stroke with Current Brush");
-        runMenuCommand("Stroke with Current Eraser");
         assert thereIsSelection();
 
         runMenuCommand("Deselect");

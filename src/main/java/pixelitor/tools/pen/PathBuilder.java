@@ -33,6 +33,7 @@ import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
 import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
@@ -62,7 +63,7 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void mousePressed(PMouseEvent e) {
         if (path == null) {
-            path = new Path(e.getComp());
+            path = new Path(e.getComp(), true);
             path.setPreferredPenToolMode(this);
         }
 
@@ -343,7 +344,7 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void paint(Graphics2D g) {
-        if (path != null) {
+        if (hasPath()) {
             path.paintForBuilding(g);
         }
     }
@@ -360,7 +361,7 @@ public class PathBuilder implements PenToolMode {
 
     @Override
     public void modeEnded() {
-        if (path != null && !path.getActiveSubpath().isFinished()) {
+        if (hasPath() && !path.getActiveSubpath().isFinished()) {
             path.finishActiveSubpath("PB.modeEnded");
         } else {
             assertStateIs(NO_INTERACTION);

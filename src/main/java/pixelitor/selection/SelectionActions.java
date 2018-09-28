@@ -25,15 +25,12 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.history.History;
-import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
-import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
-import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -73,13 +70,6 @@ public final class SelectionActions {
     };
 
     private static final ShowHideAction showHide = new ShowHideSelectionAction();
-
-    private static final Action traceWithBrush = new TraceAction(
-            "Stroke with Current Brush", Tools.BRUSH);
-    private static final Action traceWithEraser = new TraceAction(
-            "Stroke with Current Eraser", Tools.ERASER);
-    private static final Action traceWithSmudge = new TraceAction(
-            "Stroke with Current Smudge", Tools.SMUDGE);
 
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
@@ -170,9 +160,6 @@ public final class SelectionActions {
         }
 
         crop.setEnabled(b);
-        traceWithBrush.setEnabled(b);
-        traceWithEraser.setEnabled(b);
-        traceWithSmudge.setEnabled(b);
         deselect.setEnabled(b);
         invert.setEnabled(b);
         showHide.setEnabled(b);
@@ -186,18 +173,6 @@ public final class SelectionActions {
 
     public static Action getCrop() {
         return crop;
-    }
-
-    public static Action getTraceWithBrush() {
-        return traceWithBrush;
-    }
-
-    public static Action getTraceWithEraser() {
-        return traceWithEraser;
-    }
-
-    public static Action getTraceWithSmudge() {
-        return traceWithSmudge;
     }
 
     public static Action getDeselect() {
@@ -220,35 +195,4 @@ public final class SelectionActions {
         return modify;
     }
 
-    /**
-     * Strokes a selection with an {@link AbstractBrushTool}
-     */
-    private static class TraceAction extends MenuAction {
-        private final AbstractBrushTool brushTool;
-
-        private TraceAction(String name, AbstractBrushTool brushTool) {
-            super(name);
-            this.brushTool = brushTool;
-        }
-
-        @Override
-        public void onClick() {
-            ImageComponents.onActiveComp(this::trace);
-        }
-
-        private void trace(Composition comp) {
-            if (!comp.activeIsDrawable()) {
-                Messages.showNotDrawableError();
-                return;
-            }
-
-            if (comp.hasSelection()) {
-                Shape shape = comp.getSelectionShape();
-                if (shape != null) {
-                    Drawable dr = comp.getActiveDrawableOrThrow();
-                    brushTool.trace(dr, shape);
-                }
-            }
-        }
-    }
 }

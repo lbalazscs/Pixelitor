@@ -71,6 +71,7 @@ public class PathBuilderTest {
 
         assertThat(Tools.PEN)
                 .isActive()
+                .isConsistent()
                 .hasNoPath()
                 .modeIs(BUILD);
     }
@@ -120,7 +121,9 @@ public class PathBuilderTest {
 
         // dragging state because the mouse is down
         redo("Subpath Start", DRAGGING_THE_CONTROL_OF_LAST);
-        assertThat(Tools.PEN).pathIs(path);
+        assertThat(Tools.PEN)
+                .pathIs(path)
+                .isConsistent();
 
         undo("Subpath Start", null);
         assertThat(Tools.PEN).hasNoPath();
@@ -130,7 +133,9 @@ public class PathBuilderTest {
 
         // moving state because the mouse is up
         redo("Subpath Start", MOVING_TO_NEXT_ANCHOR);
-        assertThat(Tools.PEN).pathIs(path);
+        assertThat(Tools.PEN)
+                .pathIs(path)
+                .isConsistent();
     }
 
     @Test
@@ -148,7 +153,9 @@ public class PathBuilderTest {
 
         // moving state because the mouse is up
         redo("Subpath Start", MOVING_TO_NEXT_ANCHOR);
-        assertThat(Tools.PEN).pathIs(path);
+        assertThat(Tools.PEN)
+                .pathIs(path)
+                .isConsistent();
 
         undo("Subpath Start", null);
         assertThat(Tools.PEN).hasNoPath();
@@ -821,17 +828,15 @@ public class PathBuilderTest {
     private void undo(String edit, BuildState state) {
         History.undo(edit);
         checkState(state);
-        if (PenTool.path != null) {
-            PenTool.path.checkConsistency();
-        }
+
+        assert PenTool.checkPathConsistency();
     }
 
     private void redo(String edit, BuildState state) {
         History.redo(edit);
         checkState(state);
-        if (PenTool.path != null) {
-            PenTool.path.checkConsistency();
-        }
+
+        assert PenTool.checkPathConsistency();
     }
 
     private void press(int x, int y, BuildState state) {

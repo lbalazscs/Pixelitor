@@ -64,15 +64,17 @@ public class Path implements Serializable {
     private BuildState prevBuildState;
     private transient PenToolMode preferredPenToolMode;
 
-    public Path(Composition comp) {
+    public Path(Composition comp, boolean setAsActive) {
         this.comp = comp;
-        comp.setActivePath(this);
+        if (setAsActive) {
+            comp.setActivePath(this);
+        }
         id = "P" + (debugCounter++);
         buildState = BuildState.NO_INTERACTION;
     }
 
     public Path copyForUndo() {
-        Path copy = new Path(comp);
+        Path copy = new Path(comp, false);
         for (SubPath sp : subPaths) {
             copy.subPaths.add(sp.copyForUndo(copy));
         }
@@ -280,6 +282,8 @@ public class Path implements Serializable {
     }
 
     public void delete(SubPath subPath) {
+        assert comp.getActivePath() == this;
+
         Path backup = copyForUndo();
         subPaths.removeIf(sp -> sp == subPath);
         assert subPaths.size() >= 1; // should never be called for the last subpath
@@ -288,9 +292,13 @@ public class Path implements Serializable {
 
         PathEdit edit = new PathEdit("Delete Subpath", comp, backup, this);
         History.addEdit(edit);
+
+        assert comp.getActivePath() == this;
     }
 
     public void delete() {
+        assert comp.getActivePath() == this;
+
         comp.setActivePath(null);
 
         assert Tools.PEN.isActive();

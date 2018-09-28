@@ -42,7 +42,7 @@ public class PenToolAssert extends ToolAssert<PenToolAssert, PenTool> {
     public PenToolAssert hasNoPath() {
         isNotNull();
 
-        if (PenTool.path != null) {
+        if (PenTool.hasPath()) {
             throw new AssertionError("has path");
         }
 
@@ -90,6 +90,14 @@ public class PenToolAssert extends ToolAssert<PenToolAssert, PenTool> {
         if (actual.arePathActionsEnabled()) {
             throw new AssertionError("enabled");
         }
+
+        return this;
+    }
+
+    public PenToolAssert isConsistent() {
+        isNotNull();
+
+        assert PenTool.checkPathConsistency();
 
         return this;
     }

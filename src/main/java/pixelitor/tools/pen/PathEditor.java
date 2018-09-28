@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
+import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
@@ -48,7 +49,7 @@ public class PathEditor implements PenToolMode {
 
     @Override
     public void paint(Graphics2D g) {
-        if (path != null) {
+        if (hasPath()) {
             path.paintForEditing(g);
         }
     }

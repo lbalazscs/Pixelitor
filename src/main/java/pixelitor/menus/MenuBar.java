@@ -581,13 +581,6 @@ public class MenuBar extends JMenuBar {
                 .enableIf(ACTION_ENABLED)
                 .add();
 
-        selectMenu.addSeparator();
-
-        selectMenu.buildAction(SelectionActions.getTraceWithBrush())
-                .enableIf(ACTION_ENABLED).add();
-        selectMenu.buildAction(SelectionActions.getTraceWithEraser())
-                .enableIf(ACTION_ENABLED).add();
-
         return selectMenu;
     }
 

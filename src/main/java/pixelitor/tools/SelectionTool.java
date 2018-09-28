@@ -90,10 +90,6 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addSeparator();
 
-        settingsPanel.addButton(SelectionActions.getTraceWithBrush());
-        settingsPanel.addButton(SelectionActions.getTraceWithEraser());
-        settingsPanel.addButton(SelectionActions.getTraceWithSmudge());
-        
         settingsPanel.addButton(SelectionActions.getCrop());
 
         settingsPanel.addButton(SelectionActions.getConvertToPath(),
