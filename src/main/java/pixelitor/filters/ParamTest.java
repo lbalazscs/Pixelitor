@@ -57,7 +57,7 @@ public class ParamTest extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if ((Build.CURRENT.isDevelopment()) && (!RandomGUITest.isRunning())) {
+        if ((Build.isDevelopment()) && (!RandomGUITest.isRunning())) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 

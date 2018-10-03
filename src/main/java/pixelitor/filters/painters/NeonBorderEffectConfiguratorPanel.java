@@ -21,10 +21,9 @@ import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.ColorUtils;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 
 import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * A GUI for configuring the "neon border" effect
@@ -43,14 +42,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         this.defaultInnerColor = innerColor;
         innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
-        innerColorSwatch.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!e.isPopupTrigger()) {
-                    innerColorSwatchClicked();
-                }
-            }
-        });
+        GUIUtils.addColorDialogListener(innerColorSwatch, this::innerColorSwatchClicked);
 
         ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
                 this::getInnerColor, c -> setNewInnerColor(c, true));

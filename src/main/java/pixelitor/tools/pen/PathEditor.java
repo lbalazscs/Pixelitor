@@ -62,29 +62,44 @@ public class PathEditor implements PenToolMode {
         boolean altDown = e.isAltDown();
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
-            if (altDown) {
-                if (hit instanceof ControlPoint) {
-                    ControlPoint cp = (ControlPoint) hit;
-                    if (cp.isRetracted()) {
-                        cp.getAnchor().setType(SYMMETRIC);
-                    } else {
-                        cp.getAnchor().setType(CUSP);
-                    }
-                    cp.setActive(true);
-                    cp.mousePressed(x, y);
-                } else if (hit instanceof AnchorPoint) {
-                    AnchorPoint ap = (AnchorPoint) hit;
-                    ap.retractHandles();
-                    ap.setType(SYMMETRIC);
-                    ap.ctrlOut.setActive(true);
-                    ap.ctrlOut.mousePressed(x, y);
-                }
+            if (e.isPopupTrigger() && hit instanceof AnchorPoint) {
+                AnchorPoint ap = (AnchorPoint) activePoint;
+                ap.showPopup((int) x, (int) y);
+            } else if (altDown) {
+                altMousePressedHit(hit, x, y);
             } else {
                 // Alt is not down, normal editing
                 hit.setActive(true);
                 hit.mousePressed(x, y);
             }
         }
+    }
+
+    private static void altMousePressedHit(DraggablePoint hit, double x, double y) {
+        if (hit instanceof ControlPoint) {
+            ControlPoint cp = (ControlPoint) hit;
+            altMousePressedHitControl(cp, x, y);
+        } else if (hit instanceof AnchorPoint) {
+            AnchorPoint ap = (AnchorPoint) hit;
+            altMousePressedHitAnchor(ap, x, y);
+        }
+    }
+
+    private static void altMousePressedHitControl(ControlPoint cp, double x, double y) {
+        if (cp.isRetracted()) {
+            cp.getAnchor().setType(SYMMETRIC);
+        } else {
+            cp.getAnchor().setType(CUSP);
+        }
+        cp.setActive(true);
+        cp.mousePressed(x, y);
+    }
+
+    private static void altMousePressedHitAnchor(AnchorPoint ap, double x, double y) {
+        ap.retractHandles();
+        ap.setType(SYMMETRIC);
+        ap.ctrlOut.setActive(true);
+        ap.ctrlOut.mousePressed(x, y);
     }
 
     @Override

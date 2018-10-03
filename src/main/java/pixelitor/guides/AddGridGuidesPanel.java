@@ -26,14 +26,14 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 class AddGridGuidesPanel extends JPanel {
-    private final GroupedRangeParam divisions = new GroupedRangeParam(
-            "Divisions", 1, 4, 50, false);
+    private final GroupedRangeParam guidesParam = new GroupedRangeParam(
+            "Guides", 0, 3, 50, false);
     private final Guides.Builder builder;
 
     public AddGridGuidesPanel(Guides.Builder builder) {
         this.builder = builder;
         setLayout(new BorderLayout());
-        add(divisions.createGUI(), BorderLayout.CENTER);
+        add(guidesParam.createGUI(), BorderLayout.CENTER);
 
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         BooleanParam clearExisting = builder.getClearExisting();
@@ -42,7 +42,7 @@ class AddGridGuidesPanel extends JPanel {
         add(southPanel, BorderLayout.SOUTH);
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
-        divisions.setAdjustmentListener(updatePreview);
+        guidesParam.setAdjustmentListener(updatePreview);
         builder.setAdjustmentListener(updatePreview);
         updatePreview.paramAdjusted(); // set initial preview
     }
@@ -59,10 +59,10 @@ class AddGridGuidesPanel extends JPanel {
     }
 
     private int getNumHorDivisions() {
-        return divisions.getValue(0);
+        return guidesParam.getValue(0) + 1;
     }
 
     private int getNumVerDivisions() {
-        return divisions.getValue(1);
+        return guidesParam.getValue(1) + 1;
     }
 }

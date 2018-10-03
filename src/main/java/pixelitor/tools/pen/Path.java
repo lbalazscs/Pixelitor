@@ -331,7 +331,7 @@ public class Path implements Serializable {
         if (this.buildState == newState) {
             return;
         }
-        if (Build.CURRENT.isDevelopment()) {
+        if (Build.isDevelopment()) {
             Messages.showInStatusBar("<html><font color=red>" + buildState
                     + "</font> \u21e8 <font color=#004E00>" + newState
                     + "</font> (" + reason + ")");

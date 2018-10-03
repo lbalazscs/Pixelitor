@@ -44,7 +44,7 @@ public class PixelitorEvent {
 
     protected PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
-        if (!Build.CURRENT.isDevelopment()) {
+        if (!Build.isDevelopment()) {
             throw new IllegalStateException("should be used only for development");
         }
 

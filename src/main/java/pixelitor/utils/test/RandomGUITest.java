@@ -148,6 +148,8 @@ public class RandomGUITest {
     private static Rectangle startBounds;
     private static final boolean isLinux = JVM.isLinux;
 
+    private static final boolean enableCopyPaste = Utils.getJavaMainVersion() != 11;
+
     /**
      * Utility class with static methods
      */
@@ -212,7 +214,9 @@ public class RandomGUITest {
 
         log("initial splash");
         SplashImageCreator.createSplashImage();
-        randomCopy(); // ensure an image is on the clipboard
+        if (enableCopyPaste) {
+            randomCopy(); // ensure an image is on the clipboard
+        }
 
         SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);
         worker.execute();
@@ -323,7 +327,7 @@ public class RandomGUITest {
         if (!windowBounds.equals(startBounds)) {
             // Window moved. Shouldn't happen, but as a workaround
             // restore it to the starting state
-            System.out.println("restoring the original window size " + startBounds);
+            System.out.println("Restoring the original window bounds " + startBounds);
             PixelitorWindow.getInstance().setBounds(startBounds);
 
 //            stop();
@@ -1233,8 +1237,10 @@ public class RandomGUITest {
         weightedCaller.registerCallback(5, RandomGUITest::layerMerge);
         weightedCaller.registerCallback(3, RandomGUITest::layerAddDelete);
         weightedCaller.registerCallback(1, RandomGUITest::randomHideShow);
-        weightedCaller.registerCallback(1, RandomGUITest::randomCopy);
-        weightedCaller.registerCallback(1, RandomGUITest::randomPaste);
+        if (enableCopyPaste) {
+            weightedCaller.registerCallback(1, RandomGUITest::randomCopy);
+            weightedCaller.registerCallback(1, RandomGUITest::randomPaste);
+        }
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
         weightedCaller.registerCallback(10, RandomGUITest::randomTool);

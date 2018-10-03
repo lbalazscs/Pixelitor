@@ -25,28 +25,11 @@ import java.awt.image.BufferedImage;
  */
 public abstract class ImageContextFactory {
 	private static ImageContextFactory factory = new ImageContextFactory() {
-		boolean isJFXInstalled = isJFXInstalled();
-		
 		public ImageContext create(BufferedImage bi) {
 			try {
-				if(isJFXInstalled)
-					return new JFXImageContext(bi);
 				return new BasicImageContext(bi);
 			} catch(Error e) {
 				return new BasicImageContext(bi);
-			}
-		}
-		
-		private boolean isJFXInstalled() {
-			try {
-				Class<?> k = Class.forName("javafx.embed.swing.JFXPanel");
-				k.newInstance();
-				return true;
-			} catch(Throwable t) {
-				System.err.println("ImageContextFactory: JFX is not available.");
-				if(!(t instanceof ClassNotFoundException))
-						t.printStackTrace();
-				return false;
 			}
 		}
 	};

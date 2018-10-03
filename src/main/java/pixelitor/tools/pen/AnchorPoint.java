@@ -233,7 +233,7 @@ public class AnchorPoint extends DraggablePoint {
 
         p.addSeparator();
 
-        if (Build.CURRENT.isDevelopment()) {
+        if (Build.isDevelopment()) {
             p.add(new AbstractAction("Dump") {
                 @Override
                 public void actionPerformed(ActionEvent e) {

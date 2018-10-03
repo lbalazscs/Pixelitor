@@ -420,8 +420,14 @@ public final class Utils {
     }
 
     public static int parseJavaVersion(String versionProp) {
-        // handles version strings like: "1.8.0_161", "9.0.1", "10.0.1"
+        // handles version strings like: "1.8.0_161", "9.0.1", "10.0.1", "11"
         int firstDotPos = versionProp.indexOf('.');
+
+        if (firstDotPos == -1) {
+            // no dot, must be something newer than Java 11
+            return Integer.parseInt(versionProp);
+        }
+
         String beforeFirstDot = versionProp.substring(0, firstDotPos);
         int asInt = Integer.parseInt(beforeFirstDot);
         if (asInt == 1) {

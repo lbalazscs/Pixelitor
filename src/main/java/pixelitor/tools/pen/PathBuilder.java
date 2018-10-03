@@ -17,7 +17,9 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Build;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.DraggablePoint;
@@ -63,12 +65,18 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void mousePressed(PMouseEvent e) {
         if (path == null) {
+            //always called on the EDT, therefore thread safety is not a concern
+            //noinspection NonThreadSafeLazyInitialization
             path = new Path(e.getComp(), true);
             path.setPreferredPenToolMode(this);
         }
 
         BuildState state = path.getBuildState();
-        assert state.isMoving() : "state = " + state;
+
+//        assert state.isMoving() : "state = " + state;
+        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
+            state = recoverFromUnexpectedDragState("mousePressed", e.getIC());
+        }
 
         double x = e.getCoX();
         double y = e.getCoY();
@@ -148,7 +156,7 @@ public class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private boolean handleAltPressHitBeforeSubpath(double x, double y) {
+    private static boolean handleAltPressHitBeforeSubpath(double x, double y) {
         // if only alt is down, then break control points
         DraggablePoint hit = path.handleWasHit(x, y, true);
         if (hit != null) {
@@ -212,7 +220,14 @@ public class PathBuilder implements PenToolMode {
             return;
         }
 
+        if (state.isMoving()) {
+            state = recoverFromUnexpectedMoveState("mouseDragged", e.getIC(), state);
+            if (state == NO_INTERACTION) {
+                return;
+            }
+        }
         assert state.isDragging() : "state = " + state;
+
         double x = e.getCoX();
         double y = e.getCoY();
         lastX = x;
@@ -245,6 +260,13 @@ public class PathBuilder implements PenToolMode {
         BuildState state = path.getBuildState();
         if (state == NO_INTERACTION) {
             return;
+        }
+
+        if (state.isMoving()) {
+            state = recoverFromUnexpectedMoveState("mouseReleased", e.getIC(), state);
+            if (state == NO_INTERACTION) {
+                return;
+            }
         }
         assert state.isDragging() : "state = " + state;
 
@@ -301,7 +323,10 @@ public class PathBuilder implements PenToolMode {
             return false;
         }
         BuildState state = path.getBuildState();
-        assert state.isMoving() : "state = " + state;
+//        assert state.isMoving() : "state = " + state;
+        if (state == DRAGGING_THE_CONTROL_OF_LAST) {
+            state = recoverFromUnexpectedDragState("mouseMoved", ic);
+        }
 
         int x = e.getX();
         int y = e.getY();
@@ -340,6 +365,36 @@ public class PathBuilder implements PenToolMode {
         }
 
         return true;
+    }
+
+    // Getting here shouldn't happen, but it did happen somehow
+    // (only in Mac random gui tests)
+    private static BuildState recoverFromUnexpectedDragState(String where, ImageComponent ic) {
+        boolean active = ImageComponents.isActive(ic);
+        if (Build.isDevelopment()) {
+            System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
+                    "where = '%s, active = %s'%n", where, active);
+        }
+
+        path.setBuildState(MOVING_TO_NEXT_ANCHOR, "recovery");
+        return path.getBuildState();
+    }
+
+    // Getting here shouldn't happen, but it did happen somehow
+    // (only in Mac random gui tests)
+    private static BuildState recoverFromUnexpectedMoveState(String where, ImageComponent ic, BuildState state) {
+        boolean active = ImageComponents.isActive(ic);
+        if (Build.isDevelopment()) {
+            System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
+                    "where = '%s, active = %s'%n", where, active);
+        }
+
+        BuildState dragState = NO_INTERACTION;
+        if (state == MOVE_EDITING_PREVIOUS) {
+            dragState = DRAG_EDITING_PREVIOUS;
+        }
+        path.setBuildState(dragState, "recovery");
+        return path.getBuildState();
     }
 
     @Override

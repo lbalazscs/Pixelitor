@@ -260,7 +260,7 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (Build.CURRENT.isDevelopment()) {
+        if (Build.isDevelopment()) {
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +

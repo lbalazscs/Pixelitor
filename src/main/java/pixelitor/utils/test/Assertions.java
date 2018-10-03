@@ -24,7 +24,6 @@ import pixelitor.gui.ImageComponents;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
@@ -142,14 +141,6 @@ public class Assertions {
         int rgb = img.getRGB(x, y);
         Color c = new Color(rgb);
         return c.getAlpha() == a && c.getRed() == r && c.getGreen() == g && c.getBlue() == b;
-    }
-
-    public static boolean zoomIs(ZoomLevel expected) {
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if (ic == null) {
-            throw new IllegalStateException();
-        }
-        return ic.getZoomLevel() == expected;
     }
 
     public static boolean numLayersIs(int expected) {

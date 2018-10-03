@@ -27,16 +27,11 @@ import java.awt.EventQueue;
  * menus and runtime checks.
  */
 public enum Build {
-    DEVELOPMENT(true) {
-    }, FINAL(false) {
+    DEVELOPMENT() {
+    }, FINAL() {
     };
 
-    private final boolean development;
     private static boolean testing = false;
-
-    Build(boolean development) {
-        this.development = development;
-    }
 
     public static final boolean enableAdjLayers = false;
 
@@ -47,12 +42,12 @@ public enum Build {
     // Lazy because it should be calculated after the CURRENT is set.
     private static final Lazy<String> fixTitle = Lazy.of(Build::calcFixTitle);
 
-    public boolean isDevelopment() {
-        return development;
+    public static boolean isDevelopment() {
+        return CURRENT == DEVELOPMENT;
     }
 
-    public boolean isFinal() {
-        return !development;
+    public static boolean isFinal() {
+        return !isDevelopment();
     }
 
     private static String calcFixTitle() {

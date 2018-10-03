@@ -75,6 +75,9 @@ public class CopyAction extends AbstractAction {
                 // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
                 // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
                 // https://bugs.openjdk.java.net/browse/JDK-8041558
+
+                // TODO A different issue in September 2018: OpenJDK 11 prints an
+                // exception stack trace here, but the image copied.
                 clipboard.setContents(imageTransferable, null);
             } catch (RasterFormatException rfe) {
                 rfe.printStackTrace();

@@ -30,6 +30,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
+import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
@@ -277,6 +278,14 @@ public class ImageComponents {
         }
     }
 
+    public static void repaintVisible() {
+        if (ImageArea.currentModeIs(FRAMES)) {
+            repaintAll();
+        } else {
+            activeIC.repaint();
+        }
+    }
+
     public static void fitActiveTo(AutoZoom autoZoom) {
         if (activeIC != null) {
             activeIC.zoomToFit(autoZoom);
@@ -442,6 +451,17 @@ public class ImageComponents {
         throw new AssertionError(format(
                 "Expected at least %d images, found %d (%s)",
                 expected, numOpenImages, getOpenImageNamesAsString()));
+    }
+
+    public static void assertZoomOfActiveIs(ZoomLevel expected) {
+        if (activeIC == null) {
+            throw new AssertionError("no active image");
+        }
+        ZoomLevel actual = activeIC.getZoomLevel();
+        if (actual != expected) {
+            throw new AssertionError("expected = " + expected +
+                    ", found = " + actual);
+        }
     }
 
     private static String getOpenImageNamesAsString() {

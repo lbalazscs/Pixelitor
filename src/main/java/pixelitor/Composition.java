@@ -829,7 +829,7 @@ public class Composition implements Serializable {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
-        if (Build.CURRENT.isDevelopment() && isActive()) {
+        if (Build.isDevelopment() && isActive()) {
             ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
     }
@@ -1119,7 +1119,9 @@ public class Composition implements Serializable {
         OutputFormat outputFormat = saveSettings.getOutputFormat();
         File f = saveSettings.getFile();
 
-        System.out.println("Composition::saveAsync: CALLED, file = " + f.getAbsolutePath());
+        if (Build.isDevelopment()) {
+            System.out.println("Composition::saveAsync: saving " + f.getAbsolutePath());
+        }
 
         Runnable saveTask = outputFormat.getSaveTask(this, saveSettings);
         return saveAsync(saveTask, f, addToRecentMenus);
@@ -1165,7 +1167,9 @@ public class Composition implements Serializable {
 
     public void setActivePath(Path path) {
         if (path != null && path.getComp() != this) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                    "path belongs to other comp, this = " + toPathDebugString() +
+                            ", path.comp = " + path.getComp().toPathDebugString());
         }
 
         if (paths == null) {

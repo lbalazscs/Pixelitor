@@ -52,9 +52,22 @@ public interface PenToolMode {
     }
 
     default void modeEnded() {
+        // TODO should be cleaner
         if (PenTool.hasPath()) {
             Composition comp = ImageComponents.getActiveCompOrNull();
             if (comp != null) {
+                Path path = PenTool.getPath();
+                if (path.getComp() != comp) {
+                    // the pen tools has a path but it does not belong to the
+                    // active composition - happened in Mac random gui tests
+                    // what can we do? at least avoid consistency errors
+                    // don't use removePath, because it also removes from the active comp
+                    PenTool.path = null;
+                } else {
+                    // should be already set
+                    assert comp.getActivePath() == path;
+                    //comp.setActivePath(path);
+                }
                 comp.repaint();
             }
         }

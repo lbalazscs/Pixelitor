@@ -426,10 +426,15 @@ public class ImageComponent extends JComponent
         }
     }
 
-    public static void setShowPixelGrid(boolean showPixelGrid) {
-        ImageComponent.showPixelGrid = showPixelGrid;
-        if (showPixelGrid) {
+    public static void setShowPixelGrid(boolean newValue) {
+        if (ImageComponent.showPixelGrid == newValue) {
+            return;
+        }
+        ImageComponent.showPixelGrid = newValue;
+        if (newValue) {
             ImageComponents.pixelGridEnabled();
+        } else {
+            ImageComponents.repaintVisible();
         }
     }
 

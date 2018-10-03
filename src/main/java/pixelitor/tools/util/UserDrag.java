@@ -17,7 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.View;
 import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
@@ -63,7 +62,6 @@ public class UserDrag {
 
     public void setStart(PPoint e) {
         assert e.getView() != null;
-        assert ImageComponents.isActive(e.getIC());
 
         this.view = e.getView();
 

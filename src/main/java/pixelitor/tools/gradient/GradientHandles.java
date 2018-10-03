@@ -123,7 +123,7 @@ public class GradientHandles {
             end.restoreCoordsFromImSpace(view);
             middle.restoreCoordsFromImSpace(view);
         } else { // in random tests they can be different
-            if (Build.CURRENT.isDevelopment()) {
+            if (Build.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
                         + ImageArea.getMode());
             }

@@ -52,6 +52,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.ShapesAction;
 import pixelitor.utils.Utils;
@@ -79,6 +80,7 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.gui.ImageComponents.assertNumOpenImagesIs;
 import static pixelitor.gui.ImageComponents.assertNumOpenImagesIsAtLeast;
+import static pixelitor.gui.ImageComponents.assertZoomOfActiveIs;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionInteraction.REPLACE;
 import static pixelitor.selection.SelectionType.ELLIPSE;
@@ -87,7 +89,6 @@ import static pixelitor.utils.test.Assertions.canvasImSizeIs;
 import static pixelitor.utils.test.Assertions.numLayersIs;
 import static pixelitor.utils.test.Assertions.thereIsNoSelection;
 import static pixelitor.utils.test.Assertions.thereIsSelection;
-import static pixelitor.utils.test.Assertions.zoomIs;
 
 /**
  * An automated GUI test which uses AssertJ-Swing.
@@ -95,7 +96,6 @@ import static pixelitor.utils.test.Assertions.zoomIs;
  * perspective, and depending on the configuration, it could run for hours.
  */
 public class AssertJSwingTest {
-    private static boolean verbose = false;
     private static boolean quick = false;
 
     private static File baseTestingDir;
@@ -125,8 +125,6 @@ public class AssertJSwingTest {
 
         // enable quick mode with -Dquick=true
         quick = "true".equals(System.getProperty("quick"));
-        // enable verbose mode with -Dverbose=true
-        verbose = "true".equals(System.getProperty("verbose"));
 
         initialize(args);
 
@@ -391,24 +389,56 @@ public class AssertJSwingTest {
         assert checkConsistency();
 
         // test delete layer
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        assertThat(comp)
+                .numLayersIs(2)
+                .activeLayerIndexIs(1)
+                .activeLayerNameIs("layer 2");
         layer2Button.requireSelected();
+
         deleteLayerButton.click();
+
         layer1Button.requireSelected();
+        assertThat(comp)
+                .numLayersIs(1)
+                .activeLayerIndexIs(0)
+                .activeLayerNameIs("layer 1");
+
+        // undo delete
         keyboardUndo();
 
-        if (!JVM.isLinux) {
-            // On Linux this works, the un-deleted layer becomes
-            // active, the problem seems to be with AssertJ-Swing
-            layer2Button.requireSelected();
+        if (JVM.isLinux) {
+            Utils.sleep(1, SECONDS);
         }
+        layer2Button.requireSelected();
+        assertThat(comp)
+                .numLayersIs(2)
+                .activeLayerIndexIs(1)
+                .activeLayerNameIs("layer 2");
 
+        // redo delete
         keyboardRedo();
+        if (JVM.isLinux) {
+            Utils.sleep(1, SECONDS);
+        }
         layer1Button.requireSelected();
+        assertThat(comp)
+                .numLayersIs(1)
+                .activeLayerIndexIs(0)
+                .activeLayerNameIs("layer 1");
+
         testingMode.set(this);
 
         // test duplicate
         duplicateLayerButton.click();
+
         findLayerButton("layer 1 copy").requireSelected();
+        assertThat(comp)
+                .numLayersIs(2)
+                .activeLayerIndexIs(1)
+                .activeLayerNameIs("layer 1 copy")
+                .layerNamesAre("layer 1", "layer 1 copy");
+
         keyboardUndo();
         layer1Button.requireSelected();
         keyboardRedo();
@@ -1273,10 +1303,10 @@ public class AssertJSwingTest {
         ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
 
         runMenuCommand("Zoom In");
-        assert zoomIs(startingZoom.zoomIn());
+        assertZoomOfActiveIs(startingZoom.zoomIn());
 
         runMenuCommand("Zoom Out");
-        assert zoomIs(startingZoom.zoomIn().zoomOut());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomOut());
 
         runMenuCommand("Fit Space");
         runMenuCommand("Fit Width");
@@ -1286,12 +1316,12 @@ public class AssertJSwingTest {
         for (ZoomLevel zoomLevel : values) {
             if (!skipThis()) {
                 runMenuCommand(zoomLevel.toString());
-                assert zoomIs(zoomLevel);
+                assertZoomOfActiveIs(zoomLevel);
             }
         }
 
         runMenuCommand("Actual Pixels");
-        assert zoomIs(ZoomLevel.Z100);
+        assertZoomOfActiveIs(ZoomLevel.Z100);
     }
 
     private void testGuides() {
@@ -1778,12 +1808,48 @@ public class AssertJSwingTest {
         moveTo(200, 300);
         click();
 
-        // should be closed already
-        ctrlClick();
+        assertThat(Tools.PEN)
+                .hasPath()
+                .pathActionAreEnabled()
+                .isConsistent();
+        assertThat(PenTool.path)
+                .numSubPathsIs(1)
+                .numAnchorsIs(2);
+
+        keyboardUndo("Close Subpath");
+        keyboardUndo("Add Anchor Point");
+        keyboardUndo("Subpath Start");
+
+        assertThat(Tools.PEN)
+                .hasNoPath()
+                .pathActionAreNotEnabled()
+                .isConsistent();
+
+        keyboardRedo("Subpath Start");
+        keyboardRedo("Add Anchor Point");
+        keyboardRedo("Close Subpath");
+
+        // add a second subpath, this one will be open and
+        // consists of straight segments
+        click(600, 300);
+        click(600, 400);
+        click(700, 400);
+        click(700, 300);
+        ctrlClick(700, 250);
+
+        assertThat(Tools.PEN)
+                .hasPath()
+                .pathActionAreEnabled()
+                .isConsistent();
+        assertThat(PenTool.path)
+                .numSubPathsIs(2)
+                .numAnchorsIs(6);
 
         pw.button("toSelectionButton").requireEnabled();
         pw.button("toSelectionButton").click();
         assertThat(Tools.SELECTION).isActive();
+
+        keyboardInvert();
 
         pw.button("toPathButton").requireEnabled();
         pw.button("toPathButton").click();
@@ -1799,7 +1865,7 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Stroke with Current Brush").click();
         keyboardUndoRedo();
 
-        // TODO edit mode, trace path etc.
+        // TODO edit mode
 
         assert checkConsistency();
     }
@@ -1819,6 +1885,8 @@ public class AssertJSwingTest {
 
     private void testGradientTool() {
         log(1, "testing the gradient tool");
+
+        // TODO test handles
 
         if (testingMode.isMaskEditing()) {
             // reset the default colors, otherwise it might be all gray
@@ -1869,8 +1937,9 @@ public class AssertJSwingTest {
         testBrushStrokes();
 
         // this freezes when running with coverage??
-        enableLazyMouse(true);
-        testBrushStrokes();
+        // sometimes also without coverage??
+//        enableLazyMouse(true);
+//        testBrushStrokes();
 
         assert checkConsistency();
     }
@@ -2163,16 +2232,16 @@ public class AssertJSwingTest {
 
         ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
 
-        moveTo(getRandomX(), getRandomY());
+        moveToActiveICCenter();
 
         click();
-        assert zoomIs(startingZoom.zoomIn());
+        assertZoomOfActiveIs(startingZoom.zoomIn());
         click();
-        assert zoomIs(startingZoom.zoomIn().zoomIn());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn());
         altClick();
-        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut());
         altClick();
-        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
 
         testMouseWheelZooming();
         testControlPlusMinusZooming();
@@ -2187,10 +2256,10 @@ public class AssertJSwingTest {
         ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
 
         pressCtrlPlus(pw, 2);
-        assert zoomIs(startingZoom.zoomIn().zoomIn());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn());
 
         pressCtrlMinus(pw, 2);
-        assert zoomIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
+        assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn().zoomOut().zoomOut());
     }
 
     private void testZoomControlAndNavigatorZooming() {
@@ -2203,13 +2272,13 @@ public class AssertJSwingTest {
         ZoomLevel[] zoomLevels = ZoomLevel.values();
 
         slider.slideToMinimum();
-        assert zoomIs(zoomLevels[0]);
+        assertZoomOfActiveIs(zoomLevels[0]);
 
         findButtonByText(pw, "100%").click();
-        assert zoomIs(ZoomLevel.Z100);
+        assertZoomOfActiveIs(ZoomLevel.Z100);
 
         slider.slideToMaximum();
-        assert zoomIs(zoomLevels[zoomLevels.length - 1]);
+        assertZoomOfActiveIs(zoomLevels[zoomLevels.length - 1]);
 
         findButtonByText(pw, "Fit").click();
 
@@ -2221,11 +2290,11 @@ public class AssertJSwingTest {
 
         pressCtrlPlus(navigator, 4);
         ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
-        assert zoomIs(expectedZoomIn);
+        assertZoomOfActiveIs(expectedZoomIn);
 
         pressCtrlMinus(navigator, 2);
         ZoomLevel expectedZoomOut = expectedZoomIn.zoomOut().zoomOut();
-        assert zoomIs(expectedZoomOut);
+        assertZoomOfActiveIs(expectedZoomOut);
         findButtonByText(pw, "Fit").click();
 
         // navigate
@@ -2301,18 +2370,37 @@ public class AssertJSwingTest {
         ImageComponent ic = ImageComponents.getActiveIC();
 
         robot.rotateMouseWheel(ic, 2);
-        assert zoomIs(startingZoom.zoomOut());
+        if (JVM.isLinux) {
+            assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut());
+        } else {
+            assertZoomOfActiveIs(startingZoom.zoomOut());
+        }
 
         robot.rotateMouseWheel(ic, -2);
-        assert zoomIs(startingZoom.zoomOut().zoomIn());
+
+        if (JVM.isLinux) {
+            assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut().zoomIn().zoomIn());
+        } else {
+            assertZoomOfActiveIs(startingZoom.zoomOut().zoomIn());
+        }
 
         pw.releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardUndo(String edit) {
+        History.assertEditToBeUndoneNameIs(edit);
+        keyboardUndo();
     }
 
     private void keyboardUndo() {
         // press Ctrl-Z
         pw.pressKey(VK_CONTROL).pressKey(VK_Z)
                 .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+    }
+
+    private void keyboardRedo(String edit) {
+        History.assertEditToBeRedoneNameIs(edit);
+        keyboardRedo();
     }
 
     private void keyboardRedo() {
@@ -2367,6 +2455,15 @@ public class AssertJSwingTest {
         robot.moveMouse(x, y);
     }
 
+    private void moveToActiveICCenter() {
+        ImageComponent ic = ImageComponents.getActiveIC();
+        Rectangle visiblePart = ic.getVisiblePart();
+        Point icLoc = ic.getLocationOnScreen();
+        int cx = icLoc.x + visiblePart.width / 2;
+        int cy = icLoc.y + visiblePart.height / 2;
+        moveTo(cx, cy);
+    }
+
     // drag relative to the canvas
     private void dragTo(int x, int y) {
         robot.pressMouse(MouseButton.LEFT_BUTTON);
@@ -2403,6 +2500,7 @@ public class AssertJSwingTest {
     }
 
     private static int getExtraX() {
+        // TODO calculate exactly, like in moveToActiveICCenter()
         int extraX = 0;
         if (ImageArea.currentModeIs(TABS)) {
             extraX = (int) ImageComponents.getActiveIC().getCanvasStartX();
@@ -2411,6 +2509,7 @@ public class AssertJSwingTest {
     }
 
     private int getRandomX() {
+        // TODO calculate exactly, like in moveToActiveICCenter()
         if (ImageArea.currentModeIs(FRAMES)) {
             return 200 + random.nextInt(400);
         } else {
@@ -2579,6 +2678,11 @@ public class AssertJSwingTest {
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
+    private void click(int x, int y) {
+        moveTo(x, y);
+        click();
+    }
+
     private void randomClick() {
         moveRandom();
         click();
@@ -2586,16 +2690,19 @@ public class AssertJSwingTest {
 
     private void altClick() {
         robot.pressKey(VK_ALT);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        click();
         robot.releaseKey(VK_ALT);
     }
 
     private void ctrlClick() {
         robot.pressKey(VK_CONTROL);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        click();
         robot.releaseKey(VK_CONTROL);
+    }
+
+    private void ctrlClick(int x, int y) {
+        moveTo(x, y);
+        ctrlClick();
     }
 
     private static void cleanOutputs() {
@@ -2821,7 +2928,7 @@ public class AssertJSwingTest {
         new PixelitorEventListener().register();
 
         pw = WindowFinder.findFrame("frame0")
-                .withTimeout(20, SECONDS)
+                .withTimeout(30, SECONDS)
                 .using(robot);
         PixelitorWindow.getInstance().setLocation(0, 0);
 
@@ -2836,14 +2943,12 @@ public class AssertJSwingTest {
     }
 
     private void log(int indentLevel, String msg) {
-        if (verbose) {
-            for (int i = 0; i < indentLevel; i++) {
-                System.out.print("    ");
-            }
-            System.out.println(getCurrentTime() + ": " + msg
-                    + " (" + testingMode.toString() + ", "
-                    + ImageArea.getMode() + ")");
+        for (int i = 0; i < indentLevel; i++) {
+            System.out.print("    ");
         }
+        System.out.println(getCurrentTime() + ": " + msg
+                + " (" + testingMode.toString() + ", "
+                + ImageArea.getMode() + ")");
     }
 
     private static String getCurrentTime() {

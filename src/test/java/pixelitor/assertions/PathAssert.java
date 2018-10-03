@@ -60,4 +60,20 @@ public class PathAssert extends AbstractAssert<PathAssert, Path> {
 
         return this;
     }
+
+    public PathAssert numAnchorsIs(int expected) {
+        isNotNull();
+
+        int numSubpaths = actual.getNumSubpaths();
+        int numPoints = 0;
+        for (int i = 0; i < numSubpaths; i++) {
+            SubPath subPath = actual.getSubPath(i);
+            numPoints += subPath.getNumAnchors();
+        }
+        if (numPoints != expected) {
+            throw new AssertionError("Expected " + expected + ", found " + numPoints);
+        }
+
+        return this;
+    }
 }

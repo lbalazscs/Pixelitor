@@ -207,7 +207,7 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        if (Build.CURRENT.isDevelopment()) {
+        if (Build.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(e.getComp());
         }
     }

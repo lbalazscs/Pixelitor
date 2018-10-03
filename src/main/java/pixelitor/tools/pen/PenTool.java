@@ -126,8 +126,8 @@ public class PenTool extends Tool {
         settingsPanel.addButton(traceWithBrush);
         settingsPanel.addButton(traceWithEraser);
         settingsPanel.addButton(traceWithSmudge);
-        
-        if (Build.CURRENT.isDevelopment()) {
+
+        if (Build.isDevelopment()) {
             settingsPanel.addButton(dumpPathAction);
         }
     }
@@ -330,7 +330,9 @@ public class PenTool extends Tool {
 
     public static boolean checkPathConsistency() {
         assert path == ImageComponents.getActivePathOrNull()
-                : "tool path = " + path + ", active path = " + ImageComponents.getActivePathOrNull();
+                : "tool path = " + path +
+                ", active path = " + ImageComponents.getActivePathOrNull() +
+                ", mode = " + Tools.PEN.getMode();
         Composition activeComp = ImageComponents.getActiveCompOrNull();
         if (activeComp == null) {
             return true;

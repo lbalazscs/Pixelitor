@@ -21,12 +21,11 @@ import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.ColorUtils;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 /**
  * The GUI for a {@link ColorParam}
@@ -53,18 +52,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
         add(colorSwatch);
 
-        colorSwatch.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                // on Linux the popup trigger check is not enough
-                // probably because the popups are started by mousePressed
-                boolean showDialog = !e.isPopupTrigger()
-                        && SwingUtilities.isLeftMouseButton(e);
-                if (showDialog) {
-                    showColorDialog();
-                }
-            }
-        });
+        GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
 
         ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
                 model::getColor, this::updateColor);

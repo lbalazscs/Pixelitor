@@ -23,6 +23,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.utils.Messages;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Shape;
 
@@ -50,8 +51,10 @@ public class TraceAction extends MenuAction {
 
         Path path = comp.getActivePath();
         if (path == null) {
-            Messages.showInfo("No path",
-                    "There is no path in the composition");
+            if (!RandomGUITest.isRunning()) {
+                Messages.showInfo("No path",
+                        "There is no path in the composition");
+            }
             return;
         }
 

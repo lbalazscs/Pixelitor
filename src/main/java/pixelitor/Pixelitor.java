@@ -43,6 +43,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -76,6 +77,11 @@ public class Pixelitor {
             // doesn't seem to pick up good defaults
             System.setProperty("awt.useSystemAAFontSettings", "lcd");
             System.setProperty("swing.aatext", "true");
+
+            if (GraphicsEnvironment.isHeadless()) {
+                System.err.println("Pixelitor cannot be used in headless mode");
+                System.exit(1);
+            }
         }
 
         ExceptionHandler.INSTANCE.initialize();

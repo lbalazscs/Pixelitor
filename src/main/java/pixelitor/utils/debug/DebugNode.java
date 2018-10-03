@@ -18,6 +18,7 @@
 package pixelitor.utils.debug;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 
 import static java.lang.String.format;
@@ -44,8 +45,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             return name + " = null";
         }
 
-        @SuppressWarnings("unchecked")
-        Enumeration<DefaultMutableTreeNode> childrenEnum = children();
+        Enumeration<TreeNode> childrenEnum = children();
 
         StringBuilder sb = new StringBuilder();
 
@@ -55,7 +55,7 @@ public class DebugNode extends DefaultMutableTreeNode {
         while (childrenEnum.hasMoreElements()) {
             indent(sb, getLevel() + 1);
 
-            DefaultMutableTreeNode t = childrenEnum.nextElement();
+            TreeNode t = childrenEnum.nextElement();
 
             String info;
             if (t instanceof DebugNode) {

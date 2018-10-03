@@ -36,6 +36,8 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -284,5 +286,20 @@ public final class GUIUtils {
                 from.getVerticalScrollBar().getModel());
         to.getHorizontalScrollBar().setModel(
                 from.getHorizontalScrollBar().getModel());
+    }
+
+    public static void addColorDialogListener(JComponent colorSwatch, Runnable showDialogAction) {
+        colorSwatch.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // on Linux/Mac the popup trigger check is not enough
+                // probably because the popups are started by mousePressed
+                boolean showDialog = !e.isPopupTrigger()
+                        && SwingUtilities.isLeftMouseButton(e);
+                if (showDialog) {
+                    showDialogAction.run();
+                }
+            }
+        });
     }
 }

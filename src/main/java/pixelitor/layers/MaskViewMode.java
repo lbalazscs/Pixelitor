@@ -139,7 +139,7 @@ public enum MaskViewMode {
             }
             FadeMenuItem.INSTANCE.refresh(canFade);
 
-            if (Build.CURRENT.isDevelopment()) {
+            if (Build.isDevelopment()) {
                 assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
             }
         }

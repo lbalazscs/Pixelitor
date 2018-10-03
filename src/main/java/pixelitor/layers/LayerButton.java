@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.Build;
 import pixelitor.ThreadPool;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.PixelitorWindow;
@@ -251,7 +252,7 @@ public class LayerButton extends JToggleButton {
         handler.attachToComponent(layerIconLabel);
 
         if (maskAddedBeforeDragHandler) {
-            assert hasMaskIcon();
+            assert hasMaskIcon() : "no mask in " + layer.getName();
             handler.attachToComponent(maskIconLabel);
         }
     }
@@ -303,6 +304,11 @@ public class LayerButton extends JToggleButton {
     }
 
     public void updateLayerIconImage(ImageLayer layer) {
+        if (Build.isTesting()) {
+            // TODO shouldn't be called in unit tests, but it is
+            return;
+        }
+
         boolean isMask = layer instanceof LayerMask;
 
         BufferedImage img = layer.getCanvasSizedSubImage();
@@ -415,6 +421,8 @@ public class LayerButton extends JToggleButton {
         revalidate();
         repaint();
         maskIconLabel = null;
+
+        maskAddedBeforeDragHandler = false;
     }
 
     public void configureBorders(boolean maskEditing) {

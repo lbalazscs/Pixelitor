@@ -26,14 +26,13 @@ import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -75,14 +74,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
         color = defaultColor;
 
-        colorSwatch.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!e.isPopupTrigger()) {
-                    showColorDialog();
-                }
-            }
-        });
+        GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
 
         ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
                 this::getColor, c -> setColor(c, true));
