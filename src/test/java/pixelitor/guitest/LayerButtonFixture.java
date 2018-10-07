@@ -15,14 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
+import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.JToggleButtonFixture;
 import pixelitor.layers.LayerButton;
-
-import javax.swing.*;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Helper class to test {@link LayerButton} objects in
@@ -38,18 +36,16 @@ public class LayerButtonFixture extends JToggleButtonFixture {
     }
 
     public void setOpenEye(boolean b) {
-        // it would be nicer if we had a JCheckBoxFixture for the
-        // visibility checkbox and this would happen through robot events
-
-        try {
-            SwingUtilities.invokeAndWait(() -> ((LayerButton) target()).setOpenEye(b));
-        } catch (InterruptedException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        GuiActionRunner.execute(() ->
+                ((LayerButton) target()).setOpenEye(b));
+        robot().waitForIdle();
     }
 
     private boolean isEyeOpen() {
-        return ((LayerButton) target()).isEyeOpen();
+        Boolean result = GuiActionRunner.execute(() ->
+                ((LayerButton) target()).isEyeOpen());
+        robot().waitForIdle();
+        return result;
     }
 
     public void requireOpenEye() {

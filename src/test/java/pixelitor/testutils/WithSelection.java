@@ -22,6 +22,8 @@ import pixelitor.TestHelper;
 
 import java.awt.Rectangle;
 
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
+
 /**
  * Whether there is a selection present when a test runs
  */
@@ -31,7 +33,7 @@ public enum WithSelection {
         public void setupFor(Composition comp) {
             TestHelper.setStandardTestSelection(comp);
             Rectangle selectionShape = TestHelper.getStandardTestSelectionShape();
-            TestHelper.checkSelectionBounds(comp, selectionShape);
+            assertThat(comp).selectionBoundsIs(selectionShape);
         }
     }, NO {
         @Override

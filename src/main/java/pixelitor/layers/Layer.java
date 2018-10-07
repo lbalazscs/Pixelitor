@@ -244,7 +244,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void makeActive(boolean addToHistory) {
-        comp.setActiveLayer(this, addToHistory);
+        comp.setActiveLayer(this, addToHistory, null);
     }
 
     public boolean isActive() {

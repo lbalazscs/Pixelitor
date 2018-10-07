@@ -64,7 +64,7 @@ import pixelitor.utils.UtilsTest;
 
         AbstractBrushToolTest.class,
         BooleanParamTest.class,
-        CompositionCreationTest.class,
+        CompositionIOTest.class,
         CompositionTest.class,
         ContentLayerTest.class,
         FilterParamTest.class,

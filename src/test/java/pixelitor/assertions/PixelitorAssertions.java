@@ -21,6 +21,13 @@ import org.assertj.core.api.Assertions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
+import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.layers.ContentLayer;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
+import pixelitor.layers.TextLayer;
+import pixelitor.menus.NamedAction;
 import pixelitor.selection.Selection;
 import pixelitor.tools.SelectionTool;
 import pixelitor.tools.pen.Path;
@@ -28,50 +35,75 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.util.DraggablePoint;
 
+import java.awt.image.BufferedImage;
+
 @SuppressWarnings("ExtendsUtilityClass")
 public class PixelitorAssertions extends Assertions {
-    @org.assertj.core.util.CheckReturnValue
     public static CompositionAssert assertThat(Composition actual) {
         return new CompositionAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static CanvasAssert assertThat(Canvas actual) {
         return new CanvasAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static SelectionAssert assertThat(Selection actual) {
         return new SelectionAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static RandomFilterSourceAssert assertThat(RandomFilterSource actual) {
         return new RandomFilterSourceAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static DraggablePointAssert assertThat(DraggablePoint actual) {
         return new DraggablePointAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static SubPathAssert assertThat(SubPath actual) {
         return new SubPathAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static PathAssert assertThat(Path actual) {
         return new PathAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static PenToolAssert assertThat(PenTool actual) {
         return new PenToolAssert(actual);
     }
 
-    @org.assertj.core.util.CheckReturnValue
     public static SelectionToolAssert assertThat(SelectionTool actual) {
         return new SelectionToolAssert(actual);
+    }
+
+    public static NamedActionAssert assertThat(NamedAction actual) {
+        return new NamedActionAssert(actual);
+    }
+
+    public static LayerAssert assertThat(Layer actual) {
+        return new LayerAssert(actual, LayerAssert.class);
+    }
+
+    public static ContentLayerAssert assertThat(ContentLayer actual) {
+        return new ContentLayerAssert(actual, ContentLayerAssert.class);
+    }
+
+    public static ImageLayerAssert assertThat(ImageLayer actual) {
+        return new ImageLayerAssert(actual);
+    }
+
+    public static TextLayerAssert assertThat(TextLayer actual) {
+        return new TextLayerAssert(actual);
+    }
+
+    public static BufferedImageAssert assertThat(BufferedImage actual) {
+        return new BufferedImageAssert(actual);
+    }
+
+    public static FilterParamAssert assertThat(FilterParam actual) {
+        return new FilterParamAssert(actual, FilterParamAssert.class);
+    }
+
+    public static IntChoiceParamAssert assertThat(IntChoiceParam actual) {
+        return new IntChoiceParamAssert(actual);
     }
 }

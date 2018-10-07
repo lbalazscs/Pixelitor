@@ -412,14 +412,14 @@ public class MenuBar extends JMenuBar {
 
         sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_OPEN_BRACKET);
 
-        sub.addActionWithKey(new MenuAction("Layer to Top") {
+        sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_TOP) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveActiveLayerToTop();
             }
         }, CTRL_SHIFT_CLOSE_BRACKET);
 
-        sub.addActionWithKey(new MenuAction("Layer to Bottom") {
+        sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_BOTTOM) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveActiveLayerToBottom();
@@ -428,7 +428,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.addActionWithKey(new MenuAction("Raise Layer Selection") {
+        sub.addActionWithKey(new MenuAction(LayerMoveAction.RAISE_LAYER_SELECTION) {
             @Override
             public void onClick() {
                 Composition comp = getActiveCompOrNull();
@@ -436,7 +436,7 @@ public class MenuBar extends JMenuBar {
             }
         }, ALT_CLOSE_BRACKET);
 
-        sub.addActionWithKey(new MenuAction("Lower Layer Selection") {
+        sub.addActionWithKey(new MenuAction(LayerMoveAction.LOWER_LAYER_SELECTION) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveLayerSelectionDown();

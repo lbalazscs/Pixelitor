@@ -308,7 +308,7 @@ public class PixelitorUndoManager extends UndoManager implements ListModel<Pixel
     }
 
     @VisibleForTesting
-    public List<String> asStringList() {
+    public List<String> getEditNames() {
         return edits.stream()
                 .map(UndoableEdit::getPresentationName)
                 .collect(toList());

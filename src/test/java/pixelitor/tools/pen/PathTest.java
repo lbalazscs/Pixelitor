@@ -59,14 +59,14 @@ public class PathTest {
         sp.getAnchor(0).delete(); // delete first (and last)
         assertThat(path.getActiveSubpath()).numAnchorsIs(0);
 
-        History.undo();
-        History.undo();
+        History.undo("Delete Anchor Point");
+        History.undo("Delete Anchor Point");
         // check the active subpath because the undo replaced
         // the subpath reference in the path
         assertThat(path.getActiveSubpath()).numAnchorsIs(2);
 
-        History.redo();
-        History.redo();
+        History.redo("Delete Anchor Point");
+        History.redo("Delete Anchor Point");
         assertThat(path.getActiveSubpath()).numAnchorsIs(0);
     }
 

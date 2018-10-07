@@ -32,6 +32,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
@@ -323,7 +324,7 @@ public class Composition implements Serializable {
 
         layerList.forEach(this::addLayerToGUI);
 
-        setActiveLayer(previousActiveLayer, false);
+        setActiveLayer(previousActiveLayer);
     }
 
     private void addLayerToGUI(Layer layer) {
@@ -403,9 +404,9 @@ public class Composition implements Serializable {
 
         if (layerToBeDeleted == activeLayer) {
             if (layerIndex > 0) {
-                setActiveLayer(layerList.get(layerIndex - 1), false);
+                setActiveLayer(layerList.get(layerIndex - 1));
             } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.get(0), false);
+                setActiveLayer(layerList.get(0));
             }
         }
 
@@ -421,7 +422,11 @@ public class Composition implements Serializable {
         }
     }
 
-    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory) {
+    public void setActiveLayer(Layer newActiveLayer) {
+        setActiveLayer(newActiveLayer, false, null);
+    }
+
+    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory, String editName) {
         if (activeLayer == newActiveLayer) {
             return;
         }
@@ -438,7 +443,7 @@ public class Composition implements Serializable {
 
         if (addToHistory) {
             History.addEdit(new LayerSelectionChangeEdit(
-                    this, oldLayer, newActiveLayer));
+                    editName, this, oldLayer, newActiveLayer));
         }
 
         assert checkInvariant();
@@ -612,14 +617,16 @@ public class Composition implements Serializable {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        changeLayerOrder(oldIndex, oldIndex + 1, true);
+        changeLayerOrder(oldIndex, oldIndex + 1,
+                true, LayerMoveAction.RAISE_LAYER);
     }
 
     public void moveActiveLayerDown() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        changeLayerOrder(oldIndex, oldIndex - 1, true);
+        changeLayerOrder(oldIndex, oldIndex - 1,
+                true, LayerMoveAction.LOWER_LAYER);
     }
 
     public void moveActiveLayerToTop() {
@@ -627,17 +634,23 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
-        changeLayerOrder(oldIndex, newIndex, true);
+        changeLayerOrder(oldIndex, newIndex,
+                true, LayerMoveAction.LAYER_TO_TOP);
     }
 
     public void moveActiveLayerToBottom() {
         assert checkInvariant();
 
         int oldIndex = layerList.indexOf(activeLayer);
-        changeLayerOrder(oldIndex, 0, true);
+        changeLayerOrder(oldIndex, 0,
+                true, LayerMoveAction.LAYER_TO_BOTTOM);
     }
 
-    public void changeLayerOrder(int oldIndex, int newIndex, boolean addToHistory) {
+    public void changeLayerOrder(int oldIndex, int newIndex) {
+        changeLayerOrder(oldIndex, newIndex, false, null);
+    }
+
+    public void changeLayerOrder(int oldIndex, int newIndex, boolean addToHistory, String editName) {
         if (newIndex < 0) {
             return;
         }
@@ -657,7 +670,7 @@ public class Composition implements Serializable {
         Layers.layerOrderChanged(this);
 
         if (addToHistory) {
-            History.addEdit(new LayerOrderChangeEdit(this, oldIndex, newIndex));
+            History.addEdit(new LayerOrderChangeEdit(editName, this, oldIndex, newIndex));
         }
     }
 
@@ -668,7 +681,8 @@ public class Composition implements Serializable {
         if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layerList.get(newIndex), true);
+        setActiveLayer(layerList.get(newIndex),
+                true, LayerMoveAction.RAISE_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
@@ -680,7 +694,8 @@ public class Composition implements Serializable {
             return;
         }
 
-        setActiveLayer(layerList.get(newIndex), true);
+        setActiveLayer(layerList.get(newIndex),
+                true, LayerMoveAction.LOWER_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
@@ -1333,7 +1348,7 @@ public class Composition implements Serializable {
                 }
             }
             comp.layerList.add(newLayerIndex, newLayer);
-            comp.setActiveLayer(newLayer, false);
+            comp.setActiveLayer(newLayer);
             if (!compInit) {
                 comp.setDirty(true);
                 comp.ic.addLayerToGUI(newLayer, newLayerIndex);

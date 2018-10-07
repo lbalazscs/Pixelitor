@@ -44,6 +44,7 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.ImageComponentNode;
 import pixelitor.utils.test.Assertions;
 
@@ -837,6 +838,28 @@ public class ImageComponent extends JComponent
                 navigator.repaint();
             }
         }
+    }
+
+    /**
+     * Returns the bounds of the visible part of the canvas
+     * in screen coordinates
+     */
+    @VisibleForTesting
+    public Rectangle getVisibleCanvasBoundsOnScreen() {
+        Rectangle canvasRelativeToIC = new Rectangle(
+                (int) canvasStartX, (int) canvasStartY,
+                canvas.getCoWidth(), canvas.getCoHeight());
+
+        // take scrollbars into account
+        Rectangle retVal = canvasRelativeToIC.intersection(getVisiblePart());
+        if (retVal.isEmpty()) {
+            throw new IllegalStateException("canvas not visible");
+        }
+
+        // transform into screen coordinates
+        Point onScreen = getLocationOnScreen();
+        retVal.translate(onScreen.x, onScreen.y);
+        return retVal;
     }
 
     @Override

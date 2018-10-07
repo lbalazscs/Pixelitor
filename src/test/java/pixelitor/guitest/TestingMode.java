@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor;
+package pixelitor.guitest;
 
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
@@ -35,16 +35,18 @@ enum TestingMode {
      */
     NO_MASK(NORMAL) {
         @Override
-        public boolean isSet(Layer layer) {
-            return !layer.hasMask();
+        public void assertIsSetOn(Layer layer) {
+            if (layer.hasMask()) {
+                throw new AssertionError("Mask found in " + layer.getName());
+            }
         }
 
         @Override
         public void set(AssertJSwingTest tester) {
-            assert isSet(ImageComponents.getActiveLayerOrNull());
+            assertIsSetOn(ImageComponents.getActiveLayerOrNull());
             // do nothing as initially the layers have no masks
 
-            assert tester.checkConsistency();
+            tester.checkConsistency();
         }
     },
     /**
@@ -52,11 +54,13 @@ enum TestingMode {
      */
     WITH_MASK(NORMAL) {
         @Override
-        public boolean isSet(Layer layer) {
+        public void assertIsSetOn(Layer layer) {
             if (layer.hasMask()) {
-                return !layer.isMaskEditing();
+                if (layer.isMaskEditing()) {
+                    throw new AssertionError("Mask editing in " + layer.getName());
+                }
             } else {
-                return false;
+                throw new AssertionError("No mask found in " + layer.getName());
             }
         }
 
@@ -67,7 +71,7 @@ enum TestingMode {
             tester.addLayerMask(true);
             tester.pressCtrlOne();
 
-            assert tester.checkConsistency();
+            tester.checkConsistency();
         }
     },
     /**
@@ -75,15 +79,15 @@ enum TestingMode {
      */
     ON_MASK_VIEW_LAYER(EDIT_MASK) {
         @Override
-        public boolean isSet(Layer layer) {
+        public void assertIsSetOn(Layer layer) {
             if (layer.hasMask()) {
                 if (layer.isMaskEditing()) {
-                    return isActualMaskViewMode(EDIT_MASK);
+                    assertMaskViewModeIs(EDIT_MASK);
                 } else {
-                    return false;
+                    throw new AssertionError("Not mask editing in " + layer.getName());
                 }
             } else {
-                return false;
+                throw new AssertionError("No mask found in " + layer.getName());
             }
         }
 
@@ -92,7 +96,7 @@ enum TestingMode {
             tester.addLayerMask(true);
             tester.pressCtrlThree();
 
-            assert tester.checkConsistency();
+            tester.checkConsistency();
         }
     },
     /**
@@ -100,15 +104,15 @@ enum TestingMode {
      */
     ON_MASK_VIEW_MASK(SHOW_MASK) {
         @Override
-        public boolean isSet(Layer layer) {
+        public void assertIsSetOn(Layer layer) {
             if (layer.hasMask()) {
                 if (layer.isMaskEditing()) {
-                    return isActualMaskViewMode(SHOW_MASK);
+                    assertMaskViewModeIs(SHOW_MASK);
                 } else {
-                    return false;
+                    throw new AssertionError("Not mask editing in " + layer.getName());
                 }
             } else {
-                return false;
+                throw new AssertionError("No mask found in " + layer.getName());
             }
         }
 
@@ -117,7 +121,7 @@ enum TestingMode {
             tester.addLayerMask(true);
             tester.pressCtrlTwo();
 
-            assert tester.checkConsistency();
+            tester.checkConsistency();
         }
     },
     /**
@@ -125,15 +129,15 @@ enum TestingMode {
      */
     RUBY(RUBYLITH) {
         @Override
-        public boolean isSet(Layer layer) {
+        public void assertIsSetOn(Layer layer) {
             if (layer.hasMask()) {
                 if (layer.isMaskEditing()) {
-                    return isActualMaskViewMode(RUBYLITH);
+                    assertMaskViewModeIs(RUBYLITH);
                 } else {
-                    return false;
+                    throw new AssertionError("Not mask editing in " + layer.getName());
                 }
             } else {
-                return false;
+                throw new AssertionError("No mask found in " + layer.getName());
             }
         }
 
@@ -142,7 +146,7 @@ enum TestingMode {
             tester.addLayerMask(true);
             tester.pressCtrlFour();
 
-            assert tester.checkConsistency();
+            tester.checkConsistency();
         }
     };
 
@@ -156,14 +160,18 @@ enum TestingMode {
         return viewMode.editMask();
     }
 
-    protected static boolean isActualMaskViewMode(MaskViewMode expected) {
-        return ImageComponents.getActiveIC().getMaskViewMode() == expected;
+    protected static void assertMaskViewModeIs(MaskViewMode expected) {
+        MaskViewMode actual = ImageComponents.getActiveIC().getMaskViewMode();
+        if (actual != expected) {
+            throw new AssertionError("expected mask view mode " + expected
+                    + ", found " + actual);
+        }
     }
 
     /**
-     * Return true if the testing mode is set
+     * Assert that the testing mode is set on the given layer
      */
-    public abstract boolean isSet(Layer layer);
+    public abstract void assertIsSetOn(Layer layer);
 
     /**
      * Make sure that the testing more is set

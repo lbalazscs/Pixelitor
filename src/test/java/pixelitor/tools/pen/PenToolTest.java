@@ -29,6 +29,7 @@ import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 
 import static org.junit.Assert.assertTrue;
+import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
@@ -208,7 +209,7 @@ public class PenToolTest {
         release(100, 50);
         assertThat(ap1).isAt(100, 50);
 
-        assertThat(History.asStringList()).containsExactly(
+        assertHistoryEditsAre(
                 "Subpath Start",
                 "Add Anchor Point",
                 "Add Anchor Point",

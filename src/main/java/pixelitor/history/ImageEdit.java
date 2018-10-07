@@ -108,7 +108,7 @@ public class ImageEdit extends FadeableEdit {
         } else {
             tmp = dr.getSelectedSubImage(false);
         }
-        dr.changeImageUndoRedo(backupImage, ignoreSelection);
+        dr.changeImageForUndoRedo(backupImage, ignoreSelection);
 
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);

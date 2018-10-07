@@ -34,11 +34,11 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.CYAN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
@@ -132,7 +132,7 @@ public class FilterParamTest {
         param.reset(false);
 
         checkThatFilterWasNotCalled();
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param).isSetToDefault();
     }
 
     @Test
@@ -143,7 +143,7 @@ public class FilterParamTest {
             // in this case we don't know whether to expect
             // the calling of the filter
             param.reset(true);
-            assertThat(param.isSetToDefault()).isTrue();
+            assertThat(param).isSetToDefault();
             return;
         }
 
@@ -156,7 +156,7 @@ public class FilterParamTest {
         }
 
         param.reset(true);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param).isSetToDefault();
 
         verify(adjustmentListener, times(1)).paramAdjusted();
     }
@@ -174,8 +174,8 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testSimpleMethods() {
-        assertThat(param.getName()).isEqualTo("Param Name");
+    public void testSimpleMethodsDontCallFilter() {
+        assertThat(param).nameIs("Param Name");
 
         JComponent gui = param.createGUI();
         param.considerImageSize(new Rectangle(0, 0, 1000, 600));

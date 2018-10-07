@@ -321,21 +321,27 @@ public class History {
 
     @VisibleForTesting
     public static void assertEditToBeUndoneNameIs(String expected) {
-        String name = undoManager.getEditToBeUndone().getName();
+        PixelitorEdit editToBeUndone = undoManager.getEditToBeUndone();
+        if (editToBeUndone == null) {
+            throw new AssertionError("there is no edit to be undone");
+        }
+        String name = editToBeUndone.getName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
-                    "Expected '%s' as the edit to be undone name, but found '%s'",
-                    expected, name));
+                    "Expected '%s', found '%s'", expected, name));
         }
     }
 
     @VisibleForTesting
     public static void assertEditToBeRedoneNameIs(String expected) {
-        String name = undoManager.getEditToBeRedone().getName();
+        PixelitorEdit editToBeRedone = undoManager.getEditToBeRedone();
+        if (editToBeRedone == null) {
+            throw new AssertionError("there is no edit to be redone");
+        }
+        String name = editToBeRedone.getName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
-                    "Expected '%s' as the edit to be redone name, but found '%s'",
-                    expected, name));
+                    "Expected '%s', found '%s'", expected, name));
         }
     }
 
@@ -367,8 +373,8 @@ public class History {
     }
 
     @VisibleForTesting
-    public static List<String> asStringList() {
-        return undoManager.asStringList();
+    public static List<String> getEditNames() {
+        return undoManager.getEditNames();
     }
 
     @VisibleForTesting

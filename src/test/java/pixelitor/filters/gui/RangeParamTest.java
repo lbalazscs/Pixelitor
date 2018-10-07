@@ -19,11 +19,11 @@ package pixelitor.filters.gui;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -42,23 +42,23 @@ public class RangeParamTest {
     public void test_setValue() {
         RangeParam param = new RangeParam("Test", 0, 50, 100);
         assertThat(param.getValue()).isEqualTo(50);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param).isSetToDefault();
 
         ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(al);
 
         param.setValue(50, true);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param).isSetToDefault();
         // expect no triggering because the value didn't change
         verify(al, never()).paramAdjusted();
 
         param.setValue(60, true);
-        assertThat(param.isSetToDefault()).isFalse();
+        assertThat(param).isNotSetToDefault();
         // expect one triggering
         verify(al, times(1)).paramAdjusted();
 
         param.setValue(50, false);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param).isSetToDefault();
         // expect no new triggering, because triggering was set to false
         verify(al, times(1)).paramAdjusted();
     }

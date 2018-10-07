@@ -130,7 +130,8 @@ public class OpenRaster {
                                      ZipOutputStream zos,
                                      ProgressTracker pt) throws IOException {
         String stackXML = format(Locale.ENGLISH,
-                "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+                "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
+                        "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
                 layer.getName(),
                 layer.getVisibilityAsORAString(),
                 layer.getBlendingMode().toSVGName(),
@@ -232,7 +233,7 @@ public class OpenRaster {
 
             comp.addLayerInInitMode(layer);
         }
-        comp.setActiveLayer(comp.getLayer(0), false);
+        comp.setActiveLayer(comp.getLayer(0));
 
         pt.finish();
 

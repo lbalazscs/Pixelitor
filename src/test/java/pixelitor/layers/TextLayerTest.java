@@ -35,8 +35,8 @@ import pixelitor.testutils.WithMask;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class TextLayerTest {
@@ -83,20 +83,26 @@ public class TextLayerTest {
     }
 
     @Test
-    public void testRasterize() {
-        checkThereIsOnlyOneLayerOfType(TextLayer.class);
+    public void test_replaceWithRasterized() {
+        assertThat(comp)
+                .numLayersIs(1)
+                .typeOfLayerNIs(0, TextLayer.class);
 
         layer.replaceWithRasterized();
-
-        checkThereIsOnlyOneLayerOfType(ImageLayer.class);
+        assertThat(comp)
+                .numLayersIs(1)
+                .typeOfLayerNIs(0, ImageLayer.class);
         History.assertNumEditsIs(1);
-        History.assertLastEditNameIs("Text Layer Rasterize");
 
-        History.undo();
-        checkThereIsOnlyOneLayerOfType(TextLayer.class);
+        History.undo("Rasterize Text Layer");
+        assertThat(comp)
+                .numLayersIs(1)
+                .typeOfLayerNIs(0, TextLayer.class);
 
-        History.redo();
-        checkThereIsOnlyOneLayerOfType(ImageLayer.class);
+        History.redo("Rasterize Text Layer");
+        assertThat(comp)
+                .numLayersIs(1)
+                .typeOfLayerNIs(0, ImageLayer.class);
 
         iconUpdates.check(0, 0);
     }
@@ -104,19 +110,16 @@ public class TextLayerTest {
     @Test
     public void test_enlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
+
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void test_createMovementEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
+
         assertThat(edit).isNotNull();
         iconUpdates.check(0, 0);
-    }
-
-    private void checkThereIsOnlyOneLayerOfType(Class<? extends Layer> type) {
-        assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getActiveLayer()).isInstanceOf(type);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -131,8 +134,7 @@ public class TextLayerTest {
     public void test_commitSettings_OK() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
-        assertThat(layer.getName()).isEqualTo(oldText);
-
+        assertThat(layer).nameIs(oldText);
         String newText = "New Text";
         TextSettings newSettings = new TextSettings(oldSettings);
         newSettings.setText(newText);
@@ -140,15 +142,20 @@ public class TextLayerTest {
 
         layer.commitSettings(oldSettings);
 
-        assertThat(layer.getName()).isEqualTo(newText);
+        assertThat(layer)
+                .textIs(newText)
+                .nameIs(newText);
         History.assertNumEditsIs(1);
-        History.assertLastEditNameIs("Text Layer Change");
 
-        History.undo();
-        assertThat(layer.getName()).isEqualTo(oldText);
+        History.undo("Text Layer Change");
+        assertThat(layer)
+                .textIs(oldText)
+                .nameIs(oldText);
 
-        History.redo();
-        assertThat(layer.getName()).isEqualTo(newText);
+        History.redo("Text Layer Change");
+        assertThat(layer)
+                .textIs(newText)
+                .nameIs(newText);
 
         iconUpdates.check(0, 0);
     }

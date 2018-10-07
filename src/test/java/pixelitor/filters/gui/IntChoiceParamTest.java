@@ -20,11 +20,11 @@ package pixelitor.filters.gui;
 import org.junit.Test;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class IntChoiceParamTest {
@@ -38,7 +38,7 @@ public class IntChoiceParamTest {
         }, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
-            assertThat(param.getValue()).isEqualTo(1);
+            assertThat(param).valueIs(1);
         }
     }
 
@@ -51,25 +51,35 @@ public class IntChoiceParamTest {
                 v2,
         });
 
-        assertThat(param.getSelectedItem().toString()).isEqualTo("Item 1");
-        assertThat(param.getValue()).isEqualTo(1);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param)
+                .isSetToDefault()
+                .valueIs(1)
+                .selectedAsStringIs("Item 1");
 
         ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(al);
 
         param.setSelectedItem(v1, true);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param)
+                .isSetToDefault()
+                .valueIs(1)
+                .selectedAsStringIs("Item 1");
         // expect no triggering because the value didn't change
         verify(al, never()).paramAdjusted();
 
         param.setSelectedItem(v2, true);
-        assertThat(param.isSetToDefault()).isFalse();
+        assertThat(param)
+                .isNotSetToDefault()
+                .valueIs(2)
+                .selectedAsStringIs("Item 2");
         // expect one triggering
         verify(al, times(1)).paramAdjusted();
 
         param.setSelectedItem(v1, false);
-        assertThat(param.isSetToDefault()).isTrue();
+        assertThat(param)
+                .isSetToDefault()
+                .valueIs(1)
+                .selectedAsStringIs("Item 1");
         // expect no new triggering, because triggering was set to false
         verify(al, times(1)).paramAdjusted();
     }

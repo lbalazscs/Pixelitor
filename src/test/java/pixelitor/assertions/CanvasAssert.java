@@ -35,67 +35,40 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         super(actual, CanvasAssert.class);
     }
 
-    /**
-     * Verifies that the actual Canvas's bounds is equal to the given one.
-     *
-     * @param bounds the given bounds to compare the actual Canvas's bounds to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's bounds is not equal to the given one.
-     */
     public CanvasAssert hasImBounds(java.awt.Rectangle bounds) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting bounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting bounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // null safe check
         java.awt.Rectangle actualBounds = actual.getImBounds();
         if (!Objects.areEqual(actualBounds, bounds)) {
-            failWithMessage(assertjErrorMessage, actual, bounds, actualBounds);
+            failWithMessage(msg, actual, bounds, actualBounds);
         }
 
         return this;
     }
 
-    /**
-     * Verifies that the actual Canvas's height is equal to the given one.
-     *
-     * @param height the given height to compare the actual Canvas's height to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's height is not equal to the given one.
-     */
     public CanvasAssert hasImHeight(int height) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting height of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting height of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // check
         int actualHeight = actual.getImHeight();
         if (actualHeight != height) {
-            failWithMessage(assertjErrorMessage, actual, height, actualHeight);
+            failWithMessage(msg, actual, height, actualHeight);
         }
 
         return this;
     }
 
-    /**
-     * Verifies that the actual Canvas's width is equal to the given one.
-     *
-     * @param width the given width to compare the actual Canvas's width to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Canvas's width is not equal to the given one.
-     */
     public CanvasAssert hasImWidth(int width) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // check
         int actualWidth = actual.getImWidth();
         if (actualWidth != width) {
-            failWithMessage(assertjErrorMessage, actual, width, actualWidth);
+            failWithMessage(msg, actual, width, actualWidth);
         }
 
         return this;
@@ -107,13 +80,11 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
     public CanvasAssert hasCoWidth(int coWidth) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting component space width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting component space width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // check
         int actualCoWidth = actual.getCoWidth();
         if (actualCoWidth != coWidth) {
-            failWithMessage(assertjErrorMessage, actual, coWidth, actualCoWidth);
+            failWithMessage(msg, actual, coWidth, actualCoWidth);
         }
 
         return this;
@@ -125,13 +96,11 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
     public CanvasAssert hasCoHeight(int coHeight) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting coHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting coHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // check
         int actualCoHeight = actual.getCoHeight();
         if (actualCoHeight != coHeight) {
-            failWithMessage(assertjErrorMessage, actual, coHeight, actualCoHeight);
+            failWithMessage(msg, actual, coHeight, actualCoHeight);
         }
 
         return this;
@@ -143,13 +112,11 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
     public CanvasAssert hasCoSize(java.awt.Dimension coSize) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting coSize of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting coSize of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // null safe check
         java.awt.Dimension actualCoSize = actual.getCoSize();
         if (!Objects.areEqual(actualCoSize, coSize)) {
-            failWithMessage(assertjErrorMessage, actual, coSize, actualCoSize);
+            failWithMessage(msg, actual, coSize, actualCoSize);
         }
 
         return this;

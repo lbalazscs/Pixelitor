@@ -31,9 +31,9 @@ import pixelitor.tools.Shift;
 import pixelitor.tools.Tools;
 
 import java.awt.Graphics2D;
-import java.util.List;
 
 import static org.mockito.Mockito.mock;
+import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
@@ -674,12 +674,11 @@ public class PathBuilderTest {
     }
 
     private void undoRedo3PointSubpath(SubPath sp, boolean closed) {
-        List<String> edits = History.asStringList();
         if (closed) {
             assertThat(sp)
                     .isClosed()
                     .isFinished();
-            assertThat(edits).containsExactly(
+            assertHistoryEditsAre(
                     "Subpath Start",
                     "Add Anchor Point",
                     "Add Anchor Point",
@@ -688,7 +687,7 @@ public class PathBuilderTest {
             assertThat(sp)
                     .isNotClosed()
                     .isFinished();
-            assertThat(edits).containsExactly(
+            assertHistoryEditsAre(
                     "Subpath Start",
                     "Add Anchor Point",
                     "Add Anchor Point",
@@ -765,7 +764,7 @@ public class PathBuilderTest {
     private void undoRedoMultipleSubpaths() {
         // undo and redo everything, adding mouse movements to
         // check that the state left bt undo/redo is OK
-        assertThat(History.asStringList()).containsExactly(
+        assertHistoryEditsAre(
                 "Subpath Start",
                 "Add Anchor Point",
                 "Add Anchor Point",

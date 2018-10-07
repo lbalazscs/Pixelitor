@@ -15,26 +15,25 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.guitest;
 
-import org.junit.Test;
+import org.assertj.swing.edt.GuiActionRunner;
+import pixelitor.gui.ImageComponent;
+import pixelitor.gui.ImageComponents;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.awt.Rectangle;
 
 /**
- * Tests utility helpers
+ * Queries that run on the EDT, and return their result for other threads
  */
-public class UtilsTest {
-    @Test
-    public void test_parseJavaVersion() {
-        int v8 = Utils.parseJavaVersion("1.8.0_161");
-        int v9 = Utils.parseJavaVersion("9.0.1");
-        int v10 = Utils.parseJavaVersion("10.0.1");
-        int v11 = Utils.parseJavaVersion("11");
+public class EDTQueries {
+    private EDTQueries() {
+    }
 
-        assertThat(v8).isEqualTo(8);
-        assertThat(v9).isEqualTo(9);
-        assertThat(v10).isEqualTo(10);
-        assertThat(v11).isEqualTo(11);
+    public static Rectangle getCanvasBounds() {
+        return GuiActionRunner.execute(() -> {
+            ImageComponent ic = ImageComponents.getActiveIC();
+            return ic.getVisibleCanvasBoundsOnScreen();
+        });
     }
 }

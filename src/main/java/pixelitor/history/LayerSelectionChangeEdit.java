@@ -29,8 +29,8 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
     private Layer oldLayer;
     private Layer newLayer;
 
-    public LayerSelectionChangeEdit(Composition comp, Layer oldLayer, Layer newLayer) {
-        super("Layer Selection Change", comp);
+    public LayerSelectionChangeEdit(String editName, Composition comp, Layer oldLayer, Layer newLayer) {
+        super(editName == null ? "Layer Selection Change" : editName, comp);
 
         this.oldLayer = oldLayer;
         this.newLayer = newLayer;
@@ -40,14 +40,14 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.setActiveLayer(oldLayer, false);
+        comp.setActiveLayer(oldLayer);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.setActiveLayer(newLayer, false);
+        comp.setActiveLayer(newLayer);
     }
 
     @Override

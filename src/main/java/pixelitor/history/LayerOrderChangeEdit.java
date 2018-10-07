@@ -29,8 +29,8 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     private final int oldLayerIndex;
     private final int newLayerIndex;
 
-    public LayerOrderChangeEdit(Composition comp, int oldLayerIndex, int newLayerIndex) {
-        super("Layer Order Change", comp);
+    public LayerOrderChangeEdit(String editName, Composition comp, int oldLayerIndex, int newLayerIndex) {
+        super(editName == null ? "Layer Order Change" : editName, comp);
 
         this.oldLayerIndex = oldLayerIndex;
         this.newLayerIndex = newLayerIndex;
@@ -40,13 +40,13 @@ public class LayerOrderChangeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.changeLayerOrder(newLayerIndex, oldLayerIndex, false);
+        comp.changeLayerOrder(newLayerIndex, oldLayerIndex);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        comp.changeLayerOrder(oldLayerIndex, newLayerIndex, false);
+        comp.changeLayerOrder(oldLayerIndex, newLayerIndex);
     }
 }

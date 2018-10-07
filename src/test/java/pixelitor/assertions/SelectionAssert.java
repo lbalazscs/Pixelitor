@@ -35,16 +35,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         super(actual, SelectionAssert.class);
     }
 
-    /**
-     * Verifies that the actual Selection is alive.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is not alive.
-     */
     public SelectionAssert isAlive() {
         isNotNull();
 
-        // check that property call/field access is true
         if (!actual.isAlive()) {
             failWithMessage("\nExpecting that actual Selection is alive but is not.");
         }
@@ -52,16 +45,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is not alive.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is alive.
-     */
     public SelectionAssert isNotAlive() {
         isNotNull();
 
-        // check that property call/field access is false
         if (actual.isAlive()) {
             failWithMessage("\nExpecting that actual Selection is not alive but is.");
         }
@@ -69,16 +55,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is frozen.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is not frozen.
-     */
     public SelectionAssert isFrozen() {
         isNotNull();
 
-        // check that property call/field access is true
         if (!actual.isFrozen()) {
             failWithMessage("\nExpecting that actual Selection is frozen but is not.");
         }
@@ -86,16 +65,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is not frozen.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is frozen.
-     */
     public SelectionAssert isNotFrozen() {
         isNotNull();
 
-        // check that property call/field access is false
         if (actual.isFrozen()) {
             failWithMessage("\nExpecting that actual Selection is not frozen but is.");
         }
@@ -103,16 +75,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is hidden.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is not hidden.
-     */
     public SelectionAssert isHidden() {
         isNotNull();
 
-        // check that property call/field access is true
         if (!actual.isHidden()) {
             failWithMessage("\nExpecting that actual Selection is hidden but is not.");
         }
@@ -120,16 +85,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is not hidden.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is hidden.
-     */
     public SelectionAssert isNotHidden() {
         isNotNull();
 
-        // check that property call/field access is false
         if (actual.isHidden()) {
             failWithMessage("\nExpecting that actual Selection is not hidden but is.");
         }
@@ -137,16 +95,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is marching.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is not marching.
-     */
     public SelectionAssert isMarching() {
         isNotNull();
 
-        // check that property call/field access is true
         if (!actual.isMarching()) {
             failWithMessage("\nExpecting that actual Selection is marching but is not.");
         }
@@ -154,16 +105,9 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection is not marching.
-     *
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection is marching.
-     */
     public SelectionAssert isNotMarching() {
         isNotNull();
 
-        // check that property call/field access is false
         if (actual.isMarching()) {
             failWithMessage("\nExpecting that actual Selection is not marching but is.");
         }
@@ -171,45 +115,27 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection's shape is equal to the given one.
-     *
-     * @param shape the given shape to compare the actual Selection's shape to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection's shape is not equal to the given one.
-     */
     public SelectionAssert hasShape(java.awt.Shape shape) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting shape of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting shape of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // null safe check
         java.awt.Shape actualShape = actual.getShape();
         if (!Objects.areEqual(actualShape, shape)) {
-            failWithMessage(assertjErrorMessage, actual, shape, actualShape);
+            failWithMessage(msg, actual, shape, actualShape);
         }
 
         return this;
     }
 
-    /**
-     * Verifies that the actual Selection's shapeBounds is equal to the given one.
-     *
-     * @param shapeBounds the given shapeBounds to compare the actual Selection's shapeBounds to.
-     * @return this assertion object.
-     * @throws AssertionError - if the actual Selection's shapeBounds is not equal to the given one.
-     */
     public SelectionAssert hasShapeBounds(java.awt.Rectangle shapeBounds) {
         isNotNull();
 
-        // overrides the default error message with a more explicit one
-        String assertjErrorMessage = "\nExpecting shapeBounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
+        String msg = "\nExpecting shapeBounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        // null safe check
         java.awt.Rectangle actualShapeBounds = actual.getShapeBounds();
         if (!Objects.areEqual(actualShapeBounds, shapeBounds)) {
-            failWithMessage(assertjErrorMessage, actual, shapeBounds, actualShapeBounds);
+            failWithMessage(msg, actual, shapeBounds, actualShapeBounds);
         }
 
         return this;

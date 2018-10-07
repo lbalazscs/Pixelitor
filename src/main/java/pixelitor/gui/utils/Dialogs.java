@@ -38,10 +38,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
@@ -218,16 +216,25 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (Build.CURRENT.isFinal()) {
+        if (Build.isFinal()) {
             return;
         }
 
-        Predicate<String> isRandomGUITest = s -> s.contains("RandomGUITest");
-        Predicate<String> isAssertJSwingTest = s -> s.contains("AssertJSwingTest");
-        boolean autoTest = Arrays.stream(e.getStackTrace())
-                .map(StackTraceElement::getClassName)
-                .anyMatch(isRandomGUITest.or(isAssertJSwingTest));
+        boolean randomGUITest = false;
+        boolean assertJSwingTest = false;
+        StackTraceElement[] stackTraceElements = e.getStackTrace();
+        for (StackTraceElement ste : stackTraceElements) {
+            String className = ste.getClassName();
+            if (className.contains("RandomGUITest")) {
+                randomGUITest = true;
+                break;
+            } else if (className.contains("AssertJSwingTest")) {
+                assertJSwingTest = true;
+                break;
+            }
+        }
 
+        boolean autoTest = randomGUITest || assertJSwingTest;
         if (!autoTest) {
             return;
         }
@@ -236,7 +243,9 @@ public class Dialogs {
         // the event dumps
         Utils.sleep(2, TimeUnit.SECONDS);
 
-        Events.dumpForActiveComp();
+        if (randomGUITest) {
+            Events.dumpForActiveComp();
+        }
         Toolkit.getDefaultToolkit().beep();
         playWarningSound();
     }

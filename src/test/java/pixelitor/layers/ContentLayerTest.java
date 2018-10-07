@@ -35,8 +35,8 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * Tests the functionality common to all ContentLayer subclasses
@@ -94,23 +94,19 @@ public class ContentLayerTest {
 
     @Test
     public void testLayerMovingMethods() {
-        assertThat(layer.getTX()).isEqualTo(0);
-        assertThat(layer.getTY()).isEqualTo(0);
+        assertThat(layer).translationIs(0, 0);
 
         layer.startMovement();
 
-        assertThat(layer.getTX()).isEqualTo(0);
-        assertThat(layer.getTY()).isEqualTo(0);
+        assertThat(layer).translationIs(0, 0);
 
         layer.moveWhileDragging(2, 2);
 
-        assertThat(layer.getTX()).isEqualTo(2);
-        assertThat(layer.getTY()).isEqualTo(2);
+        assertThat(layer).translationIs(2, 2);
 
         layer.moveWhileDragging(3, 3);
 
-        assertThat(layer.getTX()).isEqualTo(3);
-        assertThat(layer.getTY()).isEqualTo(3);
+        assertThat(layer).translationIs(3, 3);
 
         // endMovement is called on the composition
         // so that we have history
@@ -134,22 +130,22 @@ public class ContentLayerTest {
         iconUpdates.check(2, 2);
 
         History.assertNumEditsIs(2);
-        History.undo();
+        History.undo("Move Layer");
         checkTranslationAfterPositiveDrag();
-        History.undo();
-        assertThat(layer.getTX()).isEqualTo(0);
-        assertThat(layer.getTY()).isEqualTo(0);
+        History.undo("Move Layer");
+        assertThat(layer).translationIs(0, 0);
+
+        History.redo("Move Layer");
+        History.redo("Move Layer");
     }
 
     private void checkTranslationAfterPositiveDrag() {
         if (layer instanceof ImageLayer) {
             // the layer was enlarged in endMovement, and the translation reset to 0, 0
-            assertThat(layer.getTX()).isEqualTo(0);
-            assertThat(layer.getTY()).isEqualTo(0);
+            assertThat(layer).translationIs(0, 0);
         } else if (layer instanceof TextLayer) {
             // text layers can have positive translations
-            assertThat(layer.getTX()).isEqualTo(3);
-            assertThat(layer.getTY()).isEqualTo(3);
+            assertThat(layer).translationIs(3, 3);
         } else {
             throw new IllegalStateException("unexpected layer " + layer.getClass().getName());
         }
@@ -157,11 +153,9 @@ public class ContentLayerTest {
 
     private void checkTranslationAfterNegativeDrag() {
         if (layer instanceof ImageLayer) {
-            assertThat(layer.getTX()).isEqualTo(-1);
-            assertThat(layer.getTY()).isEqualTo(-2);
+            assertThat(layer).translationIs(-1, -2);
         } else if (layer instanceof TextLayer) {
-            assertThat(layer.getTX()).isEqualTo(2);
-            assertThat(layer.getTY()).isEqualTo(1);
+            assertThat(layer).translationIs(2, 1);
         }
     }
 

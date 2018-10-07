@@ -49,7 +49,7 @@ public interface Drawable {
 
     void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason cr, String filterName);
 
-    void changeImageUndoRedo(BufferedImage img, boolean ignoreSelection);
+    void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection);
 
     BufferedImage getImageForFilterDialogs();
 

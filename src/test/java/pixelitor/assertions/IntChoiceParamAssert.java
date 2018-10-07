@@ -15,26 +15,35 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.assertions;
 
-import org.junit.Test;
+
+import pixelitor.filters.gui.IntChoiceParam;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Tests utility helpers
- */
-public class UtilsTest {
-    @Test
-    public void test_parseJavaVersion() {
-        int v8 = Utils.parseJavaVersion("1.8.0_161");
-        int v9 = Utils.parseJavaVersion("9.0.1");
-        int v10 = Utils.parseJavaVersion("10.0.1");
-        int v11 = Utils.parseJavaVersion("11");
 
-        assertThat(v8).isEqualTo(8);
-        assertThat(v9).isEqualTo(9);
-        assertThat(v10).isEqualTo(10);
-        assertThat(v11).isEqualTo(11);
+/**
+ * Custom AssertJ assertions for {@link IntChoiceParam} objects.
+ */
+public class IntChoiceParamAssert extends FilterParamAssert<IntChoiceParamAssert, IntChoiceParam> {
+    public IntChoiceParamAssert(IntChoiceParam actual) {
+        super(actual, IntChoiceParamAssert.class);
+    }
+
+    public IntChoiceParamAssert valueIs(int value) {
+        isNotNull();
+
+        assertThat(actual.getValue()).isEqualTo(value);
+
+        return this;
+    }
+
+    public IntChoiceParamAssert selectedAsStringIs(String value) {
+        isNotNull();
+
+        assertThat(actual.getSelectedItem().toString()).isEqualTo(value);
+
+        return this;
     }
 }

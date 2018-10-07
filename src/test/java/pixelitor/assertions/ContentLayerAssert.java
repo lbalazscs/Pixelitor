@@ -15,26 +15,27 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.assertions;
 
-import org.junit.Test;
+import pixelitor.layers.ContentLayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests utility helpers
+ * Custom AssertJ assertions for {@link ContentLayer} objects.
  */
-public class UtilsTest {
-    @Test
-    public void test_parseJavaVersion() {
-        int v8 = Utils.parseJavaVersion("1.8.0_161");
-        int v9 = Utils.parseJavaVersion("9.0.1");
-        int v10 = Utils.parseJavaVersion("10.0.1");
-        int v11 = Utils.parseJavaVersion("11");
-
-        assertThat(v8).isEqualTo(8);
-        assertThat(v9).isEqualTo(9);
-        assertThat(v10).isEqualTo(10);
-        assertThat(v11).isEqualTo(11);
+public class ContentLayerAssert<S extends ContentLayerAssert<S, T>, T extends ContentLayer> extends LayerAssert<S, T> {
+    public ContentLayerAssert(T actual, Class<S> selfType) {
+        super(actual, selfType);
     }
+
+    public S translationIs(int tx, int ty) {
+        isNotNull();
+
+        assertThat(actual.getTX()).isEqualTo(tx);
+        assertThat(actual.getTY()).isEqualTo(ty);
+
+        return myself;
+    }
+
 }

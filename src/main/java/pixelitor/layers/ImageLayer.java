@@ -499,7 +499,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void changeImageUndoRedo(BufferedImage img, boolean ignoreSelection) {
+    public void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection) {
         requireNonNull(img);
         assert img != image; // simple filters always change something
         assert state == NORMAL;

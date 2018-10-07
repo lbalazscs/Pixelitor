@@ -21,7 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * A utility class that helps to check that the image layer icon images
+ * A utility class that checks that the image layer icon images
  * and the mask icon images are updated the correct number of times.
  */
 public class IconUpdateChecker {

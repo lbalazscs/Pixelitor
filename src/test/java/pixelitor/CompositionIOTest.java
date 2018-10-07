@@ -36,11 +36,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
-public class CompositionCreationTest {
+public class CompositionIOTest {
     @BeforeClass
     public static void setupClass() {
         Build.setTestingMode();
@@ -50,10 +48,10 @@ public class CompositionCreationTest {
     public void testNewImage() {
         Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
-        assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasImWidth()).isEqualTo(20);
-        assertThat(comp.getCanvasImHeight()).isEqualTo(20);
-        assertThat(comp.getCompositeImage()).isNotNull();
+        assertThat(comp)
+                .numLayersIs(1)
+                .hasCanvasImWidth(20)
+                .hasCanvasImHeight(20);
     }
 
     private static void testSingleLayerRead(File f) {
@@ -61,12 +59,11 @@ public class CompositionCreationTest {
         checkLoadFuture(cf);
 
         Composition comp = cf.join();
-
-        comp.checkInvariant();
-        assertThat(comp.getNumLayers()).isEqualTo(1);
-        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
-        assertThat(comp.getCompositeImage()).isNotNull();
+        assertThat(comp)
+                .numLayersIs(1)
+                .hasCanvasImWidth(10)
+                .hasCanvasImHeight(10)
+                .invariantIsOK();
     }
 
     private static void checkLoadFuture(CompletableFuture<Composition> cf) {
@@ -82,19 +79,17 @@ public class CompositionCreationTest {
         checkLoadFuture(cf);
 
         Composition comp = cf.join();
-        
-        comp.checkInvariant();
-        assertThat(comp.getNumLayers()).isEqualTo(2);
-        assertThat(comp.getCanvasImWidth()).isEqualTo(10);
-        assertThat(comp.getCanvasImHeight()).isEqualTo(10);
-        assertThat(comp.getCompositeImage()).isNotNull();
+        assertThat(comp)
+                .numLayersIs(2)
+                .hasCanvasImWidth(10)
+                .hasCanvasImHeight(10)
+                .invariantIsOK();
 
         Layer secondLayer = comp.getLayer(1);
         secondLayerChecker.accept(secondLayer);
 
         return comp;
     }
-
 
     @Test
     public void testReadJPEG() {
@@ -132,29 +127,27 @@ public class CompositionCreationTest {
 
         List<Consumer<Layer>> extraChecks = new ArrayList<>();
         // extra check for simple pxc file
-        extraChecks.add(secondLayer -> {
-            assert secondLayer instanceof ImageLayer;
-            assertSame(BlendingMode.MULTIPLY, secondLayer.getBlendingMode());
-            assertEquals(0.75, secondLayer.getOpacity(), 0.0001);
-        });
+        extraChecks.add(secondLayer -> assertThat(secondLayer)
+                .classIs(ImageLayer.class)
+                .blendingModeIs(BlendingMode.MULTIPLY)
+                .opacityIs(0.75f));
         // extra check for pxc with layer mask
-        extraChecks.add(secondLayer -> {
-            assert secondLayer instanceof ImageLayer;
-            assert secondLayer.hasMask();
-            assert secondLayer.getMask().isLinked();
-            assert secondLayer.isMaskEnabled();
-        });
+        extraChecks.add(secondLayer -> assertThat(secondLayer)
+                .classIs(ImageLayer.class)
+                .hasMask()
+                .maskIsLinked()
+                .maskIsEnabled());
         // extra check for pxc with text layer
         extraChecks.add(secondLayer -> {
-            assert !secondLayer.hasMask();
             assert secondLayer instanceof TextLayer;
-            assertThat(((TextLayer) secondLayer).getSettings().getText()).isEqualTo("T");
+            assertThat((TextLayer) secondLayer)
+                    .textIs("T")
+                    .hasNoMask();
         });
         // extra check for pxc with adjustment layer
-        extraChecks.add(secondLayer -> {
-            assert !secondLayer.hasMask();
-            assert secondLayer instanceof AdjustmentLayer;
-        });
+        extraChecks.add(secondLayer -> assertThat(secondLayer)
+                .classIs(AdjustmentLayer.class)
+                .hasNoMask());
 
         for (int i = 0; i < fileNames.length; i++) {
             String fileName = fileNames[i];
@@ -178,11 +171,11 @@ public class CompositionCreationTest {
 
     @Test
     public void testReadWriteORA() throws IOException {
-        Consumer<Layer> extraCheck = secondLayer -> {
-            assert secondLayer instanceof ImageLayer;
-            assertSame(BlendingMode.MULTIPLY, secondLayer.getBlendingMode());
-            assertEquals(0.75, secondLayer.getOpacity(), 0.0001);
-        };
+        Consumer<Layer> extraCheck = secondLayer ->
+                assertThat(secondLayer)
+                        .classIs(ImageLayer.class)
+                        .blendingModeIs(BlendingMode.MULTIPLY)
+                        .opacityIs(0.75f);
 
         // read and test
         File f = new File("src/test/resources/gimp_ora_test_input.ora");
@@ -196,5 +189,4 @@ public class CompositionCreationTest {
 
         tmp.delete();
     }
-
 }

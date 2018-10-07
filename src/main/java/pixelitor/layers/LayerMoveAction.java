@@ -36,6 +36,15 @@ public class LayerMoveAction extends AbstractAction
 
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
+
+    // menu and history names (also for selection movements)
+    public static final String RAISE_LAYER = "Raise Layer";
+    public static final String LOWER_LAYER = "Lower Layer";
+    public static final String LAYER_TO_TOP = "Layer to Top";
+    public static final String LAYER_TO_BOTTOM = "Layer to Bottom";
+    public static final String LOWER_LAYER_SELECTION = "Lower Layer Selection";
+    public static final String RAISE_LAYER_SELECTION = "Raise Layer Selection";
+
     private final boolean up;
 
     private LayerMoveAction(boolean up) {
@@ -107,6 +116,6 @@ public class LayerMoveAction extends AbstractAction
     }
 
     private static String getName(boolean up) {
-        return up ? "Raise Layer" : "Lower Layer";
+        return up ? RAISE_LAYER : LOWER_LAYER;
     }
 }

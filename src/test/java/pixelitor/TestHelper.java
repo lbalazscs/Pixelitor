@@ -24,6 +24,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
@@ -49,19 +50,20 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Random;
 
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_MOVED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
 
@@ -289,12 +291,6 @@ public class TestHelper {
         return standardTestSelectionShape;
     }
 
-    public static void checkSelectionBounds(Composition comp, Rectangle expected) {
-        Selection selection = comp.getSelection();
-        Rectangle shapeBounds = selection.getShapeBounds();
-        assertThat(shapeBounds).isEqualTo(expected);
-    }
-
     public static void setStandardTestTranslationToAllLayers(Composition comp,
                                                              WithTranslation translation) {
         comp.forEachContentLayer(contentLayer -> {
@@ -316,7 +312,7 @@ public class TestHelper {
         Layer activeLayerBefore = comp.getActiveLayer();
         boolean activeLayerChanged = false;
         if (layer != activeLayerBefore) {
-            comp.setActiveLayer(layer, false);
+            comp.setActiveLayer(layer);
             activeLayerChanged = true;
         }
 
@@ -329,7 +325,7 @@ public class TestHelper {
         assert Assertions.translationIs(layer, expectedTX, expectedTY);
 
         if (activeLayerChanged) {
-            comp.setActiveLayer(activeLayerBefore, false);
+            comp.setActiveLayer(activeLayerBefore);
         }
     }
 
@@ -375,5 +371,10 @@ public class TestHelper {
         MouseEvent e = createEvent(x, y, MOUSE_MOVED,
                 ctrl, alt, shift, MouseButton.LEFT, ic);
         Tools.EventDispatcher.mouseMoved(e, ic);
+    }
+
+    public static void assertHistoryEditsAre(String... values) {
+        List<String> edits = History.getEditNames();
+        assertThat(edits).containsExactly(values);
     }
 }

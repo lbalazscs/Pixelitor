@@ -31,8 +31,8 @@ import pixelitor.filters.painters.TextSettings;
 import java.awt.Color;
 import java.awt.Font;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.Composition.fromImage;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.ImageUtils.create1x1Image;
 
 public class LayerBlendingModesTest {
@@ -197,7 +197,7 @@ public class LayerBlendingModesTest {
         // adding an invert adjustment should deliver the inverted color
         Color inverted = invert(expectedColor);
         comp.addLayerInInitMode(invertAdjustment);
-        assertThat(comp.getNumLayers()).isEqualTo(3);
+        assertThat(comp).numLayersIs(3);
         assertThat(getResultingColor()).isEqualTo(inverted);
 
         // adding a white mask to the adjustment should change nothing
@@ -224,7 +224,7 @@ public class LayerBlendingModesTest {
 
         // delete the upper layer
         comp.deleteLayer(upperLayer, true, false);
-        assertThat(comp.getNumLayers()).isEqualTo(1);
+        assertThat(comp).numLayersIs(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color
         comp.addLayerInInitMode(alwaysUpperColorAdjustment);
@@ -243,7 +243,7 @@ public class LayerBlendingModesTest {
         // merging down the adjustment with black mask should have no effect
         comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
-        assertThat(comp.getNumLayers()).isEqualTo(1);
+        assertThat(comp).numLayersIs(1);
 
         // test with text layer
         comp.addLayerInInitMode(upperColorTextLayer);
@@ -262,16 +262,16 @@ public class LayerBlendingModesTest {
         // merging down the text layer with black mask should have no effect
         comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(lowerColor);
-        assertThat(comp.getNumLayers()).isEqualTo(1);
+        assertThat(comp).numLayersIs(1);
 
         // merging down the upper layer should result in the expected color
         comp.addLayerInInitMode(upperLayer);
-        assertThat(comp.getNumLayers()).isEqualTo(2);
+        assertThat(comp).numLayersIs(2);
         upperLayer.setBlendingMode(blendingMode, false, true, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
         comp.mergeActiveLayerDown(false);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
-        assertThat(comp.getNumLayers()).isEqualTo(1);
+        assertThat(comp).numLayersIs(1);
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {

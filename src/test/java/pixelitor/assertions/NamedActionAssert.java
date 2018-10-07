@@ -15,26 +15,24 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor.assertions;
 
-import org.junit.Test;
+import org.assertj.core.api.AbstractAssert;
+import pixelitor.menus.NamedAction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests utility helpers
+ * Custom AssertJ assertions for {@link NamedAction} objects.
  */
-public class UtilsTest {
-    @Test
-    public void test_parseJavaVersion() {
-        int v8 = Utils.parseJavaVersion("1.8.0_161");
-        int v9 = Utils.parseJavaVersion("9.0.1");
-        int v10 = Utils.parseJavaVersion("10.0.1");
-        int v11 = Utils.parseJavaVersion("11");
+public class NamedActionAssert extends AbstractAssert<NamedActionAssert, NamedAction> {
+    public NamedActionAssert(NamedAction actual) {
+        super(actual, NamedActionAssert.class);
+    }
 
-        assertThat(v8).isEqualTo(8);
-        assertThat(v9).isEqualTo(9);
-        assertThat(v10).isEqualTo(10);
-        assertThat(v11).isEqualTo(11);
+    public NamedActionAssert nameIs(String expected) {
+        isNotNull();
+        assertThat(actual.getName()).isEqualTo(expected);
+        return this;
     }
 }

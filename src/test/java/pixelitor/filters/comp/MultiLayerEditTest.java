@@ -128,20 +128,19 @@ public class MultiLayerEditTest {
 
     private void checkOriginalState() {
         assertThat(comp)
-                .hasCanvasWidth(ORIG_CANVAS_WIDTH)
-                .hasCanvasHeight(ORIG_CANVAS_HEIGHT)
+                .hasCanvasImWidth(ORIG_CANVAS_WIDTH)
+                .hasCanvasImHeight(ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
                 .activeLayerTranslationIs(origTX, origTY)
                 .invariantIsOK();
 
         if (withSelection.isYes()) {
-            TestHelper.checkSelectionBounds(comp, origSelection);
+            assertThat(comp).selectionBoundsIs(origSelection);
         }
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTX()).isEqualTo(0);
-            assertThat(layer2.getTY()).isEqualTo(0);
+            assertThat(layer2).translationIs(0, 0);
         }
     }
 
@@ -159,12 +158,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Enlarge Canvas");
 
-            History.undo();
+            History.undo("Enlarge Canvas");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Enlarge Canvas");
             checkEnlargeCanvasAfterState(north, east, south, west);
         }
     }
@@ -203,12 +201,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Resize");
 
-            History.undo();
+            History.undo("Resize");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Resize");
             checkStateAfterResize();
         }
     }
@@ -246,12 +243,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Rotate 90\u00B0 CW");
 
-            History.undo();
+            History.undo("Rotate 90° CW");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Rotate 90° CW");
             checkStateAfterRotate(ANGLE_90);
         }
     }
@@ -264,12 +260,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Rotate 180\u00B0");
 
-            History.undo();
+            History.undo("Rotate 180°");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Rotate 180°");
             checkStateAfterRotate(ANGLE_180);
         }
     }
@@ -282,12 +277,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Rotate 90\u00B0 CCW");
 
-            History.undo();
+            History.undo("Rotate 90° CCW");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Rotate 90° CCW");
             checkStateAfterRotate(ANGLE_270);
         }
     }
@@ -359,8 +353,7 @@ public class MultiLayerEditTest {
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTX()).isEqualTo(0);
-            assertThat(layer2.getTY()).isEqualTo(0);
+            assertThat(layer2).translationIs(0, 0);
         }
 
         assertThat(comp).isDirty().invariantIsOK();
@@ -375,12 +368,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Flip Horizontal");
 
-            History.undo();
+            History.undo("Flip Horizontal");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Flip Horizontal");
             checkStateAfterFlip(HORIZONTAL);
         }
     }
@@ -394,12 +386,11 @@ public class MultiLayerEditTest {
 
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Flip Vertical");
 
-            History.undo();
+            History.undo("Flip Vertical");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Flip Vertical");
             checkStateAfterFlip(VERTICAL);
         }
     }
@@ -442,8 +433,7 @@ public class MultiLayerEditTest {
 
         if (numLayers == NumLayers.MORE) {
             // check the translation of the non-active layer
-            assertThat(layer2.getTX()).isEqualTo(0);
-            assertThat(layer2.getTY()).isEqualTo(0);
+            assertThat(layer2).translationIs(0, 0);
         }
     }
 
@@ -457,12 +447,11 @@ public class MultiLayerEditTest {
         // test undo with one layer
         if (numLayers.canUndo()) {
             History.assertNumEditsIs(1);
-            History.assertLastEditNameIs("Crop");
 
-            History.undo();
+            History.undo("Crop");
             checkOriginalState();
 
-            History.redo();
+            History.redo("Crop");
             checkAfterCropState();
         }
 
