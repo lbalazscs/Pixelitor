@@ -63,13 +63,10 @@ public class MaskFromColorRangePanel extends JPanel {
     private static final String PREVIEW_MODE_WHITE_MATTE = "White Matte";
     private static final String PREVIEW_MODE_RUBYLITH = "Rubylith";
 
-    private final JComboBox<String> colorSpaceCB = new JComboBox(new Value[]{
-            new Value("HSB", MaskFromColorRangeFilter.HSB),
-            new Value("RGB", MaskFromColorRangeFilter.RGB),
-    });
+    private JComboBox<String> colorSpaceCombo;
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
-    private final JCheckBox invertCB = new JCheckBox();
+    private JCheckBox invertCheckBox;
 
     private int lastPickerWidth;
     private int lastPickerHeight;
@@ -89,9 +86,25 @@ public class MaskFromColorRangePanel extends JPanel {
         super(new BorderLayout());
         this.image = image;
 
+        createInvertCheckBox();
+        createColorSpaceComboBox();
+
         add(createNorthPanel(), BorderLayout.NORTH);
         add(createImagesPanel(image), BorderLayout.CENTER);
         add(createSouthPanel(), BorderLayout.SOUTH);
+    }
+
+    private void createInvertCheckBox() {
+        invertCheckBox = new JCheckBox();
+        invertCheckBox.setName("invertCheckBox");
+    }
+
+    private void createColorSpaceComboBox() {
+        colorSpaceCombo = new JComboBox(new Value[]{
+                new Value("HSB", MaskFromColorRangeFilter.HSB),
+                new Value("RGB", MaskFromColorRangeFilter.RGB),
+        });
+        colorSpaceCombo.setName("colorSpaceCombo");
     }
 
     private JPanel createNorthPanel() {
@@ -162,22 +175,26 @@ public class MaskFromColorRangePanel extends JPanel {
         southPanel.add(southEastPanel, BorderLayout.EAST);
 
         SliderSpinner toleranceSlider = new SliderSpinner(tolerance, WEST, false);
+        toleranceSlider.setName("toleranceSlider");
+
         SliderSpinner softnessSlider = new SliderSpinner(softness, WEST, false);
+        softnessSlider.setName("softnessSlider");
+
         southCenterPanel.add(toleranceSlider);
         southCenterPanel.add(softnessSlider);
         southCenterPanel.add(new JLabel("   Invert:"));
-        southCenterPanel.add(invertCB);
+        southCenterPanel.add(invertCheckBox);
 
         southEastPanel.add(new JLabel("   Color Space:"));
-        southEastPanel.add(colorSpaceCB);
+        southEastPanel.add(colorSpaceCombo);
 
         ChangeListener changeListener = e -> updatePreview(lastColor);
         toleranceSlider.addChangeListener(changeListener);
         softnessSlider.addChangeListener(changeListener);
         ActionListener actionListener = e -> updatePreview(lastColor);
-        invertCB.addActionListener(actionListener);
+        invertCheckBox.addActionListener(actionListener);
         previewModeCB.addActionListener(actionListener);
-        colorSpaceCB.addActionListener(actionListener);
+        colorSpaceCombo.addActionListener(actionListener);
 
         return southPanel;
     }
@@ -193,11 +210,11 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        int colorSpace = ((Value) colorSpaceCB.getSelectedItem()).getValue();
+        int colorSpace = ((Value) colorSpaceCombo.getSelectedItem()).getValue();
         filter.setInterpolation(colorSpace);
         filter.setColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getValueAsPercentage());
-        filter.setInvert(invertCB.isSelected());
+        filter.setInvert(invertCheckBox.isSelected());
         return filter;
     }
 
@@ -214,10 +231,9 @@ public class MaskFromColorRangePanel extends JPanel {
             case PREVIEW_MODE_MASK:
                 previewPanel.changeImage(rgbMask);
                 break;
-            case PREVIEW_MODE_RUBYLITH: {
+            case PREVIEW_MODE_RUBYLITH:
                 updateRubyPreview(rgbMask);
                 break;
-            }
             case PREVIEW_MODE_BLACK_MATTE:
                 updateMattePreview(rgbMask, Color.BLACK);
                 break;

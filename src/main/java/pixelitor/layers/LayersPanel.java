@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * The GUI container for {@link LayerButton} objects.
@@ -170,5 +173,17 @@ public class LayersPanel extends JLayeredPane {
         int numButtons = layerButtons.size();
         int allButtonsHeight = numButtons * buttonHeight;
         return new Dimension(10, allButtonsHeight);
+    }
+
+    @VisibleForTesting
+    public int getNumLayerButtons() {
+        return layerButtons.size();
+    }
+
+    @VisibleForTesting
+    public List<String> getLayerNames() {
+        return layerButtons.stream()
+                .map(LayerButton::getLayerName)
+                .collect(toList());
     }
 }

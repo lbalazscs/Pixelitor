@@ -85,6 +85,8 @@ public class History {
     }
 
     public static void addEdit(PixelitorEdit edit) {
+//        Utils.debugCall(edit.getDebugName());
+
         assert edit != null;
         if (ignoreEdits) {
             return;
@@ -153,8 +155,10 @@ public class History {
     }
 
     public static void undo() {
-        if (Build.CURRENT != Build.FINAL) {
-            Events.postUndoEvent(undoManager.getEditToBeUndone());
+        if (Build.isDevelopment()) {
+            PixelitorEdit edit = undoManager.getEditToBeUndone();
+            Events.postUndoEvent(edit);
+//            Utils.debugCall(edit.getDebugName());
         }
 
         try {
@@ -169,8 +173,10 @@ public class History {
     }
 
     public static void redo() {
-        if (Build.CURRENT != Build.FINAL) {
-            Events.postRedoEvent(undoManager.getEditToBeRedone());
+        if (Build.isDevelopment()) {
+            PixelitorEdit edit = undoManager.getEditToBeRedone();
+            Events.postRedoEvent(edit);
+//            Utils.debugCall(edit.getDebugName());
         }
 
         try {
@@ -227,15 +233,6 @@ public class History {
     @VisibleForTesting
     public static PixelitorEdit getLastEdit() {
         return undoManager.getLastEdit();
-    }
-
-    @VisibleForTesting
-    public static String getEditToBeUndoneName() {
-        PixelitorEdit edit = undoManager.getEditToBeUndone();
-        if (edit != null) {
-            return edit.getName();
-        }
-        return "";
     }
 
     /**
@@ -323,7 +320,8 @@ public class History {
     public static void assertEditToBeUndoneNameIs(String expected) {
         PixelitorEdit editToBeUndone = undoManager.getEditToBeUndone();
         if (editToBeUndone == null) {
-            throw new AssertionError("there is no edit to be undone");
+            throw new AssertionError("there is no edit to be undone, " +
+                    "expected " + expected);
         }
         String name = editToBeUndone.getName();
         if (!name.equals(expected)) {
@@ -336,7 +334,8 @@ public class History {
     public static void assertEditToBeRedoneNameIs(String expected) {
         PixelitorEdit editToBeRedone = undoManager.getEditToBeRedone();
         if (editToBeRedone == null) {
-            throw new AssertionError("there is no edit to be redone");
+            throw new AssertionError("there is no edit to be redone, " +
+                    "expected " + expected);
         }
         String name = editToBeRedone.getName();
         if (!name.equals(expected)) {

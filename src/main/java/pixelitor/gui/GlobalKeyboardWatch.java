@@ -103,6 +103,8 @@ public class GlobalKeyboardWatch {
     }
 
     private static void keyPressed(KeyEvent e) {
+//        Utils.debugCall(Utils.debugKeyEvent(e));
+//
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_TAB:
@@ -166,6 +168,8 @@ public class GlobalKeyboardWatch {
     }
 
     private static void keyReleased(KeyEvent e) {
+//        Utils.debugCall(Utils.debugKeyEvent(e));
+//
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_SPACE:

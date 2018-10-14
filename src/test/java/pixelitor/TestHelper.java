@@ -38,7 +38,6 @@ import pixelitor.tools.MouseButton;
 import pixelitor.tools.Shift;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -316,13 +315,13 @@ public class TestHelper {
             activeLayerChanged = true;
         }
 
-        assert Assertions.translationIs(layer, 0, 0);
+        assertThat(layer).translationIs(0, 0);
 
         translation.moveLayer(comp);
 
         int expectedTX = translation.getExpectedTX();
         int expectedTY = translation.getExpectedTY();
-        assert Assertions.translationIs(layer, expectedTX, expectedTY);
+        assertThat(layer).translationIs(expectedTX, expectedTY);
 
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore);

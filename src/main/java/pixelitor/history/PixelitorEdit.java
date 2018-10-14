@@ -83,9 +83,7 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     }
 
     public String getDebugName() {
-        // by default only the presentation name, but
-        // can be overridden to include more information
-        return name;
+        return getClass().getSimpleName() + "/" + name;
     }
 
     public boolean canRepeat() {

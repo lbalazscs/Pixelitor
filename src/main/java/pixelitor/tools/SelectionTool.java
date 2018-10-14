@@ -147,6 +147,7 @@ public class SelectionTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         if (userDrag.isClick() && !polygonal) { // will be handled by mouseClicked
+            restoreInteraction();
             return;
         }
 
@@ -294,8 +295,8 @@ public class SelectionTool extends DragTool {
         return (SelectionInteraction) interactionCombo.getSelectedItem();
     }
 
-    private void setCurrentInteraction(SelectionInteraction intersect) {
-        interactionCombo.setSelectedItem(intersect);
+    private void setCurrentInteraction(SelectionInteraction interaction) {
+        interactionCombo.setSelectedItem(interaction);
     }
 
     @Override

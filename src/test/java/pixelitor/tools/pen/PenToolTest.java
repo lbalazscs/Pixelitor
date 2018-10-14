@@ -183,7 +183,7 @@ public class PenToolTest {
 
         // undo
         assertThat(firstAnchor).isAt(100, 200);
-        undo("Move Handle");
+        undo("Move Anchor Point");
         assertThat(firstAnchor).isAt(100, 100);
 
         // continue building
@@ -214,10 +214,10 @@ public class PenToolTest {
                 "Add Anchor Point",
                 "Add Anchor Point",
                 "Close Subpath",
-                "Move Handle");
+                "Move Anchor Point");
 
         // undo everything
-        undo("Move Handle");
+        undo("Move Anchor Point");
         undo("Close Subpath");
         undo("Add Anchor Point");
         undo("Add Anchor Point");
@@ -242,7 +242,7 @@ public class PenToolTest {
         assertThat(sp).isClosed();
 
         assertThat(ap1).isAt(100, 100);
-        redo("Move Handle");
+        redo("Move Anchor Point");
         assertThat(ap1).isAt(100, 50);
     }
 

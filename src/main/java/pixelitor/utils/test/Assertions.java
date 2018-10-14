@@ -17,11 +17,9 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.Tool;
@@ -39,18 +37,6 @@ import java.awt.image.WritableRaster;
  */
 public class Assertions {
     private Assertions() {
-    }
-
-    public static boolean thereIsSelection() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        if (comp == null) {
-            throw new IllegalStateException();
-        }
-        return comp.hasSelection();
-    }
-
-    public static boolean thereIsNoSelection() {
-        return !thereIsSelection();
     }
 
     @SuppressWarnings("SameReturnValue")
@@ -87,38 +73,6 @@ public class Assertions {
         return mask.isLinked() == linked;
     }
 
-    @SuppressWarnings("SameReturnValue")
-    public static boolean canvasImSizeIs(int width, int height) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
-        if (comp == null) {
-            throw new IllegalStateException();
-        }
-        Canvas canvas = comp.getCanvas();
-        int actualWidth = canvas.getImWidth();
-        int actualHeight = canvas.getImHeight();
-        if (actualWidth == width && actualHeight == height) {
-            return true;
-        } else {
-            throw new AssertionError("Expected width = " + width + ", height = " + height +
-                    ", actual width = " + actualWidth + ", height = " + actualHeight);
-        }
-    }
-
-    public static boolean translationIs(int x, int y) {
-        ContentLayer layer = (ContentLayer) ImageComponents.getActiveLayerOrNull();
-        return translationIs(layer, x, y);
-    }
-
-    public static boolean translationIs(ContentLayer layer, int x, int y) {
-        if (layer == null) {
-            throw new IllegalArgumentException();
-        }
-        boolean eq1 = layer.getTX() == x;
-        boolean eq2 = layer.getTY() == y;
-        assert eq1 : "expected x = " + x + ", found = " + layer.getTX() + " for " + layer.getName();
-        assert eq2 : "expected y = " + y + ", found = " + layer.getTY() + " for " + layer.getName();
-        return eq1 && eq2;
-    }
 
     public static boolean cropToolRectangleBoundsAre(int x, int y, int w, int h) {
         ImageComponent ic = ImageComponents.getActiveIC();

@@ -58,7 +58,6 @@ public class AdvancedTextSettingsPanel extends JPanel {
         addTrackingGUI(map);
     }
 
-
     private void addCheckboxes(Map<TextAttribute, Object> map) {
         boolean strikethrough = false;
         boolean kerning = false;
@@ -72,14 +71,15 @@ public class AdvancedTextSettingsPanel extends JPanel {
             ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
         }
 
-        strikeThroughCB = addCheckBox("Strikethrough:", strikethrough);
-        underlineCB = addCheckBox("Underline:", underline);
-        kerningCB = addCheckBox("Kerning:", kerning);
-        ligaturesCB = addCheckBox("Ligatures:", ligatures);
+        strikeThroughCB = addCheckBox("Strikethrough:", "strikeThroughCB", strikethrough);
+        underlineCB = addCheckBox("Underline:", "underlineCB", underline);
+        kerningCB = addCheckBox("Kerning:", "kerningCB", kerning);
+        ligaturesCB = addCheckBox("Ligatures:", "ligaturesCB", ligatures);
     }
 
-    private JCheckBox addCheckBox(String labelText, boolean selected) {
+    private JCheckBox addCheckBox(String labelText, String name, boolean selected) {
         JCheckBox cb = new JCheckBox("", selected);
+        cb.setName(name);
         cb.addActionListener(actionListener);
         gbh.addLabelWithControl(labelText, cb);
         return cb;
@@ -97,8 +97,9 @@ public class AdvancedTextSettingsPanel extends JPanel {
         trackingParam = new RangeParam("", -20, 0, 70);
         trackingParam.setValue(tracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
-        gbh.addLabelWithControl("Tracking (Letter-spacing):",
-                trackingParam.createGUI());
+        JComponent trackingGUI = trackingParam.createGUI();
+        trackingGUI.setName("trackingGUI");
+        gbh.addLabelWithControl("Tracking (Letter-spacing):", trackingGUI);
     }
 
     public void updateFontAttributesMap(Map<TextAttribute, Object> map) {

@@ -67,6 +67,7 @@ public class DraggablePoint extends Point2D.Double {
     public static DraggablePoint activePoint = null;
 
     // transient: it has to be reset after deserialization
+    @SuppressWarnings("TransientFieldNotInitialized")
     protected transient View view;
 
     // TODO not reliable, currently isActive is also checked
@@ -293,8 +294,12 @@ public class DraggablePoint extends Point2D.Double {
 
         Point2D before = new Point2D.Double(origX, origY);
         HandleMovedEdit edit = new HandleMovedEdit(
-                "Move Handle", this, before, comp);
+                getMoveEditName(), this, before, comp);
         return Optional.of(edit);
+    }
+
+    public String getMoveEditName() {
+        return "Move Handle";
     }
 
     // used only after deserializing from a pxc file

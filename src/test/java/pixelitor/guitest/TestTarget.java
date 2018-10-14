@@ -18,14 +18,14 @@
 package pixelitor.guitest;
 
 /**
- * Test targets: "all" (default),
+ * Test targets for the {@link AssertJSwingTest}:
+ * "all" (default),
  * "tools" (includes "Selection" menus),
  * "file", (the "File" menu with the exception of auto paint)
  * "autopaint",
  * "edit", ("Edit" and "Image" menus)
  * "filters" ("Colors" and "Filters" menus),
  * "layers" ("Layers" menus and layer buttons),
- * "develop",
  * "rest" ("View" and "Help" menus)
  */
 public enum TestTarget {
@@ -63,11 +63,6 @@ public enum TestTarget {
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testLayers();
-        }
-    }, DEVELOP {
-        @Override
-        public void run(AssertJSwingTest tester) {
-            tester.testDevelopMenu();
         }
     }, REST {
         @Override

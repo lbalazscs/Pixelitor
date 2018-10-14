@@ -112,6 +112,24 @@ public class ControlPoint extends DraggablePoint {
         return samePositionAs(anchor, epsilon);
     }
 
+    void retract() {
+        setLocationOnlyForThis(anchor.x, anchor.y);
+        rememberedDistFromAnchor = 0;
+    }
+
+    @Override
+    public void setActive(boolean active) {
+        super.setActive(active);
+        if (active) {
+            AnchorPoint.recentlyEditedPoint = anchor;
+        }
+    }
+
+    @Override
+    public String getMoveEditName() {
+        return "Move Control Handle";
+    }
+
     @Override
     public String toColoredString() {
         if (isRetracted()) {
@@ -126,18 +144,5 @@ public class ControlPoint extends DraggablePoint {
             return super.toString() + " retracted!";
         }
         return super.toString();
-    }
-
-    void retract() {
-        setLocationOnlyForThis(anchor.x, anchor.y);
-        rememberedDistFromAnchor = 0;
-    }
-
-    @Override
-    public void setActive(boolean active) {
-        super.setActive(active);
-        if (active) {
-            AnchorPoint.recentlyEditedPoint = anchor;
-        }
     }
 }

@@ -27,9 +27,9 @@ import static pixelitor.layers.MaskViewMode.RUBYLITH;
 import static pixelitor.layers.MaskViewMode.SHOW_MASK;
 
 /**
- * What is tested in AssertJ Swing test
+ * What mask state is tested in an {@link AssertJSwingTest}
  */
-enum TestingMode {
+enum MaskMode {
     /**
      * A layer with no mask is tested
      */
@@ -152,7 +152,7 @@ enum TestingMode {
 
     private final MaskViewMode viewMode;
 
-    TestingMode(MaskViewMode viewMode) {
+    MaskMode(MaskViewMode viewMode) {
         this.viewMode = viewMode;
     }
 

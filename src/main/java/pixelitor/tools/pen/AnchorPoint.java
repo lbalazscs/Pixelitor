@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.Build;
 import pixelitor.gui.View;
 import pixelitor.history.History;
+import pixelitor.tools.pen.history.AnchorPointChangeEdit;
 import pixelitor.tools.pen.history.SubPathEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
@@ -281,10 +282,14 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void retractHandles() {
+        AnchorPoint backup = new AnchorPoint(this, subPath, true);
         ctrlIn.retract();
         ctrlOut.retract();
         setType(SYMMETRIC);
         view.repaint();
+
+        History.addEdit(new AnchorPointChangeEdit("Retract Handles",
+                subPath.getComp(), backup, this));
     }
 
     @Override
@@ -318,15 +323,20 @@ public class AnchorPoint extends DraggablePoint {
         return subPath;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getMoveEditName() {
+        return "Move Anchor Point";
+    }
+
     public void dump() {
         System.out.println(Ansi.red(getType()));
         System.out.println("    " + toColoredString());
         System.out.println("    " + ctrlIn.toColoredString());
         System.out.println("    " + ctrlOut.toColoredString());
-    }
-
-    public String getId() {
-        return id;
     }
 
     // also includes the anchor point positions

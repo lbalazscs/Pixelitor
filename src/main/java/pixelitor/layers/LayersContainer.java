@@ -22,10 +22,12 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.io.DropListener;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.dnd.DropTarget;
+import java.util.List;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
@@ -109,6 +111,16 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
 
     public static void showLayersFor(ImageComponent ic) {
         INSTANCE.setLayersPanel(ic.getLayersPanel());
+    }
+
+    @VisibleForTesting
+    public int getNumLayerButtons() {
+        return layersPanel.getNumLayerButtons();
+    }
+
+    @VisibleForTesting
+    public List<String> getLayerNames() {
+        return layersPanel.getLayerNames();
     }
 }
 

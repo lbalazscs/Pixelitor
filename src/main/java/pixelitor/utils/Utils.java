@@ -28,6 +28,7 @@ import pixelitor.utils.debug.Ansi;
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -53,6 +54,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -522,6 +524,73 @@ public final class Utils {
             msg.append(Ansi.yellow("right-"));
         }
         return msg.toString();
+    }
+
+    public static void debugCall(String... args) {
+        debugCall(false, args);
+    }
+
+    public static void debugCallAndCaller(String... args) {
+        debugCall(true, args);
+    }
+
+    private static void debugCall(boolean printCaller, String... args) {
+        StackTraceElement[] fullTrace = new Throwable().getStackTrace();
+        StackTraceElement me = fullTrace[2];
+
+        String threadName;
+        if (EventQueue.isDispatchThread()) {
+            threadName = "EDT";
+        } else {
+            threadName = Thread.currentThread().getName();
+        }
+
+        String argsAsOneString;
+        if (args.length == 0) {
+            argsAsOneString = "";
+        } else if (args.length == 1) {
+            argsAsOneString = args[0];
+        } else {
+            argsAsOneString = Arrays.toString(args);
+        }
+
+        String className = me.getClassName();
+        // strip the package name
+        className = className.substring(className.lastIndexOf('.') + 1);
+
+        if (printCaller) {
+            StackTraceElement caller = fullTrace[3];
+            String callerClassName = caller.getClassName();
+            callerClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
+
+            System.out.printf("%s.%s(%s) on %s by %s.%s\n"
+                    , className
+                    , me.getMethodName()
+                    , Ansi.yellow(argsAsOneString)
+                    , threadName
+                    , callerClassName
+                    , caller.getMethodName());
+        } else {
+            System.out.printf("%s.%s(%s) on %s\n"
+                    , className
+                    , me.getMethodName()
+                    , Ansi.yellow(argsAsOneString)
+                    , threadName);
+        }
+
+    }
+
+    public static String debugKeyEvent(KeyEvent e) {
+        String keyText = KeyEvent.getKeyText(e.getKeyCode());
+        int modifiers = e.getModifiers();
+        if (modifiers != 0) {
+            String modifiersText = KeyEvent.getKeyModifiersText(modifiers);
+            if (keyText.equals(modifiersText)) { // the key itself is the modifier
+                return modifiersText;
+            }
+            return modifiersText + "+" + keyText;
+        }
+        return keyText;
     }
 }
 

@@ -107,6 +107,7 @@ public class PenTool extends Tool {
     @Override
     public void initSettingsPanel() {
         JComboBox modeChooser = new JComboBox<>(modeModel);
+        modeChooser.setName("modeChooser");
 
         modeChooser.addActionListener(e -> onModeChooserAction());
         settingsPanel.addWithLabel("Mode:", modeChooser);
@@ -328,6 +329,7 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
         assert path == ImageComponents.getActivePathOrNull()
                 : "tool path = " + path +
