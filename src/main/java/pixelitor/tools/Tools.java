@@ -26,6 +26,7 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
 
@@ -77,7 +78,23 @@ public class Tools {
             PEN, SHAPES, HAND, ZOOM};
 
     public static void setDefaultTool() {
-        changeTo(BRUSH);
+        String lastToolName = AppPreferences.loadLastToolName();
+
+        // the linear search is probably the fastest, because
+        // it requires no preparation, and anyway it runs only once
+        for (Tool tool : allTools) {
+            if (tool.getName().equals(lastToolName)) {
+                changeToProgrammatically(tool);
+                break;
+            }
+        }
+    }
+
+    private static void changeToProgrammatically(Tool tool) {
+        changeTo(tool);
+
+        // changeTo doesn't select the button, because it is
+        // either called by the button event handler or by testing code
         currentTool.getButton().setSelected(true);
     }
 

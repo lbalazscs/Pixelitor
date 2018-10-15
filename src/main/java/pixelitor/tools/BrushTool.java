@@ -34,10 +34,11 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * The brush tool
  */
 public class BrushTool extends BlendingModeBrushTool {
+    public static final String NAME = "Brush";
     private Color drawingColor;
 
     public BrushTool() {
-        super("Brush", 'b', "brush_tool_icon.png",
+        super(NAME, 'b', "brush_tool_icon.png",
                 "<b>click</b> or <b>drag</b> to draw with the current brush, " +
                         "<b>Shift-click</b> to draw lines, " +
                         "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",

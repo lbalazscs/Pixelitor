@@ -32,6 +32,9 @@ import pixelitor.menus.view.ShowHideHistogramsAction;
 import pixelitor.menus.view.ShowHideLayersAction;
 import pixelitor.menus.view.ShowHideStatusBarAction;
 import pixelitor.menus.view.ShowHideToolsAction;
+import pixelitor.tools.BrushTool;
+import pixelitor.tools.Tool;
+import pixelitor.tools.Tools;
 
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
@@ -64,6 +67,8 @@ public final class AppPreferences {
             = Preferences.userNodeForPackage(Pixelitor.class);
     private static final Preferences recentFilesNode
             = Preferences.userNodeForPackage(RecentFilesMenu.class);
+    private static final Preferences toolsNode
+            = Preferences.userNodeForPackage(Tool.class);
 
     private static final String FG_COLOR_KEY = "fg_color";
     private static final String BG_COLOR_KEY = "bg_color";
@@ -78,6 +83,8 @@ public final class AppPreferences {
     private static final String UNDO_LEVELS_KEY = "undo_levels";
 
     private static final String THUMB_SIZE_KEY = "thumb_size";
+
+    private static final String LAST_TOOL_KEY = "last_tool";
 
     private AppPreferences() {
     }
@@ -264,6 +271,7 @@ public final class AppPreferences {
         saveThumbSize();
         TipsOfTheDay.saveNextTipNr();
         saveNewImageSize();
+        saveLastToolName();
     }
 
     public static Color loadFgColor() {
@@ -307,6 +315,14 @@ public final class AppPreferences {
 
     private static void saveDesktopMode() {
         mainNode.put(UI_KEY, ImageArea.getMode().toString());
+    }
+
+    public static String loadLastToolName() {
+        return toolsNode.get(LAST_TOOL_KEY, BrushTool.NAME);
+    }
+
+    public static void saveLastToolName() {
+        toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getName());
     }
 
     /**
