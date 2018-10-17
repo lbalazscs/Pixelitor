@@ -38,7 +38,7 @@ public enum DragDisplayType {
     }, ANGLE_DIST {
         @Override
         public void draw(Graphics2D g, UserDrag userDrag) {
-            userDrag.displayAngle(g);
+            userDrag.displayAngleAndDist(g);
         }
     };
 

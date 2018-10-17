@@ -344,7 +344,7 @@ public class PathBuilder implements PenToolMode {
             if (hit != null) {
                 hit.setActive(true);
             } else {
-                DraggablePoint.activePoint = null;
+                activePoint = null;
             }
         } else {
             if (state == NO_INTERACTION) {
@@ -360,7 +360,7 @@ public class PathBuilder implements PenToolMode {
             if (first.handleContains(x, y)) {
                 first.setActive(true);
             } else {
-                DraggablePoint.activePoint = null;
+                activePoint = null;
             }
         }
 

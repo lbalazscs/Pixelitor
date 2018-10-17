@@ -63,7 +63,7 @@ public class PathEditor implements PenToolMode {
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
             if (e.isPopupTrigger() && hit instanceof AnchorPoint) {
-                AnchorPoint ap = (AnchorPoint) activePoint;
+                AnchorPoint ap = (AnchorPoint) hit;
                 ap.showPopup((int) x, (int) y);
             } else if (altDown) {
                 altMousePressedHit(hit, x, y);

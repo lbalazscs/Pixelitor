@@ -33,19 +33,22 @@ public class DragDisplay {
     private static final int BG_TEXT_HOR_DIST = 8;
     private static final int BG_TEXT_VER_DIST = 7;
 
-    public static final int BG_WIDTH = 84;
+    public static final int BG_WIDTH_PIXEL = 84;
+    public static final int BG_WIDTH_ANGLE = 70; // enough for an angle
     public static final int ONE_LINER_BG_HEIGHT = 22;
     public static final int TWO_LINER_BG_HEIGHT = 47;
     private final Graphics2D g;
     private final Composite origComposite;
     private final Stroke origStroke;
     private final Shape origClip;
+    private final int bgWidth;
 
-    public DragDisplay(Graphics2D g) {
+    public DragDisplay(Graphics2D g, int bgWidth) {
         this.g = g;
         origComposite = g.getComposite();
         origStroke = g.getStroke();
         origClip = g.getClip();
+        this.bgWidth = bgWidth;
 
         g.setStroke(BG_STROKE);
         g.setClip(null);
@@ -55,7 +58,7 @@ public class DragDisplay {
         g.setComposite(BG_COMPOSITE);
         g.setColor(Color.BLACK);
         RoundRectangle2D rect = new RoundRectangle2D.Float(
-                x, y - height, BG_WIDTH, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
+                x, y - height, bgWidth, height, BG_RECT_RADIUS, BG_RECT_RADIUS);
         g.fill(rect);
         g.setColor(Color.WHITE);
         g.draw(rect);

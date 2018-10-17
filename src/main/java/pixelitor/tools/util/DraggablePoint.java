@@ -63,15 +63,13 @@ public class DraggablePoint extends Point2D.Double {
     private final Color color;
     private final Color activeColor;
 
-    //    private boolean active = false;
+    // since there can be only one active point at a
+    // time, it can be stored in this static variable
     public static DraggablePoint activePoint = null;
 
     // transient: it has to be reset after deserialization
     @SuppressWarnings("TransientFieldNotInitialized")
     protected transient View view;
-
-    // TODO not reliable, currently isActive is also checked
-    protected boolean dragging = false;
 
     private Shape shape;
     private Shape shadow;
@@ -166,7 +164,6 @@ public class DraggablePoint extends Point2D.Double {
         // and the drag start location are not necessarily the same
         origX = this.x;
         origY = this.y;
-        dragging = true;
     }
 
     public void mouseDragged(double x, double y) {
@@ -175,7 +172,6 @@ public class DraggablePoint extends Point2D.Double {
         double newX = origX + dx;
         double newY = origY + dy;
         setLocation(newX, newY);
-        dragging = true;
     }
 
     public void mouseDragged(double x, double y, boolean constrained) {
@@ -188,19 +184,16 @@ public class DraggablePoint extends Point2D.Double {
         } else {
             setLocation(newX, newY);
         }
-        dragging = true;
     }
 
     public void mouseReleased(double x, double y) {
         mouseDragged(x, y);
         afterMouseReleasedActions();
-        dragging = false;
     }
 
     public void mouseReleased(double x, double y, boolean constrained) {
         mouseDragged(x, y, constrained);
         afterMouseReleasedActions();
-        dragging = false;
     }
 
     protected void afterMouseReleasedActions() {

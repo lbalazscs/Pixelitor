@@ -32,8 +32,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * A collection of 4 area effects,
- * each of which can be enabled or disabled
+ * A collection of 4 area effects, which can be enabled or disabled.
  */
 public class AreaEffects implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -79,7 +78,7 @@ public class AreaEffects implements Serializable {
         return effects.toArray(EMPTY_ARRAY);
     }
 
-    public void drawEffects(Graphics2D g2, Shape shape) {
+    public void drawOn(Graphics2D g2, Shape shape) {
         AreaEffect[] areaEffects = asArray();
         for (AreaEffect effect : areaEffects) {
             effect.apply(g2, shape, 0, 0);
@@ -90,8 +89,8 @@ public class AreaEffects implements Serializable {
      * Returns the extra thickness caused by the effect
      */
     public int getMaxEffectThickness() {
-        // inner glow is not considered here, because
-        // it doesn't cause extra thickness
+        // the inner glow is not considered here,
+        // because it doesn't add extra thickness
         int max = 0;
         if (glowEffect != null) {
             int effectWidth = glowEffect.getEffectWidth();

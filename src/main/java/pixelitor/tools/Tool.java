@@ -28,6 +28,7 @@ import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.toolhandlers.ToolHandlerChain;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
@@ -120,6 +121,8 @@ public abstract class Tool implements KeyListener {
 
     protected void toolEnded() {
         ended = true;
+
+        DraggablePoint.activePoint = null;
 
         closeToolDialogs();
     }

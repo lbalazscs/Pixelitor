@@ -24,6 +24,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
+import pixelitor.layers.Layer;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionInteraction;
@@ -47,29 +48,50 @@ public class EDT {
     private EDT() {
     }
 
+    public static ImageComponent getActiveIC() {
+        return GuiActionRunner.execute(ImageComponents::getActiveIC);
+    }
+
     public static Composition getComp() {
         return GuiActionRunner.execute(ImageComponents::getActiveCompOrNull);
     }
 
     public static Canvas getCanvas() {
-        return GuiActionRunner.execute(() -> {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            return ic.getCanvas();
-        });
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveIC().getCanvas());
     }
 
     public static Rectangle getVisibleCanvasBoundsOnScreen() {
-        return GuiActionRunner.execute(() -> {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            return ic.getVisibleCanvasBoundsOnScreen();
-        });
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveIC().getVisibleCanvasBoundsOnScreen());
+    }
+
+    public static int getNumOpenImages() {
+        return GuiActionRunner.execute(ImageComponents::getNumOpenImages);
+    }
+
+    public static int getNumLayers() {
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveCompOrNull().getNumLayers());
     }
 
     public static Selection getSelection() {
-        return GuiActionRunner.execute(() -> {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            return ic.getComp().getSelection();
-        });
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveCompOrNull().getSelection());
+    }
+
+    public static Guides getGuides() {
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveCompOrNull().getGuides());
+    }
+
+    public static Layer getActiveLayer() {
+        return GuiActionRunner.execute(ImageComponents::getActiveLayerOrNull);
+    }
+
+    public static boolean activeLayerHasMask() {
+        return GuiActionRunner.execute(() ->
+                ImageComponents.getActiveLayerOrNull().hasMask());
     }
 
     public static void assertThereIsSelection() {
@@ -109,13 +131,6 @@ public class EDT {
         return GuiActionRunner.execute(() -> PenTool.path);
     }
 
-    public static Guides getGuides() {
-        return GuiActionRunner.execute(() -> {
-            Composition comp = ImageComponents.getActiveCompOrNull();
-            return comp.getGuides();
-        });
-    }
-
     public static void undo(String edit) {
         GuiActionRunner.execute(() -> History.undo(edit));
     }
@@ -148,7 +163,7 @@ public class EDT {
                 ImageComponents.getActiveIC().decreaseZoom());
     }
 
-    public static ZoomLevel getZoomLevel() {
+    public static ZoomLevel getZoomLevelOfActive() {
         return GuiActionRunner.execute(() ->
                 ImageComponents.getActiveIC().getZoomLevel());
     }

@@ -20,76 +20,62 @@ package pixelitor.tools.shapes;
  * The "Action" in the shapes tool
  */
 public enum ShapesAction {
-    FILL("Fill", true, false, false, false, true, true, false) {
-    }, STROKE("Stroke", false, true, true, true, false, true, false) {
-    }, FILL_AND_STROKE("Fill and Stroke", true, true, true, true, true, true, false) {
-    }, EFFECTS_ONLY("Effects Only", false, false, false, false, false, true, false) {
-    }, SELECTION("Selection", false, false, false, false, false, false, true) {
-    }, SELECTION_FROM_STROKE("Selection from Stroke", false, false, true, false, false, false, true) {
+    FILL("Fill", true, false, false, true, false) {
+    }, STROKE("Stroke", false, true, true, true, false) {
+    }, FILL_AND_STROKE("Fill and Stroke", true, true, true, true, false) {
+    }, EFFECTS_ONLY("Effects Only", false, false, false, true, false) {
+    }, SELECTION("Selection", false, false, false, false, true) {
+    }, SELECTION_FROM_STROKE("Selection from Stroke", false, false, true, false, true) {
     };
 
-    private final boolean enableStrokeSettings;
-    private final boolean enableFillPaintSelection;
-    private final boolean enableStrokePaintSelection;
-
-    private final boolean stroke;
-    private final boolean fill;
-    private final boolean drawEffects;
+    private final String guiName;
+    private final boolean hasFillPaint;
+    private final boolean hasStrokePaint;
+    private final boolean hasStrokeSettings;
+    private final boolean canHaveEffects;
     private final boolean createSelection;
 
-    private final String guiName;
-
-    ShapesAction(String guiName, boolean enableFillPaintSelection,
-                 boolean enableStrokePaintSelection,
-                 boolean enableStrokeSettings,
-                 boolean stroke, boolean fill, boolean drawEffects,
+    ShapesAction(String guiName, boolean hasFillPaint,
+                 boolean hasStrokePaint,
+                 boolean hasStrokeSettings,
+                 boolean canHaveEffects,
                  boolean createSelection) {
 
-        this.enableFillPaintSelection = enableFillPaintSelection;
-        this.enableStrokePaintSelection = enableStrokePaintSelection;
-        this.enableStrokeSettings = enableStrokeSettings;
-        this.stroke = stroke;
-        this.fill = fill;
-        this.drawEffects = drawEffects;
+        this.hasFillPaint = hasFillPaint;
+        this.hasStrokePaint = hasStrokePaint;
+        this.hasStrokeSettings = hasStrokeSettings;
+        this.canHaveEffects = canHaveEffects;
         this.createSelection = createSelection;
         this.guiName = guiName;
 
         // check whether the arguments are compatible with each other
         if (createSelection) {
-            if (stroke || fill || drawEffects) {
+            if (hasStrokePaint || hasFillPaint || canHaveEffects) {
                 throw new IllegalArgumentException();
             }
-        } else if (drawEffects) {
+        } else if (canHaveEffects) {
             // it is ok
         } else {
-            if (!stroke && !fill) {
+            if (!hasStrokePaint && !hasFillPaint) {
                 throw new IllegalArgumentException();
             }
         }
     }
 
     public boolean hasStrokeSettings() {
-        return enableStrokeSettings;
+        return hasStrokeSettings;
     }
 
-    public boolean hasFillPaintSelection() {
-        return enableFillPaintSelection;
+    public boolean hasFillPaint() {
+        return hasFillPaint;
     }
 
-    public boolean hasStrokePaintSelection() {
-        return enableStrokePaintSelection;
+    public boolean hasStrokePaint() {
+        return hasStrokePaint;
     }
 
-    public boolean hasStroke() {
-        return stroke;
-    }
-
-    public boolean hasFill() {
-        return fill;
-    }
-
-    public boolean drawsEffects() {
-        return drawEffects;
+    public boolean canHaveEffects() {
+        return canHaveEffects;
     }
 
     public boolean createSelection() {

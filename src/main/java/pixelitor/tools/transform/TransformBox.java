@@ -35,11 +35,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static pixelitor.tools.util.DraggablePoint.activePoint;
+
 /**
  * A widget that calculates an {@link AffineTransform}
  * based on the interactive movement of handles
  */
 public class TransformBox {
+    // the distance (in component space) between
+    // the rotate handle and the NW-NE line
     private static final int ROT_HANDLE_DISTANCE = 20;
 
     private final TransformHandle nw;
@@ -61,7 +65,7 @@ public class TransformBox {
     private final Rectangle origCoRect;
     private final Rectangle2D origImRect;
 
-    private DraggablePoint activeHandle;
+//    private DraggablePoint activeHandle;
 
     private double angle = 0.0;
     private double sin = 0.0;
@@ -114,7 +118,6 @@ public class TransformBox {
     }
 
     public void rotate(AffineTransform rotate) {
-//        this.rotate = rotate;
         rotateHandlePositions(rotate);
         view.repaint();
     }
@@ -174,7 +177,7 @@ public class TransformBox {
         origSW = sw.getLocationCopy();
     }
 
-    public void rotateHandlePositions(AffineTransform at) {
+    private void rotateHandlePositions(AffineTransform at) {
         at.transform(origNW, nw);
         at.transform(origNE, ne);
         at.transform(origSE, se);
@@ -189,7 +192,7 @@ public class TransformBox {
         transformListener.accept(getImTransform());
     }
 
-    public void updateRotLocation() {
+    private void updateRotLocation() {
         Point2D northCenter = Shapes.calcCenter(nw, ne);
 
         double rotDistX = ROT_HANDLE_DISTANCE * sin;
@@ -216,7 +219,7 @@ public class TransformBox {
         }
     }
 
-    public void updateBoxShape() {
+    private void updateBoxShape() {
         boxShape = new GeneralPath();
         boxShape.moveTo(nw.getX(), nw.getY());
         boxShape.lineTo(ne.getX(), ne.getY());
@@ -226,7 +229,7 @@ public class TransformBox {
         boxShape.closePath();
     }
 
-    DraggablePoint handleWasHit(int x, int y) {
+    private DraggablePoint handleWasHit(int x, int y) {
         for (DraggablePoint handle : handles) {
             if (handle.handleContains(x, y)) {
                 return handle;
@@ -242,10 +245,9 @@ public class TransformBox {
         if (handle != null) {
             handle.setActive(true);
             handle.mousePressed(x, y);
-            activeHandle = handle;
             view.repaint();
         } else {
-            activeHandle = null;
+            activePoint = null;
             if (boxShape.contains(x, y)) {
                 globalDrag = true;
                 globalDragStartX = x;
@@ -256,8 +258,8 @@ public class TransformBox {
     }
 
     public void mouseDragged(MouseEvent e) {
-        if (activeHandle != null) {
-            activeHandle.mouseDragged(e.getX(), e.getY());
+        if (activePoint != null) {
+            activePoint.mouseDragged(e.getX(), e.getY());
             view.repaint();
         } else if (globalDrag) {
             dragAll(e.getX(), e.getY());
@@ -265,15 +267,14 @@ public class TransformBox {
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (activeHandle != null) {
+        if (activePoint != null) {
             int x = e.getX();
             int y = e.getY();
-            activeHandle.mouseReleased(x, y);
-            if (!activeHandle.handleContains(x, y)) {
+            activePoint.mouseReleased(x, y);
+            if (!activePoint.handleContains(x, y)) {
                 // we can get here if the handle has a
                 // constrained position
-                activeHandle.setActive(false);
-                activeHandle = null;
+                activePoint = null;
             }
             view.repaint();
         } else if (globalDrag) {
@@ -301,12 +302,10 @@ public class TransformBox {
         DraggablePoint handle = handleWasHit(x, y);
         if (handle != null) {
             handle.setActive(true);
-            activeHandle = handle;
             view.repaint();
         } else {
-            if (activeHandle != null) {
-                activeHandle.setActive(false);
-                activeHandle = null;
+            if (activePoint != null) {
+                activePoint = null;
                 view.repaint();
             }
         }
@@ -320,6 +319,7 @@ public class TransformBox {
         for (DraggablePoint handle : handles) {
             handle.restoreCoordsFromImSpace(view);
         }
+        updateRotLocation();
         updateBoxShape();
     }
 
@@ -327,6 +327,10 @@ public class TransformBox {
         this.angle = angle;
         cos = Math.cos(angle);
         sin = Math.sin(angle);
+    }
+
+    public double getAngle() {
+        return angle;
     }
 
     public double getSin() {

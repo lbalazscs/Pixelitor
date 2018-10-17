@@ -46,7 +46,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
- * Abstract superclass for shape filters
+ * Abstract superclass for the shape filters
  */
 public abstract class ShapeFilter extends ParametrizedFilter {
     private static final int BG_BLACK = 1;
@@ -170,15 +170,13 @@ public abstract class ShapeFilter extends ParametrizedFilter {
                 shape = at.createTransformedShape(shape);
             }
 
-//            g2.setStroke(stroke);
-
             // work with the outline so that we can have "inner glow"
             Shape outline = stroke.createStrokedShape(shape);
 
             g2.fill(outline);
 
             AreaEffects effects = effectsParam.getEffects();
-            effects.drawEffects(g2, outline);
+            effects.drawOn(g2, outline);
         }
 
         g2.dispose();

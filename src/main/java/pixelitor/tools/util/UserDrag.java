@@ -198,7 +198,8 @@ public class UserDrag {
         String widthInfo = "\u2194 = " + Math.abs(imWidth) + " px";
         String heightInfo = "\u2195 = " + Math.abs(imHeight) + " px";
 
-        DragDisplay dd = new DragDisplay(g);
+        int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
+        DragDisplay dd = new DragDisplay(g, displayBgWidth);
 
         float widthY;
         if (imHeight >= 0) {
@@ -208,7 +209,7 @@ public class UserDrag {
             // display the width info above the mouse
             widthY = (float) (coEndY - MOUSE_DISPLAY_DISTANCE);
         }
-        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - DragDisplay.BG_WIDTH / 2);
+        float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - displayBgWidth / 2);
         dd.drawOneLine(widthInfo, widthX, widthY);
 
         float heightX;
@@ -217,7 +218,7 @@ public class UserDrag {
             heightX = (float) (coEndX + MOUSE_DISPLAY_DISTANCE);
         } else {
             // display the height info on the left side of the mouse
-            heightX = (float) (coEndX - DragDisplay.BG_WIDTH - MOUSE_DISPLAY_DISTANCE);
+            heightX = (float) (coEndX - displayBgWidth - MOUSE_DISPLAY_DISTANCE);
         }
         float heightY = (float) (coStartY + (coEndY - coStartY) / 2.0f + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
         dd.drawOneLine(heightInfo, heightX, heightY);
@@ -231,7 +232,7 @@ public class UserDrag {
             int mouseDist = MOUSE_DISPLAY_DISTANCE / 2;
             if (imWidth >= 0) {
                 // display the start info to the left of the start
-                startInfoX = (float) (coStartX - DragDisplay.BG_WIDTH - mouseDist);
+                startInfoX = (float) (coStartX - displayBgWidth - mouseDist);
             } else {
                 // display the start info to the right of the start
                 startInfoX = (float) (coStartX + mouseDist);
@@ -268,7 +269,7 @@ public class UserDrag {
             dyString = "\u2191 = " + (-dy) + " px";
         }
 
-        DragDisplay dd = new DragDisplay(g);
+        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXEL);
         float x = (float) (coEndX + 30);
         float y = (float) (coEndY - 20);
 
@@ -277,8 +278,9 @@ public class UserDrag {
         dd.finish();
     }
 
-    public void displayAngle(Graphics2D g) {
-        DragDisplay dd = new DragDisplay(g);
+    public void displayAngleAndDist(Graphics2D g) {
+        int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
+        DragDisplay dd = new DragDisplay(g, displayBgWidth);
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());
         String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
@@ -291,18 +293,18 @@ public class UserDrag {
 
         double x;
         boolean xDistIsSmall = false;
-        if (coDx >= DragDisplay.BG_WIDTH) {
+        if (coDx >= displayBgWidth) {
             // display it on the right side of the mouse
             x = coEndX + MOUSE_DISPLAY_DISTANCE;
-        } else if (coDx <= -DragDisplay.BG_WIDTH) {
+        } else if (coDx <= -displayBgWidth) {
             // display it on the left side of the mouse
-            x = coEndX - MOUSE_DISPLAY_DISTANCE - DragDisplay.BG_WIDTH;
+            x = coEndX - MOUSE_DISPLAY_DISTANCE - displayBgWidth;
         } else {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
-            x = coEndX - DragDisplay.BG_WIDTH / 2.0
-                    + ((DragDisplay.BG_WIDTH / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                    * coDx / (double) DragDisplay.BG_WIDTH);
+            x = coEndX - displayBgWidth / 2.0
+                    + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                    * coDx / (double) displayBgWidth);
         }
         double y;
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;

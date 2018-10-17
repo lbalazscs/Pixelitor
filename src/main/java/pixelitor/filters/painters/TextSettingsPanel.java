@@ -166,7 +166,7 @@ public class TextSettingsPanel extends FilterGUI
     private void createTextTF(TextSettings settings) {
         String defaultText;
         if (settings == null) {
-            if (filter != null) { // filter mode
+            if (isInFilterMode()) { 
                 // Remember the last text in filter mode.
                 // This was a requested feature when we didn't have text layers,
                 // probably it is not so useful now
@@ -351,7 +351,10 @@ public class TextSettingsPanel extends FilterGUI
     public void paramAdjusted() {
         TextFilter textFilter = (TextFilter) filter;
         String text = textTF.getText();
-        lastText = text;
+
+        if (isInFilterMode()) {
+            lastText = text;
+        }
 
         AreaEffects areaEffects = null;
         double textRotationAngle = rotationParam.getValueInRadians();
@@ -388,5 +391,9 @@ public class TextSettingsPanel extends FilterGUI
             textLayer.setSettings(settings);
             textLayer.getComp().imageChanged();
         }
+    }
+
+    private boolean isInFilterMode() {
+        return filter != null;
     }
 }

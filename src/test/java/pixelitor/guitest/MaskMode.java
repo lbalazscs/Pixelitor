@@ -69,7 +69,7 @@ enum MaskMode {
             // existing masks are allowed because even if they result
             // from a layer duplication, a correct mask must be set up
             tester.addLayerMask(true);
-            tester.pressCtrlOne();
+            tester.keyboard().pressCtrlOne();
 
             tester.checkConsistency();
         }
@@ -94,7 +94,7 @@ enum MaskMode {
         @Override
         public void set(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.pressCtrlThree();
+            tester.keyboard().pressCtrlThree();
 
             tester.checkConsistency();
         }
@@ -119,7 +119,7 @@ enum MaskMode {
         @Override
         public void set(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.pressCtrlTwo();
+            tester.keyboard().pressCtrlTwo();
 
             tester.checkConsistency();
         }
@@ -144,7 +144,7 @@ enum MaskMode {
         @Override
         public void set(AssertJSwingTest tester) {
             tester.addLayerMask(true);
-            tester.pressCtrlFour();
+            tester.keyboard().pressCtrlFour();
 
             tester.checkConsistency();
         }

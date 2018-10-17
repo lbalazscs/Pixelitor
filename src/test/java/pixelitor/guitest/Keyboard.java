@@ -33,6 +33,10 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import static java.awt.event.KeyEvent.VK_0;
+import static java.awt.event.KeyEvent.VK_1;
+import static java.awt.event.KeyEvent.VK_2;
+import static java.awt.event.KeyEvent.VK_3;
+import static java.awt.event.KeyEvent.VK_4;
 import static java.awt.event.KeyEvent.VK_ADD;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_D;
@@ -197,6 +201,42 @@ public class Keyboard {
             pw.pressKey(VK_ESCAPE).releaseKey(VK_ESCAPE);
         } else {
             postKeyEventToEventQueue(0, VK_ESCAPE);
+        }
+    }
+
+    public void pressCtrlOne() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(VK_1)
+                    .releaseKey(VK_1).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_1);
+        }
+    }
+
+    public void pressCtrlTwo() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(VK_2)
+                    .releaseKey(KeyEvent.VK_2).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_2);
+        }
+    }
+
+    public void pressCtrlThree() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(VK_3)
+                    .releaseKey(VK_3).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_3);
+        }
+    }
+
+    public void pressCtrlFour() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(VK_4)
+                    .releaseKey(VK_4).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_4);
         }
     }
 

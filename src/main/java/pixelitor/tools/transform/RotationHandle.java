@@ -18,9 +18,12 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.Utils;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
@@ -32,7 +35,8 @@ public class RotationHandle extends DraggablePoint {
     private double cy;
     private double cx;
     private double rotStartAngle;
-    private double angle;
+
+    private static final int MOUSE_DISPLAY_CENTER_DISTANCE = 12 + DragDisplay.ONE_LINER_BG_HEIGHT / 2;
 
     public RotationHandle(String name, TransformBox box, Point2D pos, View view) {
         super(name, pos.getX(), pos.getY(), view, Color.WHITE, Color.RED);
@@ -59,9 +63,40 @@ public class RotationHandle extends DraggablePoint {
         double newX = origX + dx;
         double newY = origY + dy;
 
-        angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
+        double angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
         box.setAngle(angle);
 
         box.rotate(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
     }
+
+    @Override
+    public void restoreCoordsFromImSpace(View view) {
+        // do nothing, the position of the rotation handles is
+        // calculated from the restored transform handle positions
+    }
+
+    @Override
+    public void paintHandle(Graphics2D g) {
+        super.paintHandle(g);
+        if (isActive()) {
+            int displayBgWidth = DragDisplay.BG_WIDTH_ANGLE;
+            DragDisplay dd = new DragDisplay(g, displayBgWidth);
+            int dragAngle = (int) Math.toDegrees(
+                    Utils.atan2AngleToIntuitive(box.getAngle()));
+            String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
+
+            double sin = box.getSin();
+            double cos = box.getCos();
+
+            float drawX = (float) (this.x
+                    - displayBgWidth / 2.0f
+                    + displayBgWidth * 0.7 * sin);
+            float drawY = (float) (this.y
+                    - MOUSE_DISPLAY_CENTER_DISTANCE * cos
+                    + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
+            dd.drawOneLine(angleInfo, drawX, drawY);
+            dd.finish();
+        }
+    }
+
 }

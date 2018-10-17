@@ -49,7 +49,6 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
@@ -86,10 +85,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 
-import static java.awt.event.KeyEvent.VK_1;
-import static java.awt.event.KeyEvent.VK_2;
-import static java.awt.event.KeyEvent.VK_3;
-import static java.awt.event.KeyEvent.VK_4;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_ENTER;
 import static java.awt.event.KeyEvent.VK_T;
@@ -193,7 +188,7 @@ public class AssertJSwingTest {
     }
 
     private void resetState() {
-        if (ImageComponents.getNumOpenImages() > 0) {
+        if (EDT.getNumOpenImages() > 0) {
             closeAll();
         }
         openInputFileWithDialog("a.jpg");
@@ -1308,7 +1303,7 @@ public class AssertJSwingTest {
     private void testScreenCapture() {
         log(1, "testing screen capture");
 
-        ImageComponent activeIC = ImageComponents.getActiveIC();
+        ImageComponent activeIC = EDT.getActiveIC();
         testScreenCapture(true);
         testScreenCapture(false);
 
@@ -1383,7 +1378,7 @@ public class AssertJSwingTest {
     }
 
     private void testZoomCommands() {
-        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
         runMenuCommand("Zoom In");
         EDT.assertZoomOfActiveIs(startingZoom.zoomIn());
@@ -1678,6 +1673,7 @@ public class AssertJSwingTest {
         if (skipThis()) {
             return;
         }
+        log(1, "testing the filter Text");
 
         runMenuCommand("Text...");
         DialogFixture dialog = findFilterDialog();
@@ -2407,7 +2403,7 @@ public class AssertJSwingTest {
         if (altDrag) {
             mouse.altDragToCanvas(300, 300);
         } else {
-            ImageComponent ic = ImageComponents.getActiveIC();
+            ImageComponent ic = EDT.getActiveIC();
             Drawable dr = ic.getComp().getActiveDrawableOrThrow();
             int tx = dr.getTX();
             int ty = dr.getTY();
@@ -2436,7 +2432,7 @@ public class AssertJSwingTest {
         log(1, "testing the zoom tool");
         pw.toggleButton("Zoom Tool Button").click();
 
-        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
         mouse.moveToActiveICCenter();
 
@@ -2459,7 +2455,7 @@ public class AssertJSwingTest {
     }
 
     private void testControlPlusMinusZooming() {
-        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
         Keyboard.pressCtrlPlus(pw, 2);
         EDT.assertZoomOfActiveIs(startingZoom.zoomIn().zoomIn());
@@ -2497,7 +2493,7 @@ public class AssertJSwingTest {
         DialogFixture navigator = findDialogByTitle("Navigator");
         navigator.resizeTo(new Dimension(500, 400));
 
-        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
         Keyboard.pressCtrlPlus(navigator, 4);
         ZoomLevel expectedZoomIn = startingZoom.zoomIn().zoomIn().zoomIn().zoomIn();
@@ -2559,8 +2555,8 @@ public class AssertJSwingTest {
 
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
-        ZoomLevel startingZoom = ImageComponents.getActiveIC().getZoomLevel();
-        ImageComponent ic = ImageComponents.getActiveIC();
+        ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
+        ImageComponent ic = EDT.getActiveIC();
 
         robot.rotateMouseWheel(ic, 2);
         if (JVM.isLinux) {
@@ -2724,7 +2720,7 @@ public class AssertJSwingTest {
     }
 
     private void addNewLayer() {
-        int numLayers = ImageComponents.getActiveCompOrNull().getNumLayers();
+        int numLayers = EDT.getNumLayers();
         runMenuCommand("Duplicate Layer");
         EDT.assertNumLayersIs(numLayers + 1);
         keyboard.invert();
@@ -2782,8 +2778,7 @@ public class AssertJSwingTest {
     }
 
     public void addLayerMask(boolean allowExistingMask) {
-        boolean hasMask = ImageComponents.getActiveLayerOrNull().hasMask();
-        if (hasMask) {
+        if (EDT.activeLayerHasMask()) {
             if (!allowExistingMask) {
                 throw new IllegalStateException("already has mask");
             }
@@ -2799,7 +2794,7 @@ public class AssertJSwingTest {
         pw.comboBox("gradientTypeSelector").selectItem(GradientType.RADIAL.toString());
         pw.checkBox("gradientRevert").check();
 
-        if (EDT.getZoomLevel() != ZoomLevel.Z100) {
+        if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
             // otherwise location on screen can lead to crazy results
             runMenuCommand("100%");
         }
@@ -2831,26 +2826,6 @@ public class AssertJSwingTest {
 
     private void addAdjustmentLayer() {
         pw.button("addAdjLayer").click();
-    }
-
-    public void pressCtrlOne() {
-        pw.pressKey(VK_CONTROL).pressKey(VK_1)
-                .releaseKey(VK_1).releaseKey(VK_CONTROL);
-    }
-
-    public void pressCtrlTwo() {
-        pw.pressKey(VK_CONTROL).pressKey(VK_2)
-                .releaseKey(KeyEvent.VK_2).releaseKey(VK_CONTROL);
-    }
-
-    public void pressCtrlThree() {
-        pw.pressKey(VK_CONTROL).pressKey(VK_3)
-                .releaseKey(VK_3).releaseKey(VK_CONTROL);
-    }
-
-    public void pressCtrlFour() {
-        pw.pressKey(VK_CONTROL).pressKey(VK_4)
-                .releaseKey(VK_4).releaseKey(VK_CONTROL);
     }
 
     private void expectAndCloseErrorDialog() {
@@ -2959,7 +2934,7 @@ public class AssertJSwingTest {
         pw = WindowFinder.findFrame(PixelitorWindow.class)
                 .withTimeout(30, SECONDS)
                 .using(robot);
-        PixelitorWindow.getInstance().setLocation(0, 0);
+//        PixelitorWindow.getInstance().setLocation(0, 0);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
 
@@ -2989,7 +2964,7 @@ public class AssertJSwingTest {
     }
 
     public void checkConsistency() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = EDT.getActiveLayer();
         if (layer == null) { // no open image
             return;
         }
@@ -3004,5 +2979,9 @@ public class AssertJSwingTest {
         } else {
             return false;
         }
+    }
+
+    public Keyboard keyboard() {
+        return keyboard;
     }
 }

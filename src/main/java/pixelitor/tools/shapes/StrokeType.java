@@ -46,7 +46,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     }, ZIGZAG("Zigzag") {
@@ -64,7 +64,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return specifiedWidth / 2;
         }
     }, WOBBLE("Wobble") {
@@ -91,7 +91,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
     }, CHARCOAL("Charcoal (can be slow!)") {
@@ -101,7 +101,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     }, BRISTLE("Bristle (can be slow!)") {
@@ -111,7 +111,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     }, OUTLINE("Outline") {
@@ -128,7 +128,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     }, CALLIGRAPHY("Calligraphy") {
@@ -138,7 +138,7 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     }, SHAPE("Shape") {
@@ -168,13 +168,13 @@ public enum StrokeType {
         }
 
         @Override
-        public int getExtraWidth(int specifiedWidth) {
+        public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
     };
 
     private static final float OUTLINE_WIDTH = 1.0f;
-    private final static BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
+    private static final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
     private final String guiName;
 
@@ -197,10 +197,10 @@ public enum StrokeType {
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
 
     /**
-     * The real thickness of some strokes (which is relevant for the undo) is bigger than
-     * the the specified width. This method returns the extra width.
+     * Return the real thickness (for the undo), which can be bigger
+     * than the specified width.
      */
-    public abstract int getExtraWidth(int specifiedWidth);
+    public abstract int getExtraThickness(int specifiedWidth);
 
     public static EnumParam<StrokeType> asParam(String name) {
         return new EnumParam<>(name, StrokeType.class);

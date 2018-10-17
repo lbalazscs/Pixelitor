@@ -47,13 +47,13 @@ import java.awt.geom.AffineTransform;
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
+import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
  * The gradient tool
  */
 public class GradientTool extends DragTool {
     private GradientHandles handles;
-    private DraggablePoint activeHandle;
 
     private static final String NO_CYCLE_AS_STRING = "No Cycle";
     private static final String REFLECT_AS_STRING = "Reflect";
@@ -161,11 +161,10 @@ public class GradientTool extends DragTool {
         double x = e.getCoX();
         double y = e.getCoY();
         if (handles != null) {
-            DraggablePoint handle = handles.handleWasHit(x, y);
-            if (handle != null) {
-                activeHandle = handle;
-                handle.setActive(true);
-                handle.mousePressed(x, y);
+            DraggablePoint hit = handles.handleWasHit(x, y);
+            if (hit != null) {
+                hit.setActive(true);
+                hit.mousePressed(x, y);
             }
             e.repaint();
         }
@@ -175,11 +174,11 @@ public class GradientTool extends DragTool {
     public void ongoingDrag(PMouseEvent e) {
         // the gradient will be drawn only when the mouse is released
 
-        if (activeHandle != null) {
+        if (activePoint != null) {
             // draw the handles
             double x = e.getCoX();
             double y = e.getCoY();
-            activeHandle.mouseDragged(x, y, e.isShiftDown());
+            activePoint.mouseDragged(x, y, e.isShiftDown());
         } else {
             // if we are dragging a new gradient from scratch,
             // we don't want to show the old handles
@@ -195,15 +194,16 @@ public class GradientTool extends DragTool {
             return;
         }
         ImDrag imDrag;
-        if (activeHandle != null) { // a handle was dragged
+        if (activePoint != null) { // a handle was dragged
+            assert handles != null;
+            
             double x = e.getCoX();
             double y = e.getCoY();
-            activeHandle.mouseReleased(x, y, e.isShiftDown());
-            if (!activeHandle.handleContains(x, y)) {
+            activePoint.mouseReleased(x, y, e.isShiftDown());
+            if (!activePoint.handleContains(x, y)) {
                 // we can get here if the handle has a
                 // constrained position
-                activeHandle.setActive(false);
-                activeHandle = null;
+                activePoint = null;
             }
 
             imDrag = handles.toImDrag(e.getView());
@@ -234,14 +234,12 @@ public class GradientTool extends DragTool {
         DraggablePoint handle = handles.handleWasHit(x, y);
         if (handle != null) {
             handle.setActive(true);
-            activeHandle = handle;
             ic.repaint();
         } else {
-            if (activeHandle != null) {
-                activeHandle.setActive(false);
+            if (activePoint != null) {
+                activePoint = null;
                 ic.repaint();
             }
-            activeHandle = null;
         }
     }
 
@@ -267,7 +265,7 @@ public class GradientTool extends DragTool {
     @Override
     public void resetStateToInitial() {
         handles = null;
-        activeHandle = null;
+        activePoint = null;
         ImageComponents.repaintActive();
     }
 
@@ -288,7 +286,7 @@ public class GradientTool extends DragTool {
 
     private void hideHandles(View view) {
         handles = null;
-        activeHandle = null;
+        activePoint = null;
         lastGradient = null;
         view.repaint();
     }
