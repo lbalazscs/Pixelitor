@@ -19,13 +19,13 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.RectangularTransform;
+
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
-
-import com.bric.geom.RectangularTransform;
 
 /** In this transition the current frame splits off into several
  * tiles that calmly "explode" towards the viewer, revealing the
@@ -72,10 +72,11 @@ public class SquaresTransition2D extends Transition2D {
 			
 			double d1 = i1.transform.getDeterminant();
 			double d2 = i2.transform.getDeterminant();
-			if(d1<d2) {
-				return -1;
-			}
-			return 1;
+			return Double.compare(d1, d2);
+//			if(d1<d2) {
+//				return -1;
+//			}
+//			return 1;
 		}
 		
 	};

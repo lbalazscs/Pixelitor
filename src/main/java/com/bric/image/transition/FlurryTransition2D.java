@@ -19,6 +19,9 @@
  */
 package com.bric.image.transition;
 
+import com.bric.geom.ShapeBounds;
+import com.bric.geom.TransformUtils;
+
 import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -28,9 +31,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 import java.util.Vector;
-
-import com.bric.geom.ShapeBounds;
-import com.bric.geom.TransformUtils;
 
 /** In this transition one image breaks into several smaller tiles
  * and then is whisked away as if by a wind. Or, seen backwards, a flurry of incoming tiles assemble into
@@ -76,10 +76,12 @@ public class FlurryTransition2D extends Transition2D {
 			Rectangle2D r2 = ShapeBounds.getBounds(i2.clipping);
 			double area1 = r1.getWidth()*r1.getHeight();
 			double area2 = r2.getWidth()*r2.getHeight();
-			if(area1<area2) {
-				return -1;
-			}
-			return 1;
+
+			return Double.compare(area1, area2);
+//			if(area1<area2) {
+//				return -1;
+//			}
+//			return 1;
 		}
 		
 	};
