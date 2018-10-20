@@ -26,6 +26,7 @@ import pixelitor.utils.Utils;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -74,6 +75,8 @@ public class DraggablePoint extends Point2D.Double {
     private Shape shape;
     private Shape shadow;
     private static final Composite shadowComposite = AlphaComposite.SrcOver.derive(0.7f);
+
+    protected Cursor cursor;
 
     public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
         assert view != null;
@@ -303,6 +306,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public View getView() {
         return view;
+    }
+
+    public Cursor getCursor() {
+        return cursor;
     }
 
     @Override

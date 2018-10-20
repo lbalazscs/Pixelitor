@@ -77,7 +77,7 @@ public class TransformBoxTest {
         assertThat(se).isAt(400, 200);
 
         // check that the transform behaves like the handles
-        AffineTransform at = box.getImTransform();
+        AffineTransform at = box.calcImTransform();
         checkTransform(at,
                 new Rectangle(200, 100, 200, 100),
                 new Rectangle(240, 110, 160, 90));
@@ -121,7 +121,7 @@ public class TransformBoxTest {
         assertThat(nw).isAt(200, 100);
 
         // check that the transform behaves like the handles
-        AffineTransform at = box.getImTransform();
+        AffineTransform at = box.calcImTransform();
         checkTransform(at,
                 new Rectangle(200, 100, 200, 100),
                 new Rectangle(200, 100, 160, 90));
@@ -154,7 +154,7 @@ public class TransformBoxTest {
         se.mouseDragged(430, 220);
         se.mouseReleased(430, 220);
 
-        AffineTransform at = box.getImTransform();
+        AffineTransform at = box.calcImTransform();
         // should be a pure (30, 20) translation and nothing else
         assertEquals(AffineTransform.TYPE_TRANSLATION, at.getType());
         checkTransform(at, 100, 100, 130, 120);
@@ -186,7 +186,7 @@ public class TransformBoxTest {
         assertThat(se).isAt(600, 400).isAtIm(600, 400);
         assertThat(ne).isAt(600, 100).isAtIm(600, 100);
 
-        AffineTransform at = box.getImTransform();
+        AffineTransform at = box.calcImTransform();
         // check that a point at NE does not move...
         checkTransform(at, 200, 100, 200, 100);
         // ...and that a point at SE transforms like SE
@@ -197,14 +197,14 @@ public class TransformBoxTest {
     public void pureRotation() {
     }
 
-    private void checkTransform(AffineTransform at, double startX, double startY,
-                                double expectedX, double expectedY) {
+    private static void checkTransform(AffineTransform at, double startX, double startY,
+                                       double expectedX, double expectedY) {
         checkTransform(at,
                 new Point2D.Double(startX, startY),
                 new Point2D.Double(expectedX, expectedY));
     }
 
-    private void checkTransform(AffineTransform at, Point2D start, Point2D expected) {
+    private static void checkTransform(AffineTransform at, Point2D start, Point2D expected) {
         Point2D found = at.transform(start, null);
         if (!found.equals(expected)) {
             throw new AssertionError(String.format(
@@ -214,7 +214,7 @@ public class TransformBoxTest {
         }
     }
 
-    private void checkTransform(AffineTransform at, Rectangle start, Rectangle end) {
+    private static void checkTransform(AffineTransform at, Rectangle start, Rectangle end) {
         Point2D.Double topLeftStart = new Point2D.Double(start.x, start.y);
         Point2D.Double topLeftExpected = new Point2D.Double(end.x, end.y);
         checkTransform(at, topLeftStart, topLeftExpected);

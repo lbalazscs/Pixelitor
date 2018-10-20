@@ -20,6 +20,7 @@ package pixelitor.tools.transform;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
@@ -41,6 +42,7 @@ public class RotationHandle extends DraggablePoint {
     public RotationHandle(String name, TransformBox box, Point2D pos, View view) {
         super(name, pos.getX(), pos.getY(), view, Color.WHITE, Color.RED);
         this.box = box;
+        this.cursor = Cursors.DEFAULT;
     }
 
     @Override
@@ -50,7 +52,6 @@ public class RotationHandle extends DraggablePoint {
 
         cx = c.getX();
         cy = c.getY();
-        box.copyHandleLocations();
 
         // recalculate because a flipping might have occurred
         rotStartAngle = Math.atan2(this.y - cy, this.x - cx) + Math.PI / 2;

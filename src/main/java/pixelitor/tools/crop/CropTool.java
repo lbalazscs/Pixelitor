@@ -310,7 +310,7 @@ public class CropTool extends DragTool {
 
         Rectangle canvasBounds = canvas.getImBounds();
 
-        // Similar to ClipStrategy.INTERNAL_FRAME, but we need some intermediary variables
+        // Similar to ClipStrategy.FULL, but we need some intermediary variables
 
         Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
         // ...but first get this to image space...

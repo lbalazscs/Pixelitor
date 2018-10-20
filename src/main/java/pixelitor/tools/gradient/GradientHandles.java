@@ -20,6 +20,7 @@ package pixelitor.tools.gradient;
 import pixelitor.Build;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
+import pixelitor.tools.ToolWidget;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
@@ -34,7 +35,7 @@ import java.awt.geom.Point2D;
  * The three handles that can be used to manipulate
  * a gradient by dragging
  */
-public class GradientHandles {
+public class GradientHandles implements ToolWidget {
     private final GradientDefiningPoint start;
     private final GradientDefiningPoint end;
     private final GradientCenterPoint middle;
@@ -62,6 +63,7 @@ public class GradientHandles {
         start.setCenter(middle);
     }
 
+    @Override
     public DraggablePoint handleWasHit(double x, double y) {
         if (end.handleContains(x, y)) {
             return end;
@@ -75,6 +77,7 @@ public class GradientHandles {
         return null;
     }
 
+    @Override
     public void paint(Graphics2D g) {
         Shapes.drawGradientArrow(g, start.x, start.y, end.x, end.y);
 
@@ -117,6 +120,7 @@ public class GradientHandles {
         return ud;
     }
 
+    @Override
     public void coCoordsChanged(View view) {
         if (view == this.view) {
             start.restoreCoordsFromImSpace(view);

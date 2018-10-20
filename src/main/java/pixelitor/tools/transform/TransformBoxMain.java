@@ -19,6 +19,7 @@ package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
 import pixelitor.tools.shapes.ShapeType;
+import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 
 import javax.swing.*;
@@ -142,7 +143,7 @@ public class TransformBoxMain {
             addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
-                    transformBox.viewSizeChanged(TestView.this);
+                    transformBox.coCoordsChanged(TestView.this);
                     repaint();
                 }
             });
@@ -152,18 +153,18 @@ public class TransformBoxMain {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    transformBox.mousePressed(e);
+                    transformBox.handleMousePressed(new PMouseEvent(e, TestView.this));
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    transformBox.mouseReleased(e);
+                    transformBox.handleMouseReleased(new PMouseEvent(e, TestView.this));
                 }
             });
             addMouseMotionListener(new MouseMotionListener() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    transformBox.mouseDragged(e);
+                    transformBox.handleMouseDragged(new PMouseEvent(e, TestView.this));
                 }
 
                 @Override
@@ -292,7 +293,7 @@ public class TransformBoxMain {
 
         public void setViewScale(double viewScale) {
             this.viewScale = viewScale;
-            transformBox.viewSizeChanged(this);
+            transformBox.coCoordsChanged(this);
             repaint();
         }
 

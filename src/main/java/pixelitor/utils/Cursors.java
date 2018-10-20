@@ -29,6 +29,11 @@ public class Cursors {
     public static final Cursor BUSY = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
     public static final Cursor CROSSHAIR = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
 
+    public static final Cursor NW = Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR);
+    public static final Cursor NE = Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR);
+    public static final Cursor SE = Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR);
+    public static final Cursor SW = Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR);
+
     private Cursors() {
     }
 }

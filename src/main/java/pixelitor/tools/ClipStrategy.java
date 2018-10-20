@@ -38,7 +38,7 @@ public enum ClipStrategy {
      * TODO probably restoring Swing's original clip shape
      * would have the same effect
      */
-    INTERNAL_FRAME {
+    FULL {
         @Override
         public void setClipFor(Graphics2D g, ImageComponent ic) {
             // Note that the internal frame might be

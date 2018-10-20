@@ -23,6 +23,7 @@ import pixelitor.tools.util.ImDrag;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -36,6 +37,7 @@ public class StyledShape {
     private final ShapesAction action;
     private final ShapeType shapeType;
     private Shape shape; // the shape, in image-space
+    private Shape unTransformedShape;
 
     private ImDrag imDrag;
 
@@ -65,6 +67,12 @@ public class StyledShape {
      * in image space.
      */
     public void paint(Graphics2D g) {
+        if(imDrag == null) {
+            // this object is created when the mouse is pressed, but
+            // it can be painted only after the first drag events arrive
+            return;
+        }
+
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         if (action.hasFillPaint()) {
@@ -109,5 +117,10 @@ public class StyledShape {
     public void setImDrag(ImDrag imDrag) {
         this.imDrag = imDrag;
         shape = shapeType.getShape(imDrag);
+        unTransformedShape = shape;
+    }
+
+    public void transform(AffineTransform at) {
+        shape = at.createTransformedShape(unTransformedShape);
     }
 }

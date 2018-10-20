@@ -78,7 +78,7 @@ public class GradientTool extends DragTool {
                         "<b>Shift-drag</b> to constrain the direction. " +
                         "Press <b>Esc</b> to hide the handles and the arrow.",
                 Cursors.DEFAULT, true, true,
-                true, ClipStrategy.INTERNAL_FRAME);
+                true, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 

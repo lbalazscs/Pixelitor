@@ -72,7 +72,7 @@ public class SelectionTool extends DragTool {
     SelectionTool() {
         super("Selection", 'm', "selection_tool_icon.png",
                 HELP_TEXT, Cursors.DEFAULT, false,
-                true, false, ClipStrategy.INTERNAL_FRAME);
+                true, false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 

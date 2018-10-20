@@ -17,7 +17,9 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 
 import javax.swing.*;
 import java.awt.Point;
@@ -31,9 +33,9 @@ import java.awt.event.MouseEvent;
 public class PMouseEvent extends PPoint.Lazy {
     private final MouseEvent e;
 
-    public PMouseEvent(MouseEvent e, ImageComponent ic) {
-        super(ic, e.getX(), e.getY());
-        assert e.getSource() == ic;
+    public PMouseEvent(MouseEvent e, View view) {
+        super(view, e.getX(), e.getY());
+        assert e.getSource() == view;
 
         this.e = e;
     }
@@ -92,5 +94,15 @@ public class PMouseEvent extends PPoint.Lazy {
 
     public void repaint() {
         view.repaint();
+    }
+
+    // TODO this is a workaround so that the transform box
+    // demo can work without the main program
+    public void imageChanged(Composition.ImageChangeActions actions) {
+        if(view instanceof ImageComponent) {
+            getComp().imageChanged(actions);
+        } else {
+            view.repaint();
+        }
     }
 }

@@ -30,14 +30,8 @@ import java.awt.Cursor;
 public class CropHandle extends DraggablePoint {
     // All handle coordinates and sizes are in component space
 
-    private final Cursor cursor;
-
     public CropHandle(String name, int cursorType, View view) {
         super(name, 0, 0, view, Color.WHITE, Color.RED);
         this.cursor = Cursor.getPredefinedCursor(cursorType);
-    }
-
-    public Cursor getCursor() {
-        return cursor;
     }
 }

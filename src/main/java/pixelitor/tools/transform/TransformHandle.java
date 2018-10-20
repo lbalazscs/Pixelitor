@@ -21,6 +21,7 @@ import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.geom.Point2D;
 
 /**
@@ -28,23 +29,47 @@ import java.awt.geom.Point2D;
  */
 public class TransformHandle extends DraggablePoint {
     private final TransformBox box;
-    private TransformHandle verNeighbor;
-    private TransformHandle horNeighbor;
 
-    private double sin;
-    private double cos;
+    // the two neighbors in the horizontal and vertical directions
+    private TransformHandle horNeighbor;
+    private TransformHandle verNeighbor;
+
+    // the original coordinates of the two neighbors before a drag
     private double verOrigX;
     private double verOrigY;
     private double horOrigX;
     private double horOrigY;
 
-    public TransformHandle(String name, TransformBox box, Point2D pos, View view, Color c) {
+    // The sine and cosine of the current rotation angle
+    private double sin;
+    private double cos;
+
+    public TransformHandle(String name, TransformBox box, Point2D pos,
+                           View view, Color c, Cursor cursor) {
         super(name, pos.getX(), pos.getY(), view, c, Color.RED);
         this.box = box;
+        this.cursor = cursor;
+    }
+
+    public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {
+        this.verNeighbor = verNeighbor;
+        if (propagate) {
+            verNeighbor.setVerNeighbor(this, false);
+        }
+    }
+
+    public void setHorNeighbor(TransformHandle horNeighbor, boolean propagate) {
+        this.horNeighbor = horNeighbor;
+        if (propagate) {
+            horNeighbor.setHorNeighbor(this, false);
+        }
     }
 
     @Override
     public void setLocation(double x, double y) {
+        // this method does not move the related points because when
+        // the point is transformed with a rotation transform,
+        // AffineTransform.transform calls it, and expects the simple behavior
         super.setLocation(x, y);
 
         // the image space coordinates need to be updated continuously
@@ -83,19 +108,5 @@ public class TransformHandle extends DraggablePoint {
         horNeighbor.setLocation(horOrigX - ody * sin, horOrigY + ody * cos);
 
         box.handlePositionsChanged();
-    }
-
-    public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {
-        this.verNeighbor = verNeighbor;
-        if (propagate) {
-            verNeighbor.setVerNeighbor(this, false);
-        }
-    }
-
-    public void setHorNeighbor(TransformHandle horNeighbor, boolean propagate) {
-        this.horNeighbor = horNeighbor;
-        if (propagate) {
-            horNeighbor.setHorNeighbor(this, false);
-        }
     }
 }

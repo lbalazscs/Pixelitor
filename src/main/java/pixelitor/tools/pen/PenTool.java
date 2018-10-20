@@ -81,7 +81,7 @@ public class PenTool extends Tool {
         super("Pen", 'p', "pen_tool_icon.png",
                 "", // getStatusBarMessage() is overridden
                 Cursors.DEFAULT, false, true,
-                ClipStrategy.INTERNAL_FRAME);
+                ClipStrategy.FULL);
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {

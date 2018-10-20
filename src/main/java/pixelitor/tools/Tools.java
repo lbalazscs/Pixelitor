@@ -131,7 +131,7 @@ public class Tools {
         if (currentTool != SHAPES) {
             return false;
         }
-        return SHAPES.isDrawing();
+        return SHAPES.shouldDrawOverLayer();
     }
 
     public static void increaseActiveBrushSize() {
