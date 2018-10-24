@@ -88,8 +88,9 @@ public class ImageComponent extends JComponent
 
     private MaskViewMode maskViewMode;
 
-    // the start coordinates of the canvas if the ImageComponent is bigger
-    // than the canvas, and the canvas needs to be centralized
+    // The start coordinates of the canvas in component space,
+    // (bigger than zero if the ImageComponent is bigger
+    // than the canvas, and the canvas has to be centralized)
     private double canvasStartX;
     private double canvasStartY;
 
@@ -378,6 +379,7 @@ public class ImageComponent extends JComponent
 
         // restore the original transform
         g2.setTransform(componentTransform);
+        // now we are back in "component space"
 
         comp.drawGuides(g2);
 
@@ -397,7 +399,7 @@ public class ImageComponent extends JComponent
 
     public boolean showPixelGridIfEnabled() {
         // for some reason the pixel grid is very slow if there is
-        // a selection visible and the pixel grid might not be shown anyway
+        // a selection visible, so don't show it
         return zoomLevel.allowPixelGrid() && !comp.showsSelection();
     }
 

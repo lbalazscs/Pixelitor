@@ -21,7 +21,6 @@ import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.Cursors;
-import pixelitor.utils.Utils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -48,10 +47,7 @@ public class RotationHandle extends DraggablePoint {
     @Override
     public void mousePressed(double x, double y) {
         super.mousePressed(x, y); // sets dragStartX, dragStartY
-        Point2D c = box.getCenter();
-
-        cx = c.getX();
-        cy = c.getY();
+        recalcCenter();
 
         // recalculate because a flipping might have occurred
         rotStartAngle = Math.atan2(this.y - cy, this.x - cx) + Math.PI / 2;
@@ -64,10 +60,24 @@ public class RotationHandle extends DraggablePoint {
         double newX = origX + dx;
         double newY = origY + dy;
 
-        double angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
-        box.setAngle(angle);
+        double angle = reCalcAngle(newX, newY, false);
 
         box.rotate(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+    }
+
+    public double reCalcAngle(double newX, double newY, boolean recalcCenter) {
+        if (recalcCenter) {
+            recalcCenter();
+        }
+        double angle = Math.atan2(newY - cy, newX - cx) + Math.PI / 2;
+        box.setAngle(angle);
+        return angle;
+    }
+
+    private void recalcCenter() {
+        Point2D c = box.getCenter();
+        cx = c.getX();
+        cy = c.getY();
     }
 
     @Override
@@ -82,8 +92,7 @@ public class RotationHandle extends DraggablePoint {
         if (isActive()) {
             int displayBgWidth = DragDisplay.BG_WIDTH_ANGLE;
             DragDisplay dd = new DragDisplay(g, displayBgWidth);
-            int dragAngle = (int) Math.toDegrees(
-                    Utils.atan2AngleToIntuitive(box.getAngle()));
+            int dragAngle = box.getAngleDegrees();
             String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
 
             double sin = box.getSin();

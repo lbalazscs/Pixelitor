@@ -19,9 +19,9 @@ package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DraggablePoint;
+import pixelitor.utils.Cursors;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.geom.Point2D;
 
 /**
@@ -44,11 +44,15 @@ public class TransformHandle extends DraggablePoint {
     private double sin;
     private double cos;
 
+    private final int cursorIndex;
+    private final int cursorIndexIO;
+
     public TransformHandle(String name, TransformBox box, Point2D pos,
-                           View view, Color c, Cursor cursor) {
+                           View view, Color c, int cursorIndex, int cursorIndexIO) {
         super(name, pos.getX(), pos.getY(), view, c, Color.RED);
         this.box = box;
-        this.cursor = cursor;
+        this.cursorIndex = cursorIndex;
+        this.cursorIndexIO = cursorIndexIO;
     }
 
     public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {
@@ -108,5 +112,23 @@ public class TransformHandle extends DraggablePoint {
         horNeighbor.setLocation(horOrigX - ody * sin, horOrigY + ody * cos);
 
         box.handlePositionsChanged();
+    }
+
+    @Override
+    public void mouseReleased(double x, double y) {
+        super.mouseReleased(x, y);
+
+        // the angle can change by 180 degrees
+        // when the box is turned "inside out"
+        box.recalcAngle();
+    }
+
+    // the correct cursor depends on the rotation angle
+    public void recalcCursor() {
+        if (box.areCornersInDefaultOrder()) {
+            cursor = Cursors.getCursorAtOffset(cursorIndex + box.getCursorOffset());
+        } else {
+            cursor = Cursors.getCursorAtOffset(cursorIndexIO + box.getCursorOffset());
+        }
     }
 }

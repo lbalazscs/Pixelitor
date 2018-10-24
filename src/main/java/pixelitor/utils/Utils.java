@@ -176,6 +176,17 @@ public final class Utils {
         return angle;
     }
 
+    /**
+     * The inverse function of atan2AngleToIntuitive
+     */
+    public static double intuitiveToAtan2Angle(double radians) {
+        if (radians > Math.PI) {
+            return 2 * Math.PI - radians;
+        } else {
+            return -radians;
+        }
+    }
+
     public static Point2D offsetFromPolar(double distance, double angle) {
         double offsetX = distance * FastMath.cos(angle);
         double offsetY = distance * FastMath.sin(angle);

@@ -136,16 +136,15 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Paint over the active layer
+     * Paint over the active layer.
+     * The transform of the given Graphics2D is in image space.
      */
     public void paintOverLayer(Graphics2D g, Composition comp) {
         // empty instead of abstract for the convenience of subclasses
     }
 
     /**
-     * A possibility to paint temporarily something on the
-     * {@link ImageComponent} after all the layers have been painted.
-     *
+     * Paint on the {@link ImageComponent} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
     public void paintOverImage(Graphics2D g2, Canvas canvas,

@@ -18,13 +18,15 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
+import pixelitor.gui.utils.DoubleDim2D;
 import pixelitor.history.History;
 import pixelitor.tools.ToolWidget;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Cursors;
+import pixelitor.utils.AngleUnit;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Color;
@@ -32,16 +34,25 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
+import static pixelitor.utils.Cursors.DEFAULT;
+import static pixelitor.utils.Cursors.MOVE;
+import static pixelitor.utils.Cursors.NE_OFFSET;
+import static pixelitor.utils.Cursors.NE_OFFSET_IO;
+import static pixelitor.utils.Cursors.NW_OFFSET;
+import static pixelitor.utils.Cursors.NW_OFFSET_IO;
+import static pixelitor.utils.Cursors.SE_OFFSET;
+import static pixelitor.utils.Cursors.SE_OFFSET_IO;
+import static pixelitor.utils.Cursors.SW_OFFSET;
+import static pixelitor.utils.Cursors.SW_OFFSET_IO;
 
 /**
  * A widget that calculates an {@link AffineTransform}
@@ -58,14 +69,24 @@ public class TransformBox implements ToolWidget {
     private final TransformHandle sw;
     private final RotationHandle rot;
     private final Consumer<AffineTransform> transformListener;
-    private final List<DraggablePoint> handles;
+    private final DraggablePoint[] handles;
+    private final TransformHandle[] trHandles;
     private final View view;
 
     // the starting position of the box, corresponding to
     // the default size of the transformed object
     private final Rectangle2D origImRect;
 
+    // the width/height of the rotated rectangle in image space
+    private final Dimension2D rotatedImDim;
+
     private double angle = 0.0;
+    private int angleDegrees = 0;
+
+    // the angle-dependent cursor offset used to
+    // determine the cursor for a given corner
+    private int cursorOffset = 0;
+
     private double sin = 0.0;
     private double cos = 1.0;
 
@@ -82,26 +103,28 @@ public class TransformBox implements ToolWidget {
                         Consumer<AffineTransform> transformListener) {
         origCoRect = Shapes.toPositiveRect(origCoRect);
         origImRect = view.componentToImageSpace(origCoRect);
+        rotatedImDim = new DoubleDim2D(origImRect);
         this.view = view;
 
         int eastX = origCoRect.x + origCoRect.width;
         int southY = origCoRect.y + origCoRect.height;
 
+        Point2D.Double nwLoc = new Point2D.Double(origCoRect.x, origCoRect.y);
+        Point2D.Double neLoc = new Point2D.Double(eastX, origCoRect.y);
+        Point2D.Double seLoc = new Point2D.Double(eastX, southY);
+        Point2D.Double swLoc = new Point2D.Double(origCoRect.x, southY);
+
         nw = new TransformHandle("NW", this,
-                new Point2D.Double(origCoRect.x, origCoRect.y),
-                view, Color.WHITE, Cursors.NW);
+                nwLoc, view, Color.WHITE, NW_OFFSET, NW_OFFSET_IO);
 
         ne = new TransformHandle("NE", this,
-                new Point2D.Double(eastX, origCoRect.y),
-                view, Color.WHITE, Cursors.NE);
+                neLoc, view, Color.WHITE, NE_OFFSET, NE_OFFSET_IO);
 
         se = new TransformHandle("SE", this,
-                new Point2D.Double(eastX, southY),
-                view, Color.WHITE, Cursors.SE);
+                seLoc, view, Color.WHITE, SE_OFFSET, SE_OFFSET_IO);
 
         sw = new TransformHandle("SW", this,
-                new Point2D.Double(origCoRect.x, southY),
-                view, Color.WHITE, Cursors.SW);
+                swLoc, view, Color.WHITE, SW_OFFSET, SW_OFFSET_IO);
 
         Point2D center = Shapes.calcCenter(ne, sw);
 
@@ -117,14 +140,29 @@ public class TransformBox implements ToolWidget {
         se.setHorNeighbor(sw, true);
         se.setVerNeighbor(ne, true);
 
-        updateBoxShape();
+        handles = new DraggablePoint[]{nw, ne, se, sw, rot};
+        trHandles = new TransformHandle[]{nw, ne, se, sw};
 
-        handles = Arrays.asList(nw, ne, se, sw, rot);
+        updateBoxShape();
+        updateCursors();
     }
 
     public void rotate(AffineTransform rotate) {
         rotateHandlePositions(rotate);
         view.repaint();
+    }
+
+    // rotates the box to the given "intuitive" angles given in degrees
+    @VisibleForTesting
+    public void rotateTo(double value, AngleUnit unit) {
+        saveMemento(); // so that rotate works
+        double rad = unit.toAtan2Radians(value);
+        double angleBefore = angle;
+        setAngle(rad);
+        Point2D c = getCenter();
+        double cx = c.getX();
+        double cy = c.getY();
+        rotate(AffineTransform.getRotateInstance(rad - angleBefore, cx, cy));
     }
 
     /**
@@ -141,8 +179,8 @@ public class TransformBox implements ToolWidget {
 
         // scale with origin at NW
         at.translate(nw.imX, nw.imY);
-        double scaleX = calcImWidth() / origImRect.getWidth();
-        double scaleY = calcImHeight() / origImRect.getHeight();
+        double scaleX = rotatedImDim.getWidth() / origImRect.getWidth();
+        double scaleY = rotatedImDim.getHeight() / origImRect.getHeight();
         at.scale(scaleX, scaleY);
 //        at.translate(-nw.imX, -nw.imY);
 //
@@ -157,26 +195,22 @@ public class TransformBox implements ToolWidget {
         return at;
     }
 
-    // calculate the width of the rotated rectangle in image space
-    private double calcImWidth() {
+    private void updateRotatedDimensions() {
+        double width, height;
         if (Math.abs(cos) > Math.abs(sin)) {
-            return (ne.imX - nw.imX) / cos;
+            width = (ne.imX - nw.imX) / cos;
+            height = (sw.imY - nw.imY) / cos;
         } else {
-            // the precision is better if the calculation
-            // is based on the y coordinates
-            return (ne.imY - nw.imY) / sin;
+            // the precision is better when divided by sin
+            width = (ne.imY - nw.imY) / sin;
+            height = (nw.imX - sw.imX) / sin;
         }
+
+        rotatedImDim.setSize(width, height);
     }
 
-    // calculate the height of the rotated rectangle in image space
-    private double calcImHeight() {
-        if (Math.abs(cos) > Math.abs(sin)) {
-            return (sw.imY - nw.imY) / cos;
-        } else {
-            // the precision is better if the calculation
-            // is based on the x coordinates
-            return (nw.imX - sw.imX) / sin;
-        }
+    public Dimension2D getRotatedImSize() {
+        return rotatedImDim;
     }
 
     private void saveMemento() {
@@ -193,6 +227,7 @@ public class TransformBox implements ToolWidget {
     }
 
     public void handlePositionsChanged() {
+        updateRotatedDimensions();
         updateRotLocation();
         updateBoxShape();
         transformListener.accept(calcImTransform());
@@ -203,7 +238,7 @@ public class TransformBox implements ToolWidget {
 
         double rotDistX = ROT_HANDLE_DISTANCE * sin;
         double rotDistY = ROT_HANDLE_DISTANCE * cos;
-        if (calcImHeight() < 0) {
+        if (rotatedImDim.getHeight() < 0) {
             rotDistX *= -1;
             rotDistY *= -1;
         }
@@ -293,6 +328,7 @@ public class TransformBox implements ToolWidget {
                 activePoint = null;
             }
             e.imageChanged(REPAINT);
+            updateCursors();
             addToHistory(e);
             return true;
         } else if (globalDrag) {
@@ -309,6 +345,13 @@ public class TransformBox implements ToolWidget {
         Memento afterMovement = saveState();
         History.addEdit(new TransformBoxChangedEdit(e.getComp(),
                 this, beforeMovement, afterMovement, false));
+    }
+
+    @VisibleForTesting
+    void updateCursors() {
+        for (TransformHandle handle : trHandles) {
+            handle.recalcCursor();
+        }
     }
 
     private void dragAll(PMouseEvent e) {
@@ -350,10 +393,10 @@ public class TransformBox implements ToolWidget {
                 view.repaint();
             }
 
-            if(boxShape.contains(e.getPoint())) {
-                view.setCursor(Cursors.MOVE);
+            if (boxShape.contains(e.getPoint())) {
+                view.setCursor(MOVE);
             } else {
-                view.setCursor(Cursors.DEFAULT);
+                view.setCursor(DEFAULT);
             }
         }
     }
@@ -364,7 +407,7 @@ public class TransformBox implements ToolWidget {
 
     @Override
     public void coCoordsChanged(View view) {
-        for (DraggablePoint handle : handles) {
+        for (TransformHandle handle : trHandles) {
             handle.restoreCoordsFromImSpace(view);
         }
         updateRotLocation();
@@ -375,10 +418,35 @@ public class TransformBox implements ToolWidget {
         this.angle = angle;
         cos = Math.cos(angle);
         sin = Math.sin(angle);
+
+        angleDegrees = (int) Math.toDegrees(
+                Utils.atan2AngleToIntuitive(angle));
+        cursorOffset = calcCursorOffset(angleDegrees);
+    }
+
+    public int getCursorOffset() {
+        return cursorOffset;
     }
 
     public double getAngle() {
         return angle;
+    }
+
+    public int getAngleDegrees() {
+        return angleDegrees;
+    }
+
+    /**
+     * Calculates the angle-dependent part of the cursor offset,
+     * by dividing the 0-360 range of angles into eight equal parts,
+     * corresponding to the eight cursors
+     */
+    @VisibleForTesting
+    static int calcCursorOffset(int angleDeg) {
+        if (angleDeg > 338) { // 360 - (45/2) = 338
+            return 0;
+        }
+        return (angleDeg + 22) / 45;
     }
 
     public double getSin() {
@@ -387,6 +455,15 @@ public class TransformBox implements ToolWidget {
 
     public double getCos() {
         return cos;
+    }
+
+    public void recalcAngle() {
+        rot.reCalcAngle(rot.x, rot.y, true);
+    }
+
+    public boolean areCornersInDefaultOrder() {
+        // if the box is "inside out", then one of them is negative
+        return rotatedImDim.getHeight() >= 0 && rotatedImDim.getWidth() >= 0;
     }
 
     @VisibleForTesting
@@ -407,6 +484,11 @@ public class TransformBox implements ToolWidget {
     @VisibleForTesting
     public TransformHandle getSW() {
         return sw;
+    }
+
+    @VisibleForTesting
+    public RotationHandle getRot() {
+        return rot;
     }
 
     private Memento saveState() {

@@ -177,6 +177,11 @@ public class TestHelper {
     }
 
     public static PMouseEvent createPEvent(int x, int y, int id,
+                                           ImageComponent ic) {
+        return createPEvent(x, y, id, Ctrl.NO, Alt.NO, Shift.NO, MouseButton.LEFT, ic);
+    }
+
+    public static PMouseEvent createPEvent(int x, int y, int id,
                                            Ctrl ctrl, Alt alt, Shift shift,
                                            MouseButton mouseButton, ImageComponent ic) {
         MouseEvent e = createEvent(x, y, id, ctrl, alt, shift, mouseButton, ic);

@@ -20,6 +20,7 @@ package pixelitor.utils;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests utility helpers
@@ -36,5 +37,20 @@ public class UtilsTest {
         assertThat(v9).isEqualTo(9);
         assertThat(v10).isEqualTo(10);
         assertThat(v11).isEqualTo(11);
+    }
+
+    @Test
+    public void testAngleFunctions() {
+        for (double a = -Math.PI; a < Math.PI; a += 0.1) {
+            double intuitive = Utils.atan2AngleToIntuitive(a);
+            double atan = Utils.intuitiveToAtan2Angle(intuitive);
+            assertEquals(atan, a, 0.01);
+        }
+
+        for (double a = 0.0; a < 2 * Math.PI; a += 0.1) {
+            double atan = Utils.intuitiveToAtan2Angle(a);
+            double b = Utils.atan2AngleToIntuitive(atan);
+            assertEquals(a, b, 0.01);
+        }
     }
 }

@@ -23,6 +23,8 @@ import pixelitor.tools.pen.AnchorPointType;
 import pixelitor.tools.pen.ControlPoint;
 import pixelitor.tools.util.DraggablePoint;
 
+import static java.lang.String.format;
+
 /**
  * Custom AssertJ assertions for {@link DraggablePoint} objects.
  */
@@ -37,7 +39,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dx = Math.abs(actual.x - x);
         double dy = Math.abs(actual.y - y);
         if ((dx > 0.1) || (dy > 0.1)) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "found (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
                     actual.x, actual.y, x, y));
         }
@@ -51,7 +53,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         double dImX = Math.abs(actual.imX - x);
         double dImY = Math.abs(actual.imY - y);
         if (dImX > 2 || dImY > 2) {
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "found image coords (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
                     actual.imX, actual.imY, x, y));
         }
@@ -86,7 +88,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         ControlPoint cp = (ControlPoint) actual;
         if (!cp.isRetracted()) {
             AnchorPoint anchor = cp.getAnchor();
-            throw new AssertionError(String.format(
+            throw new AssertionError(format(
                     "Not retracted: control is at (%.1f, %.1f), anchor is at (%.1f, %.1f)",
                     cp.getX(), cp.getY(), anchor.getX(), anchor.getY()));
         }
@@ -125,6 +127,17 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
 
         if (actual.isActive()) {
             throw new AssertionError("active");
+        }
+
+        return this;
+    }
+
+    public DraggablePointAssert cursorNameIs(String expected) {
+        isNotNull();
+
+        String real = actual.getCursor().getName();
+        if (!real.equals(expected)) {
+            throw new AssertionError(format("expected '%s', found '%s'", expected, real));
         }
 
         return this;

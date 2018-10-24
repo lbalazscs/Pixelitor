@@ -19,29 +19,35 @@ package pixelitor.tools.transform;
 
 import org.junit.Before;
 import org.junit.Test;
+import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.View;
+import pixelitor.gui.ImageComponent;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
+import static java.awt.event.MouseEvent.MOUSE_PRESSED;
+import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.junit.Assert.assertEquals;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 public class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
-    private View view;
+    private ImageComponent ic;
 
     @Before
     public void setUp() {
-        view = TestHelper.createMockICWithoutComp();
+        Composition comp = TestHelper.createMockComposition();
+        ic = comp.getIC();
     }
 
     @Test
     public void moveNWFromInitialState() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {});
+                ic, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -85,7 +91,7 @@ public class TransformBoxTest {
 
     @Test
     public void moveSEFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, view, at -> {});
+        TransformBox box = new TransformBox(originalRect, ic, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -130,7 +136,7 @@ public class TransformBoxTest {
     @Test
     public void pureTranslation() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {});
+                ic, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -163,7 +169,7 @@ public class TransformBoxTest {
     @Test
     public void pureScaling() {
         TransformBox box = new TransformBox(originalRect,
-                view, at -> {});
+                ic, at -> {});
         TransformHandle nw = box.getNW();
         TransformHandle sw = box.getSW();
         TransformHandle ne = box.getNE();
@@ -195,6 +201,144 @@ public class TransformBoxTest {
 
     @Test
     public void pureRotation() {
+        TransformBox box = new TransformBox(originalRect,
+                ic, at -> {});
+        TransformHandle nw = box.getNW();
+        TransformHandle sw = box.getSW();
+        TransformHandle ne = box.getNE();
+        TransformHandle se = box.getSE();
+        RotationHandle rot = box.getRot();
+
+        // check the handles original state
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
+        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
+        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
+        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+        assertThat(rot).isAt(300, 80).isAtIm(300, 80);
+        assertThat(box).angleDegreesIs(0);
+        assertThat(nw).cursorNameIs("Northwest Resize Cursor");
+        assertThat(sw).cursorNameIs("Southwest Resize Cursor");
+        assertThat(ne).cursorNameIs("Northeast Resize Cursor");
+        assertThat(se).cursorNameIs("Southeast Resize Cursor");
+
+        // rotate by 90 degrees
+        press(box, 300, 80);
+        drag(box, 200, 120);
+        release(box, 10, 150);
+        assertThat(box).angleDegreesIs(90);
+
+        assertThat(nw).isAt(250, 250).isAtIm(250, 250);
+        assertThat(sw).isAt(350, 250).isAtIm(350, 250);
+        assertThat(ne).isAt(250, 50).isAtIm(250, 50);
+        assertThat(se).isAt(350, 50).isAtIm(350, 50);
+
+        assertThat(nw).cursorNameIs("Southwest Resize Cursor");
+        assertThat(sw).cursorNameIs("Southeast Resize Cursor");
+        assertThat(ne).cursorNameIs("Northwest Resize Cursor");
+        assertThat(se).cursorNameIs("Northeast Resize Cursor");
+
+        // rotate by setting an angle
+        box.rotateTo(180, INTUITIVE_DEGREES);
+        box.updateCursors();
+        assertThat(box).angleDegreesIs(180);
+
+        assertThat(nw).isAt(400, 200).isAtIm(400, 200);
+        assertThat(sw).isAt(400, 100).isAtIm(400, 100);
+        assertThat(ne).isAt(200, 200).isAtIm(200, 200);
+        assertThat(se).isAt(200, 100).isAtIm(200, 100);
+
+        assertThat(nw).cursorNameIs("Southeast Resize Cursor");
+        assertThat(sw).cursorNameIs("Northeast Resize Cursor");
+        assertThat(ne).cursorNameIs("Southwest Resize Cursor");
+        assertThat(se).cursorNameIs("Northwest Resize Cursor");
+    }
+
+    @Test
+    public void testCursorAfterTurnedInsideOut() {
+        TransformBox box = new TransformBox(originalRect,
+                ic, at -> {});
+        TransformHandle nw = box.getNW();
+        TransformHandle sw = box.getSW();
+        TransformHandle ne = box.getNE();
+        TransformHandle se = box.getSE();
+        RotationHandle rot = box.getRot();
+
+        // drag NW downwards
+        press(box, 200, 100);
+        drag(box, 200, 200);
+        release(box, 200, 300);
+        assertThat(box)
+                .angleDegreesIs(180)
+                .rotSizeIs(200, -100);
+
+        assertThat(nw).cursorNameIs("Southwest Resize Cursor");
+        assertThat(sw).cursorNameIs("Northwest Resize Cursor");
+        assertThat(ne).cursorNameIs("Southeast Resize Cursor");
+        assertThat(se).cursorNameIs("Northeast Resize Cursor");
+
+        // drag NW downwards again
+        press(box, 200, 300);
+        drag(box, 200, 350);
+        release(box, 200, 400);
+        assertThat(box)
+                .angleDegreesIs(180)
+                .rotSizeIs(-200, 200);
+
+        // expect no change
+        assertThat(nw).cursorNameIs("Southwest Resize Cursor");
+        assertThat(sw).cursorNameIs("Northwest Resize Cursor");
+        assertThat(ne).cursorNameIs("Southeast Resize Cursor");
+        assertThat(se).cursorNameIs("Northeast Resize Cursor");
+
+        // drag back
+        press(box, 200, 400);
+        drag(box, 200, 350);
+        release(box, 200, 300);
+        assertThat(box)
+                .angleDegreesIs(180)
+                .rotSizeIs(-200, 100);
+
+        // drag NE to the left
+        press(box, 400, 300);
+        drag(box, 200, 300);
+        release(box, 100, 300);
+        assertThat(box)
+                .angleDegreesIs(180)
+                .rotSizeIs(100, 100);
+
+        assertThat(nw).cursorNameIs("Southeast Resize Cursor");
+        assertThat(sw).cursorNameIs("Northeast Resize Cursor");
+        assertThat(ne).cursorNameIs("Southwest Resize Cursor");
+        assertThat(se).cursorNameIs("Northwest Resize Cursor");
+
+        // drag NE upwards
+        press(box, 100, 300);
+        drag(box, 100, 200);
+        release(box, 100, 100);
+        assertThat(box)
+                .angleDegreesIs(0)
+                .rotSizeIs(100, -100);
+
+        assertThat(nw).cursorNameIs("Northeast Resize Cursor");
+        assertThat(sw).cursorNameIs("Southeast Resize Cursor");
+        assertThat(ne).cursorNameIs("Northwest Resize Cursor");
+        assertThat(se).cursorNameIs("Southwest Resize Cursor");
+    }
+
+    @Test
+    public void test_calcAngleCursorOffset() {
+        checkOffset(0, 0);
+        checkOffset(20, 0);
+        checkOffset(40, 1);
+        checkOffset(50, 1);
+        checkOffset(190, 4);
+        checkOffset(260, 6);
+        checkOffset(350, 0);
+    }
+
+    private static void checkOffset(int angleDegrees, int expectedOffset) {
+        int offset = TransformBox.calcCursorOffset(angleDegrees);
+        assertEquals(expectedOffset, offset);
     }
 
     private static void checkTransform(AffineTransform at, double startX, double startY,
@@ -226,5 +370,17 @@ public class TransformBoxTest {
                 end.x + end.width,
                 end.y + end.height);
         checkTransform(at, bottomRightStart, bottomRightExpected);
+    }
+
+    private boolean press(TransformBox box, int x, int y) {
+        return box.handleMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, ic));
+    }
+
+    private boolean drag(TransformBox box, int x, int y) {
+        return box.handleMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ic));
+    }
+
+    private boolean release(TransformBox box, int x, int y) {
+        return box.handleMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, ic));
     }
 }
