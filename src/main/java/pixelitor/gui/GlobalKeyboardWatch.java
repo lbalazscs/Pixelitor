@@ -30,6 +30,7 @@ import javax.swing.*;
 import java.awt.AWTEvent;
 import java.awt.AWTKeyStroke;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
@@ -301,5 +303,27 @@ public class GlobalKeyboardWatch {
 
     public static void setKeyListener(KeyListener keyListener) {
         GlobalKeyboardWatch.keyListener = keyListener;
+    }
+
+    /**
+     * Reports all events which take more than the given time to complete.
+     *
+     * See https://stackoverflow.com/questions/5541493/how-do-i-profile-the-edt-in-swing
+     */
+    public static void showEventsSlowerThan(long threshold, TimeUnit unit) {
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new EventQueue() {
+            final long thresholdNanos = unit.toNanos(threshold);
+
+            @Override
+            protected void dispatchEvent(AWTEvent event) {
+                long startTime = System.nanoTime();
+                super.dispatchEvent(event);
+                long endTime = System.nanoTime();
+
+                if (endTime - startTime > thresholdNanos) {
+                    System.out.println(((endTime - startTime) / 1_000_000) + " ms: " + event);
+                }
+            }
+        });
     }
 }

@@ -49,14 +49,7 @@ public class EffectsParam extends AbstractFilterParam {
             effectsPanel.setDefaultButton(button);
 
             ConfigureParamGUI configureParamGUI = new ConfigureParamGUI(owner ->
-                    new DialogBuilder()
-                            .owner(owner)
-                            .title("Effects")
-                            .content(effectsPanel)
-                            .withScrollbars()
-                            .okText("Close")
-                            .noCancelButton()
-                            .build(), button);
+                    buildDialog(owner, true), button);
 
             paramGUI = configureParamGUI;
             setParamGUIEnabledState();
@@ -65,6 +58,23 @@ public class EffectsParam extends AbstractFilterParam {
             effectsPanel.setBorder(createTitledBorder("Effects"));
             return effectsPanel;
         }
+    }
+
+    public JDialog buildDialog(JDialog owner, boolean modal) {
+        DialogBuilder db = new DialogBuilder();
+        if (owner != null) {
+            db = db.owner(owner);
+        }
+        if (!modal) {
+            db = db.notModal();
+        }
+        return db
+                .title("Effects")
+                .content(effectsPanel)
+                .withScrollbars()
+                .okText("Close")
+                .noCancelButton()
+                .build();
     }
 
     public AreaEffects getEffects() {
@@ -121,5 +131,9 @@ public class EffectsParam extends AbstractFilterParam {
         if (effectsPanel != null) {
             effectsPanel.reset(trigger);
         }
+    }
+
+    public int getMaxEffectThickness() {
+        return effectsPanel.getMaxEffectThickness();
     }
 }

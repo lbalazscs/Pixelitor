@@ -20,12 +20,11 @@ package pixelitor.tools.shapes;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.painters.AreaEffects;
-import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageComponent;
-import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
@@ -35,6 +34,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
@@ -89,7 +89,8 @@ public class ShapesTool extends DragTool {
 
     private JButton effectsButton;
     private JDialog effectsDialog;
-    private EffectsPanel effectsPanel;
+    //    private EffectsPanel effectsPanel;
+    private final EffectsParam effectsParam = new EffectsParam("");
 
     private Shape backupSelectionShape = null;
 
@@ -111,9 +112,8 @@ public class ShapesTool extends DragTool {
 
         spaceDragStartPoint = true;
 
-        // we don't want any instant feedback in the image, but
-        // we want feedback as a side-effect in the stroke preview
-        strokeParam.setAdjustmentListener(ParamAdjustmentListener.EMPTY);
+        strokeParam.setAdjustmentListener(() -> regenerateShape(strokeParam));
+        effectsParam.setAdjustmentListener(() -> regenerateShape(effectsParam));
     }
 
     @Override
@@ -122,14 +122,18 @@ public class ShapesTool extends DragTool {
         settingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(typeModel.getSize());
+        shapeTypeCB.addActionListener(e -> regenerateShape(typeModel));
 
         JComboBox<ShapesAction> actionCB = new JComboBox<>(actionModel);
         settingsPanel.addWithLabel("Action:", actionCB, "actionCB");
         actionCB.addActionListener(e -> updateEnabledState());
+        actionCB.addActionListener(e -> regenerateShape(actionModel));
 
         settingsPanel.addWithLabel("Fill:", fillPaintCombo);
+        fillPaintCombo.addActionListener(e -> regenerateShape(fillPaintModel));
 
         settingsPanel.addWithLabel("Stroke:", strokePaintCombo);
+        strokePaintCombo.addActionListener(e -> regenerateShape(strokePaintModel));
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
                 e -> initAndShowStrokeSettingsDialog());
@@ -141,26 +145,22 @@ public class ShapesTool extends DragTool {
     }
 
     private void showEffectsDialog() {
-        if (effectsPanel == null) {
-            effectsPanel = new EffectsPanel(
-                    () -> effectsPanel.updateEffectsFromGUI(), null);
-        }
 
-        effectsDialog = new DialogBuilder()
-                .content(effectsPanel)
-                .title("Effects")
-                .notModal()
-                .okText("Close")
-                .noCancelButton()
-                .show();
+//        if (effectsPanel == null) {
+//            effectsPanel = new EffectsPanel(
+//                    () -> effectsPanel.updateEffectsFromGUI(), null);
+//        }
+
+        effectsDialog = effectsParam.buildDialog(null, false);
+        GUIUtils.showDialog(effectsDialog);
     }
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
-            if(transformBox.handleMousePressed(e)) {
+            if (transformBox.handleMousePressed(e)) {
                 return;
             }
             // if pressed outside the transform box,
@@ -177,10 +177,10 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void ongoingDrag(PMouseEvent e) {
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
-            if(transformBox.handleMouseDragged(e)) {
+            if (transformBox.handleMouseDragged(e)) {
                 return;
             }
             throw new IllegalStateException("should not get here");
@@ -205,10 +205,10 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void dragFinished(PMouseEvent e) {
-        if(state == TRANSFORM) {
+        if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
-            if(transformBox.handleMouseReleased(e)) {
+            if (transformBox.handleMouseReleased(e)) {
                 return;
             }
             throw new IllegalStateException("should not get here");
@@ -216,7 +216,7 @@ public class ShapesTool extends DragTool {
 
         assert state == INITIAL_DRAG;
 
-        if(userDrag.isClick()) {
+        if (userDrag.isClick()) {
             return;
         }
 
@@ -232,6 +232,7 @@ public class ShapesTool extends DragTool {
                     at -> styledShape.transform(at));
             e.getView().repaint();
             state = TRANSFORM;
+            History.addEdit(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
         } else { // selection mode
             comp.onSelection(selection -> addSelectionEdit(comp, selection));
             state = NO_INTERACTION;
@@ -295,19 +296,42 @@ public class ShapesTool extends DragTool {
             thickness += extraStrokeThickness;
         }
 
-        int effectThickness = 0;
-        if (effectsPanel != null) {
-            effectThickness = effectsPanel.getMaxEffectThickness();
-
-            // the extra stroke thickness must be added
-            // because the effect can be on the stroke
-            effectThickness += extraStrokeThickness;
-        }
+        int effectThickness = effectsParam.getMaxEffectThickness();
+        // the extra stroke thickness must be added
+        // because the effect can be on the stroke
+        effectThickness += extraStrokeThickness;
 
         if (effectThickness > thickness) {
             thickness = effectThickness;
         }
         return thickness;
+    }
+
+    private void regenerateShape(Object source) {
+        // TODO do other check like in GradientTool
+        if (styledShape != null) {
+            if (source == typeModel) {
+                styledShape.setType(getSelectedType());
+                transformBox.applyTransformation();
+            } else if (source == actionModel) {
+                ShapesAction newAction = getSelectedAction();
+                if (newAction.hasStrokePaint()) {
+                    stroke.invalidate();
+                }
+                styledShape.setAction(newAction);
+            } else if (source == fillPaintModel) {
+                styledShape.setFillPaint(getSelectedFillPaint());
+            } else if (source == strokePaintModel) {
+                styledShape.setStrokePaint(getSelectedStrokePaint());
+            } else if (source == strokeParam) {
+                stroke.invalidate();
+                styledShape.setStroke(stroke.get());
+            } else if (source == effectsParam) {
+                styledShape.setEffects(effectsParam.getEffects());
+            }
+
+            ImageComponents.getActiveCompOrNull().imageChanged();
+        }
     }
 
     private void updateEnabledState() {
@@ -345,7 +369,7 @@ public class ShapesTool extends DragTool {
             // updates the shape continuously while drawing
             Shape currentShape = getSelectedType().getShape(userDrag.toImDrag());
             paintShape(g, currentShape, comp);
-        } else if(state == TRANSFORM) {
+        } else if (state == TRANSFORM) {
             assert transformBox != null;
             styledShape.paint(g);
         }
@@ -355,10 +379,10 @@ public class ShapesTool extends DragTool {
     public void paintOverImage(Graphics2D g, Canvas canvas, ImageComponent ic,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
-        if(state == INITIAL_DRAG) {
+        if (state == INITIAL_DRAG) {
             // paint the drag display for the initial drag
             super.paintOverImage(g, canvas, ic, componentTransform, imageTransform);
-        } else if(state == TRANSFORM) {
+        } else if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
             transformBox.paint(g);
@@ -460,7 +484,35 @@ public class ShapesTool extends DragTool {
     public void resetStateToInitial() {
         state = NO_INTERACTION;
         transformBox = null;
+
+        boolean hadShape = styledShape != null;
         styledShape = null;
+
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        if (hadShape) {
+            comp.imageChanged();
+        } else {
+            comp.repaint();
+        }
+    }
+
+    public void restoreBox(StyledShape shape, TransformBox box) {
+        assert styledShape == null;
+        assert transformBox == null;
+
+        styledShape = shape;
+        transformBox = box;
+        state = TRANSFORM;
+        ImageComponents.getActiveCompOrNull().imageChanged();
+    }
+
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+
+        // TODO finalize existing box
+
+        resetStateToInitial();
     }
 
     private ShapesAction getSelectedAction() {
@@ -480,11 +532,7 @@ public class ShapesTool extends DragTool {
     }
 
     public AreaEffects getEffects() {
-        if (effectsPanel == null) { // not initialized => no effects
-            return null;
-        }
-
-        return effectsPanel.getEffects();
+        return effectsParam.getEffects();
     }
 
     public Stroke getStroke() {

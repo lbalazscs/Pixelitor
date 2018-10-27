@@ -37,6 +37,7 @@ public class DragDisplay {
     public static final int BG_WIDTH_ANGLE = 70; // enough for an angle
     public static final int ONE_LINER_BG_HEIGHT = 22;
     public static final int TWO_LINER_BG_HEIGHT = 47;
+    public static final int MOUSE_DISPLAY_DISTANCE = 10;
     private final Graphics2D g;
     private final Composite origComposite;
     private final Stroke origStroke;
@@ -52,6 +53,50 @@ public class DragDisplay {
 
         g.setStroke(BG_STROKE);
         g.setClip(null);
+    }
+
+    public static String getHeightDisplayString(double height) {
+        String dyString;
+        int rounded = (int) height;
+        if (height >= 0) {
+            dyString = "\u2195 = " + rounded + " px";
+        } else {
+            dyString = "\u2195 = " + (-rounded) + " px";
+        }
+        return dyString;
+    }
+
+    public static String getWidthDisplayString(double width) {
+        String dxString;
+        int rounded = (int) width;
+        if (width >= 0) {
+            dxString = "\u2194 = " + rounded + " px";
+        } else {
+            dxString = "\u2194 = " + (-rounded) + " px";
+        }
+        return dxString;
+    }
+
+    public static void displayRelativeMovement(Graphics2D g, int dx, int dy,
+                                               float x, float y) {
+        String dxString;
+        if (dx >= 0) {
+            dxString = "\u2192 = " + dx + " px";
+        } else {
+            dxString = "\u2190 = " + (-dx) + " px";
+        }
+        String dyString;
+        if (dy >= 0) {
+            dyString = "\u2193 = " + dy + " px";
+        } else {
+            dyString = "\u2191 = " + (-dy) + " px";
+        }
+
+        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
+
+        dd.drawTwoLines(dxString, dyString, x, y);
+
+        dd.finish();
     }
 
     private void drawBg(float x, float y, int height) {

@@ -18,11 +18,16 @@
 package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.DragDisplay;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.Cursors;
+import pixelitor.utils.Shapes;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
+
+import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
 
 /**
  * A corner handle of a {@link TransformBox}
@@ -47,10 +52,16 @@ public class TransformHandle extends DraggablePoint {
     private final int cursorIndex;
     private final int cursorIndexIO;
 
-    public TransformHandle(String name, TransformBox box, Point2D pos,
+    private Direction direction;
+
+    // true for NW and NE
+    private final boolean nextToRot;
+
+    public TransformHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
                            View view, Color c, int cursorIndex, int cursorIndexIO) {
         super(name, pos.getX(), pos.getY(), view, c, Color.RED);
         this.box = box;
+        this.nextToRot = nextToRot;
         this.cursorIndex = cursorIndex;
         this.cursorIndexIO = cursorIndexIO;
     }
@@ -123,12 +134,70 @@ public class TransformHandle extends DraggablePoint {
         box.recalcAngle();
     }
 
-    // the correct cursor depends on the rotation angle
-    public void recalcCursor() {
+    /**
+     * Determines the direction as the box is rotating
+     */
+    public void recalcDirection() {
+        int offset;
         if (box.areCornersInDefaultOrder()) {
-            cursor = Cursors.getCursorAtOffset(cursorIndex + box.getCursorOffset());
+            offset = cursorIndex + box.getCursorOffset();
         } else {
-            cursor = Cursors.getCursorAtOffset(cursorIndexIO + box.getCursorOffset());
+            offset = cursorIndexIO + box.getCursorOffset();
         }
+        direction = Direction.atOffset(offset);
+        cursor = direction.getCursor();
+    }
+
+    private Point2D getHorHalfPoint() {
+        // as this is used for placing the drag display, take
+        // the rotation handle into account: for the NW-NE edge
+        // return the rotation location instead of the edge center
+        if (nextToRot && horNeighbor.nextToRot) {
+            return box.getRot();
+        }
+
+        return Shapes.calcCenter(this, horNeighbor);
+    }
+
+    private Point2D getVerHalfPoint() {
+        return Shapes.calcCenter(this, verNeighbor);
+    }
+
+    private Direction getHorEdgeDirection() {
+        return direction.getDirectionBetween(horNeighbor.direction);
+    }
+
+    private Direction getVerEdgeDirection() {
+        return direction.getDirectionBetween(verNeighbor.direction);
+    }
+
+    @Override
+    public void paintHandle(Graphics2D g) {
+        super.paintHandle(g);
+
+        if (isActive()) {
+            drawDragDisplays(g);
+        }
+    }
+
+    private void drawDragDisplays(Graphics2D g) {
+        Dimension2D size = box.getRotatedImSize();
+        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
+
+        Direction horEdgeDirection = getHorEdgeDirection();
+        String widthString = DragDisplay.getWidthDisplayString(size.getWidth());
+        Point2D horHalf = getHorHalfPoint();
+        float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
+        float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
+        dd.drawOneLine(widthString, horX, horY);
+
+        Direction verEdgeDirection = getVerEdgeDirection();
+        String heightString = DragDisplay.getHeightDisplayString(size.getHeight());
+        Point2D verHalf = getVerHalfPoint();
+        float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
+        float verY = (float) (verHalf.getY() + verEdgeDirection.dy);
+        dd.drawOneLine(heightString, verX, verY);
+
+        dd.finish();
     }
 }

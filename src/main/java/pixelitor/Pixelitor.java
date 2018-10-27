@@ -102,6 +102,8 @@ public class Pixelitor {
     private static void createAndShowGUI(String[] args) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
+//        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
+
         setLookAndFeel();
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
@@ -204,7 +206,7 @@ public class Pixelitor {
 
 //        ImageComponents.getActiveIC().setZoom(ZoomLevel.Z6400, true);
 
-//        GlobalKeyboardWatch.registerDebugMouseWatching();
+//        GlobalKeyboardWatch.registerDebugMouseWatching(false);
 
 //        new TweenWizard().start(pw);
 

@@ -34,8 +34,9 @@ import static pixelitor.tools.shapes.ShapesTool.STROKE_FOR_OPEN_SHAPES;
  * that can paint itself on a given {@link Graphics2D}
  */
 public class StyledShape {
-    private final ShapesAction action;
-    private final ShapeType shapeType;
+    private ShapesAction action;
+    private final ShapesTool tool;
+    private ShapeType shapeType;
     private Shape shape; // the shape, in image-space
     private Shape unTransformedShape;
 
@@ -47,9 +48,15 @@ public class StyledShape {
 
     private Stroke stroke;
 
-    public StyledShape(ShapeType shapeType, ShapesAction action, ShapesTool tool) {
+    public StyledShape(ShapeType shapeType, ShapesAction action,
+                       ShapesTool tool) {
         this.shapeType = shapeType;
         this.action = action;
+        this.tool = tool;
+        configureBasedOnAction(action, tool);
+    }
+
+    private void configureBasedOnAction(ShapesAction action, ShapesTool tool) {
         if (action.hasFillPaint()) {
             this.fillPaint = tool.getSelectedFillPaint();
         }
@@ -122,5 +129,32 @@ public class StyledShape {
 
     public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
+    }
+
+    public void setType(ShapeType shapeType) {
+        this.shapeType = shapeType;
+        shape = shapeType.getShape(imDrag);
+        unTransformedShape = shape;
+    }
+
+    public void setAction(ShapesAction action) {
+        this.action = action;
+        configureBasedOnAction(action, tool);
+    }
+
+    public void setFillPaint(TwoPointBasedPaint fillPaint) {
+        this.fillPaint = fillPaint;
+    }
+
+    public void setStrokePaint(TwoPointBasedPaint strokePaint) {
+        this.strokePaint = strokePaint;
+    }
+
+    public void setStroke(Stroke stroke) {
+        this.stroke = stroke;
+    }
+
+    public void setEffects(AreaEffects effects) {
+        this.effects = effects;
     }
 }

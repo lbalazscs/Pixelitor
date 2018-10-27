@@ -26,6 +26,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
+import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
+
 /**
  * Represents the mouse drag on the image made
  * by the user while using a {@link DragTool}.
@@ -55,7 +57,6 @@ public class UserDrag {
 
     private boolean constrainPoints = false;
     private boolean startFromCenter = false;
-    private static final int MOUSE_DISPLAY_DISTANCE = 10;
 
     public UserDrag() {
     }
@@ -193,14 +194,15 @@ public class UserDrag {
     }
 
     public void displayWidthHeight(Graphics2D g) {
-        int imWidth = (int) (imEndX - imStartX);
-        int imHeight = (int) (imEndY - imStartY);
-        String widthInfo = "\u2194 = " + Math.abs(imWidth) + " px";
-        String heightInfo = "\u2195 = " + Math.abs(imHeight) + " px";
+        double imWidth = imEndX - imStartX;
+        double imHeight = imEndY - imStartY;
+        String widthInfo = DragDisplay.getWidthDisplayString(imWidth);
+        String heightInfo = DragDisplay.getHeightDisplayString(imHeight);
 
         int displayBgWidth = DragDisplay.BG_WIDTH_PIXEL;
         DragDisplay dd = new DragDisplay(g, displayBgWidth);
 
+        // draw the width display
         float widthY;
         if (imHeight >= 0) {
             // display the width info bellow the mouse
@@ -212,6 +214,7 @@ public class UserDrag {
         float widthX = (float) (coStartX + (coEndX - coStartX) / 2.0f - displayBgWidth / 2);
         dd.drawOneLine(widthInfo, widthX, widthY);
 
+        // draw the height display
         float heightX;
         if (imWidth >= 0) {
             // display the height info on the right side of the mouse
@@ -256,26 +259,7 @@ public class UserDrag {
     public void displayRelativeMovement(Graphics2D g) {
         int dx = (int) (imEndX - imStartX);
         int dy = (int) (imEndY - imStartY);
-        String dxString;
-        if (dx >= 0) {
-            dxString = "\u2192 = " + dx + " px";
-        } else {
-            dxString = "\u2190 = " + (-dx) + " px";
-        }
-        String dyString;
-        if (dy >= 0) {
-            dyString = "\u2193 = " + dy + " px";
-        } else {
-            dyString = "\u2191 = " + (-dy) + " px";
-        }
-
-        DragDisplay dd = new DragDisplay(g, DragDisplay.BG_WIDTH_PIXEL);
-        float x = (float) (coEndX + 30);
-        float y = (float) (coEndY - 20);
-
-        dd.drawTwoLines(dxString, dyString, x, y);
-
-        dd.finish();
+        DragDisplay.displayRelativeMovement(g, dx, dy, (float) (coEndX + 30), (float) (coEndY - 20));
     }
 
     public void displayAngleAndDist(Graphics2D g) {

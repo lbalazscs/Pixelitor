@@ -42,17 +42,17 @@ import java.awt.geom.Rectangle2D;
 import java.util.function.Consumer;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.tools.transform.Direction.NE_OFFSET;
+import static pixelitor.tools.transform.Direction.NE_OFFSET_IO;
+import static pixelitor.tools.transform.Direction.NW_OFFSET;
+import static pixelitor.tools.transform.Direction.NW_OFFSET_IO;
+import static pixelitor.tools.transform.Direction.SE_OFFSET;
+import static pixelitor.tools.transform.Direction.SE_OFFSET_IO;
+import static pixelitor.tools.transform.Direction.SW_OFFSET;
+import static pixelitor.tools.transform.Direction.SW_OFFSET_IO;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Cursors.MOVE;
-import static pixelitor.utils.Cursors.NE_OFFSET;
-import static pixelitor.utils.Cursors.NE_OFFSET_IO;
-import static pixelitor.utils.Cursors.NW_OFFSET;
-import static pixelitor.utils.Cursors.NW_OFFSET_IO;
-import static pixelitor.utils.Cursors.SE_OFFSET;
-import static pixelitor.utils.Cursors.SE_OFFSET_IO;
-import static pixelitor.utils.Cursors.SW_OFFSET;
-import static pixelitor.utils.Cursors.SW_OFFSET_IO;
 
 /**
  * A widget that calculates an {@link AffineTransform}
@@ -114,16 +114,16 @@ public class TransformBox implements ToolWidget {
         Point2D.Double seLoc = new Point2D.Double(eastX, southY);
         Point2D.Double swLoc = new Point2D.Double(origCoRect.x, southY);
 
-        nw = new TransformHandle("NW", this,
+        nw = new TransformHandle("NW", this, true,
                 nwLoc, view, Color.WHITE, NW_OFFSET, NW_OFFSET_IO);
 
-        ne = new TransformHandle("NE", this,
+        ne = new TransformHandle("NE", this, true,
                 neLoc, view, Color.WHITE, NE_OFFSET, NE_OFFSET_IO);
 
-        se = new TransformHandle("SE", this,
+        se = new TransformHandle("SE", this, false,
                 seLoc, view, Color.WHITE, SE_OFFSET, SE_OFFSET_IO);
 
-        sw = new TransformHandle("SW", this,
+        sw = new TransformHandle("SW", this, false,
                 swLoc, view, Color.WHITE, SW_OFFSET, SW_OFFSET_IO);
 
         Point2D center = Shapes.calcCenter(ne, sw);
@@ -144,7 +144,7 @@ public class TransformBox implements ToolWidget {
         trHandles = new TransformHandle[]{nw, ne, se, sw};
 
         updateBoxShape();
-        updateCursors();
+        updateDirections();
     }
 
     public void rotate(AffineTransform rotate) {
@@ -230,6 +230,10 @@ public class TransformBox implements ToolWidget {
         updateRotatedDimensions();
         updateRotLocation();
         updateBoxShape();
+        applyTransformation();
+    }
+
+    public void applyTransformation() {
         transformListener.accept(calcImTransform());
     }
 
@@ -328,7 +332,7 @@ public class TransformBox implements ToolWidget {
                 activePoint = null;
             }
             e.imageChanged(REPAINT);
-            updateCursors();
+            updateDirections();
             addToHistory(e);
             return true;
         } else if (globalDrag) {
@@ -348,9 +352,9 @@ public class TransformBox implements ToolWidget {
     }
 
     @VisibleForTesting
-    void updateCursors() {
+    void updateDirections() {
         for (TransformHandle handle : trHandles) {
-            handle.recalcCursor();
+            handle.recalcDirection();
         }
     }
 

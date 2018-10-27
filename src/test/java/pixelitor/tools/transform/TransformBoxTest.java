@@ -239,7 +239,7 @@ public class TransformBoxTest {
 
         // rotate by setting an angle
         box.rotateTo(180, INTUITIVE_DEGREES);
-        box.updateCursors();
+        box.updateDirections();
         assertThat(box).angleDegreesIs(180);
 
         assertThat(nw).isAt(400, 200).isAtIm(400, 200);
