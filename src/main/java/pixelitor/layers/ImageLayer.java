@@ -31,6 +31,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.io.PXCFormat;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
+import pixelitor.utils.ImageTrimUtil;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -518,6 +519,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return new Rectangle(
                 translationX, translationY,
                 image.getWidth(), image.getHeight());
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox() {
+        // TODO cache rect size by utilizing some BoundingBoxDirty flag
+        Rectangle rect = ImageTrimUtil.getTrimRect(getImage());
+
+        return new Rectangle(
+                translationX + rect.x, translationY + rect.y,
+                rect.width, rect.height);
     }
 
     public boolean checkImageDoesNotCoverCanvas() {

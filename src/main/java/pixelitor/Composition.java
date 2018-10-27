@@ -469,6 +469,10 @@ public class Composition implements Serializable {
         return layerList.get(i);
     }
 
+    public List<Layer> getLayers() {
+        return layerList;
+    }
+
     public int getNumLayers() {
         return layerList.size();
     }

@@ -24,6 +24,8 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 
+import java.awt.*;
+
 /**
  * A layer with a content (text or image layer) that
  * can be moved/rotated.
@@ -63,6 +65,12 @@ public abstract class ContentLayer extends Layer {
     public int getTY() {
         return translationY + tmpTY;
     }
+
+    /**
+     * Returns the layer bounding box relative to the canvas
+     * I must return rect trimmed from transparent pixels
+     */
+    abstract public Rectangle getEffectiveBoundingBox();
 
     @Override
     public void startMovement() {

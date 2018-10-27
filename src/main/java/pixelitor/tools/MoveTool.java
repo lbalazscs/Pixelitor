@@ -17,32 +17,73 @@
 
 package pixelitor.tools;
 
+import pixelitor.tools.move.ObjectsSelection;
 import pixelitor.Composition;
+import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.layers.Layer;
+import pixelitor.tools.move.ObjectsFinder;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
+import javax.swing.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+
 /**
  * The move tool.
  */
 public class MoveTool extends DragTool {
+    private static final String AUTO_SELECT_LABEL = "Auto select layer";
+    private final JCheckBox autoselectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
+    private ObjectsFinder objectFinder = new ObjectsFinder();
+
     public MoveTool() {
         super("Move", 'v', "move_tool_icon.png",
                 "<b>drag</b> to move the active layer, " +
                         "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
                         "<b>Shift-drag</b> to constrain the movement.",
-                Cursors.MOVE, false, true, true, ClipStrategy.CANVAS);
+                Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
     }
 
     @Override
     public void initSettingsPanel() {
+        settingsPanel.add(autoselectCheckBox);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+        super.mouseMoved(e, ic);
+
+        if (autoselectCheckBox.isSelected()) {
+            Point2D p = ic.componentToImageSpace(e.getPoint());
+            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, ic.getComp());
+
+            if (objectsSelection.isEmpty()) {
+                ic.setCursor(Cursors.DEFAULT);
+                return;
+            }
+        }
+
+        ic.setCursor(Cursors.MOVE);
     }
 
     @Override
     public void dragStarted(PMouseEvent e) {
+        if (autoselectCheckBox.isSelected()) {
+            Point2D p = e.getComp().getIC().componentToImageSpace(e.getPoint());
+            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, e.getComp());
+
+            if (objectsSelection.isEmpty()) {
+                userDrag.cancel();
+                return;
+            }
+            e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
+        }
+
         e.getComp().startMovement(e.isAltDown() || e.isRight());
     }
 

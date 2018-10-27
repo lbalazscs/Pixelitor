@@ -23,6 +23,7 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -81,5 +82,11 @@ public class SmartObject extends ContentLayer {
     @Override
     public void crop(Rectangle2D cropRect) {
 
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox() {
+        // unknown, return empty
+        return new Rectangle();
     }
 }

@@ -39,6 +39,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -157,6 +158,12 @@ public class TextLayer extends ContentLayer {
         }
 
         return d;
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox()
+    {
+        return painter.getBoundingBox();
     }
 
     // TODO if a text layer has a mask, then this will apply the
