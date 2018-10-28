@@ -65,6 +65,7 @@ public class AboutDialog {
                 "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
                 "<li>many components by <b>Jeremy Wood</b>" +
                 "<li>the fast math library by <b>Jeff Hain</b>" +
+                "<li>the metadata library by <b>Drew Noakes</b>" +
                 "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
                 "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
                 "<li>the SwingX library";

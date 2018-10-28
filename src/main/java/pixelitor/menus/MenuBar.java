@@ -77,6 +77,7 @@ import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
 import pixelitor.menus.file.AnimGifExport;
+import pixelitor.menus.file.MetaDataPanel;
 import pixelitor.menus.file.OpenRasterExportPanel;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.file.ScreenCaptureAction;
@@ -232,6 +233,23 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
+        // reload
+        fileMenu.addActionWithKey(new MenuAction("Reload") {
+            @Override
+            public void onClick() {
+                reloadActiveFromFileAsync();
+            }
+        }, F12);
+
+        fileMenu.addAction(new MenuAction("Show Metadata...") {
+            @Override
+            public void onClick() {
+                MetaDataPanel.showInDialog(pw);
+            }
+        });
+
+        fileMenu.addSeparator();
+
         // close
         fileMenu.addActionWithKey(new MenuAction("Close") {
             @Override
@@ -247,14 +265,6 @@ public class MenuBar extends JMenuBar {
                 warnAndCloseAll();
             }
         }, CTRL_ALT_W);
-
-        // reload
-        fileMenu.addActionWithKey(new MenuAction("Reload") {
-            @Override
-            public void onClick() {
-                reloadActiveFromFileAsync();
-            }
-        }, F12);
 
         fileMenu.addSeparator();
 

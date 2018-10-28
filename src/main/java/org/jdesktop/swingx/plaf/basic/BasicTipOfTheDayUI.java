@@ -1,5 +1,5 @@
 /*
- * $Id: BasicTipOfTheDayUI.java 3475 2009-08-28 08:30:47Z kleopatra $
+ * $Id: BasicTipOfTheDayUI.java 3927 2011-02-22 16:34:11Z kleopatra $
  *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -20,6 +20,18 @@
  */
 package org.jdesktop.swingx.plaf.basic;
 
+import org.jdesktop.swingx.JXTipOfTheDay;
+import org.jdesktop.swingx.JXTipOfTheDay.ShowOnStartupChoice;
+import org.jdesktop.swingx.SwingXUtilities;
+import org.jdesktop.swingx.plaf.TipOfTheDayUI;
+import org.jdesktop.swingx.plaf.UIManagerExt;
+import org.jdesktop.swingx.tips.TipOfTheDayModel.Tip;
+
+import javax.swing.*;
+import javax.swing.plaf.ActionMapUIResource;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicHTML;
+import javax.swing.text.html.HTMLDocument;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -36,36 +48,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Locale;
-
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.plaf.ActionMapUIResource;
-import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.basic.BasicHTML;
-import javax.swing.text.html.HTMLDocument;
-
-import org.jdesktop.swingx.JXTipOfTheDay;
-import org.jdesktop.swingx.SwingXUtilities;
-import org.jdesktop.swingx.JXTipOfTheDay.ShowOnStartupChoice;
-import org.jdesktop.swingx.plaf.TipOfTheDayUI;
-import org.jdesktop.swingx.plaf.UIManagerExt;
-import org.jdesktop.swingx.tips.TipOfTheDayModel.Tip;
 
 /**
  * Base implementation of the <code>JXTipOfTheDay</code> UI.
@@ -158,6 +140,7 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
     buttons.add(closeButton);
     
     final ActionListener saveChoice = new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         if (choice != null) {
           choice.setShowingOnStartup(showOnStartupBox.isSelected());
@@ -167,7 +150,8 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
     };
 
     closeButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {        
+      @Override
+      public void actionPerformed(ActionEvent e) {
         dialog.setVisible(false);
         saveChoice.actionPerformed(null);
       }
@@ -340,7 +324,12 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
   protected void uninstallDefaults() {}
 
   class ChangeListener implements PropertyChangeListener {
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
+      // the only reason for using this file instead if the SwingX
+      // version is that for historical reasons we want our version of
+      // JXTipOfTheDay, and the constant JXTipOfTheDay.CURRENT_TIP_CHANGED_KEY
+      // is inlined in the SwingX class file
       if (JXTipOfTheDay.CURRENT_TIP_CHANGED_KEY.equals(evt.getPropertyName())) {
         showCurrentTip();
       }
@@ -351,6 +340,8 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
     public PreviousTipAction() {
       super("previousTip");
     }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
       tipPane.previousTip();
     }
@@ -364,6 +355,8 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
     public NextTipAction() {
       super("nextTip");
     }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
       tipPane.nextTip();
     }
