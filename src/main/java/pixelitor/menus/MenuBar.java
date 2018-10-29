@@ -130,8 +130,6 @@ import static pixelitor.gui.ImageComponents.onActiveImageLayer;
 import static pixelitor.gui.ImageComponents.onActiveTextLayer;
 import static pixelitor.gui.ImageComponents.reloadActiveFromFileAsync;
 import static pixelitor.gui.ImageComponents.repaintActive;
-import static pixelitor.gui.ImageComponents.warnAndCloseActive;
-import static pixelitor.gui.ImageComponents.warnAndCloseAll;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
@@ -251,20 +249,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // close
-        fileMenu.addActionWithKey(new MenuAction("Close") {
-            @Override
-            public void onClick() {
-                warnAndCloseActive();
-            }
-        }, CTRL_W);
+        fileMenu.addActionWithKey(ImageComponents.CLOSE_ACTIVE_ACTION, CTRL_W);
 
         // close all
-        fileMenu.addActionWithKey(new MenuAction("Close All") {
-            @Override
-            public void onClick() {
-                warnAndCloseAll();
-            }
-        }, CTRL_ALT_W);
+        fileMenu.addActionWithKey(ImageComponents.CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
 
@@ -1147,7 +1135,7 @@ public class MenuBar extends JMenuBar {
         PMenu developMenu = new PMenu("Develop", 'D');
 
         developMenu.add(createDebugSubmenu(pw));
-        developMenu.add(createTestSubmenu(pw));
+        developMenu.add(createTestSubmenu());
         developMenu.add(createSplashSubmenu());
         developMenu.add(createExperimentalSubmenu());
 
@@ -1324,7 +1312,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createTestSubmenu(PixelitorWindow pw) {
+    private static JMenu createTestSubmenu() {
         PMenu sub = new PMenu("Test");
 
         sub.addFilter("ParamTest", ParamTest::new);

@@ -30,6 +30,7 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
+import pixelitor.menus.MenuAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
@@ -47,9 +48,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
@@ -66,6 +66,27 @@ public class ImageComponents {
     private static ImageComponent activeIC;
     private static final List<ActiveImageChangeListener> activeICChangeListeners
             = new ArrayList<>();
+
+    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
+        @Override
+        public void onClick() {
+            warnAndCloseAll();
+        }
+    };
+
+    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction("Close") {
+        @Override
+        public void onClick() {
+            warnAndCloseActive();
+        }
+    };
+
+    public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
+        @Override
+        public void onClick() {
+            closeUnmodified();
+        }
+    };
 
     private ImageComponents() {
     }
@@ -97,10 +118,6 @@ public class ImageComponents {
 
     public static ImageComponent getActiveIC() {
         return activeIC;
-    }
-
-    public static boolean hasActiveImage() {
-        return activeIC != null && !icList.isEmpty();
     }
 
     public static Composition getActiveCompOrNull() {
@@ -347,17 +364,6 @@ public class ImageComponents {
         }
     }
 
-    public static void onActiveICAndComp(BiConsumer<ImageComponent, Composition> action) {
-        if (activeIC != null) {
-            Composition comp = activeIC.getComp();
-            action.accept(activeIC, comp);
-        }
-    }
-
-    public static <T> T fromActiveIC(Function<ImageComponent, T> function) {
-        return function.apply(activeIC);
-    }
-
     public static void forAllImages(Consumer<ImageComponent> action) {
         for (ImageComponent ic : icList) {
             action.accept(ic);
@@ -470,7 +476,7 @@ public class ImageComponents {
                 .collect(joining(", ", "[", "]"));
     }
 
-    public static void warnAndCloseActive() {
+    private static void warnAndCloseActive() {
         warnAndClose(activeIC);
     }
 
@@ -500,11 +506,25 @@ public class ImageComponents {
         }
     }
 
-    public static void warnAndCloseAll() {
+    private static void warnAndCloseAll() {
+        warnAndCloseAllIf(ic -> true);
+    }
+
+    public static void warnAndCloseAllBut(ImageComponent selected) {
+        warnAndCloseAllIf(ic -> ic != selected);
+    }
+
+    private static void closeUnmodified() {
+        warnAndCloseAllIf(ic -> !ic.getComp().isDirty());
+    }
+
+    private static void warnAndCloseAllIf(Predicate<ImageComponent> condition) {
         // make a copy because items will be removed from the original while iterating
         Iterable<ImageComponent> tmpCopy = new ArrayList<>(icList);
         for (ImageComponent ic : tmpCopy) {
-            warnAndClose(ic);
+            if (condition.test(ic)) {
+                warnAndClose(ic);
+            }
         }
     }
 

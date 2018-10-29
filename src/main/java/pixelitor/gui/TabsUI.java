@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.utils.Keys;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -29,6 +30,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -43,7 +45,7 @@ import static javax.swing.BorderFactory.createEtchedBorder;
  * where the edited images are in tabs
  */
 public class TabsUI extends JTabbedPane implements ImageAreaUI {
-
+    private final Lazy<JMenu> tabPlacementMenu = Lazy.of(this::createTabPlacementMenu);
     private boolean userInitiated = true;
 
     public TabsUI() {
@@ -52,6 +54,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(Keys.CTRL_TAB, "navigateNext");
         inputMap.put(Keys.CTRL_SHIFT_TAB, "navigatePrevious");
+
     }
 
     private void tabsChanged() {
@@ -85,7 +88,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             userInitiated = true;
         }
 
-        setTabComponentAt(myIndex, new TabTitleRenderer(ic.getName(), this, tab));
+        setTabComponentAt(myIndex, new TabTitleRenderer(ic.getName(), tab));
         setSelectedIndex(myIndex);
         tab.onActivation();
     }
@@ -106,13 +109,63 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     public void selectTab(ImageTab tab) {
         // expect that this call is not needed
         // since new tabs are already selected
-        assert getSelectedIndex() == indexOfComponent(tab);
+        //assert getSelectedIndex() == indexOfComponent(tab);
+
+        // if implemented, it would be:
+        setSelectedIndex(indexOfComponent(tab));
+    }
+
+    private JMenu createTabPlacementMenu() {
+        JMenu menu = new JMenu("Tab Placement");
+
+        JRadioButtonMenuItem topMI = new JRadioButtonMenuItem(new AbstractAction("Top") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTabPlacement(TOP);
+            }
+        });
+        JRadioButtonMenuItem bottomMI = new JRadioButtonMenuItem(new AbstractAction("Bottom") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTabPlacement(BOTTOM);
+            }
+        });
+        JRadioButtonMenuItem leftMI = new JRadioButtonMenuItem(new AbstractAction("Left") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTabPlacement(LEFT);
+            }
+        });
+        JRadioButtonMenuItem rightMI = new JRadioButtonMenuItem(new AbstractAction("Right") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTabPlacement(RIGHT);
+            }
+        });
+
+
+        ButtonGroup group = new ButtonGroup();
+        group.add(topMI);
+        group.add(bottomMI);
+        group.add(leftMI);
+        group.add(rightMI);
+        topMI.setSelected(true);
+
+        menu.add(topMI);
+        menu.add(bottomMI);
+        menu.add(leftMI);
+        menu.add(rightMI);
+        return menu;
+    }
+
+    public JMenu getTabPlacementMenu() {
+        return tabPlacementMenu.get();
     }
 
     static class TabTitleRenderer extends JPanel {
         private final JLabel titleLabel;
 
-        public TabTitleRenderer(String title, TabsUI pane, ImageTab tab) {
+        TabTitleRenderer(String title, ImageTab tab) {
             super(new GridBagLayout());
             setOpaque(false);
             titleLabel = new JLabel(title);
@@ -126,7 +179,27 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
 
             gbc.gridx++;
             gbc.weightx = 0;
-            add(new CloseTabButton(pane, tab), gbc);
+            add(new CloseTabButton(tab), gbc);
+
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        tab.showPopup(e);
+                    } else {
+                        // TODO why is this necessary, why adding a mouse listener
+                        // stops the tab selection from working???
+                        tab.select();
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        tab.showPopup(e);
+                    }
+                }
+            });
         }
 
         public void setTitle(String newTitle) {
@@ -150,10 +223,10 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
                 button.setBorderPainted(false);
             }
         };
-        public static final int MARGIN = 5;
-        public static final int SIZE = 17;
+        static final int MARGIN = 5;
+        static final int SIZE = 17;
 
-        public CloseTabButton(TabsUI pane, ImageTab tab) {
+        CloseTabButton(ImageTab tab) {
             setPreferredSize(new Dimension(SIZE, SIZE));
             setToolTipText("Close this tab");
             setUI(new BasicButtonUI());

@@ -489,10 +489,12 @@ public class ShapesTool extends DragTool {
         styledShape = null;
 
         Composition comp = ImageComponents.getActiveCompOrNull();
-        if (hadShape) {
-            comp.imageChanged();
-        } else {
-            comp.repaint();
+        if (comp != null) { // this gets also called after a "close all"
+            if (hadShape) {
+                comp.imageChanged();
+            } else {
+                comp.repaint();
+            }
         }
     }
 

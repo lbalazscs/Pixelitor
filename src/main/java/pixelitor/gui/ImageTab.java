@@ -19,6 +19,8 @@ package pixelitor.gui;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
 
 /**
  * An {@link ImageWindow} used in the tabs UI.
@@ -54,7 +56,7 @@ public class ImageTab extends JComponent implements ImageWindow {
     @Override
     public void updateTitle(ImageComponent ic) {
         int myIndex = tabsUI.indexOfComponent(this);
-        if(myIndex != -1) {
+        if (myIndex != -1) {
             TabsUI.TabTitleRenderer tabComponent = (TabsUI.TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
             tabComponent.setTitle(ic.getName());
         }
@@ -71,5 +73,29 @@ public class ImageTab extends JComponent implements ImageWindow {
 
     public ImageComponent getIC() {
         return ic;
+    }
+
+    public void showPopup(MouseEvent mouse) {
+        JPopupMenu popup = new JPopupMenu();
+
+        // close the clicked one, even if it is not the active!
+        popup.add(new AbstractAction("Close") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ImageComponents.warnAndClose(ic);
+            }
+        });
+        popup.add(new AbstractAction("Close Others") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ImageComponents.warnAndCloseAllBut(ic);
+            }
+        });
+        popup.add(ImageComponents.CLOSE_UNMODIFIED_ACTION);
+        popup.add(ImageComponents.CLOSE_ALL_ACTION);
+        popup.addSeparator();
+        popup.add(tabsUI.getTabPlacementMenu());
+
+        popup.show(mouse.getComponent(), mouse.getX(), mouse.getY());
     }
 }
