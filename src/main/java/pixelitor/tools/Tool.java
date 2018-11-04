@@ -253,8 +253,8 @@ public abstract class Tool implements KeyListener {
         assert Tools.currentTool == this;
         if (oldIC != null) {
             oldIC.repaint();
+            resetStateToInitial();
         }
-        resetStateToInitial();
     }
 
     public void compReplaced(Composition oldComp, Composition newComp) {

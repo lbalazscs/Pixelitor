@@ -232,7 +232,7 @@ public class TestHelper {
         ImageComponent ic = mock(ImageComponent.class);
 
         when(ic.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
-        when(ic.componentToImageSpace(any(Rectangle.class))).then(returnsFirstArg());
+        when(ic.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)

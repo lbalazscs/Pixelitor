@@ -22,6 +22,7 @@ import pixelitor.gui.View;
 import pixelitor.history.HandleMovedEdit;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -333,6 +334,13 @@ public class DraggablePoint extends Point2D.Double {
                 .format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
                         name, x, y, imX, imY);
         return sb;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode(name, this);
+        node.addDouble("x", getX());
+        node.addDouble("y", getY());
+        return node;
     }
 }
 

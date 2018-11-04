@@ -28,6 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
@@ -45,6 +46,7 @@ import static java.awt.Color.WHITE;
 public class Shapes {
     private static final Stroke BIG_STROKE = new BasicStroke(3);
     private static final Stroke SMALL_STROKE = new BasicStroke(1);
+    public static final float UNIT_ARROW_HEAD_WIDTH = 0.7f;
 
     private Shapes() {
         // do not instantiate
@@ -162,11 +164,10 @@ public class Shapes {
     @SuppressWarnings("SuspiciousNameCombination")
     public static GeneralPath createUnitArrow() {
         float arrowWidth = 0.3f;
-        float arrowHeadWidth = 0.7f;
         float arrowHeadStart = 0.6f;
 
         float halfArrowWidth = arrowWidth / 2.0f;
-        float halfArrowHeadWidth = arrowHeadWidth / 2;
+        float halfArrowHeadWidth = UNIT_ARROW_HEAD_WIDTH / 2;
 
         GeneralPath unitArrow = new GeneralPath();
         unitArrow.moveTo(0.0f, -halfArrowWidth);
@@ -329,5 +330,27 @@ public class Shapes {
             return false;
         }
         return true;
+    }
+
+    public static Shape createCenteredCircle(double cx, double cy, double radius) {
+        double diameter = 2 * radius;
+        return new Ellipse2D.Double(cx - radius, cy - radius, diameter, diameter);
+    }
+
+    public static void debug(Graphics2D g, Color c, Point2D point) {
+        Shape circle = createCenteredCircle(point.getX(), point.getY(), 5);
+        debug(g, c, circle);
+    }
+
+    public static void debug(Graphics2D g, Color c, Shape shape) {
+        Color origColor = g.getColor();
+        Stroke origStroke = g.getStroke();
+
+        g.setColor(c);
+        g.setStroke(new BasicStroke(5));
+        g.draw(shape);
+
+        g.setColor(origColor);
+        g.setStroke(origStroke);
     }
 }

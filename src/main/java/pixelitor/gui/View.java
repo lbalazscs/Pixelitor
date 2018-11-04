@@ -42,7 +42,7 @@ public interface View {
 
     Point2D imageToComponentSpace(Point2D im);
 
-    Rectangle2D componentToImageSpace(Rectangle co);
+    Rectangle2D componentToImageSpace(Rectangle2D co);
 
     Rectangle imageToComponentSpace(Rectangle2D im);
 

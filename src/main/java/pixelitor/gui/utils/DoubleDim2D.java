@@ -53,4 +53,11 @@ public class DoubleDim2D extends Dimension2D {
         this.width = width;
         this.height = height;
     }
+
+    /**
+     * Returns true if the corners are no longer in their default order
+     */
+    public boolean isInsideOut() {
+        return width < 0 || height < 0;
+    }
 }

@@ -34,6 +34,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 
@@ -41,7 +42,7 @@ import java.awt.geom.Rectangle2D;
  * The shapes types in the shapes tool
  */
 public enum ShapeType {
-    RECTANGLE("Rectangle", true) {
+    RECTANGLE("Rectangle", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setPositiveCoordinates(imDrag);
@@ -57,7 +58,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, ELLIPSE("Ellipse", true) {
+    }, ELLIPSE("Ellipse", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setPositiveCoordinates(imDrag);
@@ -73,7 +74,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, DIAMOND("Diamond", true) {
+    }, DIAMOND("Diamond", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -104,7 +105,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, LINE("Line", false) {
+    }, LINE("Line", false, true) {
         @Override
         public Shape getShape(ImDrag imDrag) {
 //            updateCoordinatesPositive(start, end);
@@ -117,10 +118,16 @@ public enum ShapeType {
         }
 
         @Override
+        public Shape getHorizontalShape(ImDrag imDrag) {
+            return new Line2D.Double(imDrag.getStartX(), imDrag.getStartY(),
+                    imDrag.getStartX() + imDrag.getDistance(), imDrag.getStartY());
+        }
+
+        @Override
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
-    }, HEART("Heart", true) {
+    }, HEART("Heart", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -131,7 +138,7 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return new HeartShape(x, y, diameter, diameter);
         }
-    }, STAR("Star", true) {
+    }, STAR("Star", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -170,7 +177,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, RANDOM_STAR("Random Star", true) {
+    }, RANDOM_STAR("Random Star", true, false) {
         private ImDrag lastUserDrag;
 
         @Override
@@ -196,11 +203,20 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, ARROW("Arrow", true) {
+    }, ARROW("Arrow", true, true) {
         GeneralPath unitArrow = null;
 
         @Override
         public Shape getShape(ImDrag imDrag) {
+            return createArrowShape(imDrag, true);
+        }
+
+        @Override
+        public Shape getHorizontalShape(ImDrag imDrag) {
+            return createArrowShape(imDrag, false);
+        }
+
+        private Shape createArrowShape(ImDrag imDrag, boolean rotate) {
             if (unitArrow == null) {
                 unitArrow = Shapes.createUnitArrow();
             }
@@ -214,10 +230,12 @@ public enum ShapeType {
 
             AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
             transform.scale(distance, distance); // originally it had a length of 1.0
-            double angleInRadians = imDrag.getDrawAngle();
-            double angle = Utils.atan2AngleToIntuitive(angleInRadians);
-            angle += Math.PI / 2;
-            transform.rotate(angle);
+            if (rotate) {
+                double angleInRadians = imDrag.getDrawAngle();
+                double angle = Utils.atan2AngleToIntuitive(angleInRadians);
+                angle += Math.PI / 2;
+                transform.rotate(angle);
+            }
             return transform.createTransformedShape(unitArrow);
         }
 
@@ -236,7 +254,7 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
-    }, CAT("Cat", true) {
+    }, CAT("Cat", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -247,7 +265,7 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return new CatShape(x, y, diameter, diameter);
         }
-    }, KIWI("Kiwi", true) {
+    }, KIWI("Kiwi", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -258,7 +276,7 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return new KiwiShape(x, y, diameter, diameter);
         }
-    }, BAT("Bat", true) {
+    }, BAT("Bat", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -269,7 +287,7 @@ public enum ShapeType {
         public Shape getShape(double x, double y, double diameter) {
             return new BatShape(x, y, diameter, diameter);
         }
-    }, RABBIT("Rabbit", true) {
+    }, RABBIT("Rabbit", true, false) {
         @Override
         public Shape getShape(ImDrag imDrag) {
             setCoordinates(imDrag);
@@ -290,13 +308,15 @@ public enum ShapeType {
 
     private final String guiName;
     private final boolean closed;
+    private final boolean directional;
 
     @SuppressWarnings("WeakerAccess")
     protected double x, y, width, height;
 
-    ShapeType(String guiName, boolean closed) {
+    ShapeType(String guiName, boolean closed, boolean directional) {
         this.guiName = guiName;
         this.closed = closed;
+        this.directional = directional;
     }
 
     /**
@@ -323,6 +343,20 @@ public enum ShapeType {
     }
 
     public abstract Shape getShape(ImDrag imDrag);
+
+    /**
+     * Return the directional shape that would result
+     * from the given drag if it was horizontal
+     */
+    public Shape getHorizontalShape(ImDrag imDrag) {
+        // overridden in directional types
+        assert !directional;
+        throw new UnsupportedOperationException("not directional");
+    }
+
+    public boolean isDirectional() {
+        return directional;
+    }
 
     public boolean isClosed() {
         return closed;

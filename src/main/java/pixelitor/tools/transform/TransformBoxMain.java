@@ -253,10 +253,10 @@ public class TransformBoxMain {
         }
 
         @Override
-        public Rectangle2D componentToImageSpace(Rectangle co) {
+        public Rectangle2D componentToImageSpace(Rectangle2D co) {
             return new Rectangle.Double(
-                    componentXToImageSpace(co.x),
-                    componentYToImageSpace(co.y),
+                    componentXToImageSpace(co.getX()),
+                    componentYToImageSpace(co.getY()),
                     (co.getWidth() / viewScale),
                     (co.getHeight() / viewScale)
             );

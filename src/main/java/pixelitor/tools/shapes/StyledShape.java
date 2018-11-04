@@ -18,12 +18,19 @@
 package pixelitor.tools.shapes;
 
 import pixelitor.filters.painters.AreaEffects;
+import pixelitor.gui.View;
+import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ImDrag;
+import pixelitor.tools.util.UserDrag;
+import pixelitor.utils.Shapes;
+import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -37,16 +44,23 @@ public class StyledShape {
     private ShapesAction action;
     private final ShapesTool tool;
     private ShapeType shapeType;
-    private Shape shape; // the shape, in image-space
-    private Shape unTransformedShape;
+    private Shape shape; // the current shape, in image-space
+    private Shape unTransformedShape; // the original shape, in image-space
 
-    private ImDrag imDrag;
+    // this doesn't change after the transform box appears,
+    // so that another untransformed shape can be generated
+    private ImDrag origImDrag;
+
+    // this is transformed as the box is manipulated, so that
+    // the gradients move together with the box
+    private ImDrag transformedImDrag;
 
     private TwoPointBasedPaint fillPaint;
     private TwoPointBasedPaint strokePaint;
     private AreaEffects effects;
 
     private Stroke stroke;
+    private boolean insideBox;
 
     public StyledShape(ShapeType shapeType, ShapesAction action,
                        ShapesTool tool) {
@@ -54,6 +68,7 @@ public class StyledShape {
         this.action = action;
         this.tool = tool;
         configureBasedOnAction(action, tool);
+        this.insideBox = false;
     }
 
     private void configureBasedOnAction(ShapesAction action, ShapesTool tool) {
@@ -74,7 +89,7 @@ public class StyledShape {
      * in image space.
      */
     public void paint(Graphics2D g) {
-        if(imDrag == null) {
+        if (transformedImDrag == null) {
             // this object is created when the mouse is pressed, but
             // it can be painted only after the first drag events arrive
             return;
@@ -84,7 +99,7 @@ public class StyledShape {
 
         if (action.hasFillPaint()) {
             if (shapeType.isClosed()) {
-                fillPaint.setupPaint(g, imDrag);
+                fillPaint.setupPaint(g, transformedImDrag);
                 g.fill(shape);
                 fillPaint.finish(g);
             } else if (!action.hasStrokePaint()) {
@@ -92,7 +107,7 @@ public class StyledShape {
                 // it can be only stroked, even if stroke is disabled.
                 // So use the default stroke and the fill paint.
                 g.setStroke(STROKE_FOR_OPEN_SHAPES);
-                fillPaint.setupPaint(g, imDrag);
+                fillPaint.setupPaint(g, transformedImDrag);
                 g.draw(shape);
                 fillPaint.finish(g);
             }
@@ -100,7 +115,7 @@ public class StyledShape {
 
         if (action.hasStrokePaint()) {
             g.setStroke(stroke);
-            strokePaint.setupPaint(g, imDrag);
+            strokePaint.setupPaint(g, transformedImDrag);
             g.draw(shape);
             strokePaint.finish(g);
         }
@@ -122,19 +137,20 @@ public class StyledShape {
     }
 
     public void setImDrag(ImDrag imDrag) {
-        this.imDrag = imDrag;
-        shape = shapeType.getShape(imDrag);
-        unTransformedShape = shape;
+        assert !insideBox;
+
+        this.origImDrag = imDrag;
+        unTransformedShape = shapeType.getShape(imDrag);
+
+        // this method should be called only during the
+        // initial drag, when there is no transform box yet
+        this.transformedImDrag = imDrag;
+        shape = unTransformedShape;
     }
 
     public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
-    }
-
-    public void setType(ShapeType shapeType) {
-        this.shapeType = shapeType;
-        shape = shapeType.getShape(imDrag);
-        unTransformedShape = shape;
+        transformedImDrag = origImDrag.createTransformed(at);
     }
 
     public void setAction(ShapesAction action) {
@@ -156,5 +172,79 @@ public class StyledShape {
 
     public void setEffects(AreaEffects effects) {
         this.effects = effects;
+    }
+
+    public void setType(ShapeType shapeType) {
+        assert insideBox;
+        this.shapeType = shapeType;
+
+        if (shapeType.isDirectional()) {
+            // TODO this ignores the height of the current box
+            unTransformedShape = shapeType.getShape(origImDrag.getCenterHorizontalDrag());
+        } else {
+            unTransformedShape = shapeType.getShape(origImDrag);
+        }
+
+        // must be created before the next call to paint()
+        shape = null;
+    }
+
+    public TransformBox createBox(UserDrag userDrag, View view) {
+        assert !insideBox;
+        insideBox = true;
+
+        TransformBox box;
+        if (shapeType.isDirectional()) {
+            box = createRotatedBox(userDrag, view);
+        } else {
+            box = new TransformBox(userDrag.toCoRect(), view, this::transform);
+        }
+        return box;
+    }
+
+    private TransformBox createRotatedBox(UserDrag userDrag, View view) {
+        // First calculate the settings for a horizontal box.
+        // The box is in component space, everything else is in image space.
+
+        // Set the original shape to the horizontal shape.
+        // It could also be rotated backwards with an AffineTransform.
+        ImDrag imDrag = userDrag.toImDrag();
+        unTransformedShape = shapeType.getHorizontalShape(imDrag);
+
+        // Set the original drag to the diagonal of the back-rotated transform box,
+        // so that after a shape-type change the new shape is created correctly
+        double imDragDist = imDrag.getDistance();
+        double halfImHeight = imDragDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
+        origImDrag = new ImDrag(
+                imDrag.getStartX(),
+                imDrag.getStartY() - halfImHeight,
+                imDrag.getStartX() + imDragDist,
+                imDrag.getStartY() + halfImHeight);
+//            transformedImDrag = origImDrag;
+
+        // create the horizontal box
+        double coDist = userDrag.calcCoDist();
+        Rectangle2D horizontalBoxBounds = new Rectangle.Double(
+                userDrag.getCoStartX(),
+                userDrag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+                coDist,
+                coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
+        TransformBox box = new TransformBox(horizontalBoxBounds, view, this::transform);
+
+        // rotate the horizontal box into place
+        double angle = userDrag.calcAngle();
+        double rotCenterCoX = horizontalBoxBounds.getX();
+        double rotCenterCoY = horizontalBoxBounds.getY() + horizontalBoxBounds.getHeight() / 2.0;
+        box.saveState(); // so that transform works
+        box.setAngle(angle);
+        box.transform(AffineTransform.getRotateInstance(
+                angle, rotCenterCoX, rotCenterCoY));
+        return box;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode node = new DebugNode("StyledShape", this);
+        node.addString("ShapeType", shapeType.toString());
+        return node;
     }
 }

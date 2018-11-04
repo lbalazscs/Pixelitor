@@ -48,10 +48,10 @@ public class TransformBoxTest {
     public void moveNWFromInitialState() {
         TransformBox box = new TransformBox(originalRect,
                 ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
 
         // check the handles original state
         assertThat(nw).isAt(200, 100);
@@ -92,10 +92,10 @@ public class TransformBoxTest {
     @Test
     public void moveSEFromInitialState() {
         TransformBox box = new TransformBox(originalRect, ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
 
         // check the handles original state
         assertThat(nw).isAt(200, 100);
@@ -137,10 +137,10 @@ public class TransformBoxTest {
     public void pureTranslation() {
         TransformBox box = new TransformBox(originalRect,
                 ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
 
         // check the handles original state
         assertThat(nw).isAt(200, 100);
@@ -170,10 +170,10 @@ public class TransformBoxTest {
     public void pureScaling() {
         TransformBox box = new TransformBox(originalRect,
                 ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
 
         // check the handles original state
         assertThat(nw).isAt(200, 100).isAtIm(200, 100);
@@ -203,10 +203,10 @@ public class TransformBoxTest {
     public void pureRotation() {
         TransformBox box = new TransformBox(originalRect,
                 ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
         RotationHandle rot = box.getRot();
 
         // check the handles original state
@@ -257,15 +257,16 @@ public class TransformBoxTest {
     public void testCursorAfterTurnedInsideOut() {
         TransformBox box = new TransformBox(originalRect,
                 ic, at -> {});
-        TransformHandle nw = box.getNW();
-        TransformHandle sw = box.getSW();
-        TransformHandle ne = box.getNE();
-        TransformHandle se = box.getSE();
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
         RotationHandle rot = box.getRot();
 
         // drag NW downwards
         press(box, 200, 100);
         drag(box, 200, 200);
+//        drag(box, 200, 299);
         release(box, 200, 300);
         assertThat(box)
                 .angleDegreesIs(180)
@@ -317,7 +318,7 @@ public class TransformBoxTest {
         release(box, 100, 100);
         assertThat(box)
                 .angleDegreesIs(0)
-                .rotSizeIs(100, -100);
+                .rotSizeIs(-100, 100);
 
         assertThat(nw).cursorNameIs("Northeast Resize Cursor");
         assertThat(sw).cursorNameIs("Southeast Resize Cursor");

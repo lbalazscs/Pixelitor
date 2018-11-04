@@ -62,7 +62,14 @@ public class RotationHandle extends DraggablePoint {
 
         double angle = reCalcAngle(newX, newY, false);
 
-        box.rotate(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+        box.transform(AffineTransform.getRotateInstance(angle - rotStartAngle, cx, cy));
+    }
+
+    @Override
+    public void mouseReleased(double x, double y) {
+        super.mouseReleased(x, y);
+
+        box.updateDirections();
     }
 
     public double reCalcAngle(double newX, double newY, boolean recalcCenter) {

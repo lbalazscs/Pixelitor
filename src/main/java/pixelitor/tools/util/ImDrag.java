@@ -17,9 +17,17 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.utils.Shapes;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+
+import static java.lang.String.format;
 
 /**
  * Similar to {@link UserDrag}, but for clarity
@@ -52,6 +60,15 @@ public class ImDrag {
         startY = r.getY();
         endX = startX + r.getWidth();
         endY = startY + r.getHeight();
+    }
+
+    public ImDrag createTransformed(AffineTransform at) {
+        // TODO can be optimized?
+        Point2D start = new Point2D.Double(startX, startY);
+        Point2D end = new Point2D.Double(endX, endY);
+        at.transform(start, start);
+        at.transform(end, end);
+        return new ImDrag(start.getX(), start.getY(), end.getX(), end.getY());
     }
 
     public double getStartX() {
@@ -238,7 +255,33 @@ public class ImDrag {
         return endY - startY;
     }
 
+    /**
+     * Return the horizontal line that runs through the center in image space
+     */
+    public ImDrag getCenterHorizontalDrag() {
+        double centerY = startY + getDY() / 2.0;
+        return new ImDrag(
+                startX,
+                centerY,
+                endX,
+                centerY);
+    }
+
+
     public double taxiCabMetric(int x, int y) {
         return Math.abs(x - startX) + Math.abs(y - startY);
+    }
+
+    public void debug(Graphics2D g, Color c) {
+        Line2D.Double line = new Line2D.Double(startX, startY, endX, endY);
+        Shape circle = Shapes.createCenteredCircle(startX, startY, 10);
+        Shapes.debug(g, c, line);
+        Shapes.debug(g, c, circle);
+    }
+
+    @Override
+    public String toString() {
+        return format("(%.2f, %.2f) => (%.2f, %.2f)",
+                startX, startY, endX, endY);
     }
 }

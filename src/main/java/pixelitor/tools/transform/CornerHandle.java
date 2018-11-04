@@ -32,12 +32,12 @@ import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
 /**
  * A corner handle of a {@link TransformBox}
  */
-public class TransformHandle extends DraggablePoint {
+public class CornerHandle extends DraggablePoint {
     private final TransformBox box;
 
     // the two neighbors in the horizontal and vertical directions
-    private TransformHandle horNeighbor;
-    private TransformHandle verNeighbor;
+    private CornerHandle horNeighbor;
+    private CornerHandle verNeighbor;
 
     // the original coordinates of the two neighbors before a drag
     private double verOrigX;
@@ -57,8 +57,8 @@ public class TransformHandle extends DraggablePoint {
     // true for NW and NE
     private final boolean nextToRot;
 
-    public TransformHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
-                           View view, Color c, int cursorIndex, int cursorIndexIO) {
+    public CornerHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
+                        View view, Color c, int cursorIndex, int cursorIndexIO) {
         super(name, pos.getX(), pos.getY(), view, c, Color.RED);
         this.box = box;
         this.nextToRot = nextToRot;
@@ -66,14 +66,14 @@ public class TransformHandle extends DraggablePoint {
         this.cursorIndexIO = cursorIndexIO;
     }
 
-    public void setVerNeighbor(TransformHandle verNeighbor, boolean propagate) {
+    public void setVerNeighbor(CornerHandle verNeighbor, boolean propagate) {
         this.verNeighbor = verNeighbor;
         if (propagate) {
             verNeighbor.setVerNeighbor(this, false);
         }
     }
 
-    public void setHorNeighbor(TransformHandle horNeighbor, boolean propagate) {
+    public void setHorNeighbor(CornerHandle horNeighbor, boolean propagate) {
         this.horNeighbor = horNeighbor;
         if (propagate) {
             horNeighbor.setHorNeighbor(this, false);
@@ -106,6 +106,10 @@ public class TransformHandle extends DraggablePoint {
 
     @Override
     public void mouseDragged(double x, double y) {
+        // The angle can change by 180 degrees
+        // when the box is turned "inside out"
+        box.recalcAngle();
+
         double dx = x - dragStartX;
         double dy = y - dragStartY;
         double newX = origX + dx;
@@ -122,27 +126,19 @@ public class TransformHandle extends DraggablePoint {
         // the horizontal neighbor is moved only by ody
         horNeighbor.setLocation(horOrigX - ody * sin, horOrigY + ody * cos);
 
-        box.handlePositionsChanged();
-    }
-
-    @Override
-    public void mouseReleased(double x, double y) {
-        super.mouseReleased(x, y);
-
-        // the angle can change by 180 degrees
-        // when the box is turned "inside out"
-        box.recalcAngle();
+        box.cornerHandlesMoved();
     }
 
     /**
      * Determines the direction as the box is rotating
      */
-    public void recalcDirection() {
+    public void recalcDirection(boolean isInsideOut) {
         int offset;
-        if (box.areCornersInDefaultOrder()) {
-            offset = cursorIndex + box.getCursorOffset();
-        } else {
+        if (isInsideOut) {
             offset = cursorIndexIO + box.getCursorOffset();
+        } else {
+            // the corners are in default order
+            offset = cursorIndex + box.getCursorOffset();
         }
         direction = Direction.atOffset(offset);
         cursor = direction.getCursor();

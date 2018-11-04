@@ -108,7 +108,7 @@ public class GradientHandles implements ToolWidget {
             // the forward angle
             ud = new UserDrag() {
                 @Override
-                protected double calcAngle() {
+                public double calcAngle() {
                     return super.calcReversedAngle();
                 }
             };

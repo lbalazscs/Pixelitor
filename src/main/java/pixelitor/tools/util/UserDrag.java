@@ -26,6 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
+import static java.lang.String.format;
 import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
 
 /**
@@ -164,14 +165,37 @@ public class UserDrag {
     }
 
     public Rectangle toCoRect() {
-        // TODO keep double precision
-        return new Rectangle((int) coStartX, (int) coStartY,
-                (int) (coEndX - coStartX),
-                (int) (coEndY - coStartY));
+        int x;
+        int y;
+        int width;
+        int height;
+
+        if (startFromCenter) {
+            double halfWidth = coEndX - coStartX; // can be negative
+            double halfHeight = coEndY - coStartY; // can be negative
+
+            x = (int) (coStartX - halfWidth);
+            y = (int) (coStartY - halfHeight);
+            width = (int) (2 * halfWidth);
+            height = (int) (2 * halfHeight);
+        } else {
+            x = (int) coStartX;
+            y = (int) coStartY;
+            width = (int) (coEndX - coStartX);
+            height = (int) (coEndY - coStartY);
+        }
+
+        return new Rectangle(x, y, width, height);
     }
 
     public PRectangle toPosPRect() {
         return PRectangle.positiveFromCo(toCoRect(), view);
+    }
+
+    public double calcCoDist() {
+        double dx = coEndX - coStartX;
+        double dy = coEndY - coStartY;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     public double calcImDist() {
@@ -185,7 +209,7 @@ public class UserDrag {
         return Utils.atan2AngleToIntuitive(angle);
     }
 
-    protected double calcAngle() {
+    public double calcAngle() {
         return Math.atan2(coEndY - coStartY, coEndX - coStartX);
     }
 
@@ -312,5 +336,11 @@ public class UserDrag {
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 
         dd.finish();
+    }
+
+    @Override
+    public String toString() {
+        return format("(%.2f, %.2f) => (%.2f, %.2f)",
+                coStartX, coStartY, coEndX, coEndY);
     }
 }
