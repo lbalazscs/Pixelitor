@@ -66,6 +66,9 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
+        if (userDrag.isCanceled()) {
+            return;
+        }
         if (spaceDragStartPoint) {
             userDrag.saveEndValues();
         }
@@ -88,6 +91,9 @@ public abstract class DragTool extends Tool {
 
     @Override
     public void mouseReleased(PMouseEvent e) {
+        if (userDrag.isCanceled()) {
+            return;
+        }
         userDrag.setEnd(e);
         userDrag.mouseReleased();
         dragFinished(e);

@@ -39,6 +39,8 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -157,6 +159,37 @@ public class TextLayer extends ContentLayer {
         }
 
         return d;
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox() {
+        return painter.getBoundingBox();
+    }
+
+    @Override
+    public Rectangle getSnappingBoundingBox() {
+        return painter.getBoundingBox();
+    }
+
+    @Override
+    public int getMouseHitPixelAtPoint(Point p) {
+        // we treat surrounding rect as area for mouse hit detection
+        // for small font sizes or thin font styles it can be helpful
+        // for larger font sizes it could be more appropriate to use pixel perfect test
+        if (painter.getBoundingShape().contains(p)) {
+            if (hasMask() && getMask().isMaskEnabled()) {
+                BufferedImage maskImage = getMask().getImage();
+                int ix = p.x - getMask().translationX;
+                int iy = p.y - getMask().translationY;
+                if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
+                    int maskPixel = maskImage.getRGB(ix, iy);
+                    int maskAlpha = maskPixel & 0xff;
+                    return 0x00ffffff | (maskAlpha << 24);
+                }
+            }
+            return 0xffffffff;
+        }
+        return 0x00000000;
     }
 
     // TODO if a text layer has a mask, then this will apply the

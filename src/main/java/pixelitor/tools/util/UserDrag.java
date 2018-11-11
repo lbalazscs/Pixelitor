@@ -36,6 +36,7 @@ import static pixelitor.tools.util.DragDisplay.MOUSE_DISPLAY_DISTANCE;
  */
 public class UserDrag {
     private boolean dragging;
+    private boolean canceled;
 
     // The coordinates in the component (mouse) space.
     private double coStartX;
@@ -158,6 +159,14 @@ public class UserDrag {
 
     public boolean isDragging() {
         return dragging;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    public void cancel() {
+        canceled = true;
     }
 
     public void mouseReleased() {

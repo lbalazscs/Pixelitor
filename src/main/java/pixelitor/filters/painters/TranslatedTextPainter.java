@@ -41,6 +41,27 @@ public class TranslatedTextPainter extends TextPainter {
 
     private transient RotatedRectangle rotatedLayout;
     private double rotation = 0;
+    private Rectangle boundingBox = new Rectangle();
+
+    /**
+     * Return last painted bounding box for rendered text
+     * Note that this is not pixel perfect rect
+     * If text was not rendered yet, returned rectangle is empty
+     */
+    public Rectangle getBoundingBox()
+    {
+        return rotatedLayout != null? rotatedLayout.getBoundingBox() : boundingBox;
+    }
+
+    /**
+     * Return last painted bounding shape for rendered text (rect or rotated rect)
+     * Note that this is not pixel perfect shape
+     * If text was not rendered yet, returned shape is empty
+     */
+    public Shape getBoundingShape()
+    {
+        return rotatedLayout != null? rotatedLayout.asShape() : boundingBox;
+    }
 
     @Override
     protected Rectangle calculateLayout(int contentWidth, int contentHeight, int width, int height) {
@@ -85,7 +106,7 @@ public class TranslatedTextPainter extends TextPainter {
 
         int tw = metrics.stringWidth(text);
         int th = metrics.getHeight();
-        Rectangle boundingBox = calculateLayout(tw, th, width, height);
+        boundingBox = calculateLayout(tw, th, width, height);
 
         AffineTransform origTX = g.getTransform();
 

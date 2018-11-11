@@ -31,6 +31,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.io.PXCFormat;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
+import pixelitor.utils.ImageTrimUtil;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
@@ -40,6 +41,7 @@ import pixelitor.utils.test.Assertions;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -118,6 +120,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * This is different from the image if there is a selection.
      */
     private transient BufferedImage filterSourceImage;
+
+    /**
+     * The image bounding box trimmed from transparent pixels
+     */
+    private transient Rectangle trimmedBoundingBox;
 
     private ImageLayer(Composition comp, String name, Layer parent) {
         super(comp, name, parent);
@@ -310,6 +317,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert Assertions.checkRasterMinimum(newImage);
 
         comp.imageChanged(INVALIDATE_CACHE);
+        imageChanged();
 
         if (oldRef != null && oldRef != image) {
             oldRef.flush();
@@ -382,6 +390,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageContentChanged) {
             updateIconImage();
+            imageChanged();
         }
 
         previewImage = null;
@@ -496,6 +505,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         filterSourceImage = null;
         updateIconImage();
         comp.imageChanged();
+        imageChanged();
     }
 
     @Override
@@ -518,6 +528,60 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return new Rectangle(
                 translationX, translationY,
                 image.getWidth(), image.getHeight());
+    }
+
+    public void imageChanged() {
+        invalidateCache();
+    }
+
+    public void invalidateCache() {
+        trimmedBoundingBox = null;
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox() {
+        // cache trimmed rect until better solution is found
+        if (trimmedBoundingBox == null) {
+            trimmedBoundingBox = ImageTrimUtil.getTrimRect(getImage());
+        }
+
+        return new Rectangle(
+            translationX + trimmedBoundingBox.x,
+            translationY + trimmedBoundingBox.y,
+            trimmedBoundingBox.width,
+            trimmedBoundingBox.height
+        );
+    }
+
+    @Override
+    public Rectangle getSnappingBoundingBox() {
+        return getEffectiveBoundingBox();
+    }
+
+    @Override
+    public int getMouseHitPixelAtPoint(Point p) {
+        BufferedImage image = getImage();
+        int x = p.x-translationX;
+        int y = p.y-translationY;
+        if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
+            if (hasMask() && getMask().isMaskEnabled()) {
+                BufferedImage maskImage = getMask().getImage();
+                int ix = p.x - getMask().translationX;
+                int iy = p.y - getMask().translationY;
+                if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
+                    int maskPixel = maskImage.getRGB(ix, iy);
+                    int imagePixel = image.getRGB(x, y);
+                    float maskAlpha = (maskPixel & 0xff) / 255f;
+                    int imageAlpha = (imagePixel >> 24) & 0xff;
+                    int layerAlpha = (int)(imageAlpha * maskAlpha);
+                    return imagePixel & 0x00ffffff | (layerAlpha << 24);
+                }
+            }
+
+            return image.getRGB(x, y);
+        }
+
+        return 0x00000000;
     }
 
     public boolean checkImageDoesNotCoverCanvas() {
