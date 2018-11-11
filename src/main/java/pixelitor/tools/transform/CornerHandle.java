@@ -19,25 +19,20 @@ package pixelitor.tools.transform;
 
 import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplay;
-import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.Shapes;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
-
-import static pixelitor.tools.util.DragDisplay.BG_WIDTH_PIXEL;
 
 /**
  * A corner handle of a {@link TransformBox}
  */
-public class CornerHandle extends DraggablePoint {
-    private final TransformBox box;
-
+public class CornerHandle extends PositionHandle {
     // the two neighbors in the horizontal and vertical directions
     private CornerHandle horNeighbor;
+    private EdgeHandle horEdge;
     private CornerHandle verNeighbor;
+    private EdgeHandle verEdge;
 
     // the original coordinates of the two neighbors before a drag
     private double verOrigX;
@@ -45,38 +40,28 @@ public class CornerHandle extends DraggablePoint {
     private double horOrigX;
     private double horOrigY;
 
-    // The sine and cosine of the current rotation angle
-    private double sin;
-    private double cos;
-
-    private final int cursorIndex;
-    private final int cursorIndexIO;
-
-    private Direction direction;
-
     // true for NW and NE
     private final boolean nextToRot;
 
     public CornerHandle(String name, TransformBox box, boolean nextToRot, Point2D pos,
                         View view, Color c, int cursorIndex, int cursorIndexIO) {
-        super(name, pos.getX(), pos.getY(), view, c, Color.RED);
-        this.box = box;
+        super(name, box, pos.getX(), pos.getY(), view, c, Color.RED, cursorIndex, cursorIndexIO);
         this.nextToRot = nextToRot;
-        this.cursorIndex = cursorIndex;
-        this.cursorIndexIO = cursorIndexIO;
     }
 
-    public void setVerNeighbor(CornerHandle verNeighbor, boolean propagate) {
+    public void setVerNeighbor(CornerHandle verNeighbor, EdgeHandle verEdge, boolean propagate) {
         this.verNeighbor = verNeighbor;
+        this.verEdge = verEdge;
         if (propagate) {
-            verNeighbor.setVerNeighbor(this, false);
+            verNeighbor.setVerNeighbor(this, verEdge, false);
         }
     }
 
-    public void setHorNeighbor(CornerHandle horNeighbor, boolean propagate) {
+    public void setHorNeighbor(CornerHandle horNeighbor, EdgeHandle horEdge, boolean propagate) {
         this.horNeighbor = horNeighbor;
+        this.horEdge = horEdge;
         if (propagate) {
-            horNeighbor.setHorNeighbor(this, false);
+            horNeighbor.setHorNeighbor(this, horEdge, false);
         }
     }
 
@@ -94,9 +79,7 @@ public class CornerHandle extends DraggablePoint {
 
     @Override
     public void mousePressed(double x, double y) {
-        super.mousePressed(x, y); // sets dragStartX, dragStartY
-        sin = box.getSin();
-        cos = box.getCos();
+        super.mousePressed(x, y);
 
         verOrigX = verNeighbor.getX();
         verOrigY = verNeighbor.getY();
@@ -129,21 +112,6 @@ public class CornerHandle extends DraggablePoint {
         box.cornerHandlesMoved();
     }
 
-    /**
-     * Determines the direction as the box is rotating
-     */
-    public void recalcDirection(boolean isInsideOut) {
-        int offset;
-        if (isInsideOut) {
-            offset = cursorIndexIO + box.getCursorOffset();
-        } else {
-            // the corners are in default order
-            offset = cursorIndex + box.getCursorOffset();
-        }
-        direction = Direction.atOffset(offset);
-        cursor = direction.getCursor();
-    }
-
     private Point2D getHorHalfPoint() {
         // as this is used for placing the drag display, take
         // the rotation handle into account: for the NW-NE edge
@@ -152,48 +120,42 @@ public class CornerHandle extends DraggablePoint {
             return box.getRot();
         }
 
-        return Shapes.calcCenter(this, horNeighbor);
+        return horEdge;
     }
 
     private Point2D getVerHalfPoint() {
-        return Shapes.calcCenter(this, verNeighbor);
+        return verEdge;
     }
 
     private Direction getHorEdgeDirection() {
-        return direction.getDirectionBetween(horNeighbor.direction);
+        return horEdge.getDirection();
     }
 
     private Direction getVerEdgeDirection() {
-        return direction.getDirectionBetween(verNeighbor.direction);
+        return verEdge.getDirection();
     }
 
     @Override
-    public void paintHandle(Graphics2D g) {
-        super.paintHandle(g);
-
-        if (isActive()) {
-            drawDragDisplays(g);
-        }
+    protected void drawDragDisplays(DragDisplay dd, Dimension2D size) {
+        drawWidthDisplay(dd, size);
+        drawHeightDisplay(dd, size);
     }
 
-    private void drawDragDisplays(Graphics2D g) {
-        Dimension2D size = box.getRotatedImSize();
-        DragDisplay dd = new DragDisplay(g, BG_WIDTH_PIXEL);
-
+    public void drawWidthDisplay(DragDisplay dd, Dimension2D size) {
         Direction horEdgeDirection = getHorEdgeDirection();
         String widthString = DragDisplay.getWidthDisplayString(size.getWidth());
         Point2D horHalf = getHorHalfPoint();
         float horX = (float) (horHalf.getX() + horEdgeDirection.dx);
         float horY = (float) (horHalf.getY() + horEdgeDirection.dy);
         dd.drawOneLine(widthString, horX, horY);
+    }
 
+    public void drawHeightDisplay(DragDisplay dd, Dimension2D size) {
         Direction verEdgeDirection = getVerEdgeDirection();
         String heightString = DragDisplay.getHeightDisplayString(size.getHeight());
         Point2D verHalf = getVerHalfPoint();
         float verX = (float) (verHalf.getX() + verEdgeDirection.dx);
         float verY = (float) (verHalf.getY() + verEdgeDirection.dy);
         dd.drawOneLine(heightString, verX, verY);
-
-        dd.finish();
     }
 }

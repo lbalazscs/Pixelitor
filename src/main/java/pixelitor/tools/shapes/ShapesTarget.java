@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-package pixelitor.filters.gui;
+
+package pixelitor.tools.shapes;
 
 /**
- * Captures the state of a filter parameter at a given moment
- * (like the "Memento" design pattern)
- *
- * The self-bounded type parameter is for ensuring that
- * interpolate receives and returns the actual type
+ * The target of the shapes in the {@link ShapesTool}
  */
-public interface ParamState<S extends ParamState<S>> {
-    /**
-     * Calculate a new interpolated ParamState object,
-     * where the current object represents the starting state
-     * and the given argument represents the end state
-     */
-    S interpolate(S endState, double progress);
+public enum ShapesTarget {
+    PIXELS("Pixels"),
+    SELECTION("Selection");
+
+    private final String guiName;
+
+    ShapesTarget(String guiName) {
+        this.guiName = guiName;
+    }
+
+    @Override
+    public String toString() {
+        return guiName;
+    }
 }

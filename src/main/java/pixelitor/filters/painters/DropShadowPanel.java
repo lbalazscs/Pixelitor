@@ -31,14 +31,14 @@ import java.awt.geom.Point2D;
 /**
  * A GUI for configuring the "drop shadow" shape effect
  */
-public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
+public class DropShadowPanel extends EffectPanel {
     private final AngleParam angleParam;
     private final RangeParam distanceParam;
     private final RangeParam spreadParam;
 
-    DropShadowEffectConfiguratorPanel(boolean defaultEnabled, Color defaultColor,
-                                      int defaultDistance, double defaultAngle,
-                                      int defaultSpread) {
+    DropShadowPanel(boolean defaultEnabled, Color defaultColor,
+                    int defaultDistance, double defaultAngle,
+                    int defaultSpread) {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
@@ -78,6 +78,19 @@ public class DropShadowEffectConfiguratorPanel extends EffectConfiguratorPanel {
     @Override
     public int getBrushWidth() {
         return spreadParam.getValue();
+    }
+
+    @Override
+    public void setBrushWidth(int value) {
+        spreadParam.setValue(value);
+    }
+
+    public void setAngle(double rad) {
+        angleParam.setValue(rad, false);
+    }
+
+    public void setDistance(double value) {
+        distanceParam.setValueNoTrigger(value);
     }
 
     @Override

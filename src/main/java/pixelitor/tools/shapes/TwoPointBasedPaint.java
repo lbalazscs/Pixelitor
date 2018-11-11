@@ -43,7 +43,12 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * Used as a fill type in the Shapes Tool.
  */
 enum TwoPointBasedPaint {
-    LINEAR_GRADIENT("Linear Gradient") {
+    NONE("None") {
+        @Override
+        protected Paint getPaint(ImDrag imDrag) {
+            throw new UnsupportedOperationException();
+        }
+    }, LINEAR_GRADIENT("Linear Gradient") {
         @Override
         protected Paint getPaint(ImDrag imDrag) {
             return new GradientPaint(
@@ -102,7 +107,7 @@ enum TwoPointBasedPaint {
         }
 
         @Override
-        public void setupPaint(Graphics2D g, ImDrag imDrag) {
+        public void prepare(Graphics2D g, ImDrag imDrag) {
             g.setComposite(AlphaComposite.getInstance(DST_OUT));
         }
 
@@ -123,7 +128,7 @@ enum TwoPointBasedPaint {
     /**
      * Called before the drawing/filling
      */
-    public void setupPaint(Graphics2D g, ImDrag imDrag) {
+    public void prepare(Graphics2D g, ImDrag imDrag) {
         g.setPaint(getPaint(imDrag));
     }
 

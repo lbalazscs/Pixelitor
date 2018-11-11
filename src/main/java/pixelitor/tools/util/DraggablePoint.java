@@ -46,7 +46,7 @@ import java.util.Optional;
 public class DraggablePoint extends Point2D.Double {
     private static final long serialVersionUID = 1L;
 
-    private static final int HANDLE_RADIUS = 5;
+    public static final int HANDLE_RADIUS = 5;
     private static final int HANDLE_DIAMETER = 2 * HANDLE_RADIUS;
     private static final int SHADOW_OFFSET = 1;
 

@@ -338,7 +338,11 @@ public class Shapes {
     }
 
     public static void debug(Graphics2D g, Color c, Point2D point) {
-        Shape circle = createCenteredCircle(point.getX(), point.getY(), 5);
+        debug(g, c, point, 5);
+    }
+
+    public static void debug(Graphics2D g, Color c, Point2D point, int radius) {
+        Shape circle = createCenteredCircle(point.getX(), point.getY(), radius);
         debug(g, c, circle);
     }
 

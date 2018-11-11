@@ -120,11 +120,10 @@ public class Pixelitor {
         // to run after all the files have been opened,
         // and on the same IO thread
         openCLFilesAsync(args)
+                .thenAcceptAsync(v -> afterStartTestActions(pw), EventQueue::invokeLater)
                 .thenRunAsync(Utils::preloadFontNames,
                         IOThread.getExecutor())
                 .exceptionally(Messages::showExceptionOnEDT);
-
-        afterStartTestActions(pw);
     }
 
     private static void setLookAndFeel() {

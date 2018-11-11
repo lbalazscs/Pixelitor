@@ -15,60 +15,58 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.transform.history;
+package pixelitor.tools.shapes.history;
 
 import pixelitor.Composition;
+import pixelitor.history.PartialImageEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.Tools;
+import pixelitor.tools.shapes.StyledShape;
 import pixelitor.tools.transform.TransformBox;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
-
-/**
- * Represents a change to a {@link TransformBox}
- */
-public class TransformBoxChangedEdit extends PixelitorEdit {
+public class FinalizeShapeEdit extends PixelitorEdit {
+    private final PartialImageEdit imageEdit;
     private final TransformBox box;
-    private final TransformBox.Memento before;
-    private final TransformBox.Memento after;
-    private final boolean simpleRepaint;
+    private final StyledShape styledShape;
 
-    public TransformBoxChangedEdit(Composition comp, TransformBox box,
-                                   TransformBox.Memento before,
-                                   TransformBox.Memento after,
-                                   boolean simpleRepaint) {
-        super("Transform Box Change", comp);
+    public FinalizeShapeEdit(Composition comp,
+                             PartialImageEdit imageEdit,
+                             TransformBox box,
+                             StyledShape styledShape) {
+        super("Finalize Shape", comp);
+
+        assert imageEdit != null;
+        assert box != null;
+        assert styledShape != null;
+
+        this.imageEdit = imageEdit;
         this.box = box;
-        this.before = before;
-        this.after = after;
-        this.simpleRepaint = simpleRepaint;
+        this.styledShape = styledShape;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        box.restoreFrom(before);
-
-        updateGUI();
+        imageEdit.undo();
+        Tools.SHAPES.restoreBox(styledShape, box);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        box.restoreFrom(after);
-
-        updateGUI();
+        imageEdit.redo();
+        Tools.SHAPES.resetStateToInitial();
     }
 
-    private void updateGUI() {
-        if(simpleRepaint) {
-            comp.repaint();
-        } else {
-            comp.imageChanged(REPAINT);
-        }
+    @Override
+    public void die() {
+        super.die();
+
+        imageEdit.die();
     }
 }

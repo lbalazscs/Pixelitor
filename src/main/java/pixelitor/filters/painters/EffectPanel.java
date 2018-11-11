@@ -40,7 +40,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 /**
  * A GUI for configuring an area effect
  */
-public abstract class EffectConfiguratorPanel extends JPanel implements Resettable {
+public abstract class EffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
     private final ColorSwatch colorSwatch;
 
@@ -57,7 +57,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
     protected final GridBagHelper gbh;
 
-    EffectConfiguratorPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
+    EffectPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
 
@@ -68,7 +68,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
-        enabledCB.setSelected(defaultEnabled);
+        setTabEnabled(defaultEnabled);
         enabledCB.addActionListener(e -> updateDefaultButtonIcon());
 
         colorSwatch = new ColorSwatch(defaultColor, BUTTON_SIZE);
@@ -87,6 +87,10 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         gbh.addLabelWithControl("Opacity:", opacitySlider);
     }
 
+    public void setTabEnabled(boolean defaultEnabled) {
+        enabledCB.setSelected(defaultEnabled);
+    }
+
     private void showColorDialog() {
         Color selectedColor = ColorPicker.showDialog(
                 PixelitorWindow.getInstance(),
@@ -96,7 +100,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         }
     }
 
-    private void setColor(Color newColor, boolean trigger) {
+    public void setColor(Color newColor, boolean trigger) {
         color = newColor;
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
@@ -126,6 +130,8 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
     public abstract int getBrushWidth();
 
+    public abstract void setBrushWidth(int value);
+
     public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
         if (this.adjustmentListener != null) {
             throw new IllegalStateException("only one is allowed");
@@ -146,7 +152,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
         effect.setBrushSteps(calculateBrushSteps(brushWidth));
     }
 
-    public static int calculateBrushSteps(int brushWidth) {
+    private static int calculateBrushSteps(int brushWidth) {
         return 1 + brushWidth / 3;
     }
 
@@ -160,7 +166,7 @@ public abstract class EffectConfiguratorPanel extends JPanel implements Resettab
 
     @Override
     public void reset(boolean trigger) {
-        enabledCB.setSelected(defaultEnabled);
+        setTabEnabled(defaultEnabled);
         setColor(defaultColor, trigger);
     }
 

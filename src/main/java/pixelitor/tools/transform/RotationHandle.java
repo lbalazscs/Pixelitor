@@ -24,7 +24,9 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 
 /**
@@ -42,6 +44,11 @@ public class RotationHandle extends DraggablePoint {
         super(name, pos.getX(), pos.getY(), view, Color.WHITE, Color.RED);
         this.box = box;
         this.cursor = Cursors.DEFAULT;
+    }
+
+    @Override
+    protected Shape createShape(double startX, double startY, double size) {
+        return new Ellipse2D.Double(startX, startY, size, size);
     }
 
     @Override

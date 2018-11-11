@@ -207,6 +207,10 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         return model.getValue();
     }
 
+    public void setValue(int value) {
+        model.setValue(value);
+    }
+
     @Override
     public void stateChanged(ChangeEvent e) {
         Object o = e.getSource();

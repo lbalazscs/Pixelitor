@@ -67,7 +67,7 @@ import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
-import pixelitor.tools.shapes.ShapesAction;
+import pixelitor.tools.shapes.ShapesTarget;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -96,6 +96,7 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionInteraction.REPLACE;
+import static pixelitor.tools.shapes.ShapesTarget.SELECTION;
 
 /**
  * An automated GUI test which uses AssertJ-Swing.
@@ -205,9 +206,9 @@ public class AssertJSwingTest {
 
     private void resetShapesTool() {
         pw.toggleButton("Shapes Tool Button").click();
-        // make sure that action is set to fill
+        // make sure that the target is set to pixels
         // in order to enable the effects button
-        pw.comboBox("actionCB").selectItem(ShapesAction.FILL.toString());
+        pw.comboBox("targetCB").selectItem(ShapesTarget.PIXELS.toString());
     }
 
     private static TestTarget decideTarget() {
@@ -1825,8 +1826,6 @@ public class AssertJSwingTest {
 
         setupEffectsDialog();
 
-        boolean stokeSettingsDialogTested = false;
-
         ShapeType[] testedShapeTypes = quick
                 ? new ShapeType[]{ShapeType.RECTANGLE, ShapeType.CAT}
                 : ShapeType.values();
@@ -1834,28 +1833,23 @@ public class AssertJSwingTest {
         boolean tested = false;
         boolean deselectWasLast = false;
 
+        setupStrokeSettingsDialog();
+
         for (ShapeType shapeType : testedShapeTypes) {
             pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
-            for (ShapesAction shapesAction : ShapesAction.values()) {
+            for (ShapesTarget shapesTarget : ShapesTarget.values()) {
                 if (skipThis()) {
                     continue;
                 }
-                pw.comboBox("actionCB").selectItem(shapesAction.toString());
+                pw.comboBox("targetCB").selectItem(shapesTarget.toString());
                 pw.pressAndReleaseKeys(KeyEvent.VK_R);
-
-                if (shapesAction == ShapesAction.STROKE) { // stroke settings will be enabled here
-                    if (!stokeSettingsDialogTested) {
-                        setupStrokeSettingsDialog();
-                        stokeSettingsDialogTested = true;
-                    }
-                }
 
                 mouse.moveRandomlyWithinCanvas();
                 mouse.dragRandomlyWithinCanvas();
                 tested = true;
                 deselectWasLast = false;
 
-                if (shapesAction.createSelection()) {
+                if (shapesTarget == SELECTION) {
                     if (EDT.getSelection() != null) { // TODO shouldn't this be always true?
                         keyboard.deselect();
                         deselectWasLast = true;

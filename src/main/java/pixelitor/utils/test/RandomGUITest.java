@@ -120,7 +120,7 @@ public class RandomGUITest {
     private static final Random rand = new Random();
 
     // set to null to select random tools
-    private static final Tool preferredTool = Tools.PEN;
+    private static final Tool preferredTool = Tools.SHAPES;
 
     // set to null to select random filters
 //    private static final Filter preferredFilter = new Magnify();
@@ -1224,7 +1224,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, () -> reload(r));
         weightedCaller.registerCallback(1, RandomGUITest::randomZoom);
         weightedCaller.registerCallback(1, RandomGUITest::randomZoomOut);
-        weightedCaller.registerCallback(3, RandomGUITest::deselect);
+        weightedCaller.registerCallback(10, RandomGUITest::deselect);
         weightedCaller.registerCallback(1, () -> showHideSelection(r));
         weightedCaller.registerCallback(1, RandomGUITest::layerToCanvasSize);
         weightedCaller.registerCallback(1, RandomGUITest::invertSelection);

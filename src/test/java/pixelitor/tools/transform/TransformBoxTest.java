@@ -214,7 +214,8 @@ public class TransformBoxTest {
         assertThat(sw).isAt(200, 200).isAtIm(200, 200);
         assertThat(ne).isAt(400, 100).isAtIm(400, 100);
         assertThat(se).isAt(400, 200).isAtIm(400, 200);
-        assertThat(rot).isAt(300, 80).isAtIm(300, 80);
+        int rotOrigY = 100 - TransformBox.ROT_HANDLE_DISTANCE;
+        assertThat(rot).isAt(300, rotOrigY).isAtIm(300, rotOrigY);
         assertThat(box).angleDegreesIs(0);
         assertThat(nw).cursorNameIs("Northwest Resize Cursor");
         assertThat(sw).cursorNameIs("Southwest Resize Cursor");
@@ -222,7 +223,7 @@ public class TransformBoxTest {
         assertThat(se).cursorNameIs("Southeast Resize Cursor");
 
         // rotate by 90 degrees
-        press(box, 300, 80);
+        press(box, 300, rotOrigY);
         drag(box, 200, 120);
         release(box, 10, 150);
         assertThat(box).angleDegreesIs(90);
@@ -374,14 +375,14 @@ public class TransformBoxTest {
     }
 
     private boolean press(TransformBox box, int x, int y) {
-        return box.handleMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, ic));
+        return box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, ic));
     }
 
     private boolean drag(TransformBox box, int x, int y) {
-        return box.handleMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ic));
+        return box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ic));
     }
 
     private boolean release(TransformBox box, int x, int y) {
-        return box.handleMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, ic));
+        return box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, ic));
     }
 }

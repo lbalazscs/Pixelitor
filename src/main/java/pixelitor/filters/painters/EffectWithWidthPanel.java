@@ -24,15 +24,15 @@ import pixelitor.gui.utils.SliderSpinner;
 import java.awt.Color;
 
 /**
- * An EffectConfiguratorPanel that has a width parameter.
- * Most effect configurator panels use this as the superclass
+ * An {@link EffectPanel} that has a width parameter.
+ * Most effect panels use this as the superclass.
  */
-public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
+public class EffectWithWidthPanel extends EffectPanel {
     private final RangeParam widthRange;
     private final SliderSpinner widthSlider;
 
-    public SimpleEffectConfiguratorPanel(String effectName, boolean defaultSelected,
-                                         Color defaultColor, int defaultWidth) {
+    public EffectWithWidthPanel(String effectName, boolean defaultSelected,
+                                Color defaultColor, int defaultWidth) {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
@@ -46,6 +46,11 @@ public class SimpleEffectConfiguratorPanel extends EffectConfiguratorPanel {
     @Override
     public int getBrushWidth() {
         return widthSlider.getCurrentValue();
+    }
+
+    @Override
+    public void setBrushWidth(int value) {
+        widthSlider.setValue(value);
     }
 
     @Override

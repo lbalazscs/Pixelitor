@@ -1192,13 +1192,6 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addAction(new MenuAction("imageChanged(FULL) on the active image") {
-            @Override
-            public void onClick() {
-                getActiveCompOrNull().imageChanged(FULL, true);
-            }
-        });
-
         developMenu.addAction(new MenuAction("Debug getCanvasSizedSubImage") {
             @Override
             public void onClick() {
@@ -1261,6 +1254,13 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 repaintActive();
+            }
+        });
+
+        sub.addAction(new MenuAction("imageChanged(FULL) on the active image") {
+            @Override
+            public void onClick() {
+                getActiveCompOrNull().imageChanged(FULL, true);
             }
         });
 

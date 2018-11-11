@@ -22,6 +22,8 @@ import org.jdesktop.swingx.painter.effects.GlowPathEffect;
 import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
+import pixelitor.filters.gui.EffectsParam;
+import pixelitor.filters.gui.ParamState;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -33,8 +35,9 @@ import java.util.Random;
 
 /**
  * A collection of 4 area effects, which can be enabled or disabled.
+ * It also functions as the {@link ParamState} of {@link EffectsParam}
  */
-public class AreaEffects implements Serializable {
+public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     private static final long serialVersionUID = 1L;
     private static final AreaEffect[] EMPTY_ARRAY = new AreaEffect[0];
 
@@ -151,5 +154,11 @@ public class AreaEffects implements Serializable {
             ae.setGlowEffect(new GlowPathEffect(1.0f));
         }
         return ae;
+    }
+
+    @Override
+    public AreaEffects interpolate(AreaEffects endState, double progress) {
+        // TODO add animation support
+        return null;
     }
 }

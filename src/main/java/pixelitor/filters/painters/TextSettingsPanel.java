@@ -359,7 +359,6 @@ public class TextSettingsPanel extends FilterGUI
         AreaEffects areaEffects = null;
         double textRotationAngle = rotationParam.getValueInRadians();
         if (effectsPanel != null) {
-            effectsPanel.updateEffectsFromGUI();
             areaEffects = effectsPanel.getEffects();
 
             // adjust the drop shadow angle so that it is

@@ -17,8 +17,17 @@
 
 package pixelitor.tools.shapes;
 
+import pixelitor.Composition;
+import pixelitor.filters.gui.StrokeParam;
+import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
+import pixelitor.gui.ImageComponents;
 import pixelitor.gui.View;
+import pixelitor.history.History;
+import pixelitor.history.PartialImageEdit;
+import pixelitor.layers.Drawable;
+import pixelitor.tools.shapes.history.FinalizeShapeEdit;
+import pixelitor.tools.shapes.history.StyledShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
@@ -31,18 +40,19 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.shapes.ShapesTool.STROKE_FOR_OPEN_SHAPES;
+import static pixelitor.tools.shapes.TwoPointBasedPaint.NONE;
 
 /**
  * A shape with associated stroke, fill and effects
  * that can paint itself on a given {@link Graphics2D}
  */
-public class StyledShape {
-    private ShapesAction action;
-    private final ShapesTool tool;
+public class StyledShape implements Cloneable {
+    private final ShapeSettings settings;
     private ShapeType shapeType;
     private Shape shape; // the current shape, in image-space
     private Shape unTransformedShape; // the original shape, in image-space
@@ -60,28 +70,22 @@ public class StyledShape {
     private AreaEffects effects;
 
     private Stroke stroke;
+
+    // Not needed for the rendering, but needed
+    // to restore the the stroke GUI after undo
+    private StrokeSettings strokeSettings;
+
     private boolean insideBox;
 
-    public StyledShape(ShapeType shapeType, ShapesAction action,
-                       ShapesTool tool) {
-        this.shapeType = shapeType;
-        this.action = action;
-        this.tool = tool;
-        configureBasedOnAction(action, tool);
+    public StyledShape(ShapeSettings settings) {
+        this.settings = settings;
+        shapeType = settings.getSelectedType();
+        setFillPaint(settings.getSelectedFillPaint());
+        setStrokePaint(settings.getSelectedStrokePaint());
+        setStroke(settings.getStroke());
+        setEffects(settings.getEffects());
+        this.strokeSettings = settings.getStrokeSettings();
         this.insideBox = false;
-    }
-
-    private void configureBasedOnAction(ShapesAction action, ShapesTool tool) {
-        if (action.hasFillPaint()) {
-            this.fillPaint = tool.getSelectedFillPaint();
-        }
-        if (action.hasStrokePaint()) {
-            this.strokePaint = tool.getSelectedStrokePaint();
-            this.stroke = tool.getStroke();
-        }
-        if (action.canHaveEffects()) {
-            this.effects = tool.getEffects();
-        }
     }
 
     /**
@@ -94,38 +98,39 @@ public class StyledShape {
             // it can be painted only after the first drag events arrive
             return;
         }
+        if (transformedImDrag.isClick()) {
+            return;
+        }
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        if (action.hasFillPaint()) {
+        if (hasFillPaint()) {
             if (shapeType.isClosed()) {
-                fillPaint.setupPaint(g, transformedImDrag);
+                fillPaint.prepare(g, transformedImDrag);
                 g.fill(shape);
                 fillPaint.finish(g);
-            } else if (!action.hasStrokePaint()) {
+            } else if (!hasStrokePaint()) {
                 // Special case: an open shape cannot be filled,
                 // it can be only stroked, even if stroke is disabled.
                 // So use the default stroke and the fill paint.
                 g.setStroke(STROKE_FOR_OPEN_SHAPES);
-                fillPaint.setupPaint(g, transformedImDrag);
+                fillPaint.prepare(g, transformedImDrag);
                 g.draw(shape);
                 fillPaint.finish(g);
             }
         }
 
-        if (action.hasStrokePaint()) {
+        if (hasStrokePaint()) {
             g.setStroke(stroke);
-            strokePaint.setupPaint(g, transformedImDrag);
+            strokePaint.prepare(g, transformedImDrag);
             g.draw(shape);
             strokePaint.finish(g);
         }
 
         if (effects != null) {
-            assert action.canHaveEffects();
-
-            if (action.hasFillPaint()) {
+            if (hasFillPaint()) {
                 effects.drawOn(g, shape);
-            } else if (action.hasStrokePaint()) {
+            } else if (hasStrokePaint()) {
                 // special case if there is only stroke:
                 // apply the effect on the stroke outline
                 Shape outline = stroke.createStrokedShape(shape);
@@ -136,8 +141,18 @@ public class StyledShape {
         }
     }
 
+    private boolean hasStrokePaint() {
+        return strokePaint != NONE;
+    }
+
+    private boolean hasFillPaint() {
+        return fillPaint != NONE;
+    }
+
     public void setImDrag(ImDrag imDrag) {
         assert !insideBox;
+
+        assert !imDrag.isClick() : "imDrag = " + imDrag.toString();
 
         this.origImDrag = imDrag;
         unTransformedShape = shapeType.getShape(imDrag);
@@ -153,28 +168,23 @@ public class StyledShape {
         transformedImDrag = origImDrag.createTransformed(at);
     }
 
-    public void setAction(ShapesAction action) {
-        this.action = action;
-        configureBasedOnAction(action, tool);
-    }
-
-    public void setFillPaint(TwoPointBasedPaint fillPaint) {
+    private void setFillPaint(TwoPointBasedPaint fillPaint) {
         this.fillPaint = fillPaint;
     }
 
-    public void setStrokePaint(TwoPointBasedPaint strokePaint) {
+    private void setStrokePaint(TwoPointBasedPaint strokePaint) {
         this.strokePaint = strokePaint;
     }
 
-    public void setStroke(Stroke stroke) {
+    private void setStroke(Stroke stroke) {
         this.stroke = stroke;
     }
 
-    public void setEffects(AreaEffects effects) {
+    private void setEffects(AreaEffects effects) {
         this.effects = effects;
     }
 
-    public void setType(ShapeType shapeType) {
+    private void setType(ShapeType shapeType) {
         assert insideBox;
         this.shapeType = shapeType;
 
@@ -242,9 +252,133 @@ public class StyledShape {
         return box;
     }
 
+    public void finalizeTo(Composition comp, TransformBox transformBox) {
+        Drawable dr = comp.getActiveDrawableOrNull();
+        if (dr == null) { // can happen because this could be called via activeImageHasChanged
+            // TODO how to handle changing the image when there is a box on a text layer?
+            return;
+        }
+
+        Rectangle shapeBounds = shape.getBounds();
+        int thickness = calcThickness();
+        shapeBounds.grow(thickness, thickness);
+
+        if (!shapeBounds.isEmpty()) {
+            BufferedImage originalImage = dr.getImage();
+            PartialImageEdit imageEdit = History.createPartialImageEdit(
+                    shapeBounds, originalImage, dr, false, "Shape");
+            if (imageEdit != null) {
+                History.addEdit(new FinalizeShapeEdit(comp,
+                        imageEdit, transformBox, this));
+            }
+        }
+
+        paintShape(dr);
+
+        comp.imageChanged();
+        dr.updateIconImage();
+    }
+
+    private void paintShape(Drawable dr) {
+        int tx = -dr.getTX();
+        int ty = -dr.getTY();
+
+        BufferedImage bi = dr.getImage();
+        Graphics2D g2 = bi.createGraphics();
+        g2.translate(tx, ty);
+
+//        Composition comp = dr.getComp();
+//        comp.applySelectionClipping(g2);
+
+        paint(g2);
+        g2.dispose();
+    }
+
+    private int calcThickness() {
+        int thickness = 0;
+        int extraStrokeThickness = 0;
+        if (hasStrokePaint()) {
+            StrokeParam strokeParam = settings.getStrokeParam();
+
+            thickness = strokeParam.getStrokeWidth();
+
+            StrokeType strokeType = strokeParam.getStrokeType();
+            extraStrokeThickness = strokeType.getExtraThickness(thickness);
+            thickness += extraStrokeThickness;
+        }
+        if (effects != null) {
+            int effectThickness = effects.getMaxEffectThickness();
+            // the extra stroke thickness must be added
+            // because the effect can be on the stroke
+            effectThickness += extraStrokeThickness;
+            if (effectThickness > thickness) {
+                thickness = effectThickness;
+            }
+        }
+
+        return thickness;
+    }
+
+    @Override
+    protected final StyledShape clone() {
+        // this is used only for undo, it should be OK to share
+        // all the references
+        try {
+            return (StyledShape) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // can't happen
+        }
+    }
+
+    public void regenerate(TransformBox transformBox) {
+        StyledShape backup = clone();
+
+        setType(settings.getSelectedType());
+        setFillPaint(settings.getSelectedFillPaint());
+        setStrokePaint(settings.getSelectedStrokePaint());
+
+        setStroke(settings.getStroke());
+        strokeSettings = settings.getStrokeSettings();
+        settings.invalidateStroke();
+
+        setEffects(settings.getEffects());
+
+
+        transformBox.applyTransformation();
+
+        Composition comp = ImageComponents.getActiveCompOrNull();
+        History.addEdit(new StyledShapeEdit(comp, backup));
+        comp.imageChanged();
+    }
+
+    public ShapeType getShapeType() {
+        return shapeType;
+    }
+
+    public TwoPointBasedPaint getFillPaint() {
+        return fillPaint;
+    }
+
+    public TwoPointBasedPaint getStrokePaint() {
+        return strokePaint;
+    }
+
+    public StrokeSettings getStrokeSettings() {
+        return strokeSettings;
+    }
+
+    public AreaEffects getEffects() {
+        return effects;
+    }
+
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("StyledShape", this);
         node.addString("ShapeType", shapeType.toString());
         return node;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("StyledShape, width = %.2f", strokeSettings.getWidth());
     }
 }

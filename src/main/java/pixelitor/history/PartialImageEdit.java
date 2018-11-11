@@ -53,6 +53,8 @@ public class PartialImageEdit extends FadeableEdit {
         this.saveRect = saveRect;
 
         backupRaster = image.getData(this.saveRect);
+
+//        EventQueue.invokeLater(() -> Utils.debugRaster(backupRaster, "Partial Image"));
     }
 
     @Override

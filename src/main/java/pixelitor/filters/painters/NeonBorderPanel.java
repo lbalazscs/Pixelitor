@@ -28,14 +28,14 @@ import java.awt.Color;
 /**
  * A GUI for configuring the "neon border" effect
  */
-public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorPanel {
+public class NeonBorderPanel extends EffectWithWidthPanel {
     private Color innerColor;
     private final Color defaultInnerColor;
     private final ColorSwatch innerColorSwatch;
 
-    NeonBorderEffectConfiguratorPanel(boolean defaultSelected,
-                                      Color defaultColor, Color innerColor,
-                                      int defaultWidth) {
+    NeonBorderPanel(boolean defaultSelected,
+                    Color defaultColor, Color innerColor,
+                    int defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColor;
@@ -45,7 +45,7 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
         GUIUtils.addColorDialogListener(innerColorSwatch, this::innerColorSwatchClicked);
 
         ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
-                this::getInnerColor, c -> setNewInnerColor(c, true));
+                this::getInnerColor, c -> setInnerColor(c, true));
 
         gbh.addLabelWithControl("Inner Color:", innerColorSwatch);
     }
@@ -56,11 +56,11 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
                 PixelitorWindow.getInstance(), "Select Color",
                 this.innerColor, true);
         if (selectedColor != null) { // ok was pressed
-            setNewInnerColor(selectedColor, true);
+            setInnerColor(selectedColor, true);
         }
     }
 
-    private void setNewInnerColor(Color selectedColor, boolean trigger) {
+    public void setInnerColor(Color selectedColor, boolean trigger) {
         this.innerColor = selectedColor;
         innerColorSwatch.setForeground(this.innerColor);
         innerColorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
@@ -84,6 +84,6 @@ public class NeonBorderEffectConfiguratorPanel extends SimpleEffectConfiguratorP
     @Override
     public void reset(boolean trigger) {
         super.reset(false);
-        setNewInnerColor(defaultInnerColor, trigger);
+        setInnerColor(defaultInnerColor, trigger);
     }
 }

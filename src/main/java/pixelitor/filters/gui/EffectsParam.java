@@ -84,28 +84,36 @@ public class EffectsParam extends AbstractFilterParam {
             effectsPanel = new EffectsPanel(adjustmentListener, null);
         }
 
-        effectsPanel.updateEffectsFromGUI();
         return effectsPanel.getEffects();
+    }
+
+    public void setEffects(AreaEffects effects) {
+        if (effectsPanel == null) { // probably never true
+            effectsPanel = new EffectsPanel(adjustmentListener, effects);
+            return;
+        }
+
+        effectsPanel.setEffects(effects);
     }
 
     @Override
     public void randomize() {
-
+        // TODO
     }
 
     @Override
     public void considerImageSize(Rectangle bounds) {
-
+        // ignore
     }
 
     @Override
     public ParamState copyState() {
-        throw new UnsupportedOperationException();
+        return getEffects();
     }
 
     @Override
     public void setState(ParamState state) {
-        throw new UnsupportedOperationException();
+        setEffects((AreaEffects) state);
     }
 
     @Override
@@ -131,9 +139,5 @@ public class EffectsParam extends AbstractFilterParam {
         if (effectsPanel != null) {
             effectsPanel.reset(trigger);
         }
-    }
-
-    public int getMaxEffectThickness() {
-        return effectsPanel.getMaxEffectThickness();
     }
 }

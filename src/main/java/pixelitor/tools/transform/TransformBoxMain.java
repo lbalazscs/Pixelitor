@@ -56,7 +56,7 @@ public class TransformBoxMain {
     private static void buildGUI() {
         try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -116,7 +116,7 @@ public class TransformBoxMain {
         private static final int canvasHeight = 300;
         private final Dimension size = new Dimension(600, 400);
 
-        PRectangle prect;
+        PRectangle rect;
         TransformBox transformBox;
 
         Shape unTransformedShape;
@@ -131,10 +131,10 @@ public class TransformBoxMain {
             setSize(size);
             calcCanvasStart();
 
-            prect = PRectangle.fromIm(50, 50, 200, 100, this);
-            Rectangle compSpaceRect = prect.getCo();
+            rect = PRectangle.fromIm(50, 50, 200, 100, this);
+            Rectangle compSpaceRect = rect.getCo();
 
-            unTransformedShape = ShapeType.CAT.getShape(prect.toImDrag());
+            unTransformedShape = ShapeType.CAT.getShape(rect.toImDrag());
             transformedShape = unTransformedShape;
             transformBox = new TransformBox(compSpaceRect, this,
                     at -> transformedShape =
@@ -153,18 +153,18 @@ public class TransformBoxMain {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    transformBox.handleMousePressed(new PMouseEvent(e, TestView.this));
+                    transformBox.processMousePressed(new PMouseEvent(e, TestView.this));
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    transformBox.handleMouseReleased(new PMouseEvent(e, TestView.this));
+                    transformBox.processMouseReleased(new PMouseEvent(e, TestView.this));
                 }
             });
             addMouseMotionListener(new MouseMotionListener() {
                 @Override
                 public void mouseDragged(MouseEvent e) {
-                    transformBox.handleMouseDragged(new PMouseEvent(e, TestView.this));
+                    transformBox.processMouseDragged(new PMouseEvent(e, TestView.this));
                 }
 
                 @Override

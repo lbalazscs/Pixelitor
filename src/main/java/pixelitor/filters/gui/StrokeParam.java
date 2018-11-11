@@ -149,12 +149,25 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public ParamState copyState() {
-        throw new UnsupportedOperationException();
+        return new StrokeSettings(
+                strokeWidthParam.getValueAsDouble(),
+                strokeCapParam.getSelected(),
+                strokeJoinParam.getSelected(),
+                strokeTypeParam.getSelected(),
+                shapeTypeParam.getSelected(),
+                dashedParam.isChecked());
     }
 
     @Override
     public void setState(ParamState state) {
-        throw new UnsupportedOperationException();
+        StrokeSettings setting = (StrokeSettings) state;
+
+        strokeWidthParam.setValueNoTrigger(setting.getWidth());
+        strokeCapParam.setSelectedItem(setting.getCap(), false);
+        strokeJoinParam.setSelectedItem(setting.getJoin(), false);
+        strokeTypeParam.setSelectedItem(setting.getType(), false);
+        shapeTypeParam.setSelectedItem(setting.getShapeType(), false);
+        dashedParam.setValue(setting.isDashed(), true, false);
     }
 
     @Override

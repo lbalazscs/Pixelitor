@@ -115,6 +115,18 @@ public class History {
     public static void addToolArea(Rectangle rect, BufferedImage origImage,
                                    Drawable dr, boolean relativeToImage,
                                    String toolName) {
+        PartialImageEdit edit = createPartialImageEdit(rect, origImage, dr,
+                relativeToImage, toolName);
+        if (edit != null) {
+            addEdit(edit);
+        }
+    }
+
+    public static PartialImageEdit createPartialImageEdit(Rectangle rect,
+                                                          BufferedImage origImage,
+                                                          Drawable dr,
+                                                          boolean relativeToImage,
+                                                          String editName) {
         assert rect.width > 0 : "rectangle.width = " + rect.width;
         assert rect.height > 0 : "rectangle.height = " + rect.height;
 
@@ -133,7 +145,7 @@ public class History {
 
         assert (origImage != null);
         if (rect.isEmpty()) {
-            return;
+            return null;
         }
 
         Composition comp = dr.getComp();
@@ -141,9 +153,9 @@ public class History {
         // we could also intersect with the selection bounds,
         // but typically the extra savings would be minimal
 
-        PartialImageEdit edit = new PartialImageEdit(toolName, comp,
+        PartialImageEdit edit = new PartialImageEdit(editName, comp,
                 dr, origImage, rect, false);
-        addEdit(edit);
+        return edit;
     }
 
     public static String getUndoPresentationName() {
