@@ -50,7 +50,17 @@ public class TranslatedTextPainter extends TextPainter {
      */
     public Rectangle getBoundingBox()
     {
-        return boundingBox;
+        return rotatedLayout != null? rotatedLayout.getBoundingBox() : boundingBox;
+    }
+
+    /**
+     * Return last painted bounding shape for rendered text (rect or rotated rect)
+     * Note that this is not pixel perfect shape
+     * If text was not rendered yet, returned shape is empty
+     */
+    public Shape getBoundingShape()
+    {
+        return rotatedLayout != null? rotatedLayout.asShape() : boundingBox;
     }
 
     @Override

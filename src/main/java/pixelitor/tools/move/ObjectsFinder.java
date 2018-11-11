@@ -16,6 +16,10 @@ import java.util.ListIterator;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ObjectsFinder {
+
+    private final static float layerOpacityThreshold = 0.05f;
+    private final static int pixelAlphaThreshold = 30;
+
     public ObjectsFinder() {
         super();
     }
@@ -44,6 +48,7 @@ public class ObjectsFinder {
 
     public ObjectsSelection findLayerAtPoint(Point2D p, Composition stage) {
         ObjectsSelection result = new ObjectsSelection();
+        Point pPixel = new Point((int)p.getX(), (int)p.getY());
 
         // iterate in reverse order (we need to search layers from top to bottom)
         List layers = stage.getLayers();
@@ -52,13 +57,15 @@ public class ObjectsFinder {
             Layer layer = (Layer) li.previous();
             if (!(layer instanceof ContentLayer)) continue;
             if (!layer.isVisible()) continue;
-            if (layer.getOpacity() < 0.05) continue;
+            if (layer.getOpacity() < layerOpacityThreshold) continue;
 
             ContentLayer imageLayer = (ContentLayer) layer;
-            Rectangle rect = imageLayer.getEffectiveBoundingBox();
-            if (rect.contains(p)) {
+            int pixel = imageLayer.getMouseHitPixelAtPoint(pPixel);
+
+            if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
                 result.setObject(layer);
-                result.setRect(rect);
+                result.setSnappingBoundingBox(imageLayer.getSnappingBoundingBox());
+                result.setEffectiveBoundingBox(imageLayer.getEffectiveBoundingBox());
                 break;
             }
         }

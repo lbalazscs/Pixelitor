@@ -3,24 +3,18 @@ package pixelitor.tools.move;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Represents objects selection on stage. It keep track on objects bounding box
- * Bounding box must be represented in canvas coordinate space
+ * Represents objects selection on stage.
+ * It keep track of objects snapping bounding box
+ * It keep track of objects effective bounding box
+ * Bounding boxes must be represented in canvas coordinate space
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ObjectsSelection {
 
-    private Object objects[];
     private Object object;
-    private Rectangle2D rect;
-
-    public Object[] getObjects() {
-        return objects;
-    }
-
-    public void setObjects(Object[] objects) {
-        this.objects = objects;
-    }
+    private Rectangle2D snappingBoundingBox;
+    private Rectangle2D effectiveBoundingBox;
 
     public Object getObject() {
         return object;
@@ -30,12 +24,20 @@ public class ObjectsSelection {
         this.object = object;
     }
 
-    public Rectangle2D getRect() {
-        return rect;
+    public Rectangle2D getSnappingBoundingBox() {
+        return snappingBoundingBox;
     }
 
-    public void setRect(Rectangle2D rect) {
-        this.rect = rect;
+    public void setSnappingBoundingBox(Rectangle2D snappingBoundingBox) {
+        this.snappingBoundingBox = snappingBoundingBox;
+    }
+
+    public Rectangle2D getEffectiveBoundingBox() {
+        return effectiveBoundingBox;
+    }
+
+    public void setEffectiveBoundingBox(Rectangle2D effectiveBoundingBox) {
+        this.effectiveBoundingBox = effectiveBoundingBox;
     }
 
     public boolean isEmpty() {

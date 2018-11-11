@@ -23,6 +23,7 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -88,5 +89,17 @@ public class SmartObject extends ContentLayer {
     public Rectangle getEffectiveBoundingBox() {
         // unknown, return empty
         return new Rectangle();
+    }
+
+    @Override
+    public Rectangle getSnappingBoundingBox() {
+        // unknown, return empty
+        return new Rectangle();
+    }
+
+    @Override
+    public int getMouseHitPixelAtPoint(Point p) {
+        // unknown
+        return 0x00000000;
     }
 }
