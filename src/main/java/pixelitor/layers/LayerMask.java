@@ -27,6 +27,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
@@ -212,5 +213,15 @@ public class LayerMask extends ImageLayer {
                     TRANSPARENCY_COLOR_MODEL, raster, false, null);
             return tmpTransparency;
         }
+    }
+
+    @Override
+    public Rectangle getEffectiveBoundingBox() {
+        return getImageBounds();
+    }
+
+    @Override
+    public Rectangle getSnappingBoundingBox() {
+        return getImageBounds();
     }
 }
