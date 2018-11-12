@@ -3,6 +3,7 @@ package pixelitor.tools.move;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.MaskViewMode;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -50,6 +51,17 @@ public class ObjectsFinder {
         ObjectsSelection result = new ObjectsSelection();
         Point pPixel = new Point((int)p.getX(), (int)p.getY());
 
+        // in edit mask mode - do not auto select other layers as they are invisible
+        // in this mode, active layer is mask layer
+        MaskViewMode viewMode = stage.getIC().getMaskViewMode();
+        if (viewMode == MaskViewMode.SHOW_MASK) {
+            ContentLayer contentLayer = (ContentLayer) stage.getActiveLayer();
+            result.setObject(contentLayer);
+            result.setSnappingBoundingBox(contentLayer.getSnappingBoundingBox());
+            result.setEffectiveBoundingBox(contentLayer.getEffectiveBoundingBox());
+            return result;
+        }
+
         // iterate in reverse order (we need to search layers from top to bottom)
         List layers = stage.getLayers();
         ListIterator li = layers.listIterator(layers.size());
@@ -59,13 +71,13 @@ public class ObjectsFinder {
             if (!layer.isVisible()) continue;
             if (layer.getOpacity() < layerOpacityThreshold) continue;
 
-            ContentLayer imageLayer = (ContentLayer) layer;
-            int pixel = imageLayer.getMouseHitPixelAtPoint(pPixel);
+            ContentLayer contentLayer = (ContentLayer) layer;
+            int pixel = contentLayer.getMouseHitPixelAtPoint(pPixel);
 
             if (((pixel >> 24) & 0xff) > pixelAlphaThreshold) {
                 result.setObject(layer);
-                result.setSnappingBoundingBox(imageLayer.getSnappingBoundingBox());
-                result.setEffectiveBoundingBox(imageLayer.getEffectiveBoundingBox());
+                result.setSnappingBoundingBox(contentLayer.getSnappingBoundingBox());
+                result.setEffectiveBoundingBox(contentLayer.getEffectiveBoundingBox());
                 break;
             }
         }

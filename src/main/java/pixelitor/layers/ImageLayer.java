@@ -564,12 +564,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int x = p.x-translationX;
         int y = p.y-translationY;
         if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
-            if (hasMask() && getMask().isMaskEnabled()) {
-                BufferedImage maskImage = getMask().getImage();
-                int ix = p.x - getMask().translationX;
-                int iy = p.y - getMask().translationY;
-                if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
-                    int maskPixel = maskImage.getRGB(ix, iy);
+            if ( hasMask() && getMask().isMaskEnabled()) {
+                int maskPixel = getMask().getMouseHitPixelAtPoint(p);
+                if (maskPixel != 0) {
                     int imagePixel = image.getRGB(x, y);
                     float maskAlpha = (maskPixel & 0xff) / 255f;
                     int imageAlpha = (imagePixel >> 24) & 0xff;
