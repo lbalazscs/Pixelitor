@@ -24,6 +24,8 @@ import pixelitor.layers.Layer;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -41,11 +43,16 @@ public class MultiLayerEdit extends PixelitorEdit {
     private SelectionChangeEdit selectionChangeEdit;
     private DeselectEdit deselectEdit;
     private GuidesChangeEdit guidesChangeEdit;
+    private final AffineTransform forwardCanvasTx;
+    private AffineTransform backwardCanvasTx;
 
     private final boolean undoable;
 
-    public MultiLayerEdit(String name, Composition comp, MultiLayerBackup backup) {
+    public MultiLayerEdit(String name, Composition comp,
+                          MultiLayerBackup backup,
+                          AffineTransform canvasTx) {
         super(name, comp);
+        this.forwardCanvasTx = canvasTx;
 
         int numLayers = comp.getNumLayers();
         if (numLayers == 1) {
@@ -144,6 +151,7 @@ public class MultiLayerEdit extends PixelitorEdit {
         // of the image covers canvas checks
         if (canvasChangeEdit != null) {
             canvasChangeEdit.undo();
+            comp.getIC().revalidate(); // make sure the scrollbars are OK
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.undo();
@@ -153,6 +161,17 @@ public class MultiLayerEdit extends PixelitorEdit {
         }
         if (guidesChangeEdit != null) {
             guidesChangeEdit.undo();
+        }
+
+        if (backwardCanvasTx == null && forwardCanvasTx != null) {
+            try {
+                backwardCanvasTx = forwardCanvasTx.createInverse();
+            } catch (NoninvertibleTransformException e) {
+                e.printStackTrace();
+            }
+        }
+        if (backwardCanvasTx != null) { // successful inversion
+            comp.imCoordsChanged(backwardCanvasTx, true);
         }
     }
 
@@ -171,12 +190,17 @@ public class MultiLayerEdit extends PixelitorEdit {
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.redo();
+            comp.getIC().revalidate(); // make sure the scrollbars are OK
         }
         if (deselectEdit != null) {
             deselectEdit.redo();
         }
         if (guidesChangeEdit != null) {
             guidesChangeEdit.redo();
+        }
+
+        if (backwardCanvasTx != null) { // the backwards transform was inverted successfully
+            comp.imCoordsChanged(forwardCanvasTx, true);
         }
     }
 

@@ -31,6 +31,7 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.Optional;
 
@@ -79,6 +80,10 @@ public class DraggablePoint extends Point2D.Double {
 
     protected Cursor cursor;
 
+    // the original positions in image space, saved when
+    // a transform box is created to serve as reference points
+    private Point2D imTransformRefPoint;
+
     public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
         assert view != null;
 
@@ -90,7 +95,7 @@ public class DraggablePoint extends Point2D.Double {
         this.color = color;
         this.activeColor = activeColor;
         setShapes();
-        calcImCoords();
+        calcImCoordsOnlyForThis();
     }
 
     @Override
@@ -107,8 +112,42 @@ public class DraggablePoint extends Point2D.Double {
         setShapes();
     }
 
+    /**
+     * Stores the current location as a reference point
+     * for future affine transformations
+     */
+    public void storeTransformRefPoint() {
+        imTransformRefPoint = getImLocationCopy();
+    }
+
+    public void imTransform(AffineTransform at, boolean useRefPoint) {
+        imTransformOnlyThis(at, useRefPoint);
+    }
+
+    /**
+     * Transforms the image-space coordinates with the given {@link AffineTransform},
+     * and also recalculates the component-space coordinates
+     */
+    public final void imTransformOnlyThis(AffineTransform at, boolean useRefPoint) {
+        // can't simply use at.transform(refPoint, this) because that would
+        // call setLocation, which is in component space and also can be overridden
+        Point2D transformed;
+        if (useRefPoint) {
+            transformed = at.transform(imTransformRefPoint, null);
+        } else {
+            transformed = at.transform(getImLocationCopy(), null);
+        }
+        setImLocationOnlyForThis(transformed);
+    }
+
     public final void setLocationOnlyForThis(Point2D p) {
         setLocationOnlyForThis(p.getX(), p.getY());
+    }
+
+    public final void setImLocationOnlyForThis(Point2D p) {
+        imX = p.getX();
+        imY = p.getY();
+        restoreCoordsFromImSpace(view);
     }
 
     private void setShapes() {
@@ -205,6 +244,10 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public void calcImCoords() {
+        calcImCoordsOnlyForThis();
+    }
+
+    public final void calcImCoordsOnlyForThis() {
         imX = view.componentXToImageSpace(x);
         imY = view.componentYToImageSpace(y);
     }
@@ -279,6 +322,10 @@ public class DraggablePoint extends Point2D.Double {
         return new Point2D.Double(x, y);
     }
 
+    public Point2D getImLocationCopy() {
+        return new Point2D.Double(imX, imY);
+    }
+
     public PPoint asPPoint() {
         return PPoint.lazyFromCo(x, y, view);
     }
@@ -324,7 +371,7 @@ public class DraggablePoint extends Point2D.Double {
                         "y = \u001B[33m%.2f\u001B[0m}" +
                         "{imX = \u001B[36m%.1f\u001B[0m, " +
                         "imY = \u001B[36m%.1f\u001B[0m}",
-                        name, x, y, imX, imY);
+                name, x, y, imX, imY);
         return sb;
     }
 

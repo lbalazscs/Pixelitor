@@ -75,12 +75,14 @@ public class EnlargeCanvas implements CompAction {
 
         comp.forEachLayer(this::processLayer);
 
+        AffineTransform canvasTx = null;
         if (north > 0 || west > 0) {
-            comp.transformSelection(
-                    () -> AffineTransform.getTranslateInstance(west, north));
+            canvasTx = AffineTransform.getTranslateInstance(west, north);
+            comp.imCoordsChanged(
+                    canvasTx, false);
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
+        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, canvasTx);
 
         History.addEdit(edit);
 

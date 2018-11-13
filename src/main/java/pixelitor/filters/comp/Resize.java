@@ -67,15 +67,14 @@ public class Resize implements CompAction {
         String editName = "Resize";
         MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
-        comp.transformSelection(() -> {
-            double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
-            double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-            return AffineTransform.getScaleInstance(sx, sy);
-        });
+        double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
+        double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
+        AffineTransform at = AffineTransform.getScaleInstance(sx, sy);
+        comp.imCoordsChanged(at, false);
 
         resizeLayers(comp);
 
-        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup);
+        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, at);
         History.addEdit(edit);
 
         canvas.changeImSize(canvasTargetWidth, canvasTargetHeight);
@@ -86,6 +85,7 @@ public class Resize implements CompAction {
         comp.updateAllIconImages();
 
         comp.imageChanged(REPAINT, true);
+        comp.getIC().revalidate(); // make sure the scrollbars are OK
 
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");

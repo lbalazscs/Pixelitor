@@ -22,6 +22,8 @@ import org.junit.Test;
 import pixelitor.TestHelper;
 import pixelitor.gui.ImageComponent;
 
+import java.awt.geom.AffineTransform;
+
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class GradientHandlesTest {
@@ -36,16 +38,17 @@ public class GradientHandlesTest {
     private GradientDefiningPoint start;
     private GradientDefiningPoint end;
     private GradientCenterPoint middle;
+    private GradientHandles handles;
 
     @Before
     public void setup() {
         ImageComponent ic = TestHelper.createMockICWithoutComp();
-        GradientHandles gh = new GradientHandles(
+        handles = new GradientHandles(
                 START_X_FOR_START, START_Y_FOR_START,
                 START_X_FOR_END, START_Y_FOR_END, ic);
-        start = gh.getStart();
-        end = gh.getEnd();
-        middle = gh.getMiddle();
+        start = handles.getStart();
+        end = handles.getEnd();
+        middle = handles.getMiddle();
 
         assertThat(start)
                 .isAt(START_X_FOR_START, START_Y_FOR_START)
@@ -102,5 +105,39 @@ public class GradientHandlesTest {
         assertThat(middle)
                 .isAt(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0)
                 .isAtIm(START_X_FOR_MIDDLE + dx / 2.0, START_Y_FOR_MIDDLE + dy / 2.0);
+    }
+
+    @Test
+    public void test_imCoordsChanged_translate() {
+        int dx = 10;
+        int dy = 20;
+        AffineTransform at = AffineTransform.getTranslateInstance(dx, dy);
+        handles.imCoordsChanged(at);
+
+        assertThat(start)
+                .isAt(START_X_FOR_START + dx, START_Y_FOR_START + dy)
+                .isAtIm(START_X_FOR_START + dx, START_Y_FOR_START + dy);
+        assertThat(middle)
+                .isAt(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy)
+                .isAtIm(START_X_FOR_MIDDLE + dx, START_Y_FOR_MIDDLE + dy);
+        assertThat(end)
+                .isAt(START_X_FOR_END + dx, START_Y_FOR_END + dy)
+                .isAtIm(START_X_FOR_END + dx, START_Y_FOR_END + dy);
+    }
+
+    @Test
+    public void test_imCoordsChanged_scale() {
+        AffineTransform at = AffineTransform.getScaleInstance(0.5, 0.5);
+        handles.imCoordsChanged(at);
+
+        assertThat(start)
+                .isAt(START_X_FOR_START * 0.5, START_Y_FOR_START * 0.5)
+                .isAtIm(START_X_FOR_START * 0.5, START_Y_FOR_START * 0.5);
+        assertThat(middle)
+                .isAt(START_X_FOR_MIDDLE * 0.5, START_Y_FOR_MIDDLE * 0.5)
+                .isAtIm(START_X_FOR_MIDDLE * 0.5, START_Y_FOR_MIDDLE * 0.5);
+        assertThat(end)
+                .isAt(START_X_FOR_END * 0.5, START_Y_FOR_END * 0.5)
+                .isAtIm(START_X_FOR_END * 0.5, START_Y_FOR_END * 0.5);
     }
 }

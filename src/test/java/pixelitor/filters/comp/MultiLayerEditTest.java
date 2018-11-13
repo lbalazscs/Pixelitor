@@ -121,7 +121,7 @@ public class MultiLayerEditTest {
         withMask.setupFor(comp);
 
         if (withSelection.isYes()) {
-            origSelection = TestHelper.getStandardTestSelectionShape();
+            origSelection = WithSelection.getSelectionShape();
         }
         History.clear();
     }

@@ -26,12 +26,15 @@ import pixelitor.tools.pen.history.AddAnchorPointEdit;
 import pixelitor.tools.pen.history.CloseSubPathEdit;
 import pixelitor.tools.pen.history.FinishSubPathEdit;
 import pixelitor.tools.pen.history.SubPathStartEdit;
+import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -90,8 +93,6 @@ public class SubPath implements Serializable {
         for (AnchorPoint point : anchorPoints) {
             AnchorPoint ap = new AnchorPoint(point, copy, true);
             ap.calcImCoords();
-            ap.ctrlOut.calcImCoords();
-            ap.ctrlIn.calcImCoords();
             copy.anchorPoints.add(ap);
         }
 
@@ -357,9 +358,9 @@ public class SubPath implements Serializable {
     }
 
     private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
-        if (ap1.samePositionAs(ap2, 1.0)) {
-            assert ap1.ctrlOut.isRetracted();
-            assert ap2.ctrlIn.isRetracted();
+        if (ap1.samePositionAs(ap2, 1.0)
+                && ap1.ctrlOut.isRetracted()
+                && ap2.ctrlIn.isRetracted()) {
             // we will keep the first, so copy the out ctrl of the second to the first
             ap1.ctrlOut.copyPositionFrom(ap2.ctrlOut);
             return true;
@@ -438,6 +439,12 @@ public class SubPath implements Serializable {
         }
     }
 
+    public void imCoordsChanged(AffineTransform at) {
+        for (AnchorPoint point : anchorPoints) {
+            point.imTransform(at, false);
+        }
+    }
+
     /**
      * Checks whether all the objects are wired together correctly
      */
@@ -508,7 +515,7 @@ public class SubPath implements Serializable {
             }
             point.dump();
         }
-        out.print(Ansi.purple("Moving: ") + moving);
+        out.println(Ansi.purple("Moving: ") + moving);
     }
 
     public AnchorPoint getAnchor(int index) {
@@ -741,5 +748,37 @@ public class SubPath implements Serializable {
                 .stream()
                 .map(AnchorPoint::toString)
                 .collect(joining(",", " [", "]"));
+    }
+
+    public TransformBox createTransformBox() {
+        storeTransformRefPoints();
+
+        GeneralPath gp = new GeneralPath();
+        addToComponentSpaceShape(gp);
+        Rectangle2D coBoundingBox = gp.getBounds();
+
+//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
+        TransformBox box = new TransformBox(coBoundingBox, comp.getIC(), this::refTransform);
+        return box;
+    }
+
+    @VisibleForTesting
+    public void refTransform(AffineTransform at) {
+        for (AnchorPoint point : anchorPoints) {
+            point.imTransform(at, true);
+        }
+    }
+
+    public void transform(AffineTransform at) {
+        for (AnchorPoint point : anchorPoints) {
+            point.imTransform(at, false);
+        }
+    }
+
+    @VisibleForTesting
+    public void storeTransformRefPoints() {
+        for (AnchorPoint point : anchorPoints) {
+            point.storeTransformRefPoint();
+        }
     }
 }

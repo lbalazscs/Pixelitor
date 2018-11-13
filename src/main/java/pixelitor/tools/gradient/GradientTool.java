@@ -263,6 +263,13 @@ public class GradientTool extends DragTool {
     }
 
     @Override
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        if (handles != null) {
+            handles.imCoordsChanged(at);
+        }
+    }
+
+    @Override
     public void resetStateToInitial() {
         handles = null;
         activePoint = null;

@@ -21,12 +21,15 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.Composition.LayerAdder;
+import pixelitor.filters.comp.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
+import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
@@ -785,11 +788,12 @@ public class CompositionTest {
     public void test_deselect() {
         assertThat(comp).doesNotHaveSelection();
 
-        TestHelper.setStandardTestSelection(comp);
+        Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+        TestHelper.addRectangleSelection(comp, selectionShape);
 
         assertThat(comp)
                 .hasSelection()
-                .selectionBoundsIs(TestHelper.getStandardTestSelectionShape());
+                .selectionBoundsIs(selectionShape);
 
         comp.deselect(true);
 
@@ -799,7 +803,7 @@ public class CompositionTest {
         History.undo("Deselect");
         assertThat(comp)
                 .hasSelection()
-                .selectionBoundsIs(TestHelper.getStandardTestSelectionShape());
+                .selectionBoundsIs(selectionShape);
 
         History.redo("Deselect");
         assertThat(comp).doesNotHaveSelection();
@@ -807,12 +811,23 @@ public class CompositionTest {
 
     @Test
     public void test_cropSelection() {
-        TestHelper.setStandardTestSelection(comp);
+        Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+        TestHelper.addRectangleSelection(comp, selectionShape);
         assertThat(comp)
                 .hasSelection()
-                .selectionBoundsIs(TestHelper.getStandardTestSelectionShape());
+                .selectionBoundsIs(selectionShape);
 
-        comp.cropSelection(new Rectangle(2, 2, 4, 4));
+        Rectangle cropRect = new Rectangle(2, 2, 4, 4);
+        comp.intersectSelection(cropRect);
+
+        assertThat(comp)
+                .hasSelection()
+                .selectionBoundsIs(new Rectangle(4, 4, 2, 2));
+
+        Tools.changeTo(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
+
+        AffineTransform tx = Crop.createTransformForCropRect(cropRect);
+        comp.imCoordsChanged(tx, false);
 
         assertThat(comp)
                 .hasSelection()

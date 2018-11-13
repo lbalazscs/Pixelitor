@@ -129,6 +129,7 @@ public class ImageComponent extends JComponent
                 "The image '%s' was reloaded from the file %s.",
                 newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
+        revalidate(); // make sure the scrollbars are OK if the new comp has a different size
         repaint();
     }
 

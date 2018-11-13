@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.tools.crop.CropTool;
@@ -31,6 +32,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.RandomUtils;
 
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 /**
  * Tool-related static utility methods
@@ -156,6 +158,10 @@ public class Tools {
 
     public static void coCoordsChanged(ImageComponent ic) {
         currentTool.coCoordsChanged(ic);
+    }
+
+    public static void imCoordsChanged(Composition comp, AffineTransform at) {
+        currentTool.imCoordsChanged(comp, at);
     }
 
     public static class EventDispatcher {

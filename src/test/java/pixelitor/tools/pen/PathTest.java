@@ -29,6 +29,7 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
@@ -80,6 +81,27 @@ public class PathTest {
     public void testConversionsForEllipse() {
         testConversionsFor(
                 new Ellipse2D.Double(20, 20, 40, 10));
+    }
+
+    @Test
+    public void testTransform() {
+        Rectangle shape = new Rectangle(10, 10, 100, 100);
+        Path path = Shapes.shapeToPath(shape, ic);
+        SubPath sp = path.getActiveSubpath();
+        assertThat(sp).firstAnchorIsAt(10, 10);
+
+        sp.storeTransformRefPoints(); // the ref point for the first anchor is 10, 10
+
+        AffineTransform at = AffineTransform.getTranslateInstance(20, 10);
+        sp.refTransform(at);
+        assertThat(sp).firstAnchorIsAt(30, 20);
+
+        at = AffineTransform.getTranslateInstance(10, 20);
+        sp.refTransform(at);
+        assertThat(sp).firstAnchorIsAt(20, 30);
+
+        sp.transform(at); // absolute transform
+        assertThat(sp).firstAnchorIsAt(30, 50);
     }
 
     private void testConversionsFor(Shape shape) {

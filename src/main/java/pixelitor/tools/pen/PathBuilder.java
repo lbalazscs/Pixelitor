@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.Build;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.DraggablePoint;
@@ -27,6 +28,7 @@ import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
@@ -405,6 +407,16 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
+    public void coCoordsChanged(View view) {
+        // do nothing
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at) {
+        // do nothing
+    }
+
+    @Override
     public String getToolMessage() {
         return BUILDER_HELP_MESSAGE;
     }
@@ -412,6 +424,11 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void start() {
         Tools.PEN.startBuilding(false);
+    }
+
+    @Override
+    public boolean requiresExistingPath() {
+        return false;
     }
 
     @Override

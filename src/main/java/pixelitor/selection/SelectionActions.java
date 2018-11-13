@@ -41,6 +41,7 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
 import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
+import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
  * Static methods for managing the actions that should be enabled
@@ -48,7 +49,7 @@ import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
  */
 public final class SelectionActions {
 
-    private static final Action crop = new AbstractAction("Crop") {
+    private static final Action crop = new AbstractAction("Crop Selection") {
         @Override
         public void actionPerformed(ActionEvent e) {
             Crop.selectionCropActiveImage();
@@ -86,7 +87,7 @@ public final class SelectionActions {
         Path path = Shapes.shapeToPath(shape, comp.getIC());
         comp.setActivePath(path);
         Tools.PEN.setPath(path);
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
         Tools.PEN.activate();
 
         if (addToHistory) {

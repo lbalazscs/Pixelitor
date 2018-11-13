@@ -29,6 +29,7 @@ import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 /**
@@ -132,6 +133,13 @@ public class GradientHandles implements ToolWidget {
                         + ImageArea.getMode());
             }
         }
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at) {
+        start.imTransformOnlyThis(at, false);
+        end.imTransformOnlyThis(at, false);
+        middle.imTransformOnlyThis(at, false);
     }
 
     @VisibleForTesting

@@ -95,12 +95,6 @@ public class RotationHandle extends DraggablePoint {
     }
 
     @Override
-    public void restoreCoordsFromImSpace(View view) {
-        // do nothing, the position of the rotation handles is
-        // calculated from the restored transform handle positions
-    }
-
-    @Override
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {

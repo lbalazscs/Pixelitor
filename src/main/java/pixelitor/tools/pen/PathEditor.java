@@ -18,6 +18,7 @@
 package pixelitor.tools.pen;
 
 import pixelitor.gui.ImageComponent;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.DraggablePoint;
@@ -25,6 +26,7 @@ import pixelitor.tools.util.PMouseEvent;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
@@ -52,6 +54,16 @@ public class PathEditor implements PenToolMode {
         if (hasPath()) {
             path.paintForEditing(g);
         }
+    }
+
+    @Override
+    public void coCoordsChanged(View view) {
+        // do nothing
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at) {
+        // do nothing
     }
 
     @Override
@@ -154,7 +166,12 @@ public class PathEditor implements PenToolMode {
 
     @Override
     public void start() {
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
+    }
+
+    @Override
+    public boolean requiresExistingPath() {
+        return true;
     }
 
     @Override

@@ -31,8 +31,7 @@ public enum WithSelection {
     YES {
         @Override
         public void setupFor(Composition comp) {
-            TestHelper.setStandardTestSelection(comp);
-            Rectangle selectionShape = TestHelper.getStandardTestSelectionShape();
+            TestHelper.addRectangleSelection(comp, selectionShape);
             assertThat(comp).selectionBoundsIs(selectionShape);
         }
     }, NO {
@@ -42,9 +41,16 @@ public enum WithSelection {
         }
     };
 
+    private static final Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+
     public abstract void setupFor(Composition comp);
 
     public boolean isYes() {
         return this == YES;
     }
+
+    public static Rectangle getSelectionShape() {
+        return selectionShape;
+    }
+
 }

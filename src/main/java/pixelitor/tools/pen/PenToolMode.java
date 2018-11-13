@@ -20,12 +20,15 @@ package pixelitor.tools.pen;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.View;
+import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.PathNode;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.PenTool.path;
 
@@ -41,13 +44,24 @@ public interface PenToolMode {
 
     void paint(Graphics2D g);
 
+    void coCoordsChanged(View view);
+
+    void imCoordsChanged(AffineTransform at);
+
     String getToolMessage();
 
     void start();
 
-    default void modeStarted(Path path) {
+    boolean requiresExistingPath();
+
+    default void modeStarted(PenToolMode prevMode, Path path) {
         if (path != null) {
             path.setPreferredPenToolMode(this);
+        }
+        if (prevMode == TRANSFORM) {
+            // in rare cases the transform boxes can
+            // leave their cursor even after a mode change
+            ImageComponents.setCursorForAll(Tools.PEN.getStartingCursor());
         }
     }
 
@@ -88,4 +102,5 @@ public interface PenToolMode {
     // enum-like variables to make the code more readable
     PathBuilder BUILD = PathBuilder.INSTANCE;
     PathEditor EDIT = PathEditor.INSTANCE;
+    PathTransformer TRANSFORM = PathTransformer.INSTANCE;
 }

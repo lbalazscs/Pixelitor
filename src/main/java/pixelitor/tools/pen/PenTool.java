@@ -48,13 +48,14 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
+import static pixelitor.tools.pen.PenToolMode.TRANSFORM;
 
 /**
  * The Pen Tool
  */
 public class PenTool extends Tool {
     private final ComboBoxModel<PenToolMode> modeModel =
-            new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT});
+            new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
     private final AbstractAction toSelectionAction;
     private final AbstractAction traceAction;
@@ -145,10 +146,11 @@ public class PenTool extends Tool {
         assert activePath == PenTool.path : "active path = " + activePath
                 + ", PenTool.path = " + PenTool.path;
 
-        if (modeModel.getSelectedItem() == BUILD) {
+        PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
+        if (selectedMode == BUILD) {
             startBuilding(true);
         } else {
-            startEditing(true);
+            startRestrictedMode(selectedMode, true);
         }
     }
 
@@ -165,15 +167,16 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
-    public void startEditing(boolean calledFromModeChooser) {
+    public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null) {
             if (Build.isTesting()) {
-                throw new IllegalStateException("start editing with null path");
+                throw new IllegalStateException("start restricted mode with null path");
             }
             EventQueue.invokeLater(() -> {
                 if (!RandomGUITest.isRunning()) {
+                    String requestedAction = mode == EDIT ? "edit" : "transform";
                     Dialogs.showInfoDialog("No Path",
-                            "<html>There is no path to edit. " +
+                            "<html>There is no path to " + requestedAction + ". " +
                                     "You can create a path<ul>" +
                                     "<li>in build mode</li>" +
                                     "<li>by converting a selection into a path</li>" +
@@ -186,11 +189,11 @@ public class PenTool extends Tool {
 
         if (!calledFromModeChooser) {
             ignoreModeChooser = true;
-            setModeChooserCombo(EDIT);
+            setModeChooserCombo(mode);
             ignoreModeChooser = false;
         }
 
-        changeMode(EDIT, path);
+        changeMode(mode, path);
         enableActionsBasedOnFinishedPath(true);
         ImageComponents.repaintActive();
 
@@ -204,13 +207,13 @@ public class PenTool extends Tool {
 //            System.out.println("PenTool::changeMode: " + red(this.mode) + " => " + green(mode));
 //            Thread.dumpStack();
             this.mode.modeEnded();
-            mode.modeStarted(path);
+            mode.modeStarted(this.mode, path);
         }
         this.mode = mode;
 
         rubberBandLabel.setEnabled(mode == BUILD);
         rubberBandCB.setEnabled(mode == BUILD);
-        
+
         Messages.showInStatusBar(mode.getToolMessage());
         assert checkPathConsistency();
     }
@@ -287,6 +290,14 @@ public class PenTool extends Tool {
     public void coCoordsChanged(ImageComponent ic) {
         if (hasPath()) {
             path.coCoordsChanged(ic);
+            mode.coCoordsChanged(ic);
+        }
+    }
+
+    @Override
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        if (hasPath()) {
+            mode.imCoordsChanged(at);
         }
     }
 
@@ -324,7 +335,7 @@ public class PenTool extends Tool {
 
         Path compPath = setPathFromComp();
 
-        mode.modeStarted(compPath);
+        mode.modeStarted(null, compPath);
 
         assert checkPathConsistency();
     }
@@ -359,7 +370,7 @@ public class PenTool extends Tool {
             compPath = comp.getActivePath();
             if (compPath == null) {
                 path = null;
-                if (mode == EDIT) {
+                if (mode.requiresExistingPath()) {
                     startBuilding(false);
                 }
             } else {
@@ -392,7 +403,7 @@ public class PenTool extends Tool {
         PenTool.path = null;
         ImageComponents.setActivePath(null);
         enableActionsBasedOnFinishedPath(false);
-        if (mode == EDIT) {
+        if (mode.requiresExistingPath()) {
             startBuilding(false);
         }
     }

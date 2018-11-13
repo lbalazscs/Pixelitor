@@ -70,10 +70,6 @@ public class TestHelper {
     public static final int TEST_WIDTH = 20;
     public static final int TEST_HEIGHT = 10;
 
-    // all coordinates and distances must be even here because of the resize test
-    private static final Rectangle standardTestSelectionShape
-            = new Rectangle(4, 4, 8, 4);
-
     private TestHelper() {
     }
 
@@ -283,16 +279,8 @@ public class TestHelper {
         comp.endMovement();
     }
 
-    private static void addRectangleSelection(Composition comp, Rectangle rect) {
+    public static void addRectangleSelection(Composition comp, Rectangle rect) {
         comp.setSelectionRef(new Selection(rect, comp.getIC()));
-    }
-
-    public static void setStandardTestSelection(Composition comp) {
-        addRectangleSelection(comp, standardTestSelectionShape);
-    }
-
-    public static Rectangle getStandardTestSelectionShape() {
-        return standardTestSelectionShape;
     }
 
     public static void setStandardTestTranslationToAllLayers(Composition comp,

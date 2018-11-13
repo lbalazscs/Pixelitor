@@ -59,11 +59,13 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
                 getEditName(), changesCanvasDimensions);
 
         Canvas canvas = comp.getCanvas();
-        comp.transformSelection(() -> createCanvasTX(canvas));
+
+        AffineTransform canvasTX = createCanvasTX(canvas);
+        comp.imCoordsChanged(canvasTX, false);
 
         comp.forEachLayer(this::processLayer);
 
-        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup);
+        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
         History.addEdit(edit);
 
         if (changesCanvasDimensions) {
@@ -74,6 +76,9 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         comp.updateAllIconImages();
 
         comp.imageChanged(REPAINT, true);
+        if (changesCanvasDimensions) {
+            comp.getIC().revalidate(); // make sure the scrollbars are OK
+        }
     }
 
     private void processLayer(Layer layer) {

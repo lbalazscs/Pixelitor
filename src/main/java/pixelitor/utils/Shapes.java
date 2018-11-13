@@ -36,6 +36,7 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
+import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -357,4 +358,30 @@ public class Shapes {
         g.setColor(origColor);
         g.setStroke(origStroke);
     }
+
+    public static Rectangle2D calcBounds(List<? extends Point2D> points) {
+        double minX = Integer.MAX_VALUE;
+        double minY = Integer.MAX_VALUE;
+        double maxX = Integer.MIN_VALUE;
+        double maxY = Integer.MIN_VALUE;
+
+        for (Point2D point : points) {
+            double x = point.getX();
+            double y = point.getY();
+            if (x < minX) {
+                minX = x;
+            }
+            if (y < minY) {
+                minY = y;
+            }
+            if (x > maxX) {
+                maxX = x;
+            }
+            if (y > maxY) {
+                maxY = y;
+            }
+        }
+        return new Rectangle2D.Double(minX, minY, maxX - minX, maxY - minY);
+    }
+
 }

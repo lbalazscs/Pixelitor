@@ -24,6 +24,7 @@ import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.PathEdit;
+import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Messages;
@@ -32,6 +33,7 @@ import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 import java.io.Serializable;
@@ -116,6 +118,10 @@ public class Path implements Serializable {
         }
     }
 
+    public void paintForTransforming(Graphics2D g) {
+        Shapes.drawVisible(g, toComponentSpaceShape());
+    }
+
     public DraggablePoint handleWasHit(double x, double y, boolean altDown) {
         for (SubPath sp : subPaths) {
             DraggablePoint hit = sp.handleWasHit(x, y, altDown);
@@ -177,10 +183,6 @@ public class Path implements Serializable {
         return activeSubPath.addMovingPointAsAnchor();
     }
 
-    public void setMoving(MovingPoint point) {
-        activeSubPath.setMoving(point);
-    }
-
     public MovingPoint getMoving() {
         return activeSubPath.getMoving();
     }
@@ -236,6 +238,12 @@ public class Path implements Serializable {
     public void coCoordsChanged(View view) {
         for (SubPath sp : subPaths) {
             sp.coCoordsChanged(view);
+        }
+    }
+
+    public void imCoordsChanged(AffineTransform at) {
+        for (SubPath subPath : subPaths) {
+            subPath.imCoordsChanged(at);
         }
     }
 
@@ -342,7 +350,7 @@ public class Path implements Serializable {
         if (newState == MOVING_TO_NEXT_ANCHOR) {
             if (!hasMovingPoint()) {
                 MovingPoint m = PenToolMode.BUILD.createMovingAtLastMouseLoc(activeSubPath);
-                setMoving(m);
+                activeSubPath.setMoving(m);
             }
         }
 
@@ -406,5 +414,13 @@ public class Path implements Serializable {
                 .map(SubPath::toDetailedString)
                 .collect(joining(",", "[", "]"));
         return s;
+    }
+
+    public List<TransformBox> createTransformBoxes() {
+        List<TransformBox> boxes = new ArrayList<>();
+        for (SubPath subPath : subPaths) {
+            boxes.add(subPath.createTransformBox());
+        }
+        return boxes;
     }
 }

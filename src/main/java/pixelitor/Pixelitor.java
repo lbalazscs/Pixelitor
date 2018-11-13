@@ -53,6 +53,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
  * The main class
@@ -229,7 +230,7 @@ public class Pixelitor {
         Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
         Tools.PEN.activate();
     }
 

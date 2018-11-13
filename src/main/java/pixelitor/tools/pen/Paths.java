@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 
+import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 
 /**
@@ -28,6 +29,8 @@ import java.io.Serializable;
 public class Paths implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    // currently there can be only one path, which is called activePath
+    // in order to be serialization-compatible with future versions
     private Path activePath;
 
     public Path getActivePath() {
@@ -41,6 +44,12 @@ public class Paths implements Serializable {
     public void setView(View view) {
         if (activePath != null) {
             activePath.setView(view);
+        }
+    }
+
+    public void imCoordsChanged(AffineTransform at) {
+        if (activePath != null) {
+            activePath.imCoordsChanged(at);
         }
     }
 }

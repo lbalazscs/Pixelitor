@@ -392,6 +392,13 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        if (transformBox != null) {
+            transformBox.imCoordsChanged(at);
+        }
+    }
+
+    @Override
     public void resetStateToInitial() {
         // true, for example, when the initial box creation is undone
         boolean hadShape = styledShape != null;

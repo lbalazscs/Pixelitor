@@ -29,6 +29,7 @@ import pixelitor.history.MultiLayerEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -79,7 +80,7 @@ public class Crop implements CompAction {
         } else {
             // if this crop was started from the crop tool, there
             // still could be a selection that needs to be cropped
-            comp.cropSelection(imCropRect);
+            comp.intersectSelection(imCropRect);
         }
 
         comp.forEachLayer(layer -> {
@@ -89,12 +90,20 @@ public class Crop implements CompAction {
             }
         });
 
-        MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup);
+        AffineTransform tx = createTransformForCropRect(imCropRect);
+        MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup, tx);
         History.addEdit(edit);
 
         int newWidth = (int) imCropRect.getWidth();
         int newHeight = (int) imCropRect.getHeight();
         canvas.changeImSize(newWidth, newHeight);
+
+        // The intersected selection, tool widgets etc. have to be moved
+        // into the coordinate system of the new, cropped image.
+        // It is important to call thins only AFTER the actual canvas size was changed
+        // so that the component coords are calculated correctly from the new image coords.
+        comp.imCoordsChanged(tx, false);
+
         comp.updateAllIconImages();
 
         ImageComponent ic = comp.getIC();
@@ -110,6 +119,16 @@ public class Crop implements CompAction {
 
         Messages.showInStatusBar("Image cropped to "
                 + newWidth + " x " + newHeight + " pixels.");
+    }
+
+    /**
+     * The returned transform describes how the image space
+     * coordinates for a surviving pixel change after a crop
+     */
+    public static AffineTransform createTransformForCropRect(Rectangle2D imCropRect) {
+        double txx = -imCropRect.getX();
+        double txy = -imCropRect.getY();
+        return AffineTransform.getTranslateInstance(txx, txy);
     }
 
     /**

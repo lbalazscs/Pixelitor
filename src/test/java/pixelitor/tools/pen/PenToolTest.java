@@ -90,7 +90,7 @@ public class PenToolTest {
     @Test
     public void testConvertEditPathToSelection() {
         createSimpleClosedPathInBuildMode();
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
                 .isActive()
                 .isConsistent()
@@ -163,7 +163,7 @@ public class PenToolTest {
         assertThat(firstAnchor).isAt(100, 100);
 
         // switch to edit mode
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
                 .hasPath()
                 .isConsistent()
@@ -196,7 +196,7 @@ public class PenToolTest {
         SubPath sp = createSimpleClosedPathInBuildMode();
 
         // switch to edit mode
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
                 .hasPath()
                 .isConsistent()
@@ -263,7 +263,7 @@ public class PenToolTest {
         History.assertNumEditsIs(0);
 
         Tools.PEN.setPath(path);
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
 
         assertThat(Tools.PEN)
                 .pathIs(path)
@@ -284,7 +284,7 @@ public class PenToolTest {
 
         // go to build mode and back to edit - should have no effect
         Tools.PEN.startBuilding(false);
-        Tools.PEN.startEditing(false);
+        Tools.PEN.startRestrictedMode(EDIT, false);
 
         undo("Delete Subpath");
         assertThat(PenTool.path).numSubPathsIs(2);

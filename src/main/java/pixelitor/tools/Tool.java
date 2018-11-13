@@ -270,13 +270,25 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * The component coordinates have changed in the given active {@link ImageComponent}.
-     * A lot of events can trigger this, such as zooming, or changing the canvasStartX
-     * by resizing.
-     * TODO image resizing cannot be handled by simply passing the new ImageComponent,
-     * and only the selections are resized (they are resized explicitly) but no other tool
+     * Called when the component space coordinates of the pixels pixel changed,
+     * but the image coordinates are still the same (zooming, view resizing).
+     *
+     * The component coordinates of the widgets must be restored
+     * from their image coordinates
      */
     public void coCoordsChanged(ImageComponent ic) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    /**
+     * Called when the image space coordinates of the pixels changed
+     * (image resizing, cropping, canvas enlargement, flipping, etc.),
+     * and this change is described by the given {@link AffineTransform}
+     *
+     * The change in image coords implies a change in component coords,
+     * therefore the component space coordinates also have to be recalculated.
+     */
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
         // empty instead of abstract for the convenience of subclasses
     }
 

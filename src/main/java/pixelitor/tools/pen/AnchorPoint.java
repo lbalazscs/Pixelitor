@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
 import java.awt.event.ActionEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
@@ -131,6 +132,27 @@ public class AnchorPoint extends DraggablePoint {
         ctrlIn.translateOnlyThis(dx, dy);
     }
 
+    @Override
+    public void storeTransformRefPoint() {
+        super.storeTransformRefPoint();
+        ctrlIn.storeTransformRefPoint();
+        ctrlOut.storeTransformRefPoint();
+    }
+
+    @Override
+    public void imTransform(AffineTransform at, boolean useRefPoint) {
+        imTransformOnlyThis(at, useRefPoint);
+        ctrlIn.imTransformOnlyThis(at, useRefPoint);
+        ctrlOut.imTransformOnlyThis(at, useRefPoint);
+    }
+
+    @Override
+    public void calcImCoords() {
+        super.calcImCoords();
+        ctrlIn.calcImCoords();
+        ctrlOut.calcImCoords();
+    }
+
     public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,
                                                    boolean altDown) {
         if (altDown) {
@@ -163,8 +185,6 @@ public class AnchorPoint extends DraggablePoint {
     @Override
     protected void afterMouseReleasedActions() {
         calcImCoords();
-        ctrlIn.calcImCoords();
-        ctrlOut.calcImCoords();
     }
 
     public AnchorPointType getType() {

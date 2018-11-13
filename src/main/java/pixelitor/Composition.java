@@ -38,6 +38,7 @@ import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
+import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
@@ -65,7 +66,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
@@ -872,12 +872,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public void transformSelection(Supplier<AffineTransform> at) {
-        if (selection != null) {
-            selection.transform(at.get());
-        }
-    }
-
     public Selection getSelection() {
         return selection;
     }
@@ -985,6 +979,22 @@ public class Composition implements Serializable {
         setSelectionRef(new Selection(shape, ic));
     }
 
+    public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
+        // The selection is explicitly reset to a backup shape
+        // when something is undone/redone
+        if (selection != null && !isUndoRedo) {
+            selection.transform(at);
+        }
+        // The paths and the tool widgets are transformed even for undo redo.
+        // The advantage is simpler code, the disadvantage is that
+        // rounding errors could accumulate if the same operation is
+        // undone/redone many times
+        if (paths != null) {
+            paths.imCoordsChanged(at);
+        }
+        Tools.imCoordsChanged(this, at);
+    }
+
     /**
      * Returns the composite image, which has the same dimensions as the canvas.
      */
@@ -1071,9 +1081,13 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Applies the cropping to the selection
+     * Intersects the selection with the given (crop) rectangle.
+     * Note that the selection is not translated here
+     * into the coordinate system of the new, cropped image:
+     * this must be done with a separate call to imCoordsChanged
+     * in order to be consistent with other operations
      */
-    public void cropSelection(Rectangle2D cropRect) {
+    public void intersectSelection(Rectangle2D cropRect) {
         if (selection != null) {
             Shape currentShape = selection.getShape();
             Shape intersection = SelectionInteraction.INTERSECT.combine(currentShape, cropRect);
@@ -1081,12 +1095,7 @@ public class Composition implements Serializable {
                 selection.die();
                 setSelectionRef(null);
             } else {
-                // the intersection has to be translated
-                // into the coordinate system of the new, cropped image
-                double txx = -cropRect.getX();
-                double txy = -cropRect.getY();
-                AffineTransform tx = AffineTransform.getTranslateInstance(txx, txy);
-                selection.setShape(tx.createTransformedShape(intersection));
+                selection.setShape(intersection);
             }
         }
     }

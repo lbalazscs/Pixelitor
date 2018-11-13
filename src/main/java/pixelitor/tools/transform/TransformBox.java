@@ -32,7 +32,6 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Dimension2D;
@@ -91,9 +90,9 @@ public class TransformBox implements ToolWidget {
     // the box shape in component coordinates
     private GeneralPath boxShape;
 
-    private boolean globalDrag = false;
-    private double globalDragStartX;
-    private double globalDragStartY;
+    private boolean wholeBoxDrag = false;
+    private double wholeBoxDragStartX;
+    private double wholeBoxDragStartY;
 
     private Memento beforeMovement;
 
@@ -162,6 +161,9 @@ public class TransformBox implements ToolWidget {
         this.transformListener = transformListener;
     }
 
+    /**
+     * Transforms the box geometry with the given component-space transformation
+     */
     public void transform(AffineTransform at) {
         at.transform(beforeMovement.nw, nw);
         at.transform(beforeMovement.ne, ne);
@@ -318,20 +320,14 @@ public class TransformBox implements ToolWidget {
     public boolean processMousePressed(PMouseEvent e) {
         double x = e.getCoX();
         double y = e.getCoY();
-        DraggablePoint handle = handleWasHit(x, y);
-        if (handle != null) {
-            handle.setActive(true);
-            saveState();
-            handle.mousePressed(x, y);
-            view.repaint();
+        DraggablePoint hit = handleWasHit(x, y);
+        if (hit != null) {
+            handleHitWhenPressed(hit, x, y);
             return true;
         } else {
             activePoint = null;
-            if (boxShape.contains(x, y)) {
-                globalDrag = true;
-                globalDragStartX = x;
-                globalDragStartY = y;
-                saveState();
+            if (contains(x, y)) {
+                boxAreaHitWhenPressed(x, y);
                 return true;
             }
         }
@@ -339,13 +335,27 @@ public class TransformBox implements ToolWidget {
         return false;
     }
 
+    public void handleHitWhenPressed(DraggablePoint handle, double x, double y) {
+        handle.setActive(true);
+        saveState();
+        handle.mousePressed(x, y);
+        view.repaint();
+    }
+
+    public void boxAreaHitWhenPressed(double x, double y) {
+        wholeBoxDrag = true;
+        wholeBoxDragStartX = x;
+        wholeBoxDragStartY = y;
+        saveState();
+    }
+
     public boolean processMouseDragged(PMouseEvent e) {
         if (activePoint != null) {
             activePoint.mouseDragged(e.getCoX(), e.getCoY());
             e.imageChanged(REPAINT);
             return true;
-        } else if (globalDrag) {
-            dragAll(e);
+        } else if (wholeBoxDrag) {
+            dragBox(e);
             return true;
         }
         return false;
@@ -365,9 +375,9 @@ public class TransformBox implements ToolWidget {
             updateDirections(); // necessary only if dragged through the opposite corner
             addMovementToHistory(e);
             return true;
-        } else if (globalDrag) {
-            dragAll(e);
-            globalDrag = false;
+        } else if (wholeBoxDrag) {
+            dragBox(e);
+            wholeBoxDrag = false;
             addMovementToHistory(e);
             return true;
         }
@@ -375,6 +385,9 @@ public class TransformBox implements ToolWidget {
         return false;
     }
 
+    /**
+     * Used when there can be only one transform box
+     */
     public void mouseMoved(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
@@ -389,12 +402,32 @@ public class TransformBox implements ToolWidget {
                 view.repaint();
             }
 
-            if (boxShape.contains(e.getPoint())) {
+            if (contains(x, y)) {
                 view.setCursor(MOVE);
             } else {
                 view.setCursor(DEFAULT);
             }
         }
+    }
+
+    /**
+     * Used when there can be more than one transform boxes
+     */
+    public boolean processMouseMoved(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        DraggablePoint hit = handleWasHit(x, y);
+        if (hit != null) {
+            hit.setActive(true);
+            view.repaint();
+            view.setCursor(hit.getCursor());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean contains(double x, double y) {
+        return boxShape.contains(x, y);
     }
 
     private void addMovementToHistory(PMouseEvent e) {
@@ -416,12 +449,12 @@ public class TransformBox implements ToolWidget {
         }
     }
 
-    private void dragAll(PMouseEvent e) {
+    private void dragBox(PMouseEvent e) {
         double x = e.getCoX();
         double y = e.getCoY();
 
-        double dx = x - globalDragStartX;
-        double dy = y - globalDragStartY;
+        double dx = x - wholeBoxDragStartX;
+        double dy = y - wholeBoxDragStartY;
 
         nw.setLocation(
                 beforeMovement.nw.getX() + dx,
@@ -450,8 +483,28 @@ public class TransformBox implements ToolWidget {
         for (CornerHandle corner : corners) {
             corner.restoreCoordsFromImSpace(view);
         }
+        updateEdgePositions();
         updateRotLocation();
         updateBoxShape();
+    }
+
+    @Override
+    public void imCoordsChanged(AffineTransform at) {
+        // rotate the corners
+        for (CornerHandle corner : corners) {
+            corner.imTransformOnlyThis(at, false);
+        }
+
+        // rotate the rotation handle
+        rot.calcImCoords(); // might not be up to date
+        rot.imTransformOnlyThis(at, false);
+        recalcAngle();
+
+        updateEdgePositions();
+        updateRotatedDimensions();
+        updateBoxShape();
+        applyTransformation();
+        updateDirections();
     }
 
     public void setAngle(double angle) {
@@ -530,29 +583,6 @@ public class TransformBox implements ToolWidget {
         return rot;
     }
 
-    // used for debugging
-    public Rectangle getImBounds() {
-        int minX = Integer.MAX_VALUE;
-        int minY = Integer.MAX_VALUE;
-        int maxX = Integer.MIN_VALUE;
-        int maxY = Integer.MIN_VALUE;
-        for (CornerHandle corner : corners) {
-            if (corner.imX < minX) {
-                minX = (int) corner.imX;
-            }
-            if (corner.imY < minY) {
-                minY = (int) corner.imY;
-            }
-            if (corner.imX > maxX) {
-                maxX = (int) corner.imX;
-            }
-            if (corner.imY > maxY) {
-                maxY = (int) corner.imY;
-            }
-        }
-        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
-    }
-
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("TransformBox", this);
 
@@ -567,7 +597,16 @@ public class TransformBox implements ToolWidget {
         node.addInt("angle", getAngleDegrees());
         node.addDouble("scale X", calcScaleX());
         node.addDouble("scale Y", calcScaleY());
-        node.addString("transform", calcImTransform().toString());
+
+        AffineTransform at = calcImTransform();
+        DebugNode transformNode = new DebugNode("transform", at);
+        transformNode.addDouble("scaleX (m00)", at.getScaleX());
+        transformNode.addDouble("scaleY (m11)", at.getScaleY());
+        transformNode.addDouble("shearX (m01)", at.getShearX());
+        transformNode.addDouble("shearY (m10)", at.getShearY());
+        transformNode.addDouble("translateX (m02)", at.getTranslateX());
+        transformNode.addDouble("translateY (m12)", at.getTranslateY());
+        node.add(transformNode);
 
         return node;
     }

@@ -25,12 +25,14 @@ import pixelitor.gui.ImageComponent;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
@@ -325,6 +327,68 @@ public class TransformBoxTest {
         assertThat(sw).cursorNameIs("Southeast Resize Cursor");
         assertThat(ne).cursorNameIs("Northwest Resize Cursor");
         assertThat(se).cursorNameIs("Southwest Resize Cursor");
+    }
+
+    @Test
+    public void testImageSpaceRotation() {
+        TransformBox box = new TransformBox(originalRect,
+                ic, at -> {});
+        CornerHandle nw = box.getNW();
+        CornerHandle sw = box.getSW();
+        CornerHandle ne = box.getNE();
+        CornerHandle se = box.getSE();
+        RotationHandle rot = box.getRot();
+
+        // check the handles original state
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100);
+        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
+        assertThat(ne).isAt(400, 100).isAtIm(400, 100);
+        assertThat(se).isAt(400, 200).isAtIm(400, 200);
+        int rotOrigY = 100 - TransformBox.ROT_HANDLE_DISTANCE;
+        assertThat(rot).isAt(300, rotOrigY).isAtIm(300, rotOrigY);
+        assertThat(box).angleDegreesIs(0);
+
+        // rotate around NW 90 degrees
+        AffineTransform at = AffineTransform.getQuadrantRotateInstance(1, 200, 100);
+        box.imCoordsChanged(at);
+
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
+        assertThat(sw).isAt(100, 100).isAtIm(100, 100);
+        assertThat(ne).isAt(200, 300).isAtIm(200, 300);
+        assertThat(se).isAt(100, 300).isAtIm(100, 300);
+        assertThat(rot)
+                .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 200)
+                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 200);
+        assertThat(box).angleDegreesIs(270);
+
+        // drag SE downwards
+        press(box, 100, 300);
+        drag(box, 100, 350);
+        release(box, 100, 400);
+
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
+        assertThat(sw).isAt(100, 100).isAtIm(100, 100); // no change
+        assertThat(ne).isAt(200, 400).isAtIm(200, 400);
+        assertThat(se).isAt(100, 400).isAtIm(100, 400);
+        assertThat(rot)
+                .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 250)
+                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 200);
+        assertThat(box).angleDegreesIs(270); // no change
+
+        // rotate back
+        try {
+            at = at.createInverse();
+        } catch (NoninvertibleTransformException e) {
+            fail();
+        }
+        box.imCoordsChanged(at);
+
+        assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
+        assertThat(sw).isAt(200, 200).isAtIm(200, 200);
+        assertThat(ne).isAt(500, 100).isAtIm(500, 100);
+        assertThat(se).isAt(500, 200).isAtIm(500, 200);
+        assertThat(rot).isAt(350, rotOrigY).isAtIm(350, rotOrigY);
+        assertThat(box).angleDegreesIs(0);
     }
 
     @Test
