@@ -24,7 +24,9 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 /**
  * A layer with a content (text or image layer) that
@@ -70,20 +72,20 @@ public abstract class ContentLayer extends Layer {
      * Returns the layer bounding box relative to the canvas
      * It must return rect trimmed from transparent pixels
      */
-    abstract public Rectangle getEffectiveBoundingBox();
+    public abstract Rectangle getEffectiveBoundingBox();
 
     /**
      * Returns the bounding box relative to the canvas used for snapping
      * It must return rect that can help user position the layer
      * It don't have to be the same as effective bounding box
      */
-    abstract public Rectangle getSnappingBoundingBox();
+    public abstract Rectangle getSnappingBoundingBox();
 
     /**
      * Returns pixel (sRGB) at point or zero if point is out of layer
      * Zero means black transparent pixel (omitted from hit detection)
      */
-    abstract public int getMouseHitPixelAtPoint(Point p);
+    public abstract int getMouseHitPixelAtPoint(Point p);
 
     @Override
     public void startMovement() {
@@ -131,6 +133,19 @@ public abstract class ContentLayer extends Layer {
     public void setTranslation(int x, int y) {
         this.translationX = x;
         this.translationY = y;
+    }
+
+    @Override
+    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
+        if (!deleteCroppedPixels) {
+            // relative to the canvas
+            int cropX = (int) cropRect.getX();
+            int cropY = (int) cropRect.getY();
+
+            setTranslation(
+                    translationX - cropX,
+                    translationY - cropY);
+        }
     }
 
     public abstract void flip(Flip.Direction direction);

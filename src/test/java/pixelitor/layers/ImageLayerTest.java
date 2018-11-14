@@ -353,6 +353,124 @@ public class ImageLayerTest {
     }
 
     @Test
+    public void test_crop_deletePixels_noGrowing() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
+        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        Rectangle cropRect = new Rectangle(3, 3, 5, 5);
+
+        // when
+        layer.crop(cropRect, true, false);
+
+        // then
+        // intersect because growing is disabled
+        Rectangle expectedNewCanvas = cropRect.intersection(origBounds);
+        checkLayerAfterCrop(0, 0,
+                5, 5, expectedNewCanvas);
+    }
+
+    @Test
+    public void test_crop_deletePixels_withGrowing() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
+        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        Rectangle cropRect = new Rectangle(3, 3, 50, 50);
+
+        // when
+        layer.crop(cropRect, true, true);
+
+        // then
+        checkLayerAfterCrop(0, 0,
+                50, 50, cropRect);
+    }
+
+    @Test
+    public void test_crop_keepPixels_noGrowing() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origImBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
+        assertThat(layer).imageBoundsIsEqualTo(origImBounds);
+        Rectangle cropRect = new Rectangle(3, 4, 50, 50);
+
+        // when
+        layer.crop(cropRect, false, false);
+
+        // then
+        // intersect because growing is disabled
+        Rectangle expectedNewCanvas = cropRect.intersection(origImBounds);
+        checkLayerAfterCrop(tx - 3, ty - 4,
+                20 - tx, 10 - ty, expectedNewCanvas);
+    }
+
+    @Test
+    public void test_crop_keepPixels_withGrowingRightDown() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
+        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        Rectangle cropRect = new Rectangle(3, 4, 50, 50);
+
+        // when
+        layer.crop(cropRect, false, true);
+
+        // then
+        checkLayerAfterCrop(tx - 3, ty - 4,
+                53 - tx, 54 - ty, cropRect);
+    }
+
+    @Test
+    public void test_crop_keepPixels_withGrowingLeft() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
+        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        Rectangle cropRect = new Rectangle(-10, 3, 20, 3);
+
+        // when
+        layer.crop(cropRect, false, true);
+
+        // then
+        checkLayerAfterCrop(0, -3 + ty,
+                30, 10 - ty, cropRect);
+    }
+
+    @Test
+    public void test_crop_keepPixels_withGrowingDown() {
+        // given
+        int tx = layer.getTX();
+        int ty = layer.getTY();
+        Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - ty);
+        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        Rectangle cropRect = new Rectangle(8, 5, 4, 10);
+
+        // when
+        layer.crop(cropRect, false, true);
+
+        // then
+        checkLayerAfterCrop(-8 + tx, -5 + ty,
+                20 - tx, 15 - ty, cropRect);
+    }
+
+    private void checkLayerAfterCrop(int expectedTx, int expectedTy,
+                                     int expectedImWidth, int expectedImHeight,
+                                     Rectangle expectedNewCanvas) {
+        assertThat(layer).imageBoundsIsEqualTo(
+                new Rectangle(expectedTx, expectedTy,
+                        expectedImWidth, expectedImHeight));
+        iconUpdates.check(0, 0);
+
+        comp.getCanvas().changeImSize((int) expectedNewCanvas.getWidth(), (int) expectedNewCanvas.getHeight());
+        ConsistencyChecks.imageCoversCanvas(layer);
+    }
+
+    @Test
     public void test_cropToCanvasSize() {
         layer.cropToCanvasSize();
 

@@ -69,7 +69,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect) {
+    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
         // do nothing
     }
 

@@ -442,7 +442,9 @@ public abstract class Layer implements Serializable {
      * The given crop rectangle is given in image space,
      * relative to the canvas
      */
-    public abstract void crop(Rectangle2D cropRect);
+    public abstract void crop(Rectangle2D cropRect,
+                              boolean deleteCroppedPixels,
+                              boolean allowGrowing);
 
     public LayerMask getMask() {
         return mask;

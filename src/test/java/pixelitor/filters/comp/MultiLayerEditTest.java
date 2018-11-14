@@ -441,7 +441,7 @@ public class MultiLayerEditTest {
     public void testCrop() {
         checkOriginalState();
 
-        new Crop(new Rectangle(3, 3, 6, 3), false, false).process(comp);
+        new Crop(new Rectangle(3, 3, 6, 3), false, false, true).process(comp);
         checkAfterCropState();
 
         // test undo with one layer

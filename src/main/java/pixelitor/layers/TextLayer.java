@@ -320,7 +320,7 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect) {
+    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
         // the text will not be cropped, but the translations have to be adjusted
 
         // as the cropping is the exact opposite of "enlarge canvas",

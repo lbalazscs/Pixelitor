@@ -118,6 +118,8 @@ public class TestHelper {
         ImageComponent ic = createMockICWithoutComp();
         when(ic.getComp()).thenReturn(comp);
         when(ic.getCanvas()).thenReturn(canvas);
+        canvas.setIC(ic);
+
         when(comp.getIC()).thenReturn(ic);
 
         when(comp.getSelection()).thenReturn(null);
@@ -243,7 +245,8 @@ public class TestHelper {
         when(ic.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
         when(ic.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(ic.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
-
+        when(ic.getViewScale()).thenReturn(1.0);
+        
         Point fakeLocationOnScreen = new Point(0, 0);
         when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
 

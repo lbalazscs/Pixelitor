@@ -38,16 +38,21 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
  * A cropping action on all layers of a composition
  */
 public class Crop implements CompAction {
-    // the crop rectangle in image space
+    // the crop rectangle in image space (relative to the canvas)
     private Rectangle2D imCropRect;
 
     private final boolean selectionCrop;
     private final boolean allowGrowing;
+    private final boolean deleteCroppedPixels;
 
-    public Crop(Rectangle2D imCropRect, boolean selectionCrop, boolean allowGrowing) {
+    public Crop(Rectangle2D imCropRect,
+                boolean selectionCrop,
+                boolean allowGrowing,
+                boolean deleteCroppedPixels) {
         this.imCropRect = imCropRect;
         this.selectionCrop = selectionCrop;
         this.allowGrowing = allowGrowing;
+        this.deleteCroppedPixels = deleteCroppedPixels;
     }
 
     @Override
@@ -58,7 +63,7 @@ public class Crop implements CompAction {
         }
 
         if (imCropRect.isEmpty()) {
-            // empty selection, can't do anything useful
+            // can't do anything useful
             return;
         }
         Guides guides = comp.getGuides();
@@ -84,9 +89,9 @@ public class Crop implements CompAction {
         }
 
         comp.forEachLayer(layer -> {
-            layer.crop(imCropRect);
+            layer.crop(imCropRect, deleteCroppedPixels, allowGrowing);
             if (layer.hasMask()) {
-                layer.getMask().crop(imCropRect);
+                layer.getMask().crop(imCropRect, deleteCroppedPixels, allowGrowing);
             }
         });
 
@@ -134,11 +139,13 @@ public class Crop implements CompAction {
     /**
      * Crops the active image based on the crop tool
      */
-    public static void toolCropActiveImage(boolean allowGrowing) {
+    public static void toolCropActiveImage(boolean allowGrowing,
+                                           boolean deleteCroppedPixels) {
         try {
             ImageComponents.onActiveComp(comp -> {
                 Rectangle2D cropRect = Tools.CROP.getCropRect().getIm();
-                new Crop(cropRect, false, allowGrowing).process(comp);
+                new Crop(cropRect, false, allowGrowing, deleteCroppedPixels)
+                        .process(comp);
                 comp.repaint();
             });
         } catch (Exception ex) {
@@ -155,7 +162,8 @@ public class Crop implements CompAction {
             if (comp != null) {
                 //noinspection CodeBlock2Expr
                 comp.onSelection(sel -> {
-                    new Crop(sel.getShapeBounds(), true, true)
+                    new Crop(sel.getShapeBounds(), true,
+                            true, true)
                             .process(comp);
                 });
             }

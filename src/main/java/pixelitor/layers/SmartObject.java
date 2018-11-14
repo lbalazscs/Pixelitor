@@ -81,8 +81,11 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect) {
-
+    public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
+        if (!deleteCroppedPixels) {
+            super.crop(cropRect, deleteCroppedPixels, allowGrowing);
+            return;
+        }
     }
 
     @Override

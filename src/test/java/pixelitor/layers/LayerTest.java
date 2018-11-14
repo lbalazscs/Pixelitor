@@ -34,7 +34,6 @@ import pixelitor.layers.LayerMaskActions.EnableDisableMaskAction;
 import pixelitor.layers.LayerMaskActions.LinkUnlinkMaskAction;
 import pixelitor.testutils.WithMask;
 
-import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -242,12 +241,6 @@ public class LayerTest {
         layer.resize(25, 30);
         layer.resize(canvasWidth, canvasHeight);
 
-        iconUpdates.check(0, 0);
-    }
-
-    @Test
-    public void test_crop() {
-        layer.crop(new Rectangle(3, 3, 5, 5));
         iconUpdates.check(0, 0);
     }
 

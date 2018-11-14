@@ -79,6 +79,7 @@ public class CropTool extends DragTool {
     private JComboBox guidesSelector;
 
     private JCheckBox allowGrowingCB;
+    private JCheckBox deleteCroppedPixelsCB;
 
     private final RectGuideline rectGuideline = new RectGuideline();
 
@@ -124,11 +125,12 @@ public class CropTool extends DragTool {
         addCropSizeControls();
         settingsPanel.addSeparator();
 
-        addAllowGrowingCheckBox();
-        settingsPanel.addSeparator();
-
         addCropButton();
         addCancelButton();
+
+        settingsPanel.addSeparator();
+
+        addCropControlCheckboxes();
 
         enableCropActions(false);
     }
@@ -178,7 +180,11 @@ public class CropTool extends DragTool {
         settingsPanel.add(hSizeSpinner);
     }
 
-    private void addAllowGrowingCheckBox() {
+    private void addCropControlCheckboxes() {
+        deleteCroppedPixelsCB = new JCheckBox("Delete Cropped Pixels", true);
+        deleteCroppedPixelsCB.setToolTipText("If not checked, only the canvas gets smaller");
+        settingsPanel.add(deleteCroppedPixelsCB);
+
         allowGrowingCB = new JCheckBox("Allow Growing", false);
         allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
         settingsPanel.add(allowGrowingCB);
@@ -439,7 +445,9 @@ public class CropTool extends DragTool {
             return;
         }
 
-        Crop.toolCropActiveImage(allowGrowingCB.isSelected());
+        Crop.toolCropActiveImage(
+                allowGrowingCB.isSelected(),
+                deleteCroppedPixelsCB.isSelected());
         resetStateToInitial();
     }
 

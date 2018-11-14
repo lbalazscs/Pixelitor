@@ -546,10 +546,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         return new Rectangle(
-            translationX + trimmedBoundingBox.x,
-            translationY + trimmedBoundingBox.y,
-            trimmedBoundingBox.width,
-            trimmedBoundingBox.height
+                translationX + trimmedBoundingBox.x,
+                translationY + trimmedBoundingBox.y,
+                trimmedBoundingBox.width,
+                trimmedBoundingBox.height
         );
     }
 
@@ -561,16 +561,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public int getMouseHitPixelAtPoint(Point p) {
         BufferedImage image = getImage();
-        int x = p.x-translationX;
-        int y = p.y-translationY;
+        int x = p.x - translationX;
+        int y = p.y - translationY;
         if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
-            if ( hasMask() && getMask().isMaskEnabled()) {
+            if (hasMask() && getMask().isMaskEnabled()) {
                 int maskPixel = getMask().getMouseHitPixelAtPoint(p);
                 if (maskPixel != 0) {
                     int imagePixel = image.getRGB(x, y);
-                    float maskAlpha = (maskPixel & 0xff) / 255f;
+                    float maskAlpha = (maskPixel & 0xff) / 255.0f;
                     int imageAlpha = (imagePixel >> 24) & 0xff;
-                    int layerAlpha = (int)(imageAlpha * maskAlpha);
+                    int layerAlpha = (int) (imageAlpha * maskAlpha);
                     return imagePixel & 0x00ffffff | (layerAlpha << 24);
                 }
             }
@@ -813,19 +813,70 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void crop(Rectangle2D cropRect) {
+    public void setTranslation(int x, int y) {
+        // don't allow positive translations for for image layers
+        if (x > 0 || y > 0) {
+            throw new IllegalArgumentException("x = " + x + ", y = " + y);
+        }
+        super.setTranslation(x, y);
+    }
+
+    @Override
+    public void crop(Rectangle2D cropRect,
+                     boolean deleteCroppedPixels,
+                     boolean allowGrowing) {
+        if (!deleteCroppedPixels && !allowGrowing) {
+            // the simple case: it is guaranteed that the image will
+            // cover the new canvas, so just set the new translation
+            super.crop(cropRect, false, allowGrowing);
+            return;
+        }
+
         int cropWidth = (int) cropRect.getWidth();
         int cropHeight = (int) cropRect.getHeight();
-
-        BufferedImage img = getImage();
 
         // the cropRect is in image space, but relative to the canvas,
         // so it is translated to get the correct image coordinates
         int cropX = (int) (cropRect.getX() - getTX());
         int cropY = (int) (cropRect.getY() - getTY());
 
-        BufferedImage dest = ImageUtils.crop(img, cropX, cropY, cropWidth, cropHeight);
-        setImage(dest);
+        if (!deleteCroppedPixels) {
+            assert allowGrowing;
+
+            boolean imageCoversNewCanvas =
+                    cropX >= 0
+                            && cropY >= 0
+                            && cropX + cropWidth <= image.getWidth()
+                            && cropY + cropHeight <= image.getHeight();
+            if (imageCoversNewCanvas) {
+                // no need to change the image, just set the translation
+                super.crop(cropRect, false, allowGrowing);
+            } else {
+                // the image still has to be enlarged, but the translation will not be zero
+                int westEnlargement = Math.max(0, -cropX);
+                int newWidth = westEnlargement + Math.max(image.getWidth(), cropX + cropWidth);
+                int northEnlargement = Math.max(0, -cropY);
+                int newHeight = northEnlargement + Math.max(image.getHeight(), cropY + cropHeight);
+
+                BufferedImage newImage = ImageUtils
+                        .crop(image, -westEnlargement, -northEnlargement, newWidth, newHeight);
+                setImage(newImage);
+                setTranslation(
+                        Math.min(-cropX, 0),
+                        Math.min(-cropY, 0)
+                );
+            }
+            return;
+        }
+
+        // if we get here, we know that the pixels have to be deleted,
+        // that is, the new image dimensions must be cropWidth, cropHeight
+        // and the translation must be 0, 0
+        assert deleteCroppedPixels;
+
+        // this method call can also grow the image
+        BufferedImage newImage = ImageUtils.crop(image, cropX, cropY, cropWidth, cropHeight);
+        setImage(newImage);
         setTranslation(0, 0);
     }
 
