@@ -207,7 +207,10 @@ public class SplashImageCreator {
 
         textFilter.setSettings(settings);
         textFilter.startOn(layer, FILTER_WITHOUT_DIALOG);
-        layer.setTranslation(0, translationY);
+
+        layer.startMovement();
+        layer.moveWhileDragging(0, translationY);
+        layer.endMovement();
 
         layer.enlargeImage(layer.getComp().getCanvasImBounds());
 
