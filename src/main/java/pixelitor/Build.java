@@ -17,6 +17,8 @@
 
 package pixelitor;
 
+import org.jdesktop.swingx.plaf.basic.BasicHyperlinkUI;
+import org.jdesktop.swingx.plaf.macosx.MacOSXErrorPaneUI;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 
@@ -38,6 +40,17 @@ public enum Build {
     public static Build CURRENT = FINAL;
 
     public static final String VERSION_NUMBER = "4.2.1";
+
+    // these references are here only in order to make sure that
+    // their dynamically loaded classes are included into the final jar
+    // after a  "minimizeJar" Maven Build. This cannot be achieved with
+    // include filters in pom.xml because the maven-shade-plugin limitation
+    // "specifying an include filter for classes in an artifact implicitly
+    // excludes all non-specified classes in that artifact"
+    @SuppressWarnings("unused")
+    public MacOSXErrorPaneUI keepRef1; // used by JXErrorPane for exception reporting
+    @SuppressWarnings("unused")
+    public BasicHyperlinkUI keepRef2; // used by the metadata JXTreeTable
 
     // Lazy because it should be calculated after the CURRENT is set.
     private static final Lazy<String> fixTitle = Lazy.of(Build::calcFixTitle);

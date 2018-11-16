@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractLayoutPainter.java 3100 2008-10-14 22:33:10Z rah003 $
+ * $Id: AbstractLayoutPainter.java 4079 2011-11-15 16:05:13Z kschaefe $
  *
  * Copyright 2006 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -27,10 +27,10 @@ import java.awt.Rectangle;
  * An abstract base class for any painter which can be positioned. This means
  * the painter has some intrinsic size to what it is drawing and
  * can be stretched or aligned both horizontally and vertically.
- * <p/>
- * <p/>
+ *
+ *
  * The AbstractLayoutPainter class provides the following configuraable properties:
- * <p/>
+ *
  * <ul>
  * <li>horizonalAlignment - the horizonal alignment (left, center, and right)</li>
  * <li>verticalAlignment - the verticalAlignment alignment (top, center, and bottom)</li>
@@ -38,26 +38,26 @@ import java.awt.Rectangle;
  * <li>fillVertical - indicates if the painter should stretch to fill the available space vertically</li>
  * <li>insets - whitespace on the top, bottom, left, and right.
  * </ul>
- * <p/>
+ *
  * By combining these five properties any AbstractLayoutPainter subclass can position it's content
  * within the paintable area.  For example, an ImagePainter has an intrinsic size based on the image
  * it is painting. If you wanted to paint the image in the lower right hand corner of the paintable
  * area, but inset by 5 pixels, you could do the following:
- * <p/>
+ *
  * <pre><code>
  *     ImagePainter p = new ImagePainter(null);
  *     p.setVerticalAlignment(AbstractLayoutPainter.VerticalAlignment.BOTTOM);
  *     p.setHorizontalAlignment(AbstractLayoutPainter.HorizontalAlignment.RIGHT);
  *     p.setInsets(new Insets(0,0,5,5));
  * </code></pre>
- * <p/>
- * <p/>
+ *
+ *
  * For something which is resizable, like a RectanglePainter, you can use the fill properties
  * to make it resize along with the paintable area. For example, to make a rectangle with 20 px
  * rounded corners, and which resizes with the paintable area but is inset
  * by 10 pixels on all sides, you could do
  * the following:
- * <p/>
+ *
  * <pre><code>
  *     RectanglePainter p = new RectanglePainter();
  *     p.setRoundHeight(20);
@@ -67,8 +67,10 @@ import java.awt.Rectangle;
  *     p.setFillVertical(true);
  * </code></pre>
  *
+ *
  * @author joshua@marinacci.org
  */
+@SuppressWarnings("nls")
 public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
 
     /**
@@ -90,7 +92,7 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
     /**
      * An enum which controls horizontalAlignment alignment
      */
-    public static enum HorizontalAlignment {
+    public enum HorizontalAlignment {
         CENTER {
             @Override
             public String toString() {
@@ -113,7 +115,7 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
     /**
      * An enum which controls verticalAlignment alignment
      */
-    public static enum VerticalAlignment {
+    public enum VerticalAlignment {
         CENTER {
             @Override
             public String toString() {
@@ -132,7 +134,6 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         }
     }
 
-
     /**
      * Gets the current horizontalAlignment alignment.
      *
@@ -142,16 +143,13 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         return horizontalAlignment;
     }
 
-
     /**
      * Gets the current whitespace insets.
-     *
      * @return the current insets
      */
     public Insets getInsets() {
         return insets;
     }
-
 
     /**
      * gets the current verticalAlignment alignment
@@ -162,7 +160,6 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         return verticalAlignment;
     }
 
-
     /**
      * indicates if the painter content is stretched horizontally
      *
@@ -171,7 +168,6 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
     public boolean isFillHorizontal() {
         return fillHorizontal;
     }
-
 
     /**
      * indicates if the painter content is stretched vertically
@@ -182,7 +178,6 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         return fillVertical;
     }
 
-
     /**
      * Sets a new horizontalAlignment alignment. Used to position the content at the left, right, or center.
      *
@@ -192,36 +187,32 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         HorizontalAlignment old = this.getHorizontalAlignment();
         this.horizontalAlignment = horizontal;
         setDirty(true);
-        firePropertyChange("horizontal", old, this.horizontalAlignment);
+        firePropertyChange("horizontalAlignment", old, getHorizontalAlignment());
     }
-
 
     /**
      * Sets if the content should be stretched horizontally to fill all available horizontalAlignment
      * space (minus the left and right insets).
      *
-     * @param fillHorizontal new horizonal stretch value
+     * @param fillHorizontal new horizontal stretch value
      */
     public void setFillHorizontal(boolean fillHorizontal) {
         boolean old = this.isFillHorizontal();
         this.fillHorizontal = fillHorizontal;
         setDirty(true);
-        firePropertyChange("horizontalStretch", old, this.fillHorizontal);
+        firePropertyChange("fillHorizontal", old, isFillHorizontal());
     }
-
 
     /**
      * Sets the current whitespace insets.
-     *
      * @param insets new insets
      */
     public void setInsets(Insets insets) {
         Insets old = this.getInsets();
         this.insets = insets;
         setDirty(true);
-        firePropertyChange("insets", old, this.insets);
+        firePropertyChange("insets", old, getInsets());
     }
-
 
     /**
      * Sets a new verticalAlignment alignment. Used to position the content at the top, bottom, or center.
@@ -232,9 +223,8 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         VerticalAlignment old = this.getVerticalAlignment();
         this.verticalAlignment = vertical;
         setDirty(true);
-        firePropertyChange("vertical", old, this.verticalAlignment);
+        firePropertyChange("verticalAlignment", old, getVerticalAlignment());
     }
-
 
     /**
      * Sets if the content should be stretched vertically to fill all available verticalAlignment
@@ -246,7 +236,7 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
         boolean old = this.isFillVertical();
         this.fillVertical = verticalStretch;
         setDirty(true);
-        firePropertyChange("verticalStretch", old, this.fillVertical);
+        firePropertyChange("fillVertical", old, isFillVertical());
     }
 
     /**
@@ -255,10 +245,10 @@ public abstract class AbstractLayoutPainter<T> extends AbstractPainter<T> {
      * horizontalAlignment, and verticalAlignment properties. This method
      * is typically called by subclasses in their doPaint() methods.
      *
-     * @param contentWidth  The width of the content to be painted
+     * @param contentWidth The width of the content to be painted
      * @param contentHeight The height of the content to be painted
-     * @param width         the width of the area that the content will be positioned in
-     * @param height        the height of the area that the content will be positioned in
+     * @param width the width of the area that the content will be positioned in
+     * @param height the height of the area that the content will be positioned in
      * @return the rectangle for the content to be painted in
      */
     protected Rectangle calculateLayout(final int contentWidth, final int contentHeight,

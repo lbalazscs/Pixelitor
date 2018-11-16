@@ -1,5 +1,5 @@
 /*
- * $Id: AbstractPainter.java 3471 2009-08-27 13:10:39Z kleopatra $
+ * $Id: AbstractPainter.java 4082 2011-11-15 18:39:43Z kschaefe $
  *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -40,12 +40,12 @@ import java.lang.ref.SoftReference;
  * provides subclasses with the ability to cacheable painting operations, configure the
  * drawing surface with common settings (such as antialiasing and interpolation), and
  * toggle whether a subclass paints or not via the <code>visibility</code> property.</p>
- * <p/>
+ *
  * <p>Subclasses of <code>AbstractPainter</code> generally need only override the
  * {@link #doPaint(Graphics2D, Object, int, int)} method. If a subclass requires more control
- * over whether cacheing is enabled, or for configuring the graphics state, then it
+ * over whether caching is enabled, or for configuring the graphics state, then it
  * may override the appropriate protected methods to interpose its own behavior.</p>
- * <p/>
+ *
  * <p>For example, here is the doPaint method of a simple <code>Painter</code> that
  * paints an opaque rectangle:
  * <pre><code>
@@ -57,6 +57,7 @@ import java.lang.ref.SoftReference;
  *
  * @author rbair
  */
+@SuppressWarnings("nls")
 public abstract class AbstractPainter<T> extends AbstractBean implements Painter<T>, Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -102,6 +103,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     private boolean antialiasing = true;
     private Interpolation interpolation = Interpolation.NearestNeighbor;
     private boolean visible = true;
+    private boolean inPaintContext;
 
     /**
      * Creates a new instance of AbstractPainter.
@@ -111,7 +113,6 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
 
     /**
      * Creates a new instance of AbstractPainter.
-     *
      * @param cacheable indicates if this painter should be cacheable
      */
     public AbstractPainter(boolean cacheable) {
@@ -120,9 +121,8 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
 
     /**
      * A defensive copy of the Effects to apply to the results
-     * of the AbstractPainter's painting operation. The array may
-     * be empty but it will never be null.
-     *
+     *  of the AbstractPainter's painting operation. The array may
+     *  be empty but it will never be null.
      * @return the array of filters applied to this painter
      */
     public final BufferedImageOp[] getFilters() {
@@ -137,12 +137,13 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      * and then setFilters(Effect... filters) will be called with the resulting
      * array</p>
      *
+     *
      * @param effects the BufferedImageOps to wrap as filters
      */
     public void setFilters(BufferedImageOp... effects) {
         if (effects == null) effects = new BufferedImageOp[0];
         BufferedImageOp[] old = getFilters();
-        this.filters = new BufferedImageOp[effects == null ? 0 : effects.length];
+        this.filters = new BufferedImageOp[effects.length];
         System.arraycopy(effects, 0, this.filters, 0, this.filters.length);
         setDirty(true);
         firePropertyChange("filters", old, getFilters());
@@ -150,17 +151,14 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
 
     /**
      * Returns if antialiasing is turned on or not. The default value is true.
-     * This is a bound property.
-     *
+     *  This is a bound property.
      * @return the current antialiasing setting
      */
     public boolean isAntialiasing() {
         return antialiasing;
     }
-
     /**
      * Sets the antialiasing setting.  This is a bound property.
-     *
      * @param value the new antialiasing setting
      */
     public void setAntialiasing(boolean value) {
@@ -173,7 +171,6 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     /**
      * Gets the current interpolation setting. This property determines if interpolation will
      * be used when drawing scaled images. @see java.awt.RenderingHints.KEY_INTERPOLATION.
-     *
      * @return the current interpolation setting
      */
     public Interpolation getInterpolation() {
@@ -183,7 +180,6 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     /**
      * Sets a new value for the interpolation setting. This setting determines if interpolation
      * should be used when drawing scaled images. @see java.awt.RenderingHints.KEY_INTERPOLATION.
-     *
      * @param value the new interpolation setting
      */
     public void setInterpolation(Interpolation value) {
@@ -224,7 +220,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
 
     /**
      * <p>Gets whether this <code>AbstractPainter</code> can be cached as an image.
-     * If cacheing is enabled, then it is the responsibility of the developer to
+     * If caching is enabled, then it is the responsibility of the developer to
      * invalidate the painter (via {@link #clearCache}) if external state has
      * changed in such a way that the painter is invalidated and needs to be
      * repainted.</p>
@@ -241,7 +237,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      * The {@link #shouldUseCache} method actually determines whether the cacheable is used.
      * However, if false, then this is treated as an absolute value. That is, no
      * cacheable will be used.</p>
-     * <p/>
+     *
      * <p>If set to false, then #clearCache is called to free system resources.</p>
      *
      * @param cacheable
@@ -259,7 +255,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      * <p>Call this method to clear the cacheable. This may be called whether there is
      * a cacheable being used or not. If cleared, on the next call to <code>paint</code>,
      * the painting routines will be called.</p>
-     * <p/>
+     *
      * <p><strong>Subclasses</strong>If overridden in subclasses, you
      * <strong>must</strong> call super.clearCache, or physical
      * resources (such as an Image) may leak.</p>
@@ -299,7 +295,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      * being repainted. This is a bound property.
      *
      * @return true if the painter state has changed and the painter needs to be
-     *         repainted.
+     *              repainted.
      */
     protected boolean isDirty() {
         return dirty;
@@ -320,6 +316,14 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
         }
     }
 
+    boolean isInPaintContext() {
+        return inPaintContext;
+    }
+
+    void setInPaintContext(boolean inPaintContext) {
+        this.inPaintContext = inPaintContext;
+    }
+
     /**
      * <p>Returns true if the painter should use caching. This method allows subclasses to
      * specify the heuristics regarding whether to cache or not. If a <code>Painter</code>
@@ -337,8 +341,8 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      * any drawing operations to configure the drawing surface. The default
      * implementation sets the rendering hints that have been specified for
      * this <code>AbstractPainter</code>.</p>
-     * <p/>
-     * <p>This method can be overriden by subclasses to modify the drawing
+     *
+     * <p>This method can be overridden by subclasses to modify the drawing
      * surface before any painting happens.</p>
      *
      * @param g the graphics surface to configure. This will never be null.
@@ -357,14 +361,12 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
         getInterpolation().configureGraphics(g);
     }
 
-
     /**
      * Subclasses must implement this method and perform custom painting operations
      * here.
-     *
      * @param width
      * @param height
-     * @param g      The Graphics2D object in which to paint
+     * @param g The Graphics2D object in which to paint
      * @param object
      */
     protected abstract void doPaint(Graphics2D g, T object, int width, int height);
@@ -372,6 +374,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     /**
      * @inheritDoc
      */
+    @Override
     public final void paint(Graphics2D g, T obj, int width, int height) {
         if (g == null) {
             throw new NullPointerException("The Graphics2D must be supplied");
@@ -418,8 +421,10 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
                     gfx.dispose();
                 }
 
-                for (BufferedImageOp f : getFilters()) {
-                    cache = f.filter(cache, null);
+                if (!isInPaintContext()) {
+                    for (BufferedImageOp f : getFilters()) {
+                        cache = f.filter(cache, null);
+                    }
                 }
 
                 //only save the temporary image as the cacheable if I'm caching

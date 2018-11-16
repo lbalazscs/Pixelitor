@@ -1,5 +1,5 @@
 /*
- * $Id: TextPainter.java 3471 2009-08-27 13:10:39Z kleopatra $
+ * $Id: TextPainter.java 4147 2012-02-01 17:13:24Z kschaefe $
  *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -33,15 +33,22 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
 
+import static org.jdesktop.swingx.painter.PainterUtils.getComponentFont;
+import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
+
 /**
  * A painter which draws text. If the font, text, and paint are not provided they will be
  * obtained from the object being painted if it is a Swing text component.
  *
  * @author rbair
  */
+@SuppressWarnings("nls")
 public class TextPainter extends AbstractAreaPainter<Object> {
     private String text = "";
     private Font font = null;
+
+    // for compatibility with older pixelitor versions
+    private static final long serialVersionUID = 8840747324227212590L;
 
     /**
      * Creates a new instance of TextPainter
@@ -52,7 +59,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text
-     *
      * @param text the text to paint
      */
     public TextPainter(String text) {
@@ -61,7 +67,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified font.
-     *
      * @param text the text to paint
      * @param font the font to paint the text with
      */
@@ -71,8 +76,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified paint.
-     *
-     * @param text  the text to paint
+     * @param text the text to paint
      * @param paint the paint to paint with
      */
     public TextPainter(String text, Paint paint) {
@@ -81,9 +85,8 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified font and paint.
-     *
-     * @param text  the text to paint
-     * @param font  the font to paint the text with
+     * @param text the text to paint
+     * @param font the font to paint the text with
      * @param paint the paint to paint with
      */
     public TextPainter(String text, Font font, Paint paint) {
@@ -94,7 +97,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Set the font (and font size and style) to be used when drawing the text
-     *
      * @param f the new font
      */
     public void setFont(Font f) {
@@ -106,7 +108,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * gets the font (and font size and style) to be used when drawing the text
-     *
      * @return the current font
      */
     public Font getFont() {
@@ -115,7 +116,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Sets the text to draw
-     *
      * @param text the text to draw
      */
     public void setText(String text) {
@@ -127,7 +127,6 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * gets the text currently used to draw
-     *
      * @return the text to be drawn
      */
     public String getText() {
@@ -139,25 +138,19 @@ public class TextPainter extends AbstractAreaPainter<Object> {
      */
     @Override
     protected void doPaint(Graphics2D g, Object component, int width, int height) {
-        Font font = calculateFont(component);
-        if (font != null) {
-            g.setFont(font);
+        Font f = calculateFont(component);
+        if (f != null) {
+            g.setFont(f);
         }
 
-        Paint paint = getFillPaint();
-        if (paint == null) {
-            if (component instanceof JComponent) {
-                paint = ((JComponent) component).getForeground();
-            }
-        }
-
-        String text = calculateText(component);
+        Paint paint = getForegroundPaint(getFillPaint(), component);
+        String t = calculateText(component);
 
         // get the font metrics
         FontMetrics metrics = g.getFontMetrics(g.getFont());
         //Rectangle2D rect = metrics.getStringBounds(text,g);
 
-        int tw = metrics.stringWidth(text);
+        int tw = metrics.stringWidth(t);
         int th = metrics.getHeight();
         Rectangle res = calculateLayout(tw, th, width, height);
 
@@ -171,47 +164,42 @@ public class TextPainter extends AbstractAreaPainter<Object> {
             g.setPaint(paint);
         }
 
-        g.drawString(text, 0, 0 + metrics.getAscent());
+        g.drawString(t, 0, 0 + metrics.getAscent());
         if (getAreaEffects() != null) {
             Shape shape = provideShape(g, component, width, height);
             for (AreaEffect ef : getAreaEffects()) {
                 ef.apply(g, shape, width, height);
             }
         }
-        g.translate(-res.x, -res.y);
+        g.translate(-res.x,-res.y);
     }
 
     protected String calculateText(final Object component) {
         // prep the text
-        String text = getText();
+        String t = getText();
         //make components take priority if(text == null || text.trim().equals("")) {
-        if (text != null && !text.trim().equals("")) {
-            return text;
+        if (t != null && !t.trim().equals("")) {
+            return t;
         }
         if (component instanceof JTextComponent) {
-            text = ((JTextComponent) component).getText();
+            t = ((JTextComponent) component).getText();
         }
         if (component instanceof JLabel) {
-            text = ((JLabel) component).getText();
+            t = ((JLabel) component).getText();
         }
         if (component instanceof AbstractButton) {
-            text = ((AbstractButton) component).getText();
+            t = ((AbstractButton) component).getText();
         }
-        return text;
+        return t;
     }
 
     protected Font calculateFont(final Object component) {
         // prep the various text attributes
-        Font font = getFont();
-        if (font == null) {
-            if (component instanceof JComponent) {
-                font = ((JComponent) component).getFont();
-            }
+        Font f = getComponentFont(getFont(), component);
+        if (f == null) {
+            f = new Font("Dialog", Font.PLAIN, 18);
         }
-        if (font == null) {
-            font = new Font("Dialog", Font.PLAIN, 18);
-        }
-        return font;
+        return f;
     }
 
     /**
@@ -219,11 +207,10 @@ public class TextPainter extends AbstractAreaPainter<Object> {
      */
     @Override
     protected Shape provideShape(Graphics2D g2, Object comp, int width, int height) {
-        Font font = calculateFont(comp);
-        String text = calculateText(comp);
-        assert font != null; // lbalazscs
-        FontMetrics metrics = g2.getFontMetrics(font);
-        GlyphVector vect = font.createGlyphVector(g2.getFontRenderContext(), text);
+        Font f = calculateFont(comp);
+        String t = calculateText(comp);
+        FontMetrics metrics = g2.getFontMetrics(f);
+        GlyphVector vect = f.createGlyphVector(g2.getFontRenderContext(), t);
         return vect.getOutline(0f, 0f + metrics.getAscent());
     }
 }
