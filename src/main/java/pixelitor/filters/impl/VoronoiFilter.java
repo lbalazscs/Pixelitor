@@ -110,10 +110,11 @@ public class VoronoiFilter extends PointFilter {
     @Override
     public int filterRGB(int x, int y, int rgb) {
         int closestPointIndex = 0;
-        double fromHereToClosestSoFar = metric.distanceInt(
-                xCoords[closestPointIndex], x,
-                yCoords[closestPointIndex], y);
+        double fromHereToClosestSoFar = Double.POSITIVE_INFINITY;
 
+        // naive brute-force search, but quite fast, because
+        // it doesn't calculate square roots for the distance
+        // TODO use a faster algorithm
         for (int i = 0; i < numPoints; i++) {
             double fromHereToPointI = metric.distanceInt(
                     xCoords[i], x, yCoords[i], y);
@@ -131,9 +132,7 @@ public class VoronoiFilter extends PointFilter {
      */
     private int nearestSiteDouble(double x, double y) {
         int closestPointIndex = 0;
-        double fromHereToClosestSoFar = metric.distanceDouble(
-                xCoords[closestPointIndex], x,
-                yCoords[closestPointIndex], y);
+        double fromHereToClosestSoFar = Double.POSITIVE_INFINITY;
 
         for (int i = 0; i < numPoints; i++) {
             double fromHereToPointI = metric.distanceDouble(

@@ -29,7 +29,6 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
 
 import static java.lang.String.format;
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
@@ -121,16 +120,10 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
                 BufferedImage image = renderFrame(filter, time, busyCursorParent);
 
                 // ...then write the file
-                GUIUtils.invokeAndWait(() -> {
-                    try {
-                        // TODO ideally while writing out the frame,
-                        // the rendering of the next frame should be
-                        // started on another thread
-                        animationWriter.addFrame(image);
-                    } catch (IOException e) {
-                        Messages.showException(e);
-                    }
-                });
+                // TODO ideally while writing out the frame,
+                // the rendering of the next frame should be
+                // started on another thread
+                animationWriter.addFrame(image);
             } catch (Exception e) {
                 canceled = true;
                 Messages.showException(e);

@@ -19,6 +19,7 @@ package pixelitor.tools.shapes;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.GUIUtils;
@@ -97,8 +98,8 @@ public class ShapesTool extends DragTool {
         JComboBox<ShapesTarget> targetCB = settings.createTargetCombo();
         settingsPanel.addWithLabel("Target:", targetCB, "targetCB");
 
-        settingsPanel.addWithLabel("Fill:", fillPaintCombo);
-        settingsPanel.addWithLabel("Stroke:", strokePaintCombo);
+        settingsPanel.addWithLabel("Fill:", fillPaintCombo, "fillPaintCB");
+        settingsPanel.addWithLabel("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
                 e -> initAndShowStrokeSettingsDialog());
@@ -237,7 +238,15 @@ public class ShapesTool extends DragTool {
     }
 
     private void addSelectionEdit(Composition comp, Selection selection) {
-        selection.clipToCanvasSize(comp); // the selection can be too big
+        boolean notEmpty = selection.clipToCanvasSize(comp); // the selection can be too big
+        if (!notEmpty) {
+            // if the selection is outside the canvas, then only deselect
+            comp.deselect(false);
+            return;
+        }
+        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) : "selection is outside " + settings
+                .getSelectedType();
+
         PixelitorEdit edit;
         if (backupSelectionShape != null) {
             edit = new SelectionChangeEdit("Selection Change",

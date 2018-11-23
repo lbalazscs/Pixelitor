@@ -1113,7 +1113,8 @@ public class ImageUtils {
         if (bounds.isEmpty()) { // the selection is outside the image
             // this should not happen, because the selection should be
             // always within the canvas
-            throw new IllegalStateException();
+            throw new IllegalStateException(format("tx = %d, ty = %d, bounds = %s",
+                    tx, ty, selection.getShapeBounds()));
         }
 
         return getCopyOfSubimage(src, bounds);

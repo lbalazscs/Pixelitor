@@ -102,7 +102,7 @@ public class Selection {
         marchingAntsTimer.start();
     }
 
-    public void stopMarching() {
+    private void stopMarching() {
         if (marchingAntsTimer != null) {
             marchingAntsTimer.stop();
             marchingAntsTimer = null;
@@ -160,7 +160,7 @@ public class Selection {
         dead = true;
     }
 
-    public void repaint() {
+    private void repaint() {
 //        if(shape != null && !hidden) {
 //             Rectangle selBounds = shape.getBounds();
 //             ic.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
@@ -181,7 +181,7 @@ public class Selection {
      * Restricts the selection shape to be within the canvas bounds.
      * This must be always called for new or changed selections.
      *
-     * @return true if something is still selected
+     * @return true if the selection shape is not empty
      */
     public boolean clipToCanvasSize(Composition comp) {
         assert comp == ic.getComp();
@@ -219,8 +219,8 @@ public class Selection {
         shape = type.modify(oldArea, outlineArea);
 
         Composition comp = ic.getComp();
-        boolean stillSelection = clipToCanvasSize(comp);
-        if (stillSelection) {
+        boolean notEmpty = clipToCanvasSize(comp);
+        if (notEmpty) {
             SelectionChangeEdit edit = new SelectionChangeEdit(
                     "Modify Selection", comp, backupShape);
             History.addEdit(edit);

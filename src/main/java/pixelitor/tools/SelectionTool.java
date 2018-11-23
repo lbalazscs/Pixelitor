@@ -185,6 +185,9 @@ public class SelectionTool extends DragTool {
         }
 
         altMeansSubtract = false;
+        assert !comp.hasBuiltSelection();
+        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) :
+                "selection is outside";
     }
 
     @Override
@@ -204,13 +207,17 @@ public class SelectionTool extends DragTool {
 
         super.mouseClicked(e);
 
-        deselect(e.getComp(), true);
+        Composition comp = e.getComp();
+        deselect(comp, true);
 
         altMeansSubtract = false;
 
         if (Build.isDevelopment()) {
-            ConsistencyChecks.selectionActionsEnabledCheck(e.getComp());
+            ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
+        assert !comp.hasBuiltSelection();
+        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) :
+                "selection is outside";
     }
 
     private static void deselect(Composition comp, boolean addToHistory) {

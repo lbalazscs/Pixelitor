@@ -449,7 +449,7 @@ public class SubPath implements Serializable {
      * Checks whether all the objects are wired together correctly
      */
     @SuppressWarnings("SameReturnValue")
-    public boolean checkWiring() {
+    private boolean checkWiring() {
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
@@ -755,7 +755,7 @@ public class SubPath implements Serializable {
 
         GeneralPath gp = new GeneralPath();
         addToComponentSpaceShape(gp);
-        Rectangle2D coBoundingBox = gp.getBounds();
+        Rectangle2D coBoundingBox = gp.getBounds2D();
 
 //        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
         TransformBox box = new TransformBox(coBoundingBox, comp.getIC(), this::refTransform);

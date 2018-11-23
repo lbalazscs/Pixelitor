@@ -29,15 +29,16 @@ import pixelitor.utils.JProgressBarTracker;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.CompletableFuture;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
@@ -137,15 +138,22 @@ public class OptimizedJpegSavePanel extends JPanel {
     private void updatePreview(boolean first) {
         JpegSettings settings = getSelectedSettings();
 
-        ProgressTracker pt;
-        if (first) {
-            pt = new StatusBarProgressTracker("JPEG preview", 100);
-        } else {
-            pt = new JProgressBarTracker(progressPanel);
-        }
-        ImageWithSize imageWithSize = JpegOutput.writeJPGtoPreviewImage(
-                this.image, settings, pt);
+        CompletableFuture
+            .supplyAsync(
+                () -> createPreview(settings),
+                IOThread.getExecutor())
+            .thenAcceptAsync(
+                imageWithSize -> setPreview(first, imageWithSize),
+                EventQueue::invokeLater)
+            .exceptionally(Messages::showExceptionOnEDT);
+    }
 
+    private ImageWithSize createPreview(JpegSettings settings) {
+        ProgressTracker pt = new JProgressBarTracker(progressPanel);
+        return JpegOutput.writeJPGtoPreviewImage(image, settings, pt);
+    }
+
+    private void setPreview(boolean first, ImageWithSize imageWithSize) {
         BufferedImage newPreview = imageWithSize.getImage();
         optimized.changeImage(newPreview);
 
@@ -160,7 +168,7 @@ public class OptimizedJpegSavePanel extends JPanel {
 
     private JpegSettings getSelectedSettings() {
         return new JpegSettings(qualityParam.getValueAsPercentage(),
-                progressiveCB.isSelected());
+            progressiveCB.isSelected());
     }
 
     public static void showInDialog(BufferedImage image, JFrame frame) {
@@ -168,15 +176,15 @@ public class OptimizedJpegSavePanel extends JPanel {
         OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
 
         new DialogBuilder()
-                .content(p)
-                .owner(frame)
-                .title("Save Optimized JPEG")
-                .okText("Save")
-                .okAction(() -> {
-                    JpegSettings settings = p.getSelectedSettings();
-                    OpenSave.saveJpegWithQuality(settings);
-                })
-                .show();
+            .content(p)
+            .owner(frame)
+            .title("Save Optimized JPEG")
+            .okText("Save")
+            .okAction(() -> {
+                JpegSettings settings = p.getSelectedSettings();
+                OpenSave.saveJpegWithQuality(settings);
+            })
+            .show();
     }
 }
 

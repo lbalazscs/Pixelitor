@@ -68,6 +68,7 @@ import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.ShapesTarget;
+import pixelitor.tools.shapes.TwoPointBasedPaint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -393,7 +394,9 @@ public class AssertJSwingTest {
         layer2Button.requireSelected();
 
         // delete layer 2
-        pw.button("deleteLayer").click();
+        pw.button("deleteLayer")
+                .requireEnabled()
+                .click();
         layersContainer.requireNumLayers(1);
         layer1Button.requireSelected();
 
@@ -413,8 +416,7 @@ public class AssertJSwingTest {
     }
 
     private void testDuplicateLayerWithButton() {
-        JButtonFixture duplicateLayerButton = pw.button("duplicateLayer");
-        duplicateLayerButton.click();
+        pw.button("duplicateLayer").click();
 
         findLayerButton("layer 1 copy").requireSelected();
         layersContainer
@@ -617,8 +619,7 @@ public class AssertJSwingTest {
         dialog.checkBox("boldCB").check().uncheck();
         dialog.checkBox("italicCB").check();
 
-        JButtonFixture advancedButton = findButtonByText(dialog, "Advanced...");
-        advancedButton.click();
+        findButtonByText(dialog, "Advanced...").click();
 
         DialogFixture advanced = findDialogByTitle("Advanced Text Settings");
         advanced.checkBox("underlineCB").check().uncheck();
@@ -755,7 +756,7 @@ public class AssertJSwingTest {
         mouse.dragToCanvas(400, 400);
         EDT.assertThereIsSelection();
 
-        runMenuCommand("Crop");
+        runMenuCommand("Crop Selection");
         EDT.assertThereIsNoSelection();
 
         keyboard.undo("Crop");
@@ -1076,8 +1077,7 @@ public class AssertJSwingTest {
         checkNumLayersAfterReOpening("saved.ora", 1);
 
         // test it with two layers
-        JButtonFixture duplicateLayerButton = pw.button("duplicateLayer");
-        duplicateLayerButton.click();
+        pw.button("duplicateLayer").click();
         EDT.assertNumLayersIs(2);
 
         runMenuCommand("Export OpenRaster...");
@@ -1226,7 +1226,7 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Batch Filter");
         dialog.comboBox("filtersCB").selectItem("Angular Waves");
         dialog.button("ok").click(); // next
-//        Utils.sleep(3, SECONDS);
+
         findButtonByText(dialog, "Randomize Settings").click();
         dialog.button("ok").click(); // start processing
         dialog.requireNotVisible();
@@ -1741,7 +1741,9 @@ public class AssertJSwingTest {
         DialogFixture dialog = findFilterDialog();
 
         for (String buttonText : extraButtonsToClick) {
-            findButtonByText(dialog, buttonText).click();
+            findButtonByText(dialog, buttonText)
+                    .requireEnabled()
+                    .click();
         }
 
         if (randomize == Randomize.YES) {
@@ -1833,6 +1835,7 @@ public class AssertJSwingTest {
         boolean tested = false;
         boolean deselectWasLast = false;
 
+        pw.comboBox("strokePaintCB").selectItem(TwoPointBasedPaint.FOREGROUND.toString());
         setupStrokeSettingsDialog();
 
         for (ShapeType shapeType : testedShapeTypes) {
@@ -1861,14 +1864,16 @@ public class AssertJSwingTest {
         if (deselectWasLast) {
             keyboard.undoRedo("Deselect");
         } else if (tested) {
-            keyboard.undoRedo("Shapes");
+            keyboard.undoRedo("Create Shape");
         }
 
         checkConsistency();
     }
 
     private void setupEffectsDialog() {
-        findButtonByText(pw, "Effects...").click();
+        findButtonByText(pw, "Effects...")
+                .requireEnabled()
+                .click();
 
         DialogFixture dialog = findDialogByTitle("Effects");
         JTabbedPaneFixture tabbedPane = dialog.tabbedPane();
@@ -1889,7 +1894,9 @@ public class AssertJSwingTest {
     }
 
     private void setupStrokeSettingsDialog() {
-        findButtonByText(pw, "Stroke Settings...").click();
+        findButtonByText(pw, "Stroke Settings...")
+                .requireEnabled()
+                .click();
         DialogFixture dialog = findDialogByTitle("Stroke Settings");
 
         dialog.slider().slideTo(20);
@@ -1982,22 +1989,32 @@ public class AssertJSwingTest {
         keyboard.undoRedo("Retract Handles");
 
         // test convert to selection
-        pw.button("toSelectionButton").requireEnabled();
-        pw.button("toSelectionButton").click();
+        pw.button("toSelectionButton")
+                .requireEnabled()
+                .click();
         EDT.assertActiveToolsIs(Tools.SELECTION);
 
         keyboard.invert();
 
-        pw.button("toPathButton").requireEnabled();
-        pw.button("toPathButton").click();
+        pw.button("toPathButton")
+                .requireEnabled()
+                .click();
         EDT.assertActiveToolsIs(Tools.PEN);
         assertThat(EDT.getPenToolPath()).isNotNull();
 
-        findButtonByText(pw, "Stroke with Current Smudge").click();
+        findButtonByText(pw, "Stroke with Current Smudge")
+                .requireEnabled()
+                .click();
         keyboard.undoRedo("Smudge");
-        findButtonByText(pw, "Stroke with Current Eraser").click();
+
+        findButtonByText(pw, "Stroke with Current Eraser")
+                .requireEnabled()
+                .click();
         keyboard.undoRedo("Eraser");
-        findButtonByText(pw, "Stroke with Current Brush").click();
+
+        findButtonByText(pw, "Stroke with Current Brush")
+                .requireEnabled()
+                .click();
         keyboard.undoRedo("Brush");
 
         checkConsistency();
@@ -2099,7 +2116,7 @@ public class AssertJSwingTest {
         enableLazyMouse(false);
         testBrushStrokes(true);
 
-        // this freezes when running with coverage??
+        // TODO this freezes when running with coverage??
         // sometimes also without coverage??
 //        enableLazyMouse(true);
 //        testBrushStrokes();
@@ -2108,7 +2125,9 @@ public class AssertJSwingTest {
     }
 
     private void enableLazyMouse(boolean b) {
-        findButtonByText(pw, "Lazy Mouse...").click();
+        findButtonByText(pw, "Lazy Mouse...")
+                .requireEnabled()
+                .click();
         DialogFixture dialog = findDialogByTitle("Lazy Mouse");
         if (b) {
             dialog.checkBox().check();
@@ -2291,7 +2310,9 @@ public class AssertJSwingTest {
         // crop using the "Crop" button in the selection tool
         EDT.assertThereIsSelection();
 
-        findButtonByText(pw, "Crop").click();
+        findButtonByText(pw, "Crop Selection")
+                .requireEnabled()
+                .click();
         assertThat(EDT.getCanvas())
                 .hasImWidth(selWidth)
                 .hasImHeight(selHeight);
@@ -2314,7 +2335,7 @@ public class AssertJSwingTest {
                 .hasImHeight(origCanvasHeight);
 
         // crop from the menu
-        runMenuCommand("Crop");
+        runMenuCommand("Crop Selection");
         EDT.assertThereIsNoSelection();
         assertThat(canvas)
                 .hasImWidth(selWidth)
@@ -2371,7 +2392,9 @@ public class AssertJSwingTest {
 
         mouse.randomAltClick(); // must be at the end, otherwise it tries to start a rectangle
 
-        findButtonByText(pw, "Crop").click();
+        findButtonByText(pw, "Crop")
+                .requireEnabled()
+                .click();
 
         keyboard.undoRedoUndo("Crop");
 
@@ -2874,7 +2897,9 @@ public class AssertJSwingTest {
     }
 
     private static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
-        findPopupMenuFixtureByText(popupMenu, text).click();
+        findPopupMenuFixtureByText(popupMenu, text)
+                .requireEnabled()
+                .click();
     }
 
     private static void processCLArguments(String[] args) {

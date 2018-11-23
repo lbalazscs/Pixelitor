@@ -31,6 +31,7 @@ import javax.imageio.ImageTypeSpecifier;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +72,8 @@ public class TrackedIO {
                                    ImageOutputStream ios,
                                    String formatName,
                                    ProgressTracker pt) throws IOException {
+        assert !EventQueue.isDispatchThread();
+
         ImageTypeSpecifier type =
                 ImageTypeSpecifier.createFromRenderedImage(img);
         Iterator<ImageWriter> writers = ImageIO.getImageWriters(type, formatName);
@@ -118,6 +121,8 @@ public class TrackedIO {
 
     public static BufferedImage readFromIIS(ImageInputStream iis,
                                             ProgressTracker pt) throws IOException {
+        assert !EventQueue.isDispatchThread();
+
         BufferedImage image;
         Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 

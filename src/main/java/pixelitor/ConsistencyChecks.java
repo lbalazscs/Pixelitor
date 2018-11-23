@@ -22,10 +22,12 @@ import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
+import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
@@ -43,6 +45,7 @@ public final class ConsistencyChecks {
         assert comp != null;
 
         selectionActionsEnabledCheck(comp);
+        assert selectionIsNotOutsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
         if (checkImageCoversCanvas) {
             assert imageCoversCanvas(comp);
@@ -121,6 +124,29 @@ public final class ConsistencyChecks {
                         + Thread.currentThread().getName());
             }
         }
+    }
+
+    public static boolean selectionIsNotOutsideCanvas(Composition comp) {
+        Selection selection = comp.getSelection();
+        if (selection == null) {
+            return true;
+        }
+        Rectangle canvasImBounds = comp.getCanvasImBounds();
+        Rectangle shapeBounds = selection.getShapeBounds();
+
+        // in principle the selection must be fully inside the canvas,
+        // but this is hard to check since
+        // canvasImBounds.contains(shapeBounds)
+        // doesn't work (the bounds are not necessarily the smallest)
+        // so check that it is not fully outside
+
+        boolean ok = !canvasImBounds.intersection(shapeBounds).isEmpty();
+        if (!ok) {
+            System.out.println("ConsistencyChecks::selectionIsNotOutsideCanvas: "
+                    + "canvasImBounds = " + canvasImBounds
+                    + ", shapeBounds = " + shapeBounds);
+        }
+        return ok;
     }
 
     @SuppressWarnings("SameReturnValue")

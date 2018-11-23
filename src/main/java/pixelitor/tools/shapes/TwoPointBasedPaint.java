@@ -42,7 +42,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * A Paint type based on two endpoints of a UserDrag.
  * Used as a fill type in the Shapes Tool.
  */
-enum TwoPointBasedPaint {
+public enum TwoPointBasedPaint {
     NONE("None") {
         @Override
         protected Paint getPaint(ImDrag imDrag) {

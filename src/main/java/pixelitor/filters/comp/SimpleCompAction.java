@@ -65,12 +65,12 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
         comp.forEachLayer(this::processLayer);
 
-        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
-        History.addEdit(edit);
-
         if (changesCanvasDimensions) {
             changeCanvas(comp);
         }
+
+        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
+        History.addEdit(edit);
 
         // Only after the shared canvas size was updated
         comp.updateAllIconImages();

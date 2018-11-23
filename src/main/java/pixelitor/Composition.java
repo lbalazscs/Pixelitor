@@ -828,6 +828,10 @@ public class Composition implements Serializable {
     }
 
     public void deselect(boolean addToHistory) {
+        if (builtSelection != null) {
+            builtSelection.die();
+            builtSelection = null;
+        }
         if (selection != null) {
             if (addToHistory) {
                 DeselectEdit edit = createDeselectEdit();

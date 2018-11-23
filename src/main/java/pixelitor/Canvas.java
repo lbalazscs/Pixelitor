@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
 /**
@@ -94,6 +95,10 @@ public class Canvas implements Serializable {
         return new Rectangle(0, 0, width, height);
     }
 
+    public Rectangle2D getImBoundsDouble() {
+        return new Rectangle2D.Double(0, 0, width, height);
+    }
+
     /**
      * Returns the width in image space
      */
@@ -146,7 +151,8 @@ public class Canvas implements Serializable {
     public Shape clipShapeToBounds(Shape shape) {
         assert shape != null;
 
-        Area compBounds = new Area(getImBounds());
+        Rectangle2D canvasBounds = getImBoundsDouble();
+        Area compBounds = new Area(canvasBounds);
         Area result = new Area(shape);
         result.intersect(compBounds);
         return result;
