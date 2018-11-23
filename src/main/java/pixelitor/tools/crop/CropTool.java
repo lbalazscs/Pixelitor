@@ -19,11 +19,13 @@ package pixelitor.tools.crop;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.DIContainer;
 import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.guidelines.RectGuideline;
@@ -81,7 +83,7 @@ public class CropTool extends DragTool {
     private JCheckBox allowGrowingCB;
     private JCheckBox deleteCroppedPixelsCB;
 
-    private final RectGuideline rectGuideline = new RectGuideline();
+    private final RectGuideline rectGuideline;
 
     public CropTool() {
         super("Crop", 'c', "crop_tool_icon.png",
@@ -95,6 +97,9 @@ public class CropTool extends DragTool {
         spaceDragStartPoint = true;
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
+
+        GuidesRenderer glRenderer = DIContainer.get(GuidesRenderer.class, DIContainer.CROP_GUIDES_RENDERER);
+        rectGuideline = new RectGuideline(glRenderer);
     }
 
     private void maskOpacityChanged() {

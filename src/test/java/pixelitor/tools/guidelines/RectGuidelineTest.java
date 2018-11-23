@@ -18,13 +18,19 @@
 package pixelitor.tools.guidelines;
 
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import pixelitor.guides.GuidesRenderer;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.geom.Arc2D;
+import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.*;
@@ -38,29 +44,33 @@ public class RectGuidelineTest {
 
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 30);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.NONE);
         rectGuideline.draw(rect, g2);
 
-        verify(g2, never()).draw(any(Line2D.class));
+        verify(glRenderer, never()).draw(g2, new ArrayList<>());
     }
-
 
     @Test
     public void draw_Type_RULE_OF_THIRDS() {
 
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 12);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.RULE_OF_THIRDS);
         rectGuideline.draw(rect, g2);
 
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(30, 0, 30, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(60, 0, 60, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 4, 90, 4)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 8, 90, 8)));
+        Line2D[] lines = new Line2D[4];
+        lines[0] = new Line2D.Double(30, 0, 30, 12);
+        lines[1] = new Line2D.Double(60, 0, 60, 12);
+        lines[2] = new Line2D.Double(0, 4, 90, 4);
+        lines[3] = new Line2D.Double(0, 8, 90, 8);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -68,8 +78,9 @@ public class RectGuidelineTest {
 
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 12);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.GOLDEN_SECTIONS);
         rectGuideline.draw(rect, g2);
 
@@ -77,10 +88,13 @@ public class RectGuidelineTest {
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
 
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(sectionWidth, 0, sectionWidth, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(90 - sectionWidth, 0, 90 - sectionWidth, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, sectionHeight, 90, sectionHeight)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 12 - sectionHeight, 90, 12 - sectionHeight)));
+        Line2D[] lines = new Line2D[4];
+        lines[0] = new Line2D.Double(sectionWidth, 0, sectionWidth, 12);
+        lines[1] = new Line2D.Double(90 - sectionWidth, 0, 90 - sectionWidth, 12);
+        lines[2] = new Line2D.Double(0, sectionHeight, 90, sectionHeight);
+        lines[3] = new Line2D.Double(0, 12 - sectionHeight, 90, 12 - sectionHeight);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -89,15 +103,19 @@ public class RectGuidelineTest {
         // rect orientation: width >= height
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 12);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.DIAGONALS);
         rectGuideline.draw(rect, g2);
 
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 12, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 12, 12, 0)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(90, 0, 90 - 12, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(90, 12, 90 - 12, 0)));
+        Line2D[] lines = new Line2D[4];
+        lines[0] = new Line2D.Double(0, 0, 12, 12);
+        lines[1] = new Line2D.Double(0, 12, 12, 0);
+        lines[2] = new Line2D.Double(90, 0, 90 - 12, 12);
+        lines[3] = new Line2D.Double(90, 12, 90 - 12, 0);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -106,34 +124,41 @@ public class RectGuidelineTest {
         // rect orientation: height > width
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 12, 90);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.DIAGONALS);
         rectGuideline.draw(rect, g2);
 
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 12, 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 12, 12, 0)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 90, 12, 90 - 12)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 90 - 12, 12, 90)));
+        Line2D[] lines = new Line2D[4];
+        lines[0] = new Line2D.Double(0, 0, 12, 12);
+        lines[1] = new Line2D.Double(0, 12, 12, 0);
+        lines[2] = new Line2D.Double(0, 90, 12, 90 - 12);
+        lines[3] = new Line2D.Double(0, 90 - 12, 12, 90);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
     public void draw_Type_TRIANGLES_top_left_to_bottom_down()
     {
-
         // orientation: 0 (diagonal line from top left to bottom down)
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.TRIANGLES);
         rectGuideline.setOrientation(0);
         rectGuideline.draw(rect, g2);
 
         Point.Double p = new Point.Double(5,5);
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 10, 10)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 10, p.x, p.y)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(10, 0, p.x, p.y)));
+        Line2D[] lines = new Line2D[3];
+        lines[0] = new Line2D.Double(0, 0, 10, 10);
+        lines[1] = new Line2D.Double(0, 10, p.x, p.y);
+        lines[2] = new Line2D.Double(10, 0, p.x, p.y);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -142,16 +167,20 @@ public class RectGuidelineTest {
         // orientation: 1 (diagonal line from bottom down to top left)
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.TRIANGLES);
         rectGuideline.setOrientation(1);
         rectGuideline.draw(rect, g2);
 
         Point.Double p = new Point.Double(5,5);
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 10, 10, 0)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, p.x, p.y)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(10, 10, p.x, p.y)));
+        Line2D[] lines = new Line2D[3];
+        lines[0] = new Line2D.Double(0, 10, 10, 0);
+        lines[1] = new Line2D.Double(0, 0, p.x, p.y);
+        lines[2] = new Line2D.Double(10, 10, p.x, p.y);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -159,16 +188,18 @@ public class RectGuidelineTest {
     {
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 90, 90);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.GRID);
         rectGuideline.draw(rect, g2);
 
         // cross at the center (gridSize: 50)
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(45, 0, 45, 90)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 45, 90, 45)));
-        // total
-        verify(g2, atMost(4)).draw(any());
+        Line2D[] lines = new Line2D[2];
+        lines[0] = new Line2D.Double(0, 45, 90, 45);
+        lines[1] = new Line2D.Double(45, 0, 45, 90);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -177,22 +208,24 @@ public class RectGuidelineTest {
         // gridSize: 50 (one cross at the center if size less than 2xSize)
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 100, 100);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.GRID);
         rectGuideline.draw(rect, g2);
 
-        // cross at the center (gridSize: 50)
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(50, 0, 50, 100)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 50, 100, 50)));
-        // sides horizontal
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 100, 0)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 100, 100, 100)));
-        // sides vertical
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 0, 0, 100)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(100, 0, 100, 100)));
-        // total
-        verify(g2, atMost(12)).draw(any());
+        Line2D[] lines = new Line2D[6];
+        // horizontal : cross at the center (gridSize: 50)
+        lines[0] = new Line2D.Double(0, 0, 100, 0);
+        lines[1] = new Line2D.Double(0, 50, 100, 50);
+        lines[2] = new Line2D.Double(0, 100, 100, 100);
+
+        // vertical : cross at the center (gridSize: 50)
+        lines[3] = new Line2D.Double(0, 0, 0, 100);
+        lines[4] = new Line2D.Double(50, 0, 50, 100);
+        lines[5] = new Line2D.Double(100, 0, 100, 100);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -200,22 +233,24 @@ public class RectGuidelineTest {
     {
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 102, 102);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.GRID);
         rectGuideline.draw(rect, g2);
 
-        // cross at the center (gridSize: 50)
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(51, 0, 51, 102)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 51, 102, 51)));
-        // sides horizontal
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 1, 102, 1)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(0, 101, 102, 101)));
-        // sides vertical
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(1, 0, 1, 102)));
-        verify(g2, times(2)).draw(refEq(new Line2D.Double(101, 0, 101, 102)));
-        // total
-        verify(g2, atMost(12)).draw(any());
+        Line2D[] lines = new Line2D[6];
+        // horizontal : cross at the center (gridSize: 50)
+        lines[0] = new Line2D.Double(0, 1, 102, 1);
+        lines[1] = new Line2D.Double(0, 51, 102, 51);
+        lines[2] = new Line2D.Double(0, 101, 102, 101);
+
+        // vertical : cross at the center (gridSize: 50)
+        lines[3] = new Line2D.Double(1, 0, 1, 102);
+        lines[4] = new Line2D.Double(51, 0, 51, 102);
+        lines[5] = new Line2D.Double(101, 0, 101, 102);
+
+        verify(glRenderer).draw(refEq(g2), argThat(new DrawMatcherLine2D(Arrays.asList(lines))));
     }
 
     @Test
@@ -224,12 +259,37 @@ public class RectGuidelineTest {
         // orientation: 0 (spiral that starts from bottom left)
         Rectangle2D rect = new Rectangle2D.Double(0, 0, 10, 10);
         Graphics2D g2 = mock(Graphics2D.class);
+        GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline();
+        rectGuideline = new RectGuideline(glRenderer);
         rectGuideline.setType(RectGuidelineType.GOLDEN_SPIRAL);
         rectGuideline.setOrientation(0);
         rectGuideline.draw(rect, g2);
 
-        verify(g2, atMost(2*11)).draw(any(Arc2D.Double.class));
+        verify(glRenderer).draw(refEq(g2), any());
+    }
+}
+
+class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
+
+    private List<Line2D> shapes;
+
+    public DrawMatcherLine2D(List<Line2D> shapes) {
+        this.shapes = shapes;
+    }
+
+    @Override
+    public boolean matches(List<Shape> shapes) {
+        for (int i=0; i < shapes.size(); i++) {
+            if (shapes.get(i) instanceof Line2D) {
+                Line2D line = (Line2D) shapes.get(i);
+                Line2D line2 = this.shapes.get(i);
+                assertEquals(line.getX1(), line2.getX1(), 1e-15);
+                assertEquals(line.getY1(), line2.getY1(), 1e-15);
+                assertEquals(line.getX2(), line2.getX2(), 1e-15);
+                assertEquals(line.getY2(), line2.getY2(), 1e-15);
+            }
+        }
+        return true;
     }
 }

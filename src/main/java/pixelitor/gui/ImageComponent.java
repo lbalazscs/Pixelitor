@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
+import pixelitor.CanvasMargins;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
@@ -320,6 +321,10 @@ public class ImageComponent extends JComponent
         layersPanel.changeLayerButtonOrder(oldIndex, newIndex);
     }
 
+    public CanvasMargins getCanvasMargins() {
+        return new CanvasMargins(canvasStartY, canvasStartX, canvasStartY, canvasStartX);
+    }
+
     @Override
     public void paint(Graphics g) {
         try {
@@ -382,6 +387,7 @@ public class ImageComponent extends JComponent
 
         // restore the original transform
         g2.setTransform(componentTransform);
+        g2.setClip(originalClip);
         // now we are back in "component space"
 
         comp.drawGuides(g2);
