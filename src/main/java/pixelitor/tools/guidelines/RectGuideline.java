@@ -17,16 +17,14 @@
 
 package pixelitor.tools.guidelines;
 
-import pixelitor.guides.Guides;
+import pixelitor.guides.GuidesRenderer;
 
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
+import java.util.Arrays;
 
 /**
  * Crop guidelines renderer
@@ -36,7 +34,12 @@ public class RectGuideline {
     private Graphics2D g2;
     private RectGuidelineType type = RectGuidelineType.NONE;
     private int orientation = 0;
-    private final static double GOLDEN_RATIO = 1.618;
+    private GuidesRenderer glRenderer;
+    private static final double GOLDEN_RATIO = 1.618;
+
+    public RectGuideline(GuidesRenderer glRenderer) {
+        this.glRenderer = glRenderer;
+    }
 
     public RectGuidelineType getType()
     {
@@ -86,17 +89,7 @@ public class RectGuideline {
 
     private void drawShapes(Shape[] shapes)
     {
-        g2.setStroke(Guides.INNER_STROKE);
-        g2.setColor(BLACK);
-        for (Shape shape : shapes) {
-            g2.draw(shape);
-        }
-
-        g2.setStroke(Guides.OUTER_STROKE);
-        g2.setColor(WHITE);
-        for (Shape shape : shapes) {
-            g2.draw(shape);
-        }
+        this.glRenderer.draw(g2, Arrays.asList(shapes));
     }
 
     private void drawSections(Rectangle2D rect, double phi)

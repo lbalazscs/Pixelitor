@@ -17,13 +17,18 @@
 
 package pixelitor.gui;
 
+import com.bric.swing.ColorSwatch;
+import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.guides.GuideStrokeType;
+import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.layers.LayerButtonLayout;
+import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -70,6 +75,51 @@ public class PreferencesPanel extends JPanel {
 
         gbh.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
+
+        configureGuidesSettings(gbh);
+        configureCropGuidesSettings(gbh);
+    }
+
+    private void configureGuidesSettings(GridBagHelper gbh) {
+        GuideStyle guideStyle = AppPreferences.getGuideStyle();
+
+        ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
+        JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
+        guideStroke.setSelectedItem(guideStyle.getStrokeType());
+
+        gbh.addLabelWithControl("Guide color: ", guideColorSwatch);
+        gbh.addLabelWithControl("Guide style: ", guideStroke);
+
+        new ColorPickerDialog(guideColorSwatch, e -> {
+            guideStyle.setColorA(guideColorSwatch.getForeground());
+            PixelitorWindow.getInstance().repaint();
+        });
+
+        guideStroke.addActionListener(e -> {
+            guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
+            PixelitorWindow.getInstance().repaint();
+        });
+    }
+
+    private void configureCropGuidesSettings(GridBagHelper gbh) {
+        GuideStyle guideStyle = AppPreferences.getCropGuideStyle();
+
+        ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
+        JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
+        guideStroke.setSelectedItem(guideStyle.getStrokeType());
+
+        gbh.addLabelWithControl("Cropping guide color: ", guideColorSwatch);
+        gbh.addLabelWithControl("Cropping guide style: ", guideStroke);
+
+        new ColorPickerDialog(guideColorSwatch, e -> {
+            guideStyle.setColorA(guideColorSwatch.getForeground());
+            PixelitorWindow.getInstance().repaint();
+        });
+
+        guideStroke.addActionListener(e -> {
+            guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
+            PixelitorWindow.getInstance().repaint();
+        });
     }
 
     private boolean validate(JDialog d) {

@@ -18,7 +18,9 @@
 package pixelitor.guides;
 
 import pixelitor.Canvas;
+import pixelitor.CanvasMargins;
 import pixelitor.Composition;
+import pixelitor.DIContainer;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.ImageComponent;
@@ -26,9 +28,8 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
@@ -36,20 +37,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static java.awt.BasicStroke.CAP_BUTT;
-import static java.awt.BasicStroke.JOIN_BEVEL;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
-
 /**
  * Represents a set of guides.
  * Objects of this class should be mutated only while building,
  * for any changes a new instance should be built.
  */
 public class Guides implements Serializable {
-    public static final Stroke OUTER_STROKE = new BasicStroke(1,
-            CAP_BUTT, JOIN_BEVEL, 0, new float[]{5, 2}, 0);
-    public static final Stroke INNER_STROKE = new BasicStroke(3);
 
     private final Composition comp;
     // all guides are stored as percentages so that resizing
@@ -57,7 +50,7 @@ public class Guides implements Serializable {
     private final List<Double> horizontals = new ArrayList<>();
     private final List<Double> verticals = new ArrayList<>();
 
-    private List<Line2D> lines;
+    private List<Shape> lines;
 
     private String name;
 
@@ -207,15 +200,17 @@ public class Guides implements Serializable {
     private void regenerateLines() {
         int width = comp.getCanvasImWidth();
         int height = comp.getCanvasImHeight();
+        CanvasMargins margins = comp.getIC().getCanvasMargins();
         ImageComponent ic = comp.getIC();
+
         lines = new ArrayList<>();
         for (Double h : horizontals) {
             double y = h * height;
 
             // the generated lines have to be in component space
-            double coStartX = ic.imageXToComponentSpace(0);
+            double coStartX = ic.imageXToComponentSpace(0) - margins.getLeft();
             double coStartY = ic.imageYToComponentSpace(y);
-            double coEndX = ic.imageXToComponentSpace(width);
+            double coEndX = ic.imageXToComponentSpace(width) + margins.getRight();
             double coEndY = coStartY;
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
@@ -224,26 +219,17 @@ public class Guides implements Serializable {
             double x = v * width;
 
             double coStartX = ic.imageXToComponentSpace(x);
-            double coStartY = ic.imageYToComponentSpace(0);
+            double coStartY = ic.imageYToComponentSpace(0) - margins.getTop();
             double coEndX = coStartX;
-            double coEndY = ic.imageYToComponentSpace(height);
+            double coEndY = ic.imageYToComponentSpace(height) + margins.getBottom();
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
         }
     }
 
     public void draw(Graphics2D g) {
-        g.setStroke(Guides.INNER_STROKE);
-        g.setColor(BLACK);
-        for (Line2D line : lines) {
-            g.draw(line);
-        }
-
-        g.setStroke(Guides.OUTER_STROKE);
-        g.setColor(WHITE);
-        for (Line2D line : lines) {
-            g.draw(line);
-        }
+        GuidesRenderer glRenderer = DIContainer.get(GuidesRenderer.class, DIContainer.GUIDES_RENDERER);
+        glRenderer.draw(g, lines);
     }
 
     public void coCoordsChanged() {

@@ -23,6 +23,8 @@ import pixelitor.TipsOfTheDay;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.guides.GuideStrokeType;
+import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.layers.LayerButtonLayout;
@@ -85,6 +87,19 @@ public final class AppPreferences {
     private static final String THUMB_SIZE_KEY = "thumb_size";
 
     private static final String LAST_TOOL_KEY = "last_tool";
+
+    private static final String GUIDE_COLOR_KEY = "guide_color";
+    private static final String GUIDE_STROKE_KEY = "guide_stroke";
+    private static final String CROP_GUIDE_COLOR_KEY = "crop_guide_color";
+    private static final String CROP_GUIDE_STROKE_KEY = "crop_guide_stroke";
+
+    private static final int GUIDE_COLOR_DEFAULT = Color.BLACK.getRGB();
+    private static final int GUIDE_STROKE_DEFAULT = GuideStrokeType.DASHED.ordinal();
+    private static final int CROP_GUIDE_COLOR_DEFAULT = Color.BLACK.getRGB();
+    private static final int CROP_GUIDE_STROKE_DEFAULT = GuideStrokeType.SOLID.ordinal();
+
+    private static GuideStyle guideStyle;
+    private static GuideStyle cropGuideStyle;
 
     private AppPreferences() {
     }
@@ -254,6 +269,42 @@ public final class AppPreferences {
         mainNode.putInt(THUMB_SIZE_KEY, LayerButtonLayout.getThumbSize());
     }
 
+    public static GuideStyle getGuideStyle() {
+        if (null == guideStyle) {
+            int colorRGB = mainNode.getInt(GUIDE_COLOR_KEY, GUIDE_COLOR_DEFAULT);
+            int strokeId = mainNode.getInt(GUIDE_STROKE_KEY, GUIDE_STROKE_DEFAULT);
+            guideStyle = new GuideStyle();
+            guideStyle.setColorA(new Color(colorRGB));
+            guideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
+        }
+
+        return guideStyle;
+    }
+
+    public static GuideStyle getCropGuideStyle() {
+        if (null == cropGuideStyle) {
+            int colorRGB = mainNode.getInt(CROP_GUIDE_COLOR_KEY, CROP_GUIDE_COLOR_DEFAULT);
+            int strokeId = mainNode.getInt(CROP_GUIDE_STROKE_KEY, CROP_GUIDE_STROKE_DEFAULT);
+            cropGuideStyle = new GuideStyle();
+            cropGuideStyle.setColorA(new Color(colorRGB));
+            cropGuideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
+        }
+
+        return cropGuideStyle;
+    }
+
+    private static void saveGuideStyles() {
+        GuideStyle style = getGuideStyle();
+        mainNode.putInt(GUIDE_COLOR_KEY, style.getColorA().getRGB());
+        mainNode.putInt(GUIDE_STROKE_KEY, style.getStrokeType().ordinal());
+    }
+
+    private static void saveCropGuideStyles() {
+        GuideStyle style = getCropGuideStyle();
+        mainNode.putInt(CROP_GUIDE_COLOR_KEY, style.getColorA().getRGB());
+        mainNode.putInt(CROP_GUIDE_STROKE_KEY, style.getStrokeType().ordinal());
+    }
+
     public static void savePrefsAndExit() {
         savePreferencesBeforeExit();
         System.exit(0);
@@ -272,6 +323,8 @@ public final class AppPreferences {
         TipsOfTheDay.saveNextTipNr();
         saveNewImageSize();
         saveLastToolName();
+        saveGuideStyles();
+        saveCropGuideStyles();
     }
 
     public static Color loadFgColor() {
