@@ -198,16 +198,6 @@ public abstract class Tool implements KeyListener {
     }
 
     @Override
-    public void shiftPressed() {
-        // empty by default
-    }
-
-    @Override
-    public void shiftReleased() {
-        // empty by default
-    }
-
-    @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
             ImageComponents.setCursorForAll(

@@ -31,6 +31,7 @@ import pixelitor.layers.LayerButtonLayout;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
@@ -39,12 +40,25 @@ import static java.lang.Integer.parseInt;
  * The GUI for the preferences dialog
  */
 public class PreferencesPanel extends JPanel {
-    private final JTextField undoLevelsTF;
-    private final JComboBox<IntChoiceParam.Value> thumbSizeCB;
+    private static final Border EMPTY_BORDER =
+        BorderFactory.createEmptyBorder(0, 10, 5, 0);
+    private JTextField undoLevelsTF;
+    private JComboBox<IntChoiceParam.Value> thumbSizeCB;
 
     private PreferencesPanel() {
-        setLayout(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(this);
+        JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.LEFT);
+        JPanel generalPanel = createGeneralPanel();
+        JPanel guidesPanel = createGuidesPanel();
+
+        tabbedPane.add("General", generalPanel);
+        tabbedPane.add("Guides", guidesPanel);
+        add(tabbedPane);
+    }
+
+    private JPanel createGeneralPanel() {
+        JPanel generalPanel = new JPanel(new GridBagLayout());
+
+        GridBagHelper gbh = new GridBagHelper(generalPanel);
 
         JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
@@ -76,8 +90,17 @@ public class PreferencesPanel extends JPanel {
         gbh.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
 
+        generalPanel.setBorder(EMPTY_BORDER);
+        return generalPanel;
+    }
+
+    private JPanel createGuidesPanel() {
+        JPanel guidesPanel = new JPanel(new GridBagLayout());
+        GridBagHelper gbh = new GridBagHelper(guidesPanel);
         configureGuidesSettings(gbh);
         configureCropGuidesSettings(gbh);
+        guidesPanel.setBorder(EMPTY_BORDER);
+        return guidesPanel;
     }
 
     private void configureGuidesSettings(GridBagHelper gbh) {
@@ -87,17 +110,17 @@ public class PreferencesPanel extends JPanel {
         JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
         guideStroke.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelWithControl("Guide color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Guide style: ", guideStroke);
+        gbh.addLabelWithControl("Guide Color: ", guideColorSwatch);
+        gbh.addLabelWithControl("Guide Style: ", guideStroke);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
-            PixelitorWindow.getInstance().repaint();
+            ImageArea.getUI().repaint();
         });
 
         guideStroke.addActionListener(e -> {
             guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
-            PixelitorWindow.getInstance().repaint();
+            ImageArea.getUI().repaint();
         });
     }
 
@@ -108,17 +131,17 @@ public class PreferencesPanel extends JPanel {
         JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
         guideStroke.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelWithControl("Cropping guide color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Cropping guide style: ", guideStroke);
+        gbh.addLabelWithControl("Cropping Guide Color: ", guideColorSwatch);
+        gbh.addLabelWithControl("Cropping Guide Style: ", guideStroke);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
-            PixelitorWindow.getInstance().repaint();
+            ImageArea.getUI().repaint();
         });
 
         guideStroke.addActionListener(e -> {
             guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
-            PixelitorWindow.getInstance().repaint();
+            ImageArea.getUI().repaint();
         });
     }
 

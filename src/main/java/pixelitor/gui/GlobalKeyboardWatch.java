@@ -159,11 +159,6 @@ public class GlobalKeyboardWatch {
                     keyListener.altPressed();
                 }
                 break;
-            case KeyEvent.VK_SHIFT:
-                if (!dialogActive) {
-                    keyListener.shiftPressed();
-                }
-                break;
             default:
                 keyListener.otherKeyPressed(e);
         }
@@ -181,11 +176,6 @@ public class GlobalKeyboardWatch {
             case KeyEvent.VK_ALT:
                 if (!dialogActive) {
                     keyListener.altReleased();
-                }
-                break;
-            case KeyEvent.VK_SHIFT:
-                if (!dialogActive) {
-                    keyListener.shiftReleased();
                 }
                 break;
         }

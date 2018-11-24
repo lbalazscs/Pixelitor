@@ -466,24 +466,6 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void shiftPressed() {
-        if (state != TRANSFORM) {
-            return;
-        }
-
-        cropBox.setUseAspectRatio(true);
-    }
-
-    @Override
-    public void shiftReleased() {
-        if (state != TRANSFORM) {
-            return;
-        }
-
-        cropBox.setUseAspectRatio(false);
-    }
-
-    @Override
     public void otherKeyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             executeCropCommand();

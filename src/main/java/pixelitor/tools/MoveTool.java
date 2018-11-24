@@ -17,12 +17,12 @@
 
 package pixelitor.tools;
 
-import pixelitor.tools.move.ObjectsSelection;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
 import pixelitor.layers.Layer;
 import pixelitor.tools.move.ObjectsFinder;
+import pixelitor.tools.move.ObjectsSelection;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
@@ -37,7 +37,7 @@ import java.awt.geom.Point2D;
  * The move tool.
  */
 public class MoveTool extends DragTool {
-    private static final String AUTO_SELECT_LABEL = "Auto select layer";
+    private static final String AUTO_SELECT_LABEL = "Auto Select Layer";
     private final JCheckBox autoselectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
     private ObjectsFinder objectFinder = new ObjectsFinder();
 

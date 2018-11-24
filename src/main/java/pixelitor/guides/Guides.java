@@ -29,7 +29,6 @@ import pixelitor.history.History;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
@@ -50,7 +49,7 @@ public class Guides implements Serializable {
     private final List<Double> horizontals = new ArrayList<>();
     private final List<Double> verticals = new ArrayList<>();
 
-    private List<Shape> lines;
+    private List<Line2D> lines;
 
     private String name;
 

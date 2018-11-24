@@ -35,9 +35,5 @@ public interface KeyListener {
 
     void altReleased();
 
-    void shiftPressed();
-
-    void shiftReleased();
-
     void otherKeyPressed(KeyEvent e);
 }

@@ -66,9 +66,6 @@ public class CropBox {
     // type of user transform
     private int transformMode = MODE_NONE;
 
-    // keep the aspect ratio of the selected area
-    private boolean useAspectRatio = false;
-
     // ratio width/height of the selected area
     private double aspectRatio = 0;
 
@@ -87,10 +84,6 @@ public class CropBox {
         handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
                 right, upper, lower, left);
         update(rect);
-    }
-
-    public void setUseAspectRatio(boolean useAspectRatio) {
-        this.useAspectRatio = useAspectRatio;
     }
 
     public void paintHandles(Graphics2D g) {
@@ -186,7 +179,7 @@ public class CropBox {
         if (transformMode == MODE_RESIZE) {
             TransformHelper.resize(rect.getCo(), dragStartCursorType, mouseOffset);
 
-            if (useAspectRatio && aspectRatio > 0) {
+            if (e.isShiftDown() && aspectRatio > 0) {
                 TransformHelper.keepAspectRatio(rect.getCo(), dragStartCursorType, aspectRatio);
             }
         } else if (transformMode == MODE_RELOCATE) {
