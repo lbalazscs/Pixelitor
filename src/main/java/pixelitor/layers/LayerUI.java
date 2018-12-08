@@ -15,23 +15,28 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.shapes;
+package pixelitor.layers;
 
 /**
- * The target of the shapes in the {@link ShapesTool}
+ * The purpose of this interface is to separate
+ * the Swing components from the unit tests
  */
-public enum ShapesTarget {
-    PIXELS("Pixels"),
-    SELECTION("Selection");
+public interface LayerUI {
+    void setLayerName(String newName);
 
-    private final String guiName;
+    String getLayerName();
 
-    ShapesTarget(String guiName) {
-        this.guiName = guiName;
-    }
+    void setOpenEye(boolean newVisibility);
 
-    @Override
-    public String toString() {
-        return guiName;
-    }
+    boolean isVisibilityChecked();
+
+    void addMaskIconLabel();
+
+    void deleteMaskIconLabel();
+
+    void updateLayerIconImage(ImageLayer imageLayer);
+
+    void configureBorders(boolean b);
+
+    void setSelected(boolean b);
 }

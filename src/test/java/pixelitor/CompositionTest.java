@@ -122,7 +122,7 @@ public class CompositionTest {
                 .secondLayerIsActive();
 
         Layer firstLayer = comp.getLayer(0);
-        comp.setActiveLayer(firstLayer, true, null);
+        comp.setActiveLayer(firstLayer, true, true, null);
 
         assertThat(comp)
                 .isDirty()
@@ -532,7 +532,7 @@ public class CompositionTest {
 
         // now delete layer 1
         Layer layer1 = comp.getLayer(0);
-        comp.setActiveLayer(layer1, true, null);
+        comp.setActiveLayer(layer1, true, true, null);
         comp.deleteLayer(layer1, true, false);
 
         assertThat(comp)
@@ -625,11 +625,11 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_setSelectionFromShape() {
+    public void test_createSelectionFromShape() {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle rect = new Rectangle(3, 3, 5, 5);
-        comp.setSelectionFromShape(rect);
+        comp.createSelectionFromShape(rect);
 
         assertThat(comp)
                 .hasSelection()

@@ -23,6 +23,7 @@ import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.Keys;
+import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.Events;
 
@@ -92,13 +93,13 @@ public class GlobalKeyboardWatch {
         // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
         // so that they can be used to switch between tabs/internal frames
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
-                .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
+            .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
         forwardKeys = new HashSet<>(forwardKeys); // make modifiable
         forwardKeys.remove(Keys.CTRL_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
 
         Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
-                .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
+            .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
         backwardKeys = new HashSet<>(backwardKeys); // make modifiable
         backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
@@ -210,7 +211,7 @@ public class GlobalKeyboardWatch {
 
     public static void registerKeysOnAlwaysVisibleComponent() {
         InputMap inputMap = alwaysVisibleComponent.getInputMap(
-                JComponent.WHEN_IN_FOCUSED_WINDOW);
+            JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = alwaysVisibleComponent.getActionMap();
 
         for (MappedKey key : mappedKeys) {
@@ -220,11 +221,11 @@ public class GlobalKeyboardWatch {
 
     public static void addBrushSizeActions() {
         GlobalKeyboardWatch.add(
-                MappedKey.fromChar(']', false,
-                        "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
+            MappedKey.fromChar(']', false,
+                "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
         GlobalKeyboardWatch.add(
-                MappedKey.fromChar('[', false,
-                        "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
+            MappedKey.fromChar('[', false,
+                "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
     }
 
     public static void registerDebugMouseWatching(boolean postEvents) {
@@ -234,39 +235,30 @@ public class GlobalKeyboardWatch {
             String msg = null;
             if (e.getID() == MouseEvent.MOUSE_CLICKED) {
                 msg = "CLICKED"
-                        + " x = " + e.getX() + ", y = " + e.getY()
-                        + ", click count = " + e.getClickCount()
-                        + ", comp = " + componentDescr;
+                    + " at (" + e.getX() + ", " + e.getY()
+                    + "), click count = " + e.getClickCount()
+                    + ", comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
                 msg = "DRAGGED"
-                        + " x = " + e.getX() + ", y = " + e.getY()
-                        + ", comp = " + componentDescr;
+                    + " at (" + e.getX() + ", " + e.getY()
+                    + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
                 msg = "PRESSED"
-                        + " x = " + e.getX() + ", y = " + e.getY()
-                        + ", comp = " + componentDescr;
+                    + " at (" + e.getX() + ", " + e.getY()
+                    + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
                 msg = "RELEASED"
-                        + " x = " + e.getX() + ", y = " + e.getY()
-                        + ", comp = " + componentDescr;
+                    + " at (" + e.getX() + ", " + e.getY()
+                    + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
                 msg = "WHEEL"
-                        + " x = " + e.getX() + ", y = " + e.getY()
-                        + ", comp = " + componentDescr;
+                    + " at (" + e.getX() + ", " + e.getY()
+                    + "), comp = " + componentDescr;
             }
             if (msg != null) {
-                if (e.isShiftDown()) {
-                    msg = "shift! " + msg;
-                }
-                if (e.isAltDown()) {
-                    msg = "alt! " + msg;
-                }
-                if (e.isControlDown()) {
-                    msg = "ctrl! " + msg;
-                }
-                if (e.isPopupTrigger()) {
-                    msg = "popup! " + msg;
-                }
+                msg = Tools.getCurrent().getName() + " Tool: "
+                    + Utils.debugMouseModifiers(e)
+                    + msg;
                 if (postEvents) {
                     Events.postMouseEvent(msg);
                 } else {
@@ -274,8 +266,8 @@ public class GlobalKeyboardWatch {
                 }
             }
         }, AWTEvent.MOUSE_EVENT_MASK
-                | AWTEvent.MOUSE_MOTION_EVENT_MASK
-                | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+            | AWTEvent.MOUSE_MOTION_EVENT_MASK
+            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
     private static String getComponentDescription(MouseEvent e) {

@@ -18,7 +18,6 @@
 package pixelitor.guitest;
 
 import pixelitor.gui.ImageComponents;
-import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
 import static pixelitor.layers.MaskViewMode.EDIT_MASK;
@@ -35,15 +34,15 @@ enum MaskMode {
      */
     NO_MASK(NORMAL) {
         @Override
-        public void assertIsSetOn(Layer layer) {
-            if (layer.hasMask()) {
-                throw new AssertionError("Mask found in " + layer.getName());
+        public void check() {
+            if (EDT.activeLayerHasMask()) {
+                throw new AssertionError("Mask found in " + EDT.activeLayerName());
             }
         }
 
         @Override
         public void set(AssertJSwingTest tester) {
-            assertIsSetOn(ImageComponents.getActiveLayerOrNull());
+            check();
             // do nothing as initially the layers have no masks
 
             tester.checkConsistency();
@@ -54,13 +53,13 @@ enum MaskMode {
      */
     WITH_MASK(NORMAL) {
         @Override
-        public void assertIsSetOn(Layer layer) {
-            if (layer.hasMask()) {
-                if (layer.isMaskEditing()) {
-                    throw new AssertionError("Mask editing in " + layer.getName());
+        public void check() {
+            if (EDT.activeLayerHasMask()) {
+                if (EDT.activeLayerIsMaskEditing()) {
+                    throw new AssertionError("Mask editing in " + EDT.activeLayerName());
                 }
             } else {
-                throw new AssertionError("No mask found in " + layer.getName());
+                throw new AssertionError("No mask found in " + EDT.activeLayerName());
             }
         }
 
@@ -79,15 +78,15 @@ enum MaskMode {
      */
     ON_MASK_VIEW_LAYER(EDIT_MASK) {
         @Override
-        public void assertIsSetOn(Layer layer) {
-            if (layer.hasMask()) {
-                if (layer.isMaskEditing()) {
+        public void check() {
+            if (EDT.activeLayerHasMask()) {
+                if (EDT.activeLayerIsMaskEditing()) {
                     assertMaskViewModeIs(EDIT_MASK);
                 } else {
-                    throw new AssertionError("Not mask editing in " + layer.getName());
+                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
                 }
             } else {
-                throw new AssertionError("No mask found in " + layer.getName());
+                throw new AssertionError("No mask found in " + EDT.activeLayerName());
             }
         }
 
@@ -104,15 +103,15 @@ enum MaskMode {
      */
     ON_MASK_VIEW_MASK(SHOW_MASK) {
         @Override
-        public void assertIsSetOn(Layer layer) {
-            if (layer.hasMask()) {
-                if (layer.isMaskEditing()) {
+        public void check() {
+            if (EDT.activeLayerHasMask()) {
+                if (EDT.activeLayerIsMaskEditing()) {
                     assertMaskViewModeIs(SHOW_MASK);
                 } else {
-                    throw new AssertionError("Not mask editing in " + layer.getName());
+                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
                 }
             } else {
-                throw new AssertionError("No mask found in " + layer.getName());
+                throw new AssertionError("No mask found in " + EDT.activeLayerName());
             }
         }
 
@@ -129,15 +128,15 @@ enum MaskMode {
      */
     RUBY(RUBYLITH) {
         @Override
-        public void assertIsSetOn(Layer layer) {
-            if (layer.hasMask()) {
-                if (layer.isMaskEditing()) {
+        public void check() {
+            if (EDT.activeLayerHasMask()) {
+                if (EDT.activeLayerIsMaskEditing()) {
                     assertMaskViewModeIs(RUBYLITH);
                 } else {
-                    throw new AssertionError("Not mask editing in " + layer.getName());
+                    throw new AssertionError("Not mask editing in " + EDT.activeLayerName());
                 }
             } else {
-                throw new AssertionError("No mask found in " + layer.getName());
+                throw new AssertionError("No mask found in " + EDT.activeLayerName());
             }
         }
 
@@ -169,12 +168,12 @@ enum MaskMode {
     }
 
     /**
-     * Assert that the testing mode is set on the given layer
+     * Checks that the testing mode is set on the active layer
      */
-    public abstract void assertIsSetOn(Layer layer);
+    public abstract void check();
 
     /**
-     * Make sure that the testing more is set
+     * Make sure that the testing more is set on the active layer
      */
     public abstract void set(AssertJSwingTest tester);
 }

@@ -170,11 +170,15 @@ public class FgBgColorSelector extends JLayeredPane {
         resetToDefaultAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFgColor(BLACK, false);
-                setBgColor(WHITE, true);
+                setDefaultColors();
             }
         };
         defaultsButton.addActionListener(resetToDefaultAction);
+    }
+
+    public void setDefaultColors() {
+        setFgColor(BLACK, false);
+        setBgColor(WHITE, true);
     }
 
     private void initSwapColorsButton() {
@@ -183,18 +187,22 @@ public class FgBgColorSelector extends JLayeredPane {
         swapColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (layerMaskEditing) {
-                    Color tmpFgColor = maskFgColor;
-                    setFgColor(maskBgColor, false);
-                    setBgColor(tmpFgColor, true);
-                } else {
-                    Color tmpFgColor = fgColor;
-                    setFgColor(bgColor, false);
-                    setBgColor(tmpFgColor, true);
-                }
+                swapColors();
             }
         };
         swapButton.addActionListener(swapColorsAction);
+    }
+
+    public void swapColors() {
+        if (layerMaskEditing) {
+            Color tmpFgColor = maskFgColor;
+            setFgColor(maskBgColor, false);
+            setBgColor(tmpFgColor, true);
+        } else {
+            Color tmpFgColor = fgColor;
+            setFgColor(bgColor, false);
+            setBgColor(tmpFgColor, true);
+        }
     }
 
     private void initRandomizeButton() {

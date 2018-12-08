@@ -47,8 +47,8 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
  * The panel shown in the "Export Optimized JPEG..." dialog
  */
 public class OptimizedJpegSavePanel extends JPanel {
-    private static final int GRID_HGAP = 10;
-    private static final int GRID_VGAP = 10;
+    private static final int GRID_HOR_GAP = 10;
+    private static final int GRID_VER_GAP = 10;
     private final BufferedImage image;
     private ImagePanel optimized;
     private RangeParam qualityParam;
@@ -67,12 +67,12 @@ public class OptimizedJpegSavePanel extends JPanel {
         add(comparePanel, BorderLayout.CENTER);
         add(controlsPanel, BorderLayout.SOUTH);
 
-        updatePreview(true); // to set a first preview image
+        updatePreview();
     }
 
     private JPanel createComparePanel(BufferedImage image) {
         JPanel comparePanel = new JPanel();
-        comparePanel.setLayout(new GridLayout(1, 2, GRID_HGAP, GRID_VGAP));
+        comparePanel.setLayout(new GridLayout(1, 2, GRID_HOR_GAP, GRID_VER_GAP));
         Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
 
         original = createViewPanel(imageSize);
@@ -117,11 +117,11 @@ public class OptimizedJpegSavePanel extends JPanel {
 
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);
-        progressiveCB.addActionListener(e -> updatePreview(false));
+        progressiveCB.addActionListener(e -> updatePreview());
         p.add(progressiveCB);
 
         qualityParam = new RangeParam("  JPEG Quality", 1, 60, 100);
-        qualityParam.setAdjustmentListener(() -> updatePreview(false));
+        qualityParam.setAdjustmentListener(this::updatePreview);
         p.add(new SliderSpinner(qualityParam, WEST, false));
 
         sizeLabel = new JLabel();
@@ -135,7 +135,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         return p;
     }
 
-    private void updatePreview(boolean first) {
+    private void updatePreview() {
         JpegSettings settings = getSelectedSettings();
 
         CompletableFuture
@@ -143,7 +143,7 @@ public class OptimizedJpegSavePanel extends JPanel {
                 () -> createPreview(settings),
                 IOThread.getExecutor())
             .thenAcceptAsync(
-                imageWithSize -> setPreview(first, imageWithSize),
+                this::setPreview,
                 EventQueue::invokeLater)
             .exceptionally(Messages::showExceptionOnEDT);
     }
@@ -153,17 +153,12 @@ public class OptimizedJpegSavePanel extends JPanel {
         return JpegOutput.writeJPGtoPreviewImage(image, settings, pt);
     }
 
-    private void setPreview(boolean first, ImageWithSize imageWithSize) {
+    private void setPreview(ImageWithSize imageWithSize) {
         BufferedImage newPreview = imageWithSize.getImage();
         optimized.changeImage(newPreview);
 
         int numBytes = imageWithSize.getSize();
         sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
-
-        if (first) {
-            // clear the message
-            Messages.showInStatusBar("");
-        }
     }
 
     private JpegSettings getSelectedSettings() {

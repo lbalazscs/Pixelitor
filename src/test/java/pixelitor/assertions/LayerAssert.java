@@ -20,7 +20,7 @@ package pixelitor.assertions;
 import org.assertj.core.api.AbstractAssert;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayerUI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -78,14 +78,14 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
 
     public S uiIsVisible() {
         isNotNull();
-        LayerButton layerUI = actual.getUI();
+        LayerUI layerUI = actual.getUI();
         assertThat(layerUI.isVisibilityChecked()).isTrue();
         return myself;
     }
 
     public S uiIsNotVisible() {
         isNotNull();
-        LayerButton layerUI = actual.getUI();
+        LayerUI layerUI = actual.getUI();
         assertThat(layerUI.isVisibilityChecked()).isFalse();
         return myself;
     }

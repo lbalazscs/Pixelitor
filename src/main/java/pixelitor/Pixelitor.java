@@ -36,6 +36,7 @@ import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.util.DragDisplay;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
@@ -93,6 +94,8 @@ public class Pixelitor {
                 Dialogs.showExceptionDialog(e);
             }
         });
+
+        DragDisplay.initializeFont();
 
         // Force the initialization of FastMath look-up tables now
         // on the main thread, so that later no unexpected delays happen.

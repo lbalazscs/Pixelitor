@@ -70,7 +70,7 @@ public class PenToolTest {
     public void testConvertBuildPathToSelection() {
         createSimpleClosedPathInBuildMode();
 
-        Tools.PEN.convertToSelection(true);
+        Tools.PEN.convertToSelection();
         assertThat(Tools.SELECTION).isActive();
         assertThat(comp).hasSelection();
 
@@ -96,7 +96,7 @@ public class PenToolTest {
                 .isConsistent()
                 .modeIs(EDIT);
 
-        Tools.PEN.convertToSelection(true);
+        Tools.PEN.convertToSelection();
         assertThat(Tools.SELECTION).isActive();
         assertThat(comp).hasSelection();
 

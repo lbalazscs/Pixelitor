@@ -45,7 +45,7 @@ import java.awt.image.BufferedImage;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.tools.shapes.ShapesTool.STROKE_FOR_OPEN_SHAPES;
-import static pixelitor.tools.shapes.TwoPointBasedPaint.NONE;
+import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
 /**
  * A shape with associated stroke, fill and effects
@@ -65,8 +65,8 @@ public class StyledShape implements Cloneable {
     // the gradients move together with the box
     private ImDrag transformedImDrag;
 
-    private TwoPointBasedPaint fillPaint;
-    private TwoPointBasedPaint strokePaint;
+    private TwoPointPaintType fillPaintType;
+    private TwoPointPaintType strokePaintType;
     private AreaEffects effects;
 
     private Stroke stroke;
@@ -80,8 +80,8 @@ public class StyledShape implements Cloneable {
     public StyledShape(ShapeSettings settings) {
         this.settings = settings;
         shapeType = settings.getSelectedType();
-        setFillPaint(settings.getSelectedFillPaint());
-        setStrokePaint(settings.getSelectedStrokePaint());
+        setFillPaintType(settings.getSelectedFillPaint());
+        setStrokePaintType(settings.getSelectedStrokePaint());
         setStroke(settings.getStroke());
         setEffects(settings.getEffects());
         this.strokeSettings = settings.getStrokeSettings();
@@ -106,25 +106,25 @@ public class StyledShape implements Cloneable {
 
         if (hasFillPaint()) {
             if (shapeType.isClosed()) {
-                fillPaint.prepare(g, transformedImDrag);
+                fillPaintType.prepare(g, transformedImDrag);
                 g.fill(shape);
-                fillPaint.finish(g);
+                fillPaintType.finish(g);
             } else if (!hasStrokePaint()) {
                 // Special case: an open shape cannot be filled,
                 // it can be only stroked, even if stroke is disabled.
                 // So use the default stroke and the fill paint.
                 g.setStroke(STROKE_FOR_OPEN_SHAPES);
-                fillPaint.prepare(g, transformedImDrag);
+                fillPaintType.prepare(g, transformedImDrag);
                 g.draw(shape);
-                fillPaint.finish(g);
+                fillPaintType.finish(g);
             }
         }
 
         if (hasStrokePaint()) {
             g.setStroke(stroke);
-            strokePaint.prepare(g, transformedImDrag);
+            strokePaintType.prepare(g, transformedImDrag);
             g.draw(shape);
-            strokePaint.finish(g);
+            strokePaintType.finish(g);
         }
 
         if (effects != null) {
@@ -142,17 +142,19 @@ public class StyledShape implements Cloneable {
     }
 
     private boolean hasStrokePaint() {
-        return strokePaint != NONE;
+        return strokePaintType != NONE;
     }
 
     private boolean hasFillPaint() {
-        return fillPaint != NONE;
+        return fillPaintType != NONE;
     }
 
     public void setImDrag(ImDrag imDrag) {
         assert !insideBox;
 
-        assert !imDrag.isClick() : "imDrag = " + imDrag.toString();
+        if (imDrag.isClick()) {
+            return;
+        }
 
         this.origImDrag = imDrag;
         unTransformedShape = shapeType.getShape(imDrag);
@@ -168,12 +170,12 @@ public class StyledShape implements Cloneable {
         transformedImDrag = origImDrag.createTransformed(at);
     }
 
-    private void setFillPaint(TwoPointBasedPaint fillPaint) {
-        this.fillPaint = fillPaint;
+    private void setFillPaintType(TwoPointPaintType fillPaintType) {
+        this.fillPaintType = fillPaintType;
     }
 
-    private void setStrokePaint(TwoPointBasedPaint strokePaint) {
-        this.strokePaint = strokePaint;
+    private void setStrokePaintType(TwoPointPaintType strokePaintType) {
+        this.strokePaintType = strokePaintType;
     }
 
     private void setStroke(Stroke stroke) {
@@ -253,30 +255,33 @@ public class StyledShape implements Cloneable {
     }
 
     public void finalizeTo(Composition comp, TransformBox transformBox) {
+        PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawableOrNull();
-        if (dr == null) { // can happen because this could be called via activeImageHasChanged
-            // TODO how to handle changing the image when there is a box on a text layer?
-            return;
-        }
+        if (dr != null) { // a text layer could be active
+            Rectangle shapeBounds = shape.getBounds();
+            int thickness = calcThickness();
+            shapeBounds.grow(thickness, thickness);
 
-        Rectangle shapeBounds = shape.getBounds();
-        int thickness = calcThickness();
-        shapeBounds.grow(thickness, thickness);
-
-        if (!shapeBounds.isEmpty()) {
-            BufferedImage originalImage = dr.getImage();
-            PartialImageEdit imageEdit = History.createPartialImageEdit(
+            if (!shapeBounds.isEmpty()) {
+                BufferedImage originalImage = dr.getImage();
+                imageEdit = History.createPartialImageEdit(
                     shapeBounds, originalImage, dr, false, "Shape");
-            if (imageEdit != null) {
-                History.addEdit(new FinalizeShapeEdit(comp,
-                        imageEdit, transformBox, this));
             }
         }
 
-        paintShape(dr);
+        // must be added even if there is no image edit
+        // to manage the shapes tool state changes
+        History.addEdit(new FinalizeShapeEdit(comp,
+            imageEdit, transformBox, this));
 
-        comp.imageChanged();
-        dr.updateIconImage();
+        if (imageEdit != null) {
+            paintShape(dr);
+            comp.imageChanged();
+            dr.updateIconImage();
+        } else {
+            // a repaint is necessary even if the box is outside the canvas
+            comp.repaint();
+        }
     }
 
     private void paintShape(Drawable dr) {
@@ -334,8 +339,8 @@ public class StyledShape implements Cloneable {
         StyledShape backup = clone();
 
         setType(settings.getSelectedType());
-        setFillPaint(settings.getSelectedFillPaint());
-        setStrokePaint(settings.getSelectedStrokePaint());
+        setFillPaintType(settings.getSelectedFillPaint());
+        setStrokePaintType(settings.getSelectedStrokePaint());
 
         setStroke(settings.getStroke());
         strokeSettings = settings.getStrokeSettings();
@@ -355,12 +360,12 @@ public class StyledShape implements Cloneable {
         return shapeType;
     }
 
-    public TwoPointBasedPaint getFillPaint() {
-        return fillPaint;
+    public TwoPointPaintType getFillPaintType() {
+        return fillPaintType;
     }
 
-    public TwoPointBasedPaint getStrokePaint() {
-        return strokePaint;
+    public TwoPointPaintType getStrokePaintType() {
+        return strokePaintType;
     }
 
     public StrokeSettings getStrokeSettings() {
@@ -369,6 +374,22 @@ public class StyledShape implements Cloneable {
 
     public AreaEffects getEffects() {
         return effects;
+    }
+
+    /**
+     * Return a shape that is guaranteed to be closed and
+     * corresponds to the displayed pixels (ignoring the effects)
+     */
+    public Shape getEffectiveShape() {
+        if (shapeType.isClosed()) {
+            return shape;
+        } else if (hasStrokePaint()) {
+            // the shape is not closed, but there is a stroke
+            return stroke.createStrokedShape(shape);
+        } else {
+            // the shape is not closed, and there is no stroke
+            return STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
+        }
     }
 
     public DebugNode getDebugNode() {

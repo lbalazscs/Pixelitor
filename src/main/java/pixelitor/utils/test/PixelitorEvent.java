@@ -42,7 +42,7 @@ public class PixelitorEvent {
     private final Layer layer;
     private static final Format dateFormatter = new SimpleDateFormat("HH:mm:ss:SSS");
 
-    protected PixelitorEvent(String type, Composition comp, Layer layer) {
+    public PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
         if (!Build.isDevelopment()) {
             throw new IllegalStateException("should be used only for development");

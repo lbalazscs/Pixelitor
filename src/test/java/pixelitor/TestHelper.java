@@ -271,7 +271,7 @@ public class TestHelper {
             when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
         } else {
-            comp.setSelectionFromShape(shape);
+            comp.createSelectionFromShape(shape);
         }
     }
 

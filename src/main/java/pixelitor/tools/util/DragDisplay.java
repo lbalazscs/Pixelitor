@@ -17,6 +17,8 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.utils.ImageUtils;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -25,6 +27,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 
 public class DragDisplay {
     private static final AlphaComposite BG_COMPOSITE = AlphaComposite.SrcOver.derive(0.65f);
@@ -127,5 +130,22 @@ public class DragDisplay {
     public void finish() {
         g.setStroke(origStroke);
         g.setClip(origClip);
+    }
+
+    /**
+     * The first time {@link DragDisplay} is used, it initializes
+     * some fonts (sun.font.CompositeFont.doDeferredInitialisation),
+     * and it is better to do this before the GUI starts,
+     * otherwise it would block the EDT
+     */
+    public static void initializeFont() {
+        BufferedImage tmp = ImageUtils.createSysCompatibleImage(10, 10);
+        Graphics2D g2 = tmp.createGraphics();
+        DragDisplay dd = new DragDisplay(g2, BG_WIDTH_PIXEL);
+
+        dd.drawOneLine("x", 0, 10);
+
+        g2.dispose();
+        tmp.flush();
     }
 }

@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
@@ -34,10 +35,12 @@ import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.LinkedEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
@@ -47,6 +50,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
@@ -76,7 +80,11 @@ public abstract class Layer implements Serializable {
     protected boolean isAdjustment = false;
 
     // transient variables from here
-    private transient LayerButton ui;
+
+    // The UI is lazily initialized so that it is created on the EDT
+    // even if the layer itself is created on another thread
+    private transient Lazy<LayerUI> ui = Lazy.of(this::createUI);
+
     private transient List<LayerChangeListener> layerChangeListeners;
 
     /**
@@ -98,9 +106,9 @@ public abstract class Layer implements Serializable {
         canvas = comp.getCanvas();
 
         if (parent != null) { // this is a layer mask
-            ui = parent.getUI();
+            ui = parent.ui;
         } else { // normal layer
-            ui = new LayerButton(this);
+            createUI();
         }
         layerChangeListeners = new ArrayList<>();
     }
@@ -111,6 +119,7 @@ public abstract class Layer implements Serializable {
         // defaults for transient fields
         ui = null;
         maskEditing = false;
+        ui = Lazy.of(this::createUI);
 
         in.defaultReadObject();
         layerChangeListeners = new ArrayList<>();
@@ -118,11 +127,27 @@ public abstract class Layer implements Serializable {
         // Creates a layer button only for real layers, because
         // layer masks use the button of the real layer.
         if (parent == null) { // not mask
-            ui = new LayerButton(this);
+            createUI();
 
             if (mask != null) {
                 mask.setUI(ui);
             }
+        }
+    }
+
+    private LayerUI createUI() {
+        if (Build.isTesting()) {
+            return new TestLayerUI();
+        }
+
+        if (EventQueue.isDispatchThread()) {
+            return new LayerButton(this);
+        } else {
+            // preferably we should rarely get here
+            // TODO this branch is still called for pxc and ora files
+            CompletableFuture<LayerButton> future = CompletableFuture.supplyAsync(
+                () -> new LayerButton(this), EventQueue::invokeLater);
+            return future.join();
         }
     }
 
@@ -137,7 +162,7 @@ public abstract class Layer implements Serializable {
 
         this.visible = newVisibility;
         comp.imageChanged();
-        ui.setOpenEye(newVisibility);
+        ui.get().setOpenEye(newVisibility);
 
         if (addToHistory) {
             History.addEdit(
@@ -145,11 +170,11 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    public LayerButton getUI() {
-        return ui;
+    public LayerUI getUI() {
+        return ui.get();
     }
 
-    public void setUI(LayerButton ui) {
+    public void setUI(Lazy<LayerUI> ui) {
         this.ui = ui;
     }
 
@@ -224,7 +249,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        ui.setLayerName(newName);
+        ui.get().setLayerName(newName);
 
         if (addToHistory) {
             History.addEdit(new LayerRenameEdit(this, previousName, name));
@@ -244,7 +269,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void makeActive(boolean addToHistory) {
-        comp.setActiveLayer(this, addToHistory, null);
+        comp.setActiveLayer(this, true, addToHistory, null);
     }
 
     public boolean isActive() {
@@ -291,7 +316,7 @@ public abstract class Layer implements Serializable {
 
         // needs to be added first, because the inherited layer
         // mask constructor already will try to update the image
-        ui.addMaskIconLabel();
+        ui.get().addMaskIconLabel();
 
         comp.imageChanged();
 
@@ -330,7 +355,7 @@ public abstract class Layer implements Serializable {
 
         this.mask = mask;
         comp.imageChanged();
-        ui.addMaskIconLabel();
+        ui.get().addMaskIconLabel();
         Layers.maskAddedTo(this);
         mask.updateIconImage();
     }
@@ -349,7 +374,7 @@ public abstract class Layer implements Serializable {
         }
 
         Layers.maskDeletedFrom(this);
-        ui.deleteMaskIconLabel();
+        ui.get().deleteMaskIconLabel();
 
         MaskViewMode.NORMAL.activate(ic, this, "mask deleted");
     }
@@ -465,7 +490,7 @@ public abstract class Layer implements Serializable {
     public void setMaskEditing(boolean b) {
         assert b ? hasMask() : true;
         this.maskEditing = b;
-        ui.configureBorders(b); // sets the border around the icon
+        ui.get().configureBorders(b); // sets the border around the icon
     }
 
     public boolean isMaskEditing() {
@@ -574,7 +599,8 @@ public abstract class Layer implements Serializable {
     }
 
     public void activateUI() {
-        ui.setSelected(true);
+        assert Build.isTesting() || EventQueue.isDispatchThread();
+        ui.get().setSelected(true);
     }
 
     public void addLayerChangeListener(LayerChangeListener listener) {

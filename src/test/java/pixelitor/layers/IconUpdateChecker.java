@@ -17,8 +17,7 @@
 
 package pixelitor.layers;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A utility class that checks that the image layer icon images
@@ -27,13 +26,13 @@ import static org.mockito.Mockito.verify;
 public class IconUpdateChecker {
     private final Layer layer;
     private final LayerMask mask;
-    private final LayerButton ui;
+
     private final int layerIconUpdatesAtStart;
     private final int maskIconUpdatesAtStart;
 
-    public IconUpdateChecker(LayerButton ui, Layer layer, LayerMask mask,
-                             int layerIconUpdatesAtStart, int maskIconUpdatesAtStart) {
-        this.ui = ui;
+    public IconUpdateChecker(Layer layer, LayerMask mask,
+                             int layerIconUpdatesAtStart,
+                             int maskIconUpdatesAtStart) {
         this.layer = layer;
         this.mask = mask;
         this.layerIconUpdatesAtStart = layerIconUpdatesAtStart;
@@ -50,8 +49,8 @@ public class IconUpdateChecker {
 
     private void checkLayer(int num) {
         if (layer instanceof ImageLayer) {
-            verify(ui, times(layerIconUpdatesAtStart + num))
-                    .updateLayerIconImage((ImageLayer) layer);
+            TestLayerUI ui = (TestLayerUI) layer.getUI();
+            assertThat(ui.getNumIconImageUpdates((ImageLayer) layer)).isEqualTo(layerIconUpdatesAtStart + num);
         }
     }
 
@@ -59,6 +58,8 @@ public class IconUpdateChecker {
         if (mask == null) {
             return;
         }
-        verify(ui, times(maskIconUpdatesAtStart + num)).updateLayerIconImage(mask);
+//        verify(ui, times(maskIconUpdatesAtStart + num)).updateLayerIconImage(mask);
+        TestLayerUI ui = (TestLayerUI) mask.getUI();
+        assertThat(ui.getNumIconImageUpdates(mask)).isEqualTo(maskIconUpdatesAtStart + num);
     }
 }

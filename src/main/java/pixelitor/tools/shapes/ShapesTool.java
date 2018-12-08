@@ -19,36 +19,35 @@ package pixelitor.tools.shapes;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
-import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
 import pixelitor.layers.Drawable;
-import pixelitor.selection.Selection;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
+import pixelitor.tools.Tools;
+import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
-import static pixelitor.tools.shapes.ShapesTarget.PIXELS;
-import static pixelitor.tools.shapes.ShapesTarget.SELECTION;
 import static pixelitor.tools.shapes.ShapesToolState.INITIAL_DRAG;
 import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
 import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
@@ -59,35 +58,39 @@ import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
 public class ShapesTool extends DragTool {
     private final ShapeSettings settings = new ShapeSettings(this);
 
-    private final JComboBox<TwoPointBasedPaint> fillPaintCombo
-            = settings.createFillPaintCombo();
-    private final JComboBox<TwoPointBasedPaint> strokePaintCombo
-            = settings.createStrokePaintCombo();
-
-    private StyledShape styledShape;
+    private final JComboBox<TwoPointPaintType> fillPaintCombo
+        = settings.createFillPaintCombo();
+    private final JComboBox<TwoPointPaintType> strokePaintCombo
+        = settings.createStrokePaintCombo();
 
     private JButton strokeSettingsButton;
     private JDialog strokeSettingsDialog;
 
-    private JButton effectsButton;
     private JDialog effectsDialog;
-
-    private Shape backupSelectionShape = null;
 
     public static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
 
+    private StyledShape styledShape;
     private TransformBox transformBox;
 
     private ShapesToolState state = NO_INTERACTION;
 
+    private final Action convertAction = new AbstractAction("Convert to Selection...") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            convertToSelection();
+        }
+    };
+
     public ShapesTool() {
         super("Shapes", 'u', "shapes_tool_icon.png",
-                "<b>drag</b> to draw a shape. " +
-                        "Hold <b>Alt</b> down to drag from the center. " +
-                        "Hold <b>SPACE</b> down while drawing to move the shape. ",
-                Cursors.DEFAULT, true, true,
-                false, ClipStrategy.FULL);
+            "<b>drag</b> to draw a shape. " +
+                "Hold <b>Alt</b> down to drag from the center. " +
+                "Hold <b>SPACE</b> down while drawing to move the shape. ",
+            Cursors.DEFAULT, true, true,
+            false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
+        convertAction.setEnabled(false);
     }
 
     @Override
@@ -95,28 +98,22 @@ public class ShapesTool extends DragTool {
         JComboBox<ShapeType> shapeTypeCB = settings.createShapeTypeCombo();
         settingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
 
-        JComboBox<ShapesTarget> targetCB = settings.createTargetCombo();
-        settingsPanel.addWithLabel("Target:", targetCB, "targetCB");
-
         settingsPanel.addWithLabel("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addWithLabel("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
-                e -> initAndShowStrokeSettingsDialog());
+            e -> initAndShowStrokeSettingsDialog());
 
-        effectsButton = settingsPanel.addButton("Effects...",
-                e -> showEffectsDialog());
+        settingsPanel.addButton("Effects...",
+            e -> showEffectsDialog());
 
-        updateEnabledState();
+        settingsPanel.addButton(convertAction, "convertToSelection",
+            "Convert the active shape to a selection");
+
+        updateStrokeEnabledState();
     }
 
     private void showEffectsDialog() {
-
-//        if (effectsPanel == null) {
-//            effectsPanel = new EffectsPanel(
-//                    () -> effectsPanel.updateEffectsFromGUI(), null);
-//        }
-
         effectsDialog = settings.buildEffectsDialog(null);
         GUIUtils.showDialog(effectsDialog);
     }
@@ -135,12 +132,8 @@ public class ShapesTool extends DragTool {
         }
 
         // if this method didn't return yet, start a new shape
-        state = INITIAL_DRAG;
-        if (settings.getSelectedTarget() == SELECTION) {
-            backupSelectionShape = e.getComp().getSelectionShape();
-        } else {
-            styledShape = new StyledShape(settings);
-        }
+        styledShape = new StyledShape(settings);
+        setState(INITIAL_DRAG);
     }
 
     @Override
@@ -151,29 +144,23 @@ public class ShapesTool extends DragTool {
             if (transformBox.processMouseDragged(e)) {
                 return;
             }
-            throw new IllegalStateException("should not get here");
+            // we can get here if we entered the TRANSFORM state
+            // while dragging another shape
+            return;
         }
-
 
         assert state == INITIAL_DRAG;
 
         userDrag.setStartFromCenter(e.isAltDown());
 
         Composition comp = e.getComp();
-        if (styledShape != null) {
-            assert settings.getSelectedTarget() == PIXELS;
 
-            styledShape.setImDrag(userDrag.toImDrag());
-            // this will trigger paintOverLayer, therefore the continuous drawing of the shape
-            // TODO it could be optimized not to repaint the whole image, however
-            // it is not easy as some shapes extend beyond their drag rectangle
-            comp.imageChanged(REPAINT);
-        } else {
-            assert settings.getSelectedTarget() == SELECTION;
-
-            Shape currentShape = settings.getSelectedType().getShape(userDrag.toImDrag());
-            setSelection(currentShape, comp);
-        }
+        assert styledShape != null;
+        styledShape.setImDrag(userDrag.toImDrag());
+        // this will trigger paintOverLayer, therefore the continuous drawing of the shape
+        // TODO it could be optimized not to repaint the whole image, however
+        // it is not easy as some shapes extend beyond their drag rectangle
+        comp.imageChanged(REPAINT);
     }
 
     @Override
@@ -184,7 +171,9 @@ public class ShapesTool extends DragTool {
             if (transformBox.processMouseReleased(e)) {
                 return;
             }
-            throw new IllegalStateException("should not get here");
+            // we can get here if we entered the TRANSFORM state
+            // while dragging another shape
+            return;
         }
 
         assert state == INITIAL_DRAG;
@@ -192,26 +181,18 @@ public class ShapesTool extends DragTool {
         if (userDrag.isClick()) {
             // cancel the shape started in dragStarted
             styledShape = null;
+            setState(NO_INTERACTION);
             return;
         }
 
         userDrag.setStartFromCenter(e.isAltDown());
         Composition comp = e.getComp();
 
+        transformBox = styledShape.createBox(userDrag, e.getView());
 
-        ShapesTarget target = settings.getSelectedTarget();
-        if (target == PIXELS) {
-//            finalizeShape(comp, action);
-
-            transformBox = styledShape.createBox(userDrag, e.getView());
-
-            e.getView().repaint();
-            state = TRANSFORM;
-            History.addEdit(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
-        } else { // selection mode
-            comp.onSelection(selection -> addSelectionEdit(comp, selection));
-            state = NO_INTERACTION;
-        }
+        e.getView().repaint();
+        setState(TRANSFORM);
+        History.addEdit(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
 
         settings.invalidateStroke();
     }
@@ -221,6 +202,27 @@ public class ShapesTool extends DragTool {
         if (state == TRANSFORM) {
             transformBox.mouseMoved(e);
         }
+    }
+
+    private void setState(ShapesToolState newState) {
+        state = newState;
+
+        switch (newState) {
+            case TRANSFORM:
+                assert styledShape != null;
+                assert transformBox != null;
+                break;
+            case INITIAL_DRAG:
+                assert styledShape != null;
+                assert transformBox == null;
+                break;
+            case NO_INTERACTION:
+                assert styledShape == null;
+                assert transformBox == null;
+                break;
+        }
+
+        convertAction.setEnabled(newState == TRANSFORM);
     }
 
     /**
@@ -235,26 +237,7 @@ public class ShapesTool extends DragTool {
 
         styledShape = null;
         transformBox = null;
-    }
-
-    private void addSelectionEdit(Composition comp, Selection selection) {
-        boolean notEmpty = selection.clipToCanvasSize(comp); // the selection can be too big
-        if (!notEmpty) {
-            // if the selection is outside the canvas, then only deselect
-            comp.deselect(false);
-            return;
-        }
-        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) : "selection is outside " + settings
-                .getSelectedType();
-
-        PixelitorEdit edit;
-        if (backupSelectionShape != null) {
-            edit = new SelectionChangeEdit("Selection Change",
-                    comp, backupSelectionShape);
-        } else {
-            edit = new NewSelectionEdit(comp, selection.getShape());
-        }
-        History.addEdit(edit);
+        setState(NO_INTERACTION);
     }
 
     public void regenerateShape() {
@@ -266,11 +249,8 @@ public class ShapesTool extends DragTool {
     }
 
     // TODO this should be in ShapeSettings?
-    public void updateEnabledState() {
-        ShapesTarget target = settings.getSelectedTarget();
-
-        enableEffectSettings(target == PIXELS);
-        enableStrokeSettings(target == PIXELS && settings.hasStrokePaint());
+    public void updateStrokeEnabledState() {
+        enableStrokeSettings(settings.hasStrokePaint());
     }
 
     private void initAndShowStrokeSettingsDialog() {
@@ -300,12 +280,7 @@ public class ShapesTool extends DragTool {
             if (userDrag.isClick()) {
                 return;
             }
-
-            ShapesTarget target = settings.getSelectedTarget();
-
-            if (target == PIXELS) {
-                styledShape.paint(g);
-            }
+            styledShape.paint(g);
         } else if (state == TRANSFORM) {
             assert transformBox != null;
             styledShape.paint(g);
@@ -341,33 +316,7 @@ public class ShapesTool extends DragTool {
         // TODO create a styled shape and paint it
     }
 
-    private void setSelection(Shape shape, Composition comp) {
-        ShapeType shapeType = settings.getSelectedType();
-        Shape selectionShape = createSelectionShape(shape, shapeType);
-
-        Selection selection = comp.getSelection();
-
-        if (selection != null) {
-            // this code is called for each drag event:
-            // update the selection shape
-            selection.setShape(selectionShape);
-        } else {
-            comp.setSelectionFromShape(selectionShape);
-        }
-    }
-
-    private static Shape createSelectionShape(Shape shape, ShapeType shapeType) {
-        Shape selectionShape;
-        if (!shapeType.isClosed()) {
-            selectionShape = STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
-        } else {
-            selectionShape = shape;
-        }
-        return selectionShape;
-    }
-
     public boolean shouldDrawOverLayer() {
-        // TODO if a selection is made, then it could always return false?
         return state == INITIAL_DRAG || state == TRANSFORM;
     }
 
@@ -379,12 +328,25 @@ public class ShapesTool extends DragTool {
         }
     }
 
-    private void enableEffectSettings(boolean b) {
-        effectsButton.setEnabled(b);
+    private void convertToSelection() {
+        assert state == TRANSFORM : "state = " + state;
 
-        if (!b) {
-            closeEffectsDialog();
+        Shape shape = styledShape.getEffectiveShape();
+
+        Composition comp = ImageComponents.getActiveCompOrNull();
+
+        PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
+        if (selectionEdit == null) {
+            Dialogs.showInfoDialog("No Selection",
+                "No selection was created because the shape is outside the canvas.");
+            return;
         }
+
+        History.addEdit(new ConvertShapeToSelectionEdit(
+            comp, transformBox, styledShape, selectionEdit));
+
+        resetStateToInitial();
+        Tools.SELECTION.activate();
     }
 
     @Override
@@ -412,9 +374,9 @@ public class ShapesTool extends DragTool {
         // true, for example, when the initial box creation is undone
         boolean hadShape = styledShape != null;
 
-        state = NO_INTERACTION;
         transformBox = null;
         styledShape = null;
+        setState(NO_INTERACTION);
 
         Composition comp = ImageComponents.getActiveCompOrNull();
         if (comp != null) { // this gets also called after a "close all"
@@ -435,12 +397,12 @@ public class ShapesTool extends DragTool {
      * Restores a previously deleted box as part of an undo/redo operation
      */
     public void restoreBox(StyledShape shape, TransformBox box) {
-        assert styledShape == null;
-        assert transformBox == null;
+        // at this point we could have an active StyledShape, if
+        // an undo happened while a second shape was dragged
 
         styledShape = shape;
         transformBox = box;
-        state = TRANSFORM;
+        setState(TRANSFORM);
         ImageComponents.getActiveCompOrNull().imageChanged();
     }
 
@@ -450,6 +412,8 @@ public class ShapesTool extends DragTool {
 
     // used only for undo/redo
     public void setStyledShape(StyledShape styledShape) {
+        assert state == TRANSFORM : "state = " + state;
+
         this.styledShape = styledShape;
         transformBox.setTransformListener(styledShape::transform);
         settings.restoreFrom(styledShape);
@@ -461,6 +425,8 @@ public class ShapesTool extends DragTool {
 
         // finalize existing box
         if (transformBox != null) {
+            assert styledShape != null;
+            assert state == TRANSFORM : "state = " + state;
             finalizeShape(ImageComponents.getActiveCompOrNull());
         }
 
@@ -472,12 +438,18 @@ public class ShapesTool extends DragTool {
         // finalize existing box
         if (transformBox != null) {
             assert styledShape != null;
+            assert state == TRANSFORM : "state = " + state;
             finalizeShape(oldIC.getComp());
         } else {
             assert styledShape == null;
         }
 
         super.activeImageHasChanged(oldIC, newIC);
+    }
+
+    @VisibleForTesting
+    public ShapesToolState getState() {
+        return state;
     }
 
     @Override

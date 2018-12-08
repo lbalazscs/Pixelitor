@@ -26,7 +26,6 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageComponents;
 import pixelitor.utils.Utils;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
@@ -144,10 +143,15 @@ public class Keyboard {
             // press D
             pw.pressKey(VK_D).releaseKey(VK_D);
         } else {
-            GuiActionRunner.execute(() -> {
-                FgBgColors.setFGColor(Color.BLACK);
-                FgBgColors.setBGColor(Color.WHITE);
-            });
+            GuiActionRunner.execute(FgBgColors::setDefaultColors);
+        }
+    }
+
+    void randomizeColors() {
+        if (osLevelKeyEvents) {
+            pw.pressAndReleaseKeys(KeyEvent.VK_R);
+        } else {
+            GuiActionRunner.execute(FgBgColors::randomizeColors);
         }
     }
 

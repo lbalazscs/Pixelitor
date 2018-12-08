@@ -32,6 +32,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
+import pixelitor.layers.LayerUI;
 import pixelitor.layers.LayersContainer;
 import pixelitor.layers.LayersPanel;
 import pixelitor.layers.MaskViewMode;
@@ -174,6 +175,7 @@ public class ImageComponent extends JComponent
         layersPanel = new LayersPanel();
         comp.addAllLayersToGUI();
         LayersContainer.showLayersFor(this);
+        Layers.activeLayerChanged(comp.getActiveLayer());
 
         newMaskViewMode.activate(this, comp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
@@ -304,8 +306,8 @@ public class ImageComponent extends JComponent
         return zoomLevel;
     }
 
-    public void deleteLayerButton(LayerButton button) {
-        layersPanel.deleteLayerButton(button);
+    public void deleteLayerUI(LayerUI ui) {
+        layersPanel.deleteLayerButton((LayerButton) ui);
     }
 
     public Composition getComp() {
@@ -799,7 +801,7 @@ public class ImageComponent extends JComponent
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        LayerButton layerButton = newLayer.getUI();
+        LayerButton layerButton = (LayerButton) newLayer.getUI();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
         if (ImageComponents.isActive(this)) {

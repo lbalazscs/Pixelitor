@@ -61,18 +61,22 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
         JPanel northPanel = new JPanel(new BorderLayout());
         JPanel northLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        northLeftPanel.add(new JButton(new AbstractAction("Expand All") {
+        JButton expandButton = new JButton(new AbstractAction("Expand All") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 treeTable.expandAll();
             }
-        }));
-        northLeftPanel.add(new JButton(new AbstractAction("Collapse All") {
+        });
+        JButton collapseButton = new JButton(new AbstractAction("Collapse All") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 treeTable.collapseAll();
             }
-        }));
+        });
+        expandButton.setName("expandButton");
+        collapseButton.setName("collapseButton");
+        northLeftPanel.add(expandButton);
+        northLeftPanel.add(collapseButton);
         northPanel.add(northLeftPanel, BorderLayout.WEST);
         JButton helpButton = new JButton(new AbstractAction("Help") {
             @Override

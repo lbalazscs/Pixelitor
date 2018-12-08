@@ -30,9 +30,9 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMoveAction;
+import pixelitor.layers.LayerUI;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
@@ -404,15 +404,15 @@ public class Composition implements Serializable {
 
         if (layerToBeDeleted == activeLayer) {
             if (layerIndex > 0) {
-                setActiveLayer(layerList.get(layerIndex - 1));
+                setActiveLayer(layerList.get(layerIndex - 1), updateGUI);
             } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.get(0));
+                setActiveLayer(layerList.get(0), updateGUI);
             }
         }
 
         if (updateGUI) {
-            LayerButton button = layerToBeDeleted.getUI();
-            ic.deleteLayerButton(button);
+            LayerUI ui = layerToBeDeleted.getUI();
+            ic.deleteLayerUI(ui);
 
             if (isActive()) {
                 Layers.numLayersChanged(this, layerList.size());
@@ -423,10 +423,14 @@ public class Composition implements Serializable {
     }
 
     public void setActiveLayer(Layer newActiveLayer) {
-        setActiveLayer(newActiveLayer, false, null);
+        setActiveLayer(newActiveLayer, true, false, null);
     }
 
-    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory, String editName) {
+    public void setActiveLayer(Layer newActiveLayer, boolean updateGUI) {
+        setActiveLayer(newActiveLayer, updateGUI, false, null);
+    }
+
+    public void setActiveLayer(Layer newActiveLayer, boolean updateGUI, boolean addToHistory, String editName) {
         if (activeLayer == newActiveLayer) {
             return;
         }
@@ -437,9 +441,10 @@ public class Composition implements Serializable {
         Layer oldLayer = activeLayer;
         activeLayer = newActiveLayer;
 
-        // notify UI
-        activeLayer.activateUI();
-        Layers.activeLayerChanged(newActiveLayer);
+        if (updateGUI) {
+            activeLayer.activateUI();
+            Layers.activeLayerChanged(newActiveLayer);
+        }
 
         if (addToHistory) {
             History.addEdit(new LayerSelectionChangeEdit(
@@ -685,7 +690,7 @@ public class Composition implements Serializable {
         if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layerList.get(newIndex),
+        setActiveLayer(layerList.get(newIndex), true,
                 true, LayerMoveAction.RAISE_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
@@ -698,7 +703,7 @@ public class Composition implements Serializable {
             return;
         }
 
-        setActiveLayer(layerList.get(newIndex),
+        setActiveLayer(layerList.get(newIndex), true,
                 true, LayerMoveAction.LOWER_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
@@ -828,6 +833,15 @@ public class Composition implements Serializable {
     }
 
     public void deselect(boolean addToHistory) {
+//        if(Build.isDevelopment()) {
+//            boolean hadSelection = selection != null;
+//            boolean hadSelectionShape = hadSelection && selection.getShape() != null;
+//            String msg = "Deselect (" + reason
+//                + "), hadSelection = " + hadSelection
+//                + ", hadSelectionShape = " + hadSelectionShape
+//                + ", hadBuiltSelection = " + (builtSelection != null);
+//            Events.post(new PixelitorEvent(msg, this, activeLayer));
+//        }
         if (builtSelection != null) {
             builtSelection.die();
             builtSelection = null;
@@ -895,23 +909,24 @@ public class Composition implements Serializable {
         this.builtSelection = selection;
     }
 
-    // this is the "complete" method for setting a selection
-    // from shape in the sense that it handles
-    // everything: existing selections, history management
-    public PixelitorEdit setSelectionFromShapeComplete(Shape shape) {
+    /**
+     * Creates a selection from a shape and also handles
+     * existing selections
+     */
+    public PixelitorEdit changeSelectionFromShape(Shape shape) {
         PixelitorEdit edit;
         shape = canvas.clipShapeToBounds(shape);
         if (shape.getBounds().isEmpty()) {
-            // the new selection was outside the canvas
+            // the new selection would be outside the canvas
             return null;
         }
 
         if (selection != null) {
-            Shape backupSelectionShape = selection.getShape();
+            Shape oldShape = selection.getShape();
             selection.setShape(shape);
-            edit = new SelectionChangeEdit("Selection Change", this, backupSelectionShape);
+            edit = new SelectionChangeEdit("Selection Change", this, oldShape);
         } else {
-            setSelectionFromShape(shape);
+            createSelectionFromShape(shape);
             edit = new NewSelectionEdit(this, selection.getShape());
         }
         return edit;
@@ -975,10 +990,10 @@ public class Composition implements Serializable {
         }
     }
 
-    public void setSelectionFromShape(Shape shape) {
+    public void createSelectionFromShape(Shape shape) {
         if (selection != null) {
-            throw new IllegalStateException("setSelectionFromShape called while there was a selection: " + selection
-                    .toString());
+            throw new IllegalStateException("There is already a selection: "
+                + selection.toString());
         }
         setSelectionRef(new Selection(shape, ic));
     }
@@ -1365,7 +1380,7 @@ public class Composition implements Serializable {
                 }
             }
             comp.layerList.add(newLayerIndex, newLayer);
-            comp.setActiveLayer(newLayer);
+            comp.setActiveLayer(newLayer, !compInit);
             if (!compInit) {
                 comp.setDirty(true);
                 comp.ic.addLayerToGUI(newLayer, newLayerIndex);

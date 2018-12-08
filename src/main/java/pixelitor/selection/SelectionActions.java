@@ -32,10 +32,8 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -147,18 +145,6 @@ public final class SelectionActions {
      */
     public static void setEnabled(boolean b, Composition comp) {
         assert comp == null || ImageComponents.getActiveCompOrNull() == comp;
-
-        if (RandomGUITest.isRunning()) {
-            assert EventQueue.isDispatchThread() : "not EDT thread";
-            if (comp != null) {
-                boolean hasSelection = comp.hasSelection();
-                if (hasSelection != b) {
-                    String name = comp.getName();
-                    throw new IllegalStateException("composition " + name +
-                            ": hasSelection = " + hasSelection + ", b = " + b);
-                }
-            }
-        }
 
         crop.setEnabled(b);
         deselect.setEnabled(b);

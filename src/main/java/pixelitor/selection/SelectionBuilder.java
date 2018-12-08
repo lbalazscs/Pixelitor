@@ -41,51 +41,41 @@ public class SelectionBuilder {
     private boolean finished = false;
 
     /**
-     * Called in mousePressed
+     * Called in mousePressed (or mouseReleased for polygonal selection)
      */
     public SelectionBuilder(SelectionType selectionType, SelectionInteraction selectionInteraction, Composition comp) {
         this.selectionInteraction = selectionInteraction;
         this.selectionType = selectionType;
         this.comp = comp;
-        Selection selection = comp.getSelection();
+        Selection existingSelection = comp.getSelection();
 
-        if (selection == null) {
+        if (existingSelection == null) {
             return;
         }
 
-        startNewShape(selectionInteraction, selection);
-    }
-
-    /**
-     * Called if there is already a selection in mousePressed
-     */
-    private void startNewShape(SelectionInteraction selectionInteraction, Selection selection) {
-        assert selection.isAlive() : "dead selection";
+        assert existingSelection.isAlive() : "dead selection";
 
         comp.setBuiltSelection(new Selection(null, comp.getIC()));
 
         if (selectionInteraction == SelectionInteraction.REPLACE) {
-            replacedShape = selection.getShape();
+            replacedShape = existingSelection.getShape();
             // At this point the mouse was pressed, and it is clear that the
             // old selection should go away, but we don't know yet whether the
             // mouse will be released at the same point (Deselect) or another
             // point (Replace Selection)
             // Therefore we don't deselect yet (the selection information
             // will be needed when the mouse will be released), only hide.
-            selection.setHidden(true, true);
+            existingSelection.setHidden(true, true);
         } else {
-//            // the current shape becomes the previous shape
-//            // and will be replaced as mouse dragged events come
-
-            selection.setFrozen(true);
+            existingSelection.setFrozen(true);
         }
     }
 
     /**
      * As the mouse is dragged or released, the current
-     * selection shape is continuously updated
+     * built selection shape is continuously updated
      */
-    public void updateSelection(Object mouseInfo) {
+    public void updateBuiltSelection(Object mouseInfo) {
         Selection builtSelection = comp.getBuiltSelection();
         boolean noPreviousSelection = builtSelection == null;
 

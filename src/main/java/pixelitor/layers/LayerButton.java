@@ -44,7 +44,7 @@ import static pixelitor.utils.ImageUtils.createThumbnail;
  * The selectable and draggable component representing
  * a layer in the "Layers" part of the GUI.
  */
-public class LayerButton extends JToggleButton {
+public class LayerButton extends JToggleButton implements LayerUI {
     private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
     private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
     private static final CheckerboardPainter checkerBoardPainter
@@ -130,6 +130,10 @@ public class LayerButton extends JToggleButton {
     private int staticY;
 
     public LayerButton(Layer layer) {
+        if (Build.isTesting()) {
+            throw new IllegalStateException("Swing component in unit test");
+        }
+
         this.layer = layer;
 
         setLayout(new LayerButtonLayout(layer));
@@ -232,6 +236,7 @@ public class LayerButton extends JToggleButton {
         }
     }
 
+    @Override
     public void setOpenEye(boolean newVisibility) {
         visibilityCB.setSelected(newVisibility);
     }
@@ -287,6 +292,7 @@ public class LayerButton extends JToggleButton {
         return layer;
     }
 
+    @Override
     public String getLayerName() {
         return layer.getName();
     }
@@ -295,20 +301,18 @@ public class LayerButton extends JToggleButton {
         return nameEditor.isEditable();
     }
 
+    @Override
     public boolean isVisibilityChecked() {
         return visibilityCB.isSelected();
     }
 
+    @Override
     public void setLayerName(String newName) {
         nameEditor.setText(newName);
     }
 
+    @Override
     public void updateLayerIconImage(ImageLayer layer) {
-        if (Build.isTesting()) {
-            // TODO shouldn't be called in unit tests, but it is
-            return;
-        }
-
         boolean isMask = layer instanceof LayerMask;
 
         BufferedImage img = layer.getCanvasSizedSubImage();
@@ -322,7 +326,7 @@ public class LayerButton extends JToggleButton {
             BufferedImage thumb = createThumbnail(img, thumbSize, painter);
 
             SwingUtilities.invokeLater(() ->
-                    updateIconOnEDT(layer, isMask, thumb));
+                updateIconOnEDT(layer, isMask, thumb));
         };
         ThreadPool.submit(notEDT);
     }
@@ -343,12 +347,16 @@ public class LayerButton extends JToggleButton {
         repaint();
     }
 
+    @Override
     public void addMaskIconLabel() {
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel
-                .setToolTipText("<html><b>Shift-click</b> to disable/enable," +
-                        "<br><b>Alt-click</b> to show mask/layer," +
-                        "<br><b>Right-click</b> for more options");
+            .setToolTipText("<html>" +
+                "<b>Click</b> activates mask editing,<br>" +
+                "<b>Shift-click</b> disables/enables the mask,<br>" +
+                "<b>Alt-click</b> toggles mask/layer view,<br>" +
+                "<b>Shift-Alt-click</b> toggles rubylith/normal view,<br>" +
+                "<b>Right-click</b> shows more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
         configureLayerIcon(maskIconLabel, "maskIcon");
@@ -410,6 +418,7 @@ public class LayerButton extends JToggleButton {
         }
     }
 
+    @Override
     public void deleteMaskIconLabel() {
         // TODO remove the two mouse listeners (left-click, right-click)?
         // at least remove the drag reorder handler
@@ -425,6 +434,7 @@ public class LayerButton extends JToggleButton {
         maskAddedBeforeDragHandler = false;
     }
 
+    @Override
     public void configureBorders(boolean maskEditing) {
         SelectionState newSelectionState;
 

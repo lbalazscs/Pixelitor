@@ -38,7 +38,7 @@ public class FinalizeShapeEdit extends PixelitorEdit {
                              StyledShape styledShape) {
         super("Finalize Shape", comp);
 
-        assert imageEdit != null;
+        // the image edit can be null!
         assert box != null;
         assert styledShape != null;
 
@@ -51,7 +51,9 @@ public class FinalizeShapeEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        imageEdit.undo();
+        if (imageEdit != null) {
+            imageEdit.undo();
+        }
         Tools.SHAPES.restoreBox(styledShape, box);
     }
 
@@ -59,14 +61,17 @@ public class FinalizeShapeEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        imageEdit.redo();
+        if (imageEdit != null) {
+            imageEdit.redo();
+        }
         Tools.SHAPES.resetStateToInitial();
     }
 
     @Override
     public void die() {
         super.die();
-
-        imageEdit.die();
+        if (imageEdit != null) {
+            imageEdit.die();
+        }
     }
 }

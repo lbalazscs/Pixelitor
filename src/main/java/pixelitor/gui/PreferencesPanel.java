@@ -103,44 +103,46 @@ public class PreferencesPanel extends JPanel {
         return guidesPanel;
     }
 
-    private void configureGuidesSettings(GridBagHelper gbh) {
+    private static void configureGuidesSettings(GridBagHelper gbh) {
         GuideStyle guideStyle = AppPreferences.getGuideStyle();
 
         ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
-        guideStroke.setSelectedItem(guideStyle.getStrokeType());
+        JComboBox guideStyleCB = new JComboBox<>(GuideStrokeType.values());
+        guideStyleCB.setName("guideStyleCB");
+        guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
         gbh.addLabelWithControl("Guide Color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Guide Style: ", guideStroke);
+        gbh.addLabelWithControl("Guide Style: ", guideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });
 
-        guideStroke.addActionListener(e -> {
-            guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
+        guideStyleCB.addActionListener(e -> {
+            guideStyle.setStrokeType((GuideStrokeType) guideStyleCB.getSelectedItem());
             ImageArea.getUI().repaint();
         });
     }
 
-    private void configureCropGuidesSettings(GridBagHelper gbh) {
+    private static void configureCropGuidesSettings(GridBagHelper gbh) {
         GuideStyle guideStyle = AppPreferences.getCropGuideStyle();
 
         ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        JComboBox guideStroke = new JComboBox<>(GuideStrokeType.values());
-        guideStroke.setSelectedItem(guideStyle.getStrokeType());
+        JComboBox cropGuideStyleCB = new JComboBox<>(GuideStrokeType.values());
+        cropGuideStyleCB.setName("cropGuideStyleCB");
+        cropGuideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
         gbh.addLabelWithControl("Cropping Guide Color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Cropping Guide Style: ", guideStroke);
+        gbh.addLabelWithControl("Cropping Guide Style: ", cropGuideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
             ImageArea.getUI().repaint();
         });
 
-        guideStroke.addActionListener(e -> {
-            guideStyle.setStrokeType((GuideStrokeType) guideStroke.getSelectedItem());
+        cropGuideStyleCB.addActionListener(e -> {
+            guideStyle.setStrokeType((GuideStrokeType) cropGuideStyleCB.getSelectedItem());
             ImageArea.getUI().repaint();
         });
     }

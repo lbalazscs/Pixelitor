@@ -59,6 +59,10 @@ public class FgBgColors {
         selector.randomize();
     }
 
+    public static void setDefaultColors() {
+        selector.setDefaultColors();
+    }
+
     public static void setLayerMaskEditing(boolean b) {
         selector.setLayerMaskEditing(b);
     }

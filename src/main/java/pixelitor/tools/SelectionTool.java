@@ -141,7 +141,7 @@ public class SelectionTool extends DragTool {
         }
 
         userDrag.setStartFromCenter(startFromCenter);
-        selectionBuilder.updateSelection(userDrag.toImDrag());
+        selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
     }
 
     @Override
@@ -164,10 +164,10 @@ public class SelectionTool extends DragTool {
                 setupInteractionWithKeyModifiers(e);
                 selectionBuilder = new SelectionBuilder(getSelectionType(),
                         getCurrentInteraction(), comp);
-                selectionBuilder.updateSelection(e);
+                selectionBuilder.updateBuiltSelection(e);
                 restoreInteraction();
             } else {
-                selectionBuilder.updateSelection(e);
+                selectionBuilder.updateBuiltSelection(e);
                 if (e.isRight()) {
                     selectionBuilder.combineShapes();
                     stopBuildingSelection();
@@ -179,14 +179,16 @@ public class SelectionTool extends DragTool {
             boolean startFromCenter = (!altMeansSubtract) && e.isAltDown();
             userDrag.setStartFromCenter(startFromCenter);
 
-            selectionBuilder.updateSelection(userDrag.toImDrag());
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
             selectionBuilder.combineShapes();
             stopBuildingSelection();
+
+            assert !comp.hasBuiltSelection();
         }
 
         altMeansSubtract = false;
-        assert !comp.hasBuiltSelection();
-        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) :
+
+        assert ConsistencyChecks.selectionIsOK(comp) :
                 "selection is outside";
     }
 
@@ -195,7 +197,7 @@ public class SelectionTool extends DragTool {
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
-                selectionBuilder.updateSelection(e);
+                selectionBuilder.updateBuiltSelection(e);
                 selectionBuilder.combineShapes();
                 stopBuildingSelection();
                 return;
@@ -209,14 +211,14 @@ public class SelectionTool extends DragTool {
 
         Composition comp = e.getComp();
         deselect(comp, true);
+        assert !comp.hasBuiltSelection() : "built selection is = " + comp.getBuiltSelection();
 
         altMeansSubtract = false;
 
         if (Build.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
-        assert !comp.hasBuiltSelection();
-        assert ConsistencyChecks.selectionIsNotOutsideCanvas(comp) :
+        assert ConsistencyChecks.selectionIsOK(comp) :
                 "selection is outside";
     }
 

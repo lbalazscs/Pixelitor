@@ -35,7 +35,6 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.mockito.Mockito.mock;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
@@ -77,16 +76,13 @@ public class ContentLayerTest {
 
         comp.addLayerInInitMode(layer);
 
-        LayerButton ui = mock(LayerButton.class);
-        layer.setUI(ui);
-
         withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
 
         assert comp.getNumLayers() == 1 : "found " + comp.getNumLayers() + " layers";
         History.clear();

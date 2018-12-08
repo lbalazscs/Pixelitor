@@ -38,7 +38,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.spy;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.DIFFERENCE;
 import static pixelitor.layers.BlendingMode.NORMAL;
@@ -82,9 +81,6 @@ public class LayerTest {
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);
 
-        LayerButton ui = spy(layer.getUI());
-        layer.setUI(ui);
-
         comp.addLayerInInitMode(layer);
 
         ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
@@ -96,9 +92,9 @@ public class LayerTest {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(ui, layer, mask, 0, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
 
-        comp.setActiveLayer(layer, true, null);
+        comp.setActiveLayer(layer, true, true, null);
 
         assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
 

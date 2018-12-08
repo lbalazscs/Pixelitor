@@ -28,20 +28,18 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Stroke;
 
-import static pixelitor.tools.shapes.TwoPointBasedPaint.NONE;
-import static pixelitor.tools.shapes.TwoPointBasedPaint.RADIAL_GRADIENT;
+import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
+import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
 
 public class ShapeSettings {
     private boolean regenerate = true;
 
     private final EnumComboBoxModel<ShapeType> typeModel
             = new EnumComboBoxModel<>(ShapeType.class);
-    private final EnumComboBoxModel<ShapesTarget> targetModel
-            = new EnumComboBoxModel<>(ShapesTarget.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> fillPaintModel
-            = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
-    private final EnumComboBoxModel<TwoPointBasedPaint> strokePaintModel
-            = new EnumComboBoxModel<>(TwoPointBasedPaint.class);
+    private final EnumComboBoxModel<TwoPointPaintType> fillPaintModel
+        = new EnumComboBoxModel<>(TwoPointPaintType.class);
+    private final EnumComboBoxModel<TwoPointPaintType> strokePaintModel
+        = new EnumComboBoxModel<>(TwoPointPaintType.class);
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
@@ -63,17 +61,17 @@ public class ShapeSettings {
         if (regenerate) {
             tool.regenerateShape();
         }
-        tool.updateEnabledState();
+        tool.updateStrokeEnabledState();
     }
 
-    public JComboBox<TwoPointBasedPaint> createFillPaintCombo() {
+    public JComboBox<TwoPointPaintType> createFillPaintCombo() {
         JComboBox cb = new JComboBox<>(fillPaintModel);
         cb.setMaximumRowCount(fillPaintModel.getSize());
         cb.addActionListener(e -> guiChanged());
         return cb;
     }
 
-    public JComboBox<TwoPointBasedPaint> createStrokePaintCombo() {
+    public JComboBox<TwoPointPaintType> createStrokePaintCombo() {
         JComboBox cb = new JComboBox<>(strokePaintModel);
         cb.setMaximumRowCount(strokePaintModel.getSize());
         cb.addActionListener(e -> guiChanged());
@@ -88,29 +86,19 @@ public class ShapeSettings {
         return shapeTypeCB;
     }
 
-    public JComboBox<ShapesTarget> createTargetCombo() {
-        JComboBox<ShapesTarget> actionCB = new JComboBox<>(targetModel);
-        actionCB.addActionListener(e -> guiChanged());
-        return actionCB;
-    }
-
     public JDialog buildEffectsDialog(JDialog owner) {
         return effectsParam.buildDialog(owner, false);
-    }
-
-    public ShapesTarget getSelectedTarget() {
-        return targetModel.getSelectedItem();
     }
 
     public ShapeType getSelectedType() {
         return typeModel.getSelectedItem();
     }
 
-    public TwoPointBasedPaint getSelectedFillPaint() {
+    public TwoPointPaintType getSelectedFillPaint() {
         return fillPaintModel.getSelectedItem();
     }
 
-    public TwoPointBasedPaint getSelectedStrokePaint() {
+    public TwoPointPaintType getSelectedStrokePaint() {
         return strokePaintModel.getSelectedItem();
     }
 
@@ -148,8 +136,8 @@ public class ShapeSettings {
         try {
             // the shape target cannot change for a styled shape edit
             typeModel.setSelectedItem(styledShape.getShapeType());
-            fillPaintModel.setSelectedItem(styledShape.getFillPaint());
-            strokePaintModel.setSelectedItem(styledShape.getStrokePaint());
+            fillPaintModel.setSelectedItem(styledShape.getFillPaintType());
+            strokePaintModel.setSelectedItem(styledShape.getStrokePaintType());
             strokeParam.setState(styledShape.getStrokeSettings());
             effectsParam.setEffects(styledShape.getEffects());
         } finally {
@@ -159,7 +147,6 @@ public class ShapeSettings {
 
     public void addToDebugNode(DebugNode node) {
         node.addString("Type", getSelectedType().toString());
-        node.addString("Target", getSelectedTarget().toString());
         node.addString("Fill", getSelectedFillPaint().toString());
         node.addString("Stroke", getSelectedStrokePaint().toString());
         strokeParam.addDebugNodeInfo(node);

@@ -186,8 +186,8 @@ public class OpenRaster {
         String documentElementNodeName = doc.getNodeName();
         if (!documentElementNodeName.equals("image")) {
             throw new IllegalStateException(format(
-                    "stack.xml root element is '%s', expected: 'image'",
-                    documentElementNodeName));
+                "stack.xml root element is '%s', expected: 'image'",
+                documentElementNodeName));
         }
 
         int compWidth = parseInt(doc.getAttribute("w").trim());
@@ -233,7 +233,7 @@ public class OpenRaster {
 
             comp.addLayerInInitMode(layer);
         }
-        comp.setActiveLayer(comp.getLayer(0));
+        comp.setActiveLayer(comp.getLayer(0), false);
 
         pt.finish();
 

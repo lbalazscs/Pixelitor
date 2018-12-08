@@ -25,8 +25,8 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.debug.Ansi;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * Events happening inside the app - used for debugging.
@@ -42,25 +42,25 @@ public class Events {
 
     private static final int MAX_SIZE = 100;
 
-    private static final List<PixelitorEvent> eventList = new LinkedList<>();
+    private static final Queue<PixelitorEvent> events = new ArrayDeque<>();
 
     public static void post(PixelitorEvent event) {
         if (VERBOSE) {
-            System.err.println("Events::post: " + event);
+            System.out.println(event);
         }
-        eventList.add(event);
+        events.add(event);
 
-        if (eventList.size() > MAX_SIZE) {
-            eventList.remove(0);
+        if (events.size() > MAX_SIZE) {
+            events.remove();
         }
     }
 
     public static void postListenerEvent(String type, Composition comp, Layer layer) {
-        post(new PixelitorEvent("[LISTENER] " + type, comp, layer));
+        post(new PixelitorEvent(Ansi.blue("  [LISTENER ") + type + "]", comp, layer));
     }
 
     public static void postMouseEvent(String msg) {
-        post(new PixelitorEvent("[MOUSE] " + msg, null, null));
+        post(new PixelitorEvent(Ansi.purple("  [MOUSE ") + msg + "]", null, null));
     }
 
     public static void postAssertJEvent(String type) {
@@ -68,25 +68,25 @@ public class Events {
     }
 
     public static void postAssertJEvent(String type, Composition comp, Layer layer) {
-        post(new PixelitorEvent("[ASSERTJ] " + type, comp, layer));
+        post(new PixelitorEvent("[ASSERTJ " + type + "]", comp, layer));
     }
 
     public static void postAddToHistoryEvent(PixelitorEdit edit) {
-        post(new PixelitorEvent(Ansi.cyan("    [ADD TO HIST]")
-                + edit.getDebugName(), null, null));
+        post(new PixelitorEvent(Ansi.cyan("  [ADD TO HIST ")
+            + edit.getDebugName() + "]", null, null));
     }
 
     public static void postUndoEvent(PixelitorEdit editToBeUndone) {
         String editName = editToBeUndone.getDebugName();
-        post(new PixelitorEvent("    ["
-                + Ansi.red("UNDO ")
+        post(new PixelitorEvent("  ["
+            + Ansi.red("UNDO ")
                 + editName + "]", null, null));
     }
 
     public static void postRedoEvent(PixelitorEdit editToBeRedone) {
         String editName = editToBeRedone.getDebugName();
         post(new PixelitorEvent("    ["
-                + Ansi.green("REDO ")
+            + Ansi.green("  REDO ")
                 + editName + "]", null, null));
     }
 
@@ -99,7 +99,7 @@ public class Events {
      * An event that signalizes the start of a RandomGUITest step
      */
     public static void postRandomTestEvent(String description) {
-        post(new PixelitorEvent("[RAND] " + description, null, null));
+        post(new PixelitorEvent(Ansi.yellow("[RAND ") + description + "]", null, null));
     }
 
     public static void postProgramError(String s, Composition comp, Layer layer) {
@@ -111,13 +111,13 @@ public class Events {
      */
     public static void dumpForActiveComp() {
         Composition comp = ImageComponents.getActiveCompOrNull();
-        eventList.stream()
+        events.stream()
                 .filter(e -> e.isComp(comp))
                 .forEach(System.out::println);
     }
 
     public static void dumpMouse() {
-        eventList.stream()
+        events.stream()
                 .filter(e -> e.toString().startsWith("[MOUSE]"))
                 .forEach(System.out::println);
     }
@@ -126,6 +126,6 @@ public class Events {
      * Dumps the last events.
      */
     public static void dumpAll() {
-        eventList.forEach(System.out::println);
+        events.forEach(System.out::println);
     }
 }

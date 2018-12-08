@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertNotSame;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
@@ -87,9 +86,6 @@ public class ImageLayerTest {
 
         layer = TestHelper.createImageLayer("layer 1", comp);
 
-        LayerButton ui = mock(LayerButton.class);
-        layer.setUI(ui);
-
         withMask.setupFor(layer);
         LayerMask mask = null;
         if (withMask.isYes()) {
@@ -98,12 +94,12 @@ public class ImageLayerTest {
 
         withTranslation.setupFor(layer);
 
-        int layerIconUpdatesAtStart = 0;
+        int layerIconUpdatesAtStart = 1;
         if (withTranslation.isYes()) {
-            layerIconUpdatesAtStart = 1;
+            layerIconUpdatesAtStart = 2;
         }
 
-        iconUpdates = new IconUpdateChecker(ui, layer, mask, layerIconUpdatesAtStart, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, 1);
     }
 
     @Test

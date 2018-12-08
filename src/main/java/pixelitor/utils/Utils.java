@@ -534,6 +534,9 @@ public final class Utils {
         if (rightMouse) {
             msg.append(Ansi.yellow("right-"));
         }
+        if (e.isPopupTrigger()) {
+            msg.append(Ansi.cyan("popup-"));
+        }
         return msg.toString();
     }
 

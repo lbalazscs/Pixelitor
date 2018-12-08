@@ -22,6 +22,7 @@ import org.assertj.swing.core.Robot;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
+import pixelitor.gui.ImageComponents;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -191,6 +192,12 @@ public class Mouse {
         robot.releaseKey(VK_CONTROL);
     }
 
+    void shiftClick() {
+        robot.pressKey(VK_SHIFT);
+        click();
+        robot.releaseKey(VK_SHIFT);
+    }
+
     void ctrlClickScreen(int x, int y) {
         moveToScreen(x, y);
         ctrlClick();
@@ -200,9 +207,19 @@ public class Mouse {
         ctrlClickScreen(x + canvasBounds.x, y + canvasBounds.y);
     }
 
+    void randomCtrlClick() {
+        moveRandomlyWithinCanvas();
+        ctrlClick();
+    }
+
     void randomAltClick() {
         moveRandomlyWithinCanvas();
         altClick();
+    }
+
+    void randomShiftClick() {
+        moveRandomlyWithinCanvas();
+        shiftClick();
     }
 
     void dragFromCanvasCenterToTheRight() {
@@ -215,7 +232,8 @@ public class Mouse {
     }
 
     void recalcCanvasBounds() {
-        canvasBounds = EDT.getVisibleCanvasBoundsOnScreen();
+        canvasBounds = EDT.call(() ->
+            ImageComponents.getActiveIC().getVisibleCanvasBoundsOnScreen());
 
 //        debugCanvasBounds();
     }

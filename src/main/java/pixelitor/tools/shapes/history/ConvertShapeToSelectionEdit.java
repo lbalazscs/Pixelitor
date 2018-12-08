@@ -15,48 +15,48 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.pen.history;
+package pixelitor.tools.shapes.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
-import pixelitor.tools.pen.Path;
+import pixelitor.tools.shapes.StyledShape;
+import pixelitor.tools.transform.TransformBox;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.Shape;
 
-public class ConvertSelectionToPathEdit extends PixelitorEdit {
-    private final Shape oldSelectionShape;
-    private final Path oldPath;
+public class ConvertShapeToSelectionEdit extends PixelitorEdit {
+    private final TransformBox box;
+    private final StyledShape styledShape;
+    private final PixelitorEdit selectionEdit;
 
-    public ConvertSelectionToPathEdit(Composition comp,
-                                      Shape oldSelectionShape, Path oldPath) {
-        super("Convert Selection to Path", comp);
-        this.oldSelectionShape = oldSelectionShape;
-        this.oldPath = oldPath;
+    public ConvertShapeToSelectionEdit(Composition comp,
+                                       TransformBox box,
+                                       StyledShape styledShape,
+                                       PixelitorEdit selectionEdit
+    ) {
+        super("Convert Path to Selection", comp);
+        this.box = box;
+        this.styledShape = styledShape;
+        this.selectionEdit = selectionEdit;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        assert !comp.hasSelection();
-
-        comp.setActivePath(oldPath);
-        if (Tools.PEN.isActive()) {
-            Tools.PEN.setPath(oldPath);
-        }
-
-        comp.createSelectionFromShape(oldSelectionShape);
-        Tools.SELECTION.activate();
+        selectionEdit.undo();
+        Tools.SHAPES.restoreBox(styledShape, box);
+        Tools.SHAPES.activate();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        SelectionActions.selectionToPath(comp, false);
+        selectionEdit.redo();
+        Tools.SHAPES.resetStateToInitial();
+        Tools.SELECTION.activate();
     }
 }

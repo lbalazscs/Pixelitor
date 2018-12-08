@@ -24,6 +24,7 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
@@ -180,6 +181,11 @@ public class PathTransformer implements PenToolMode {
     @Override
     public boolean requiresExistingPath() {
         return true;
+    }
+
+    @VisibleForTesting
+    public TransformBox getBox(int index) {
+        return boxes.get(index);
     }
 
     @Override

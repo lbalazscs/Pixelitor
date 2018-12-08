@@ -24,11 +24,13 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -182,9 +184,9 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean handleContains(double x, double y) {
         return (x > (this.x - HANDLE_RADIUS))
-                && (x < (this.x + HANDLE_RADIUS))
-                && (y > (this.y - HANDLE_RADIUS))
-                && (y < (this.y + HANDLE_RADIUS));
+            && (x < (this.x + HANDLE_RADIUS))
+            && (y > (this.y - HANDLE_RADIUS))
+            && (y < (this.y + HANDLE_RADIUS));
     }
 
     public void paintHandle(Graphics2D g) {
@@ -309,7 +311,7 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean samePositionAs(DraggablePoint that, double epsilon) {
         return Math.abs(this.x - that.x) < epsilon
-                && Math.abs(this.y - that.y) < epsilon;
+            && Math.abs(this.y - that.y) < epsilon;
     }
 
     public void copyPositionFrom(DraggablePoint that) {
@@ -326,6 +328,12 @@ public class DraggablePoint extends Point2D.Double {
         return new Point2D.Double(imX, imY);
     }
 
+    public Point getScreenCoords() {
+        Point p = new Point((int) x, (int) y);
+        SwingUtilities.convertPointToScreen(p, (JComponent) view);
+        return p;
+    }
+
     public PPoint asPPoint() {
         return PPoint.lazyFromCo(x, y, view);
     }
@@ -338,7 +346,7 @@ public class DraggablePoint extends Point2D.Double {
 
         Point2D before = new Point2D.Double(origX, origY);
         HandleMovedEdit edit = new HandleMovedEdit(
-                getMoveEditName(), this, before, comp);
+            getMoveEditName(), this, before, comp);
         return Optional.of(edit);
     }
 
@@ -367,19 +375,19 @@ public class DraggablePoint extends Point2D.Double {
 
     public String toColoredString() {
         String sb = String.format("\u001B[32m%s\u001B[0m " +
-                        "{x = \u001B[33m%.2f\u001B[0m, " +
-                        "y = \u001B[33m%.2f\u001B[0m}" +
-                        "{imX = \u001B[36m%.1f\u001B[0m, " +
-                        "imY = \u001B[36m%.1f\u001B[0m}",
-                name, x, y, imX, imY);
+                "{x = \u001B[33m%.2f\u001B[0m, " +
+                "y = \u001B[33m%.2f\u001B[0m}" +
+                "{imX = \u001B[36m%.1f\u001B[0m, " +
+                "imY = \u001B[36m%.1f\u001B[0m}",
+            name, x, y, imX, imY);
         return sb;
     }
 
     @Override
     public String toString() {
         String sb = String
-                .format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
-                        name, x, y, imX, imY);
+            .format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
+                name, x, y, imX, imY);
         return sb;
     }
 

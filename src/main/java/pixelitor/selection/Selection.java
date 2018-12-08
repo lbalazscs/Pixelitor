@@ -23,6 +23,7 @@ import pixelitor.gui.ImageComponent;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.view.ShowHideAction;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -59,6 +60,7 @@ public class Selection {
     private boolean frozen = false;
 
     public Selection(Shape shape, ImageComponent ic) {
+        // TODO should not allow selections with null shape
         assert ic != null;
 
         this.shape = shape;
@@ -298,6 +300,20 @@ public class Selection {
 
     public boolean isAlive() {
         return !dead;
+    }
+
+    public DebugNode createDebugNode(String name) {
+        DebugNode node = new DebugNode(name, this);
+
+        node.addBoolean("hidden", hidden);
+        node.addBoolean("dead", dead);
+        node.addBoolean("frozen", frozen);
+        node.addBoolean("marching", isMarching());
+
+        node.addString("Shape Class", shape.getClass().getName());
+        node.addString("Bounds", getShapeBounds().toString());
+
+        return node;
     }
 
     @Override

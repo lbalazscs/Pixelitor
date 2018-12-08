@@ -31,6 +31,8 @@ public class LayerNode extends DebugNode {
         if (layer.hasMask()) {
             LayerMask mask = layer.getMask();
             add(new LayerMaskNode(mask));
+        } else {
+            addString("has mask", "no");
         }
 
         addBoolean("mask enabled", layer.isMaskEnabled());

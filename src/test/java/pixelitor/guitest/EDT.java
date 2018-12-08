@@ -17,8 +17,8 @@
 
 package pixelitor.guitest;
 
+import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.ImageComponent;
 import pixelitor.gui.ImageComponents;
@@ -31,14 +31,17 @@ import pixelitor.selection.SelectionInteraction;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
+import pixelitor.tools.pen.PathTransformer;
 import pixelitor.tools.pen.PenTool;
+import pixelitor.tools.shapes.ShapesToolState;
+import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.test.Assertions;
 import pixelitor.utils.test.Events;
 
-import java.awt.Rectangle;
-import java.io.File;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.awt.Point;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 /**
  * Utility methods to execute queries, actions and assertions
@@ -48,50 +51,43 @@ public class EDT {
     private EDT() {
     }
 
+    public static <T> T call(Callable<T> callable) {
+        return GuiActionRunner.execute(callable);
+    }
+
+    public static void run(GuiActionRunnable runnable) {
+        GuiActionRunner.execute(runnable);
+    }
+
     public static ImageComponent getActiveIC() {
-        return GuiActionRunner.execute(ImageComponents::getActiveIC);
+        return call(ImageComponents::getActiveIC);
     }
 
     public static Composition getComp() {
-        return GuiActionRunner.execute(ImageComponents::getActiveCompOrNull);
+        return call(ImageComponents::getActiveCompOrNull);
     }
 
-    public static Canvas getCanvas() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveIC().getCanvas());
+    /**
+     * Returns the given property of the active composition
+     */
+    public static <T> T active(Function<Composition, T> fun) {
+        return call(() -> fun.apply(ImageComponents.getActiveCompOrNull()));
     }
 
-    public static Rectangle getVisibleCanvasBoundsOnScreen() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveIC().getVisibleCanvasBoundsOnScreen());
-    }
-
-    public static int getNumOpenImages() {
-        return GuiActionRunner.execute(ImageComponents::getNumOpenImages);
-    }
-
-    public static int getNumLayers() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveCompOrNull().getNumLayers());
+    public static <T> T activeTool(Function<Tool, T> fun) {
+        return call(() -> fun.apply(Tools.getCurrent()));
     }
 
     public static Selection getSelection() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveCompOrNull().getSelection());
+        return active(Composition::getSelection);
     }
 
     public static Guides getGuides() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveCompOrNull().getGuides());
+        return active(Composition::getGuides);
     }
 
     public static Layer getActiveLayer() {
-        return GuiActionRunner.execute(ImageComponents::getActiveLayerOrNull);
-    }
-
-    public static boolean activeLayerHasMask() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveLayerOrNull().hasMask());
+        return call(ImageComponents::getActiveLayerOrNull);
     }
 
     public static void assertThereIsSelection() {
@@ -107,85 +103,108 @@ public class EDT {
     }
 
     public static void assertSelectionInteractionIs(SelectionInteraction expected) {
-        SelectionInteraction actual = GuiActionRunner.execute(
-                Tools.SELECTION::getCurrentInteraction);
+        SelectionInteraction actual = call(Tools.SELECTION::getCurrentInteraction);
         if (expected != actual) {
             throw new AssertionError("expected " + expected + ", found " + actual);
         }
     }
 
-    public static void assertCurrentCompFileIs(File expected) {
-        GuiActionRunner.execute(() ->
-                assertThat(ImageComponents.getActiveCompOrNull().getFile()).isEqualTo(expected));
-    }
-
     public static void assertActiveToolsIs(Tool expected) {
-        Tool actual = GuiActionRunner.execute(Tools::getCurrent);
+        Tool actual = call(Tools::getCurrent);
         if (actual != expected) {
             throw new AssertionError("Expected " + expected
-                    + ", found " + actual);
+                + ", found " + actual);
         }
     }
 
     public static Path getPenToolPath() {
-        return GuiActionRunner.execute(() -> PenTool.path);
+        return call(() -> PenTool.path);
+    }
+
+    public static Point getPenToolBoxPos(int boxIndex,
+                                         Function<TransformBox, DraggablePoint> pointFun) {
+        return call(() -> {
+            PathTransformer mode = (PathTransformer) Tools.PEN.getMode();
+            TransformBox box = mode.getBox(boxIndex);
+            return pointFun.apply(box).getScreenCoords();
+        });
     }
 
     public static void undo(String edit) {
-        GuiActionRunner.execute(() -> History.undo(edit));
+        run(() -> History.undo(edit));
     }
 
     public static void redo(String edit) {
-        GuiActionRunner.execute(() -> History.redo(edit));
+        run(() -> History.redo(edit));
     }
 
     public static void assertEditToBeUndoneNameIs(String expected) {
-        GuiActionRunner.execute(
-                () -> History.assertEditToBeUndoneNameIs(expected));
+        run(() -> History.assertEditToBeUndoneNameIs(expected));
     }
 
     public static void assertEditToBeRedoneNameIs(String expected) {
-        GuiActionRunner.execute(
-                () -> History.assertEditToBeRedoneNameIs(expected));
+        run(() -> History.assertEditToBeRedoneNameIs(expected));
     }
 
     public static void postAssertJEvent(String evt) {
-        GuiActionRunner.execute(() -> Events.postAssertJEvent(evt));
+        run(() -> Events.postAssertJEvent(evt));
     }
 
     public static void increaseZoom() {
-        GuiActionRunner.execute(() ->
-                ImageComponents.getActiveIC().increaseZoom());
+        run(() -> ImageComponents.getActiveIC().increaseZoom());
     }
 
     public static void decreaseZoom() {
-        GuiActionRunner.execute(() ->
-                ImageComponents.getActiveIC().decreaseZoom());
+        run(() -> ImageComponents.getActiveIC().decreaseZoom());
     }
 
     public static ZoomLevel getZoomLevelOfActive() {
-        return GuiActionRunner.execute(() ->
-                ImageComponents.getActiveIC().getZoomLevel());
+        return call(() -> ImageComponents.getActiveIC().getZoomLevel());
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        GuiActionRunner.execute(() -> ImageComponents.assertZoomOfActiveIs(expected));
+        run(() -> ImageComponents.assertZoomOfActiveIs(expected));
     }
 
     public static void assertNumOpenImagesIs(int expected) {
-        GuiActionRunner.execute(() -> ImageComponents.assertNumOpenImagesIs(expected));
+        run(() -> ImageComponents.assertNumOpenImagesIs(expected));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int expected) {
-        GuiActionRunner.execute(() -> ImageComponents.assertNumOpenImagesIsAtLeast(expected));
+        run(() -> ImageComponents.assertNumOpenImagesIsAtLeast(expected));
     }
 
     public static void assertNumLayersIs(int expected) {
-        GuiActionRunner.execute(() -> Assertions.numLayersIs(expected));
+        run(() -> Assertions.numLayersIs(expected));
+    }
+
+    public static void assertShapesToolStateIs(ShapesToolState expected) {
+        ShapesToolState actual = call(Tools.SHAPES::getState);
+        if (actual != expected) {
+            throw new AssertionError("expected " + expected + ", found " + actual);
+        }
     }
 
     public static void activate(ImageComponent ic) {
-        GuiActionRunner.execute(() ->
-                ImageComponents.setActiveIC(ic, true));
+        run(() -> ImageComponents.setActiveIC(ic, true));
+    }
+
+    /**
+     * Returns the given property of the active layer.
+     */
+    public static <T> T activeLayer(Function<Layer, T> fun) {
+        return call(() -> fun.apply(ImageComponents.getActiveLayerOrNull()));
+    }
+
+    public static String activeLayerName() {
+        return activeLayer(Layer::getName);
+    }
+
+    public static boolean activeLayerIsMaskEditing() {
+        return activeLayer(Layer::isMaskEditing);
+    }
+
+    public static boolean activeLayerHasMask() {
+        return activeLayer(Layer::hasMask);
     }
 }

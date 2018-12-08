@@ -38,24 +38,24 @@ public class CompositionNode extends DebugNode {
 
         BufferedImage compositeImage = comp.getCompositeImage();
         BufferedImageNode imageNode = new BufferedImageNode(
-                "Composite Image", compositeImage);
+            "composite image", compositeImage);
         add(imageNode);
 
         Paths paths = comp.getPaths();
         if (paths == null) {
-            addBoolean("Paths", false);
+            addBoolean("has paths", false);
         } else {
             add(new PathsNode(paths));
         }
 
         Guides guides = comp.getGuides();
         if (guides == null) {
-            addBoolean("Guides", false);
+            addBoolean("has guides", false);
         } else {
             add(new GuidesNode(guides));
         }
 
-        addInt("numLayers", comp.getNumLayers());
+        addInt("num layers", comp.getNumLayers());
         addQuotedString("name", comp.getName());
 
         String filePath = "";
@@ -66,21 +66,24 @@ public class CompositionNode extends DebugNode {
 
         addQuotedString("file", filePath);
 
-        boolean dirty = comp.isDirty();
-        addBoolean("dirty", dirty);
+        addBoolean("dirty", comp.isDirty());
 
-        boolean hasSelection = comp.hasSelection();
-        addBoolean("hasSelection", hasSelection);
+        if (comp.hasBuiltSelection()) {
+            add(comp.getBuiltSelection().createDebugNode("Built Selection"));
+        } else {
+            addBoolean("has built selection", false);
+        }
 
-        if (hasSelection) {
-            SelectionNode selectionNode = new SelectionNode(comp.getSelection());
-            add(selectionNode);
+        if (comp.hasSelection()) {
+            add(comp.getSelection().createDebugNode("Selection"));
+        } else {
+            addBoolean("has selection", false);
         }
 
         int canvasWidth = comp.getCanvasImWidth();
-        addInt("canvasWidth", canvasWidth);
+        addInt("canvas im width", canvasWidth);
         int canvasHeight = comp.getCanvasImHeight();
-        addInt("canvasHeight", canvasHeight);
+        addInt("canvas im height", canvasHeight);
     }
 
     private void addLayerNode(Layer layer) {
