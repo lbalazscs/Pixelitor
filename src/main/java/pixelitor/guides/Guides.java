@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,12 @@ package pixelitor.guides;
 import pixelitor.Canvas;
 import pixelitor.CanvasMargins;
 import pixelitor.Composition;
-import pixelitor.DIContainer;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
+import pixelitor.utils.DIContainer;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
@@ -199,17 +199,17 @@ public class Guides implements Serializable {
     private void regenerateLines() {
         int width = comp.getCanvasImWidth();
         int height = comp.getCanvasImHeight();
-        CanvasMargins margins = comp.getIC().getCanvasMargins();
-        ImageComponent ic = comp.getIC();
+        CanvasMargins margins = comp.getView().getCanvasMargins();
+        CompositionView cv = comp.getView();
 
         lines = new ArrayList<>();
         for (Double h : horizontals) {
             double y = h * height;
 
             // the generated lines have to be in component space
-            double coStartX = ic.imageXToComponentSpace(0) - margins.getLeft();
-            double coStartY = ic.imageYToComponentSpace(y);
-            double coEndX = ic.imageXToComponentSpace(width) + margins.getRight();
+            double coStartX = cv.imageXToComponentSpace(0) - margins.getLeft();
+            double coStartY = cv.imageYToComponentSpace(y);
+            double coEndX = cv.imageXToComponentSpace(width) + margins.getRight();
             double coEndY = coStartY;
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
@@ -217,10 +217,10 @@ public class Guides implements Serializable {
         for (Double v : verticals) {
             double x = v * width;
 
-            double coStartX = ic.imageXToComponentSpace(x);
-            double coStartY = ic.imageYToComponentSpace(0) - margins.getTop();
+            double coStartX = cv.imageXToComponentSpace(x);
+            double coStartY = cv.imageYToComponentSpace(0) - margins.getTop();
             double coEndX = coStartX;
-            double coEndY = ic.imageYToComponentSpace(height) + margins.getBottom();
+            double coEndY = cv.imageYToComponentSpace(height) + margins.getBottom();
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
         }

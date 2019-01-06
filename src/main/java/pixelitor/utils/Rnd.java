@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,11 +21,14 @@ import java.awt.Color;
 import java.util.List;
 import java.util.Random;
 
-public class RandomUtils {
+/**
+ * Static utility methods related to random numbers
+ */
+public class Rnd {
     private static final Random rand = new Random();
 
-    private RandomUtils() {
-        // static utility methods, do not instantiate
+    private Rnd() {
+        // do not instantiate
     }
 
     @SafeVarargs

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,12 @@ package pixelitor.utils.test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 
 import static java.lang.String.format;
 
@@ -34,10 +34,10 @@ import static java.lang.String.format;
  * Listens to changes and generates events.
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
-        GlobalLayerMaskChangeListener, ActiveImageChangeListener {
+    GlobalLayerMaskChangeListener, CompActivationListener {
 
     public PixelitorEventListener() {
-        if (Build.CURRENT.isFinal()) {
+        if (Build.isFinal()) {
             throw new IllegalStateException("this should be only used for debugging");
         }
     }
@@ -45,7 +45,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     public void register() {
         Layers.addLayerChangeListener(this);
         Layers.addLayerMaskChangeListener(this);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
     }
 
     @Override
@@ -76,15 +76,15 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void noOpenImageAnymore() {
-        Events.postListenerEvent("noOpenImageAnymore", null, null);
+    public void allCompsClosed() {
+        Events.postListenerEvent("allCompsClosed", null, null);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
-        String oldICName = oldIC == null ? "null" : oldIC.getName();
-        Events.postListenerEvent(format("activeImageHasChanged %s => %s",
-                oldICName, newIC.getName()),
-                newIC.getComp(), null);
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+        String oldCVName = oldCV == null ? "null" : oldCV.getName();
+        Events.postListenerEvent(format("compActivated %s => %s",
+                oldCVName, newCV.getName()),
+                newCV.getComp(), null);
     }
 }

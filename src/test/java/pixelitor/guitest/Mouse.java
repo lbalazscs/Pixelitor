@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import org.assertj.swing.core.Robot;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -233,7 +233,7 @@ public class Mouse {
 
     void recalcCanvasBounds() {
         canvasBounds = EDT.call(() ->
-            ImageComponents.getActiveIC().getVisibleCanvasBoundsOnScreen());
+            OpenComps.getActiveView().getVisibleCanvasBoundsOnScreen());
 
 //        debugCanvasBounds();
     }

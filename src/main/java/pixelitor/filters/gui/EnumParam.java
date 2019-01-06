@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.event.ListDataListener;
 
@@ -41,7 +41,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     @Override
     public void randomize() {
         setSelectedItem(
-                RandomUtils.chooseFrom(enumConstants),
+            Rnd.chooseFrom(enumConstants),
                 false);
     }
 

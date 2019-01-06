@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.crop;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.tools.TransformHelper;
 import pixelitor.tools.util.ArrowKey;
@@ -92,9 +92,7 @@ public class CropBox {
     }
 
     private void drawRect(Graphics2D g) {
-        Rectangle rect = getSelectedRectInComponentSpace();
-
-        Shapes.drawVisible(g, rect);
+        Shapes.drawVisible(g, getSelectedCoRect());
     }
 
     private void drawHandles(Graphics2D g) {
@@ -103,7 +101,7 @@ public class CropBox {
         }
     }
 
-    private Rectangle getSelectedRectInComponentSpace() {
+    private Rectangle getSelectedCoRect() {
         int upperLeftX = (int) upperLeft.getX();
         int upperRightX = (int) upperRight.getX();
         int upperLeftY = (int) upperLeft.getY();
@@ -204,13 +202,13 @@ public class CropBox {
         transformMode = MODE_NONE;
     }
 
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
-        boolean isCursorSet = setCursorForPoint(e.getX(), e.getY(), ic);
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
+        boolean isCursorSet = setCursorForPoint(e.getX(), e.getY(), cv);
         if (!isCursorSet) {
             if (rect.containsCo(e.getX(), e.getY())) {
-                ic.setCursor(Cursors.MOVE);
+                cv.setCursor(Cursors.MOVE);
             } else {
-                ic.setCursor(Cursors.DEFAULT);
+                cv.setCursor(Cursors.DEFAULT);
             }
         }
     }
@@ -219,22 +217,22 @@ public class CropBox {
         return rect;
     }
 
-    public void coCoordsChanged(View ic) {
-        rect.coCoordsChanged(ic);
+    public void coCoordsChanged(View view) {
+        rect.coCoordsChanged(view);
         update(rect);
     }
 
     /**
      * Set size of selection in image space
      */
-    public void setImSize(int width, int height, ImageComponent ic) {
-        Rectangle2D imageSpaceRect = rect.getIm();
-        imageSpaceRect.setRect(imageSpaceRect.getX(), imageSpaceRect.getY(), width, height);
+    public void setImSize(int width, int height, CompositionView cv) {
+        Rectangle2D imRect = rect.getIm();
+        imRect.setRect(imRect.getX(), imRect.getY(), width, height);
 
-        rect.recalcCo(ic);
+        rect.recalcCo(cv);
 
         update(rect);
-        ic.repaint();
+        cv.repaint();
     }
 
     /**
@@ -244,7 +242,7 @@ public class CropBox {
         return adjusting;
     }
 
-    public void arrowKeyPressed(ArrowKey key, ImageComponent ic) {
+    public void arrowKeyPressed(ArrowKey key, CompositionView cv) {
 
         // two situation we need to take into consideration
         // 1. user zoom level is >= 100% then we always move rect by 1px
@@ -252,7 +250,7 @@ public class CropBox {
         // 2. user zoom level is < 100% then we scale up to ensure that user always see
         //    rect movement
 
-        double viewScale = ic.getZoomLevel().getViewScale();
+        double viewScale = cv.getZoomLevel().getViewScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
         Rectangle2D im = rect.getIm();
@@ -263,9 +261,9 @@ public class CropBox {
                 im.getHeight()
         );
 
-        rect.recalcCo(ic);
+        rect.recalcCo(cv);
         update(rect);
-        ic.repaint();
+        cv.repaint();
     }
 }
 

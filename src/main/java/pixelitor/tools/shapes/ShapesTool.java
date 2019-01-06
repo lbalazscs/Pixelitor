@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.tools.shapes;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
@@ -198,7 +198,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
         if (state == TRANSFORM) {
             transformBox.mouseMoved(e);
         }
@@ -207,20 +207,7 @@ public class ShapesTool extends DragTool {
     private void setState(ShapesToolState newState) {
         state = newState;
 
-        switch (newState) {
-            case TRANSFORM:
-                assert styledShape != null;
-                assert transformBox != null;
-                break;
-            case INITIAL_DRAG:
-                assert styledShape != null;
-                assert transformBox == null;
-                break;
-            case NO_INTERACTION:
-                assert styledShape == null;
-                assert transformBox == null;
-                break;
-        }
+        assert state.isOK(this);
 
         convertAction.setEnabled(newState == TRANSFORM);
     }
@@ -288,12 +275,12 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g, Canvas canvas, ImageComponent ic,
+    public void paintOverImage(Graphics2D g, Canvas canvas, CompositionView cv,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (state == INITIAL_DRAG) {
             // paint the drag display for the initial drag
-            super.paintOverImage(g, canvas, ic, componentTransform, imageTransform);
+            super.paintOverImage(g, canvas, cv, componentTransform, imageTransform);
         } else if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
@@ -333,7 +320,7 @@ public class ShapesTool extends DragTool {
 
         Shape shape = styledShape.getEffectiveShape();
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit == null) {
@@ -345,7 +332,7 @@ public class ShapesTool extends DragTool {
         History.addEdit(new ConvertShapeToSelectionEdit(
             comp, transformBox, styledShape, selectionEdit));
 
-        resetStateToInitial();
+        resetInitialState();
         Tools.SELECTION.activate();
     }
 
@@ -356,9 +343,9 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void coCoordsChanged(ImageComponent ic) {
+    public void coCoordsChanged(CompositionView cv) {
         if (transformBox != null) {
-            transformBox.coCoordsChanged(ic);
+            transformBox.coCoordsChanged(cv);
         }
     }
 
@@ -370,7 +357,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void resetStateToInitial() {
+    public void resetInitialState() {
         // true, for example, when the initial box creation is undone
         boolean hadShape = styledShape != null;
 
@@ -378,7 +365,7 @@ public class ShapesTool extends DragTool {
         styledShape = null;
         setState(NO_INTERACTION);
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp != null) { // this gets also called after a "close all"
             if (hadShape) {
                 comp.imageChanged();
@@ -390,7 +377,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void compReplaced(Composition oldComp, Composition newComp) {
-        resetStateToInitial();
+        resetInitialState();
     }
 
     /**
@@ -403,11 +390,15 @@ public class ShapesTool extends DragTool {
         styledShape = shape;
         transformBox = box;
         setState(TRANSFORM);
-        ImageComponents.getActiveCompOrNull().imageChanged();
+        OpenComps.getActiveCompOrNull().imageChanged();
     }
 
     public StyledShape getStyledShape() {
         return styledShape;
+    }
+
+    public TransformBox getTransformBox() {
+        return transformBox;
     }
 
     // used only for undo/redo
@@ -427,24 +418,24 @@ public class ShapesTool extends DragTool {
         if (transformBox != null) {
             assert styledShape != null;
             assert state == TRANSFORM : "state = " + state;
-            finalizeShape(ImageComponents.getActiveCompOrNull());
+            finalizeShape(OpenComps.getActiveCompOrNull());
         }
 
-        resetStateToInitial();
+        resetInitialState();
     }
 
     @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
         // finalize existing box
         if (transformBox != null) {
             assert styledShape != null;
             assert state == TRANSFORM : "state = " + state;
-            finalizeShape(oldIC.getComp());
+            finalizeShape(oldCV.getComp());
         } else {
             assert styledShape == null;
         }
 
-        super.activeImageHasChanged(oldIC, newIC);
+        super.compActivated(oldCV, newCV);
     }
 
     @VisibleForTesting

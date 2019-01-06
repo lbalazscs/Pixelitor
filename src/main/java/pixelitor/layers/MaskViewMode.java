@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
@@ -77,9 +77,9 @@ public enum MaskViewMode {
         Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
-                ImageComponents.onActiveIC(ic -> {
-                    Layer activeLayer = ic.getComp().getActiveLayer();
-                    activate(ic, activeLayer, "main menu");
+                OpenComps.onActiveIC(cv -> {
+                    Layer activeLayer = cv.getComp().getActiveLayer();
+                    activate(cv, activeLayer, "main menu");
                 });
             }
         };
@@ -102,26 +102,26 @@ public enum MaskViewMode {
     }
 
     public void activate(Layer activeLayer, String reason) {
-        ImageComponent ic = activeLayer.getComp().getIC();
-        activate(ic, activeLayer, reason);
+        CompositionView cv = activeLayer.getComp().getView();
+        activate(cv, activeLayer, reason);
     }
 
     public void activate(Composition comp, Layer activeLayer, String reason) {
-        activate(comp.getIC(), activeLayer, reason);
+        activate(comp.getView(), activeLayer, reason);
     }
 
-    public void activate(ImageComponent ic, Layer layer, String reason) {
-        assert ic != null;
+    public void activate(CompositionView cv, Layer layer, String reason) {
+        assert cv != null;
         if (Build.CURRENT != Build.FINAL) {
-            Events.postMaskViewActivate(this, ic, layer, reason);
+            Events.postMaskViewActivate(this, cv, layer, reason);
         }
 
-        boolean change = ic.setMaskViewMode(this);
+        boolean change = cv.setMaskViewMode(this);
         layer.setMaskEditing(editMask);
         if (change) {
             FgBgColors.setLayerMaskEditing(editMask);
 
-            if (!ic.isMock()) {
+            if (!cv.isMock()) {
                 Tools.BRUSH.setupMaskEditing(editMask);
                 Tools.CLONE.setupMaskEditing(editMask);
                 Tools.GRADIENT.setupMaskEditing(editMask);

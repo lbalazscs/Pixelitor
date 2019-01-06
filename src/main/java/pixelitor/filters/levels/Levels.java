@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.levels.gui.LevelsGUI;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.layers.Drawable;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -62,10 +62,10 @@ public class Levels extends FilterWithGUI {
 
     @Override
     public void randomizeSettings() {
-        int inputBlackValue = RandomUtils.nextInt(255);
-        int inputWhiteValue = RandomUtils.nextInt(255);
-        int outputBlackValue = RandomUtils.nextInt(255);
-        int outputWhiteValue = RandomUtils.nextInt(255);
+        int inputBlackValue = Rnd.nextInt(255);
+        int inputWhiteValue = Rnd.nextInt(255);
+        int outputBlackValue = Rnd.nextInt(255);
+        int outputWhiteValue = Rnd.nextInt(255);
         GrayScaleLookup g = new GrayScaleLookup(inputBlackValue, inputWhiteValue, outputBlackValue, outputWhiteValue);
         rgbLookup = new RGBLookup(g, g, g, g, g, g, g);
     }

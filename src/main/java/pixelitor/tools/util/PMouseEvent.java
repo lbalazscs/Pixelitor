@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.util;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class PMouseEvent extends PPoint.Lazy {
     }
 
     public JViewport getViewport() {
-        return (JViewport) getIC().getParent();
+        return (JViewport) getCV().getParent();
     }
 
     public MouseEvent getOrigEvent() {
@@ -99,7 +99,7 @@ public class PMouseEvent extends PPoint.Lazy {
     // TODO this is a workaround so that the transform box
     // demo can work without the main program
     public void imageChanged(Composition.ImageChangeActions actions) {
-        if(view instanceof ImageComponent) {
+        if(view instanceof CompositionView) {
             getComp().imageChanged(actions);
         } else {
             view.repaint();

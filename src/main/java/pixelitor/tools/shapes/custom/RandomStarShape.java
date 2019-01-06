@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,11 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.custom;
+package pixelitor.tools.shapes.custom;
 
 import net.jafama.FastMath;
 import pixelitor.utils.CachedFloatRandom;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -49,7 +49,7 @@ public class RandomStarShape implements Shape {
     private static double initialAngle;
 
     public static void randomize() {
-        numPoints = 2 * (4 + RandomUtils.nextInt(6));
+        numPoints = 2 * (4 + Rnd.nextInt(6));
         numRadius = 2; // if higher than 2 then sometimes nice dancing starts are produced, but often ugly ones
         radiusRatios = new double[numRadius];
         radiusRatios[0] = 1.0;

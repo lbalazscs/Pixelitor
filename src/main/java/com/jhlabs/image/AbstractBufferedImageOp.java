@@ -70,7 +70,7 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
         // if it is used as a helper filter, then the
         // calling filter will finish it
         if (!usedAsHelper) {
-            pt.finish();
+            pt.finished();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,10 @@ package pixelitor.menus.edit;
 
 import pixelitor.filters.Fade;
 import pixelitor.filters.FilterAction;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -31,13 +31,13 @@ import javax.swing.event.UndoableEditListener;
 /**
  * The Fade menu item. It is enabled only if fading is possible.
  */
-public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ActiveImageChangeListener {
+public class FadeMenuItem extends JMenuItem implements UndoableEditListener, CompActivationListener {
     public static final FadeMenuItem INSTANCE = new FadeMenuItem();
 
     private FadeMenuItem() {
         super(new FilterAction("Fade", Fade::new));
         History.addUndoableEditListener(this);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         setEnabled(false);
     }
 
@@ -58,12 +58,12 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Act
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setEnabled(false);
 
 // the following should be very slightly better, but goes into a complex territory:

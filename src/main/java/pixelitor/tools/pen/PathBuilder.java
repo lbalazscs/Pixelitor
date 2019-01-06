@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Build;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -77,7 +77,7 @@ public class PathBuilder implements PenToolMode {
 
 //        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mousePressed", e.getIC());
+            state = recoverFromUnexpectedDragState("mousePressed", e.getCV());
         }
 
         double x = e.getCoX();
@@ -223,7 +223,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseDragged", e.getIC(), state);
+            state = recoverFromUnexpectedMoveState("mouseDragged", e.getCV(), state);
             if (state == NO_INTERACTION) {
                 return;
             }
@@ -265,7 +265,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseReleased", e.getIC(), state);
+            state = recoverFromUnexpectedMoveState("mouseReleased", e.getCV(), state);
             if (state == NO_INTERACTION) {
                 return;
             }
@@ -320,14 +320,14 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
+    public boolean mouseMoved(MouseEvent e, CompositionView cv) {
         if (path == null) {
             return false;
         }
         BuildState state = path.getBuildState();
 //        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mouseMoved", ic);
+            state = recoverFromUnexpectedDragState("mouseMoved", cv);
         }
 
         int x = e.getX();
@@ -371,8 +371,8 @@ public class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedDragState(String where, ImageComponent ic) {
-        boolean active = ImageComponents.isActive(ic);
+    private static BuildState recoverFromUnexpectedDragState(String where, CompositionView cv) {
+        boolean active = OpenComps.isActive(cv);
         if (Build.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                     "where = '%s, active = %s'%n", where, active);
@@ -384,8 +384,8 @@ public class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedMoveState(String where, ImageComponent ic, BuildState state) {
-        boolean active = ImageComponents.isActive(ic);
+    private static BuildState recoverFromUnexpectedMoveState(String where, CompositionView cv, BuildState state) {
+        boolean active = OpenComps.isActive(cv);
         if (Build.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                     "where = '%s, active = %s'%n", where, active);

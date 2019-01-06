@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.io.DropListener;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -35,7 +35,7 @@ import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
 /**
  * The part of the GUI that manages the layers of a composition.
  */
-public class LayersContainer extends JPanel implements ActiveImageChangeListener {
+public class LayersContainer extends JPanel implements CompActivationListener {
     private LayersPanel layersPanel;
     private final JScrollPane scrollPane;
 
@@ -54,7 +54,7 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
 
         setBorder(createTitledBorder("Layers"));
 
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
 
         new DropTarget(this, new DropListener(NEW_LAYERS));
     }
@@ -95,22 +95,22 @@ public class LayersContainer extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         scrollPane.setViewportView(null);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
-        // the layers pane of the imageComponent is set in
-        // ImageComponent.onActivation()
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+        // the layers pane of the CompositionView is set in
+        // CompositionView.onActivation()
     }
 
     public static boolean areLayersShown() {
         return (INSTANCE.getParent() != null);
     }
 
-    public static void showLayersFor(ImageComponent ic) {
-        INSTANCE.setLayersPanel(ic.getLayersPanel());
+    public static void showLayersFor(CompositionView cv) {
+        INSTANCE.setLayersPanel(cv.getLayersPanel());
     }
 
     @VisibleForTesting

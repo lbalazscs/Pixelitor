@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.filters.Invert;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
  * An Action that adds a new adjustment layer to the active composition.
  */
 public class AddAdjLayerAction extends AbstractAction
-        implements ActiveImageChangeListener {
+    implements CompActivationListener {
 
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
@@ -41,12 +41,12 @@ public class AddAdjLayerAction extends AbstractAction
                 Icons.load("add_adj_layer.png"));
         putValue(Action.SHORT_DESCRIPTION, "Adds a new adjustment layer.");
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
 
         new LayerAdder(comp)
@@ -55,12 +55,12 @@ public class AddAdjLayerAction extends AbstractAction
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setEnabled(true);
     }
 }

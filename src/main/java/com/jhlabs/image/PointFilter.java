@@ -60,7 +60,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
 
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
         finishProgressTracker();
 
         return dst;
@@ -84,7 +84,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             };
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
         finishProgressTracker();
 
         return dst;

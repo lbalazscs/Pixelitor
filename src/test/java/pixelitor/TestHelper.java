@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ContentLayer;
@@ -115,12 +115,12 @@ public class TestHelper {
         when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
         when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
 
-        ImageComponent ic = createMockICWithoutComp();
-        when(ic.getComp()).thenReturn(comp);
-        when(ic.getCanvas()).thenReturn(canvas);
-        canvas.setIC(ic);
+        CompositionView cv = createMockViewWithoutComp();
+        when(cv.getComp()).thenReturn(comp);
+        when(cv.getCanvas()).thenReturn(canvas);
+        canvas.setView(cv);
 
-        when(comp.getIC()).thenReturn(ic);
+        when(comp.getView()).thenReturn(cv);
 
         when(comp.getSelection()).thenReturn(null);
 
@@ -175,20 +175,20 @@ public class TestHelper {
     }
 
     public static PMouseEvent createPEvent(int x, int y, int id,
-                                           ImageComponent ic) {
-        return createPEvent(x, y, id, Ctrl.NO, Alt.NO, Shift.NO, MouseButton.LEFT, ic);
+                                           CompositionView cv) {
+        return createPEvent(x, y, id, Ctrl.NO, Alt.NO, Shift.NO, MouseButton.LEFT, cv);
     }
 
     public static PMouseEvent createPEvent(int x, int y, int id,
                                            Ctrl ctrl, Alt alt, Shift shift,
-                                           MouseButton mouseButton, ImageComponent ic) {
-        MouseEvent e = createEvent(x, y, id, ctrl, alt, shift, mouseButton, ic);
-        return new PMouseEvent(e, ic);
+                                           MouseButton mouseButton, CompositionView cv) {
+        MouseEvent e = createEvent(x, y, id, ctrl, alt, shift, mouseButton, cv);
+        return new PMouseEvent(e, cv);
     }
 
     public static MouseEvent createEvent(int x, int y, int id,
                                          Ctrl ctrl, Alt alt, Shift shift,
-                                         MouseButton mouseButton, ImageComponent ic) {
+                                         MouseButton mouseButton, CompositionView cv) {
         int modifiers = 0;
         modifiers = ctrl.modify(modifiers);
         modifiers = alt.modify(modifiers);
@@ -199,7 +199,7 @@ public class TestHelper {
             popupTrigger = true;
         }
         //noinspection MagicConstant
-        return new MouseEvent(ic,
+        return new MouseEvent(cv,
                 id,
                 System.currentTimeMillis(),
                 modifiers,
@@ -210,56 +210,56 @@ public class TestHelper {
         );
     }
 
-    public static ImageComponent setupAMockICFor(Composition comp) {
-        ImageComponent ic = createMockICWithoutComp();
+    public static CompositionView setupAMockICFor(Composition comp) {
+        CompositionView cv = createMockViewWithoutComp();
 
-        when(ic.getComp()).thenReturn(comp);
-        when(ic.activeIsDrawable()).thenAnswer(
+        when(cv.getComp()).thenReturn(comp);
+        when(cv.activeIsDrawable()).thenAnswer(
                 invocation -> comp.activeIsDrawable());
 
-        comp.setIC(ic);
+        comp.setView(cv);
 
         // set it to active only after the comp is set
-        // because the active ic should return non-null in ic.getComp()
-        ImageComponents.setActiveIC(ic, false);
+        // because the active view should return non-null in cv.getComp()
+        OpenComps.setActiveIC(cv, false);
 
-        return ic;
+        return cv;
     }
 
-    public static ImageComponent createMockICWithoutComp() {
-        ImageComponent ic = mock(ImageComponent.class);
+    public static CompositionView createMockViewWithoutComp() {
+        CompositionView cv = mock(CompositionView.class);
 
-        when(ic.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
-        when(ic.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
+        when(cv.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
+        when(cv.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
 
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
-        when(ic.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
+        when(cv.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
             return new Rectangle(
                     (int) in.getX(), (int) in.getY(),
                     (int) in.getWidth(), (int) in.getHeight());
         });
 
-        when(ic.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
-        when(ic.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
-        when(ic.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
-        when(ic.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
-        when(ic.getViewScale()).thenReturn(1.0);
+        when(cv.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(cv.componentYToImageSpace(anyDouble())).then(returnsFirstArg());
+        when(cv.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
+        when(cv.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
+        when(cv.getViewScale()).thenReturn(1.0);
         
         Point fakeLocationOnScreen = new Point(0, 0);
-        when(ic.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
+        when(cv.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
 
         Cursor cursor = Cursor.getDefaultCursor();
-        when(ic.getCursor()).thenReturn(cursor);
+        when(cv.getCursor()).thenReturn(cursor);
 
         JViewport parent = new JViewport();
-        when(ic.getParent()).thenReturn(parent);
+        when(cv.getParent()).thenReturn(parent);
 
-        when(ic.isMock()).thenReturn(true);
-        when(ic.getMaskViewMode()).thenReturn(NORMAL);
+        when(cv.isMock()).thenReturn(true);
+        when(cv.getMaskViewMode()).thenReturn(NORMAL);
 
-        return ic;
+        return cv;
     }
 
     public static void addSelectionRectTo(Composition comp,
@@ -267,7 +267,7 @@ public class TestHelper {
         Rectangle shape = new Rectangle(x, y, width, height);
         MockingDetails mockingDetails = mockingDetails(comp);
         if (mockingDetails.isMock()) {
-            Selection selection = new Selection(shape, comp.getIC());
+            Selection selection = new Selection(shape, comp.getView());
             when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
         } else {
@@ -283,7 +283,7 @@ public class TestHelper {
     }
 
     public static void addRectangleSelection(Composition comp, Rectangle rect) {
-        comp.setSelectionRef(new Selection(rect, comp.getIC()));
+        comp.setSelectionRef(new Selection(rect, comp.getView()));
     }
 
     public static void setStandardTestTranslationToAllLayers(Composition comp,
@@ -324,48 +324,48 @@ public class TestHelper {
         }
     }
 
-    public static void press(int x, int y, ImageComponent ic) {
-        press(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    public static void press(int x, int y, CompositionView cv) {
+        press(x, y, Ctrl.NO, Alt.NO, Shift.NO, cv);
     }
 
     public static void press(int x, int y,
-                             Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+                             Ctrl ctrl, Alt alt, Shift shift, CompositionView cv) {
         MouseEvent e = createEvent(x, y, MOUSE_PRESSED,
-                ctrl, alt, shift, MouseButton.LEFT, ic);
-        Tools.EventDispatcher.mousePressed(e, ic);
+                ctrl, alt, shift, MouseButton.LEFT, cv);
+        Tools.EventDispatcher.mousePressed(e, cv);
     }
 
-    public static void drag(int x, int y, ImageComponent ic) {
-        drag(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    public static void drag(int x, int y, CompositionView cv) {
+        drag(x, y, Ctrl.NO, Alt.NO, Shift.NO, cv);
     }
 
     public static void drag(int x, int y,
-                            Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+                            Ctrl ctrl, Alt alt, Shift shift, CompositionView cv) {
         MouseEvent e = createEvent(x, y, MOUSE_DRAGGED,
-                ctrl, alt, shift, MouseButton.LEFT, ic);
-        Tools.EventDispatcher.mouseDragged(e, ic);
+                ctrl, alt, shift, MouseButton.LEFT, cv);
+        Tools.EventDispatcher.mouseDragged(e, cv);
     }
 
-    public static void release(int x, int y, ImageComponent ic) {
-        release(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    public static void release(int x, int y, CompositionView cv) {
+        release(x, y, Ctrl.NO, Alt.NO, Shift.NO, cv);
     }
 
     public static void release(int x, int y,
-                               Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+                               Ctrl ctrl, Alt alt, Shift shift, CompositionView cv) {
         MouseEvent e = createEvent(x, y, MOUSE_RELEASED,
-                ctrl, alt, shift, MouseButton.LEFT, ic);
-        Tools.EventDispatcher.mouseReleased(e, ic);
+                ctrl, alt, shift, MouseButton.LEFT, cv);
+        Tools.EventDispatcher.mouseReleased(e, cv);
     }
 
-    public static void move(int x, int y, ImageComponent ic) {
-        move(x, y, Ctrl.NO, Alt.NO, Shift.NO, ic);
+    public static void move(int x, int y, CompositionView cv) {
+        move(x, y, Ctrl.NO, Alt.NO, Shift.NO, cv);
     }
 
     public static void move(int x, int y,
-                            Ctrl ctrl, Alt alt, Shift shift, ImageComponent ic) {
+                            Ctrl ctrl, Alt alt, Shift shift, CompositionView cv) {
         MouseEvent e = createEvent(x, y, MOUSE_MOVED,
-                ctrl, alt, shift, MouseButton.LEFT, ic);
-        Tools.EventDispatcher.mouseMoved(e, ic);
+                ctrl, alt, shift, MouseButton.LEFT, cv);
+        Tools.EventDispatcher.mouseMoved(e, cv);
     }
 
     public static void assertHistoryEditsAre(String... values) {

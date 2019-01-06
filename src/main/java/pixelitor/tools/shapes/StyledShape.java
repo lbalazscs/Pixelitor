@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
@@ -351,7 +351,7 @@ public class StyledShape implements Cloneable {
 
         transformBox.applyTransformation();
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         History.addEdit(new StyledShapeEdit(comp, backup));
         comp.imageChanged();
     }

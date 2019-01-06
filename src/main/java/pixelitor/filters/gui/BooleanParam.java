@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -126,7 +126,7 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            boolean randomValue = RandomUtils.nextBoolean();
+            boolean randomValue = Rnd.nextBoolean();
             setValue(randomValue, true, false);
         }
     }

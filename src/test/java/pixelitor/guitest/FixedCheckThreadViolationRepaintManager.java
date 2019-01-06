@@ -96,7 +96,7 @@ abstract class FixedCheckThreadViolationRepaintManager extends RepaintManager {
             if (lastComponent != null && c == lastComponent.get()) {
                 return;
             }
-            lastComponent = new WeakReference<JComponent>(c);
+            lastComponent = new WeakReference<>(c);
             violationFound(c, stackTrace);
         }
     }

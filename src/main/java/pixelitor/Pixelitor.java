@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,8 +22,8 @@ import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
@@ -168,7 +168,7 @@ public class Pixelitor {
     }
 
     public static void exitApp(PixelitorWindow pw) {
-        if (ImageComponents.thereAreUnsavedChanges()) {
+        if (OpenComps.thereAreUnsavedChanges()) {
             String msg = "There are unsaved changes. Are you sure you want to exit?";
             if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
                 pw.setVisible(false);
@@ -207,7 +207,7 @@ public class Pixelitor {
 
 //        Tests3x3.addStandardImage(false);
 
-//        ImageComponents.getActiveIC().setZoom(ZoomLevel.Z6400, true);
+//        ImageComponents.getActiveCV().setZoom(ZoomLevel.Z6400, true);
 
 //        GlobalKeyboardWatch.registerDebugMouseWatching(false);
 
@@ -230,7 +230,7 @@ public class Pixelitor {
     private static void addTestPath() {
         Rectangle2D.Double shape = new Rectangle2D.Double(100, 100, 300, 100);
 
-        Path path = Shapes.shapeToPath(shape, ImageComponents.getActiveIC());
+        Path path = Shapes.shapeToPath(shape, OpenComps.getActiveView());
 
         Tools.PEN.setPath(path);
         Tools.PEN.startRestrictedMode(EDIT, false);
@@ -243,19 +243,19 @@ public class Pixelitor {
 
     private static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
-        ImageComponent ic = ImageComponents.getActiveIC();
-        Layer layer = ic.getComp()
+        CompositionView cv = OpenComps.getActiveView();
+        Layer layer = cv.getComp()
                 .getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(ic, layer, "after-start test");
+        MaskViewMode.SHOW_MASK.activate(cv, layer, "after-start test");
     }
 
     private static void startFilter(Filter filter) {
-        filter.startOn(ImageComponents.getActiveDrawableOrThrow());
+        filter.startOn(OpenComps.getActiveDrawableOrThrow());
     }
 
     private static void addNewImage() {
         NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-        ImageComponents.getActiveLayerOrNull()
+        OpenComps.getActiveLayerOrNull()
                 .addMask(LayerMaskAddType.PATTERN);
     }
 

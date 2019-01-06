@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
@@ -52,8 +52,8 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            Composition comp = ic.getComp();
+            CompositionView cv = OpenComps.getActiveView();
+            Composition comp = cv.getComp();
 
             if (source == CopySource.LAYER) {
                 Layer layer = comp.getActiveLayer();

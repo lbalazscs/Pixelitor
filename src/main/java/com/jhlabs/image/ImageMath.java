@@ -24,22 +24,22 @@ public class ImageMath {
     /**
      * The value of pi as a float.
      */
-    public final static float PI = (float) Math.PI;
+    public static final float PI = (float) Math.PI;
 
     /**
      * The value of half pi as a float.
      */
-    public final static float HALF_PI = (float) Math.PI / 2.0f;
+    public static final float HALF_PI = (float) Math.PI / 2.0f;
 
     /**
      * The value of quarter pi as a float.
      */
-    public final static float QUARTER_PI = (float) Math.PI / 4.0f;
+    public static final float QUARTER_PI = (float) Math.PI / 4.0f;
 
     /**
      * The value of two pi as a float.
      */
-    public final static float TWO_PI = (float) Math.PI * 2.0f;
+    public static final float TWO_PI = (float) Math.PI * 2.0f;
 
     /**
      * Apply a bias to a number in the unit interval, moving numbers towards 0 or 1
@@ -189,11 +189,11 @@ public class ImageMath {
      *
      * @param a the lower clamp threshold
      * @param b the upper clamp threshold
-     * @param x the input parameter
+     * @param input the input parameter
      * @return the clamped value
      */
-    public static float clamp(float x, float a, float b) {
-        return (x < a) ? a : (x > b) ? b : x;
+    public static float clamp(float input, float a, float b) {
+        return (input < a) ? a : (input > b) ? b : input;
     }
 
     /**
@@ -201,11 +201,11 @@ public class ImageMath {
      *
      * @param a the lower clamp threshold
      * @param b the upper clamp threshold
-     * @param x the input parameter
+     * @param input the input parameter
      * @return the clamped value
      */
-    public static int clamp(int x, int a, int b) {
-        return (x < a) ? a : (x > b) ? b : x;
+    public static int clamp(int input, int a, int b) {
+        return (input < a) ? a : (input > b) ? b : input;
     }
 
     /**
@@ -482,22 +482,22 @@ public class ImageMath {
     }
 
     // Catmull-Rom splines
-    private final static float m00 = -0.5f;
-    private final static float m01 = 1.5f;
-    private final static float m02 = -1.5f;
-    private final static float m03 = 0.5f;
-    private final static float m10 = 1.0f;
-    private final static float m11 = -2.5f;
-    private final static float m12 = 2.0f;
-    private final static float m13 = -0.5f;
-    private final static float m20 = -0.5f;
-    private final static float m21 = 0.0f;
-    private final static float m22 = 0.5f;
-    private final static float m23 = 0.0f;
-    private final static float m30 = 0.0f;
-    private final static float m31 = 1.0f;
-    private final static float m32 = 0.0f;
-    private final static float m33 = 0.0f;
+    private static final float m00 = -0.5f;
+    private static final float m01 = 1.5f;
+    private static final float m02 = -1.5f;
+    private static final float m03 = 0.5f;
+    private static final float m10 = 1.0f;
+    private static final float m11 = -2.5f;
+    private static final float m12 = 2.0f;
+    private static final float m13 = -0.5f;
+    private static final float m20 = -0.5f;
+    private static final float m21 = 0.0f;
+    private static final float m22 = 0.5f;
+    private static final float m23 = 0.0f;
+    private static final float m30 = 0.0f;
+    private static final float m31 = 1.0f;
+    private static final float m32 = 0.0f;
+    private static final float m33 = 0.0f;
 
     /**
      * Compute a Catmull-Rom spline.

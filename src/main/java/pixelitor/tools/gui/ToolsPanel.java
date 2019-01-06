@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.gui;
 
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.MappedKey;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
@@ -53,7 +53,7 @@ public class ToolsPanel extends JPanel {
                 AddTextLayerAction.INSTANCE.actionPerformed(null);
             }
         };
-        GlobalKeyboardWatch.add(MappedKey.fromChar(
+        GlobalEventWatch.add(MappedKey.fromChar(
                 't', true, "text", textToolAction));
     }
 
@@ -70,7 +70,7 @@ public class ToolsPanel extends JPanel {
         String toolName = tool.getName();
         char activationChar = tool.getActivationKeyChar();
 
-        GlobalKeyboardWatch.add(MappedKey.fromChar(
+        GlobalEventWatch.add(MappedKey.fromChar(
                 activationChar, true, toolName, activateAction));
     }
 }

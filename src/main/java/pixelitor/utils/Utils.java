@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import net.jafama.FastMath;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
@@ -219,9 +219,9 @@ public final class Utils {
     @SuppressWarnings("WeakerAccess")
     public static void debugImage(BufferedImage img, String name) {
         BufferedImage copy = ImageUtils.copyImage(img);
-        ImageComponent savedIC = ImageComponents.getActiveIC();
+        CompositionView savedView = OpenComps.getActiveView();
 
-        Optional<Composition> debugCompOpt = ImageComponents.findCompositionByName(name);
+        Optional<Composition> debugCompOpt = OpenComps.findCompositionByName(name);
         if (debugCompOpt.isPresent()) { // TODO after Java 9: ifPresentOrElse​
             // if we already have a debug composition, simply replace the image
             Composition comp = debugCompOpt.get();
@@ -235,11 +235,11 @@ public final class Utils {
             comp.repaint();
         } else {
             Composition comp = Composition.fromImage(copy, null, name);
-            ImageComponents.addAsNewImage(comp);
+            OpenComps.addAsNewImage(comp);
         }
 
-        if (savedIC != null) {
-            ImageComponents.setActiveIC(savedIC, true);
+        if (savedView != null) {
+            OpenComps.setActiveIC(savedView, true);
         }
     }
 
@@ -382,7 +382,7 @@ public final class Utils {
     /**
      * Quick allMatch for arrays (without creating Streams)
      */
-    public static <T> boolean allMatch(T[] array, Predicate<T> predicate) {
+    public static <T> boolean allMatch(T[] array, Predicate<? super T> predicate) {
         for (T element : array) {
             if (!predicate.test(element)) {
                 return false;
@@ -394,7 +394,7 @@ public final class Utils {
     /**
      * Quick allMatch for lists (without creating Streams)
      */
-    public static <T> boolean allMatch(List<T> list, Predicate<T> predicate) {
+    public static <T> boolean allMatch(List<T> list, Predicate<? super T> predicate) {
         for (T element : list) {
             if (!predicate.test(element)) {
                 return false;
@@ -406,7 +406,7 @@ public final class Utils {
     /**
      * Quick anyMatch for arrays (without creating Streams)
      */
-    public static <T> boolean anyMatch(T[] array, Predicate<T> predicate) {
+    public static <T> boolean anyMatch(T[] array, Predicate<? super T> predicate) {
         for (T element : array) {
             if (predicate.test(element)) {
                 return true;
@@ -419,7 +419,7 @@ public final class Utils {
     /**
      * Quick anyMatch for lists (without creating Streams)
      */
-    public static <T> boolean anyMatch(List<T> list, Predicate<T> predicate) {
+    public static <T> boolean anyMatch(List<T> list, Predicate<? super T> predicate) {
         for (T element : list) {
             if (predicate.test(element)) {
                 return true;
@@ -512,6 +512,10 @@ public final class Utils {
         localGE.getAvailableFontFamilyNames();
     }
 
+    /**
+     * Returns a new CompletableFuture that is completed when all of the
+     * CompletableFutures in the given list complete
+     */
     public static <T> CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }

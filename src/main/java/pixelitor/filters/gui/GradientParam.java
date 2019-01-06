@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.ColorUtils;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -144,7 +144,7 @@ public class GradientParam extends AbstractFilterParam {
         if (randomizePolicy.allow()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
-                randomColors[i] = RandomUtils.createRandomColor(false);
+                randomColors[i] = Rnd.createRandomColor(false);
             }
 
             trigger = false;

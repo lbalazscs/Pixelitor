@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -376,9 +376,9 @@ public class ChannelMixer extends ParametrizedFilter {
         int blue = fromBlue.getValue();
         int extra = red + green + blue - 100;
         if (extra != 0) {
-            fromRed.setValueNoTrigger(red - extra / 3);
-            fromGreen.setValueNoTrigger(green - extra / 3);
-            fromBlue.setValueNoTrigger(blue - extra / 3);
+            fromRed.setValueNoTrigger(red - extra / 3.0);
+            fromGreen.setValueNoTrigger(green - extra / 3.0);
+            fromBlue.setValueNoTrigger(blue - extra / 3.0);
         }
     }
 

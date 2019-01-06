@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -247,9 +247,9 @@ public class Path implements Serializable {
         }
     }
 
-    public SubPath startNewSubpath(double x, double y, ImageComponent ic) {
+    public SubPath startNewSubpath(double x, double y, CompositionView cv) {
         SubPath sp = startNewSubpath();
-        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, ic), sp);
+        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, cv), sp);
         first.setType(SMOOTH);
         sp.addFirstPoint(first, false);
         return sp;

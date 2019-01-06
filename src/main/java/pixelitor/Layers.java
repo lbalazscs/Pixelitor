@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
@@ -72,14 +72,14 @@ public class Layers {
             listener.activeLayerChanged(newActiveLayer);
         }
 
-        ImageComponent ic = newActiveLayer.getComp().getIC();
-        if (ic == null) {
+        CompositionView cv = newActiveLayer.getComp().getView();
+        if (cv == null) {
             // can happen at when adding a new image:
-            // the active layer changes, but there is no ic yet
+            // the active layer changes, but there is no view yet
             return;
         }
         // always go to normal mask-viewing mode on the activated layer
-        MaskViewMode.NORMAL.activate(ic, newActiveLayer, "active layer changed");
+        MaskViewMode.NORMAL.activate(cv, newActiveLayer, "active layer changed");
     }
 
     public static void layerOrderChanged(Composition comp) {

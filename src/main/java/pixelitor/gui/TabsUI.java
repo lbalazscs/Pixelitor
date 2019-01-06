@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,26 +69,26 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     @Override
-    public void activateIC(ImageComponent ic) {
-        ImageTab tab = (ImageTab) ic.getImageWindow();
+    public void activateIC(CompositionView cv) {
+        ImageTab tab = (ImageTab) cv.getImageWindow();
         setSelectedIndex(indexOfComponent(tab));
     }
 
     @Override
-    public void addNewIC(ImageComponent ic) {
-        ImageTab tab = new ImageTab(ic, this);
-        ic.setImageWindow(tab);
+    public void addNewIC(CompositionView cv) {
+        ImageTab tab = new ImageTab(cv, this);
+        cv.setImageWindow(tab);
 
         int myIndex = getTabCount();
 
         try {
             userInitiated = false;
-            addTab(ic.getName(), tab);
+            addTab(cv.getName(), tab);
         } finally {
             userInitiated = true;
         }
 
-        setTabComponentAt(myIndex, new TabTitleRenderer(ic.getName(), tab));
+        setTabComponentAt(myIndex, new TabTitleRenderer(cv.getName(), tab));
         setSelectedIndex(myIndex);
         tab.onActivation();
     }
@@ -96,14 +96,14 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
-            ImageComponents.warnAndClose(tab.getIC());
+            OpenComps.warnAndClose(tab.getIC());
         }
     }
 
     public void closeTab(ImageTab tab) {
         remove(indexOfComponent(tab));
-        ImageComponent ic = tab.getIC();
-        ImageComponents.imageClosed(ic);
+        CompositionView cv = tab.getIC();
+        OpenComps.imageClosed(cv);
     }
 
     public void selectTab(ImageTab tab) {

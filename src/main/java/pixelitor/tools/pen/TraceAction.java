@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.AbstractBrushTool;
@@ -40,7 +40,7 @@ public class TraceAction extends MenuAction {
 
     @Override
     public void onClick() {
-        ImageComponents.onActiveComp(this::trace);
+        OpenComps.onActiveComp(this::trace);
     }
 
     private void trace(Composition comp) {

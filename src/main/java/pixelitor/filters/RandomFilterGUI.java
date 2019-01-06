@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -89,7 +89,7 @@ public class RandomFilterGUI extends FilterGUI {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                Drawable dr = ImageComponents.getActiveDrawableOrThrow();
+                Drawable dr = OpenComps.getActiveDrawableOrThrow();
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }

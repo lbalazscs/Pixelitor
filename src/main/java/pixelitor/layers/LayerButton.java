@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Build;
 import pixelitor.ThreadPool;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
@@ -130,9 +130,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private int staticY;
 
     public LayerButton(Layer layer) {
-        if (Build.isTesting()) {
-            throw new IllegalStateException("Swing component in unit test");
-        }
+        assert !Build.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
 
@@ -389,30 +387,30 @@ public class LayerButton extends JToggleButton implements LayerUI {
             String reason = "mask icon shift-alt-clicked";
             // shift-alt-click switches to RUBYLITH except when
             // it is already RUBYLITH
-            ImageComponent ic = layer.getComp().getIC();
-            if (ic.getMaskViewMode() == MaskViewMode.RUBYLITH) {
-                MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
+            CompositionView cv = layer.getComp().getView();
+            if (cv.getMaskViewMode() == MaskViewMode.RUBYLITH) {
+                MaskViewMode.EDIT_MASK.activate(cv, layer, reason);
             } else {
-                MaskViewMode.RUBYLITH.activate(ic, layer, reason);
+                MaskViewMode.RUBYLITH.activate(cv, layer, reason);
             }
         } else if (altClick) {
             String reason = "mask icon alt-clicked";
             // alt-click switches to SHOW_MASK except when it
             // already is in SHOW_MASK
-            ImageComponent ic = layer.getComp().getIC();
-            if (ic.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
-                MaskViewMode.EDIT_MASK.activate(ic, layer, reason);
+            CompositionView cv = layer.getComp().getView();
+            if (cv.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
+                MaskViewMode.EDIT_MASK.activate(cv, layer, reason);
             } else {
-                MaskViewMode.SHOW_MASK.activate(ic, layer, reason);
+                MaskViewMode.SHOW_MASK.activate(cv, layer, reason);
             }
         } else if (shiftClick) {
             // shift-click disables except when it is already disabled
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
         } else {
-            ImageComponent ic = layer.getComp().getIC();
+            CompositionView cv = layer.getComp().getView();
 
             // don't change SHOW_MASK into EDIT_MASK
-            if (ic.getMaskViewMode() == MaskViewMode.NORMAL) {
+            if (cv.getMaskViewMode() == MaskViewMode.NORMAL) {
                 MaskViewMode.EDIT_MASK.activate(layer, "mask icon clicked");
             }
         }

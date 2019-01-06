@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -25,7 +25,7 @@ import java.awt.geom.Rectangle2D;
 
 /**
  * How the clipping shape of {@link Graphics2D} is set when painting the
- * active {@link ImageComponent}.
+ * active {@link CompositionView}.
  * Each tool has its own {@link ClipStrategy}.
  */
 public enum ClipStrategy {
@@ -33,22 +33,22 @@ public enum ClipStrategy {
      * The painting is allowed to leave the canvas,
      * but not the internal frame.
      * Necessary because the clipping was overridden previously
-     * in {@link ImageComponent}.
+     * in {@link CompositionView}.
      *
      * TODO probably restoring Swing's original clip shape
      * would have the same effect
      */
     FULL {
         @Override
-        public void setClipFor(Graphics2D g, ImageComponent ic) {
+        public void setClipFor(Graphics2D g, CompositionView cv) {
             // Note that the internal frame might be
-            // smaller than the ImageComponent when there are scrollbars,
+            // smaller than the CompositionView when there are scrollbars,
             // so we have to use the view rectangle:
-            Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
+            Rectangle coVisiblePart = cv.getVisiblePart();
 
             // We are in image space because g has the transforms applied.
-            Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
-            g.setClip(imageSpaceVisiblePart);
+            Rectangle2D imVisiblePart = cv.componentToImageSpace(coVisiblePart);
+            g.setClip(imVisiblePart);
         }
     },
     /**
@@ -58,7 +58,7 @@ public enum ClipStrategy {
      */
     CANVAS {
         @Override
-        public void setClipFor(Graphics2D g, ImageComponent ic) {
+        public void setClipFor(Graphics2D g, CompositionView cv) {
             // empty: the canvas clipping has been already set
         }
     },
@@ -67,13 +67,13 @@ public enum ClipStrategy {
      */
     CUSTOM {
         @Override
-        public void setClipFor(Graphics2D g, ImageComponent ic) {
+        public void setClipFor(Graphics2D g, CompositionView cv) {
             // empty: it will be set later in the tool
         }
     };
 
     /**
-     * Called when the active {@link ImageComponent} is painted
+     * Called when the active {@link CompositionView} is painted
      */
-    public abstract void setClipFor(Graphics2D g, ImageComponent ic);
+    public abstract void setClipFor(Graphics2D g, CompositionView cv);
 }

@@ -1,7 +1,23 @@
-package pixelitor;
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package pixelitor.utils;
 
 import pixelitor.guides.GuidesRenderer;
-import pixelitor.utils.AppPreferences;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +30,8 @@ public class DIContainer {
     public static final int GUIDES_RENDERER = 1;
     public static final int CROP_GUIDES_RENDERER = 2;
 
-    private static Map<Class, Object> diMap = new HashMap<>();
-    private static Map<Integer, Object> diMap2 = new HashMap<>();
+    private static final Map<Class, Object> diMap = new HashMap<>();
+    private static final Map<Integer, Object> diMap2 = new HashMap<>();
 
     private DIContainer() {
         // should not be called
@@ -29,7 +45,7 @@ public class DIContainer {
     public static <T> T get(Class<T> classType) {
 
         Object result = diMap.get(classType);
-        if (null == result) {
+        if (result == null) {
             result = factorize(classType);
             diMap.put(classType, result);
         }
@@ -43,9 +59,8 @@ public class DIContainer {
      * Use this if you need many objects of given class in application that differ in configuration
      */
     public static <T> T get(Class<T> classType, Integer id) {
-
         Object result = diMap2.get(id);
-        if (null == result) {
+        if (result == null) {
             result = factorize(id);
             diMap2.put(id, result);
         }

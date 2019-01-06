@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,9 +62,9 @@ public class PixelitorWindow extends JFrame {
 
         setupFrameIcons();
 
-        GlobalKeyboardWatch.init();
-        GlobalKeyboardWatch.addBrushSizeActions();
-        GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
+        GlobalEventWatch.init();
+        GlobalEventWatch.addBrushSizeActions();
+        GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
 
         AppPreferences.loadFramePosition(this);
         setVisible(true);
@@ -98,7 +98,7 @@ public class PixelitorWindow extends JFrame {
     private void addLayersAndHistograms() {
         verticalBoxEast = Box.createVerticalBox();
         histogramsPanel = HistogramsPanel.INSTANCE;
-        ImageComponents.addActiveImageChangeListener(histogramsPanel);
+        OpenComps.addActivationListener(histogramsPanel);
 
         if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
             verticalBoxEast.add(histogramsPanel);
@@ -173,7 +173,7 @@ public class PixelitorWindow extends JFrame {
         if (v) {
             verticalBoxEast.add(histogramsPanel);
 
-            ImageComponents.onActiveComp(histogramsPanel::updateFromCompIfShown);
+            OpenComps.onActiveComp(histogramsPanel::updateFromCompIfShown);
         } else {
             verticalBoxEast.remove(histogramsPanel);
         }

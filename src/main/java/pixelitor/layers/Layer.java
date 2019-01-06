@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
@@ -136,7 +136,7 @@ public abstract class Layer implements Serializable {
     }
 
     private LayerUI createUI() {
-        if (Build.isTesting()) {
+        if (Build.isUnitTesting()) {
             return new TestLayerUI();
         }
 
@@ -362,8 +362,8 @@ public abstract class Layer implements Serializable {
 
     public void deleteMask(boolean addToHistory) {
         LayerMask oldMask = mask;
-        ImageComponent ic = comp.getIC();
-        MaskViewMode oldMode = ic.getMaskViewMode();
+        CompositionView cv = comp.getView();
+        MaskViewMode oldMode = cv.getMaskViewMode();
         mask = null;
         maskEditing = false;
 
@@ -376,7 +376,7 @@ public abstract class Layer implements Serializable {
         Layers.maskDeletedFrom(this);
         ui.get().deleteMaskIconLabel();
 
-        MaskViewMode.NORMAL.activate(ic, this, "mask deleted");
+        MaskViewMode.NORMAL.activate(cv, this, "mask deleted");
     }
 
     /**
@@ -599,7 +599,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void activateUI() {
-        assert Build.isTesting() || EventQueue.isDispatchThread();
+        assert Build.isUnitTesting() || EventQueue.isDispatchThread();
         ui.get().setSelected(true);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
@@ -133,7 +133,7 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public boolean mouseMoved(MouseEvent e, ImageComponent ic) {
+    public boolean mouseMoved(MouseEvent e, CompositionView cv) {
         boolean hit = false;
         for (TransformBox box : boxes) {
             if (box.processMouseMoved(e)) {
@@ -144,19 +144,19 @@ public class PathTransformer implements PenToolMode {
         if (!hit) {
             if (activePoint != null) {
                 activePoint = null;
-                ic.repaint();
+                cv.repaint();
             }
             int x = e.getX();
             int y = e.getY();
             boolean contained = false;
             for (TransformBox box : boxes) {
                 if (box.contains(x, y)) {
-                    ic.setCursor(MOVE);
+                    cv.setCursor(MOVE);
                     contained = true;
                     break;
                 }
             }
-            ic.setCursor(contained ? Cursors.MOVE : Cursors.DEFAULT);
+            cv.setCursor(contained ? Cursors.MOVE : Cursors.DEFAULT);
         }
 
         return false;

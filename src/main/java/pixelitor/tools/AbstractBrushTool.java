@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,10 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -41,6 +42,7 @@ import java.awt.Composite;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
@@ -260,7 +262,12 @@ public abstract class AbstractBrushTool extends Tool {
 
     private void finishBrushStroke(Drawable dr) {
         BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
-        History.addToolArea(affectedArea.asRectangle(brush.getActualRadius()),
+
+        double brushRadius = brush.getActualRadius();
+        Rectangle rect = affectedArea.asRectangle(brushRadius);
+        assert !rect.isEmpty() : "brush radius = " + brushRadius + ", affected area = " + affectedArea;
+
+        History.addToolArea(rect,
                 originalImage, dr,
                 false, getName());
 
@@ -357,27 +364,27 @@ public abstract class AbstractBrushTool extends Tool {
 //        cursor = Toolkit.getDefaultToolkit().createCustomCursor(
 //                cursorImage,
 //                new Point(cursorSize.width / 2, cursorSize.height / 2), "brush");
-//        ImageComponents.onAllImages(ic -> ic.setCursor(cursor));
+//        ImageComponents.onAllImages(cv -> cv.setCursor(cursor));
     }
 
     @Override
     protected void toolStarted() {
         super.toolStarted();
-        resetStateToInitial();
+        resetInitialState();
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
 
     }
 
     @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        resetStateToInitial();
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+        resetInitialState();
     }
 
     @Override
-    public void resetStateToInitial() {
+    public void resetInitialState() {
         firstMouseDown = true;
         respectSelection = true;
     }
@@ -393,12 +400,12 @@ public abstract class AbstractBrushTool extends Tool {
 
             finishBrushStroke(dr);
         } finally {
-            resetStateToInitial();
+            resetInitialState();
         }
     }
 
     private void doTrace(Drawable dr, Shape shape) {
-        ImageComponent ic = dr.getComp().getIC();
+        CompositionView cv = dr.getComp().getView();
         PPoint startingPoint = null;
 
         PathIterator fpi = new FlatteningPathIterator(
@@ -415,7 +422,7 @@ public abstract class AbstractBrushTool extends Tool {
             int type = fpi.currentSegment(coords);
             double x = coords[0];
             double y = coords[1];
-            PPoint p = PPoint.lazyFromIm(x, y, ic);
+            PPoint p = PPoint.lazyFromIm(x, y, cv);
             affectedArea.updateWith(p);
 
             switch (type) {
@@ -463,6 +470,9 @@ public abstract class AbstractBrushTool extends Tool {
         // because of a JDK bug (?), sometimes it is possible
         // to drag the slider to negative values
         if (value < MIN_BRUSH_RADIUS) {
+            if (Build.isDevelopment()) {
+                Thread.dumpStack();
+            }
             value = MIN_BRUSH_RADIUS;
             brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
         }
@@ -492,13 +502,13 @@ public abstract class AbstractBrushTool extends Tool {
     // TODO indicate the size of the brush
 //    @Override
 //    public void paintOverImage(Graphics2D g2, Canvas canvas,
-//                               ImageComponent ic,
+//                               CompositionView cv,
 //                               AffineTransform componentTransform,
 //                               AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();
 //            int y = userDrag.getCoEndY();
-//            double radius = getRadius() * ic.getViewScale();
+//            double radius = getRadius() * cv.getViewScale();
 //            double diameter = 2 * radius;
 //            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
 //                  diameter, diameter);

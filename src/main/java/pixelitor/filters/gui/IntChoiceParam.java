@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
@@ -71,7 +71,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     @Override
     public void randomize() {
         if (randomizePolicy.allow()) {
-            Value choice = RandomUtils.chooseFrom(choicesList);
+            Value choice = Rnd.chooseFrom(choicesList);
             setCurrentChoice(choice, false);
         }
     }
@@ -80,7 +80,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
         return currentChoice.getValue();
     }
 
-    public void setCurrentChoice(Value currentChoice, boolean trigger) {
+    private void setCurrentChoice(Value currentChoice, boolean trigger) {
         setSelectedItem(currentChoice, trigger);
     }
 
@@ -107,7 +107,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     }
 
     @Override
-    public Object getSelectedItem() {
+    public Value getSelectedItem() {
         return currentChoice;
     }
 

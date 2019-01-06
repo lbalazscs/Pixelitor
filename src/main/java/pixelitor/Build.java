@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public enum Build {
     }, FINAL() {
     };
 
-    private static boolean testing = false;
+    private static volatile boolean unitTesting = false;
 
     public static final boolean enableAdjLayers = false;
 
@@ -77,12 +77,12 @@ public enum Build {
         return fixTitle.get();
     }
 
-    public static synchronized boolean isTesting() {
-        return testing;
+    public static boolean isUnitTesting() {
+        return unitTesting;
     }
 
-    public static void setTestingMode() {
-        testing = true;
+    public static void setUnitTestingMode() {
+        unitTesting = true;
         Utils.makeSureAssertionsAreEnabled();
     }
 }

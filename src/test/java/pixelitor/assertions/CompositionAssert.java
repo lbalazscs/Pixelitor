@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,8 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 
-import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -278,11 +278,11 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert selectionBoundsIs(Rectangle rect) {
+    public CompositionAssert selectionBoundsIs(Rectangle2D rect) {
         isNotNull();
 
-        Rectangle bounds = actual.getSelection()
-                .getShapeBounds();
+        Rectangle2D bounds = actual.getSelection()
+            .getShapeBounds2D();
         assertEquals("selection bounds", rect, bounds);
 
         return this;

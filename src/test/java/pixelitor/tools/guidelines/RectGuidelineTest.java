@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,9 +31,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.refEq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.refEq;
+import static org.mockito.Mockito.verify;
 
 public class RectGuidelineTest {
 
@@ -272,7 +275,7 @@ public class RectGuidelineTest {
 
 class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
 
-    private List<Line2D> shapes;
+    private final List<Line2D> shapes;
 
     public DrawMatcherLine2D(List<Line2D> shapes) {
         this.shapes = shapes;
@@ -284,10 +287,10 @@ class DrawMatcherLine2D implements ArgumentMatcher<List<Shape>> {
             if (shapes.get(i) instanceof Line2D) {
                 Line2D line = (Line2D) shapes.get(i);
                 Line2D line2 = this.shapes.get(i);
-                assertEquals(line.getX1(), line2.getX1(), 1e-15);
-                assertEquals(line.getY1(), line2.getY1(), 1e-15);
-                assertEquals(line.getX2(), line2.getX2(), 1e-15);
-                assertEquals(line.getY2(), line2.getY2(), 1e-15);
+                assertEquals(line.getX1(), line2.getX1(), 1.0e-15);
+                assertEquals(line.getY1(), line2.getY1(), 1.0e-15);
+                assertEquals(line.getX2(), line2.getX2(), 1.0e-15);
+                assertEquals(line.getY2(), line2.getY2(), 1.0e-15);
             }
         }
         return true;

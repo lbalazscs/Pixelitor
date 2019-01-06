@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,18 +37,18 @@ public class ImageFrame extends JInternalFrame
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
-    private final ImageComponent ic;
+    private final CompositionView cv;
     private final JScrollPane scrollPane;
 
-    public ImageFrame(ImageComponent ic, int locX, int locY) {
-        super(ic.createTitleWithZoom(),
+    public ImageFrame(CompositionView cv, int locX, int locY) {
+        super(cv.createTitleWithZoom(),
                 true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
-        this.ic = ic;
+        this.cv = cv;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        scrollPane = new JScrollPane(this.ic);
+        scrollPane = new JScrollPane(this.cv);
         this.add(scrollPane);
 
         setLocation(locX, locY);
@@ -61,18 +61,18 @@ public class ImageFrame extends JInternalFrame
         // We can get here as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
-        ImageComponents.imageActivated(ic);
+        OpenComps.imageActivated(cv);
     }
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e) {
-        ImageComponents.imageClosed(ic);
+        OpenComps.imageClosed(cv);
     }
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         if (!RandomGUITest.isRunning()) {
-            ImageComponents.warnAndClose(ic);
+            OpenComps.warnAndClose(cv);
         }
     }
 
@@ -82,12 +82,12 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameDeiconified(InternalFrameEvent e) {
-        ic.updateNavigator(true);
+        cv.updateNavigator(true);
     }
 
     @Override
     public void internalFrameIconified(InternalFrameEvent e) {
-        ic.updateNavigator(true);
+        cv.updateNavigator(true);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     public void setToNaturalSize() {
-        Canvas canvas = ic.getCanvas();
+        Canvas canvas = cv.getCanvas();
         int zoomedWidth = canvas.getCoWidth();
         int zoomedHeight = canvas.getCoHeight();
         setSize(zoomedWidth, zoomedHeight);
@@ -154,7 +154,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void updateTitle(ImageComponent ic) {
-        setTitle(ic.createTitleWithZoom());
+    public void updateTitle(CompositionView cv) {
+        setTitle(cv.createTitleWithZoom());
     }
 }

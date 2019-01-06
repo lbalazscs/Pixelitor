@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor;
 
 import pixelitor.colors.FillType;
 import pixelitor.filters.Fill;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TextFieldValidator;
@@ -52,7 +52,7 @@ public final class NewImage {
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
         Composition comp = createNewComposition(bg, width, height, title);
-        ImageComponents.addAsNewImage(comp);
+        OpenComps.addAsNewImage(comp);
         return comp;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,10 @@ package pixelitor.tools.crop;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.DIContainer;
 import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.ClipStrategy;
@@ -34,6 +33,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.DIContainer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
@@ -113,7 +113,7 @@ public class CropTool extends DragTool {
             maskOpacity.setValue(100);
         }
         hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-        ImageComponents.repaintActive();
+        OpenComps.repaintActive();
     }
 
     /**
@@ -153,7 +153,7 @@ public class CropTool extends DragTool {
                 "<br>Press <b>Shift-O</b> to change the orientation.");
         guidesSelector.setMaximumRowCount(guidesSelector.getItemCount());
 //        guidesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
-        guidesSelector.addActionListener(e -> ImageComponents.repaintActive());
+        guidesSelector.addActionListener(e -> OpenComps.repaintActive());
         settingsPanel.addWithLabel("Guides:", guidesSelector);
     }
 
@@ -163,7 +163,7 @@ public class CropTool extends DragTool {
                 cropBox.setImSize(
                         (int) wSizeSpinner.getValue(),
                         (int) hSizeSpinner.getValue(),
-                        ImageComponents.getActiveIC()
+                    OpenComps.getActiveView()
                 );
             }
         };
@@ -186,13 +186,13 @@ public class CropTool extends DragTool {
     }
 
     private void addCropControlCheckboxes() {
-        deleteCroppedPixelsCB = new JCheckBox("Delete Cropped Pixels", true);
-        deleteCroppedPixelsCB.setToolTipText("If not checked, only the canvas gets smaller");
-        settingsPanel.add(deleteCroppedPixelsCB);
+        deleteCroppedPixelsCB = settingsPanel.addCheckBox(
+            "Delete Cropped Pixels", true, "deleteCroppedPixelsCB",
+            "If not checked, only the canvas gets smaller");
 
-        allowGrowingCB = new JCheckBox("Allow Growing", false);
-        allowGrowingCB.setToolTipText("Enables the enlargement of the canvas");
-        settingsPanel.add(allowGrowingCB);
+        allowGrowingCB = settingsPanel.addCheckBox(
+            "Allow Growing", false, "allowGrowingCB",
+            "Enables the enlargement of the canvas");
     }
 
     private void addCropButton() {
@@ -255,10 +255,10 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
-        super.mouseMoved(e, ic);
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
+        super.mouseMoved(e, cv);
         if (state == TRANSFORM) {
-            cropBox.mouseMoved(e, ic);
+            cropBox.mouseMoved(e, cv);
         }
     }
 
@@ -292,13 +292,13 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (ended) {
             return;
         }
-        if (ic != ImageComponents.getActiveIC()) {
+        if (cv != OpenComps.getActiveView()) {
             return;
         }
         PRectangle cropRect = getCropRect();
@@ -323,11 +323,11 @@ public class CropTool extends DragTool {
 
         // Similar to ClipStrategy.FULL, but we need some intermediary variables
 
-        Rectangle componentSpaceVisiblePart = ic.getVisiblePart();
+        Rectangle coVisiblePart = cv.getVisiblePart();
         // ...but first get this to image space...
-        Rectangle2D imageSpaceVisiblePart = ic.componentToImageSpace(componentSpaceVisiblePart);
+        Rectangle2D imVisiblePart = cv.componentToImageSpace(coVisiblePart);
         // ... and now we can intersect
-        Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imageSpaceVisiblePart);
+        Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
         darkAreaClip.append(canvasImgIntersection, false);
 
@@ -350,9 +350,9 @@ public class CropTool extends DragTool {
             // Paint the handles.
             // The zooming is temporarily reset because the transformSupport works in component space
 
-            // prevents drawing outside the InternalImageFrame/ImageComponent
+            // prevents drawing outside the InternalImageFrame/CompositionView
             // it is important to call this AFTER setting the unscaled transform
-            g2.setClip(componentSpaceVisiblePart);
+            g2.setClip(coVisiblePart);
 
             // draw guidelines
             rectGuideline.setType((RectGuidelineType) guidesSelector.getSelectedItem());
@@ -403,11 +403,11 @@ public class CropTool extends DragTool {
     @Override
     protected void toolEnded() {
         super.toolEnded();
-        resetStateToInitial();
+        resetInitialState();
     }
 
     @Override
-    public void resetStateToInitial() {
+    public void resetInitialState() {
         ended = true;
         cropBox = null;
         state = INITIAL;
@@ -417,23 +417,23 @@ public class CropTool extends DragTool {
         hSizeSpinner.setValue(0);
         wSizeSpinner.setValue(0);
 
-        ImageComponents.repaintActive();
-        ImageComponents.setCursorForAll(Cursors.DEFAULT);
+        OpenComps.repaintActive();
+        OpenComps.setCursorForAll(Cursors.DEFAULT);
     }
 
     @Override
-    public void coCoordsChanged(ImageComponent ic) {
+    public void coCoordsChanged(CompositionView cv) {
         if (cropBox != null && state == TRANSFORM) {
-            cropBox.coCoordsChanged(ic);
+            cropBox.coCoordsChanged(cv);
         }
     }
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            ImageComponent ic = ImageComponents.getActiveIC();
-            if (ic != null) {
-                cropBox.arrowKeyPressed(key, ic);
+            CompositionView cv = OpenComps.getActiveView();
+            if (cv != null) {
+                cropBox.arrowKeyPressed(key, cv);
                 return true;
             }
         }
@@ -453,7 +453,7 @@ public class CropTool extends DragTool {
         Crop.toolCropActiveImage(
                 allowGrowingCB.isSelected(),
                 deleteCroppedPixelsCB.isSelected());
-        resetStateToInitial();
+        resetInitialState();
     }
 
     private void executeCancelCommand() {
@@ -461,7 +461,7 @@ public class CropTool extends DragTool {
             return;
         }
 
-        resetStateToInitial();
+        resetInitialState();
         Messages.showInStatusBar("Crop canceled.");
     }
 
@@ -477,7 +477,7 @@ public class CropTool extends DragTool {
                 if (state == TRANSFORM) {
                     int o = rectGuideline.getOrientation();
                     rectGuideline.setOrientation(o + 1);
-                    ImageComponents.repaintActive();
+                    OpenComps.repaintActive();
                     e.consume();
                 }
             } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,17 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.BlendingModePanel;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 
-import static pixelitor.gui.ImageComponents.onActiveLayer;
+import static pixelitor.gui.OpenComps.onActiveLayer;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
  */
 public class LayerBlendingModePanel extends BlendingModePanel
-        implements ActiveImageChangeListener, GlobalLayerChangeListener {
+    implements CompActivationListener, GlobalLayerChangeListener {
 
     private boolean userInteractionChange = true;
 
@@ -39,7 +39,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
     private LayerBlendingModePanel() {
         super(false);
 
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         Layers.addLayerChangeListener(this);
 
         opacityDDSlider.addActionListener(e -> {
@@ -72,12 +72,12 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setEnabled(true);
     }
 

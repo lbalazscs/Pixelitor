@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.Symmetry;
 
 import java.awt.Dimension;
@@ -47,7 +47,7 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    private transient ImageComponent ic;
+    private transient CompositionView cv;
 
     // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
@@ -81,11 +81,11 @@ public class Canvas implements Serializable {
      * Recalculates the component-space (zoomed) size
      */
     public void recalcCoSize() {
-        double viewScale = ic.getViewScale();
+        double viewScale = cv.getViewScale();
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
 
-        ic.canvasCoSizeChanged();
+        cv.canvasCoSizeChanged();
     }
 
     /**
@@ -93,10 +93,6 @@ public class Canvas implements Serializable {
      */
     public Rectangle getImBounds() {
         return new Rectangle(0, 0, width, height);
-    }
-
-    public Rectangle2D getImBoundsDouble() {
-        return new Rectangle2D.Double(0, 0, width, height);
     }
 
     /**
@@ -134,9 +130,9 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setIC(ImageComponent ic) {
-        this.ic = ic;
-        if (ic != null) {
+    public void setView(CompositionView cv) {
+        this.cv = cv;
+        if (cv != null) {
             recalcCoSize();
         }
     }
@@ -151,7 +147,7 @@ public class Canvas implements Serializable {
     public Shape clipShapeToBounds(Shape shape) {
         assert shape != null;
 
-        Rectangle2D canvasBounds = getImBoundsDouble();
+        Rectangle2D canvasBounds = getImBounds();
         Area compBounds = new Area(canvasBounds);
         Area result = new Area(shape);
         result.intersect(compBounds);

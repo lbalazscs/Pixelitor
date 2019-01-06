@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -190,7 +190,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
     }
 
     public static void showInDialog(PixelitorWindow pw) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         File file = comp.getFile();
         if (file == null) {
             Dialogs.showInfoDialog(pw, "No file", "There is no file for " + comp.getName());

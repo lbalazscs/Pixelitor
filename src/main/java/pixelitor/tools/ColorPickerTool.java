@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -70,25 +70,25 @@ public class ColorPickerTool extends Tool {
     }
 
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
-        ImageComponent ic = e.getIC();
+        CompositionView cv = e.getCV();
         int x = (int) e.getImX();
         int y = (int) e.getImY();
 
         BufferedImage img;
         boolean isGray = false;
         if (sampleLayerOnly.isSelected()) {
-            if (!ic.activeIsDrawable()) {
+            if (!cv.activeIsDrawable()) {
                 return;
             }
 
-            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
+            Drawable dr = cv.getComp().getActiveDrawableOrThrow();
             img = dr.getImage();
             isGray = img.getType() == TYPE_BYTE_GRAY;
 
             x -= dr.getTX();
             y -= dr.getTY();
         } else {
-            img = ic.getComp().getCompositeImage();
+            img = cv.getComp().getCompositeImage();
         }
         int imgWidth = img.getWidth();
         int imgHeight = img.getHeight();

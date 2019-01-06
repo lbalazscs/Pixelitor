@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.automate;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
@@ -117,17 +117,17 @@ public class Automate {
 
         System.out.println("Automate::processFile: CALLED, comp = " + comp.getName());
 
-        ImageComponent ic = comp.getIC();
+        CompositionView cv = comp.getView();
 
-        ic.paintImmediately(ic.getBounds());
+        cv.paintImmediately();
         action.process(comp);
-        ic.paintImmediately(ic.getBounds());
+        cv.paintImmediately();
 
         return comp;
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
-        ImageComponent ic = comp.getIC();
+        CompositionView cv = comp.getView();
         OutputFormat outputFormat = OutputFormat.getLastUsed();
         File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
         CompletableFuture<Void> retVal = null;
@@ -151,15 +151,15 @@ public class Automate {
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    ImageComponents.warnAndClose(ic);
+                    OpenComps.warnAndClose(cv);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
             }
         } else { // the file does not exist or overwrite all was pressed previously
-            ic.paintImmediately(ic.getBounds());
+            cv.paintImmediately();
             retVal = comp.saveAsync(saveSettings, false);
         }
-        ImageComponents.warnAndClose(ic);
+        OpenComps.warnAndClose(cv);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;

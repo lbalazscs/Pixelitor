@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.filters.Invert;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -1002,7 +1002,7 @@ public class ImageUtils {
         Graphics2D g = image.createGraphics();
         g.setColor(BLACK);
 
-        ZoomLevel zoomLevel = ImageComponents.getActiveIC().getZoomLevel();
+        ZoomLevel zoomLevel = OpenComps.getActiveView().getZoomLevel();
 
 //        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 

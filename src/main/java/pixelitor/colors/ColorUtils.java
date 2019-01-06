@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
@@ -226,9 +226,9 @@ public class ColorUtils {
     // should not be called from dialogs because it sets dialogActive to false at the end
     public static Color showColorPickerDialog(PixelitorWindow pw, String title,
                                               Color selectedColor, boolean allowOpacity) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
         return color;
     }
 

@@ -17,40 +17,20 @@
 
 package pixelitor.utils;
 
+import pixelitor.gui.CompositionView;
+
 /**
- * Tracks the progress of some operation.
+ * Listener for events related to changing the active composition
  */
-public interface ProgressTracker {
+public interface CompActivationListener {
     /**
-     * One work unit - usually a line of pixels - was finished
+     * Called when the active image changes either because the user
+     * switches to another image or because a new image was opened.
      */
-    void unitDone();
-
-    /**
-     * Multiple work units were finished
-     */
-    void unitsDone(int units);
+    void compActivated(CompositionView oldIC, CompositionView newIC);
 
     /**
-     * All the work is done
+     * Called when the user has closed all images
      */
-    void finished();
-
-    /**
-     * A "null object" tracker that does nothing and
-     * also can be shared because it has no state
-     */
-    ProgressTracker NULL_TRACKER = new ProgressTracker() {
-        @Override
-        public void unitsDone(int units) {
-        }
-
-        @Override
-        public void unitDone() {
-        }
-
-        @Override
-        public void finished() {
-        }
-    };
+    void allCompsClosed();
 }

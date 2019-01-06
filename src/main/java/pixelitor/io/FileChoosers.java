@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
@@ -102,9 +102,9 @@ public class FileChoosers {
     public static void openAsync() {
         initOpenChooser();
 
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         int status = openChooser.showOpenDialog(PixelitorWindow.getInstance());
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
@@ -145,9 +145,9 @@ public class FileChoosers {
             saveChooser.setCurrentDirectory(customSaveDir);
         }
 
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
@@ -245,9 +245,9 @@ public class FileChoosers {
             initSaveChooser();
             setupFilterToOnlyOneFormat(saveChooser, fileFilter);
 
-            GlobalKeyboardWatch.setDialogActive(true);
+            GlobalEventWatch.setDialogActive(true);
             int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-            GlobalKeyboardWatch.setDialogActive(false);
+            GlobalEventWatch.setDialogActive(false);
 
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveChooser.getSelectedFile();

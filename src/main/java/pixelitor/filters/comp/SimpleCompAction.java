@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
@@ -48,7 +48,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         process(comp);
     }
@@ -77,7 +77,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
         comp.imageChanged(REPAINT, true);
         if (changesCanvasDimensions) {
-            comp.getIC().revalidate(); // make sure the scrollbars are OK
+            comp.getView().revalidate(); // make sure the scrollbars are OK
         }
     }
 

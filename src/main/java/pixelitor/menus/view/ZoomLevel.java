@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.view;
 
 import pixelitor.utils.Lazy;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 /**
  * The available zoom levels
@@ -338,7 +338,7 @@ public enum ZoomLevel {
     public abstract ZoomLevel zoomOut();
 
     public static ZoomLevel getRandomZoomLevel() {
-        return RandomUtils.chooseFrom(values());
+        return Rnd.chooseFrom(values());
     }
 
     public double getViewScale() {

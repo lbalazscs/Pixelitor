@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,11 +132,11 @@ public class TransformBoxMain {
             calcCanvasStart();
 
             rect = PRectangle.fromIm(50, 50, 200, 100, this);
-            Rectangle compSpaceRect = rect.getCo();
+            Rectangle coRect = rect.getCo();
 
             unTransformedShape = ShapeType.CAT.getShape(rect.toImDrag());
             transformedShape = unTransformedShape;
-            transformBox = new TransformBox(compSpaceRect, this,
+            transformBox = new TransformBox(coRect, this,
                     at -> transformedShape =
                             at.createTransformedShape(unTransformedShape));
 

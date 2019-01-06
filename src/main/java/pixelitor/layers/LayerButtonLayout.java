@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
@@ -156,9 +156,9 @@ public class LayerButtonLayout implements LayoutManager {
 
         height = newThumbSize + 2 * GAP;
 
-        ImageComponents.onActiveIC(ic -> {
-            //LayersContainer.showLayersFor(ic);
-            ic.getComp().updateAllIconImages();
+        OpenComps.onActiveIC(cv -> {
+            //LayersContainer.showLayersFor(cv);
+            cv.getComp().updateAllIconImages();
         });
     }
 }

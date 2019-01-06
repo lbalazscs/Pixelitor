@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.io;
 
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooser;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -56,7 +56,7 @@ public class OpenSave {
 
     private static Composition addJustLoadedComp(Composition comp, File file) {
         if (comp != null) { // there was no decoding problem
-            ImageComponents.addAsNewImage(comp);
+            OpenComps.addAsNewImage(comp);
             RecentFilesMenu.getInstance().addFile(file);
             Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
         }
@@ -147,7 +147,7 @@ public class OpenSave {
     }
 
     public static void save(boolean saveAs) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         save(comp, saveAs);
     }
 
@@ -235,7 +235,7 @@ public class OpenSave {
             return;
         }
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         CompletableFuture
                 .supplyAsync(() -> exportLayersToPNG(comp), IOThread.getExecutor())
@@ -287,7 +287,7 @@ public class OpenSave {
     }
 
     public static void saveCurrentImageInAllFormats() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         boolean canceled = !SingleDirChooser.selectOutputDir(false);
         if (canceled) {
@@ -309,7 +309,7 @@ public class OpenSave {
             FileChoosers.initSaveChooser();
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
-            Composition comp = ImageComponents.getActiveCompOrNull();
+            Composition comp = OpenComps.getActiveCompOrNull();
             FileChoosers.showSaveChooserAndSaveComp(comp, settings);
         } finally {
             FileChoosers.setDefaultSaveExtensions();

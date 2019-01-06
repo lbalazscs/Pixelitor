@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -116,7 +116,7 @@ public class TextSettings implements Serializable {
 
     public void randomize() {
         // TODO randomize the other fields as well
-        text = Long.toHexString(RandomUtils.nextLong());
+        text = Long.toHexString(Rnd.nextLong());
     }
 
     public void configurePainter(TranslatedTextPainter painter) {
@@ -149,9 +149,9 @@ public class TextSettings implements Serializable {
     }
 
     public static TextSettings createRandomSettings(Random rand) {
-        return new TextSettings(RandomUtils.createRandomString(10),
+        return new TextSettings(Rnd.createRandomString(10),
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
-                RandomUtils.createRandomColor(false),
+            Rnd.createRandomColor(false),
                 AreaEffects.createRandom(rand),
                 HorizontalAlignment.CENTER,
                 VerticalAlignment.CENTER,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,18 +18,18 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.ActiveImageChangeListener;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Messages;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -61,15 +61,15 @@ public class Tools {
     public static Tool currentTool;
 
     static {
-        ImageComponents.addActiveImageChangeListener(new ActiveImageChangeListener() {
+        OpenComps.addActivationListener(new CompActivationListener() {
             @Override
-            public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
-                currentTool.activeImageHasChanged(oldIC, newIC);
+            public void compActivated(CompositionView oldIC, CompositionView newIC) {
+                currentTool.compActivated(oldIC, newIC);
             }
 
             @Override
-            public void noOpenImageAnymore() {
-                currentTool.noOpenImageAnymore();
+            public void allCompsClosed() {
+                currentTool.allCompsClosed();
             }
         });
     }
@@ -149,15 +149,15 @@ public class Tools {
     }
 
     public static Tool getRandomTool() {
-        return RandomUtils.chooseFrom(allTools);
+        return Rnd.chooseFrom(allTools);
     }
 
     public static void fgBgColorsChanged() {
         currentTool.fgBgColorsChanged();
     }
 
-    public static void coCoordsChanged(ImageComponent ic) {
-        currentTool.coCoordsChanged(ic);
+    public static void coCoordsChanged(CompositionView cv) {
+        currentTool.coCoordsChanged(cv);
     }
 
     public static void imCoordsChanged(Composition comp, AffineTransform at) {
@@ -171,13 +171,13 @@ public class Tools {
         private EventDispatcher() {
         }
 
-        public static void mousePressed(MouseEvent e, ImageComponent ic) {
-            lastEvent = new PMouseEvent(e, ic);
+        public static void mousePressed(MouseEvent e, CompositionView cv) {
+            lastEvent = new PMouseEvent(e, cv);
             currentTool.handlerChain.handleMousePressed(lastEvent);
             mouseDown = true;
         }
 
-        public static void mouseReleased(MouseEvent e, ImageComponent ic) {
+        public static void mouseReleased(MouseEvent e, CompositionView cv) {
             if (!mouseDown) {
                 // the "mouse pressed" event was lost/consumed somehow
                 // (for example a combo box was open when it happened)
@@ -185,13 +185,13 @@ public class Tools {
                 // it was a click
                 return;
             }
-            lastEvent = new PMouseEvent(e, ic);
+            lastEvent = new PMouseEvent(e, cv);
             currentTool.handlerChain.handleMouseReleased(lastEvent);
             mouseDown = false;
         }
 
-        public static void mouseDragged(MouseEvent e, ImageComponent ic) {
-            lastEvent = new PMouseEvent(e, ic);
+        public static void mouseDragged(MouseEvent e, CompositionView cv) {
+            lastEvent = new PMouseEvent(e, cv);
             if (!mouseDown) {
                 // recover from a missing "mouse pressed" event by
                 // simulating one
@@ -202,16 +202,16 @@ public class Tools {
             currentTool.handlerChain.handleMouseDragged(lastEvent);
         }
 
-        public static void mouseClicked(MouseEvent e, ImageComponent ic) {
-            lastEvent = new PMouseEvent(e, ic);
+        public static void mouseClicked(MouseEvent e, CompositionView cv) {
+            lastEvent = new PMouseEvent(e, cv);
             // doesn't need to go through the handler chain
             currentTool.mouseClicked(lastEvent);
             mouseDown = false;
         }
 
-        public static void mouseMoved(MouseEvent e, ImageComponent ic) {
+        public static void mouseMoved(MouseEvent e, CompositionView cv) {
             // doesn't need to go through the handler chain
-            currentTool.mouseMoved(e, ic);
+            currentTool.mouseMoved(e, cv);
         }
 
         public static void toolChanged(Tool oldTool, Tool newTool) {

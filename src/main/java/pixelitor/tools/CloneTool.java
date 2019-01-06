@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Mirror;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
@@ -245,10 +245,10 @@ public class CloneTool extends BlendingModeBrushTool {
 
         int canvasWidth = comp.getCanvasImWidth();
         int canvasHeight = comp.getCanvasImHeight();
-        int sourceX = RandomUtils.nextInt(canvasWidth);
-        int sourceY = RandomUtils.nextInt(canvasHeight);
+        int sourceX = Rnd.nextInt(canvasWidth);
+        int sourceY = Rnd.nextInt(canvasHeight);
 
-        setCloningSource(PPoint.eagerFromIm(sourceX, sourceY, comp.getIC()));
+        setCloningSource(PPoint.eagerFromIm(sourceX, sourceY, comp.getView()));
         startNewCloningStroke(start, true);
     }
 

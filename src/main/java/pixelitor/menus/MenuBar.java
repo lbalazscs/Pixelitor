@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,12 +42,12 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.Navigator;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.PreferencesPanel;
 import pixelitor.gui.utils.Dialogs;
@@ -120,16 +120,16 @@ import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.ImageComponents.duplicateActive;
-import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
-import static pixelitor.gui.ImageComponents.getActiveCompositeImage;
-import static pixelitor.gui.ImageComponents.getActiveIC;
-import static pixelitor.gui.ImageComponents.getActiveLayerOrNull;
-import static pixelitor.gui.ImageComponents.onActiveDrawable;
-import static pixelitor.gui.ImageComponents.onActiveImageLayer;
-import static pixelitor.gui.ImageComponents.onActiveTextLayer;
-import static pixelitor.gui.ImageComponents.reloadActiveFromFileAsync;
-import static pixelitor.gui.ImageComponents.repaintActive;
+import static pixelitor.gui.OpenComps.duplicateActive;
+import static pixelitor.gui.OpenComps.getActiveCompOrNull;
+import static pixelitor.gui.OpenComps.getActiveCompositeImage;
+import static pixelitor.gui.OpenComps.getActiveView;
+import static pixelitor.gui.OpenComps.getActiveLayerOrNull;
+import static pixelitor.gui.OpenComps.onActiveDrawable;
+import static pixelitor.gui.OpenComps.onActiveImageLayer;
+import static pixelitor.gui.OpenComps.onActiveTextLayer;
+import static pixelitor.gui.OpenComps.reloadActiveFromFileAsync;
+import static pixelitor.gui.OpenComps.repaintActive;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
@@ -249,10 +249,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // close
-        fileMenu.addActionWithKey(ImageComponents.CLOSE_ACTIVE_ACTION, CTRL_W);
+        fileMenu.addActionWithKey(OpenComps.CLOSE_ACTIVE_ACTION, CTRL_W);
 
         // close all
-        fileMenu.addActionWithKey(ImageComponents.CLOSE_ALL_ACTION, CTRL_ALT_W);
+        fileMenu.addActionWithKey(OpenComps.CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
 
@@ -479,8 +479,8 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageComponent ic = getActiveIC();
-                Composition comp = ic.getComp();
+                CompositionView cv = getActiveView();
+                Composition comp = cv.getComp();
                 Layer layer = comp.getActiveLayer();
 
                 layer.deleteMask(true);
@@ -492,8 +492,8 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                ImageComponent ic = getActiveIC();
-                Layer layer = ic.getComp().getActiveLayer();
+                CompositionView cv = getActiveView();
+                Layer layer = cv.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
                     Messages.showNotImageLayerError();
@@ -1012,7 +1012,7 @@ public class MenuBar extends JMenuBar {
 
         JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
-                ImageComponent.setShowPixelGrid(showPixelGridMI.getState()));
+                CompositionView.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 
         viewMenu.addSeparator();
@@ -1020,7 +1020,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Add Horizontal Guide...") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = OpenComps.getActiveCompOrNull();
                 Guides.showAddSingleGuideDialog(comp, true);
             }
         });
@@ -1028,7 +1028,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Add Vertical Guide...") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = OpenComps.getActiveCompOrNull();
                 Guides.showAddSingleGuideDialog(comp, false);
             }
         });
@@ -1036,7 +1036,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Add Grid Guides...") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = OpenComps.getActiveCompOrNull();
                 Guides.showAddGridDialog(comp);
             }
         });
@@ -1044,7 +1044,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Clear Guides") {
             @Override
             public void onClick() {
-                Composition comp = ImageComponents.getActiveCompOrNull();
+                Composition comp = OpenComps.getActiveCompOrNull();
                 comp.clearGuides();
             }
         });
@@ -1305,7 +1305,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("debug mouse to sys.out") {
             @Override
             public void onClick() {
-                GlobalKeyboardWatch.registerDebugMouseWatching(false);
+                GlobalEventWatch.registerDebugMouseWatching(false);
             }
         });
 

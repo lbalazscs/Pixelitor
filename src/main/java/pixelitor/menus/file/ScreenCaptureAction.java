@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,20 +18,24 @@
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
+import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.TimeUnit;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
@@ -49,10 +53,10 @@ public class ScreenCaptureAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         new DialogBuilder()
-                .content(getSettingsPanel())
-                .title("Screen Capture")
-                .okAction(this::capture)
-                .show();
+            .content(getSettingsPanel())
+            .title("Screen Capture")
+            .okAction(this::capture)
+            .show();
     }
 
     private JPanel getSettingsPanel() {
@@ -69,38 +73,53 @@ public class ScreenCaptureAction extends AbstractAction {
 
     private void capture() {
         try {
-            PixelitorWindow window = PixelitorWindow.getInstance();
-
-            boolean hidePixelitor = hidePixelitorCB.isSelected();
-            if (hidePixelitor) {
-                window.iconify();
-                Thread.sleep(500);
+            boolean hide = hidePixelitor();
+            if (hide) {
+                hideApp();
             }
 
-            Robot robot = new Robot();
-            BufferedImage screenCapture = robot.createScreenCapture(
-                    new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
+            BufferedImage screenCapture = createCapturedImage();
 
-            if (hidePixelitor) {
-                window.deiconify();
+            if (hide) {
+                unHideApp();
             }
 
-            // necessary even though Composition.fromImage later calls
-            // toSysCompatibleImage, because without this, the image will
-            // be RGB, with no support for transparency
-            int type = screenCapture.getType();
-            if (type != TYPE_INT_ARGB) {
-                screenCapture = ImageUtils.convertToARGB(screenCapture, true);
-            }
-
-            String name = "Screen Capture " + captureCount;
-            Composition comp = Composition.fromImage(screenCapture, null, name);
-            comp.setDirty(true);
-            ImageComponents.addAsNewImage(comp);
-
-            captureCount++;
+            addAsNewComp(screenCapture);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
+    }
+
+    private static BufferedImage createCapturedImage() throws AWTException {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        return new Robot().createScreenCapture(new Rectangle(screenSize));
+    }
+
+    private static void hideApp() {
+        PixelitorWindow.getInstance().iconify();
+        Utils.sleep(500, TimeUnit.MILLISECONDS);
+    }
+
+    private static void unHideApp() {
+        PixelitorWindow.getInstance().deiconify();
+    }
+
+    private boolean hidePixelitor() {
+        return hidePixelitorCB.isSelected();
+    }
+
+    private static void addAsNewComp(BufferedImage screenCapture) {
+        // necessary even though Composition.fromImage later calls
+        // toSysCompatibleImage, because without this, the image will
+        // be RGB, with no support for transparency
+        int type = screenCapture.getType();
+        if (type != TYPE_INT_ARGB) {
+            screenCapture = ImageUtils.convertToARGB(screenCapture, true);
+        }
+
+        String name = "Screen Capture " + captureCount++;
+        Composition comp = Composition.fromImage(screenCapture, null, name);
+        comp.setDirty(true);
+        OpenComps.addAsNewImage(comp);
     }
 }

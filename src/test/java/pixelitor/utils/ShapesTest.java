@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.testutils.ShapeChecker;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
@@ -36,12 +36,12 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 public class ShapesTest {
-    private ImageComponent ic;
+    private CompositionView cv;
 
     @Before
     public void setup() {
         Composition comp = TestHelper.createEmptyComposition();
-        ic = TestHelper.setupAMockICFor(comp);
+        cv = TestHelper.setupAMockICFor(comp);
     }
 
     @Test
@@ -49,13 +49,13 @@ public class ShapesTest {
         Shape s = new Rectangle2D.Double(2, 2, 10, 10);
         checkRectangleShape(s);
 
-        Path path = Shapes.shapeToPath(s, ic);
+        Path path = Shapes.shapeToPath(s, cv);
         checkRectanglePath(path.getActiveSubpath());
 
         s = path.toImageSpaceShape();
         checkRectangleShape(s);
 
-        path = Shapes.shapeToPath(s, ic);
+        path = Shapes.shapeToPath(s, cv);
         checkRectanglePath(path.getActiveSubpath());
     }
 
@@ -64,13 +64,13 @@ public class ShapesTest {
         Shape s = new Ellipse2D.Double(2, 2, 10, 10);
         checkEllipseShape(s);
 
-        Path path = Shapes.shapeToPath(s, ic);
+        Path path = Shapes.shapeToPath(s, cv);
         checkEllipsePath(path.getActiveSubpath());
 
         s = path.toImageSpaceShape();
         checkEllipseShape(s);
 
-        path = Shapes.shapeToPath(s, ic);
+        path = Shapes.shapeToPath(s, cv);
         checkEllipsePath(path.getActiveSubpath());
     }
 

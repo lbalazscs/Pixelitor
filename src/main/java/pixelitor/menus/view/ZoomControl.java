@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -34,7 +34,7 @@ import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
 /**
  * The zoom widget in the status bar
  */
-public class ZoomControl extends JPanel implements ActiveImageChangeListener {
+public class ZoomControl extends JPanel implements CompActivationListener {
 
     public static final ZoomControl INSTANCE = new ZoomControl();
 
@@ -63,7 +63,7 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-                ImageComponents.onActiveIC(
+            OpenComps.onActiveIC(
                         this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  Zoom: ");
@@ -79,13 +79,13 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
                 ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
     }
 
-    private void zoomAccordingToTheSlider(ImageComponent ic) {
+    private void zoomAccordingToTheSlider(CompositionView cv) {
         int sliderValue = zoomSlider.getValue();
         ZoomLevel zoomLevel = zoomLevels[sliderValue];
-        ic.setZoomAtCenter(zoomLevel);
+        cv.setZoomAtCenter(zoomLevel);
         setNewZoomText(zoomLevel);
     }
 
@@ -138,12 +138,12 @@ public class ZoomControl extends JPanel implements ActiveImageChangeListener {
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setLookIfNoImage();
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setToNewZoom(newIC.getZoomLevel());
     }
 

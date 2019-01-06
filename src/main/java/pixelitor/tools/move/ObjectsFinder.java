@@ -1,3 +1,20 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.tools.move;
 
 import pixelitor.Composition;
@@ -5,7 +22,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
-import java.awt.*;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.ListIterator;
@@ -18,11 +35,10 @@ import java.util.ListIterator;
  */
 public class ObjectsFinder {
 
-    private final static float layerOpacityThreshold = 0.05f;
-    private final static int pixelAlphaThreshold = 30;
+    private static final float layerOpacityThreshold = 0.05f;
+    private static final int pixelAlphaThreshold = 30;
 
     public ObjectsFinder() {
-        super();
     }
 
     public ObjectsSelection findObjectAtPoint(Point2D p, Composition stage) {
@@ -30,11 +46,15 @@ public class ObjectsFinder {
 
         // search layers
         result = findLayerAtPoint(p, stage);
-        if (!result.isEmpty()) return result;
+        if (!result.isEmpty()) {
+            return result;
+        }
 
         // search guidelines
         result = findGuideLineAtPoint(p, stage);
-        if (!result.isEmpty()) return result;
+        if (!result.isEmpty()) {
+            return result;
+        }
 
         return new ObjectsSelection();
     }
@@ -49,11 +69,11 @@ public class ObjectsFinder {
 
     public ObjectsSelection findLayerAtPoint(Point2D p, Composition stage) {
         ObjectsSelection result = new ObjectsSelection();
-        Point pPixel = new Point((int)p.getX(), (int)p.getY());
+        Point pPixel = new Point((int) p.getX(), (int) p.getY());
 
         // in edit mask mode - do not auto select other layers as they are invisible
         // in this mode, active layer is mask layer
-        MaskViewMode viewMode = stage.getIC().getMaskViewMode();
+        MaskViewMode viewMode = stage.getView().getMaskViewMode();
         if (viewMode == MaskViewMode.SHOW_MASK) {
             ContentLayer contentLayer = (ContentLayer) stage.getActiveLayer();
             result.setObject(contentLayer);
@@ -67,9 +87,15 @@ public class ObjectsFinder {
         ListIterator li = layers.listIterator(layers.size());
         while (li.hasPrevious()) {
             Layer layer = (Layer) li.previous();
-            if (!(layer instanceof ContentLayer)) continue;
-            if (!layer.isVisible()) continue;
-            if (layer.getOpacity() < layerOpacityThreshold) continue;
+            if (!(layer instanceof ContentLayer)) {
+                continue;
+            }
+            if (!layer.isVisible()) {
+                continue;
+            }
+            if (layer.getOpacity() < layerOpacityThreshold) {
+                continue;
+            }
 
             ContentLayer contentLayer = (ContentLayer) layer;
             int pixel = contentLayer.getMouseHitPixelAtPoint(pPixel);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Canvas;
-import pixelitor.gui.GlobalKeyboardWatch;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.UserDrag;
@@ -79,7 +79,7 @@ public abstract class DragTool extends Tool {
         userDrag.setEnd(e);
 
         if (spaceDragStartPoint) {
-            if (endPointInitialized && GlobalKeyboardWatch.isSpaceDown()) {
+            if (endPointInitialized && GlobalEventWatch.isSpaceDown()) {
                 userDrag.adjustStartForSpaceDownDrag();
             }
 
@@ -107,7 +107,7 @@ public abstract class DragTool extends Tool {
     public abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (ended) {

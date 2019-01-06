@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -38,7 +38,7 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
  * to the active layer of the active composition.
  */
 public class AddLayerMaskAction extends AbstractAction
-        implements ActiveImageChangeListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+    implements CompActivationListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
     
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
@@ -48,14 +48,14 @@ public class AddLayerMaskAction extends AbstractAction
                 "<html>Adds a layer mask to the active layer. " +
                         "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         Layers.addLayerChangeListener(this);
         Layers.addLayerMaskChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         Layer layer = comp.getActiveLayer();
         assert !layer.hasMask();
         boolean ctrlPressed = false;
@@ -79,12 +79,12 @@ public class AddLayerMaskAction extends AbstractAction
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         boolean hasMask = newIC.getComp().getActiveLayer().hasMask();
         setEnabled(!hasMask);
     }

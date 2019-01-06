@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,7 @@ public class Clouds extends ParametrizedFilter {
                 color2.getColor(),
                 pt);
 
-        pt.finish();
+        pt.finished();
         return dest;
     }
 
@@ -95,7 +95,7 @@ public class Clouds extends ParametrizedFilter {
             Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, color1, color2);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
     }
 
     private static void calculateLine(float startingScale, float roughness,

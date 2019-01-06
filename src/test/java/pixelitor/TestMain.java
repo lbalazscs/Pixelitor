@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,22 +15,21 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.utils;
+package pixelitor;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.guitest.FixedFailOnThreadViolationRepaintManager;
 
 /**
- * Listens to the events related to changing the active image
+ * A way to run the app from the test directory,
+ * having the test code and libraries are available
  */
-public interface ActiveImageChangeListener {
-    /**
-     * Called when the active image changes either because the user
-     * switches to another image or because a new image was opened.
-     */
-    void activeImageChanged(ImageComponent oldIC, ImageComponent newIC);
+public class TestMain {
+    private TestMain() {
+    }
 
-    /**
-     * Called when the user has closed all the images
-     */
-    void noOpenImageAnymore();
+    public static void main(String[] args) {
+        FixedFailOnThreadViolationRepaintManager.install();
+
+        Pixelitor.main(args);
+    }
 }

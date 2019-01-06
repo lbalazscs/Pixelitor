@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimation;
@@ -38,7 +38,7 @@ public class AnimGifExport {
     }
 
     public static void start(JFrame dialogOwner) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
                     "Animation frames are based on the layers of the image.\n" +

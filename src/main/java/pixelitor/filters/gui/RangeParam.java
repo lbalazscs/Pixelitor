@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -186,7 +186,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void randomize() {
         if (randomizePolicy.allow()) {
             int range = maxValue - minValue;
-            int newValue = minValue + RandomUtils.nextInt(range);
+            int newValue = minValue + Rnd.nextInt(range);
 
             setValueNoTrigger(newValue);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.RandomUtils;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.Rnd;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -146,7 +146,7 @@ public class Starburst extends ParametrizedFilter {
             triangle.closePath();
 
             if (useRandomColors) {
-                g.setColor(RandomUtils.createRandomColor(rand, false));
+                g.setColor(Rnd.createRandomColor(rand, false));
             }
 
             g.fill(triangle);

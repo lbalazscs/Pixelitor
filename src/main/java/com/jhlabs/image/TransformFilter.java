@@ -37,40 +37,37 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
     /**
      * Treat pixels off the edge as zero.
      */
-    public final static int TRANSPARENT = 0;
+    public static final int TRANSPARENT = 0;
 
     /**
      * Clamp pixels to the image edges.
      */
-    public final static int REPEAT_EDGE_PIXELS = 1;
+    public static final int REPEAT_EDGE_PIXELS = 1;
 
     /**
      * Wrap pixels off the edge onto the opposite edge.
      */
-    public final static int WRAP_AROUND = 2;
+    public static final int WRAP_AROUND = 2;
 
     /**
      * Clamp pixels RGB to the image edges, but zero the alpha. This prevents gray borders on your image.
      */
-    public final static int RGB_CLAMP = 3;
+    public static final int RGB_CLAMP = 3;
 
-    public final static int REFLECT = 4;
-
-    // Horizontally reflect, vertically repeat
-    public final static int MIXED = 5;
+    public static final int REFLECT = 4;
 
 
     /**
      * Use nearest-neighbour interpolation.
      */
-    public final static int NEAREST_NEIGHBOUR = 0;
-    public final static int NEAREST_NEIGHBOUR_OLD = 2;
+    public static final int NEAREST_NEIGHBOUR = 0;
+    public static final int NEAREST_NEIGHBOUR_OLD = 2;
 
     /**
      * Use bilinear interpolation.
      */
-    public final static int BILINEAR = 1;
-    public final static int BILINEAR_OLD = 3;
+    public static final int BILINEAR = 1;
+    public static final int BILINEAR_OLD = 3;
 
     /**
      * The action to take for pixels off the image edge.
@@ -285,7 +282,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
             };
             resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(resultLines, dst, width, pt);
+        ThreadPool.waitToFinish2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;
@@ -338,7 +335,7 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 
             resultLines[finalY] = ThreadPool.submit2(calculateLineTask);
         }
-        ThreadPool.waitForFutures2(resultLines, dst, width, pt);
+        ThreadPool.waitToFinish2(resultLines, dst, width, pt);
         finishProgressTracker();
 
         return dst;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,12 @@ package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.tools.custom.BatShape;
-import pixelitor.tools.custom.CatShape;
-import pixelitor.tools.custom.HeartShape;
-import pixelitor.tools.custom.KiwiShape;
-import pixelitor.tools.custom.RabbitShape;
-import pixelitor.tools.custom.RandomStarShape;
+import pixelitor.tools.shapes.custom.BatShape;
+import pixelitor.tools.shapes.custom.CatShape;
+import pixelitor.tools.shapes.custom.HeartShape;
+import pixelitor.tools.shapes.custom.KiwiShape;
+import pixelitor.tools.shapes.custom.RabbitShape;
+import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Shapes;

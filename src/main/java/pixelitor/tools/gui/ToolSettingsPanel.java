@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,10 +75,20 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
-    public JCheckBox addCheckBox(String text, boolean selected, String name, Consumer<Boolean> consumer) {
+    public JCheckBox addCheckBox(String text, boolean selected, String name,
+                                 Consumer<Boolean> consumer) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);
         checkBox.addActionListener(e -> consumer.accept(checkBox.isSelected()));
+        add(checkBox);
+        return checkBox;
+    }
+
+    public JCheckBox addCheckBox(String text, boolean selected, String name,
+                                 String toolTip) {
+        JCheckBox checkBox = new JCheckBox(text, selected);
+        checkBox.setName(name);
+        checkBox.setToolTipText(toolTip);
         add(checkBox);
         return checkBox;
     }

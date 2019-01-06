@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,9 +97,9 @@ public class ValueNoise extends ParametrizedFilter {
                     width, frequency, persistence, amplitude, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
 
-        pt.finish();
+        pt.finished();
 
         return dest;
     }

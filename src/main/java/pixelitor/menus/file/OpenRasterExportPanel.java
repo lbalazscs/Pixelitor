@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.FileChoosers;
@@ -43,7 +43,7 @@ public class OpenRasterExportPanel extends JPanel {
     }
 
     public static void showInDialog(JFrame owner) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
             boolean exportAnyway = Dialogs.showYesNoQuestionDialog(
                     "Only one layer", comp.getName() + " has only one layer.\n" +

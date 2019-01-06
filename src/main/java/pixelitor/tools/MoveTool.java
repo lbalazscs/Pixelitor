@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Layer;
 import pixelitor.tools.move.ObjectsFinder;
 import pixelitor.tools.move.ObjectsSelection;
@@ -38,8 +38,8 @@ import java.awt.geom.Point2D;
  */
 public class MoveTool extends DragTool {
     private static final String AUTO_SELECT_LABEL = "Auto Select Layer";
-    private final JCheckBox autoselectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
-    private ObjectsFinder objectFinder = new ObjectsFinder();
+    private final JCheckBox autoSelectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
+    private final ObjectsFinder objectFinder = new ObjectsFinder();
 
     public MoveTool() {
         super("Move", 'v', "move_tool_icon.png",
@@ -51,30 +51,30 @@ public class MoveTool extends DragTool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.add(autoselectCheckBox);
+        settingsPanel.add(autoSelectCheckBox);
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
-        super.mouseMoved(e, ic);
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
+        super.mouseMoved(e, cv);
 
-        if (autoselectCheckBox.isSelected()) {
-            Point2D p = ic.componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, ic.getComp());
+        if (autoSelectCheckBox.isSelected()) {
+            Point2D p = cv.componentToImageSpace(e.getPoint());
+            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, cv.getComp());
 
             if (objectsSelection.isEmpty()) {
-                ic.setCursor(Cursors.DEFAULT);
+                cv.setCursor(Cursors.DEFAULT);
                 return;
             }
         }
 
-        ic.setCursor(Cursors.MOVE);
+        cv.setCursor(Cursors.MOVE);
     }
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        if (autoselectCheckBox.isSelected()) {
-            Point2D p = e.getComp().getIC().componentToImageSpace(e.getPoint());
+        if (autoSelectCheckBox.isSelected()) {
+            Point2D p = e.getComp().getView().componentToImageSpace(e.getPoint());
             ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, e.getComp());
 
             if (objectsSelection.isEmpty()) {
@@ -117,7 +117,7 @@ public class MoveTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp != null) {
             move(comp, key.getMoveX(), key.getMoveY());
             return true;

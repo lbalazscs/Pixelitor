@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.GlobalKeyboardWatch;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.OpenComps;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -41,7 +41,7 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (GlobalKeyboardWatch.isSpaceDown()) {
+        if (GlobalEventWatch.isSpaceDown()) {
             Tools.HAND.mousePressed(e);
             handToolForwarding = true;
             return true;
@@ -82,7 +82,7 @@ public class HandToolHandler extends ToolHandler {
     public void spacePressed() {
         if (!spaceDown) { // this is called all the time while the space is held down
             if (!currentToolUsage) {
-                ImageComponents.setCursorForAll(Tools.HAND.getStartingCursor());
+                OpenComps.setCursorForAll(Tools.HAND.getStartingCursor());
             }
         }
         spaceDown = true;
@@ -91,7 +91,7 @@ public class HandToolHandler extends ToolHandler {
     public void spaceReleased() {
         spaceDown = false;
         if (!handToolForwarding) {
-            ImageComponents.setCursorForAll(cursor);
+            OpenComps.setCursorForAll(cursor);
         }
     }
 }

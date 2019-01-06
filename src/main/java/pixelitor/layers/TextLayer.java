@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TranslatedTextPainter;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.ContentLayerMoveEdit;
@@ -78,14 +78,14 @@ public class TextLayer extends ContentLayer {
     }
 
     public static void createNew(PixelitorWindow pw) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp == null) {
             throw new IllegalStateException("no open image");
         }
         TextLayer textLayer = new TextLayer(comp);
 
         Layer activeLayerBefore = comp.getActiveLayer();
-        MaskViewMode oldViewMode = comp.getIC().getMaskViewMode();
+        MaskViewMode oldViewMode = comp.getView().getMaskViewMode();
 
         // don't add it yet to history, only after the user chooses to press OK
         new LayerAdder(comp).add(textLayer);

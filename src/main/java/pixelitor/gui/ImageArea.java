@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,8 +88,8 @@ public class ImageArea {
 
     private static void setupKeysAndDnD() {
         JComponent component = (JComponent) ui;
-        GlobalKeyboardWatch.setAlwaysVisibleComponent(component);
-        GlobalKeyboardWatch.registerKeysOnAlwaysVisibleComponent();
+        GlobalEventWatch.setAlwaysVisibleComponent(component);
+        GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
         new DropTarget(component, new DropListener(NEW_IMAGES));
     }
 
@@ -134,7 +134,7 @@ public class ImageArea {
             // corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        ImageComponents.forAllImages(ImageArea::addNewIC);
+        OpenComps.forAllImages(ImageArea::addNewIC);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -143,12 +143,12 @@ public class ImageArea {
         uiChangeListeners.add(listener);
     }
 
-    public static void activateIC(ImageComponent ic) {
-        ui.activateIC(ic);
+    public static void activateIC(CompositionView cv) {
+        ui.activateIC(cv);
     }
 
-    public static void addNewIC(ImageComponent ic) {
-        ui.addNewIC(ic);
+    public static void addNewIC(CompositionView cv) {
+        ui.addNewIC(cv);
     }
 
     public static Dimension getSize() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.gui.utils;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.Build;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
@@ -78,9 +78,9 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
@@ -103,10 +103,10 @@ public class Dialogs {
 
     public static boolean showYesNoDialog(Component parent, String title,
                                           String msg, int messageType) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         int reply = JOptionPane.showConfirmDialog(parent, msg, title,
                 YES_NO_OPTION, messageType);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
 
         return (reply == YES_OPTION);
     }
@@ -121,11 +121,11 @@ public class Dialogs {
                                              Object[] options,
                                              int initialOptionIndex,
                                              int messageType) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         int userAnswer = JOptionPane.showOptionDialog(getParent(), msg, title,
                 OK_CANCEL_OPTION, messageType, null,
                 options, options[initialOptionIndex]);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
 
         return userAnswer == OK_OPTION;
     }
@@ -135,9 +135,9 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
     }
 
     public static void showWarningDialog(String title, String msg) {
@@ -150,9 +150,9 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
     }
 
     public static void showNotImageLayerDialog() {
@@ -289,12 +289,12 @@ public class Dialogs {
                         "<br>Your changes will be lost if you don't save them.</html>",
                 compName);
 
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
         int answer = JOptionPane.showOptionDialog(
                 PixelitorWindow.getInstance(), new JLabel(question),
                 "Unsaved changes", YES_NO_CANCEL_OPTION,
                 WARNING_MESSAGE, null, options, options[0]);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
         return answer;
     }
 }

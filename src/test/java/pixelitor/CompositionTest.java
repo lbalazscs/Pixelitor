@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
@@ -41,7 +42,7 @@ public class CompositionTest {
 
     @BeforeClass
     public static void setupClass() {
-        Build.setTestingMode();
+        Build.setUnitTestingMode();
     }
 
     @Before
@@ -598,8 +599,8 @@ public class CompositionTest {
         History.assertNumEditsIs(0); // nothing happened
 
         // set a selection
-        Rectangle originalSelectionRect = new Rectangle(3, 3, 4, 4);
-        comp.setSelectionRef(new Selection(originalSelectionRect, comp.getIC()));
+        Rectangle2D originalSelectionRect = new Rectangle2D.Double(3, 3, 4, 4);
+        comp.setSelectionRef(new Selection(originalSelectionRect, comp.getView()));
 
         assertThat(comp).hasSelection();
         assertThat(comp.getSelection())

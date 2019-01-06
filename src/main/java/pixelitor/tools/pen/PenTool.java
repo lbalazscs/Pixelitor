@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.tools.pen;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -142,7 +142,7 @@ public class PenTool extends Tool {
         if (ignoreModeChooser) {
             return;
         }
-        Path activePath = ImageComponents.getActivePathOrNull();
+        Path activePath = OpenComps.getActivePathOrNull();
         assert activePath == PenTool.path : "active path = " + activePath
             + ", PenTool.path = " + PenTool.path;
 
@@ -162,14 +162,14 @@ public class PenTool extends Tool {
         }
         changeMode(BUILD, path);
         enableActionsBasedOnFinishedPath(hasPath());
-        ImageComponents.repaintActive();
+        OpenComps.repaintActive();
 
         assert checkPathConsistency();
     }
 
     public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null) {
-            if (Build.isTesting()) {
+            if (Build.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
             EventQueue.invokeLater(() -> {
@@ -195,7 +195,7 @@ public class PenTool extends Tool {
 
         changeMode(mode, path);
         enableActionsBasedOnFinishedPath(true);
-        ImageComponents.repaintActive();
+        OpenComps.repaintActive();
 
         assert checkPathConsistency();
     }
@@ -231,7 +231,7 @@ public class PenTool extends Tool {
         Path oldPath = path;
 
         Shape shape = path.toImageSpaceShape();
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit == null) {
@@ -267,14 +267,14 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
-        if (mode.mouseMoved(e, ic)) {
-            ic.repaint();
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
+        if (mode.mouseMoved(e, cv)) {
+            cv.repaint();
         }
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, ImageComponent ic,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -282,10 +282,10 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void coCoordsChanged(ImageComponent ic) {
+    public void coCoordsChanged(CompositionView cv) {
         if (hasPath()) {
-            path.coCoordsChanged(ic);
-            mode.coCoordsChanged(ic);
+            path.coCoordsChanged(cv);
+            mode.coCoordsChanged(cv);
         }
     }
 
@@ -297,18 +297,18 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
-        if (oldIC != null) { // is null if the first image is opened with active pen tool
-            Composition oldComp = oldIC.getComp();
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+        if (oldCV != null) { // is null if the first image is opened with active pen tool
+            Composition oldComp = oldCV.getComp();
             Path oldPath = oldComp.getActivePath();
             if (oldPath != null) {
                 oldPath.setPreferredPenToolMode(mode);
             }
         }
 
-        super.activeImageHasChanged(oldIC, newIC);
+        super.compActivated(oldCV, newCV);
 
-        assert ImageComponents.getActiveIC() == newIC;
+        assert OpenComps.getActiveView() == newCV;
         assert checkPathConsistency();
     }
 
@@ -318,7 +318,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void resetStateToInitial() {
+    public void resetInitialState() {
         setPathFromComp();
 
         assert checkPathConsistency();
@@ -337,11 +337,11 @@ public class PenTool extends Tool {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
-        assert path == ImageComponents.getActivePathOrNull()
+        assert path == OpenComps.getActivePathOrNull()
             : "tool path = " + path +
-            ", active path = " + ImageComponents.getActivePathOrNull() +
+            ", active path = " + OpenComps.getActivePathOrNull() +
             ", mode = " + Tools.PEN.getMode();
-        Composition activeComp = ImageComponents.getActiveCompOrNull();
+        Composition activeComp = OpenComps.getActiveCompOrNull();
         if (activeComp == null) {
             return true;
         }
@@ -358,7 +358,7 @@ public class PenTool extends Tool {
 
     private Path setPathFromComp() {
         Path compPath = null;
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp == null) {
             path = null;
         } else {
@@ -396,7 +396,7 @@ public class PenTool extends Tool {
 
     public void removePath() {
         PenTool.path = null;
-        ImageComponents.setActivePath(null);
+        OpenComps.setActivePath(null);
         enableActionsBasedOnFinishedPath(false);
         if (mode.requiresExistingPath()) {
             startBuilding(false);

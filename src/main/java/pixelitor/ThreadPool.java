@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class ThreadPool {
      * computation, and updates the given
      * {@link ProgressTracker} in the meantime.
      */
-    public static void waitForFutures(Iterable<Future<?>> futures, ProgressTracker pt) {
+    public static void waitToFinish(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
 
         for (Future<?> future : futures) {
@@ -78,7 +78,7 @@ public class ThreadPool {
     }
 
     // same as the above, but with array argument
-    public static void waitForFutures(Future<?>[] futures, ProgressTracker pt) {
+    public static void waitToFinish(Future<?>[] futures, ProgressTracker pt) {
         assert pt != null;
 
         for (Future<?> future : futures) {
@@ -92,11 +92,11 @@ public class ThreadPool {
     }
 
     /**
-     * Similar to waitForFutures, but works with futures
+     * Similar to waitToFinish, but works with futures
      * that return an int array representing a line, and
      * updates the given destination image with the new pixels.
      */
-    public static void waitForFutures2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
+    public static void waitToFinish2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
         assert pt != null;
 
         try {

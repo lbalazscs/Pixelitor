@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -166,7 +166,7 @@ public class RandomSpheres extends ParametrizedFilter {
 
             pt.unitDone();
         }
-        pt.finish();
+        pt.finished();
 
         g.dispose();
         return dest;

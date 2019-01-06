@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class FilterUtils {
         FilterAction filterAction;
         do {
             // try a random filter until all conditions are true
-            filterAction = RandomUtils.chooseFrom(allFilters);
+            filterAction = Rnd.chooseFrom(allFilters);
         } while (!conditions.test(filterAction.getFilter()));
 
         return filterAction.getFilter();

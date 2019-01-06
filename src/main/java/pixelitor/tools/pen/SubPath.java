@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -120,7 +120,7 @@ public class SubPath implements Serializable {
 
     // not used in the builder, only in tests
     public void addPoint(double x, double y) {
-        AnchorPoint ap = new AnchorPoint(x, y, comp.getIC(), this);
+        AnchorPoint ap = new AnchorPoint(x, y, comp.getView(), this);
         addPoint(ap);
     }
 
@@ -646,41 +646,41 @@ public class SubPath implements Serializable {
         }
     }
 
-    public void addLine(double newX, double newY, ImageComponent ic) {
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
-        AnchorPoint ap = new AnchorPoint(newX, newY, ic, this);
+    public void addLine(double newX, double newY, CompositionView cv) {
+        newX = cv.imageXToComponentSpace(newX);
+        newY = cv.imageYToComponentSpace(newY);
+        AnchorPoint ap = new AnchorPoint(newX, newY, cv, this);
         addPoint(ap);
     }
 
     public void addCubicCurve(double c1x, double c1y,
                               double c2x, double c2y,
-                              double newX, double newY, ImageComponent ic) {
+                              double newX, double newY, CompositionView cv) {
         ControlPoint lastOut = getLast().ctrlOut;
-        c1x = ic.imageXToComponentSpace(c1x);
-        c1y = ic.imageYToComponentSpace(c1y);
+        c1x = cv.imageXToComponentSpace(c1x);
+        c1y = cv.imageYToComponentSpace(c1y);
         lastOut.setLocationOnlyForThis(c1x, c1y);
         lastOut.afterMovingActionsForThis();
 
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
-        AnchorPoint next = new AnchorPoint(newX, newY, ic, this);
+        newX = cv.imageXToComponentSpace(newX);
+        newY = cv.imageYToComponentSpace(newY);
+        AnchorPoint next = new AnchorPoint(newX, newY, cv, this);
         addPoint(next);
         next.setType(SMOOTH);
 
-        c2x = ic.imageXToComponentSpace(c2x);
-        c2y = ic.imageYToComponentSpace(c2y);
+        c2x = cv.imageXToComponentSpace(c2x);
+        c2y = cv.imageYToComponentSpace(c2y);
         ControlPoint nextIn = next.ctrlIn;
         nextIn.setLocationOnlyForThis(c2x, c2y);
         nextIn.afterMovingActionsForThis();
     }
 
     public void addQuadCurve(double cx, double cy,
-                             double newX, double newY, ImageComponent ic) {
-        cx = ic.imageXToComponentSpace(cx);
-        cy = ic.imageYToComponentSpace(cy);
-        newX = ic.imageXToComponentSpace(newX);
-        newY = ic.imageYToComponentSpace(newY);
+                             double newX, double newY, CompositionView cv) {
+        cx = cv.imageXToComponentSpace(cx);
+        cy = cv.imageYToComponentSpace(cy);
+        newX = cv.imageXToComponentSpace(newX);
+        newY = cv.imageYToComponentSpace(newY);
         AnchorPoint last = getLast();
 
         // convert the quadratic bezier (with one control point)
@@ -703,7 +703,7 @@ public class SubPath implements Serializable {
         lastOut.setLocationOnlyForThis(cp1x, cp1y);
         lastOut.afterMovingActionsForThis();
 
-        AnchorPoint next = new AnchorPoint(newX, newY, ic, this);
+        AnchorPoint next = new AnchorPoint(newX, newY, cv, this);
         addPoint(next);
         next.setType(SMOOTH);
 
@@ -758,7 +758,7 @@ public class SubPath implements Serializable {
         Rectangle2D coBoundingBox = gp.getBounds2D();
 
 //        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
-        TransformBox box = new TransformBox(coBoundingBox, comp.getIC(), this::refTransform);
+        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);
         return box;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -43,15 +43,15 @@ public class ZoomTool extends Tool {
     @Override
     public void mousePressed(PMouseEvent e) {
         Point mousePos = e.getPoint();
-        ImageComponent ic = e.getIC();
+        CompositionView cv = e.getCV();
         if (e.isLeft()) {
             if(e.isAltDown()) {
-                ic.decreaseZoom(mousePos);
+                cv.decreaseZoom(mousePos);
             } else {
-                ic.increaseZoom(mousePos);
+                cv.increaseZoom(mousePos);
             }
         } else if (e.isRight()) {
-            ic.decreaseZoom(mousePos);
+            cv.decreaseZoom(mousePos);
         }
     }
 

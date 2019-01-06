@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Resize;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedPanel;
@@ -266,7 +266,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     public static void resizeActiveImage() {
-        Composition comp = ImageComponents.getActiveComp()
+        Composition comp = OpenComps.getActiveComp()
                 .orElseThrow(() -> new IllegalStateException("no active image"));
         showInDialog(comp);
     }

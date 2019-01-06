@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -270,7 +270,7 @@ public final class AppPreferences {
     }
 
     public static GuideStyle getGuideStyle() {
-        if (null == guideStyle) {
+        if (guideStyle == null) {
             int colorRGB = mainNode.getInt(GUIDE_COLOR_KEY, GUIDE_COLOR_DEFAULT);
             int strokeId = mainNode.getInt(GUIDE_STROKE_KEY, GUIDE_STROKE_DEFAULT);
             guideStyle = new GuideStyle();
@@ -282,7 +282,7 @@ public final class AppPreferences {
     }
 
     public static GuideStyle getCropGuideStyle() {
-        if (null == cropGuideStyle) {
+        if (cropGuideStyle == null) {
             int colorRGB = mainNode.getInt(CROP_GUIDE_COLOR_KEY, CROP_GUIDE_COLOR_DEFAULT);
             int strokeId = mainNode.getInt(CROP_GUIDE_STROKE_KEY, CROP_GUIDE_STROKE_DEFAULT);
             cropGuideStyle = new GuideStyle();

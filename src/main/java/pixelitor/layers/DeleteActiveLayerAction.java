@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
  * An Action that deletes the active layer from the active composition.
  */
 public class DeleteActiveLayerAction extends AbstractAction
-        implements ActiveImageChangeListener, GlobalLayerChangeListener {
+    implements CompActivationListener, GlobalLayerChangeListener {
 
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
@@ -40,23 +40,23 @@ public class DeleteActiveLayerAction extends AbstractAction
         super("Delete Layer", Icons.load("delete_layer.gif"));
         putValue(SHORT_DESCRIPTION, "Deletes the active layer.");
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         Layers.addLayerChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         comp.deleteActiveLayer(true, true);
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         if (newIC.getComp().getNumLayers() <= 1) { // no more deletion is possible
             setEnabled(false);
         } else {

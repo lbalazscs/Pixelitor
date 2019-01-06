@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Composition;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 /**
  * The panel that shows the histograms
  */
-public class HistogramsPanel extends JPanel implements ActiveImageChangeListener {
+public class HistogramsPanel extends JPanel implements CompActivationListener {
     public static final HistogramsPanel INSTANCE = new HistogramsPanel();
     private static final String TYPE_LOGARITHMIC = "Logarithmic";
     private static final String TYPE_LINEAR = "Linear";
@@ -85,7 +85,7 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
         boolean isLogarithmicNow = selected.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            ImageComponents.getActiveComp().ifPresent(
+            OpenComps.getActiveComp().ifPresent(
                     this::updateFromCompIfShown);
         }
     }
@@ -95,15 +95,15 @@ public class HistogramsPanel extends JPanel implements ActiveImageChangeListener
     }
 
     @Override
-    public void noOpenImageAnymore() {
-        red.noOpenImageAnymore();
-        green.noOpenImageAnymore();
-        blue.noOpenImageAnymore();
+    public void allCompsClosed() {
+        red.allCompsClosed();
+        green.allCompsClosed();
+        blue.allCompsClosed();
         repaint();
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         updateFromCompIfShown(newIC.getComp());
     }
 

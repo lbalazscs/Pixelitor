@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
@@ -40,7 +40,7 @@ public interface PenToolMode {
     void mouseReleased(PMouseEvent e);
 
     // return true if needs repainting
-    boolean mouseMoved(MouseEvent e, ImageComponent ic);
+    boolean mouseMoved(MouseEvent e, CompositionView cv);
 
     void paint(Graphics2D g);
 
@@ -61,14 +61,14 @@ public interface PenToolMode {
         if (prevMode == TRANSFORM) {
             // in rare cases the transform boxes can
             // leave their cursor even after a mode change
-            ImageComponents.setCursorForAll(Tools.PEN.getStartingCursor());
+            OpenComps.setCursorForAll(Tools.PEN.getStartingCursor());
         }
     }
 
     default void modeEnded() {
         // TODO should be cleaner
         if (PenTool.hasPath()) {
-            Composition comp = ImageComponents.getActiveCompOrNull();
+            Composition comp = OpenComps.getActiveCompOrNull();
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {

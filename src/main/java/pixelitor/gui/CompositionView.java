@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.CanvasMargins;
 import pixelitor.Composition;
@@ -47,7 +48,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
-import pixelitor.utils.debug.ImageComponentNode;
+import pixelitor.utils.debug.CompositionViewNode;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
@@ -72,7 +73,7 @@ import static java.lang.String.format;
 /**
  * The GUI component that shows a composition
  */
-public class ImageComponent extends JComponent
+public class CompositionView extends JComponent
         implements MouseListener, MouseMotionListener, View {
 
     private double viewScale = 1.0f;
@@ -91,7 +92,7 @@ public class ImageComponent extends JComponent
     private MaskViewMode maskViewMode;
 
     // The start coordinates of the canvas in component space,
-    // (bigger than zero if the ImageComponent is bigger
+    // (bigger than zero if the CompositionView is bigger
     // than the canvas, and the canvas has to be centralized)
     private double canvasStartX;
     private double canvasStartY;
@@ -103,12 +104,13 @@ public class ImageComponent extends JComponent
 
     private static boolean showPixelGrid = false;
 
-    public ImageComponent(Composition comp) {
+    public CompositionView(Composition comp) {
+        assert !Build.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
         this.comp = comp;
         this.canvas = comp.getCanvas();
-        comp.setIC(this); // also sets the ic in the canvas
+        comp.setView(this); // also sets the view in the canvas
 
         ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
         setZoom(fitZoom, null);
@@ -149,7 +151,7 @@ public class ImageComponent extends JComponent
         comp = newComp;
 
         // do this here so that the old comp is deselected before
-        // its ic is set to null
+        // its view is set to null
         if (addToHistory) {
             PixelitorEdit replaceEdit = new CompositionReplacedEdit(
                     "Reload", this, oldComp, newComp, oldMode);
@@ -167,8 +169,8 @@ public class ImageComponent extends JComponent
             }
         }
 
-        oldComp.setIC(null);
-        comp.setIC(this);
+        oldComp.setView(null);
+        comp.setView(this);
         canvas = newComp.getCanvas();
 
         // refresh the layer buttons
@@ -238,7 +240,7 @@ public class ImageComponent extends JComponent
 //        String msg = Utils.debugMouseModifiers(e);
 //        if(!msg.isEmpty()) {
 //            System.out
-//                    .println("ImageComponent::mousePressed: " + msg + "press");
+//                    .println("CompositionView::mousePressed: " + msg + "press");
 //        }
 
         Tools.EventDispatcher.mousePressed(e, this);
@@ -394,7 +396,7 @@ public class ImageComponent extends JComponent
 
         comp.drawGuides(g2);
 
-        if (ImageComponents.isActive(this)) {
+        if (OpenComps.isActive(this)) {
             currentTool.paintOverImage(g2, canvas, this,
                     componentTransform, imageTransform);
         }
@@ -406,6 +408,10 @@ public class ImageComponent extends JComponent
         }
 
         g2.setClip(originalClip);
+    }
+
+    public void paintImmediately() {
+        paintImmediately(getX(), getY(), getWidth(), getHeight());
     }
 
     public boolean showPixelGridIfEnabled() {
@@ -441,14 +447,14 @@ public class ImageComponent extends JComponent
     }
 
     public static void setShowPixelGrid(boolean newValue) {
-        if (ImageComponent.showPixelGrid == newValue) {
+        if (CompositionView.showPixelGrid == newValue) {
             return;
         }
-        ImageComponent.showPixelGrid = newValue;
+        CompositionView.showPixelGrid = newValue;
         if (newValue) {
-            ImageComponents.pixelGridEnabled();
+            OpenComps.pixelGridEnabled();
         } else {
-            ImageComponents.repaintVisible();
+            OpenComps.repaintVisible();
         }
     }
 
@@ -590,7 +596,7 @@ public class ImageComponent extends JComponent
             moveScrollbarsAfterZoom(oldZoom, newZoom, mousePos);
         }
 
-        if (ImageComponents.isActive(this)) {
+        if (OpenComps.isActive(this)) {
             ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
@@ -612,8 +618,8 @@ public class ImageComponent extends JComponent
         // the x, y coordinates were generated BEFORE the zooming
         // so we need to find the corresponding coordinates after zooming
         // TODO maybe this would not be necessary if we did this earlier?
-        Point imageSpaceOrigin = fromComponentToImageSpace(zoomOrigin, oldZoom);
-        zoomOrigin = fromImageToComponentSpace(imageSpaceOrigin, newZoom);
+        Point imOrigin = fromComponentToImageSpace(zoomOrigin, oldZoom);
+        zoomOrigin = fromImageToComponentSpace(imOrigin, newZoom);
 
         Rectangle areaThatShouldBeVisible = new Rectangle(
                 zoomOrigin.x - visiblePart.width / 2,
@@ -687,7 +693,7 @@ public class ImageComponent extends JComponent
 
         // one can zoom an inactive image with the mouse wheel,
         // but the tools are interacting only with the active image
-        if (ImageComponents.isActive(this)) {
+        if (OpenComps.isActive(this)) {
             Tools.coCoordsChanged(this);
         }
         comp.coCoordsChanged();
@@ -792,7 +798,7 @@ public class ImageComponent extends JComponent
     }
 
     /**
-     * Returns how much of this ImageComponent is currently
+     * Returns how much of this {@link CompositionView} is currently
      * visible considering that the JScrollPane might show
      * only a part of it
      */
@@ -804,7 +810,7 @@ public class ImageComponent extends JComponent
         LayerButton layerButton = (LayerButton) newLayer.getUI();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
 
-        if (ImageComponents.isActive(this)) {
+        if (OpenComps.isActive(this)) {
             Layers.numLayersChanged(comp, comp.getNumLayers());
         }
     }
@@ -855,12 +861,12 @@ public class ImageComponent extends JComponent
      */
     @VisibleForTesting
     public Rectangle getVisibleCanvasBoundsOnScreen() {
-        Rectangle canvasRelativeToIC = new Rectangle(
+        Rectangle canvasRelativeToView = new Rectangle(
                 (int) canvasStartX, (int) canvasStartY,
                 canvas.getCoWidth(), canvas.getCoHeight());
 
         // take scrollbars into account
-        Rectangle retVal = canvasRelativeToIC.intersection(getVisiblePart());
+        Rectangle retVal = canvasRelativeToView.intersection(getVisiblePart());
         if (retVal.isEmpty()) {
             throw new IllegalStateException("canvas not visible");
         }
@@ -873,7 +879,7 @@ public class ImageComponent extends JComponent
 
     @Override
     public String toString() {
-        ImageComponentNode node = new ImageComponentNode("ImageComponent", this);
+        CompositionViewNode node = new CompositionViewNode("CompositionView", this);
         return node.toDetailedString();
     }
 }

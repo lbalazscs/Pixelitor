@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -30,7 +30,7 @@ import java.awt.event.ActionEvent;
  * An Action that duplicates the active layer of the active composition
  */
 public class DuplicateLayerAction extends AbstractAction
-        implements ActiveImageChangeListener {
+    implements CompActivationListener {
 
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
@@ -38,22 +38,22 @@ public class DuplicateLayerAction extends AbstractAction
         super("Duplicate Layer", Icons.load("duplicate_layer.png"));
         putValue(SHORT_DESCRIPTION, "Duplicates the active layer.");
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         comp.duplicateActiveLayer();
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setEnabled(true);
     }
 }

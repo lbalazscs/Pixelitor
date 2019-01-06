@@ -1,9 +1,33 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.curves;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.EventListener;
 
@@ -14,14 +38,13 @@ import java.util.EventListener;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesPanel extends JPanel implements MouseMotionListener, MouseListener {
-    public ToneCurves toneCurves = new ToneCurves();
+    public final ToneCurves toneCurves = new ToneCurves();
     private int mouseKnotIndex = -1;
     private int mouseKnotIndexDeleted = -1;
-    private BufferedImage img;
-    private EventListenerList actionListenerList = new EventListenerList();
+    private final BufferedImage img;
+    private final EventListenerList actionListenerList = new EventListenerList();
 
     public ToneCurvesPanel() {
-        super();
         //size: grid(255px) + curvePadding(2*10px) + scales(20px)
         Dimension size = new Dimension(295, 295);
         this.setPreferredSize(size);
@@ -44,12 +67,13 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     private void fireActionPerformed(ActionEvent actionEvent) {
-        EventListener listenerList[] = actionListenerList.getListeners(ActionListener.class);
-        for (int i = 0, n = listenerList.length; i < n; i++) {
-            ((ActionListener) listenerList[i]).actionPerformed(actionEvent);
+        EventListener[] listenerList = actionListenerList.getListeners(ActionListener.class);
+        for (EventListener eventListener : listenerList) {
+            ((ActionListener) eventListener).actionPerformed(actionEvent);
         }
     }
 
+    @Override
     public void paint(Graphics g) {
         super.paint(g);
         g.drawImage(img, 0, 0, null);
@@ -112,7 +136,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         ToneCurve activeCurve = toneCurves.getActiveCurve();
         if (activeCurve.isOverKnot(mousePos)) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        } else if (activeCurve.isOverChart(mousePos)) {
+        } else if (ToneCurve.isOverChart(mousePos)) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         } else {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

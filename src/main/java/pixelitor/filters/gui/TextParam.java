@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -71,7 +71,7 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         trigger = false;
-        setValue(RandomUtils.createRandomString(15));
+        setValue(Rnd.createRandomString(15));
         trigger = true;
     }
 

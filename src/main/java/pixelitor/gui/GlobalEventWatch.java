@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,9 +47,9 @@ import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
 
 /**
- * A global listener for keyboard events
+ * A global listener for AWT/Swing events
  */
-public class GlobalKeyboardWatch {
+public class GlobalEventWatch {
     private static boolean spaceDown = false;
     private static boolean dialogActive = false;
     private static JComponent alwaysVisibleComponent;
@@ -71,7 +71,7 @@ public class GlobalKeyboardWatch {
         }
     };
 
-    private GlobalKeyboardWatch() {
+    private GlobalEventWatch() {
         // do not instantiate: only static utility methods
     }
 
@@ -188,7 +188,7 @@ public class GlobalKeyboardWatch {
 
     @VisibleForTesting
     public static void setSpaceDown(boolean spaceDown) {
-        GlobalKeyboardWatch.spaceDown = spaceDown;
+        GlobalEventWatch.spaceDown = spaceDown;
     }
 
     /**
@@ -196,11 +196,11 @@ public class GlobalKeyboardWatch {
      * key for navigating the UI, and not for "Hide All"
      */
     public static void setDialogActive(boolean dialogActive) {
-        GlobalKeyboardWatch.dialogActive = dialogActive;
+        GlobalEventWatch.dialogActive = dialogActive;
     }
 
     public static void setAlwaysVisibleComponent(JComponent alwaysVisibleComponent) {
-        GlobalKeyboardWatch.alwaysVisibleComponent = alwaysVisibleComponent;
+        GlobalEventWatch.alwaysVisibleComponent = alwaysVisibleComponent;
     }
 
     public static void add(MappedKey key) {
@@ -220,10 +220,10 @@ public class GlobalKeyboardWatch {
     }
 
     public static void addBrushSizeActions() {
-        GlobalKeyboardWatch.add(
+        GlobalEventWatch.add(
             MappedKey.fromChar(']', false,
                 "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
-        GlobalKeyboardWatch.add(
+        GlobalEventWatch.add(
             MappedKey.fromChar('[', false,
                 "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
     }
@@ -273,7 +273,7 @@ public class GlobalKeyboardWatch {
     private static String getComponentDescription(MouseEvent e) {
         Component c = e.getComponent();
         String descr = c.getClass().getSimpleName();
-        if (c instanceof ImageComponent) {
+        if (c instanceof CompositionView) {
             descr += "(name = " + c.getName() + ")";
         } else if (c instanceof ToolButton) {
             ToolButton b = (ToolButton) c;
@@ -284,7 +284,7 @@ public class GlobalKeyboardWatch {
     }
 
     public static void setKeyListener(KeyListener keyListener) {
-        GlobalKeyboardWatch.keyListener = keyListener;
+        GlobalEventWatch.keyListener = keyListener;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.tools;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
@@ -230,9 +230,9 @@ public class SelectionTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if (ic != null) {
-            Composition comp = ic.getComp();
+        CompositionView cv = OpenComps.getActiveView();
+        if (cv != null) {
+            Composition comp = cv.getComp();
             Selection selection = comp.getSelection();
             if (selection != null) {
                 selection.nudge(key.getTransform());
@@ -278,12 +278,12 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         // ignore
     }
 
     @Override
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
         stopBuildingSelection();
     }
 

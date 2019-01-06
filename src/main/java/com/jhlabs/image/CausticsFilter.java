@@ -254,7 +254,7 @@ public class CausticsFilter extends WholeImageFilter {
             Runnable lineTask = () -> calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
 
         finishProgressTracker();
 

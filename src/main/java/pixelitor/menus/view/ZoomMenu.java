@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
@@ -61,13 +61,13 @@ public class ZoomMenu extends PMenu {
     private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveIC().increaseZoom();
+            OpenComps.getActiveView().increaseZoom();
         }
     };
     private static final Action ZOOM_OUT_ACTION = new AbstractAction("Zoom Out") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            ImageComponents.getActiveIC().decreaseZoom();
+            OpenComps.getActiveView().decreaseZoom();
         }
     };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -241,6 +241,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         previewImage = null;
         filterSourceImage = null;
         image = null;
+        trimmedBoundingBox = null;
 
         in.defaultReadObject();
         setImage(PXCFormat.deserializeImage(in));
@@ -1147,7 +1148,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage oldImage = copyImage(image);
 
         LayerMask oldMask = mask;
-        MaskViewMode oldMode = comp.getIC().getMaskViewMode();
+        MaskViewMode oldMode = comp.getView().getMaskViewMode();
 
         mask.applyToImage(image);
         deleteMask(false);

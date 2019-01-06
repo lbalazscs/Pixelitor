@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 /**
  * A filter parameter for selecting the
@@ -55,7 +55,7 @@ public class ElevationAngleParam extends AngleParam {
 
     @Override
     public void randomize() {
-        int val = RandomUtils.nextInt(90);
+        int val = Rnd.nextInt(90);
         setValueInDegrees(val, false);
     }
 }

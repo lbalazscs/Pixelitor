@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.tools;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.GlobalKeyboardWatch;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -43,7 +43,7 @@ import java.awt.geom.AffineTransform;
  * An abstract superclass for all tools.
  *
  * A tool defines the interaction between the user's
- * mouse and key events and an {@link ImageComponent}
+ * mouse and key events and an {@link CompositionView}
  */
 public abstract class Tool implements KeyListener {
     private boolean altDown = false;
@@ -115,8 +115,8 @@ public abstract class Tool implements KeyListener {
     protected void toolStarted() {
         ended = false;
 
-        GlobalKeyboardWatch.setKeyListener(this);
-        ImageComponents.setCursorForAll(cursor);
+        GlobalEventWatch.setKeyListener(this);
+        OpenComps.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
@@ -144,17 +144,17 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Paint on the {@link ImageComponent} after all the layers have been painted.
+     * Paint on the {@link CompositionView} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
     public void paintOverImage(Graphics2D g2, Canvas canvas,
-                               ImageComponent ic,
+                               CompositionView cv,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         // empty instead of abstract for the convenience of subclasses
     }
 
-    public void mouseMoved(MouseEvent e, ImageComponent ic) {
+    public void mouseMoved(MouseEvent e, CompositionView cv) {
         // empty instead of abstract for the convenience of subclasses
     }
 
@@ -172,8 +172,8 @@ public abstract class Tool implements KeyListener {
         GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
-    public void setClipFor(Graphics2D g, ImageComponent ic) {
-        clipStrategy.setClipFor(g, ic);
+    public void setClipFor(Graphics2D g, CompositionView cv) {
+        clipStrategy.setClipFor(g, cv);
     }
 
     @Override
@@ -200,7 +200,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
-            ImageComponents.setCursorForAll(
+            OpenComps.setCursorForAll(
                     Tools.COLOR_PICKER.getStartingCursor());
         }
         altDown = true;
@@ -209,7 +209,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altReleased() {
         if(doColorPickerForwarding()) {
-            ImageComponents.setCursorForAll(cursor);
+            OpenComps.setCursorForAll(cursor);
         }
         altDown = false;
     }
@@ -235,15 +235,15 @@ public abstract class Tool implements KeyListener {
         return toolNode;
     }
 
-    public void noOpenImageAnymore() {
-        resetStateToInitial();
+    public void allCompsClosed() {
+        resetInitialState();
     }
 
-    public void activeImageHasChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldCV, CompositionView newCV) {
         assert Tools.currentTool == this;
-        if (oldIC != null) {
-            oldIC.repaint();
-            resetStateToInitial();
+        if (oldCV != null) {
+            oldCV.repaint();
+            resetInitialState();
         }
     }
 
@@ -251,7 +251,7 @@ public abstract class Tool implements KeyListener {
         // empty instead of abstract for the convenience of subclasses
     }
 
-    public void resetStateToInitial() {
+    public void resetInitialState() {
         // empty instead of abstract for the convenience of subclasses
     }
 
@@ -260,13 +260,13 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Called when the component space coordinates of the pixels pixel changed,
+     * Called when the component space coordinates of the pixels changed,
      * but the image coordinates are still the same (zooming, view resizing).
      *
      * The component coordinates of the widgets must be restored
      * from their image coordinates
      */
-    public void coCoordsChanged(ImageComponent ic) {
+    public void coCoordsChanged(CompositionView cv) {
         // empty instead of abstract for the convenience of subclasses
     }
 
@@ -286,7 +286,7 @@ public abstract class Tool implements KeyListener {
         if (toolButton != null) {
             toolButton.doClick();
         } else {
-            assert Build.isTesting();
+            assert Build.isUnitTesting();
             Tools.changeTo(this);
         }
     }

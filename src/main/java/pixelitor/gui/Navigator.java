@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
 
@@ -50,14 +50,14 @@ import java.awt.geom.AffineTransform;
  * The navigator component that allows the user to pan a zoomed-in image.
  */
 public class Navigator extends JComponent
-        implements MouseListener, MouseMotionListener, ActiveImageChangeListener {
+    implements MouseListener, MouseMotionListener, CompActivationListener {
 
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter
             = ImageUtils.createCheckerboardPainter();
 
-    private ImageComponent ic; // can be null if all images are closed
+    private CompositionView cv; // can be null if all images are closed
     private boolean dragging = false;
     private double imgScalingRatio;
     private Rectangle viewBoxRect;
@@ -80,15 +80,15 @@ public class Navigator extends JComponent
     // based on this instead of the navigator size
     private ZoomLevel exactZoom = null;
 
-    private Navigator(ImageComponent ic) {
+    private Navigator(CompositionView cv) {
         adjListener = e ->
                 SwingUtilities.invokeLater(this::updateViewBoxPosition);
 
-        recalculateSize(ic, true, true, true);
+        recalculateSize(cv, true, true, true);
 
         addMouseListener(this);
         addMouseMotionListener(this);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
 
         addNavigatorResizedListener();
         addMouseWheelZoomingSupport();
@@ -123,7 +123,7 @@ public class Navigator extends JComponent
     }
 
     private void setNavigatorSizeFromZoom(ZoomLevel zoom) {
-        Canvas canvas = ic.getCanvas();
+        Canvas canvas = cv.getCanvas();
         double scale = zoom.getViewScale();
         preferredWidth = (int) (scale * canvas.getImWidth());
         preferredHeight = (int) (scale * canvas.getImHeight());
@@ -150,8 +150,8 @@ public class Navigator extends JComponent
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (Navigator.this.ic != null) { // it is null if all images are closed
-                    recalculateSize(Navigator.this.ic, false, false, true);
+                if (Navigator.this.cv != null) { // it is null if all images are closed
+                    recalculateSize(Navigator.this.cv, false, false, true);
                 }
             }
         });
@@ -161,18 +161,18 @@ public class Navigator extends JComponent
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
                 if (e.getWheelRotation() < 0) { // up, away from the user
-                    // this.ic will be always the active image
-                    this.ic.increaseZoom();
+                    // this.cv will be always the active image
+                    this.cv.increaseZoom();
                 } else {  // down, towards the user
-                    this.ic.decreaseZoom();
+                    this.cv.decreaseZoom();
                 }
             }
         });
     }
 
     public static void showInDialog(PixelitorWindow pw) {
-        ImageComponent ic = ImageComponents.getActiveIC();
-        Navigator navigator = new Navigator(ic);
+        CompositionView cv = OpenComps.getActiveView();
+        Navigator navigator = new Navigator(cv);
 
         if (dialog != null && dialog.isVisible()) {
             dialog.setVisible(false);
@@ -191,32 +191,32 @@ public class Navigator extends JComponent
                 .show();
     }
 
-    public void recalculateSize(ImageComponent ic,
-                                boolean newIC,
-                                boolean icSizeChanged,
+    public void recalculateSize(CompositionView cv,
+                                boolean newCV,
+                                boolean cvSizeChanged,
                                 boolean navigatorResized) {
-        assert (newIC || icSizeChanged || navigatorResized) : "why did you call me?";
+        assert (newCV || cvSizeChanged || navigatorResized) : "why did you call me?";
 
-        if (newIC) {
-            if (this.ic != null) {
+        if (newCV) {
+            if (this.cv != null) {
                 releaseImage();
             }
 
-            this.ic = ic;
-            scrollPane = ic.getImageWindow().getScrollPane();
+            this.cv = cv;
+            scrollPane = cv.getImageWindow().getScrollPane();
         }
 
         if (exactZoom == null) {
-            JDialog dialog = GUIUtils.getDialogAncestor(this);
-            if (dialog != null) { // is null during the initial construction
-                dialog.setTitle("Navigator");
+            JDialog ancestor = GUIUtils.getDialogAncestor(this);
+            if (ancestor != null) { // is null during the initial construction
+                ancestor.setTitle("Navigator");
             }
         }
 
-        if (newIC) {
-            recalculateScaling(ic, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
-        } else if (icSizeChanged || navigatorResized) {
-            recalculateScaling(ic, getWidth(), getHeight());
+        if (newCV) {
+            recalculateScaling(cv, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
+        } else if (cvSizeChanged || navigatorResized) {
+            recalculateScaling(cv, getWidth(), getHeight());
         } else {
             throw new IllegalStateException();
         }
@@ -226,13 +226,13 @@ public class Navigator extends JComponent
 
         updateViewBoxPosition();
 
-        if (newIC) {
-            ic.setNavigator(this);
+        if (newCV) {
+            cv.setNavigator(this);
             scrollPane.getHorizontalScrollBar().addAdjustmentListener(adjListener);
             scrollPane.getVerticalScrollBar().addAdjustmentListener(adjListener);
         }
 
-        if (icSizeChanged) {
+        if (cvSizeChanged) {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 window.pack();
@@ -242,14 +242,14 @@ public class Navigator extends JComponent
     }
 
     private void releaseImage() {
-        ic.setNavigator(null);
+        cv.setNavigator(null);
         scrollPane.getHorizontalScrollBar().removeAdjustmentListener(adjListener);
         scrollPane.getVerticalScrollBar().removeAdjustmentListener(adjListener);
 
-        ic = null;
+        cv = null;
     }
 
-    // updates the view box rectangle position based on the ic
+    // updates the view box rectangle position based on the view
     private void updateViewBoxPosition() {
         if (dragging) {
             // no need to update the rectangle if the change
@@ -286,12 +286,12 @@ public class Navigator extends JComponent
         int bigWidth = (int) (viewBoxRect.width * scaleX);
         int bigHeight = (int) (viewBoxRect.height * scaleY);
 
-        ic.scrollRectToVisible(new Rectangle(bigX, bigY, bigWidth, bigHeight));
+        cv.scrollRectToVisible(new Rectangle(bigX, bigY, bigWidth, bigHeight));
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (ic == null) {
+        if (cv == null) {
             return;
         }
 
@@ -302,7 +302,7 @@ public class Navigator extends JComponent
         AffineTransform origTX = g2.getTransform();
 
         g2.scale(imgScalingRatio, imgScalingRatio);
-        g2.drawImage(ic.getComp().getCompositeImage(), 0, 0, null);
+        g2.drawImage(cv.getComp().getCompositeImage(), 0, 0, null);
         g2.setTransform(origTX);
 
         g2.setStroke(VIEW_BOX_STROKE);
@@ -316,7 +316,7 @@ public class Navigator extends JComponent
             showPopup(e);
         } else {
             Point point = e.getPoint();
-            if (viewBoxRect.contains(point) && ic != null) {
+            if (viewBoxRect.contains(point) && cv != null) {
                 dragStartPoint = point;
                 origRectLoc = viewBoxRect.getLocation();
                 dragging = true;
@@ -371,8 +371,8 @@ public class Navigator extends JComponent
         }
     }
 
-    private void recalculateScaling(ImageComponent ic, int width, int height) {
-        Canvas canvas = ic.getCanvas();
+    private void recalculateScaling(CompositionView cv, int width, int height) {
+        Canvas canvas = cv.getCanvas();
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
 
@@ -420,20 +420,20 @@ public class Navigator extends JComponent
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         releaseImage();
         repaint();
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         recalculateSize(newIC, true, true, false);
     }
 
     // called when the dialog is closed - then this
     // navigator instance is no longer needed
     private void dispose() {
-        ImageComponents.removeActiveImageChangeListener(this);
+        OpenComps.removeActivationListener(this);
     }
 
     @Override

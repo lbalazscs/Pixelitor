@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -38,18 +38,18 @@ import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 public class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
-    private ImageComponent ic;
+    private CompositionView cv;
 
     @Before
     public void setUp() {
         Composition comp = TestHelper.createMockComposition();
-        ic = comp.getIC();
+        cv = comp.getView();
     }
 
     @Test
     public void moveNWFromInitialState() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -93,7 +93,7 @@ public class TransformBoxTest {
 
     @Test
     public void moveSEFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, ic, at -> {});
+        TransformBox box = new TransformBox(originalRect, cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -138,7 +138,7 @@ public class TransformBoxTest {
     @Test
     public void pureTranslation() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -171,7 +171,7 @@ public class TransformBoxTest {
     @Test
     public void pureScaling() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -204,7 +204,7 @@ public class TransformBoxTest {
     @Test
     public void pureRotation() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -259,7 +259,7 @@ public class TransformBoxTest {
     @Test
     public void testCursorAfterTurnedInsideOut() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -332,7 +332,7 @@ public class TransformBoxTest {
     @Test
     public void testImageSpaceRotation() {
         TransformBox box = new TransformBox(originalRect,
-                ic, at -> {});
+            cv, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -439,14 +439,14 @@ public class TransformBoxTest {
     }
 
     private boolean press(TransformBox box, int x, int y) {
-        return box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, ic));
+        return box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, cv));
     }
 
     private boolean drag(TransformBox box, int x, int y) {
-        return box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ic));
+        return box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, cv));
     }
 
     private boolean release(TransformBox box, int x, int y) {
-        return box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, ic));
+        return box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, cv));
     }
 }

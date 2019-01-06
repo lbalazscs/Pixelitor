@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,11 @@
 package pixelitor.menus;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -32,11 +32,11 @@ import javax.swing.event.UndoableEditListener;
  * A menu item that is enabled only when the last edit can be repeated.
  * Currently only the filters can be repeated.
  */
-public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ActiveImageChangeListener {
+public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, CompActivationListener {
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         setEnabled(false);
     }
 
@@ -55,12 +55,12 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, A
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         Composition comp = newIC.getComp();
         onNewComp(comp);
     }

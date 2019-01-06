@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.selection;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.view.ShowHideAction;
@@ -33,6 +33,7 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.JOIN_ROUND;
@@ -44,7 +45,7 @@ import static java.awt.Color.WHITE;
  */
 public class Selection {
     private float dashPhase;
-    private ImageComponent ic;
+    private CompositionView cv;
     private Timer marchingAntsTimer;
 
     // The shape that is currently drawn.
@@ -59,15 +60,15 @@ public class Selection {
     private boolean dead = false;
     private boolean frozen = false;
 
-    public Selection(Shape shape, ImageComponent ic) {
+    public Selection(Shape shape, CompositionView cv) {
         // TODO should not allow selections with null shape
-        assert ic != null;
+        assert cv != null;
 
         this.shape = shape;
-        this.ic = ic;
+        this.cv = cv;
 
         // hack to prevent unit tests from starting the marching
-        if (Build.isTesting()) {
+        if (Build.isUnitTesting()) {
             frozen = true;
         }
 
@@ -77,13 +78,13 @@ public class Selection {
     // copy constructor
     public Selection(Selection orig, boolean shareIC) {
         if (shareIC) {
-            this.ic = orig.ic;
+            this.cv = orig.cv;
         }
 
         // the shapes can be shared
         this.shape = orig.shape;
 
-        // the Timer is not copied! - setIC starts it
+        // the Timer is not copied! - setView starts it
     }
 
     public void startMarching() {
@@ -92,12 +93,12 @@ public class Selection {
         }
 
         assert !dead : "dead selection";
-        assert ic != null : "no ic in selection";
+        assert cv != null : "no view in selection";
 
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
             if(!hidden) {
-                dashPhase += 1.0f / (float) ic.getViewScale();
+                dashPhase += 1.0f / (float) cv.getViewScale();
                 repaint();
             }
         });
@@ -129,7 +130,7 @@ public class Selection {
         // As the selection coordinates are in image space, this is
         // called with a Graphics2D transformed into image space.
         // The line width has to be scaled to compensate.
-        double viewScale = ic.getViewScale();
+        double viewScale = cv.getViewScale();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
         float[] dash;
@@ -158,21 +159,21 @@ public class Selection {
     public void die() {
         stopMarching();
         repaint();
-        ic = null;
+        cv = null;
         dead = true;
     }
 
     private void repaint() {
 //        if(shape != null && !hidden) {
 //             Rectangle selBounds = shape.getBounds();
-//             ic.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
+//             cv.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
 
 //             the above optimization is not enough, the previous positions should be also considered for the
 //             case when the selection is shrinking while dragging.
 //             But it does not seem to solve the pixel grid problem anyway
 //        }
 
-        ic.repaint();
+        cv.repaint();
     }
 
     public void setShape(Shape currentShape) {
@@ -186,7 +187,7 @@ public class Selection {
      * @return true if the selection shape is not empty
      */
     public boolean clipToCanvasSize(Composition comp) {
-        assert comp == ic.getComp();
+        assert comp == cv.getComp();
         if (shape != null) {
             shape = comp.clipShapeToCanvasSize(shape);
 
@@ -210,6 +211,10 @@ public class Selection {
         return shape.getBounds();
     }
 
+    public Rectangle2D getShapeBounds2D() {
+        return shape.getBounds2D();
+    }
+
     public void modify(SelectionModifyType type, float amount) {
         BasicStroke outlineStroke = new BasicStroke(amount);
         Shape outlineShape = outlineStroke.createStrokedShape(shape);
@@ -220,7 +225,7 @@ public class Selection {
         Shape backupShape = shape;
         shape = type.modify(oldArea, outlineArea);
 
-        Composition comp = ic.getComp();
+        Composition comp = cv.getComp();
         boolean notEmpty = clipToCanvasSize(comp);
         if (notEmpty) {
             SelectionChangeEdit edit = new SelectionChangeEdit(
@@ -240,7 +245,7 @@ public class Selection {
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
         History.addEdit(new SelectionChangeEdit(
-                "Nudge Selection", ic.getComp(), backupShape));
+                "Nudge Selection", cv.getComp(), backupShape));
     }
 
     public boolean isHidden() {
@@ -292,9 +297,9 @@ public class Selection {
     }
 
     // called when the composition is duplicated
-    public void setIC(ImageComponent ic) {
-        assert ic != null;
-        this.ic = ic;
+    public void setView(CompositionView cv) {
+        assert cv != null;
+        this.cv = cv;
         startMarching();
     }
 
@@ -312,6 +317,7 @@ public class Selection {
 
         node.addString("Shape Class", shape.getClass().getName());
         node.addString("Bounds", getShapeBounds().toString());
+        node.addString("Bounds 2D", getShapeBounds2D().toString());
 
         return node;
     }
@@ -319,7 +325,7 @@ public class Selection {
     @Override
     public String toString() {
         return "Selection{" +
-                "composition=" + ic.getComp().getName() +
+                "composition=" + cv.getComp().getName() +
                 ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
                 ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
                 '}';

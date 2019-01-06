@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * The GUI container for {@link LayerButton} objects.
- * Each {@link ImageComponent} has its own {@link LayersPanel} instance.
+ * Each {@link CompositionView} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
     private final List<LayerButton> layerButtons = new ArrayList<>();
@@ -161,7 +161,7 @@ public class LayersPanel extends JLayeredPane {
         doLayout();
 
         // notify the raise/lower layer menu items
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         LayerMoveAction.INSTANCE_UP.enableDisable(comp);
         LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
     }

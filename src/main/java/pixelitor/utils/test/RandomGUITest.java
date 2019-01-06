@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,11 +39,11 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.MappedKey;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;
@@ -77,7 +77,7 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
 
@@ -120,7 +120,7 @@ public class RandomGUITest {
     private static final Random rand = new Random();
 
     // set to null to select random tools
-    private static final Tool preferredTool = Tools.SHAPES;
+    private static final Tool preferredTool = null;
 
     // set to null to select random filters
 //    private static final Filter preferredFilter = new Magnify();
@@ -146,7 +146,6 @@ public class RandomGUITest {
     private static final boolean verbose = "true".equals(System.getProperty("verbose"));
 
     private static Rectangle startBounds;
-    private static final boolean isLinux = JVM.isLinux;
 
     private static final boolean enableCopyPaste = Utils.getJavaMainVersion() != 11;
 
@@ -171,13 +170,13 @@ public class RandomGUITest {
         PixelitorWindow.getInstance().setAlwaysOnTop(true);
 
         new PixelitorEventListener().register();
-        GlobalKeyboardWatch.registerDebugMouseWatching(true);
+        GlobalEventWatch.registerDebugMouseWatching(true);
 
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
         stopKeyStroke = KeyStroke.getKeyStroke('w');
-        GlobalKeyboardWatch.add(MappedKey.fromKeyStroke(stopKeyStroke, "stopTest", new AbstractAction() {
+        GlobalEventWatch.add(MappedKey.fromKeyStroke(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
@@ -188,7 +187,7 @@ public class RandomGUITest {
 
         // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
-        GlobalKeyboardWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
+        GlobalEventWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nRandomGUITest: exiting app because '" + exitKeyStroke
@@ -270,12 +269,12 @@ public class RandomGUITest {
                         break;
                     }
 
-                    r.delay(RandomUtils.intInRange(100, 500));
+                    r.delay(Rnd.intInRange(100, 500));
 
                     Runnable runnable = () -> {
                         try {
                             weightedCaller.callRandomAction();
-                            Composition comp = ImageComponents.getActiveComp().orElseThrow(() ->
+                            Composition comp = OpenComps.getActiveComp().orElseThrow(() ->
                                     new IllegalStateException("no active composition"));
                             ConsistencyChecks.checkAll(
                                     comp,
@@ -317,8 +316,6 @@ public class RandomGUITest {
 
     private static Rectangle getWindowBounds() {
         return PixelitorWindow.getInstance().getBounds();
-//        Container contentPane = PixelitorWindow.getInstance().getContentPane();
-//        return contentPane.getBounds();
     }
 
     // generates a random point within the main window relative to the screen
@@ -329,10 +326,6 @@ public class RandomGUITest {
             // restore it to the starting state
             System.out.println("Restoring the original window bounds " + startBounds);
             PixelitorWindow.getInstance().setBounds(startBounds);
-
-//            stop();
-//            throw new IllegalStateException("windowBounds = " + windowBounds
-//                    + ", startBounds = " + startBounds);
         }
 
         int safetyGapLeft = 10;
@@ -357,8 +350,8 @@ public class RandomGUITest {
         }
 
         Point randomPoint = new Point(
-                RandomUtils.intInRange(minX, maxX),
-                RandomUtils.intInRange(minY, maxY));
+            Rnd.intInRange(minX, maxX),
+            Rnd.intInRange(minY, maxY));
         return randomPoint;
     }
 
@@ -418,7 +411,7 @@ public class RandomGUITest {
             modifiers = Ansi.blue("shift-") + modifiers;
         }
         // don't generate Alt-movements on Linux, because it can drag the window
-        boolean altDown = isLinux ? false : rand.nextBoolean();
+        boolean altDown = JVM.isLinux ? false : rand.nextBoolean();
         if (altDown) {
             r.keyPress(VK_ALT);
             r.delay(50);
@@ -470,7 +463,7 @@ public class RandomGUITest {
     }
 
     private static void randomFilter() {
-        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        Drawable dr = OpenComps.getActiveDrawableOrNull();
         if (dr == null) {
             return;
         }
@@ -540,7 +533,7 @@ public class RandomGUITest {
     }
 
     private static void randomTween() {
-        Drawable dr = ImageComponents.getActiveDrawableOrNull();
+        Drawable dr = OpenComps.getActiveDrawableOrNull();
         if (dr == null) {
             return;
         }
@@ -555,7 +548,7 @@ public class RandomGUITest {
         TweenAnimation animation = new TweenAnimation();
         animation.setFilter(filter);
 
-        Interpolation randomInterpolation = RandomUtils.chooseFrom(Interpolation.values());
+        Interpolation randomInterpolation = Rnd.chooseFrom(Interpolation.values());
         animation.setInterpolation(randomInterpolation);
 
         ParamSet paramSet = filter.getParamSet();
@@ -599,16 +592,16 @@ public class RandomGUITest {
         double r = Math.random();
         if (r > 0.75) {
             log("fitActiveTo SPACE");
-            ImageComponents.fitActiveTo(AutoZoom.SPACE);
+            OpenComps.fitActiveTo(AutoZoom.SPACE);
         } else if (r > 0.5) {
             log("fitActiveTo WIDTH");
-            ImageComponents.fitActiveTo(AutoZoom.WIDTH);
+            OpenComps.fitActiveTo(AutoZoom.WIDTH);
         } else if (r > 0.25) {
             log("fitActiveTo HEIGHT");
-            ImageComponents.fitActiveTo(AutoZoom.HEIGHT);
+            OpenComps.fitActiveTo(AutoZoom.HEIGHT);
         } else {
             log("fitActiveToActualPixels");
-            ImageComponents.fitActiveTo(AutoZoom.ACTUAL);
+            OpenComps.fitActiveTo(AutoZoom.ACTUAL);
         }
     }
 
@@ -659,18 +652,18 @@ public class RandomGUITest {
     }
 
     private static void randomZoom() {
-        ImageComponents.onActiveIC(RandomGUITest::setRandomZoom);
+        OpenComps.onActiveIC(RandomGUITest::setRandomZoom);
     }
 
-    private static void setRandomZoom(ImageComponent ic) {
+    private static void setRandomZoom(CompositionView cv) {
         ZoomLevel randomZoomLevel = getRandomZoomLevel();
         log("zoom zoomLevel = " + randomZoomLevel);
 
         if (rand.nextBoolean()) {
-            ic.setZoom(randomZoomLevel, null);
+            cv.setZoom(randomZoomLevel, null);
         } else {
-            Point mousePos = pickRandomPointOn(ic);
-            ic.setZoom(randomZoomLevel, mousePos);
+            Point mousePos = pickRandomPointOn(cv);
+            cv.setZoom(randomZoomLevel, mousePos);
         }
     }
 
@@ -684,15 +677,15 @@ public class RandomGUITest {
         return level;
     }
 
-    private static Point pickRandomPointOn(ImageComponent ic) {
-        Rectangle vp = ic.getVisiblePart();
+    private static Point pickRandomPointOn(CompositionView cv) {
+        Rectangle vp = cv.getVisiblePart();
         int randX = vp.x;
         if (vp.width >= 2) {
-            randX = RandomUtils.intInRange(vp.x, vp.x + vp.width);
+            randX = Rnd.intInRange(vp.x, vp.x + vp.width);
         }
         int randY = vp.y;
         if (vp.height >= 2) {
-            randY = RandomUtils.intInRange(vp.y, vp.y + vp.height);
+            randY = Rnd.intInRange(vp.y, vp.y + vp.height);
         }
         return new Point(randX, randY);
     }
@@ -700,14 +693,14 @@ public class RandomGUITest {
     private static void randomZoomOut() {
         log("zoomOut");
 
-        ImageComponent ic = ImageComponents.getActiveIC();
-        if (ic != null) {
-            ZoomLevel newZoom = ic.getZoomLevel().zoomOut();
+        CompositionView cv = OpenComps.getActiveView();
+        if (cv != null) {
+            ZoomLevel newZoom = cv.getZoomLevel().zoomOut();
             if (rand.nextBoolean()) {
-                ic.setZoom(newZoom, null);
+                cv.setZoom(newZoom, null);
             } else {
-                Point mousePos = pickRandomPointOn(ic);
-                ic.setZoom(newZoom, mousePos);
+                Point mousePos = pickRandomPointOn(cv);
+                cv.setZoom(newZoom, mousePos);
             }
         }
     }
@@ -759,7 +752,7 @@ public class RandomGUITest {
         Fade fade = new Fade();
         fade.setOpacity(opacity);
 
-        Drawable dr = ImageComponents.getActiveDrawableOrThrow();
+        Drawable dr = OpenComps.getActiveDrawableOrThrow();
         fade.startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
@@ -801,7 +794,7 @@ public class RandomGUITest {
 
     private static void layerToCanvasSize() {
         log("layer to canvas size");
-        ImageComponents.getActiveCompOrNull().activeLayerToCanvasSize();
+        OpenComps.getActiveCompOrNull().activeLayerToCanvasSize();
     }
 
     private static void invertSelection() {
@@ -812,7 +805,7 @@ public class RandomGUITest {
     }
 
     private static void traceWithCurrentBrush() {
-        if (Tools.PEN.hasPath()) {
+        if (PenTool.hasPath()) {
             log("trace with current brush");
             executeAction(PenTool.getTraceWithBrush());
         }
@@ -862,13 +855,13 @@ public class RandomGUITest {
         executeAction(action);
     }
 
-    private static void activateRandomIC() {
-        log("activate random ic");
-        ImageComponents.activateRandomIC();
+    private static void activateRandomView() {
+        log("activate random view");
+        OpenComps.activateRandomView();
     }
 
     private static void layerOrderChange() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         int r = rand.nextInt(6);
         switch (r) {
             case 0:
@@ -899,7 +892,7 @@ public class RandomGUITest {
     }
 
     private static void layerMerge() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
 
         if (rand.nextBoolean()) {
             log("layer merge down");
@@ -982,7 +975,7 @@ public class RandomGUITest {
     }
 
     private static void randomChangeLayerOpacityOrBlending() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = OpenComps.getActiveLayerOrNull();
         if (rand.nextBoolean()) {
             float opacity = layer.getOpacity();
             float f = rand.nextFloat();
@@ -997,13 +990,13 @@ public class RandomGUITest {
             }
         } else {
             log("change layer blending mode");
-            BlendingMode randomBM = RandomUtils.chooseFrom(BlendingMode.values());
+            BlendingMode randomBM = Rnd.chooseFrom(BlendingMode.values());
             layer.setBlendingMode(randomBM, true, true, true);
         }
     }
 
     private static void randomChangeLayerVisibility() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = OpenComps.getActiveLayerOrNull();
         boolean visible = layer.isVisible();
         if (rand.nextBoolean()) {
             if (!visible) {
@@ -1045,7 +1038,7 @@ public class RandomGUITest {
 
     private static void randomNewTextLayer() {
         log("new text layer");
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         TextLayer textLayer = new TextLayer(comp);
         TextSettings randomSettings = TextSettings.createRandomSettings(rand);
         textLayer.setSettings(randomSettings);
@@ -1057,7 +1050,7 @@ public class RandomGUITest {
     }
 
     private static void randomTextLayerRasterize() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = OpenComps.getActiveLayerOrNull();
         if (layer instanceof TextLayer) {
             log("text layer rasterize");
 
@@ -1067,7 +1060,7 @@ public class RandomGUITest {
 
     private static void randomNewAdjustmentLayer() {
         log("new adj layer");
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         new LayerAdder(comp)
                 .withHistory("New Random Adj Layer")
@@ -1076,7 +1069,7 @@ public class RandomGUITest {
     }
 
     private static void randomSetLayerMaskEditMode() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = OpenComps.getActiveLayerOrNull();
         if (!layer.hasMask()) {
             return;
         }
@@ -1102,7 +1095,7 @@ public class RandomGUITest {
 
     // (add, delete, apply, link)
     private static void randomLayerMaskAction() {
-        Layer layer = ImageComponents.getActiveLayerOrNull();
+        Layer layer = OpenComps.getActiveLayerOrNull();
         if (!layer.hasMask()) {
             log("add layer mask");
             executeAction(AddLayerMaskAction.INSTANCE);
@@ -1139,7 +1132,7 @@ public class RandomGUITest {
             return preferredTweenFilter;
         }
         FilterAction[] filterActions = FilterUtils.getAnimationFilters();
-        FilterAction filterAction = RandomUtils.chooseFrom(filterActions);
+        FilterAction filterAction = Rnd.chooseFrom(filterActions);
         return (ParametrizedFilter) filterAction.getFilter();
     }
 
@@ -1150,12 +1143,12 @@ public class RandomGUITest {
         int west = rand.nextInt(3);
         log(format("enlargeCanvas north = %d, east = %d, south = %d, west = %d",
                 north, east, south, west));
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
 
     private static void randomGuides() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         float v = rand.nextFloat();
         if (v < 0.2) {
             log("clear guides");
@@ -1175,7 +1168,7 @@ public class RandomGUITest {
 
     private static void reload(Robot r) {
         if (rand.nextFloat() < 0.1) {
-            Composition comp = ImageComponents.getActiveCompOrNull();
+            Composition comp = OpenComps.getActiveCompOrNull();
             if (comp.getFile() != null) {
                 log("f12 reload");
                 pressKey(r, VK_F12);
@@ -1186,12 +1179,12 @@ public class RandomGUITest {
     // to prevent paths growing too large
     private static void setPathsToNull() {
         log("setPathsToNull");
-        List<ImageComponent> icList = ImageComponents.getICList();
-        ImageComponent activeIC = ImageComponents.getActiveIC();
-        for (ImageComponent ic : icList) {
+        List<CompositionView> icList = OpenComps.getViews();
+        CompositionView activeView = OpenComps.getActiveView();
+        for (CompositionView cv : icList) {
             // don't touch the active, as its path might be edited just now
-            if (ic != activeIC) {
-                ic.getComp().setActivePath(null);
+            if (cv != activeView) {
+                cv.getComp().setActivePath(null);
             }
         }
         // history is in an inconsistent state now
@@ -1232,7 +1225,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentEraser);
         weightedCaller.registerCallback(1, RandomGUITest::traceWithCurrentSmudge);
         weightedCaller.registerCallback(1, RandomGUITest::randomRotateFlip);
-        weightedCaller.registerCallback(5, RandomGUITest::activateRandomIC);
+        weightedCaller.registerCallback(5, RandomGUITest::activateRandomView);
         weightedCaller.registerCallback(1, RandomGUITest::layerOrderChange);
         weightedCaller.registerCallback(5, RandomGUITest::layerMerge);
         weightedCaller.registerCallback(3, RandomGUITest::layerAddDelete);

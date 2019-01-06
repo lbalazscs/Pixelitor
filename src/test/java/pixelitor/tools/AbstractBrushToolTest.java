@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -59,7 +59,7 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Drawable dr;
-    private ImageComponent ic;
+    private CompositionView cv;
 
     @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() {
@@ -80,13 +80,13 @@ public class AbstractBrushToolTest {
     @BeforeClass
     public static void setupClass() {
         TestHelper.setupMockFgBgSelector();
-        Build.setTestingMode();
+        Build.setUnitTestingMode();
     }
 
     @Before
     public void setUp() {
         Composition comp = TestHelper.create2LayerComposition(false);
-        ic = comp.getIC();
+        cv = comp.getView();
 
         dr = comp.getActiveDrawableOrThrow();
 
@@ -116,8 +116,8 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        PPoint start = PPoint.eagerFromIm(2.0, 2.0, ic);
-        PPoint end = PPoint.eagerFromIm(5.0, 5.0, ic);
+        PPoint start = PPoint.eagerFromIm(2.0, 2.0, cv);
+        PPoint end = PPoint.eagerFromIm(5.0, 5.0, cv);
         tool.drawBrushStrokeProgrammatically(dr, start, end);
 
         verify(brushSpy).startAt(any());

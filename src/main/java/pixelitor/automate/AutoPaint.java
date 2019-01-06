@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
@@ -124,14 +124,14 @@ public class AutoPaint {
                                    ProgressHandler progressHandler) {
         Random random = new Random();
         Composition comp = dr.getComp();
-        ImageComponent ic = comp.getIC();
+        CompositionView cv = comp.getView();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
             progressHandler.updateProgress(i);
 
             paintSingleStroke(dr, settings, comp, random);
-            ic.paintImmediately(ic.getBounds());
+            cv.paintImmediately();
         }
     }
 
@@ -163,7 +163,7 @@ public class AutoPaint {
         return PPoint.lazyFromIm(
                 rand.nextInt(canvas.getImWidth()),
                 rand.nextInt(canvas.getImHeight()),
-                comp.getIC()
+                comp.getView()
         );
     }
 
@@ -173,7 +173,7 @@ public class AutoPaint {
         double angle = rand.nextDouble() * 2 * Math.PI;
         double endX = start.getImX() + strokeLength * FastMath.cos(angle);
         double endY = start.getImY() + strokeLength * FastMath.sin(angle);
-        return PPoint.lazyFromIm(endX, endY, comp.getIC());
+        return PPoint.lazyFromIm(endX, endY, comp.getView());
     }
 
     private static void drawBrushStroke(Drawable dr,

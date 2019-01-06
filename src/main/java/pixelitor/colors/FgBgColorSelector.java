@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,13 +19,13 @@ package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.MappedKey;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -211,9 +211,9 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color rndColor1 = RandomUtils.createRandomColor(false);
+                Color rndColor1 = Rnd.createRandomColor(false);
                 setFgColor(rndColor1, false);
-                Color rndColor2 = RandomUtils.createRandomColor(false);
+                Color rndColor2 = Rnd.createRandomColor(false);
                 setBgColor(rndColor2, true);
             }
         };
@@ -306,9 +306,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalKeyboardWatch.add(MappedKey.fromChar('d', true, "reset", resetToDefaultAction));
-        GlobalKeyboardWatch.add(MappedKey.fromChar('x', true, "switch", swapColorsAction));
-        GlobalKeyboardWatch.add(MappedKey.fromChar('r', true, "randomize", randomizeColorsAction));
+        GlobalEventWatch.add(MappedKey.fromChar('d', true, "reset", resetToDefaultAction));
+        GlobalEventWatch.add(MappedKey.fromChar('x', true, "switch", swapColorsAction));
+        GlobalEventWatch.add(MappedKey.fromChar('r', true, "randomize", randomizeColorsAction));
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {

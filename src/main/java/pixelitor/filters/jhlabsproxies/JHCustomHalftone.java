@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.filters.jhlabsproxies;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -37,7 +37,7 @@ public class JHCustomHalftone extends JHMaskedHalftone {
 
     @Override
     protected BufferedImage createMaskImage(BufferedImage src) {
-        Optional<Composition> opt = ImageComponents.findCompositionByName("Untitled1");
+        Optional<Composition> opt = OpenComps.findCompositionByName("Untitled1");
         if (opt.isPresent()) {
             return opt.get().getCompositeImage();
         }

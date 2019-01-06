@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,30 +17,30 @@
 
 package pixelitor.menus;
 
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 
 import javax.swing.*;
 
 /**
  * A JRadioButtonMenuItem that becomes enabled only if there is an open image
  */
-public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements ActiveImageChangeListener {
+public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements CompActivationListener {
     public OpenImageEnabledRadioButtonMenuItem(String name) {
         super(name);
         setName(name);
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         setEnabled(true);
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 }

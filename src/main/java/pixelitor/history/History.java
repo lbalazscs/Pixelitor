@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.history;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
@@ -53,7 +53,7 @@ public class History {
     private static boolean ignoreEdits = false;
 
     static {
-        if (Build.isTesting()) {
+        if (Build.isUnitTesting()) {
             // make sure we have enough undo for the tests
             setUndoLevels(15);
         } else {
@@ -276,7 +276,7 @@ public class History {
     }
 
     public static boolean canFade() {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp == null) {
             return false;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.utils;
 
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.menus.view.ZoomLevel;
@@ -132,8 +132,8 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, false);
             layer.addConfiguredMask(mask);
         }
-        ImageComponents.addAsNewImage(comp);
-        comp.getIC().setZoom(ZoomLevel.Z6400, null);
+        OpenComps.addAsNewImage(comp);
+        comp.getView().setZoom(ZoomLevel.Z6400, null);
     }
 
     // creates expected results from actual ones for regression tests
@@ -162,7 +162,7 @@ public class Tests3x3 {
     }
 
     public static void dumpCompositeOfActive() {
-        BufferedImage img = ImageComponents.getActiveCompOrNull().calculateCompositeImage();
+        BufferedImage img = OpenComps.getActiveCompOrNull().calculateCompositeImage();
         String actual = getExpectedFromActual(img);
         System.out.println(format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
     }

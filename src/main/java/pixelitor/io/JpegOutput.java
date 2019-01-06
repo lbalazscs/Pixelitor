@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,7 +75,7 @@ public final class JpegOutput {
                 previewImage = TrackedIO.readFromIIS(iis, pt2);
             }
 
-            pt.finish();
+            pt.finished();
         } catch (IOException e) {
             Messages.showException(e);
         }

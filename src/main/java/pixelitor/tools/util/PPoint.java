@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.util;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
@@ -29,11 +29,11 @@ import java.awt.geom.Line2D;
  * The "Pixelitor Point" represents an immutable point on an image both in
  * component (mouse) coordinates and image coordinates.
  * <p>
- * Component coordinates are relative to the {@link ImageComponent},
+ * Component coordinates are relative to the {@link CompositionView},
  * image coordinates are relative to the {@link Canvas} (not necessarily
  * to the BufferedImage, as the image can be bigger than the canvas) and
  * take the position of the {@link Canvas} within the
- * {@link ImageComponent} and the image zooming into account.
+ * {@link CompositionView} and the image zooming into account.
  */
 public abstract class PPoint {
     View view;
@@ -79,8 +79,8 @@ public abstract class PPoint {
         return imY;
     }
 
-    public ImageComponent getIC() {
-        return (ImageComponent) view;
+    public CompositionView getCV() {
+        return (CompositionView) view;
     }
 
     public View getView() {
@@ -136,24 +136,24 @@ public abstract class PPoint {
         return Math.sqrt(coDistSq(other));
     }
 
-    public static PPoint lazyFromCo(double x, double y, View ic) {
-        return new Lazy(ic, x, y);
+    public static PPoint lazyFromCo(double x, double y, View view) {
+        return new Lazy(view, x, y);
     }
 
-    public static PPoint eagerFromCo(double x, double y, View ic) {
-        return new Eager(ic, x, y);
+    public static PPoint eagerFromCo(double x, double y, View view) {
+        return new Eager(view, x, y);
     }
 
-    public static PPoint eagerFromIm(double imX, double imY, View ic) {
-        return new EagerImage(ic, imX, imY);
+    public static PPoint eagerFromIm(double imX, double imY, View view) {
+        return new EagerImage(view, imX, imY);
     }
 
-    public static PPoint lazyFromIm(double imX, double imY, View ic) {
-        return new LazyImage(ic, imX, imY);
+    public static PPoint lazyFromIm(double imX, double imY, View view) {
+        return new LazyImage(view, imX, imY);
     }
 
     public Composition getComp() {
-        return ((ImageComponent) view).getComp();
+        return ((CompositionView) view).getComp();
     }
 
     /**
@@ -165,8 +165,8 @@ public abstract class PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public Lazy(View ic, double x, double y) {
-            super(ic);
+        public Lazy(View view, double x, double y) {
+            super(view);
             coX = x;
             coY = y;
             // image space coordinates are not yet initialized
@@ -196,12 +196,12 @@ public abstract class PPoint {
      * space coordinates to image space coordinates immediately
      */
     public static class Eager extends PPoint {
-        public Eager(View ic, double x, double y) {
-            super(ic);
+        public Eager(View view, double x, double y) {
+            super(view);
             coX = x;
             coY = y;
-            imX = ic.componentXToImageSpace(coX);
-            imY = ic.componentYToImageSpace(coY);
+            imX = view.componentXToImageSpace(coX);
+            imY = view.componentYToImageSpace(coY);
         }
     }
 
@@ -209,12 +209,12 @@ public abstract class PPoint {
      * A {@link PPoint} eagerly initialized with image-space coordinates
      */
     private static class EagerImage extends PPoint {
-        public EagerImage(View ic, double imX, double imY) {
-            super(ic);
+        public EagerImage(View view, double imX, double imY) {
+            super(view);
             this.imX = imX;
             this.imY = imY;
-            this.coX = (int) ic.imageXToComponentSpace(imX);
-            this.coY = (int) ic.imageYToComponentSpace(imY);
+            this.coX = (int) view.imageXToComponentSpace(imX);
+            this.coY = (int) view.imageYToComponentSpace(imY);
         }
     }
 
@@ -225,8 +225,8 @@ public abstract class PPoint {
         private boolean xConverted = false;
         private boolean yConverted = false;
 
-        public LazyImage(View ic, double imX, double imY) {
-            super(ic);
+        public LazyImage(View view, double imX, double imY) {
+            super(view);
             this.imX = imX;
             this.imY = imY;
             // component space coordinates are not yet initialized

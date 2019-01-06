@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.gradient;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.TestHelper;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 
 import java.awt.geom.AffineTransform;
 
@@ -42,10 +42,10 @@ public class GradientHandlesTest {
 
     @Before
     public void setup() {
-        ImageComponent ic = TestHelper.createMockICWithoutComp();
+        CompositionView cv = TestHelper.createMockViewWithoutComp();
         handles = new GradientHandles(
                 START_X_FOR_START, START_Y_FOR_START,
-                START_X_FOR_END, START_Y_FOR_END, ic);
+                START_X_FOR_END, START_Y_FOR_END, cv);
         start = handles.getStart();
         end = handles.getEnd();
         middle = handles.getMiddle();

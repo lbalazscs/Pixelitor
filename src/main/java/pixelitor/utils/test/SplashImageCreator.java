@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
@@ -106,9 +106,9 @@ public class SplashImageCreator {
 
             ValueNoise.reseed();
             Composition comp = createSplashImage();
-            ImageComponent ic = comp.getIC();
+            CompositionView cv = comp.getView();
 
-            ic.paintImmediately(ic.getBounds());
+            cv.paintImmediately();
 
             File f = new File(lastSaveDir, fileName);
             comp.setFile(f);
@@ -119,7 +119,7 @@ public class SplashImageCreator {
                     OutputFormat.getLastUsed(), comp.getFile());
             return comp.saveAsync(saveSettings, false)
                     // closed here because here we have a comp reference
-                    .thenAcceptAsync(v -> comp.getIC().close(), EventQueue::invokeLater);
+                    .thenAcceptAsync(v -> comp.getView().close(), EventQueue::invokeLater);
         });
     }
 
@@ -161,9 +161,6 @@ public class SplashImageCreator {
                 "version " + Build.VERSION_NUMBER,
                 WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
-
-//        font = new Font(Font.SANS_SERIF, Font.PLAIN, 10);
-//        addRasterizedTextLayer(ic, new Date().toString(), font, 0.8f, 100, false);
 
         return comp;
     }

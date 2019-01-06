@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,8 @@ package pixelitor.tools.guidelines;
 
 import pixelitor.guides.GuidesRenderer;
 
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -30,24 +31,22 @@ import java.util.Arrays;
  * Crop guidelines renderer
  */
 public class RectGuideline {
-
     private Graphics2D g2;
     private RectGuidelineType type = RectGuidelineType.NONE;
     private int orientation = 0;
-    private GuidesRenderer glRenderer;
+    private final GuidesRenderer glRenderer;
     private static final double GOLDEN_RATIO = 1.618;
+    private static final int NUM_SPIRAL_SEGMENTS = 11;
 
     public RectGuideline(GuidesRenderer glRenderer) {
         this.glRenderer = glRenderer;
     }
 
-    public RectGuidelineType getType()
-    {
+    public RectGuidelineType getType() {
         return type;
     }
 
-    public void setType(RectGuidelineType type)
-    {
+    public void setType(RectGuidelineType type) {
         this.type = type;
     }
 
@@ -55,13 +54,11 @@ public class RectGuideline {
         return orientation;
     }
 
-    public void setOrientation(int orientation)
-    {
+    public void setOrientation(int orientation) {
         this.orientation = orientation % 4;
     }
 
-    public void draw(Rectangle2D rect, Graphics2D g2)
-    {
+    public void draw(Rectangle2D rect, Graphics2D g2) {
         this.g2 = g2;
         switch (type) {
             case NONE:
@@ -87,13 +84,11 @@ public class RectGuideline {
         }
     }
 
-    private void drawShapes(Shape[] shapes)
-    {
+    private void drawShapes(Shape[] shapes) {
         this.glRenderer.draw(g2, Arrays.asList(shapes));
     }
 
-    private void drawSections(Rectangle2D rect, double phi)
-    {
+    private void drawSections(Rectangle2D rect, double phi) {
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
         double x1, x2, y1, y2;
@@ -118,18 +113,15 @@ public class RectGuideline {
         drawShapes(lines);
     }
 
-    private void drawRuleOfThirds(Rectangle2D rect)
-    {
+    private void drawRuleOfThirds(Rectangle2D rect) {
         drawSections(rect, 3);
     }
 
-    private void drawGoldenSections(Rectangle2D rect)
-    {
+    private void drawGoldenSections(Rectangle2D rect) {
         drawSections(rect, GOLDEN_RATIO);
     }
 
-    private void drawDiagonals(Rectangle2D rect)
-    {
+    private void drawDiagonals(Rectangle2D rect) {
         double x1, x2, y1, y2;
         Line2D[] lines = new Line2D.Double[4];
 
@@ -168,29 +160,28 @@ public class RectGuideline {
         drawShapes(lines);
     }
 
-    private void drawGrid(Rectangle2D rect)
-    {
+    private void drawGrid(Rectangle2D rect) {
         int gridSize = 50;
-        int gridCountH = 1 + 2*((int) (rect.getHeight() / 2 / gridSize));
-        int gridCountV = 1 + 2*((int) (rect.getWidth() / 2 / gridSize));
-        double gridOffsetH = (rect.getHeight() - (gridCountH+1) * gridSize) / 2;
-        double gridOffsetV = (rect.getWidth() - (gridCountV+1) * gridSize) / 2;
+        int gridCountH = 1 + 2 * ((int) (rect.getHeight() / 2 / gridSize));
+        int gridCountV = 1 + 2 * ((int) (rect.getWidth() / 2 / gridSize));
+        double gridOffsetH = (rect.getHeight() - (gridCountH + 1) * gridSize) / 2;
+        double gridOffsetV = (rect.getWidth() - (gridCountV + 1) * gridSize) / 2;
         Line2D[] lines = new Line2D.Double[gridCountH + gridCountV];
 
         // horizontal lines (change only y position)
         double x1 = rect.getX();
         double x2 = rect.getX() + rect.getWidth();
         for (int i = 0; i < gridCountH; i++) {
-            double yh = rect.getY() + (i+1) * gridSize + gridOffsetH;
-            lines[i] = new Line2D.Double(x1, yh,  x2, yh);
+            double yh = rect.getY() + (i + 1) * gridSize + gridOffsetH;
+            lines[i] = new Line2D.Double(x1, yh, x2, yh);
         }
 
         // vertical lines (change only x position)
         double y1 = rect.getY();
-        double y2 = rect.getY()+ rect.getHeight();
+        double y2 = rect.getY() + rect.getHeight();
         for (int i = 0; i < gridCountV; i++) {
-            double xv = rect.getX() + (i+1) * gridSize + gridOffsetV;
-            lines[gridCountH+i] = new Line2D.Double(xv, y1, xv, y2);
+            double xv = rect.getX() + (i + 1) * gridSize + gridOffsetV;
+            lines[gridCountH + i] = new Line2D.Double(xv, y1, xv, y2);
         }
 
         drawShapes(lines);
@@ -198,10 +189,10 @@ public class RectGuideline {
 
     /**
      * Get projected point P' of P on given line
+     *
      * @return projected point p.
      */
-    private Point2D.Double getProjectedPointOnLine(Line2D line, Point2D.Double p)
-    {
+    private static Point2D.Double getProjectedPointOnLine(Line2D line, Point2D.Double p) {
         Point2D.Double l1 = (Point2D.Double) line.getP1();
         Point2D.Double l2 = (Point2D.Double) line.getP2();
 
@@ -217,21 +208,20 @@ public class RectGuideline {
         }
 
         return new Point2D.Double(
-            (int)(l1.x + (d * v1.x) / v1Length),
-            (int)(l1.y + (d * v1.y) / v1Length));
+            (int) (l1.x + (d * v1.x) / v1Length),
+            (int) (l1.y + (d * v1.y) / v1Length));
     }
 
     /**
      * Get orthogonal line to given line that pass through point P
+     *
      * @return orthogonal line
      */
-    private Line2D getOrthogonalLineThroughPoint(Line2D line, Point2D.Double p)
-    {
+    private static Line2D getOrthogonalLineThroughPoint(Line2D line, Point2D.Double p) {
         return new Line2D.Double(p, getProjectedPointOnLine(line, p));
     }
 
-    private void drawTriangles(Rectangle2D rect)
-    {
+    private void drawTriangles(Rectangle2D rect) {
         Line2D[] lines = new Line2D.Double[3];
         double x1, x2, y1, y2;
 
@@ -256,121 +246,130 @@ public class RectGuideline {
         drawShapes(lines);
     }
 
-    private void drawGoldenSpiral(Rectangle2D rect)
-    {
-        Shape[] arc2D = new Arc2D.Double[11];
-        double angle;
+    private void drawGoldenSpiral(Rectangle2D rect) {
+        Shape[] arc2D = new Arc2D.Double[NUM_SPIRAL_SEGMENTS];
         double arcWidth = rect.getWidth() / GOLDEN_RATIO;
         double arcHeight = rect.getHeight();
-        Point2D.Double center;
 
         switch (orientation % 4) {
             case 0:
-            {
-                angle = 180;
-                center = new Point2D.Double(rect.getX()+arcWidth, rect.getY() + arcHeight);
-
-                for(int i=0;;) {
-                    arc2D[i] = new Arc2D.Double(
-                        (center.getX() - arcWidth),
-                        (center.getY() - arcHeight),
-                        arcWidth*2,
-                        arcHeight*2,
-                        angle,
-                        -90,
-                        Arc2D.OPEN);
-
-                    if (++i > 10) break;
-                    angle -= 90;
-                    arcWidth = arcWidth / GOLDEN_RATIO;
-                    arcHeight = arcHeight / GOLDEN_RATIO;
-                    center.setLocation(
-                        center.getX() + Math.sin( Math.toRadians(  90 - angle ) ) * arcWidth  / GOLDEN_RATIO,
-                        center.getY() - Math.sin( Math.toRadians( 180 - angle ) ) * arcHeight / GOLDEN_RATIO
-                    );
-                }
-            }
-            break;
+                drawSpiral0(rect, arc2D, arcWidth, arcHeight);
+                break;
             case 1:
-            {
-                angle = 180;
-                center = new Point2D.Double(rect.getX()+arcWidth, rect.getY());
-
-                for(int i=0;;) {
-                    arc2D[i] = new Arc2D.Double(
-                        (center.getX() - arcWidth),
-                        (center.getY() - arcHeight),
-                        arcWidth*2,
-                        arcHeight*2,
-                        angle,
-                        90,
-                        Arc2D.OPEN);
-
-                    if (++i > 10) break;
-                    angle += 90;
-                    arcWidth = arcWidth / GOLDEN_RATIO;
-                    arcHeight = arcHeight / GOLDEN_RATIO;
-                    center.setLocation(
-                        center.getX() - Math.sin( Math.toRadians(  -90 + angle ) ) * arcWidth  / GOLDEN_RATIO,
-                        center.getY() + Math.sin( Math.toRadians( -180 + angle ) ) * arcHeight / GOLDEN_RATIO
-                    );
-                }
-            }
-            break;
+                drawSpiral1(rect, arc2D, arcWidth, arcHeight);
+                break;
             case 2:
-            {
-                angle = 0;
-                center = new Point2D.Double(rect.getX()+(rect.getWidth()-arcWidth), rect.getY() + rect.getHeight());
-
-                for(int i=0;;) {
-                    arc2D[i] = new Arc2D.Double(
-                        (center.getX() - arcWidth),
-                        (center.getY() - arcHeight),
-                        arcWidth*2,
-                        arcHeight*2,
-                        angle,
-                        90,
-                        Arc2D.OPEN);
-
-                    if (++i > 10) break;
-                    angle += 90;
-                    arcWidth = arcWidth / GOLDEN_RATIO;
-                    arcHeight = arcHeight / GOLDEN_RATIO;
-                    center.setLocation(
-                        center.getX() + Math.sin( Math.toRadians( 90 + angle ) ) * arcWidth  / GOLDEN_RATIO,
-                        center.getY() - Math.sin( Math.toRadians(  0 + angle ) ) * arcHeight / GOLDEN_RATIO
-                    );
-                }
-            }
-            break;
+                drawSpiral2(rect, arc2D, arcWidth, arcHeight);
+                break;
             case 3:
-            {
-                angle = 0;
-                center = new Point2D.Double(rect.getX()+(rect.getWidth()-arcWidth), rect.getY());
-
-                for(int i=0;;) {
-                    arc2D[i] = new Arc2D.Double(
-                        (center.getX() - arcWidth),
-                        (center.getY() - arcHeight),
-                        arcWidth*2,
-                        arcHeight*2,
-                        angle,
-                        -90,
-                        Arc2D.OPEN);
-
-                    if (++i > 10) break;
-                    angle -= 90;
-                    arcWidth = arcWidth / GOLDEN_RATIO;
-                    arcHeight = arcHeight / GOLDEN_RATIO;
-                    center.setLocation(
-                        center.getX() + Math.sin( Math.toRadians( 90 - angle ) ) * arcWidth  / GOLDEN_RATIO,
-                        center.getY() + Math.sin( Math.toRadians(  0 - angle ) ) * arcHeight / GOLDEN_RATIO
-                    );
-                }
-            }
-            break;
+                drawSpiral3(rect, arc2D, arcWidth, arcHeight);
+                break;
         }
 
         drawShapes(arc2D);
+    }
+
+    private static void drawSpiral0(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
+        double angle;
+        Point2D.Double center;
+        angle = 180;
+        center = new Point2D.Double(rect.getX() + arcWidth, rect.getY() + arcHeight);
+
+        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
+            arc2D[i] = new Arc2D.Double(
+                (center.getX() - arcWidth),
+                (center.getY() - arcHeight),
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                -90,
+                Arc2D.OPEN);
+
+            angle -= 90;
+            arcWidth = arcWidth / GOLDEN_RATIO;
+            arcHeight = arcHeight / GOLDEN_RATIO;
+            center.setLocation(
+                center.getX() + Math.sin(Math.toRadians(90 - angle)) * arcWidth / GOLDEN_RATIO,
+                center.getY() - Math.sin(Math.toRadians(180 - angle)) * arcHeight / GOLDEN_RATIO
+            );
+        }
+    }
+
+    private static void drawSpiral1(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
+        double angle;
+        Point2D.Double center;
+        angle = 180;
+        center = new Point2D.Double(rect.getX() + arcWidth, rect.getY());
+
+        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
+            arc2D[i] = new Arc2D.Double(
+                (center.getX() - arcWidth),
+                (center.getY() - arcHeight),
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                90,
+                Arc2D.OPEN);
+
+            angle += 90;
+            arcWidth = arcWidth / GOLDEN_RATIO;
+            arcHeight = arcHeight / GOLDEN_RATIO;
+            center.setLocation(
+                center.getX() - Math.sin(Math.toRadians(-90 + angle)) * arcWidth / GOLDEN_RATIO,
+                center.getY() + Math.sin(Math.toRadians(-180 + angle)) * arcHeight / GOLDEN_RATIO
+            );
+        }
+    }
+
+    private static void drawSpiral2(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
+        double angle;
+        Point2D.Double center;
+        angle = 0;
+        center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY() + rect.getHeight());
+
+        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
+            arc2D[i] = new Arc2D.Double(
+                (center.getX() - arcWidth),
+                (center.getY() - arcHeight),
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                90,
+                Arc2D.OPEN);
+
+            angle += 90;
+            arcWidth = arcWidth / GOLDEN_RATIO;
+            arcHeight = arcHeight / GOLDEN_RATIO;
+            center.setLocation(
+                center.getX() + Math.sin(Math.toRadians(90 + angle)) * arcWidth / GOLDEN_RATIO,
+                center.getY() - Math.sin(Math.toRadians(0 + angle)) * arcHeight / GOLDEN_RATIO
+            );
+        }
+    }
+
+    private static void drawSpiral3(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
+        double angle;
+        Point2D.Double center;
+        angle = 0;
+        center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY());
+
+        for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
+            arc2D[i] = new Arc2D.Double(
+                (center.getX() - arcWidth),
+                (center.getY() - arcHeight),
+                arcWidth * 2,
+                arcHeight * 2,
+                angle,
+                -90,
+                Arc2D.OPEN);
+
+            angle -= 90;
+            arcWidth = arcWidth / GOLDEN_RATIO;
+            arcHeight = arcHeight / GOLDEN_RATIO;
+            center.setLocation(
+                center.getX() + Math.sin(Math.toRadians(90 - angle)) * arcWidth / GOLDEN_RATIO,
+                center.getY() + Math.sin(Math.toRadians(0 - angle)) * arcHeight / GOLDEN_RATIO
+            );
+        }
     }
 }

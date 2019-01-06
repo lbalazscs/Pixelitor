@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.ColorHistory;
 import pixelitor.colors.ColorUtils;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -74,7 +74,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = RandomUtils.createRandomColor(opacitySetting.allowOpacityAtRandomize);
+        Color c = Rnd.createRandomColor(opacitySetting.allowOpacityAtRandomize);
         setColor(c, false);
     }
 

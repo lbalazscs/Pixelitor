@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -43,7 +43,7 @@ public class LazyMouseBrush implements Brush {
     private double mouseY;
     private double drawX;
     private double drawY;
-    private ImageComponent ic;
+    private CompositionView cv;
     private double spacing;
     private static int defaultSpacing = DEFAULT_SPACING;
 
@@ -76,7 +76,7 @@ public class LazyMouseBrush implements Brush {
     public void setTarget(Composition comp, Graphics2D g) {
         delegate.setTarget(comp, g);
 
-        ic = comp.getIC();
+        cv = comp.getView();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class LazyMouseBrush implements Brush {
             this.drawY += advanceDY;
 
             delegate.continueTo(
-                    PPoint.eagerFromIm(this.drawX, this.drawY, ic));
+                    PPoint.eagerFromIm(this.drawX, this.drawY, cv));
 
             dx = mouseX - this.drawX;
             dy = mouseY - this.drawY;

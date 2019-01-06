@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.layers.MaskViewMode;
 
 import javax.swing.undo.CannotRedoException;
@@ -30,9 +30,9 @@ import javax.swing.undo.CannotUndoException;
 public class CompositionReplacedEdit extends PixelitorEdit {
     private Composition newComp;
     private final MaskViewMode oldMode;
-    private ImageComponent ic;
+    private CompositionView cv;
 
-    public CompositionReplacedEdit(String name, ImageComponent ic,
+    public CompositionReplacedEdit(String name, CompositionView cv,
                                    Composition oldComp, Composition newComp,
                                    MaskViewMode oldMode) {
         super(name, oldComp);
@@ -42,21 +42,21 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         this.newComp = newComp;
         this.oldMode = oldMode;
-        this.ic = ic;
+        this.cv = cv;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        ic.replaceComp(comp, oldMode, false);
+        cv.replaceComp(comp, oldMode, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        ic.replaceComp(newComp, MaskViewMode.NORMAL, false);
+        cv.replaceComp(newComp, MaskViewMode.NORMAL, false);
     }
 
     @Override
@@ -64,6 +64,6 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         super.die();
 
         newComp = null;
-        ic = null;
+        cv = null;
     }
 }

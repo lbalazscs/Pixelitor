@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,6 +80,7 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         if (xDist >= yDist) { // we want to move from a vertical line  to the circle
             angle = FastMath.atan2(dy, xDist);
         } else { // move from horizontal line
+            //noinspection SuspiciousNameCombination
             angle = FastMath.atan2(dx, yDist);
         }
 

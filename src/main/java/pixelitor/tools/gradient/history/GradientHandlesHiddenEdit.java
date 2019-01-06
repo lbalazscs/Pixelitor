@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,13 +37,13 @@ public class GradientHandlesHiddenEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Tools.GRADIENT.setGradient(gradient, false, comp.getIC());
+        Tools.GRADIENT.setGradient(gradient, false, comp.getView());
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        Tools.GRADIENT.setGradient(null, false, comp.getIC());
+        Tools.GRADIENT.setGradient(null, false, comp.getView());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.History;
@@ -111,14 +111,14 @@ public class Crop implements CompAction {
 
         comp.updateAllIconImages();
 
-        ImageComponent ic = comp.getIC();
-        if (!ic.isMock()) { // not in a test
-            ic.revalidate();
+        CompositionView cv = comp.getView();
+        if (!cv.isMock()) { // not in a test
+            cv.revalidate();
 
             // if before the crop the internal frame started
             // at large negative coordinates, after the crop it
             // could become unreachable, so move it
-            ic.ensurePositiveLocation();
+            cv.ensurePositiveLocation();
         }
         comp.imageChanged(FULL, true);
 
@@ -142,7 +142,7 @@ public class Crop implements CompAction {
     public static void toolCropActiveImage(boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
         try {
-            ImageComponents.onActiveComp(comp -> {
+            OpenComps.onActiveComp(comp -> {
                 Rectangle2D cropRect = Tools.CROP.getCropRect().getIm();
                 new Crop(cropRect, false, allowGrowing, deleteCroppedPixels)
                         .process(comp);
@@ -158,11 +158,11 @@ public class Crop implements CompAction {
      */
     public static void selectionCropActiveImage() {
         try {
-            Composition comp = ImageComponents.getActiveCompOrNull();
+            Composition comp = OpenComps.getActiveCompOrNull();
             if (comp != null) {
                 //noinspection CodeBlock2Expr
                 comp.onSelection(sel -> {
-                    new Crop(sel.getShapeBounds(), true,
+                    new Crop(sel.getShapeBounds2D(), true,
                             true, true)
                             .process(comp);
                 });

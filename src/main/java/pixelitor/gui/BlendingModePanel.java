@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.gui;
 
 import pixelitor.gui.utils.DropDownSlider;
 import pixelitor.layers.BlendingMode;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Composite;
@@ -86,10 +86,10 @@ public class BlendingModePanel extends JPanel {
 
     public void randomize() {
         BlendingMode[] blendingModes = BlendingMode.values();
-        int randomIndex = RandomUtils.nextInt(blendingModes.length);
+        int randomIndex = Rnd.nextInt(blendingModes.length);
         bmCombo.setSelectedIndex(randomIndex);
 
-        int newOpacity = RandomUtils.nextInt(100);
+        int newOpacity = Rnd.nextInt(100);
         opacityDDSlider.setValue(newOpacity);
     }
 

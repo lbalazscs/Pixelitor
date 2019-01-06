@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor;
 
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
@@ -103,7 +103,7 @@ public class Composition implements Serializable {
     private transient Lazy<BufferedImage> compositeImage
             = Lazy.of(this::calculateCompositeImage);
 
-    private transient ImageComponent ic;
+    private transient CompositionView cv;
 
     private transient Selection selection;
 
@@ -179,12 +179,12 @@ public class Composition implements Serializable {
             compCopy.dirty = orig.dirty;
             compCopy.file = orig.file;
             compCopy.name = orig.name;
-            compCopy.ic = orig.ic;
+            compCopy.cv = orig.cv;
         } else {
             compCopy.dirty = true;
             compCopy.file = null;
             compCopy.name = createCopyName(stripExtension(orig.name));
-            compCopy.ic = null;
+            compCopy.cv = null;
         }
 
         assert compCopy.checkInvariant();
@@ -197,7 +197,7 @@ public class Composition implements Serializable {
         compositeImage = Lazy.of(this::calculateCompositeImage);
         file = null; // will be set later
         dirty = false;
-        ic = null; // will be set later
+        cv = null; // will be set later
         selection = null; // the selection is not saved
         builtSelection = null;
 
@@ -215,20 +215,20 @@ public class Composition implements Serializable {
         }
     }
 
-    public ImageComponent getIC() {
-        return ic;
+    public CompositionView getView() {
+        return cv;
     }
 
-    public void setIC(ImageComponent ic) {
-        this.ic = ic;
-        canvas.setIC(ic);
+    public void setView(CompositionView cv) {
+        this.cv = cv;
+        canvas.setView(cv);
 
         if (selection != null) { // can happen when duplicating
-            selection.setIC(ic);
+            selection.setView(cv);
         }
         if (paths != null) {
-            if (ic != null) { // ic can be null when reloading
-                paths.setView(ic);
+            if (cv != null) { // cv can be null when reloading
+                paths.setView(cv);
             }
         }
     }
@@ -267,8 +267,8 @@ public class Composition implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-        if (ic != null) {
-            ic.updateTitle();
+        if (cv != null) {
+            cv.updateTitle();
         }
     }
 
@@ -329,7 +329,7 @@ public class Composition implements Serializable {
 
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-        ic.addLayerToGUI(layer, layerIndex);
+        cv.addLayerToGUI(layer, layerIndex);
     }
 
     public void duplicateActiveLayer() {
@@ -355,7 +355,7 @@ public class Composition implements Serializable {
     private void mergeActiveLayerToImageLayer(int activeIndex,
                                               ImageLayer imageLayer,
                                               boolean updateGUI) {
-        MaskViewMode maskViewModeBefore = ic.getMaskViewMode();
+        MaskViewMode maskViewModeBefore = cv.getMaskViewMode();
         BufferedImage imageBefore = ImageUtils.copyImage(imageLayer.getImage());
 
         // apply the effect of the merged layer to the image of the image layer
@@ -412,7 +412,7 @@ public class Composition implements Serializable {
 
         if (updateGUI) {
             LayerUI ui = layerToBeDeleted.getUI();
-            ic.deleteLayerUI(ui);
+            cv.deleteLayerUI(ui);
 
             if (isActive()) {
                 Layers.numLayersChanged(this, layerList.size());
@@ -674,7 +674,7 @@ public class Composition implements Serializable {
         layerList.remove(oldIndex);
         layerList.add(newIndex, layer);
 
-        ic.changeLayerButtonOrder(oldIndex, newIndex);
+        cv.changeLayerButtonOrder(oldIndex, newIndex);
         imageChanged();
         Layers.layerOrderChanged(this);
 
@@ -756,17 +756,17 @@ public class Composition implements Serializable {
 
     public void updateRegion(PPoint start, PPoint end, double thickness) {
         compositeImage.invalidate();
-        if (ic != null) { // during reload image it can be null
-            ic.updateRegion(start, end, thickness);
-            ic.updateNavigator(false);
+        if (cv != null) { // during reload image it can be null
+            cv.updateRegion(start, end, thickness);
+            cv.updateNavigator(false);
         }
     }
 
     public void updateRegion(PRectangle area) {
         compositeImage.invalidate();
-        if (ic != null) { // during reload image it can be null
-            ic.updateRegion(area);
-            ic.updateNavigator(false);
+        if (cv != null) { // during reload image it can be null
+            cv.updateRegion(area);
+            cv.updateNavigator(false);
         }
     }
 
@@ -995,7 +995,7 @@ public class Composition implements Serializable {
             throw new IllegalStateException("There is already a selection: "
                 + selection.toString());
         }
-        setSelectionRef(new Selection(shape, ic));
+        setSelectionRef(new Selection(shape, cv));
     }
 
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
@@ -1037,9 +1037,9 @@ public class Composition implements Serializable {
         compositeImage.invalidate();
 
         if (actions.repaintNeeded()) {
-            if (ic != null) {
-                ic.repaint();
-                ic.updateNavigator(sizeChanged);
+            if (cv != null) {
+                cv.repaint();
+                cv.updateNavigator(sizeChanged);
             }
         }
 
@@ -1049,7 +1049,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActive() {
-        return (ImageComponents.getActiveCompOrNull() == this);
+        return (OpenComps.getActiveCompOrNull() == this);
     }
 
     public void activeLayerToCanvasSize() {
@@ -1096,7 +1096,7 @@ public class Composition implements Serializable {
     }
 
     public void repaint() {
-        ic.repaint();
+        cv.repaint();
     }
 
     /**
@@ -1123,7 +1123,7 @@ public class Composition implements Serializable {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariant() {
         if (layerList.isEmpty()) {
-            if (Build.isTesting()) {
+            if (Build.isUnitTesting()) {
                 return true;
             }
             throw new IllegalStateException("no layer in " + getName());
@@ -1369,7 +1369,7 @@ public class Composition implements Serializable {
             MaskViewMode oldViewMode = null;
             if (historyName != null) {
                 activeLayerBefore = comp.activeLayer;
-                oldViewMode = comp.ic.getMaskViewMode();
+                oldViewMode = comp.cv.getMaskViewMode();
             }
 
             if (newLayerIndex == -1) { // no index was explicitly set
@@ -1383,7 +1383,7 @@ public class Composition implements Serializable {
             comp.setActiveLayer(newLayer, !compInit);
             if (!compInit) {
                 comp.setDirty(true);
-                comp.ic.addLayerToGUI(newLayer, newLayerIndex);
+                comp.cv.addLayerToGUI(newLayer, newLayerIndex);
 
                 if (refresh) {
                     comp.imageChanged();

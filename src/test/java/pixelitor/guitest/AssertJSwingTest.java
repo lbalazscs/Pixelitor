@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,8 @@ import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.history.History;
@@ -71,7 +71,7 @@ import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.tools.transform.TransformBox;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -79,13 +79,14 @@ import pixelitor.utils.test.PixelitorEventListener;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
@@ -173,7 +174,7 @@ public class AssertJSwingTest {
             tester.delayBetweenEvents(ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            tester.testShapesTool();
+            tester.testCropTool();
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -206,7 +207,7 @@ public class AssertJSwingTest {
     }
 
     private void resetState() {
-        if (EDT.call(ImageComponents::getNumOpenImages) > 0) {
+        if (EDT.call(OpenComps::getNumOpenImages) > 0) {
             closeAll();
         }
         openInputFileWithDialog("a.jpg");
@@ -257,19 +258,6 @@ public class AssertJSwingTest {
         target.run(this);
     }
 
-    void testAll() {
-        testTools();
-        testFileMenu();
-        testAutoPaint();
-        testEditMenu();
-        testImageMenu();
-        testFilters();
-        testViewMenu();
-        testHelpMenu();
-        testColors();
-        testLayers();
-    }
-
     private void setupDelayBetweenEvents() {
         // for example -Drobot.delay.millis=500 could be added to
         // the command line to slow it down
@@ -287,6 +275,19 @@ public class AssertJSwingTest {
         robot.settings().eventPostingDelay(2 * millis);
     }
 
+    void testAll() {
+        testTools();
+        testFileMenu();
+        testAutoPaint();
+        testEditMenu();
+        testImageMenu();
+        testFilters();
+        testViewMenu();
+        testHelpMenu();
+        testColors();
+        testLayers();
+    }
+
     void testTools() {
         log(0, "testing the tools");
 
@@ -294,10 +295,11 @@ public class AssertJSwingTest {
         keyboard.actualPixels();
 
         if (!maskIndependentToolsTested) {
-            testSelectionToolAndMenus();
-            testPenTool();
             testMoveTool();
             testCropTool();
+            testSelectionToolAndMenus();
+
+            testPenTool();
             testHandTool();
             testZoomTool();
             maskIndependentToolsTested = true;
@@ -857,8 +859,8 @@ public class AssertJSwingTest {
         // Test the Guides tab
         dialog.tabbedPane().selectTab("Guides");
         GuideStrokeType[] guideStyles = GuideStrokeType.values();
-        dialog.comboBox("guideStyleCB").selectItem(RandomUtils.chooseFrom(guideStyles).toString());
-        dialog.comboBox("cropGuideStyleCB").selectItem(RandomUtils.chooseFrom(guideStyles).toString());
+        dialog.comboBox("guideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
+        dialog.comboBox("cropGuideStyleCB").selectItem(Rnd.chooseFrom(guideStyles).toString());
 
         dialog.button("ok").click();
         // this time the preferences dialog should close
@@ -1237,7 +1239,7 @@ public class AssertJSwingTest {
     private void closeOneOfTwo() {
         log(1, "testing close one of two");
 
-        int numOpenImages = EDT.call(ImageComponents::getNumOpenImages);
+        int numOpenImages = EDT.call(OpenComps::getNumOpenImages);
         if (numOpenImages == 1) {
             createNewImage();
         }
@@ -1284,6 +1286,9 @@ public class AssertJSwingTest {
 
         dialog.button("expandButton").click();
         dialog.button("collapseButton").click();
+
+        findButtonByText(dialog, "Help").click();
+        findJOptionPane().buttonWithText("OK").click();
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -1396,11 +1401,11 @@ public class AssertJSwingTest {
     private void testScreenCapture() {
         log(1, "testing screen capture");
 
-        ImageComponent activeIC = EDT.getActiveIC();
+        CompositionView prevView = EDT.getActiveView();
         testScreenCapture(true);
         testScreenCapture(false);
 
-        EDT.activate(activeIC);
+        EDT.activate(prevView);
 
         checkConsistency();
     }
@@ -1906,6 +1911,8 @@ public class AssertJSwingTest {
         log(1, "testing the hand tool");
 
         pw.toggleButton("Hand Tool Button").click();
+        EDT.assertActiveToolIs(Tools.HAND);
+
         mouse.randomAltClick();
 
         mouse.moveRandomlyWithinCanvas();
@@ -1920,6 +1927,7 @@ public class AssertJSwingTest {
         log(1, "testing the shapes tool");
 
         pw.toggleButton("Shapes Tool Button").click();
+        EDT.assertActiveToolIs(Tools.SHAPES);
 
         keyboard.randomizeColors();
 
@@ -2029,6 +2037,8 @@ public class AssertJSwingTest {
         log(1, "testing the color picker tool");
 
         pw.toggleButton("Color Picker Tool Button").click();
+        EDT.assertActiveToolIs(Tools.COLOR_PICKER);
+
         mouse.randomAltClick();
 
         mouse.moveToCanvas(300, 300);
@@ -2040,7 +2050,9 @@ public class AssertJSwingTest {
 
     private void testPenTool() {
         log(1, "testing the pen tool");
+
         pw.toggleButton("Pen Tool Button").click();
+        EDT.assertActiveToolIs(Tools.PEN);
 
         testPenToolBuildMode();
         testPenToolEditMode();
@@ -2123,14 +2135,14 @@ public class AssertJSwingTest {
         pw.button("toSelectionButton")
             .requireEnabled()
             .click();
-        EDT.assertActiveToolsIs(Tools.SELECTION);
+        EDT.assertActiveToolIs(Tools.SELECTION);
 
         keyboard.invert();
 
         pw.button("toPathButton")
             .requireEnabled()
             .click();
-        EDT.assertActiveToolsIs(Tools.PEN);
+        EDT.assertActiveToolIs(Tools.PEN);
         assertThat(EDT.getPenToolPath()).isNotNull();
 
         findButtonByText(pw, "Stroke with Current Smudge")
@@ -2169,6 +2181,8 @@ public class AssertJSwingTest {
         log(1, "testing the paint bucket tool");
 
         pw.toggleButton("Paint Bucket Tool Button").click();
+        EDT.assertActiveToolIs(Tools.PAINT_BUCKET);
+
         mouse.randomAltClick();
 
         mouse.moveToCanvas(300, 300);
@@ -2181,12 +2195,14 @@ public class AssertJSwingTest {
     private void testGradientTool() {
         log(1, "testing the gradient tool");
 
+        pw.toggleButton("Gradient Tool Button").click();
+        EDT.assertActiveToolIs(Tools.GRADIENT);
+
         if (maskMode.isMaskEditing()) {
             // reset the default colors, otherwise it might be all gray
             keyboard.fgBgDefaults();
         }
 
-        pw.toggleButton("Gradient Tool Button").click();
         mouse.randomAltClick();
         boolean gradientCreated = false;
 
@@ -2248,6 +2264,8 @@ public class AssertJSwingTest {
         log(1, "testing the eraser tool");
 
         pw.toggleButton("Eraser Tool Button").click();
+        EDT.assertActiveToolIs(Tools.ERASER);
+
         testBrushStrokes(false);
 
         checkConsistency();
@@ -2257,6 +2275,7 @@ public class AssertJSwingTest {
         log(1, "testing the brush tool");
 
         pw.toggleButton("Brush Tool Button").click();
+        EDT.assertActiveToolIs(Tools.BRUSH);
 
         enableLazyMouse(false);
         testBrushStrokes(true);
@@ -2276,8 +2295,9 @@ public class AssertJSwingTest {
         DialogFixture dialog = findDialogByTitle("Lazy Mouse");
         if (b) {
             dialog.checkBox().check();
-            dialog.slider("distSlider").requireEnabled();
-            dialog.slider("distSlider").slideToMinimum();
+            dialog.slider("distSlider")
+                .requireEnabled()
+                .slideToMinimum();
             dialog.slider("spacingSlider").requireEnabled();
         } else {
             dialog.checkBox().uncheck();
@@ -2294,6 +2314,9 @@ public class AssertJSwingTest {
         boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
             pw.comboBox("brushTypeSelector").selectItem(brushType.toString());
+            if (brushType.hasSettings()) {
+                // TODO set random settings
+            }
             for (Symmetry symmetry : Symmetry.values()) {
                 if (skipThis()) {
                     continue;
@@ -2314,6 +2337,8 @@ public class AssertJSwingTest {
         log(1, "testing the smudge tool");
 
         pw.toggleButton("Smudge Tool Button").click();
+        EDT.assertActiveToolIs(Tools.SMUDGE);
+
         mouse.randomAltClick();
 
         for (int i = 0; i < 3; i++) {
@@ -2332,6 +2357,7 @@ public class AssertJSwingTest {
         log(1, "testing the clone tool");
 
         pw.toggleButton("Clone Stamp Tool Button").click();
+        EDT.assertActiveToolIs(Tools.CLONE);
 
         testClone(false, false, 100);
         testClone(false, true, 200);
@@ -2342,17 +2368,9 @@ public class AssertJSwingTest {
     }
 
     private void testClone(boolean aligned, boolean sampleAllLayers, int startX) {
-        if (aligned) {
-            pw.checkBox("alignedCB").check();
-        } else {
-            pw.checkBox("alignedCB").uncheck();
-        }
+        selectCheckBox("alignedCB", aligned);
 
-        if (sampleAllLayers) {
-            pw.checkBox("sampleAllLayersCB").check();
-        } else {
-            pw.checkBox("sampleAllLayersCB").uncheck();
-        }
+        selectCheckBox("sampleAllLayersCB", sampleAllLayers);
 
         // set the source point
         mouse.moveToCanvas(300, 300);
@@ -2375,7 +2393,7 @@ public class AssertJSwingTest {
         keyboard.actualPixels();
 
         pw.toggleButton("Selection Tool Button").click();
-        EDT.assertActiveToolsIs(Tools.SELECTION);
+        EDT.assertActiveToolIs(Tools.SELECTION);
         EDT.assertSelectionInteractionIs(REPLACE);
 
         mouse.randomAltClick();
@@ -2416,7 +2434,7 @@ public class AssertJSwingTest {
 
     private void testWithTwoEclipseSelections() {
         pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
-        EDT.assertActiveToolsIs(Tools.SELECTION);
+        EDT.assertActiveToolIs(Tools.SELECTION);
 
         // replace current selection with the first ellipse
         int e1X = 200;
@@ -2440,13 +2458,13 @@ public class AssertJSwingTest {
 
         EDT.assertThereIsSelection();
         Selection selection = EDT.getSelection();
-        Rectangle selectionBounds = selection.getShapeBounds();
-        int selWidth = selectionBounds.width;
-        int selHeight = selectionBounds.height;
+        Rectangle2D selectionBounds = selection.getShapeBounds2D();
+        double selWidth = selectionBounds.getWidth();
+        double selHeight = selectionBounds.getHeight();
 
         // the values can be off by one due to rounding errors
-        assertThat(selWidth).isCloseTo(300, within(2));
-        assertThat(selHeight).isCloseTo(200, within(2));
+        assertThat(selWidth).isCloseTo(300.0, within(2.0));
+        assertThat(selHeight).isCloseTo(200.0, within(2.0));
 
         Canvas canvas = EDT.active(Composition::getCanvas);
         int origCanvasWidth = canvas.getImWidth();
@@ -2459,9 +2477,8 @@ public class AssertJSwingTest {
             .requireEnabled()
             .click();
         assertThat(EDT.active(Composition::getCanvas))
-            .hasImWidth(selWidth)
-            .hasImHeight(selHeight);
-//        assertThat(EDTQueries.getSelection()).isNull();
+            .hasImWidth((int) selWidth)
+            .hasImHeight((int) selHeight);
         EDT.assertThereIsNoSelection();
 
         keyboard.undo("Crop");
@@ -2483,8 +2500,8 @@ public class AssertJSwingTest {
         runMenuCommand("Crop Selection");
         EDT.assertThereIsNoSelection();
         assertThat(canvas)
-            .hasImWidth(selWidth)
-            .hasImHeight(selHeight);
+            .hasImWidth((int) selWidth)
+            .hasImHeight((int) selHeight);
 
         keyboard.undo("Crop");
         EDT.assertThereIsSelection();
@@ -2525,12 +2542,28 @@ public class AssertJSwingTest {
         log(1, "testing the crop tool");
 
         pw.toggleButton("Crop Tool Button").click();
+        EDT.assertActiveToolIs(Tools.CROP);
+
+        List<Boolean> checkBoxStates = Arrays.asList(Boolean.TRUE, Boolean.FALSE);
+        for (Boolean allowGrowing : checkBoxStates) {
+            for (Boolean deleteCroppedPixels : checkBoxStates) {
+                selectCheckBox("allowGrowingCB", allowGrowing);
+                selectCheckBox("deleteCroppedPixelsCB", deleteCroppedPixels);
+
+                cropFromCropTool();
+            }
+        }
+
+        checkConsistency();
+    }
+
+    private void cropFromCropTool() {
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
         mouse.dragToCanvas(450, 450);
-        mouse.moveToCanvas(200, 200);
+        mouse.moveToCanvas(200, 200); // move to the top left corner
         mouse.dragToCanvas(150, 150);
-        Utils.sleep(1, SECONDS);
+//        Utils.sleep(1, SECONDS);
 
         keyboard.nudge();
         // currently there is no undo after resizing or nudging the crop rectangle
@@ -2540,16 +2573,15 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Crop")
             .requireEnabled()
             .click();
-
         keyboard.undoRedoUndo("Crop");
-
-        checkConsistency();
     }
 
     private void testMoveTool() {
         log(1, "testing the move tool");
 
         pw.toggleButton("Move Tool Button").click();
+        EDT.assertActiveToolIs(Tools.MOVE);
+
         testMoveToolImpl(false);
         testMoveToolImpl(true);
 
@@ -2565,8 +2597,8 @@ public class AssertJSwingTest {
         if (altDrag) {
             mouse.altDragToCanvas(300, 300);
         } else {
-            ImageComponent ic = EDT.getActiveIC();
-            Drawable dr = ic.getComp().getActiveDrawableOrThrow();
+            CompositionView cv = EDT.getActiveView();
+            Drawable dr = cv.getComp().getActiveDrawableOrThrow();
             int tx = dr.getTX();
             int ty = dr.getTY();
             assert tx == 0 : "tx = " + tx;
@@ -2578,7 +2610,7 @@ public class AssertJSwingTest {
             ty = dr.getTY();
 
             // The translations will have these values only if we are at 100% zoom!
-            assert ic.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + ic.getZoomLevel();
+            assert cv.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + cv.getZoomLevel();
             assert tx == -200 : "tx = " + tx;
             assert ty == -100 : "ty = " + tx;
         }
@@ -2592,7 +2624,9 @@ public class AssertJSwingTest {
 
     private void testZoomTool() {
         log(1, "testing the zoom tool");
+
         pw.toggleButton("Zoom Tool Button").click();
+        EDT.assertActiveToolIs(Tools.ZOOM);
 
         ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
 
@@ -2718,16 +2752,16 @@ public class AssertJSwingTest {
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
         ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
-        ImageComponent ic = EDT.getActiveIC();
+        CompositionView cv = EDT.getActiveView();
 
-        robot.rotateMouseWheel(ic, 2);
+        robot.rotateMouseWheel(cv, 2);
         if (JVM.isLinux) {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut());
         } else {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut());
         }
 
-        robot.rotateMouseWheel(ic, -2);
+        robot.rotateMouseWheel(cv, -2);
 
         if (JVM.isLinux) {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut().zoomIn().zoomIn());
@@ -3151,5 +3185,13 @@ public class AssertJSwingTest {
 
     public Keyboard keyboard() {
         return keyboard;
+    }
+
+    private void selectCheckBox(String name, boolean newSelected) {
+        if (newSelected) {
+            pw.checkBox(name).check();
+        } else {
+            pw.checkBox(name).uncheck();
+        }
     }
 }

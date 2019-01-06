@@ -37,9 +37,9 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     public float gain = 0.5f;
     public float bias = 0.5f;
     public float distancePower = 2;
-    public boolean useColor = false;
+    public final boolean useColor = false;
     protected Colormap colormap = new Gradient();
-    protected float[] coefficients = {1, 0, 0, 0};
+    protected final float[] coefficients = {1, 0, 0, 0};
     protected float angleCoefficient;
 
     protected float m00 = 1.0f;
@@ -48,16 +48,13 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     protected float m11 = 1.0f;
 //    protected Point[] results = null;
 
-    protected static final ThreadLocal<Point[]> resultsTL = new ThreadLocal<Point[]>() {
-        @Override
-        protected Point[] initialValue() {
-            Point[] results = new Point[3];
-            for (int j = 0; j < results.length; j++) {
-                results[j] = new Point();
-            }
-            return results;
+    protected static final ThreadLocal<Point[]> resultsTL = ThreadLocal.withInitial(() -> {
+        Point[] results = new Point[3];
+        for (int j = 0; j < results.length; j++) {
+            results[j] = new Point();
         }
-    };
+        return results;
+    });
 
     protected float randomness = 0;
     //    private float min;
@@ -65,11 +62,11 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     private static byte[] probabilities;
     private float gradientCoefficient;
 
-    public final static int GR_RANDOM = 0;
-    public final static int GR_SQUARE = 1;
-    public final static int GR_HEXAGONAL = 2;
-    public final static int GR_OCTAGONAL = 3;
-    public final static int GR_TRIANGULAR = 4;
+    public static final int GR_RANDOM = 0;
+    public static final int GR_SQUARE = 1;
+    public static final int GR_HEXAGONAL = 2;
+    public static final int GR_OCTAGONAL = 3;
+    public static final int GR_TRIANGULAR = 4;
 
     GridType gridType;
 
@@ -438,12 +435,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
             }
         };
 
-        static final ThreadLocal<CachedFloatRandom> randomTL = new ThreadLocal<CachedFloatRandom>() {
-            @Override
-            protected CachedFloatRandom initialValue() {
-                return new CachedFloatRandom();
-            }
-        };
+        static final ThreadLocal<CachedFloatRandom> randomTL =
+            ThreadLocal.withInitial(CachedFloatRandom::new);
 
         abstract float checkCube(float x, float y, int cubeX, int cubeY, Point[] results, float randomness);
 
@@ -622,7 +615,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
             };
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
 
         finishProgressTracker();
 

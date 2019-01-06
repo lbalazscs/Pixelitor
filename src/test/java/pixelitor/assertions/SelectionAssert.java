@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.assertions;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.util.Objects;
 import pixelitor.selection.Selection;
+
+import java.awt.geom.Rectangle2D;
 
 /**
  * Custom AssertJ assertions for {@link Selection} objects.
@@ -128,12 +130,12 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    public SelectionAssert hasShapeBounds(java.awt.Rectangle shapeBounds) {
+    public SelectionAssert hasShapeBounds(Rectangle2D shapeBounds) {
         isNotNull();
 
         String msg = "\nExpecting shapeBounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        java.awt.Rectangle actualShapeBounds = actual.getShapeBounds();
+        Rectangle2D actualShapeBounds = actual.getShapeBounds2D();
         if (!Objects.areEqual(actualShapeBounds, shapeBounds)) {
             failWithMessage(msg, actual, shapeBounds, actualShapeBounds);
         }

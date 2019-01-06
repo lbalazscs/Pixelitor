@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ public class PXCFormat {
             try (GZIPInputStream gs = new GZIPInputStream(is)) {
                 try (ObjectInput ois = new ObjectInputStream(gs)) {
                     comp = (Composition) ois.readObject();
-                    mainPT.finish();
+                    mainPT.finished();
                     mainPT = null;
                     
                     // file is transient in Composition because the pxc file can be renamed
@@ -126,7 +126,7 @@ public class PXCFormat {
         } catch (IOException e) {
             Messages.showException(e);
         }
-        mainPT.finish();
+        mainPT.finished();
         mainPT = null;
     }
 

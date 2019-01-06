@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
@@ -30,7 +30,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 
-import static pixelitor.utils.RandomUtils.nextGaussian;
+import static pixelitor.utils.Rnd.nextGaussian;
 
 public class SprayBrush extends AbstractBrush {
     private static final int DELAY_MILLIS = 50;
@@ -94,8 +94,8 @@ public class SprayBrush extends AbstractBrush {
     }
 
     private void sprayOnce() {
-        ImageComponent ic = comp.getIC();
-        if (ic == null) {
+        CompositionView cv = comp.getView();
+        if (cv == null) {
             // can happen if the composition was reloaded while spraying
             return;
         }
@@ -145,7 +145,7 @@ public class SprayBrush extends AbstractBrush {
                 minX - maxShapeRadius,
                 minY - maxShapeRadius,
                 maxX - minX + 2 * maxShapeRadius + 2,
-                maxY - minY + 2 * maxShapeRadius + 2, ic);
+                maxY - minY + 2 * maxShapeRadius + 2, cv);
 
         comp.updateRegion(area);
     }

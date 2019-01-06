@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
 import javax.swing.*;
@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
  * up or down in the layer stack
  */
 public class LayerMoveAction extends AbstractAction
-        implements ActiveImageChangeListener, GlobalLayerChangeListener {
+    implements CompActivationListener, GlobalLayerChangeListener {
 
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
@@ -51,13 +51,13 @@ public class LayerMoveAction extends AbstractAction
         super(getName(up), getIcon(up));
         this.up = up;
         setEnabled(false);
-        ImageComponents.addActiveImageChangeListener(this);
+        OpenComps.addActivationListener(this);
         Layers.addLayerChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if(up) {
             comp.moveActiveLayerUp();
         } else {
@@ -66,12 +66,12 @@ public class LayerMoveAction extends AbstractAction
     }
 
     @Override
-    public void noOpenImageAnymore() {
+    public void allCompsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void activeImageChanged(ImageComponent oldIC, ImageComponent newIC) {
+    public void compActivated(CompositionView oldIC, CompositionView newIC) {
         enableDisable(newIC.getComp());
     }
 

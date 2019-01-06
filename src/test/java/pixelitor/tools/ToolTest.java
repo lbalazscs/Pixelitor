@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,9 +28,9 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.GlobalKeyboardWatch;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.util.PMouseEvent;
@@ -50,7 +50,7 @@ import static java.awt.event.MouseEvent.MOUSE_RELEASED;
  */
 @RunWith(Parameterized.class)
 public class ToolTest {
-    private ImageComponent ic;
+    private CompositionView cv;
 
     @Parameter
     public Tool tool;
@@ -97,7 +97,7 @@ public class ToolTest {
 
     @BeforeClass
     public static void setupClass() {
-        Build.setTestingMode();
+        Build.setUnitTestingMode();
         TestHelper.setupMockFgBgSelector();
     }
 
@@ -105,14 +105,14 @@ public class ToolTest {
     public void setUp()  {
         PenTool.path = null;
         Composition comp = TestHelper.create2LayerComposition(true);
-        ic = comp.getIC();
+        cv = comp.getView();
         tool.toolStarted();
     }
 
     @After
     public void tearDown() {
         tool.toolEnded();
-        ImageComponents.setActiveIC(null, false);
+        OpenComps.setActiveIC(null, false);
     }
 
     @Test
@@ -120,9 +120,9 @@ public class ToolTest {
         stroke(alt, ctrl, shift, mouseButton);
 
         // also test with space down
-        GlobalKeyboardWatch.setSpaceDown(true);
+        GlobalEventWatch.setSpaceDown(true);
         stroke(alt, ctrl, shift, mouseButton);
-        GlobalKeyboardWatch.setSpaceDown(false);
+        GlobalEventWatch.setSpaceDown(false);
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
@@ -147,19 +147,19 @@ public class ToolTest {
     }
 
     private void press(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, ic
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, cv
         );
         tool.handlerChain.handleMousePressed(e);
     }
 
     private void drag(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, ic
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, cv
         );
         tool.handlerChain.handleMouseDragged(e);
     }
 
     private void release(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, ic
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, cv
         );
         tool.handlerChain.handleMouseReleased(e);
     }

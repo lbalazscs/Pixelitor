@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,14 +26,14 @@ import java.awt.event.MouseEvent;
  * An {@link ImageWindow} used in the tabs UI.
  */
 public class ImageTab extends JComponent implements ImageWindow {
-    private final ImageComponent ic;
+    private final CompositionView cv;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
 
-    public ImageTab(ImageComponent ic, TabsUI tabsUI) {
-        this.ic = ic;
+    public ImageTab(CompositionView cv, TabsUI tabsUI) {
+        this.cv = cv;
         this.tabsUI = tabsUI;
-        scrollPane = new JScrollPane(this.ic);
+        scrollPane = new JScrollPane(this.cv);
         setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
     }
@@ -54,11 +54,11 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void updateTitle(ImageComponent ic) {
+    public void updateTitle(CompositionView cv) {
         int myIndex = tabsUI.indexOfComponent(this);
         if (myIndex != -1) {
             TabsUI.TabTitleRenderer tabComponent = (TabsUI.TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
-            tabComponent.setTitle(ic.getName());
+            tabComponent.setTitle(cv.getName());
         }
     }
 
@@ -68,11 +68,11 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     public void onActivation() {
-        ImageComponents.imageActivated(ic);
+        OpenComps.imageActivated(cv);
     }
 
-    public ImageComponent getIC() {
-        return ic;
+    public CompositionView getIC() {
+        return cv;
     }
 
     public void showPopup(MouseEvent mouse) {
@@ -82,17 +82,17 @@ public class ImageTab extends JComponent implements ImageWindow {
         popup.add(new AbstractAction("Close") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.warnAndClose(ic);
+                OpenComps.warnAndClose(cv);
             }
         });
         popup.add(new AbstractAction("Close Others") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ImageComponents.warnAndCloseAllBut(ic);
+                OpenComps.warnAndCloseAllBut(cv);
             }
         });
-        popup.add(ImageComponents.CLOSE_UNMODIFIED_ACTION);
-        popup.add(ImageComponents.CLOSE_ALL_ACTION);
+        popup.add(OpenComps.CLOSE_UNMODIFIED_ACTION);
+        popup.add(OpenComps.CLOSE_ALL_ACTION);
         popup.addSeparator();
         popup.add(tabsUI.getTabPlacementMenu());
 

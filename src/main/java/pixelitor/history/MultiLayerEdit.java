@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -151,7 +151,7 @@ public class MultiLayerEdit extends PixelitorEdit {
         // of the image covers canvas checks
         if (canvasChangeEdit != null) {
             canvasChangeEdit.undo();
-            comp.getIC().revalidate(); // make sure the scrollbars are OK
+            comp.getView().revalidate(); // make sure the scrollbars are OK
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.undo();
@@ -190,7 +190,7 @@ public class MultiLayerEdit extends PixelitorEdit {
         }
         if (selectionChangeEdit != null) {
             selectionChangeEdit.redo();
-            comp.getIC().revalidate(); // make sure the scrollbars are OK
+            comp.getView().revalidate(); // make sure the scrollbars are OK
         }
         if (deselectEdit != null) {
             deselectEdit.redo();

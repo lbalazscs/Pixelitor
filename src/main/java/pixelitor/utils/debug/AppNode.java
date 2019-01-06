@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.utils.debug;
 
 import pixelitor.Build;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.tools.Tool;
@@ -64,18 +64,18 @@ public class AppNode extends DebugNode {
     }
 
     private void addImageNodes() {
-        List<ImageComponent> images = ImageComponents.getICList();
+        List<CompositionView> views = OpenComps.getViews();
 
-        int nrOpenImages = images.size();
+        int nrOpenImages = views.size();
         addInt("Number of Open Images", nrOpenImages);
 
-        ImageComponent activeIC = ImageComponents.getActiveIC();
-        for (ImageComponent ic : images) {
-            ImageComponentNode node;
-            if (ic == activeIC) {
-                node = new ImageComponentNode("ACTIVE Image - " + ic.getComp().getName(), ic);
+        CompositionView activeView = OpenComps.getActiveView();
+        for (CompositionView cv : views) {
+            CompositionViewNode node;
+            if (cv == activeView) {
+                node = new CompositionViewNode("ACTIVE Image - " + cv.getComp().getName(), cv);
             } else {
-                node = new ImageComponentNode("Image - " + ic.getComp().getName(), ic);
+                node = new CompositionViewNode("Image - " + cv.getComp().getName(), cv);
             }
             add(node);
         }

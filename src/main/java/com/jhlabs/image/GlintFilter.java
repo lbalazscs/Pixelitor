@@ -256,7 +256,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
             Runnable lineTask = () -> calculateLine(width, height, pixels, length2, colors, colors2, finalMask, dstPixels, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
 
         setRGB(dst, 0, 0, width, height, dstPixels);
 

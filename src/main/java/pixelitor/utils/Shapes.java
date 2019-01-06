@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.pen.SubPath;
@@ -57,8 +57,8 @@ public class Shapes {
      * Converts the given {@link Shape}, assumed to be
      * in image coordinates, to a {@link Path}
      */
-    public static Path shapeToPath(Shape shape, ImageComponent ic) {
-        Path path = new Path(ic.getComp(), true);
+    public static Path shapeToPath(Shape shape, CompositionView view) {
+        Path path = new Path(view.getComp(), true);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
         PathIterator it = shape.getPathIterator(null);
         double[] coords = new double[6];
@@ -76,16 +76,16 @@ public class Shapes {
 
             switch (type) {
                 case PathIterator.SEG_MOVETO:
-                    lastSubPath = path.startNewSubpath(x, y, ic);
+                    lastSubPath = path.startNewSubpath(x, y, view);
                     break;
                 case PathIterator.SEG_LINETO:
-                    lastSubPath.addLine(x, y, ic);
+                    lastSubPath.addLine(x, y, view);
                     break;
                 case PathIterator.SEG_QUADTO:
-                    lastSubPath.addQuadCurve(x, y, xx, yy, ic);
+                    lastSubPath.addQuadCurve(x, y, xx, yy, view);
                     break;
                 case PathIterator.SEG_CUBICTO:
-                    lastSubPath.addCubicCurve(x, y, xx, yy, xxx, yyy, ic);
+                    lastSubPath.addCubicCurve(x, y, xx, yy, xxx, yyy, view);
                     break;
                 case PathIterator.SEG_CLOSE:
                     lastSubPath.close(false);

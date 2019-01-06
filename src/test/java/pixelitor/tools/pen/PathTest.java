@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import org.junit.Test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.history.History;
 import pixelitor.utils.Shapes;
 
@@ -35,23 +35,23 @@ import java.awt.geom.Ellipse2D;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 public class PathTest {
-    private ImageComponent ic;
+    private CompositionView cv;
 
     @BeforeClass
     public static void setupClass() {
-        Build.setTestingMode();
+        Build.setUnitTestingMode();
     }
 
     @Before
     public void setUp() {
         Composition comp = TestHelper.createMockComposition();
-        ic = comp.getIC();
+        cv = comp.getView();
     }
 
     @Test
     public void testDeletingSubPathPoints() {
         Rectangle shape = new Rectangle(10, 10, 100, 100);
-        Path path = Shapes.shapeToPath(shape, ic);
+        Path path = Shapes.shapeToPath(shape, cv);
         SubPath sp = path.getActiveSubpath();
         assertThat(sp).numAnchorsIs(4);
         sp.getAnchor(3).delete(); // delete last
@@ -86,7 +86,7 @@ public class PathTest {
     @Test
     public void testTransform() {
         Rectangle shape = new Rectangle(10, 10, 100, 100);
-        Path path = Shapes.shapeToPath(shape, ic);
+        Path path = Shapes.shapeToPath(shape, cv);
         SubPath sp = path.getActiveSubpath();
         assertThat(sp).firstAnchorIsAt(10, 10);
 
@@ -105,7 +105,7 @@ public class PathTest {
     }
 
     private void testConversionsFor(Shape shape) {
-        Path path = Shapes.shapeToPath(shape, ic);
+        Path path = Shapes.shapeToPath(shape, cv);
         Path copy = path.copyForUndo();
         Shape convertedShape = copy.toImageSpaceShape();
         assertThat(Shapes.pathIteratorIsEqual(shape, convertedShape, 0.01)).isTrue();

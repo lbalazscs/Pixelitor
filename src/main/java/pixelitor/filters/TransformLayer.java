@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 
 import java.awt.Graphics2D;
@@ -70,7 +70,7 @@ public class TransformLayer extends ParametrizedFilter {
 
         double theta = angleParam.getValueInRadians();
 
-        Drawable dr = ImageComponents.getActiveDrawableOrThrow();
+        Drawable dr = OpenComps.getActiveDrawableOrThrow();
 
         float relativeX = centerParam.getRelativeX();
         float relativeY = centerParam.getRelativeY();

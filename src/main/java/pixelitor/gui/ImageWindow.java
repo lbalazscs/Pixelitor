@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.gui;
 import javax.swing.*;
 
 /**
- * A component that contains an {@link ImageComponent} inside a JScrollPane.
+ * A component that contains an {@link CompositionView} inside a JScrollPane.
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
  * Some of the methods make sense only for internal frames, not for tabs.
  */
@@ -36,7 +36,7 @@ public interface ImageWindow {
 
     void select();
 
-    void updateTitle(ImageComponent ic);
+    void updateTitle(CompositionView cv);
 
     /**
      * Important only for the cropping with internal frames.

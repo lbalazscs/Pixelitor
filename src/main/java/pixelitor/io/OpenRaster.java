@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -122,7 +122,7 @@ public class OpenRaster {
         zos.closeEntry();
         zos.close();
 
-        pt.finish();
+        pt.finished();
     }
 
     private static String writeLayer(ImageLayer layer,
@@ -235,7 +235,7 @@ public class OpenRaster {
         }
         comp.setActiveLayer(comp.getLayer(0), false);
 
-        pt.finish();
+        pt.finished();
 
         return comp;
     }

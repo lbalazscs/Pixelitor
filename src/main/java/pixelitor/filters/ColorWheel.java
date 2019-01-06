@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,8 +71,8 @@ public class ColorWheel extends ParametrizedFilter {
                     destData, width, finalY, cx, cy, hueShift, saturation, brightness);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
-        pt.finish();
+        ThreadPool.waitToFinish(futures, pt);
+        pt.finished();
 
         return dest;
     }

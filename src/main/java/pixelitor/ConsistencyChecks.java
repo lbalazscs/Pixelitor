@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
@@ -28,6 +28,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
@@ -131,8 +132,10 @@ public final class ConsistencyChecks {
         if (selection == null) {
             return true;
         }
-        Rectangle canvasImBounds = comp.getCanvasImBounds();
-        Rectangle shapeBounds = selection.getShapeBounds();
+        Rectangle canvasSize = comp.getCanvasImBounds();
+        // increase the width/height because of rounding errors
+        canvasSize = new Rectangle(0, 0, canvasSize.width + 1, canvasSize.height + 1);
+        Rectangle2D shapeBounds = selection.getShapeBounds2D();
         if (shapeBounds.isEmpty()) {
             System.out.println("\nConsistencyChecks::selectionIsOK: empty shape = " + shapeBounds);
             return false;
@@ -140,13 +143,13 @@ public final class ConsistencyChecks {
 
         // In principle the selection must be fully inside the canvas,
         // but this is hard to check since
-        // canvasImBounds.contains(shapeBounds)
+        // canvasSize.contains(shapeBounds)
         // doesn't work (the bounds are not necessarily the smallest)
         // so check that it is not fully outside
-        boolean ok = !canvasImBounds.intersection(shapeBounds).isEmpty();
+        boolean ok = !canvasSize.createIntersection(shapeBounds).isEmpty();
         if (!ok) {
             System.out.println("\nConsistencyChecks::selectionIsOK: no intersection: "
-                    + "canvasImBounds = " + canvasImBounds
+                + "canvasSize = " + canvasSize
                     + ", shapeBounds = " + shapeBounds);
         }
         return ok;
@@ -203,7 +206,7 @@ public final class ConsistencyChecks {
             return true;
         }
 
-        Composition comp = ImageComponents.getActiveCompOrNull();
+        Composition comp = OpenComps.getActiveCompOrNull();
         if (comp == null) {
             return true;
         }

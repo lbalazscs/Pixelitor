@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,9 +37,9 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.ActiveImageChangeListener;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Messages;
-import pixelitor.utils.RandomUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -59,12 +59,12 @@ import static javax.swing.JOptionPane.YES_OPTION;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 
 /**
- * Static methods for maintaining the list of open ImageComponent objects
+ * Static methods related to the list of opened compositions
  */
-public class ImageComponents {
-    private static final List<ImageComponent> icList = new ArrayList<>();
-    private static ImageComponent activeIC;
-    private static final List<ActiveImageChangeListener> activeICChangeListeners
+public class OpenComps {
+    private static final List<CompositionView> views = new ArrayList<>();
+    private static CompositionView activeView;
+    private static final List<CompActivationListener> activationListeners
             = new ArrayList<>();
 
     public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
@@ -88,41 +88,41 @@ public class ImageComponents {
         }
     };
 
-    private ImageComponents() {
+    private OpenComps() {
     }
 
     public static boolean thereAreUnsavedChanges() {
-        return icList.stream()
-                .anyMatch(ImageComponent::isDirty);
+        return views.stream()
+                .anyMatch(CompositionView::isDirty);
     }
 
-    public static List<ImageComponent> getICList() {
-        return icList;
+    public static List<CompositionView> getViews() {
+        return views;
     }
 
     private static void setAnImageAsActiveIfNoneIs() {
-        if (!icList.isEmpty()) {
+        if (!views.isEmpty()) {
             boolean activeFound = false;
-            for (ImageComponent ic : icList) {
-                if (ic == activeIC) {
+            for (CompositionView view : views) {
+                if (view == activeView) {
                     activeFound = true;
                     break;
                 }
             }
 
             if (!activeFound) {
-                setActiveIC(icList.get(0), true);
+                setActiveIC(views.get(0), true);
             }
         }
     }
 
-    public static ImageComponent getActiveIC() {
-        return activeIC;
+    public static CompositionView getActiveView() {
+        return activeView;
     }
 
     public static Composition getActiveCompOrNull() {
-        if (activeIC != null) {
-            return activeIC.getComp();
+        if (activeView != null) {
+            return activeView.getComp();
         }
 
         // there is no open image
@@ -130,8 +130,8 @@ public class ImageComponents {
     }
 
     public static Path getActivePathOrNull() {
-        if (activeIC != null) {
-            return activeIC.getComp().getActivePath();
+        if (activeView != null) {
+            return activeView.getComp().getActivePath();
         }
 
         // there is no open image
@@ -139,15 +139,15 @@ public class ImageComponents {
     }
 
     public static void setActivePath(Path path) {
-        if (activeIC == null) {
+        if (activeView == null) {
             throw new IllegalStateException();
         }
-        activeIC.getComp().setActivePath(path);
+        activeView.getComp().setActivePath(path);
     }
 
     public static Optional<Composition> getActiveComp() {
-        if (activeIC != null) {
-            return Optional.of(activeIC.getComp());
+        if (activeView != null) {
+            return Optional.of(activeView.getComp());
         }
 
         // there is no open image
@@ -155,15 +155,15 @@ public class ImageComponents {
     }
 
     public static Optional<Composition> findCompositionByName(String name) {
-        return icList.stream()
-                .map(ImageComponent::getComp)
+        return views.stream()
+                .map(CompositionView::getComp)
                 .filter(c -> c.getName().equals(name))
                 .findFirst();
     }
 
     public static Layer getActiveLayerOrNull() {
-        if (activeIC != null) {
-            return activeIC.getComp()
+        if (activeView != null) {
+            return activeView.getComp()
                     .getActiveLayer();
         }
 
@@ -175,8 +175,8 @@ public class ImageComponents {
     }
 
     public static Drawable getActiveDrawableOrNull() {
-        if (activeIC != null) {
-            Composition comp = activeIC.getComp();
+        if (activeView != null) {
+            Composition comp = activeView.getComp();
             return comp.getActiveDrawableOrNull();
         }
 
@@ -184,8 +184,8 @@ public class ImageComponents {
     }
 
     public static Drawable getActiveDrawableOrThrow() {
-        if (activeIC != null) {
-            Composition comp = activeIC.getComp();
+        if (activeView != null) {
+            Composition comp = activeView.getComp();
             return comp.getActiveDrawableOrThrow();
         }
 
@@ -193,58 +193,55 @@ public class ImageComponents {
     }
 
     public static int getNumOpenImages() {
-        return icList.size();
+        return views.size();
     }
 
     public static BufferedImage getActiveCompositeImage() {
-        if (activeIC != null) {
-            return activeIC.getComp()
+        if (activeView != null) {
+            return activeView.getComp()
                     .getCompositeImage();
         }
         return null;
     }
 
-    public static void imageClosed(ImageComponent ic) {
-        icList.remove(ic);
-        if (icList.isEmpty()) {
+    public static void imageClosed(CompositionView cv) {
+        views.remove(cv);
+        if (views.isEmpty()) {
             onAllImagesClosed();
         }
         setAnImageAsActiveIfNoneIs();
     }
 
-    public static void setActiveIC(ImageComponent ic, boolean activate) {
+    public static void setActiveIC(CompositionView cv, boolean activate) {
         if (activate) {
-            if (ic == null) {
-                throw new IllegalStateException("cannot activate null ic");
+            if (cv == null) {
+                throw new IllegalStateException("cannot activate null view");
             }
-            ImageArea.activateIC(ic);
+            ImageArea.activateIC(cv);
         }
-        activeIC = ic;
-//        System.out.println("ImageComponents::setActiveIC: new active ic is "
-//                + Ansi.yellow(activeIC == null ? "null" : activeIC.getName())
-//                + ", set on " + Thread.currentThread().getName());
+        activeView = cv;
     }
 
     /**
      * Changes the cursor for all images
      */
     public static void setCursorForAll(Cursor cursor) {
-        for (ImageComponent ic : icList) {
-            ic.setCursor(cursor);
+        for (CompositionView cv : views) {
+            cv.setCursor(cursor);
         }
     }
 
-    public static void addActiveImageChangeListener(ActiveImageChangeListener listener) {
-        activeICChangeListeners.add(listener);
+    public static void addActivationListener(CompActivationListener listener) {
+        activationListeners.add(listener);
     }
 
-    public static void removeActiveImageChangeListener(ActiveImageChangeListener listener) {
-        activeICChangeListeners.remove(listener);
+    public static void removeActivationListener(CompActivationListener listener) {
+        activationListeners.remove(listener);
     }
 
     private static void onAllImagesClosed() {
         setActiveIC(null, false);
-        activeICChangeListeners.forEach(ActiveImageChangeListener::noOpenImageAnymore);
+        activationListeners.forEach(CompActivationListener::allCompsClosed);
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
@@ -256,26 +253,26 @@ public class ImageComponents {
     /**
      * Another image became active
      */
-    public static void imageActivated(ImageComponent ic) {
-        if (ic == activeIC) {
+    public static void imageActivated(CompositionView cv) {
+        if (cv == activeView) {
             return;
         }
 
-        ImageComponent oldIC = activeIC;
+        CompositionView oldCV = activeView;
 
-        Composition comp = ic.getComp();
-        setActiveIC(ic, false);
+        Composition comp = cv.getComp();
+        setActiveIC(cv, false);
         SelectionActions.setEnabled(comp.hasSelection(), comp);
-        ic.activateUI(true);
+        cv.activateUI(true);
 
-        for (ActiveImageChangeListener listener : activeICChangeListeners) {
-            listener.activeImageChanged(oldIC, ic);
+        for (CompActivationListener listener : activationListeners) {
+            listener.compActivated(oldCV, cv);
         }
 
         Layer layer = comp.getActiveLayer();
         Layers.activeLayerChanged(layer);
 
-        ZoomMenu.zoomChanged(ic.getZoomLevel());
+        ZoomMenu.zoomChanged(cv.getZoomLevel());
 
         Canvas.activeCanvasImSizeChanged(comp.getCanvas());
         String title = comp.getName()
@@ -284,14 +281,14 @@ public class ImageComponents {
     }
 
     public static void repaintActive() {
-        if (activeIC != null) {
-            activeIC.repaint();
+        if (activeView != null) {
+            activeView.repaint();
         }
     }
 
     public static void repaintAll() {
-        for (ImageComponent ic : icList) {
-            ic.repaint();
+        for (CompositionView cv : views) {
+            cv.repaint();
         }
     }
 
@@ -299,26 +296,26 @@ public class ImageComponents {
         if (ImageArea.currentModeIs(FRAMES)) {
             repaintAll();
         } else {
-            activeIC.repaint();
+            activeView.repaint();
         }
     }
 
     public static void fitActiveTo(AutoZoom autoZoom) {
-        if (activeIC != null) {
-            activeIC.zoomToFit(autoZoom);
+        if (activeView != null) {
+            activeView.zoomToFit(autoZoom);
         }
     }
 
-    public static boolean isActive(ImageComponent ic) {
-        return ic == activeIC;
+    public static boolean isActive(CompositionView cv) {
+        return cv == activeView;
     }
 
     public static void reloadActiveFromFileAsync() {
-        // save a reference to the active image, because this will take
-        // a while and another image might become active in the meantime
-        ImageComponent ic = activeIC;
+        // save a reference to the active view, because this will take
+        // a while and another view might become active in the meantime
+        CompositionView cv = activeView;
 
-        Composition comp = ic.getComp();
+        Composition comp = cv.getComp();
         File file = comp.getFile();
         if (file == null) {
             String msg = format(
@@ -345,64 +342,64 @@ public class ImageComponents {
         }
 
         OpenSave.loadCompFromFileAsync(file)
-                .thenAcceptAsync(ic::replaceJustReloadedComp,
+                .thenAcceptAsync(cv::replaceJustReloadedComp,
                         EventQueue::invokeLater)
                 .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
                 .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public static void duplicateActive() {
-        assert activeIC != null;
-        Composition newComp = Composition.createCopy(activeIC.getComp(), false);
+        assert activeView != null;
+        Composition newComp = Composition.createCopy(activeView.getComp(), false);
 
         addAsNewImage(newComp);
     }
 
-    public static void onActiveIC(Consumer<ImageComponent> action) {
-        if (activeIC != null) {
-            action.accept(activeIC);
+    public static void onActiveIC(Consumer<CompositionView> action) {
+        if (activeView != null) {
+            action.accept(activeView);
         }
     }
 
-    public static void forAllImages(Consumer<ImageComponent> action) {
-        for (ImageComponent ic : icList) {
-            action.accept(ic);
+    public static void forAllImages(Consumer<CompositionView> action) {
+        for (CompositionView cv : views) {
+            action.accept(cv);
         }
     }
 
     public static void onActiveComp(Consumer<Composition> action) {
-        if (activeIC != null) {
-            Composition comp = activeIC.getComp();
+        if (activeView != null) {
+            Composition comp = activeView.getComp();
             action.accept(comp);
         }
     }
 
     public static void onActiveSelection(Consumer<Selection> action) {
-        if (activeIC != null) {
-            activeIC.getComp()
+        if (activeView != null) {
+            activeView.getComp()
                     .onSelection(action);
         }
     }
 
     public static void onActiveLayer(Consumer<Layer> action) {
-        if (activeIC != null) {
-            Layer activeLayer = activeIC.getComp()
+        if (activeView != null) {
+            Layer activeLayer = activeView.getComp()
                     .getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveImageLayer(Consumer<ImageLayer> action) {
-        if (activeIC != null) {
-            ImageLayer activeLayer = (ImageLayer) activeIC.getComp()
+        if (activeView != null) {
+            ImageLayer activeLayer = (ImageLayer) activeView.getComp()
                     .getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveTextLayer(Consumer<TextLayer> action) {
-        if (activeIC != null) {
-            TextLayer activeLayer = (TextLayer) activeIC.getComp()
+        if (activeView != null) {
+            TextLayer activeLayer = (TextLayer) activeView.getComp()
                     .getActiveLayer();
             action.accept(activeLayer);
         }
@@ -417,24 +414,24 @@ public class ImageComponents {
 
     public static void addAsNewImage(Composition comp) {
         try {
-            assert comp.getIC() == null : "already has ic";
+            assert comp.getView() == null : "already has view";
 
-            ImageComponent ic = new ImageComponent(comp);
+            CompositionView cv = new CompositionView(comp);
             comp.addAllLayersToGUI();
-            ic.setCursor(Tools.getCurrent().getStartingCursor());
-            icList.add(ic);
-            MaskViewMode.NORMAL.activate(ic, comp.getActiveLayer(), "image added");
-            ImageArea.addNewIC(ic);
-            setActiveIC(ic, false);
+            cv.setCursor(Tools.getCurrent().getStartingCursor());
+            views.add(cv);
+            MaskViewMode.NORMAL.activate(cv, comp.getActiveLayer(), "image added");
+            ImageArea.addNewIC(cv);
+            setActiveIC(cv, false);
         } catch (Exception e) {
             Messages.showException(e);
         }
     }
 
-    public static void activateRandomIC() {
-        ImageComponent ic = RandomUtils.chooseFrom(icList);
-        if (ic != activeIC) {
-            setActiveIC(ic, true);
+    public static void activateRandomView() {
+        CompositionView cv = Rnd.chooseFrom(views);
+        if (cv != activeView) {
+            setActiveIC(cv, true);
         }
     }
 
@@ -460,10 +457,10 @@ public class ImageComponents {
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        if (activeIC == null) {
+        if (activeView == null) {
             throw new AssertionError("no active image");
         }
-        ZoomLevel actual = activeIC.getZoomLevel();
+        ZoomLevel actual = activeView.getZoomLevel();
         if (actual != expected) {
             throw new AssertionError("expected = " + expected +
                     ", found = " + actual);
@@ -471,35 +468,35 @@ public class ImageComponents {
     }
 
     private static String getOpenImageNamesAsString() {
-        return icList.stream()
-                .map(ImageComponent::getName)
+        return views.stream()
+                .map(CompositionView::getName)
                 .collect(joining(", ", "[", "]"));
     }
 
     private static void warnAndCloseActive() {
-        warnAndClose(activeIC);
+        warnAndClose(activeView);
     }
 
-    public static void warnAndClose(ImageComponent ic) {
+    public static void warnAndClose(CompositionView cv) {
         try {
-            Composition comp = ic.getComp();
+            Composition comp = cv.getComp();
             if (comp.isDirty()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // save
                     boolean fileSaved = OpenSave.save(comp, false);
                     if (fileSaved) {
-                        ic.close();
+                        cv.close();
                     }
                 } else if (answer == NO_OPTION) { // don't save
-                    ic.close();
+                    cv.close();
                 } else if (answer == CANCEL_OPTION) { // cancel
                     // do nothing
                 } else { // dialog closed by pressing X
                     // do nothing
                 }
             } else {
-                ic.close();
+                cv.close();
             }
         } catch (Exception ex) {
             Messages.showException(ex);
@@ -507,23 +504,23 @@ public class ImageComponents {
     }
 
     private static void warnAndCloseAll() {
-        warnAndCloseAllIf(ic -> true);
+        warnAndCloseAllIf(cv -> true);
     }
 
-    public static void warnAndCloseAllBut(ImageComponent selected) {
-        warnAndCloseAllIf(ic -> ic != selected);
+    public static void warnAndCloseAllBut(CompositionView selected) {
+        warnAndCloseAllIf(cv -> cv != selected);
     }
 
     private static void closeUnmodified() {
-        warnAndCloseAllIf(ic -> !ic.getComp().isDirty());
+        warnAndCloseAllIf(cv -> !cv.getComp().isDirty());
     }
 
-    private static void warnAndCloseAllIf(Predicate<ImageComponent> condition) {
+    private static void warnAndCloseAllIf(Predicate<CompositionView> condition) {
         // make a copy because items will be removed from the original while iterating
-        Iterable<ImageComponent> tmpCopy = new ArrayList<>(icList);
-        for (ImageComponent ic : tmpCopy) {
-            if (condition.test(ic)) {
-                warnAndClose(ic);
+        Iterable<CompositionView> tmpCopy = new ArrayList<>(views);
+        for (CompositionView cv : tmpCopy) {
+            if (condition.test(cv)) {
+                warnAndClose(cv);
             }
         }
     }
@@ -535,10 +532,10 @@ public class ImageComponents {
             } else {
                 showPixelGridHelp();
             }
-        } else { // Tabs: check only the current ic
-            ImageComponent ic = getActiveIC();
-            if (ic.showPixelGridIfEnabled()) {
-                ic.repaint();
+        } else { // Tabs: check only the current view
+            CompositionView cv = getActiveView();
+            if (cv.showPixelGridIfEnabled()) {
+                cv.repaint();
             } else {
                 showPixelGridHelp();
             }
@@ -546,8 +543,8 @@ public class ImageComponents {
     }
 
     private static boolean isAnyPixelGridVisibleIfEnabled() {
-        for (ImageComponent ic : icList) {
-            if (ic.showPixelGridIfEnabled()) {
+        for (CompositionView cv : views) {
+            if (cv.showPixelGridIfEnabled()) {
                 return true;
             }
         }

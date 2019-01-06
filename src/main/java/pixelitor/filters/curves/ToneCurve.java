@@ -1,9 +1,29 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.filters.curves;
 
 import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.geom.Path2D;
 
 /**
@@ -15,20 +35,20 @@ import java.awt.geom.Path2D;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurve {
-    private final static int MAX_KNOTS = 16;
-    private final static int KNOT_RADIUS_PX = 6;
-    private final static float KNOT_RADIUS = 0.04F;
-    private final static float NEARBY_RADIUS = 0.08F;
-    public Curve curve = new Curve();
-    public ToneCurveType curveType;
+    private static final int MAX_KNOTS = 16;
+    private static final int KNOT_RADIUS_PX = 6;
+    private static final float KNOT_RADIUS = 0.04F;
+    private static final float NEARBY_RADIUS = 0.08F;
+    public final Curve curve = new Curve();
+    private final ToneCurveType curveType;
     private int width = 255;
     private int height = 255;
     private int[] curvePlotData;
     private boolean isDirty = true;
     private boolean active = false;
     private Graphics2D gr;
-    private BasicStroke curveStroke = new BasicStroke(1);
-    private BasicStroke pointStroke = new BasicStroke(2);
+    private final BasicStroke curveStroke = new BasicStroke(1);
+    private final BasicStroke pointStroke = new BasicStroke(2);
 
     public ToneCurve(ToneCurveType curveType) {
         this.curveType = curveType;
@@ -52,7 +72,7 @@ public class ToneCurve {
         }
     }
 
-    private boolean isClose(Point.Float p, Point.Float q)  {
+    private static boolean isClose(Point.Float p, Point.Float q) {
         if(Math.abs(p.x - q.x) < NEARBY_RADIUS) {
             if(Math.abs(p.y - q.y) < NEARBY_RADIUS) {
                 return true;
@@ -61,7 +81,7 @@ public class ToneCurve {
         return false;
     }
 
-    private void clampPoint(Point.Float p)  {
+    private static void clampPoint(Point.Float p) {
         p.x = ImageMath.clamp(p.x, 0, 1);
         p.y = ImageMath.clamp(p.y, 0, 1);
     }
@@ -171,7 +191,7 @@ public class ToneCurve {
         return false;
     }
 
-    private boolean isOver(Point.Float p, Point.Float q)  {
+    private static boolean isOver(Point.Float p, Point.Float q) {
         if (Math.abs(p.x - q.x) < KNOT_RADIUS) {
             return Math.abs(p.y - q.y) < KNOT_RADIUS;
         }
@@ -193,7 +213,7 @@ public class ToneCurve {
         return false;
     }
 
-    public boolean isOverChart(Point.Float p) {
+    public static boolean isOverChart(Point.Float p) {
         return p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
     }
 
@@ -232,7 +252,7 @@ public class ToneCurve {
             path2D.lineTo(x, y);
         }
 
-        gr.setColor(active ? this.curveType.color : this.curveType.colorInactive);
+        gr.setColor(active ? this.curveType.getColor() : this.curveType.getInactiveColor());
         gr.setStroke(curveStroke);
         gr.draw(path2D);
     }
@@ -243,10 +263,10 @@ public class ToneCurve {
         int knotSize = 2 * KNOT_RADIUS_PX;
         for (int i = 0; i < curve.x.length; i++) {
             gr.drawOval(
-                    (int)(curve.x[i] * width) - KNOT_RADIUS_PX,
-                    (int)(curve.y[i] * height) - KNOT_RADIUS_PX,
-                    knotSize,
-                    knotSize
+                (int)(curve.x[i] * width) - KNOT_RADIUS_PX,
+                (int)(curve.y[i] * height) - KNOT_RADIUS_PX,
+                knotSize,
+                knotSize
             );
         }
     }

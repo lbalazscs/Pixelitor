@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -134,9 +134,9 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     }
 
     static class TagNode {
-        String name;
-        String value;
-        int index;
+        final String name;
+        final String value;
+        final int index;
 
         TagNode(String name, String value, int index) {
             this.name = name;

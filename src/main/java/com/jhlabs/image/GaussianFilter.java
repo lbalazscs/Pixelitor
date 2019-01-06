@@ -37,11 +37,6 @@ public class GaussianFilter extends ConvolveFilter {
     protected float radius;
 
     /**
-     * The convolution kernel.
-     */
-    protected Kernel kernel;
-
-    /**
      * Construct a Gaussian filter.
      */
     public GaussianFilter(String filterName) {
@@ -136,7 +131,7 @@ public class GaussianFilter extends ConvolveFilter {
             resultLines[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitForFutures(resultLines, pt);
+        ThreadPool.waitToFinish(resultLines, pt);
     }
 
     private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {

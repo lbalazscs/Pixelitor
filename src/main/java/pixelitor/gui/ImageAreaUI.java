@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,9 @@ import java.awt.Dimension;
  * (internal frames and tabs)
  */
 public interface ImageAreaUI {
-    void activateIC(ImageComponent ic);
+    void activateIC(CompositionView cv);
 
-    void addNewIC(ImageComponent ic);
+    void addNewIC(CompositionView cv);
 
     Dimension getSize();
 }

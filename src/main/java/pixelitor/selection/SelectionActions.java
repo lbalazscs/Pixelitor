@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.history.History;
@@ -38,7 +38,7 @@ import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.gui.ImageComponents.getActiveCompOrNull;
+import static pixelitor.gui.OpenComps.getActiveCompOrNull;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
@@ -73,7 +73,7 @@ public final class SelectionActions {
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Composition comp = ImageComponents.getActiveCompOrNull();
+            Composition comp = OpenComps.getActiveCompOrNull();
             selectionToPath(comp, true);
         }
     };
@@ -82,7 +82,7 @@ public final class SelectionActions {
         Shape shape = comp.getSelection().getShape();
         Path oldActivePath = comp.getActivePath();
         comp.deselect(false);
-        Path path = Shapes.shapeToPath(shape, comp.getIC());
+        Path path = Shapes.shapeToPath(shape, comp.getView());
         comp.setActivePath(path);
         Tools.PEN.setPath(path);
         Tools.PEN.startRestrictedMode(EDIT, false);
@@ -144,7 +144,7 @@ public final class SelectionActions {
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert comp == null || ImageComponents.getActiveCompOrNull() == comp;
+        assert comp == null || OpenComps.getActiveCompOrNull() == comp;
 
         crop.setEnabled(b);
         deselect.setEnabled(b);

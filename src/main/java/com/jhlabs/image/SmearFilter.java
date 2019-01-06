@@ -26,11 +26,11 @@ import java.util.concurrent.Future;
 
 public class SmearFilter extends WholeImageFilter {
 
-    public final static int CROSSES = 0;
-    public final static int LINES = 1;
-    public final static int CIRCLES = 2;
-    public final static int SQUARES = 3;
-    public final static int DIAMONDS = 4;
+    public static final int CROSSES = 0;
+    public static final int LINES = 1;
+    public static final int CIRCLES = 2;
+    public static final int SQUARES = 3;
+    public static final int DIAMONDS = 4;
 
     //    private Colormap colormap = new LinearColormap();
     private float angle = 0;
@@ -185,7 +185,7 @@ public class SmearFilter extends WholeImageFilter {
             };
             futures.add(ThreadPool.submit(r));
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
     }
 
     private void renderOneLine(int width, int height, int[] inPixels, int[] outPixels, float sin, float cos) {
@@ -278,7 +278,7 @@ public class SmearFilter extends WholeImageFilter {
             Runnable r = () -> renderOneShape(width, height, inPixels, outPixels, radius, radius2);
             futures[i] = ThreadPool.submit(r);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
     }
 
     private void renderOneShape(int width, int height, int[] inPixels, int[] outPixels, int radius, int radius2) {

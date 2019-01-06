@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,14 +37,14 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     @Override
-    public void activateIC(ImageComponent ic) {
-        ImageFrame frame = (ImageFrame) ic.getImageWindow();
+    public void activateIC(CompositionView cv) {
+        ImageFrame frame = (ImageFrame) cv.getImageWindow();
         assert frame != null;
         activateFrame(frame);
     }
 
     @Override
-    public void addNewIC(ImageComponent ic) {
+    public void addNewIC(CompositionView cv) {
         int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
         int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
 
@@ -54,8 +54,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int maxHeight = this.getHeight() - CASCADE_VERTICAL_SHIFT;
         locY %= maxHeight;
 
-        ImageFrame frame = new ImageFrame(ic, locX, locY);
-        ic.setImageWindow(frame);
+        ImageFrame frame = new ImageFrame(cv, locX, locY);
+        cv.setImageWindow(frame);
 
         this.add(frame);
         activateFrame(frame);
@@ -73,11 +73,11 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void cascadeWindows() {
-        List<ImageComponent> icList = ImageComponents.getICList();
+        List<CompositionView> views = OpenComps.getViews();
         int locX = 0;
         int locY = 0;
-        for (ImageComponent ic : icList) {
-            ImageFrame frame = (ImageFrame) ic.getImageWindow();
+        for (CompositionView cv : views) {
+            ImageFrame frame = (ImageFrame) cv.getImageWindow();
             frame.setLocation(locX, locY);
             frame.setToNaturalSize();
             try {
@@ -104,8 +104,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void tileWindows() {
-        List<ImageComponent> icList = ImageComponents.getICList();
-        int numWindows = icList.size();
+        List<CompositionView> views = OpenComps.getViews();
+        int numWindows = views.size();
 
         int numRows = (int) Math.sqrt(numWindows);
         int numCols = numWindows / numRows;
@@ -116,8 +116,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int currRow = 0;
         int currCol = 0;
 
-        for (ImageComponent ic : icList) {
-            ImageFrame frame = (ImageFrame) ic.getImageWindow();
+        for (CompositionView cv : views) {
+            ImageFrame frame = (ImageFrame) cv.getImageWindow();
             try {
                 frame.setIcon(false);
                 frame.setMaximum(false);

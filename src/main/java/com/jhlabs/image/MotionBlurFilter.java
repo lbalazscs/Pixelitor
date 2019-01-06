@@ -285,7 +285,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
             Runnable lineTask = () -> calcLine(width, height, inPixels, outPixels, cx, cy, translateX, translateY, repetitions, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitForFutures(futures, pt);
+        ThreadPool.waitToFinish(futures, pt);
         if (premultiplyAlpha) {
             ImageMath.unpremultiply(outPixels, 0, inPixels.length);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class SelectionBuilder {
 
         assert existingSelection.isAlive() : "dead selection";
 
-        comp.setBuiltSelection(new Selection(null, comp.getIC()));
+        comp.setBuiltSelection(new Selection(null, comp.getView()));
 
         if (selectionInteraction == SelectionInteraction.REPLACE) {
             replacedShape = existingSelection.getShape();
@@ -81,7 +81,7 @@ public class SelectionBuilder {
 
         if (noPreviousSelection) {
             Shape newShape = selectionType.createShape(mouseInfo, null);
-            builtSelection = new Selection(newShape, comp.getIC());
+            builtSelection = new Selection(newShape, comp.getView());
             comp.setBuiltSelection(builtSelection);
         } else {
             assert builtSelection.isAlive() : "dead selection";

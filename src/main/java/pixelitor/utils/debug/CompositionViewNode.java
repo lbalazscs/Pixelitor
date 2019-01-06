@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,30 +19,30 @@ package pixelitor.utils.debug;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
+import pixelitor.gui.CompositionView;
 import pixelitor.gui.ImageFrame;
 import pixelitor.gui.ImageWindow;
 
 /**
- * A debugging node for an ImageComponent
+ * A debugging node for a CompositionView
  */
-public class ImageComponentNode extends DebugNode {
-    public ImageComponentNode(String name, ImageComponent ic) {
-        super(name, ic);
+public class CompositionViewNode extends DebugNode {
+    public CompositionViewNode(String name, CompositionView cv) {
+        super(name, cv);
 
-        Composition comp = ic.getComp();
+        Composition comp = cv.getComp();
         add(new CompositionNode(comp));
 
         addQuotedString("name", comp.getName());
 
-        addQuotedString("mask view mode", ic.getMaskViewMode().toString());
+        addQuotedString("mask view mode", cv.getMaskViewMode().toString());
 
-        int width = ic.getWidth();
-        addInt("ic width", width);
-        int height = ic.getHeight();
-        addInt("ic height", height);
+        int width = cv.getWidth();
+        addInt("cv width", width);
+        int height = cv.getHeight();
+        addInt("cv height", height);
 
-        ImageWindow imageWindow = ic.getImageWindow();
+        ImageWindow imageWindow = cv.getImageWindow();
         if (imageWindow instanceof ImageFrame) {
             ImageFrame frame = (ImageFrame) imageWindow;
             int frameWidth = frame.getWidth();
@@ -51,15 +51,15 @@ public class ImageComponentNode extends DebugNode {
             addInt("frameHeight", frameHeight);
         }
 
-        addString("zoom level", ic.getZoomLevel().toString());
-        Canvas canvas = ic.getCanvas();
+        addString("zoom level", cv.getZoomLevel().toString());
+        Canvas canvas = cv.getCanvas();
         int zoomedCanvasWidth = canvas.getCoWidth();
         addInt("zoomedCanvasWidth", zoomedCanvasWidth);
         int zoomedCanvasHeight = canvas.getCoHeight();
         addInt("zoomedCanvasHeight", zoomedCanvasHeight);
-//        boolean bigCanvas = ic.isBigCanvas();
+//        boolean bigCanvas = cv.isBigCanvas();
 //        addBooleanChild("bigCanvas", bigCanvas);
-//        boolean optimizedDrawingEnabled = ic.getImageWindow().isOptimizedDrawingEnabled();
+//        boolean optimizedDrawingEnabled = cv.getImageWindow().isOptimizedDrawingEnabled();
 //        addBoolean("optimizedDrawingEnabled", optimizedDrawingEnabled);
     }
 }

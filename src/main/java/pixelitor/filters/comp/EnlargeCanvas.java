@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.Guides;
@@ -127,7 +127,7 @@ public class EnlargeCanvas implements CompAction {
                 .title("Enlarge Canvas")
                 .content(p)
                 .okAction(() -> {
-                    Composition comp = ImageComponents.getActiveCompOrNull();
+                    Composition comp = OpenComps.getActiveCompOrNull();
                     new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
                             .process(comp);
                 })

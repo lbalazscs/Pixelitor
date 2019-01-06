@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.gui.GlobalKeyboardWatch;
+import pixelitor.gui.GlobalEventWatch;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -61,7 +61,7 @@ public abstract class OKCancelDialog extends JDialog {
         JButton cancelButton = new JButton(cancelText);
         cancelButton.setName("cancel");
 
-        GlobalKeyboardWatch.setDialogActive(true);
+        GlobalEventWatch.setDialogActive(true);
 
         GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
 
@@ -97,7 +97,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     public void close() {
         setVisible(false);
-        GlobalKeyboardWatch.setDialogActive(false);
+        GlobalEventWatch.setDialogActive(false);
         dispose();
     }
 

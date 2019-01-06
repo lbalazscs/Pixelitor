@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.guitest;
 import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.Composition;
-import pixelitor.gui.ImageComponent;
-import pixelitor.gui.ImageComponents;
+import pixelitor.gui.CompositionView;
+import pixelitor.gui.OpenComps;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
@@ -59,22 +59,22 @@ public class EDT {
         GuiActionRunner.execute(runnable);
     }
 
-    public static ImageComponent getActiveIC() {
-        return call(ImageComponents::getActiveIC);
+    public static CompositionView getActiveView() {
+        return call(OpenComps::getActiveView);
     }
 
     public static Composition getComp() {
-        return call(ImageComponents::getActiveCompOrNull);
+        return call(OpenComps::getActiveCompOrNull);
     }
 
     /**
      * Returns the given property of the active composition
      */
-    public static <T> T active(Function<Composition, T> fun) {
-        return call(() -> fun.apply(ImageComponents.getActiveCompOrNull()));
+    public static <T> T active(Function<Composition, ? extends T> fun) {
+        return call(() -> fun.apply(OpenComps.getActiveCompOrNull()));
     }
 
-    public static <T> T activeTool(Function<Tool, T> fun) {
+    public static <T> T activeTool(Function<Tool, ? extends T> fun) {
         return call(() -> fun.apply(Tools.getCurrent()));
     }
 
@@ -87,7 +87,7 @@ public class EDT {
     }
 
     public static Layer getActiveLayer() {
-        return call(ImageComponents::getActiveLayerOrNull);
+        return call(OpenComps::getActiveLayerOrNull);
     }
 
     public static void assertThereIsSelection() {
@@ -109,7 +109,7 @@ public class EDT {
         }
     }
 
-    public static void assertActiveToolsIs(Tool expected) {
+    public static void assertActiveToolIs(Tool expected) {
         Tool actual = call(Tools::getCurrent);
         if (actual != expected) {
             throw new AssertionError("Expected " + expected
@@ -151,27 +151,27 @@ public class EDT {
     }
 
     public static void increaseZoom() {
-        run(() -> ImageComponents.getActiveIC().increaseZoom());
+        run(() -> OpenComps.getActiveView().increaseZoom());
     }
 
     public static void decreaseZoom() {
-        run(() -> ImageComponents.getActiveIC().decreaseZoom());
+        run(() -> OpenComps.getActiveView().decreaseZoom());
     }
 
     public static ZoomLevel getZoomLevelOfActive() {
-        return call(() -> ImageComponents.getActiveIC().getZoomLevel());
+        return call(() -> OpenComps.getActiveView().getZoomLevel());
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
-        run(() -> ImageComponents.assertZoomOfActiveIs(expected));
+        run(() -> OpenComps.assertZoomOfActiveIs(expected));
     }
 
     public static void assertNumOpenImagesIs(int expected) {
-        run(() -> ImageComponents.assertNumOpenImagesIs(expected));
+        run(() -> OpenComps.assertNumOpenImagesIs(expected));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int expected) {
-        run(() -> ImageComponents.assertNumOpenImagesIsAtLeast(expected));
+        run(() -> OpenComps.assertNumOpenImagesIsAtLeast(expected));
     }
 
     public static void assertNumLayersIs(int expected) {
@@ -185,15 +185,15 @@ public class EDT {
         }
     }
 
-    public static void activate(ImageComponent ic) {
-        run(() -> ImageComponents.setActiveIC(ic, true));
+    public static void activate(CompositionView cv) {
+        run(() -> OpenComps.setActiveIC(cv, true));
     }
 
     /**
      * Returns the given property of the active layer.
      */
     public static <T> T activeLayer(Function<Layer, T> fun) {
-        return call(() -> fun.apply(ImageComponents.getActiveLayerOrNull()));
+        return call(() -> fun.apply(OpenComps.getActiveLayerOrNull()));
     }
 
     public static String activeLayerName() {
