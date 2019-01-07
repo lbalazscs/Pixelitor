@@ -21,8 +21,8 @@ import net.jafama.FastMath;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
@@ -219,7 +219,7 @@ public final class Utils {
     @SuppressWarnings("WeakerAccess")
     public static void debugImage(BufferedImage img, String name) {
         BufferedImage copy = ImageUtils.copyImage(img);
-        CompositionView savedView = OpenComps.getActiveView();
+        View savedView = OpenComps.getActiveView();
 
         Optional<Composition> debugCompOpt = OpenComps.findCompositionByName(name);
         if (debugCompOpt.isPresent()) { // TODO after Java 9: ifPresentOrElse​
@@ -239,7 +239,7 @@ public final class Utils {
         }
 
         if (savedView != null) {
-            OpenComps.setActiveIC(savedView, true);
+            OpenComps.setActiveView(savedView, true);
         }
     }
 

@@ -19,7 +19,7 @@ package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
@@ -43,7 +43,7 @@ public class LazyMouseBrush implements Brush {
     private double mouseY;
     private double drawX;
     private double drawY;
-    private CompositionView cv;
+    private View view;
     private double spacing;
     private static int defaultSpacing = DEFAULT_SPACING;
 
@@ -76,7 +76,7 @@ public class LazyMouseBrush implements Brush {
     public void setTarget(Composition comp, Graphics2D g) {
         delegate.setTarget(comp, g);
 
-        cv = comp.getView();
+        view = comp.getView();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class LazyMouseBrush implements Brush {
             this.drawY += advanceDY;
 
             delegate.continueTo(
-                    PPoint.eagerFromIm(this.drawX, this.drawY, cv));
+                PPoint.eagerFromIm(this.drawX, this.drawY, view));
 
             dx = mouseX - this.drawX;
             dy = mouseY - this.drawY;

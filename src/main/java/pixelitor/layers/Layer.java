@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.history.AddLayerMaskEdit;
 import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
@@ -362,8 +362,8 @@ public abstract class Layer implements Serializable {
 
     public void deleteMask(boolean addToHistory) {
         LayerMask oldMask = mask;
-        CompositionView cv = comp.getView();
-        MaskViewMode oldMode = cv.getMaskViewMode();
+        View view = comp.getView();
+        MaskViewMode oldMode = view.getMaskViewMode();
         mask = null;
         maskEditing = false;
 
@@ -376,7 +376,7 @@ public abstract class Layer implements Serializable {
         Layers.maskDeletedFrom(this);
         ui.get().deleteMaskIconLabel();
 
-        MaskViewMode.NORMAL.activate(cv, this, "mask deleted");
+        MaskViewMode.NORMAL.activate(view, this, "mask deleted");
     }
 
     /**

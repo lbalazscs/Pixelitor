@@ -19,7 +19,6 @@ package pixelitor.tools.util;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
@@ -29,11 +28,11 @@ import java.awt.geom.Line2D;
  * The "Pixelitor Point" represents an immutable point on an image both in
  * component (mouse) coordinates and image coordinates.
  * <p>
- * Component coordinates are relative to the {@link CompositionView},
+ * Component coordinates are relative to the {@link View},
  * image coordinates are relative to the {@link Canvas} (not necessarily
  * to the BufferedImage, as the image can be bigger than the canvas) and
  * take the position of the {@link Canvas} within the
- * {@link CompositionView} and the image zooming into account.
+ * {@link View} and the image zooming into account.
  */
 public abstract class PPoint {
     View view;
@@ -77,10 +76,6 @@ public abstract class PPoint {
      */
     public double getImY() {
         return imY;
-    }
-
-    public CompositionView getCV() {
-        return (CompositionView) view;
     }
 
     public View getView() {
@@ -153,7 +148,7 @@ public abstract class PPoint {
     }
 
     public Composition getComp() {
-        return ((CompositionView) view).getComp();
+        return ((View) view).getComp();
     }
 
     /**

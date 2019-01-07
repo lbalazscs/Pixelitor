@@ -17,8 +17,8 @@
 
 package pixelitor.menus;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
@@ -106,8 +106,8 @@ public abstract class MenuAction extends NamedAction {
             if (layerType == AllowedLayerType.ANY) {
                 onClick();
             } else {
-                CompositionView cv = OpenComps.getActiveView();
-                Layer activeLayer = cv.getComp().getActiveLayer();
+                View view = OpenComps.getActiveView();
+                Layer activeLayer = view.getComp().getActiveLayer();
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();
                 } else {

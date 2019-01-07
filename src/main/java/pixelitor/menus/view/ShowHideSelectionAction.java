@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.selection.Selection;
 
 /**
@@ -32,9 +32,9 @@ public class ShowHideSelectionAction extends ShowHideAction {
 
     @Override
     public boolean getCurrentVisibility() {
-        CompositionView cv = OpenComps.getActiveView();
-        if (cv != null) {
-            Selection selection = cv.getComp().getSelection();
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            Selection selection = view.getComp().getSelection();
             if (selection != null) {
                 return !selection.isHidden();
             }

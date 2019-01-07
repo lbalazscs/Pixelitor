@@ -48,9 +48,9 @@ import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
@@ -1401,7 +1401,7 @@ public class AssertJSwingTest {
     private void testScreenCapture() {
         log(1, "testing screen capture");
 
-        CompositionView prevView = EDT.getActiveView();
+        View prevView = EDT.getActiveView();
         testScreenCapture(true);
         testScreenCapture(false);
 
@@ -2597,8 +2597,8 @@ public class AssertJSwingTest {
         if (altDrag) {
             mouse.altDragToCanvas(300, 300);
         } else {
-            CompositionView cv = EDT.getActiveView();
-            Drawable dr = cv.getComp().getActiveDrawableOrThrow();
+            View view = EDT.getActiveView();
+            Drawable dr = view.getComp().getActiveDrawableOrThrow();
             int tx = dr.getTX();
             int ty = dr.getTY();
             assert tx == 0 : "tx = " + tx;
@@ -2610,7 +2610,7 @@ public class AssertJSwingTest {
             ty = dr.getTY();
 
             // The translations will have these values only if we are at 100% zoom!
-            assert cv.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + cv.getZoomLevel();
+            assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
             assert tx == -200 : "tx = " + tx;
             assert ty == -100 : "ty = " + tx;
         }
@@ -2752,16 +2752,16 @@ public class AssertJSwingTest {
     private void testMouseWheelZooming() {
         pw.pressKey(VK_CONTROL);
         ZoomLevel startingZoom = EDT.getZoomLevelOfActive();
-        CompositionView cv = EDT.getActiveView();
+        View view = EDT.getActiveView();
 
-        robot.rotateMouseWheel(cv, 2);
+        robot.rotateMouseWheel(view, 2);
         if (JVM.isLinux) {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut());
         } else {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut());
         }
 
-        robot.rotateMouseWheel(cv, -2);
+        robot.rotateMouseWheel(view, -2);
 
         if (JVM.isLinux) {
             EDT.assertZoomOfActiveIs(startingZoom.zoomOut().zoomOut().zoomIn().zoomIn());

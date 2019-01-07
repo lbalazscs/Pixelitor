@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.pen.SubPath;
@@ -57,7 +57,7 @@ public class Shapes {
      * Converts the given {@link Shape}, assumed to be
      * in image coordinates, to a {@link Path}
      */
-    public static Path shapeToPath(Shape shape, CompositionView view) {
+    public static Path shapeToPath(Shape shape, View view) {
         Path path = new Path(view.getComp(), true);
         path.setPreferredPenToolMode(PenToolMode.EDIT);
         PathIterator it = shape.getPathIterator(null);

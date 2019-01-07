@@ -21,8 +21,8 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
@@ -77,9 +77,9 @@ public enum MaskViewMode {
         Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
-                OpenComps.onActiveIC(cv -> {
-                    Layer activeLayer = cv.getComp().getActiveLayer();
-                    activate(cv, activeLayer, "main menu");
+                OpenComps.onActiveView(view -> {
+                    Layer activeLayer = view.getComp().getActiveLayer();
+                    activate(view, activeLayer, "main menu");
                 });
             }
         };
@@ -102,26 +102,26 @@ public enum MaskViewMode {
     }
 
     public void activate(Layer activeLayer, String reason) {
-        CompositionView cv = activeLayer.getComp().getView();
-        activate(cv, activeLayer, reason);
+        View view = activeLayer.getComp().getView();
+        activate(view, activeLayer, reason);
     }
 
     public void activate(Composition comp, Layer activeLayer, String reason) {
         activate(comp.getView(), activeLayer, reason);
     }
 
-    public void activate(CompositionView cv, Layer layer, String reason) {
-        assert cv != null;
+    public void activate(View view, Layer layer, String reason) {
+        assert view != null;
         if (Build.CURRENT != Build.FINAL) {
-            Events.postMaskViewActivate(this, cv, layer, reason);
+            Events.postMaskViewActivate(this, view, layer, reason);
         }
 
-        boolean change = cv.setMaskViewMode(this);
+        boolean change = view.setMaskViewMode(this);
         layer.setMaskEditing(editMask);
         if (change) {
             FgBgColors.setLayerMaskEditing(editMask);
 
-            if (!cv.isMock()) {
+            if (!view.isMock()) {
                 Tools.BRUSH.setupMaskEditing(editMask);
                 Tools.CLONE.setupMaskEditing(editMask);
                 Tools.GRADIENT.setupMaskEditing(editMask);

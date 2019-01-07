@@ -20,8 +20,8 @@ package pixelitor.tools;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
@@ -230,9 +230,9 @@ public class SelectionTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        CompositionView cv = OpenComps.getActiveView();
-        if (cv != null) {
-            Composition comp = cv.getComp();
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            Composition comp = view.getComp();
             Selection selection = comp.getSelection();
             if (selection != null) {
                 selection.nudge(key.getTransform());
@@ -283,7 +283,7 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+    public void compActivated(View oldCV, View newCV) {
         stopBuildingSelection();
     }
 

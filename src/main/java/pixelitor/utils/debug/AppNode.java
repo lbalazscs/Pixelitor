@@ -18,9 +18,9 @@
 package pixelitor.utils.debug;
 
 import pixelitor.Build;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -64,18 +64,18 @@ public class AppNode extends DebugNode {
     }
 
     private void addImageNodes() {
-        List<CompositionView> views = OpenComps.getViews();
+        List<View> views = OpenComps.getViews();
 
         int nrOpenImages = views.size();
         addInt("Number of Open Images", nrOpenImages);
 
-        CompositionView activeView = OpenComps.getActiveView();
-        for (CompositionView cv : views) {
-            CompositionViewNode node;
-            if (cv == activeView) {
-                node = new CompositionViewNode("ACTIVE Image - " + cv.getComp().getName(), cv);
+        View activeView = OpenComps.getActiveView();
+        for (View view : views) {
+            ViewNode node;
+            if (view == activeView) {
+                node = new ViewNode("ACTIVE Image - " + view.getComp().getName(), view);
             } else {
-                node = new CompositionViewNode("Image - " + cv.getComp().getName(), cv);
+                node = new ViewNode("Image - " + view.getComp().getName(), view);
             }
             add(node);
         }

@@ -21,7 +21,7 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -379,7 +379,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+    public void compActivated(View oldCV, View newCV) {
         resetInitialState();
     }
 
@@ -405,7 +405,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     private void doTrace(Drawable dr, Shape shape) {
-        CompositionView cv = dr.getComp().getView();
+        View view = dr.getComp().getView();
         PPoint startingPoint = null;
 
         PathIterator fpi = new FlatteningPathIterator(
@@ -422,7 +422,7 @@ public abstract class AbstractBrushTool extends Tool {
             int type = fpi.currentSegment(coords);
             double x = coords[0];
             double y = coords[1];
-            PPoint p = PPoint.lazyFromIm(x, y, cv);
+            PPoint p = PPoint.lazyFromIm(x, y, view);
             affectedArea.updateWith(p);
 
             switch (type) {
@@ -502,13 +502,13 @@ public abstract class AbstractBrushTool extends Tool {
     // TODO indicate the size of the brush
 //    @Override
 //    public void paintOverImage(Graphics2D g2, Canvas canvas,
-//                               CompositionView cv,
+//                               View cv,
 //                               AffineTransform componentTransform,
 //                               AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();
 //            int y = userDrag.getCoEndY();
-//            double radius = getRadius() * cv.getViewScale();
+//            double radius = getRadius() * cv.getScaling();
 //            double diameter = 2 * radius;
 //            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
 //                  diameter, diameter);

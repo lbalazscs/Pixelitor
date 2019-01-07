@@ -23,17 +23,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 
 /**
- * An {@link ImageWindow} used in the tabs UI.
+ * A {@link ViewContainer} used in the tabs UI.
  */
-public class ImageTab extends JComponent implements ImageWindow {
-    private final CompositionView cv;
+public class ImageTab extends JComponent implements ViewContainer {
+    private final View view;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
 
-    public ImageTab(CompositionView cv, TabsUI tabsUI) {
-        this.cv = cv;
+    public ImageTab(View view, TabsUI tabsUI) {
+        this.view = view;
         this.tabsUI = tabsUI;
-        scrollPane = new JScrollPane(this.cv);
+        scrollPane = new JScrollPane(this.view);
         setLayout(new BorderLayout());
         this.add(scrollPane, BorderLayout.CENTER);
     }
@@ -54,11 +54,11 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     @Override
-    public void updateTitle(CompositionView cv) {
+    public void updateTitle(View view) {
         int myIndex = tabsUI.indexOfComponent(this);
         if (myIndex != -1) {
             TabsUI.TabTitleRenderer tabComponent = (TabsUI.TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
-            tabComponent.setTitle(cv.getName());
+            tabComponent.setTitle(view.getName());
         }
     }
 
@@ -68,11 +68,11 @@ public class ImageTab extends JComponent implements ImageWindow {
     }
 
     public void onActivation() {
-        OpenComps.imageActivated(cv);
+        OpenComps.imageActivated(view);
     }
 
-    public CompositionView getIC() {
-        return cv;
+    public View getView() {
+        return view;
     }
 
     public void showPopup(MouseEvent mouse) {
@@ -82,13 +82,13 @@ public class ImageTab extends JComponent implements ImageWindow {
         popup.add(new AbstractAction("Close") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenComps.warnAndClose(cv);
+                OpenComps.warnAndClose(view);
             }
         });
         popup.add(new AbstractAction("Close Others") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenComps.warnAndCloseAllBut(cv);
+                OpenComps.warnAndCloseAllBut(view);
             }
         });
         popup.add(OpenComps.CLOSE_UNMODIFIED_ACTION);

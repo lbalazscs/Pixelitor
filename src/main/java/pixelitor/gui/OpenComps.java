@@ -62,10 +62,10 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
  * Static methods related to the list of opened compositions
  */
 public class OpenComps {
-    private static final List<CompositionView> views = new ArrayList<>();
-    private static CompositionView activeView;
+    private static final List<View> views = new ArrayList<>();
+    private static View activeView;
     private static final List<CompActivationListener> activationListeners
-            = new ArrayList<>();
+        = new ArrayList<>();
 
     public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
         @Override
@@ -93,17 +93,17 @@ public class OpenComps {
 
     public static boolean thereAreUnsavedChanges() {
         return views.stream()
-                .anyMatch(CompositionView::isDirty);
+            .anyMatch(View::isDirty);
     }
 
-    public static List<CompositionView> getViews() {
+    public static List<View> getViews() {
         return views;
     }
 
-    private static void setAnImageAsActiveIfNoneIs() {
+    private static void activateAViewIfNoneIs() {
         if (!views.isEmpty()) {
             boolean activeFound = false;
-            for (CompositionView view : views) {
+            for (View view : views) {
                 if (view == activeView) {
                     activeFound = true;
                     break;
@@ -111,12 +111,12 @@ public class OpenComps {
             }
 
             if (!activeFound) {
-                setActiveIC(views.get(0), true);
+                setActiveView(views.get(0), true);
             }
         }
     }
 
-    public static CompositionView getActiveView() {
+    public static View getActiveView() {
         return activeView;
     }
 
@@ -156,15 +156,15 @@ public class OpenComps {
 
     public static Optional<Composition> findCompositionByName(String name) {
         return views.stream()
-                .map(CompositionView::getComp)
-                .filter(c -> c.getName().equals(name))
-                .findFirst();
+            .map(View::getComp)
+            .filter(c -> c.getName().equals(name))
+            .findFirst();
     }
 
     public static Layer getActiveLayerOrNull() {
         if (activeView != null) {
             return activeView.getComp()
-                    .getActiveLayer();
+                .getActiveLayer();
         }
 
         return null;
@@ -199,35 +199,35 @@ public class OpenComps {
     public static BufferedImage getActiveCompositeImage() {
         if (activeView != null) {
             return activeView.getComp()
-                    .getCompositeImage();
+                .getCompositeImage();
         }
         return null;
     }
 
-    public static void imageClosed(CompositionView cv) {
-        views.remove(cv);
+    public static void imageClosed(View view) {
+        views.remove(view);
         if (views.isEmpty()) {
             onAllImagesClosed();
         }
-        setAnImageAsActiveIfNoneIs();
+        activateAViewIfNoneIs();
     }
 
-    public static void setActiveIC(CompositionView cv, boolean activate) {
+    public static void setActiveView(View view, boolean activate) {
         if (activate) {
-            if (cv == null) {
+            if (view == null) {
                 throw new IllegalStateException("cannot activate null view");
             }
-            ImageArea.activateIC(cv);
+            ImageArea.activateView(view);
         }
-        activeView = cv;
+        activeView = view;
     }
 
     /**
      * Changes the cursor for all images
      */
     public static void setCursorForAll(Cursor cursor) {
-        for (CompositionView cv : views) {
-            cv.setCursor(cursor);
+        for (View view : views) {
+            view.setCursor(cursor);
         }
     }
 
@@ -240,43 +240,43 @@ public class OpenComps {
     }
 
     private static void onAllImagesClosed() {
-        setActiveIC(null, false);
+        setActiveView(null, false);
         activationListeners.forEach(CompActivationListener::allCompsClosed);
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
         PixelitorWindow.getInstance()
-                .setTitle(Build.getPixelitorWindowFixTitle());
+            .setTitle(Build.getPixelitorWindowFixTitle());
         FramesUI.resetCascadeIndex();
     }
 
     /**
      * Another image became active
      */
-    public static void imageActivated(CompositionView cv) {
-        if (cv == activeView) {
+    public static void imageActivated(View view) {
+        if (view == activeView) {
             return;
         }
 
-        CompositionView oldCV = activeView;
+        View oldCV = activeView;
 
-        Composition comp = cv.getComp();
-        setActiveIC(cv, false);
+        Composition comp = view.getComp();
+        setActiveView(view, false);
         SelectionActions.setEnabled(comp.hasSelection(), comp);
-        cv.activateUI(true);
+        view.activateUI(true);
 
         for (CompActivationListener listener : activationListeners) {
-            listener.compActivated(oldCV, cv);
+            listener.compActivated(oldCV, view);
         }
 
         Layer layer = comp.getActiveLayer();
         Layers.activeLayerChanged(layer);
 
-        ZoomMenu.zoomChanged(cv.getZoomLevel());
+        ZoomMenu.zoomChanged(view.getZoomLevel());
 
         Canvas.activeCanvasImSizeChanged(comp.getCanvas());
         String title = comp.getName()
-                + " - " + Build.getPixelitorWindowFixTitle();
+            + " - " + Build.getPixelitorWindowFixTitle();
         PixelitorWindow.getInstance().setTitle(title);
     }
 
@@ -287,8 +287,8 @@ public class OpenComps {
     }
 
     public static void repaintAll() {
-        for (CompositionView cv : views) {
-            cv.repaint();
+        for (View view : views) {
+            view.repaint();
         }
     }
 
@@ -306,31 +306,31 @@ public class OpenComps {
         }
     }
 
-    public static boolean isActive(CompositionView cv) {
-        return cv == activeView;
+    public static boolean isActive(View view) {
+        return view == activeView;
     }
 
     public static void reloadActiveFromFileAsync() {
         // save a reference to the active view, because this will take
         // a while and another view might become active in the meantime
-        CompositionView cv = activeView;
+        View view = activeView;
 
-        Composition comp = cv.getComp();
+        Composition comp = view.getComp();
         File file = comp.getFile();
         if (file == null) {
             String msg = format(
-                    "The image '%s' cannot be reloaded because it was not yet saved.",
-                    comp.getName());
+                "The image '%s' cannot be reloaded because it was not yet saved.",
+                comp.getName());
             Messages.showError("No file", msg);
             return;
         }
 
         if (!file.exists()) {
             String msg = format(
-                    "The image '%s' cannot be reloaded because the file\n" +
-                            "%s\n" +
-                            "does not exist anymore.",
-                    comp.getName(), file.getAbsolutePath());
+                "The image '%s' cannot be reloaded because the file\n" +
+                    "%s\n" +
+                    "does not exist anymore.",
+                comp.getName(), file.getAbsolutePath());
             Messages.showError("No file found", msg);
             return;
         }
@@ -342,10 +342,10 @@ public class OpenComps {
         }
 
         OpenSave.loadCompFromFileAsync(file)
-                .thenAcceptAsync(cv::replaceJustReloadedComp,
-                        EventQueue::invokeLater)
-                .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
-                .exceptionally(Messages::showExceptionOnEDT);
+            .thenAcceptAsync(view::replaceJustReloadedComp,
+                EventQueue::invokeLater)
+            .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public static void duplicateActive() {
@@ -355,15 +355,15 @@ public class OpenComps {
         addAsNewImage(newComp);
     }
 
-    public static void onActiveIC(Consumer<CompositionView> action) {
+    public static void onActiveView(Consumer<View> action) {
         if (activeView != null) {
             action.accept(activeView);
         }
     }
 
-    public static void forAllImages(Consumer<CompositionView> action) {
-        for (CompositionView cv : views) {
-            action.accept(cv);
+    public static void forAllImages(Consumer<View> action) {
+        for (View view : views) {
+            action.accept(view);
         }
     }
 
@@ -376,31 +376,27 @@ public class OpenComps {
 
     public static void onActiveSelection(Consumer<Selection> action) {
         if (activeView != null) {
-            activeView.getComp()
-                    .onSelection(action);
+            activeView.getComp().onSelection(action);
         }
     }
 
     public static void onActiveLayer(Consumer<Layer> action) {
         if (activeView != null) {
-            Layer activeLayer = activeView.getComp()
-                    .getActiveLayer();
+            Layer activeLayer = activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveImageLayer(Consumer<ImageLayer> action) {
         if (activeView != null) {
-            ImageLayer activeLayer = (ImageLayer) activeView.getComp()
-                    .getActiveLayer();
+            ImageLayer activeLayer = (ImageLayer) activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
         }
     }
 
     public static void onActiveTextLayer(Consumer<TextLayer> action) {
         if (activeView != null) {
-            TextLayer activeLayer = (TextLayer) activeView.getComp()
-                    .getActiveLayer();
+            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
         }
     }
@@ -416,22 +412,22 @@ public class OpenComps {
         try {
             assert comp.getView() == null : "already has view";
 
-            CompositionView cv = new CompositionView(comp);
+            View view = new View(comp);
             comp.addAllLayersToGUI();
-            cv.setCursor(Tools.getCurrent().getStartingCursor());
-            views.add(cv);
-            MaskViewMode.NORMAL.activate(cv, comp.getActiveLayer(), "image added");
-            ImageArea.addNewIC(cv);
-            setActiveIC(cv, false);
+            view.setCursor(Tools.getCurrent().getStartingCursor());
+            views.add(view);
+            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer(), "image added");
+            ImageArea.addNewView(view);
+            setActiveView(view, false);
         } catch (Exception e) {
             Messages.showException(e);
         }
     }
 
     public static void activateRandomView() {
-        CompositionView cv = Rnd.chooseFrom(views);
-        if (cv != activeView) {
-            setActiveIC(cv, true);
+        View view = Rnd.chooseFrom(views);
+        if (view != activeView) {
+            setActiveView(view, true);
         }
     }
 
@@ -442,8 +438,8 @@ public class OpenComps {
         }
 
         throw new AssertionError(format(
-                "Expected %d images, found %d (%s)",
-                expected, numOpenImages, getOpenImageNamesAsString()));
+            "Expected %d images, found %d (%s)",
+            expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int expected) {
@@ -452,8 +448,8 @@ public class OpenComps {
             return;
         }
         throw new AssertionError(format(
-                "Expected at least %d images, found %d (%s)",
-                expected, numOpenImages, getOpenImageNamesAsString()));
+            "Expected at least %d images, found %d (%s)",
+            expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
@@ -463,40 +459,40 @@ public class OpenComps {
         ZoomLevel actual = activeView.getZoomLevel();
         if (actual != expected) {
             throw new AssertionError("expected = " + expected +
-                    ", found = " + actual);
+                ", found = " + actual);
         }
     }
 
     private static String getOpenImageNamesAsString() {
         return views.stream()
-                .map(CompositionView::getName)
-                .collect(joining(", ", "[", "]"));
+            .map(View::getName)
+            .collect(joining(", ", "[", "]"));
     }
 
     private static void warnAndCloseActive() {
         warnAndClose(activeView);
     }
 
-    public static void warnAndClose(CompositionView cv) {
+    public static void warnAndClose(View view) {
         try {
-            Composition comp = cv.getComp();
+            Composition comp = view.getComp();
             if (comp.isDirty()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // save
                     boolean fileSaved = OpenSave.save(comp, false);
                     if (fileSaved) {
-                        cv.close();
+                        view.close();
                     }
                 } else if (answer == NO_OPTION) { // don't save
-                    cv.close();
+                    view.close();
                 } else if (answer == CANCEL_OPTION) { // cancel
                     // do nothing
                 } else { // dialog closed by pressing X
                     // do nothing
                 }
             } else {
-                cv.close();
+                view.close();
             }
         } catch (Exception ex) {
             Messages.showException(ex);
@@ -504,23 +500,23 @@ public class OpenComps {
     }
 
     private static void warnAndCloseAll() {
-        warnAndCloseAllIf(cv -> true);
+        warnAndCloseAllIf(view -> true);
     }
 
-    public static void warnAndCloseAllBut(CompositionView selected) {
-        warnAndCloseAllIf(cv -> cv != selected);
+    public static void warnAndCloseAllBut(View selected) {
+        warnAndCloseAllIf(view -> view != selected);
     }
 
     private static void closeUnmodified() {
-        warnAndCloseAllIf(cv -> !cv.getComp().isDirty());
+        warnAndCloseAllIf(view -> !view.getComp().isDirty());
     }
 
-    private static void warnAndCloseAllIf(Predicate<CompositionView> condition) {
+    private static void warnAndCloseAllIf(Predicate<View> condition) {
         // make a copy because items will be removed from the original while iterating
-        Iterable<CompositionView> tmpCopy = new ArrayList<>(views);
-        for (CompositionView cv : tmpCopy) {
-            if (condition.test(cv)) {
-                warnAndClose(cv);
+        Iterable<View> tmpCopy = new ArrayList<>(views);
+        for (View view : tmpCopy) {
+            if (condition.test(view)) {
+                warnAndClose(view);
             }
         }
     }
@@ -533,9 +529,9 @@ public class OpenComps {
                 showPixelGridHelp();
             }
         } else { // Tabs: check only the current view
-            CompositionView cv = getActiveView();
-            if (cv.showPixelGridIfEnabled()) {
-                cv.repaint();
+            View view = getActiveView();
+            if (view.showPixelGridIfEnabled()) {
+                view.repaint();
             } else {
                 showPixelGridHelp();
             }
@@ -543,8 +539,8 @@ public class OpenComps {
     }
 
     private static boolean isAnyPixelGridVisibleIfEnabled() {
-        for (CompositionView cv : views) {
-            if (cv.showPixelGridIfEnabled()) {
+        for (View view : views) {
+            if (view.showPixelGridIfEnabled()) {
                 return true;
             }
         }
@@ -553,8 +549,8 @@ public class OpenComps {
 
     private static void showPixelGridHelp() {
         Messages.showInfo("Pixel Grid",
-                "The pixel grid consists of lines between the pixels,\n" +
-                        "and is shown only if the zoom is at least 1600%\n" +
-                        "and there is no selection.");
+            "The pixel grid consists of lines between the pixels,\n" +
+                "and is shown only if the zoom is at least 1600%\n" +
+                "and there is no selection.");
     }
 }

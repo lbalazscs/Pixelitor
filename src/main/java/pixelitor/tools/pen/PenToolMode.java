@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
@@ -40,7 +39,7 @@ public interface PenToolMode {
     void mouseReleased(PMouseEvent e);
 
     // return true if needs repainting
-    boolean mouseMoved(MouseEvent e, CompositionView cv);
+    boolean mouseMoved(MouseEvent e, View view);
 
     void paint(Graphics2D g);
 

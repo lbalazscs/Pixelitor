@@ -20,8 +20,8 @@ package pixelitor.guitest;
 import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.layers.Layer;
@@ -59,7 +59,7 @@ public class EDT {
         GuiActionRunner.execute(runnable);
     }
 
-    public static CompositionView getActiveView() {
+    public static View getActiveView() {
         return call(OpenComps::getActiveView);
     }
 
@@ -185,8 +185,8 @@ public class EDT {
         }
     }
 
-    public static void activate(CompositionView cv) {
-        run(() -> OpenComps.setActiveIC(cv, true));
+    public static void activate(View view) {
+        run(() -> OpenComps.setActiveView(view, true));
     }
 
     /**

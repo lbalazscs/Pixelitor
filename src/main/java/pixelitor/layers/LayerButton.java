@@ -21,8 +21,8 @@ import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Build;
 import pixelitor.ThreadPool;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.VisibleForTesting;
@@ -387,30 +387,30 @@ public class LayerButton extends JToggleButton implements LayerUI {
             String reason = "mask icon shift-alt-clicked";
             // shift-alt-click switches to RUBYLITH except when
             // it is already RUBYLITH
-            CompositionView cv = layer.getComp().getView();
-            if (cv.getMaskViewMode() == MaskViewMode.RUBYLITH) {
-                MaskViewMode.EDIT_MASK.activate(cv, layer, reason);
+            View view = layer.getComp().getView();
+            if (view.getMaskViewMode() == MaskViewMode.RUBYLITH) {
+                MaskViewMode.EDIT_MASK.activate(view, layer, reason);
             } else {
-                MaskViewMode.RUBYLITH.activate(cv, layer, reason);
+                MaskViewMode.RUBYLITH.activate(view, layer, reason);
             }
         } else if (altClick) {
             String reason = "mask icon alt-clicked";
             // alt-click switches to SHOW_MASK except when it
             // already is in SHOW_MASK
-            CompositionView cv = layer.getComp().getView();
-            if (cv.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
-                MaskViewMode.EDIT_MASK.activate(cv, layer, reason);
+            View view = layer.getComp().getView();
+            if (view.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
+                MaskViewMode.EDIT_MASK.activate(view, layer, reason);
             } else {
-                MaskViewMode.SHOW_MASK.activate(cv, layer, reason);
+                MaskViewMode.SHOW_MASK.activate(view, layer, reason);
             }
         } else if (shiftClick) {
             // shift-click disables except when it is already disabled
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
         } else {
-            CompositionView cv = layer.getComp().getView();
+            View view = layer.getComp().getView();
 
             // don't change SHOW_MASK into EDIT_MASK
-            if (cv.getMaskViewMode() == MaskViewMode.NORMAL) {
+            if (view.getMaskViewMode() == MaskViewMode.NORMAL) {
                 MaskViewMode.EDIT_MASK.activate(layer, "mask icon clicked");
             }
         }

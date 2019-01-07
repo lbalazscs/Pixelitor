@@ -23,7 +23,7 @@ import org.junit.Test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Alt;
 import pixelitor.tools.Ctrl;
@@ -45,7 +45,7 @@ import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 public class PathBuilderTest {
-    private CompositionView cv;
+    private View view;
     private Graphics2D g;
     private PathBuilder pb;
 
@@ -61,7 +61,7 @@ public class PathBuilderTest {
     public void setup() {
         // a real comp that can store paths
         Composition comp = TestHelper.createEmptyComposition();
-        cv = comp.getView(); // a mock view
+        view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
         pb = BUILD;
 
@@ -857,7 +857,7 @@ public class PathBuilderTest {
     private void press(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
         // go through the event dispatcher
         // because the undo uses its "mouseDown" state
-        TestHelper.press(x, y, ctrl, alt, shift, cv);
+        TestHelper.press(x, y, ctrl, alt, shift, view);
         checkState(state);
         pb.paint(g);
     }
@@ -895,7 +895,7 @@ public class PathBuilderTest {
     }
 
     private void drag(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.drag(x, y, ctrl, alt, shift, cv);
+        TestHelper.drag(x, y, ctrl, alt, shift, view);
         checkState(state);
         pb.paint(g);
     }
@@ -913,7 +913,7 @@ public class PathBuilderTest {
     }
 
     private void release(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.release(x, y, ctrl, alt, shift, cv);
+        TestHelper.release(x, y, ctrl, alt, shift, view);
         checkState(state);
         pb.paint(g);
     }
@@ -935,7 +935,7 @@ public class PathBuilderTest {
     }
 
     private void move(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.move(x, y, ctrl, alt, shift, cv);
+        TestHelper.move(x, y, ctrl, alt, shift, view);
         checkState(state);
         pb.paint(g);
     }

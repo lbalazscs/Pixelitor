@@ -41,10 +41,10 @@ import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.MappedKey;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -652,18 +652,18 @@ public class RandomGUITest {
     }
 
     private static void randomZoom() {
-        OpenComps.onActiveIC(RandomGUITest::setRandomZoom);
+        OpenComps.onActiveView(RandomGUITest::setRandomZoom);
     }
 
-    private static void setRandomZoom(CompositionView cv) {
+    private static void setRandomZoom(View view) {
         ZoomLevel randomZoomLevel = getRandomZoomLevel();
         log("zoom zoomLevel = " + randomZoomLevel);
 
         if (rand.nextBoolean()) {
-            cv.setZoom(randomZoomLevel, null);
+            view.setZoom(randomZoomLevel, null);
         } else {
-            Point mousePos = pickRandomPointOn(cv);
-            cv.setZoom(randomZoomLevel, mousePos);
+            Point mousePos = pickRandomPointOn(view);
+            view.setZoom(randomZoomLevel, mousePos);
         }
     }
 
@@ -677,8 +677,8 @@ public class RandomGUITest {
         return level;
     }
 
-    private static Point pickRandomPointOn(CompositionView cv) {
-        Rectangle vp = cv.getVisiblePart();
+    private static Point pickRandomPointOn(View view) {
+        Rectangle vp = view.getVisiblePart();
         int randX = vp.x;
         if (vp.width >= 2) {
             randX = Rnd.intInRange(vp.x, vp.x + vp.width);
@@ -693,14 +693,14 @@ public class RandomGUITest {
     private static void randomZoomOut() {
         log("zoomOut");
 
-        CompositionView cv = OpenComps.getActiveView();
-        if (cv != null) {
-            ZoomLevel newZoom = cv.getZoomLevel().zoomOut();
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            ZoomLevel newZoom = view.getZoomLevel().zoomOut();
             if (rand.nextBoolean()) {
-                cv.setZoom(newZoom, null);
+                view.setZoom(newZoom, null);
             } else {
-                Point mousePos = pickRandomPointOn(cv);
-                cv.setZoom(newZoom, mousePos);
+                Point mousePos = pickRandomPointOn(view);
+                view.setZoom(newZoom, mousePos);
             }
         }
     }
@@ -1179,12 +1179,12 @@ public class RandomGUITest {
     // to prevent paths growing too large
     private static void setPathsToNull() {
         log("setPathsToNull");
-        List<CompositionView> icList = OpenComps.getViews();
-        CompositionView activeView = OpenComps.getActiveView();
-        for (CompositionView cv : icList) {
+        List<View> views = OpenComps.getViews();
+        View activeView = OpenComps.getActiveView();
+        for (View view : views) {
             // don't touch the active, as its path might be edited just now
-            if (cv != activeView) {
-                cv.getComp().setActivePath(null);
+            if (view != activeView) {
+                view.getComp().setActivePath(null);
             }
         }
         // history is in an inconsistent state now

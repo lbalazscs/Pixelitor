@@ -35,7 +35,7 @@ public class DrawableCheckHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (e.getCV().activeIsDrawable()) {
+        if (e.getView().activeIsDrawable()) {
             // forwards the mouse event to the next handler
             return false;
         }
@@ -57,11 +57,11 @@ public class DrawableCheckHandler extends ToolHandler {
 
     @Override
     boolean mouseDragged(PMouseEvent e) {
-        return !e.getCV().activeIsDrawable();
+        return !e.getView().activeIsDrawable();
     }
 
     @Override
     boolean mouseReleased(PMouseEvent e) {
-        return !e.getCV().activeIsDrawable();
+        return !e.getView().activeIsDrawable();
     }
 }

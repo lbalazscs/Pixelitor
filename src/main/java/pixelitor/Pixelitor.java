@@ -22,9 +22,9 @@ import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.IOThread;
@@ -243,10 +243,10 @@ public class Pixelitor {
 
     private static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
-        CompositionView cv = OpenComps.getActiveView();
-        Layer layer = cv.getComp()
+        View view = OpenComps.getActiveView();
+        Layer layer = view.getComp()
                 .getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(cv, layer, "after-start test");
+        MaskViewMode.SHOW_MASK.activate(view, layer, "after-start test");
     }
 
     private static void startFilter(Filter filter) {

@@ -22,7 +22,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
@@ -124,14 +124,14 @@ public class AutoPaint {
                                    ProgressHandler progressHandler) {
         Random random = new Random();
         Composition comp = dr.getComp();
-        CompositionView cv = comp.getView();
+        View view = comp.getView();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
             progressHandler.updateProgress(i);
 
             paintSingleStroke(dr, settings, comp, random);
-            cv.paintImmediately();
+            view.paintImmediately();
         }
     }
 

@@ -17,7 +17,6 @@
 
 package pixelitor.tools.crop;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.tools.TransformHelper;
 import pixelitor.tools.util.ArrowKey;
@@ -202,13 +201,13 @@ public class CropBox {
         transformMode = MODE_NONE;
     }
 
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
-        boolean isCursorSet = setCursorForPoint(e.getX(), e.getY(), cv);
+    public void mouseMoved(MouseEvent e, View view) {
+        boolean isCursorSet = setCursorForPoint(e.getX(), e.getY(), view);
         if (!isCursorSet) {
             if (rect.containsCo(e.getX(), e.getY())) {
-                cv.setCursor(Cursors.MOVE);
+                view.setCursor(Cursors.MOVE);
             } else {
-                cv.setCursor(Cursors.DEFAULT);
+                view.setCursor(Cursors.DEFAULT);
             }
         }
     }
@@ -225,14 +224,14 @@ public class CropBox {
     /**
      * Set size of selection in image space
      */
-    public void setImSize(int width, int height, CompositionView cv) {
+    public void setImSize(int width, int height, View view) {
         Rectangle2D imRect = rect.getIm();
         imRect.setRect(imRect.getX(), imRect.getY(), width, height);
 
-        rect.recalcCo(cv);
+        rect.recalcCo(view);
 
         update(rect);
-        cv.repaint();
+        view.repaint();
     }
 
     /**
@@ -242,7 +241,7 @@ public class CropBox {
         return adjusting;
     }
 
-    public void arrowKeyPressed(ArrowKey key, CompositionView cv) {
+    public void arrowKeyPressed(ArrowKey key, View view) {
 
         // two situation we need to take into consideration
         // 1. user zoom level is >= 100% then we always move rect by 1px
@@ -250,7 +249,7 @@ public class CropBox {
         // 2. user zoom level is < 100% then we scale up to ensure that user always see
         //    rect movement
 
-        double viewScale = cv.getZoomLevel().getViewScale();
+        double viewScale = view.getZoomLevel().getViewScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
         Rectangle2D im = rect.getIm();
@@ -261,9 +260,9 @@ public class CropBox {
                 im.getHeight()
         );
 
-        rect.recalcCo(cv);
+        rect.recalcCo(view);
         update(rect);
-        cv.repaint();
+        view.repaint();
     }
 }
 

@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.VisibleForTesting;
@@ -100,7 +100,7 @@ public class LayersContainer extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         // the layers pane of the CompositionView is set in
         // CompositionView.onActivation()
     }
@@ -109,8 +109,8 @@ public class LayersContainer extends JPanel implements CompActivationListener {
         return (INSTANCE.getParent() != null);
     }
 
-    public static void showLayersFor(CompositionView cv) {
-        INSTANCE.setLayersPanel(cv.getLayersPanel());
+    public static void showLayersFor(View view) {
+        INSTANCE.setLayersPanel(view.getLayersPanel());
     }
 
     @VisibleForTesting

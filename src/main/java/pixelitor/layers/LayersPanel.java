@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * The GUI container for {@link LayerButton} objects.
- * Each {@link CompositionView} has its own {@link LayersPanel} instance.
+ * Each {@link View} has its own {@link LayersPanel} instance.
  */
 public class LayersPanel extends JLayeredPane {
     private final List<LayerButton> layerButtons = new ArrayList<>();

@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
 
 import java.awt.Dimension;
@@ -47,7 +47,7 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    private transient CompositionView cv;
+    private transient View view;
 
     // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
@@ -81,11 +81,11 @@ public class Canvas implements Serializable {
      * Recalculates the component-space (zoomed) size
      */
     public void recalcCoSize() {
-        double viewScale = cv.getViewScale();
+        double viewScale = view.getScaling();
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
 
-        cv.canvasCoSizeChanged();
+        view.canvasCoSizeChanged();
     }
 
     /**
@@ -130,9 +130,9 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setView(CompositionView cv) {
-        this.cv = cv;
-        if (cv != null) {
+    public void setView(View view) {
+        this.view = view;
+        if (view != null) {
             recalcCoSize();
         }
     }

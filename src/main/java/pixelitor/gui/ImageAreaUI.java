@@ -24,9 +24,9 @@ import java.awt.Dimension;
  * (internal frames and tabs)
  */
 public interface ImageAreaUI {
-    void activateIC(CompositionView cv);
+    void activateView(View view);
 
-    void addNewIC(CompositionView cv);
+    void addNewView(View view);
 
     Dimension getSize();
 }

@@ -20,8 +20,8 @@ package pixelitor.utils.test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
@@ -81,10 +81,10 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
-        String oldCVName = oldCV == null ? "null" : oldCV.getName();
+    public void compActivated(View oldView, View newView) {
+        String oldCVName = oldView == null ? "null" : oldView.getName();
         Events.postListenerEvent(format("compActivated %s => %s",
-                oldCVName, newCV.getName()),
-                newCV.getComp(), null);
+            oldCVName, newView.getName()),
+            newView.getComp(), null);
     }
 }

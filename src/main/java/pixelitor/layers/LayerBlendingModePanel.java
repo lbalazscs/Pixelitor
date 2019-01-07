@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.BlendingModePanel;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 
 import static pixelitor.gui.OpenComps.onActiveLayer;
@@ -77,7 +77,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         setEnabled(true);
     }
 

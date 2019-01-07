@@ -20,11 +20,11 @@ package pixelitor.gui;
 import javax.swing.*;
 
 /**
- * A component that contains an {@link CompositionView} inside a JScrollPane.
+ * A component that contains a {@link View} inside a JScrollPane.
  * It can be either a JInternalFrame or a tab in a JTabbedPane.
  * Some of the methods make sense only for internal frames, not for tabs.
  */
-public interface ImageWindow {
+public interface ViewContainer {
     /**
      * Sets the size of the internal frame.
      */
@@ -36,7 +36,7 @@ public interface ImageWindow {
 
     void select();
 
-    void updateTitle(CompositionView cv);
+    void updateTitle(View view);
 
     /**
      * Important only for the cropping with internal frames.

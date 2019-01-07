@@ -20,7 +20,7 @@ package pixelitor.tools.gradient;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.TestHelper;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 
 import java.awt.geom.AffineTransform;
 
@@ -42,10 +42,10 @@ public class GradientHandlesTest {
 
     @Before
     public void setup() {
-        CompositionView cv = TestHelper.createMockViewWithoutComp();
+        View view = TestHelper.createMockViewWithoutComp();
         handles = new GradientHandles(
                 START_X_FOR_START, START_Y_FOR_START,
-                START_X_FOR_END, START_Y_FOR_END, cv);
+            START_X_FOR_END, START_Y_FOR_END, view);
         start = handles.getStart();
         end = handles.getEnd();
         middle = handles.getMiddle();

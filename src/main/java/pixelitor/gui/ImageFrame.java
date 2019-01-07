@@ -30,25 +30,25 @@ import java.awt.Rectangle;
 import java.beans.PropertyVetoException;
 
 /**
- * An {@link ImageWindow} used in the "internal frames" UI.
+ * A {@link ViewContainer} used in the "internal frames" UI.
  */
 public class ImageFrame extends JInternalFrame
-        implements ImageWindow, InternalFrameListener {
+    implements ViewContainer, InternalFrameListener {
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
-    private final CompositionView cv;
+    private final View view;
     private final JScrollPane scrollPane;
 
-    public ImageFrame(CompositionView cv, int locX, int locY) {
-        super(cv.createTitleWithZoom(),
+    public ImageFrame(View view, int locX, int locY) {
+        super(view.createTitleWithZoom(),
                 true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
-        this.cv = cv;
+        this.view = view;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        scrollPane = new JScrollPane(this.cv);
+        scrollPane = new JScrollPane(this.view);
         this.add(scrollPane);
 
         setLocation(locX, locY);
@@ -61,18 +61,18 @@ public class ImageFrame extends JInternalFrame
         // We can get here as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
-        OpenComps.imageActivated(cv);
+        OpenComps.imageActivated(view);
     }
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e) {
-        OpenComps.imageClosed(cv);
+        OpenComps.imageClosed(view);
     }
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         if (!RandomGUITest.isRunning()) {
-            OpenComps.warnAndClose(cv);
+            OpenComps.warnAndClose(view);
         }
     }
 
@@ -82,12 +82,12 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameDeiconified(InternalFrameEvent e) {
-        cv.updateNavigator(true);
+        view.updateNavigator(true);
     }
 
     @Override
     public void internalFrameIconified(InternalFrameEvent e) {
-        cv.updateNavigator(true);
+        view.updateNavigator(true);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     public void setToNaturalSize() {
-        Canvas canvas = cv.getCanvas();
+        Canvas canvas = view.getCanvas();
         int zoomedWidth = canvas.getCoWidth();
         int zoomedHeight = canvas.getCoHeight();
         setSize(zoomedWidth, zoomedHeight);
@@ -154,7 +154,7 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void updateTitle(CompositionView cv) {
-        setTitle(cv.createTitleWithZoom());
+    public void updateTitle(View view) {
+        setTitle(view.createTitleWithZoom());
     }
 }

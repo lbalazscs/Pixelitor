@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
@@ -53,7 +53,7 @@ public class DuplicateLayerAction extends AbstractAction
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

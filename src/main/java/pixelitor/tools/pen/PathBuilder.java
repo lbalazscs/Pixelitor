@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Build;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -77,7 +76,7 @@ public class PathBuilder implements PenToolMode {
 
 //        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mousePressed", e.getCV());
+            state = recoverFromUnexpectedDragState("mousePressed", e.getView());
         }
 
         double x = e.getCoX();
@@ -223,7 +222,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseDragged", e.getCV(), state);
+            state = recoverFromUnexpectedMoveState("mouseDragged", e.getView(), state);
             if (state == NO_INTERACTION) {
                 return;
             }
@@ -265,7 +264,7 @@ public class PathBuilder implements PenToolMode {
         }
 
         if (state.isMoving()) {
-            state = recoverFromUnexpectedMoveState("mouseReleased", e.getCV(), state);
+            state = recoverFromUnexpectedMoveState("mouseReleased", e.getView(), state);
             if (state == NO_INTERACTION) {
                 return;
             }
@@ -320,14 +319,14 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public boolean mouseMoved(MouseEvent e, CompositionView cv) {
+    public boolean mouseMoved(MouseEvent e, View view) {
         if (path == null) {
             return false;
         }
         BuildState state = path.getBuildState();
 //        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
-            state = recoverFromUnexpectedDragState("mouseMoved", cv);
+            state = recoverFromUnexpectedDragState("mouseMoved", view);
         }
 
         int x = e.getX();
@@ -371,8 +370,8 @@ public class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedDragState(String where, CompositionView cv) {
-        boolean active = OpenComps.isActive(cv);
+    private static BuildState recoverFromUnexpectedDragState(String where, View view) {
+        boolean active = OpenComps.isActive(view);
         if (Build.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                     "where = '%s, active = %s'%n", where, active);
@@ -384,8 +383,8 @@ public class PathBuilder implements PenToolMode {
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
-    private static BuildState recoverFromUnexpectedMoveState(String where, CompositionView cv, BuildState state) {
-        boolean active = OpenComps.isActive(cv);
+    private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
+        boolean active = OpenComps.isActive(view);
         if (Build.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                     "where = '%s, active = %s'%n", where, active);

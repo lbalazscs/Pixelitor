@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.filters.Invert;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
@@ -60,7 +60,7 @@ public class AddAdjLayerAction extends AbstractAction
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

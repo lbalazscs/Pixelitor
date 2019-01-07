@@ -17,7 +17,6 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
@@ -133,7 +132,7 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public boolean mouseMoved(MouseEvent e, CompositionView cv) {
+    public boolean mouseMoved(MouseEvent e, View view) {
         boolean hit = false;
         for (TransformBox box : boxes) {
             if (box.processMouseMoved(e)) {
@@ -144,19 +143,19 @@ public class PathTransformer implements PenToolMode {
         if (!hit) {
             if (activePoint != null) {
                 activePoint = null;
-                cv.repaint();
+                view.repaint();
             }
             int x = e.getX();
             int y = e.getY();
             boolean contained = false;
             for (TransformBox box : boxes) {
                 if (box.contains(x, y)) {
-                    cv.setCursor(MOVE);
+                    view.setCursor(MOVE);
                     contained = true;
                     break;
                 }
             }
-            cv.setCursor(contained ? Cursors.MOVE : Cursors.DEFAULT);
+            view.setCursor(contained ? Cursors.MOVE : Cursors.DEFAULT);
         }
 
         return false;

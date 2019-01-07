@@ -19,7 +19,7 @@ package pixelitor.selection;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.view.ShowHideAction;
@@ -45,7 +45,7 @@ import static java.awt.Color.WHITE;
  */
 public class Selection {
     private float dashPhase;
-    private CompositionView cv;
+    private View view;
     private Timer marchingAntsTimer;
 
     // The shape that is currently drawn.
@@ -60,12 +60,12 @@ public class Selection {
     private boolean dead = false;
     private boolean frozen = false;
 
-    public Selection(Shape shape, CompositionView cv) {
+    public Selection(Shape shape, View view) {
         // TODO should not allow selections with null shape
-        assert cv != null;
+        assert view != null;
 
         this.shape = shape;
-        this.cv = cv;
+        this.view = view;
 
         // hack to prevent unit tests from starting the marching
         if (Build.isUnitTesting()) {
@@ -76,9 +76,9 @@ public class Selection {
     }
 
     // copy constructor
-    public Selection(Selection orig, boolean shareIC) {
-        if (shareIC) {
-            this.cv = orig.cv;
+    public Selection(Selection orig, boolean shareView) {
+        if (shareView) {
+            this.view = orig.view;
         }
 
         // the shapes can be shared
@@ -93,12 +93,12 @@ public class Selection {
         }
 
         assert !dead : "dead selection";
-        assert cv != null : "no view in selection";
+        assert view != null : "no view in selection";
 
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
             if(!hidden) {
-                dashPhase += 1.0f / (float) cv.getViewScale();
+                dashPhase += 1.0f / (float) view.getScaling();
                 repaint();
             }
         });
@@ -130,7 +130,7 @@ public class Selection {
         // As the selection coordinates are in image space, this is
         // called with a Graphics2D transformed into image space.
         // The line width has to be scaled to compensate.
-        double viewScale = cv.getViewScale();
+        double viewScale = view.getScaling();
         float lineWidth = (float) (DASH_WIDTH / viewScale);
 
         float[] dash;
@@ -159,21 +159,21 @@ public class Selection {
     public void die() {
         stopMarching();
         repaint();
-        cv = null;
+        view = null;
         dead = true;
     }
 
     private void repaint() {
 //        if(shape != null && !hidden) {
 //             Rectangle selBounds = shape.getBounds();
-//             cv.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
+//             view.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
 
 //             the above optimization is not enough, the previous positions should be also considered for the
 //             case when the selection is shrinking while dragging.
 //             But it does not seem to solve the pixel grid problem anyway
 //        }
 
-        cv.repaint();
+        view.repaint();
     }
 
     public void setShape(Shape currentShape) {
@@ -187,7 +187,7 @@ public class Selection {
      * @return true if the selection shape is not empty
      */
     public boolean clipToCanvasSize(Composition comp) {
-        assert comp == cv.getComp();
+        assert comp == view.getComp();
         if (shape != null) {
             shape = comp.clipShapeToCanvasSize(shape);
 
@@ -225,7 +225,7 @@ public class Selection {
         Shape backupShape = shape;
         shape = type.modify(oldArea, outlineArea);
 
-        Composition comp = cv.getComp();
+        Composition comp = view.getComp();
         boolean notEmpty = clipToCanvasSize(comp);
         if (notEmpty) {
             SelectionChangeEdit edit = new SelectionChangeEdit(
@@ -245,7 +245,7 @@ public class Selection {
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
         History.addEdit(new SelectionChangeEdit(
-                "Nudge Selection", cv.getComp(), backupShape));
+            "Nudge Selection", view.getComp(), backupShape));
     }
 
     public boolean isHidden() {
@@ -297,9 +297,9 @@ public class Selection {
     }
 
     // called when the composition is duplicated
-    public void setView(CompositionView cv) {
-        assert cv != null;
-        this.cv = cv;
+    public void setView(View view) {
+        assert view != null;
+        this.view = view;
         startMarching();
     }
 
@@ -325,7 +325,7 @@ public class Selection {
     @Override
     public String toString() {
         return "Selection{" +
-                "composition=" + cv.getComp().getName() +
+            "composition=" + view.getComp().getName() +
                 ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
                 ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
                 '}';

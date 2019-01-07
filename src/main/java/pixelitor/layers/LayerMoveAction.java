@@ -19,8 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
@@ -71,8 +71,8 @@ public class LayerMoveAction extends AbstractAction
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
-        enableDisable(newIC.getComp());
+    public void compActivated(View oldView, View newView) {
+        enableDisable(newView.getComp());
     }
 
     public void enableDisable(Composition comp) {

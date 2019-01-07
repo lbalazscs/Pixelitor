@@ -19,9 +19,9 @@ package pixelitor.automate;
 
 import pixelitor.Composition;
 import pixelitor.filters.comp.CompAction;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileUtils;
@@ -117,17 +117,17 @@ public class Automate {
 
         System.out.println("Automate::processFile: CALLED, comp = " + comp.getName());
 
-        CompositionView cv = comp.getView();
+        View view = comp.getView();
 
-        cv.paintImmediately();
+        view.paintImmediately();
         action.process(comp);
-        cv.paintImmediately();
+        view.paintImmediately();
 
         return comp;
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
-        CompositionView cv = comp.getView();
+        View view = comp.getView();
         OutputFormat outputFormat = OutputFormat.getLastUsed();
         File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
         CompletableFuture<Void> retVal = null;
@@ -151,15 +151,15 @@ public class Automate {
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    OpenComps.warnAndClose(cv);
+                    OpenComps.warnAndClose(view);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
             }
         } else { // the file does not exist or overwrite all was pressed previously
-            cv.paintImmediately();
+            view.paintImmediately();
             retVal = comp.saveAsync(saveSettings, false);
         }
-        OpenComps.warnAndClose(cv);
+        OpenComps.warnAndClose(view);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;

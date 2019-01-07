@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -70,25 +70,25 @@ public class ColorPickerTool extends Tool {
     }
 
     public void sampleColor(PMouseEvent e, boolean selectBackground) {
-        CompositionView cv = e.getCV();
+        View view = e.getView();
         int x = (int) e.getImX();
         int y = (int) e.getImY();
 
         BufferedImage img;
         boolean isGray = false;
         if (sampleLayerOnly.isSelected()) {
-            if (!cv.activeIsDrawable()) {
+            if (!view.activeIsDrawable()) {
                 return;
             }
 
-            Drawable dr = cv.getComp().getActiveDrawableOrThrow();
+            Drawable dr = view.getComp().getActiveDrawableOrThrow();
             img = dr.getImage();
             isGray = img.getType() == TYPE_BYTE_GRAY;
 
             x -= dr.getTX();
             y -= dr.getTY();
         } else {
-            img = cv.getComp().getCompositeImage();
+            img = view.getComp().getCompositeImage();
         }
         int imgWidth = img.getWidth();
         int imgHeight = img.getHeight();

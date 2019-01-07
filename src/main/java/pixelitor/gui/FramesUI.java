@@ -37,14 +37,14 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     @Override
-    public void activateIC(CompositionView cv) {
-        ImageFrame frame = (ImageFrame) cv.getImageWindow();
+    public void activateView(View view) {
+        ImageFrame frame = (ImageFrame) view.getViewContainer();
         assert frame != null;
         activateFrame(frame);
     }
 
     @Override
-    public void addNewIC(CompositionView cv) {
+    public void addNewView(View view) {
         int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
         int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
 
@@ -54,8 +54,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int maxHeight = this.getHeight() - CASCADE_VERTICAL_SHIFT;
         locY %= maxHeight;
 
-        ImageFrame frame = new ImageFrame(cv, locX, locY);
-        cv.setImageWindow(frame);
+        ImageFrame frame = new ImageFrame(view, locX, locY);
+        view.setViewContainer(frame);
 
         this.add(frame);
         activateFrame(frame);
@@ -73,11 +73,11 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void cascadeWindows() {
-        List<CompositionView> views = OpenComps.getViews();
+        List<View> views = OpenComps.getViews();
         int locX = 0;
         int locY = 0;
-        for (CompositionView cv : views) {
-            ImageFrame frame = (ImageFrame) cv.getImageWindow();
+        for (View view : views) {
+            ImageFrame frame = (ImageFrame) view.getViewContainer();
             frame.setLocation(locX, locY);
             frame.setToNaturalSize();
             try {
@@ -104,7 +104,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void tileWindows() {
-        List<CompositionView> views = OpenComps.getViews();
+        List<View> views = OpenComps.getViews();
         int numWindows = views.size();
 
         int numRows = (int) Math.sqrt(numWindows);
@@ -116,8 +116,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int currRow = 0;
         int currCol = 0;
 
-        for (CompositionView cv : views) {
-            ImageFrame frame = (ImageFrame) cv.getImageWindow();
+        for (View view : views) {
+            ImageFrame frame = (ImageFrame) view.getViewContainer();
             try {
                 frame.setIcon(false);
                 frame.setMaximum(false);

@@ -20,7 +20,6 @@ package pixelitor.tools.gradient;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
@@ -146,9 +145,9 @@ public class GradientTool extends DragTool {
         // regenerate the gradient if a tool setting
         // was changed while handles are present
         if (handles != null) {
-            CompositionView cv = OpenComps.getActiveView();
-            if (cv != null) {
-                ImDrag imDrag = handles.toImDrag(cv);
+            View view = OpenComps.getActiveView();
+            if (view != null) {
+                ImDrag imDrag = handles.toImDrag(view);
                 if (!imDrag.isClick()) {
                     drawGradient(dr, imDrag, addToHistory);
                 }
@@ -223,7 +222,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
+    public void mouseMoved(MouseEvent e, View view) {
         if (handles == null) {
             // in this method we only want to highlight the
             // handle under the mouse
@@ -234,11 +233,11 @@ public class GradientTool extends DragTool {
         DraggablePoint handle = handles.handleWasHit(x, y);
         if (handle != null) {
             handle.setActive(true);
-            cv.repaint();
+            view.repaint();
         } else {
             if (activePoint != null) {
                 activePoint = null;
-                cv.repaint();
+                view.repaint();
             }
         }
     }
@@ -256,9 +255,9 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void coCoordsChanged(CompositionView cv) {
+    public void coCoordsChanged(View view) {
         if (handles != null) {
-            handles.coCoordsChanged(cv);
+            handles.coCoordsChanged(view);
         }
     }
 
@@ -334,11 +333,11 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         // the superclass draws the drag display
-        super.paintOverImage(g2, canvas, cv, componentTransform, imageTransform);
+        super.paintOverImage(g2, canvas, view, componentTransform, imageTransform);
 
         if (handles != null) {
             handles.paint(g2);

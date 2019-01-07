@@ -69,26 +69,26 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     @Override
-    public void activateIC(CompositionView cv) {
-        ImageTab tab = (ImageTab) cv.getImageWindow();
+    public void activateView(View view) {
+        ImageTab tab = (ImageTab) view.getViewContainer();
         setSelectedIndex(indexOfComponent(tab));
     }
 
     @Override
-    public void addNewIC(CompositionView cv) {
-        ImageTab tab = new ImageTab(cv, this);
-        cv.setImageWindow(tab);
+    public void addNewView(View view) {
+        ImageTab tab = new ImageTab(view, this);
+        view.setViewContainer(tab);
 
         int myIndex = getTabCount();
 
         try {
             userInitiated = false;
-            addTab(cv.getName(), tab);
+            addTab(view.getName(), tab);
         } finally {
             userInitiated = true;
         }
 
-        setTabComponentAt(myIndex, new TabTitleRenderer(cv.getName(), tab));
+        setTabComponentAt(myIndex, new TabTitleRenderer(view.getName(), tab));
         setSelectedIndex(myIndex);
         tab.onActivation();
     }
@@ -96,14 +96,14 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
-            OpenComps.warnAndClose(tab.getIC());
+            OpenComps.warnAndClose(tab.getView());
         }
     }
 
     public void closeTab(ImageTab tab) {
         remove(indexOfComponent(tab));
-        CompositionView cv = tab.getIC();
-        OpenComps.imageClosed(cv);
+        View view = tab.getView();
+        OpenComps.imageClosed(view);
     }
 
     public void selectTab(ImageTab tab) {

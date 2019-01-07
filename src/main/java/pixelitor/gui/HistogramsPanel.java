@@ -103,8 +103,8 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
-        updateFromCompIfShown(newIC.getComp());
+    public void compActivated(View oldView, View newView) {
+        updateFromCompIfShown(newView.getComp());
     }
 
     public void updateFromCompIfShown(Composition comp) {

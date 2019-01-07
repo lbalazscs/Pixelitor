@@ -18,8 +18,8 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
@@ -52,8 +52,8 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            CompositionView cv = OpenComps.getActiveView();
-            Composition comp = cv.getComp();
+            View view = OpenComps.getActiveView();
+            Composition comp = view.getComp();
 
             if (source == CopySource.LAYER) {
                 Layer layer = comp.getActiveLayer();

@@ -20,8 +20,8 @@ package pixelitor.tools.pen;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -267,14 +267,14 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
-        if (mode.mouseMoved(e, cv)) {
-            cv.repaint();
+    public void mouseMoved(MouseEvent e, View view) {
+        if (mode.mouseMoved(e, view)) {
+            view.repaint();
         }
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -282,10 +282,10 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void coCoordsChanged(CompositionView cv) {
+    public void coCoordsChanged(View view) {
         if (hasPath()) {
-            path.coCoordsChanged(cv);
-            mode.coCoordsChanged(cv);
+            path.coCoordsChanged(view);
+            mode.coCoordsChanged(view);
         }
     }
 
@@ -297,7 +297,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+    public void compActivated(View oldCV, View newCV) {
         if (oldCV != null) { // is null if the first image is opened with active pen tool
             Composition oldComp = oldCV.getComp();
             Path oldPath = oldComp.getActivePath();

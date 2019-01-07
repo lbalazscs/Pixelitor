@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 
 /**
  * Listener for events related to changing the active composition
@@ -27,7 +27,7 @@ public interface CompActivationListener {
      * Called when the active image changes either because the user
      * switches to another image or because a new image was opened.
      */
-    void compActivated(CompositionView oldIC, CompositionView newIC);
+    void compActivated(View oldView, View newView);
 
     /**
      * Called when the user has closed all images

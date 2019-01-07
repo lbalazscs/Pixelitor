@@ -134,7 +134,7 @@ public class ImageArea {
             // corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        OpenComps.forAllImages(ImageArea::addNewIC);
+        OpenComps.forAllImages(ImageArea::addNewView);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }
@@ -143,12 +143,12 @@ public class ImageArea {
         uiChangeListeners.add(listener);
     }
 
-    public static void activateIC(CompositionView cv) {
-        ui.activateIC(cv);
+    public static void activateView(View view) {
+        ui.activateView(view);
     }
 
-    public static void addNewIC(CompositionView cv) {
-        ui.addNewIC(cv);
+    public static void addNewView(View view) {
+        ui.addNewView(view);
     }
 
     public static Dimension getSize() {

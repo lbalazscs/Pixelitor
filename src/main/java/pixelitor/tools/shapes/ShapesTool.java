@@ -19,8 +19,8 @@ package pixelitor.tools.shapes;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
@@ -198,7 +198,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
+    public void mouseMoved(MouseEvent e, View view) {
         if (state == TRANSFORM) {
             transformBox.mouseMoved(e);
         }
@@ -275,12 +275,12 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g, Canvas canvas, CompositionView cv,
+    public void paintOverImage(Graphics2D g, Canvas canvas, View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (state == INITIAL_DRAG) {
             // paint the drag display for the initial drag
-            super.paintOverImage(g, canvas, cv, componentTransform, imageTransform);
+            super.paintOverImage(g, canvas, view, componentTransform, imageTransform);
         } else if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
@@ -343,9 +343,9 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void coCoordsChanged(CompositionView cv) {
+    public void coCoordsChanged(View view) {
         if (transformBox != null) {
-            transformBox.coCoordsChanged(cv);
+            transformBox.coCoordsChanged(view);
         }
     }
 
@@ -425,7 +425,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+    public void compActivated(View oldCV, View newCV) {
         // finalize existing box
         if (transformBox != null) {
             assert styledShape != null;

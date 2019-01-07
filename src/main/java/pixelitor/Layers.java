@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
@@ -72,14 +72,14 @@ public class Layers {
             listener.activeLayerChanged(newActiveLayer);
         }
 
-        CompositionView cv = newActiveLayer.getComp().getView();
-        if (cv == null) {
+        View view = newActiveLayer.getComp().getView();
+        if (view == null) {
             // can happen at when adding a new image:
             // the active layer changes, but there is no view yet
             return;
         }
         // always go to normal mask-viewing mode on the activated layer
-        MaskViewMode.NORMAL.activate(cv, newActiveLayer, "active layer changed");
+        MaskViewMode.NORMAL.activate(view, newActiveLayer, "active layer changed");
     }
 
     public static void layerOrderChanged(Composition comp) {

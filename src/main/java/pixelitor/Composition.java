@@ -18,8 +18,8 @@
 package pixelitor;
 
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
@@ -103,7 +103,7 @@ public class Composition implements Serializable {
     private transient Lazy<BufferedImage> compositeImage
             = Lazy.of(this::calculateCompositeImage);
 
-    private transient CompositionView cv;
+    private transient View view;
 
     private transient Selection selection;
 
@@ -179,12 +179,12 @@ public class Composition implements Serializable {
             compCopy.dirty = orig.dirty;
             compCopy.file = orig.file;
             compCopy.name = orig.name;
-            compCopy.cv = orig.cv;
+            compCopy.view = orig.view;
         } else {
             compCopy.dirty = true;
             compCopy.file = null;
             compCopy.name = createCopyName(stripExtension(orig.name));
-            compCopy.cv = null;
+            compCopy.view = null;
         }
 
         assert compCopy.checkInvariant();
@@ -197,7 +197,7 @@ public class Composition implements Serializable {
         compositeImage = Lazy.of(this::calculateCompositeImage);
         file = null; // will be set later
         dirty = false;
-        cv = null; // will be set later
+        view = null; // will be set later
         selection = null; // the selection is not saved
         builtSelection = null;
 
@@ -215,20 +215,20 @@ public class Composition implements Serializable {
         }
     }
 
-    public CompositionView getView() {
-        return cv;
+    public View getView() {
+        return view;
     }
 
-    public void setView(CompositionView cv) {
-        this.cv = cv;
-        canvas.setView(cv);
+    public void setView(View view) {
+        this.view = view;
+        canvas.setView(view);
 
         if (selection != null) { // can happen when duplicating
-            selection.setView(cv);
+            selection.setView(view);
         }
         if (paths != null) {
-            if (cv != null) { // cv can be null when reloading
-                paths.setView(cv);
+            if (view != null) { // the view can be null when reloading
+                paths.setView(view);
             }
         }
     }
@@ -267,8 +267,8 @@ public class Composition implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-        if (cv != null) {
-            cv.updateTitle();
+        if (view != null) {
+            view.updateTitle();
         }
     }
 
@@ -329,7 +329,7 @@ public class Composition implements Serializable {
 
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
-        cv.addLayerToGUI(layer, layerIndex);
+        view.addLayerToGUI(layer, layerIndex);
     }
 
     public void duplicateActiveLayer() {
@@ -355,7 +355,7 @@ public class Composition implements Serializable {
     private void mergeActiveLayerToImageLayer(int activeIndex,
                                               ImageLayer imageLayer,
                                               boolean updateGUI) {
-        MaskViewMode maskViewModeBefore = cv.getMaskViewMode();
+        MaskViewMode maskViewModeBefore = view.getMaskViewMode();
         BufferedImage imageBefore = ImageUtils.copyImage(imageLayer.getImage());
 
         // apply the effect of the merged layer to the image of the image layer
@@ -412,7 +412,7 @@ public class Composition implements Serializable {
 
         if (updateGUI) {
             LayerUI ui = layerToBeDeleted.getUI();
-            cv.deleteLayerUI(ui);
+            view.deleteLayerUI(ui);
 
             if (isActive()) {
                 Layers.numLayersChanged(this, layerList.size());
@@ -674,7 +674,7 @@ public class Composition implements Serializable {
         layerList.remove(oldIndex);
         layerList.add(newIndex, layer);
 
-        cv.changeLayerButtonOrder(oldIndex, newIndex);
+        view.changeLayerButtonOrder(oldIndex, newIndex);
         imageChanged();
         Layers.layerOrderChanged(this);
 
@@ -756,17 +756,17 @@ public class Composition implements Serializable {
 
     public void updateRegion(PPoint start, PPoint end, double thickness) {
         compositeImage.invalidate();
-        if (cv != null) { // during reload image it can be null
-            cv.updateRegion(start, end, thickness);
-            cv.updateNavigator(false);
+        if (view != null) { // during reload image it can be null
+            view.updateRegion(start, end, thickness);
+            view.updateNavigator(false);
         }
     }
 
     public void updateRegion(PRectangle area) {
         compositeImage.invalidate();
-        if (cv != null) { // during reload image it can be null
-            cv.updateRegion(area);
-            cv.updateNavigator(false);
+        if (view != null) { // during reload image it can be null
+            view.updateRegion(area);
+            view.updateNavigator(false);
         }
     }
 
@@ -995,7 +995,7 @@ public class Composition implements Serializable {
             throw new IllegalStateException("There is already a selection: "
                 + selection.toString());
         }
-        setSelectionRef(new Selection(shape, cv));
+        setSelectionRef(new Selection(shape, view));
     }
 
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
@@ -1037,9 +1037,9 @@ public class Composition implements Serializable {
         compositeImage.invalidate();
 
         if (actions.repaintNeeded()) {
-            if (cv != null) {
-                cv.repaint();
-                cv.updateNavigator(sizeChanged);
+            if (view != null) {
+                view.repaint();
+                view.updateNavigator(sizeChanged);
             }
         }
 
@@ -1096,7 +1096,7 @@ public class Composition implements Serializable {
     }
 
     public void repaint() {
-        cv.repaint();
+        view.repaint();
     }
 
     /**
@@ -1369,7 +1369,7 @@ public class Composition implements Serializable {
             MaskViewMode oldViewMode = null;
             if (historyName != null) {
                 activeLayerBefore = comp.activeLayer;
-                oldViewMode = comp.cv.getMaskViewMode();
+                oldViewMode = comp.view.getMaskViewMode();
             }
 
             if (newLayerIndex == -1) { // no index was explicitly set
@@ -1383,7 +1383,7 @@ public class Composition implements Serializable {
             comp.setActiveLayer(newLayer, !compInit);
             if (!compInit) {
                 comp.setDirty(true);
-                comp.cv.addLayerToGUI(newLayer, newLayerIndex);
+                comp.view.addLayerToGUI(newLayer, newLayerIndex);
 
                 if (refresh) {
                     comp.imageChanged();

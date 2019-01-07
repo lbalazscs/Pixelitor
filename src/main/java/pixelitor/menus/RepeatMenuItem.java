@@ -18,8 +18,8 @@
 package pixelitor.menus;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.utils.CompActivationListener;
@@ -60,8 +60,8 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, C
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
-        Composition comp = newIC.getComp();
+    public void compActivated(View oldView, View newView) {
+        Composition comp = newView.getComp();
         onNewComp(comp);
     }
 

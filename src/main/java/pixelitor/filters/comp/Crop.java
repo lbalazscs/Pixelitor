@@ -19,8 +19,8 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.History;
@@ -111,14 +111,14 @@ public class Crop implements CompAction {
 
         comp.updateAllIconImages();
 
-        CompositionView cv = comp.getView();
-        if (!cv.isMock()) { // not in a test
-            cv.revalidate();
+        View view = comp.getView();
+        if (!view.isMock()) { // not in a test
+            view.revalidate();
 
             // if before the crop the internal frame started
             // at large negative coordinates, after the crop it
             // could become unreachable, so move it
-            cv.ensurePositiveLocation();
+            view.ensurePositiveLocation();
         }
         comp.imageChanged(FULL, true);
 

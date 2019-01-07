@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.move.ObjectsFinder;
 import pixelitor.tools.move.ObjectsSelection;
@@ -55,20 +55,20 @@ public class MoveTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
-        super.mouseMoved(e, cv);
+    public void mouseMoved(MouseEvent e, View view) {
+        super.mouseMoved(e, view);
 
         if (autoSelectCheckBox.isSelected()) {
-            Point2D p = cv.componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, cv.getComp());
+            Point2D p = view.componentToImageSpace(e.getPoint());
+            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, view.getComp());
 
             if (objectsSelection.isEmpty()) {
-                cv.setCursor(Cursors.DEFAULT);
+                view.setCursor(Cursors.DEFAULT);
                 return;
             }
         }
 
-        cv.setCursor(Cursors.MOVE);
+        view.setCursor(Cursors.MOVE);
     }
 
     @Override

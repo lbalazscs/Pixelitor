@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
 
 /**
@@ -30,8 +30,8 @@ public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
         super(zoomLevel.toString());
 
         addActionListener(e -> {
-            CompositionView cv = OpenComps.getActiveView();
-            cv.setZoom(zoomLevel, null);
+            View view = OpenComps.getActiveView();
+            view.setZoom(zoomLevel, null);
         });
     }
 }

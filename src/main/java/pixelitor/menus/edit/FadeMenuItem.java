@@ -19,8 +19,8 @@ package pixelitor.menus.edit;
 
 import pixelitor.filters.Fade;
 import pixelitor.filters.FilterAction;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.utils.CompActivationListener;
 
@@ -63,7 +63,7 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Com
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         setEnabled(false);
 
 // the following should be very slightly better, but goes into a complex territory:

@@ -22,7 +22,7 @@ import pixelitor.CanvasMargins;
 import pixelitor.Composition;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
 import pixelitor.utils.DIContainer;
@@ -200,16 +200,16 @@ public class Guides implements Serializable {
         int width = comp.getCanvasImWidth();
         int height = comp.getCanvasImHeight();
         CanvasMargins margins = comp.getView().getCanvasMargins();
-        CompositionView cv = comp.getView();
+        View view = comp.getView();
 
         lines = new ArrayList<>();
         for (Double h : horizontals) {
             double y = h * height;
 
             // the generated lines have to be in component space
-            double coStartX = cv.imageXToComponentSpace(0) - margins.getLeft();
-            double coStartY = cv.imageYToComponentSpace(y);
-            double coEndX = cv.imageXToComponentSpace(width) + margins.getRight();
+            double coStartX = view.imageXToComponentSpace(0) - margins.getLeft();
+            double coStartY = view.imageYToComponentSpace(y);
+            double coEndX = view.imageXToComponentSpace(width) + margins.getRight();
             double coEndY = coStartY;
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
@@ -217,10 +217,10 @@ public class Guides implements Serializable {
         for (Double v : verticals) {
             double x = v * width;
 
-            double coStartX = cv.imageXToComponentSpace(x);
-            double coStartY = cv.imageYToComponentSpace(0) - margins.getTop();
+            double coStartX = view.imageXToComponentSpace(x);
+            double coStartY = view.imageYToComponentSpace(0) - margins.getTop();
             double coEndX = coStartX;
-            double coEndY = cv.imageYToComponentSpace(height) + margins.getBottom();
+            double coEndY = view.imageYToComponentSpace(height) + margins.getBottom();
 
             lines.add(new Line2D.Double(coStartX, coStartY, coEndX, coEndY));
         }

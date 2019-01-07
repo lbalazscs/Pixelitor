@@ -273,7 +273,7 @@ public class GlobalEventWatch {
     private static String getComponentDescription(MouseEvent e) {
         Component c = e.getComponent();
         String descr = c.getClass().getSimpleName();
-        if (c instanceof CompositionView) {
+        if (c instanceof View) {
             descr += "(name = " + c.getName() + ")";
         } else if (c instanceof ToolButton) {
             ToolButton b = (ToolButton) c;

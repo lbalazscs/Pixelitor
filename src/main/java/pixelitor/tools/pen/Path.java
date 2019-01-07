@@ -19,7 +19,6 @@ package pixelitor.tools.pen;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -247,9 +246,9 @@ public class Path implements Serializable {
         }
     }
 
-    public SubPath startNewSubpath(double x, double y, CompositionView cv) {
+    public SubPath startNewSubpath(double x, double y, View view) {
         SubPath sp = startNewSubpath();
-        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, cv), sp);
+        AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, view), sp);
         first.setType(SMOOTH);
         sp.addFirstPoint(first, false);
         return sp;

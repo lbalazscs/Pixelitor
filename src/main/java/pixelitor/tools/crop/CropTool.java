@@ -21,8 +21,8 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
 import pixelitor.tools.ClipStrategy;
@@ -255,10 +255,10 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
-        super.mouseMoved(e, cv);
+    public void mouseMoved(MouseEvent e, View view) {
+        super.mouseMoved(e, view);
         if (state == TRANSFORM) {
-            cropBox.mouseMoved(e, cv);
+            cropBox.mouseMoved(e, view);
         }
     }
 
@@ -292,13 +292,13 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (ended) {
             return;
         }
-        if (cv != OpenComps.getActiveView()) {
+        if (view != OpenComps.getActiveView()) {
             return;
         }
         PRectangle cropRect = getCropRect();
@@ -323,9 +323,9 @@ public class CropTool extends DragTool {
 
         // Similar to ClipStrategy.FULL, but we need some intermediary variables
 
-        Rectangle coVisiblePart = cv.getVisiblePart();
+        Rectangle coVisiblePart = view.getVisiblePart();
         // ...but first get this to image space...
-        Rectangle2D imVisiblePart = cv.componentToImageSpace(coVisiblePart);
+        Rectangle2D imVisiblePart = view.componentToImageSpace(coVisiblePart);
         // ... and now we can intersect
         Rectangle2D canvasImgIntersection = canvasBounds.createIntersection(imVisiblePart);
         Path2D darkAreaClip = new Path2D.Double(Path2D.WIND_EVEN_ODD);
@@ -422,18 +422,18 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void coCoordsChanged(CompositionView cv) {
+    public void coCoordsChanged(View view) {
         if (cropBox != null && state == TRANSFORM) {
-            cropBox.coCoordsChanged(cv);
+            cropBox.coCoordsChanged(view);
         }
     }
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (state == TRANSFORM) {
-            CompositionView cv = OpenComps.getActiveView();
-            if (cv != null) {
-                cropBox.arrowKeyPressed(key, cv);
+            View view = OpenComps.getActiveView();
+            if (view != null) {
+                cropBox.arrowKeyPressed(key, view);
                 return true;
             }
         }

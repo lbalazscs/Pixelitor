@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 import pixelitor.utils.test.RandomGUITest;
@@ -55,7 +55,7 @@ public class AddTextLayerAction extends AbstractAction
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
+    public void compActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

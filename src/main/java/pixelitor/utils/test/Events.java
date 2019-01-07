@@ -18,8 +18,8 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
@@ -90,9 +90,9 @@ public class Events {
                 + editName + "]", null, null));
     }
 
-    public static void postMaskViewActivate(MaskViewMode mode, CompositionView cv, Layer layer, String reason) {
+    public static void postMaskViewActivate(MaskViewMode mode, View view, Layer layer, String reason) {
         post(new PixelitorEvent("[MASK VIEW " + mode.toString()
-                + " (" + reason + ")]", cv.getComp(), layer));
+            + " (" + reason + ")]", view.getComp(), layer));
     }
 
     /**

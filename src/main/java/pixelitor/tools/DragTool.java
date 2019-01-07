@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Canvas;
 import pixelitor.gui.GlobalEventWatch;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.UserDrag;
@@ -107,7 +107,7 @@ public abstract class DragTool extends Tool {
     public abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, CompositionView cv,
+    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (ended) {

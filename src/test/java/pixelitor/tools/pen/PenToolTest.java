@@ -23,7 +23,7 @@ import org.junit.Test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
@@ -39,7 +39,7 @@ import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 public class PenToolTest {
-    private CompositionView cv;
+    private View view;
     private Composition comp;
 
     @BeforeClass
@@ -53,7 +53,7 @@ public class PenToolTest {
 
         // a real comp that can store paths
         comp = TestHelper.createEmptyComposition(300, 300);
-        cv = comp.getView(); // a mock view
+        view = comp.getView(); // a mock view
         PenTool.path = null;
         Tools.PEN.startBuilding(false);
         assertThat(Tools.PEN)
@@ -250,11 +250,11 @@ public class PenToolTest {
     public void testDeleteSubPathAndPathInEditMode() {
         // create a path with two subpaths
         Path path = new Path(comp, true);
-        path.startNewSubpath(10, 20, cv);
+        path.startNewSubpath(10, 20, view);
         SubPath sp1 = path.getActiveSubpath();
         sp1.addPoint(20, 10);
         sp1.finish(comp, "test", false);
-        path.startNewSubpath(100, 20, cv);
+        path.startNewSubpath(100, 20, view);
         SubPath sp2 = path.getActiveSubpath();
         sp2.addPoint(100, 120);
         sp2.finish(comp, "test", false);
@@ -388,14 +388,14 @@ public class PenToolTest {
     }
 
     private void press(int x, int y) {
-        TestHelper.press(x, y, cv);
+        TestHelper.press(x, y, view);
     }
 
     private void drag(int x, int y) {
-        TestHelper.drag(x, y, cv);
+        TestHelper.drag(x, y, view);
     }
 
     private void release(int x, int y) {
-        TestHelper.release(x, y, cv);
+        TestHelper.release(x, y, view);
     }
 }

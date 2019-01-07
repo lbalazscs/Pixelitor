@@ -31,7 +31,7 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
@@ -106,9 +106,9 @@ public class SplashImageCreator {
 
             ValueNoise.reseed();
             Composition comp = createSplashImage();
-            CompositionView cv = comp.getView();
+            View view = comp.getView();
 
-            cv.paintImmediately();
+            view.paintImmediately();
 
             File f = new File(lastSaveDir, fileName);
             comp.setFile(f);

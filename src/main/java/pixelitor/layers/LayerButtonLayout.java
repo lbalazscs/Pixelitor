@@ -156,9 +156,9 @@ public class LayerButtonLayout implements LayoutManager {
 
         height = newThumbSize + 2 * GAP;
 
-        OpenComps.onActiveIC(cv -> {
-            //LayersContainer.showLayersFor(cv);
-            cv.getComp().updateAllIconImages();
+        OpenComps.onActiveView(view -> {
+            //LayersContainer.showLayersFor(view);
+            view.getComp().updateAllIconImages();
         });
     }
 }

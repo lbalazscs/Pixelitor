@@ -18,8 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
@@ -63,8 +63,8 @@ public class Tools {
     static {
         OpenComps.addActivationListener(new CompActivationListener() {
             @Override
-            public void compActivated(CompositionView oldIC, CompositionView newIC) {
-                currentTool.compActivated(oldIC, newIC);
+            public void compActivated(View oldView, View newView) {
+                currentTool.compActivated(oldView, newView);
             }
 
             @Override
@@ -156,8 +156,8 @@ public class Tools {
         currentTool.fgBgColorsChanged();
     }
 
-    public static void coCoordsChanged(CompositionView cv) {
-        currentTool.coCoordsChanged(cv);
+    public static void coCoordsChanged(View view) {
+        currentTool.coCoordsChanged(view);
     }
 
     public static void imCoordsChanged(Composition comp, AffineTransform at) {
@@ -171,13 +171,13 @@ public class Tools {
         private EventDispatcher() {
         }
 
-        public static void mousePressed(MouseEvent e, CompositionView cv) {
-            lastEvent = new PMouseEvent(e, cv);
+        public static void mousePressed(MouseEvent e, View view) {
+            lastEvent = new PMouseEvent(e, view);
             currentTool.handlerChain.handleMousePressed(lastEvent);
             mouseDown = true;
         }
 
-        public static void mouseReleased(MouseEvent e, CompositionView cv) {
+        public static void mouseReleased(MouseEvent e, View view) {
             if (!mouseDown) {
                 // the "mouse pressed" event was lost/consumed somehow
                 // (for example a combo box was open when it happened)
@@ -185,13 +185,13 @@ public class Tools {
                 // it was a click
                 return;
             }
-            lastEvent = new PMouseEvent(e, cv);
+            lastEvent = new PMouseEvent(e, view);
             currentTool.handlerChain.handleMouseReleased(lastEvent);
             mouseDown = false;
         }
 
-        public static void mouseDragged(MouseEvent e, CompositionView cv) {
-            lastEvent = new PMouseEvent(e, cv);
+        public static void mouseDragged(MouseEvent e, View view) {
+            lastEvent = new PMouseEvent(e, view);
             if (!mouseDown) {
                 // recover from a missing "mouse pressed" event by
                 // simulating one
@@ -202,16 +202,16 @@ public class Tools {
             currentTool.handlerChain.handleMouseDragged(lastEvent);
         }
 
-        public static void mouseClicked(MouseEvent e, CompositionView cv) {
-            lastEvent = new PMouseEvent(e, cv);
+        public static void mouseClicked(MouseEvent e, View view) {
+            lastEvent = new PMouseEvent(e, view);
             // doesn't need to go through the handler chain
             currentTool.mouseClicked(lastEvent);
             mouseDown = false;
         }
 
-        public static void mouseMoved(MouseEvent e, CompositionView cv) {
+        public static void mouseMoved(MouseEvent e, View view) {
             // doesn't need to go through the handler chain
-            currentTool.mouseMoved(e, cv);
+            currentTool.mouseMoved(e, view);
         }
 
         public static void toolChanged(Tool oldTool, Tool newTool) {

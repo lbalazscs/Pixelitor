@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
@@ -94,8 +94,8 @@ public class SprayBrush extends AbstractBrush {
     }
 
     private void sprayOnce() {
-        CompositionView cv = comp.getView();
-        if (cv == null) {
+        View view = comp.getView();
+        if (view == null) {
             // can happen if the composition was reloaded while spraying
             return;
         }
@@ -145,7 +145,7 @@ public class SprayBrush extends AbstractBrush {
                 minX - maxShapeRadius,
                 minY - maxShapeRadius,
                 maxX - minX + 2 * maxShapeRadius + 2,
-                maxY - minY + 2 * maxShapeRadius + 2, cv);
+            maxY - minY + 2 * maxShapeRadius + 2, view);
 
         comp.updateRegion(area);
     }

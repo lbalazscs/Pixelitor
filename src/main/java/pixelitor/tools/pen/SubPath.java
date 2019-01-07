@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Composition;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -646,41 +645,41 @@ public class SubPath implements Serializable {
         }
     }
 
-    public void addLine(double newX, double newY, CompositionView cv) {
-        newX = cv.imageXToComponentSpace(newX);
-        newY = cv.imageYToComponentSpace(newY);
-        AnchorPoint ap = new AnchorPoint(newX, newY, cv, this);
+    public void addLine(double newX, double newY, View view) {
+        newX = view.imageXToComponentSpace(newX);
+        newY = view.imageYToComponentSpace(newY);
+        AnchorPoint ap = new AnchorPoint(newX, newY, view, this);
         addPoint(ap);
     }
 
     public void addCubicCurve(double c1x, double c1y,
                               double c2x, double c2y,
-                              double newX, double newY, CompositionView cv) {
+                              double newX, double newY, View view) {
         ControlPoint lastOut = getLast().ctrlOut;
-        c1x = cv.imageXToComponentSpace(c1x);
-        c1y = cv.imageYToComponentSpace(c1y);
+        c1x = view.imageXToComponentSpace(c1x);
+        c1y = view.imageYToComponentSpace(c1y);
         lastOut.setLocationOnlyForThis(c1x, c1y);
         lastOut.afterMovingActionsForThis();
 
-        newX = cv.imageXToComponentSpace(newX);
-        newY = cv.imageYToComponentSpace(newY);
-        AnchorPoint next = new AnchorPoint(newX, newY, cv, this);
+        newX = view.imageXToComponentSpace(newX);
+        newY = view.imageYToComponentSpace(newY);
+        AnchorPoint next = new AnchorPoint(newX, newY, view, this);
         addPoint(next);
         next.setType(SMOOTH);
 
-        c2x = cv.imageXToComponentSpace(c2x);
-        c2y = cv.imageYToComponentSpace(c2y);
+        c2x = view.imageXToComponentSpace(c2x);
+        c2y = view.imageYToComponentSpace(c2y);
         ControlPoint nextIn = next.ctrlIn;
         nextIn.setLocationOnlyForThis(c2x, c2y);
         nextIn.afterMovingActionsForThis();
     }
 
     public void addQuadCurve(double cx, double cy,
-                             double newX, double newY, CompositionView cv) {
-        cx = cv.imageXToComponentSpace(cx);
-        cy = cv.imageYToComponentSpace(cy);
-        newX = cv.imageXToComponentSpace(newX);
-        newY = cv.imageYToComponentSpace(newY);
+                             double newX, double newY, View view) {
+        cx = view.imageXToComponentSpace(cx);
+        cy = view.imageYToComponentSpace(cy);
+        newX = view.imageXToComponentSpace(newX);
+        newY = view.imageYToComponentSpace(newY);
         AnchorPoint last = getLast();
 
         // convert the quadratic bezier (with one control point)
@@ -703,7 +702,7 @@ public class SubPath implements Serializable {
         lastOut.setLocationOnlyForThis(cp1x, cp1y);
         lastOut.afterMovingActionsForThis();
 
-        AnchorPoint next = new AnchorPoint(newX, newY, cv, this);
+        AnchorPoint next = new AnchorPoint(newX, newY, view, this);
         addPoint(next);
         next.setType(SMOOTH);
 

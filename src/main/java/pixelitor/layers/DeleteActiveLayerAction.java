@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
 
@@ -56,8 +56,8 @@ public class DeleteActiveLayerAction extends AbstractAction
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
-        if (newIC.getComp().getNumLayers() <= 1) { // no more deletion is possible
+    public void compActivated(View oldView, View newView) {
+        if (newView.getComp().getNumLayers() <= 1) { // no more deletion is possible
             setEnabled(false);
         } else {
             setEnabled(true);

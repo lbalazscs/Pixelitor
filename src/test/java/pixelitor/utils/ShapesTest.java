@@ -21,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.testutils.ShapeChecker;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
@@ -36,12 +36,12 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 public class ShapesTest {
-    private CompositionView cv;
+    private View view;
 
     @Before
     public void setup() {
         Composition comp = TestHelper.createEmptyComposition();
-        cv = TestHelper.setupAMockICFor(comp);
+        view = TestHelper.setupMockViewFor(comp);
     }
 
     @Test
@@ -49,13 +49,13 @@ public class ShapesTest {
         Shape s = new Rectangle2D.Double(2, 2, 10, 10);
         checkRectangleShape(s);
 
-        Path path = Shapes.shapeToPath(s, cv);
+        Path path = Shapes.shapeToPath(s, view);
         checkRectanglePath(path.getActiveSubpath());
 
         s = path.toImageSpaceShape();
         checkRectangleShape(s);
 
-        path = Shapes.shapeToPath(s, cv);
+        path = Shapes.shapeToPath(s, view);
         checkRectanglePath(path.getActiveSubpath());
     }
 
@@ -64,13 +64,13 @@ public class ShapesTest {
         Shape s = new Ellipse2D.Double(2, 2, 10, 10);
         checkEllipseShape(s);
 
-        Path path = Shapes.shapeToPath(s, cv);
+        Path path = Shapes.shapeToPath(s, view);
         checkEllipsePath(path.getActiveSubpath());
 
         s = path.toImageSpaceShape();
         checkEllipseShape(s);
 
-        path = Shapes.shapeToPath(s, cv);
+        path = Shapes.shapeToPath(s, view);
         checkEllipsePath(path.getActiveSubpath());
     }
 

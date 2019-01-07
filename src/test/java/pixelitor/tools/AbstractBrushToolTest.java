@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -59,7 +59,7 @@ public class AbstractBrushToolTest {
     private Brush origBrush;
 
     private Drawable dr;
-    private CompositionView cv;
+    private View view;
 
     @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() {
@@ -86,7 +86,7 @@ public class AbstractBrushToolTest {
     @Before
     public void setUp() {
         Composition comp = TestHelper.create2LayerComposition(false);
-        cv = comp.getView();
+        view = comp.getView();
 
         dr = comp.getActiveDrawableOrThrow();
 
@@ -116,8 +116,8 @@ public class AbstractBrushToolTest {
 
     @Test
     public void test_drawBrushStrokeProgrammatically() {
-        PPoint start = PPoint.eagerFromIm(2.0, 2.0, cv);
-        PPoint end = PPoint.eagerFromIm(5.0, 5.0, cv);
+        PPoint start = PPoint.eagerFromIm(2.0, 2.0, view);
+        PPoint end = PPoint.eagerFromIm(5.0, 5.0, view);
         tool.drawBrushStrokeProgrammatically(dr, start, end);
 
         verify(brushSpy).startAt(any());

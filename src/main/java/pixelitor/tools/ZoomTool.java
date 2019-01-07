@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.gui.CompositionView;
+import pixelitor.gui.View;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 
@@ -43,15 +43,15 @@ public class ZoomTool extends Tool {
     @Override
     public void mousePressed(PMouseEvent e) {
         Point mousePos = e.getPoint();
-        CompositionView cv = e.getCV();
+        View view = e.getView();
         if (e.isLeft()) {
             if(e.isAltDown()) {
-                cv.decreaseZoom(mousePos);
+                view.decreaseZoom(mousePos);
             } else {
-                cv.increaseZoom(mousePos);
+                view.increaseZoom(mousePos);
             }
         } else if (e.isRight()) {
-            cv.decreaseZoom(mousePos);
+            view.decreaseZoom(mousePos);
         }
     }
 

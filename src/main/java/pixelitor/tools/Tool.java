@@ -21,8 +21,8 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.GlobalEventWatch;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -42,8 +42,8 @@ import java.awt.geom.AffineTransform;
 /**
  * An abstract superclass for all tools.
  *
- * A tool defines the interaction between the user's
- * mouse and key events and an {@link CompositionView}
+ * A tool defines the interaction between the
+ * mouse and key events and a {@link Composition}
  */
 public abstract class Tool implements KeyListener {
     private boolean altDown = false;
@@ -144,17 +144,17 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Paint on the {@link CompositionView} after all the layers have been painted.
+     * Paint on the {@link View} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
     public void paintOverImage(Graphics2D g2, Canvas canvas,
-                               CompositionView cv,
+                               View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         // empty instead of abstract for the convenience of subclasses
     }
 
-    public void mouseMoved(MouseEvent e, CompositionView cv) {
+    public void mouseMoved(MouseEvent e, View view) {
         // empty instead of abstract for the convenience of subclasses
     }
 
@@ -172,8 +172,8 @@ public abstract class Tool implements KeyListener {
         GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
     }
 
-    public void setClipFor(Graphics2D g, CompositionView cv) {
-        clipStrategy.setClipFor(g, cv);
+    public void setClipFor(Graphics2D g, View view) {
+        clipStrategy.setClipFor(g, view);
     }
 
     @Override
@@ -239,7 +239,7 @@ public abstract class Tool implements KeyListener {
         resetInitialState();
     }
 
-    public void compActivated(CompositionView oldCV, CompositionView newCV) {
+    public void compActivated(View oldCV, View newCV) {
         assert Tools.currentTool == this;
         if (oldCV != null) {
             oldCV.repaint();
@@ -266,7 +266,7 @@ public abstract class Tool implements KeyListener {
      * The component coordinates of the widgets must be restored
      * from their image coordinates
      */
-    public void coCoordsChanged(CompositionView cv) {
+    public void coCoordsChanged(View view) {
         // empty instead of abstract for the convenience of subclasses
     }
 

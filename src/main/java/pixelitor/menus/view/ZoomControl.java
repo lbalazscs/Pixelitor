@@ -17,8 +17,8 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 
 import javax.swing.*;
@@ -63,7 +63,7 @@ public class ZoomControl extends JPanel implements CompActivationListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-            OpenComps.onActiveIC(
+            OpenComps.onActiveView(
                         this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  Zoom: ");
@@ -82,10 +82,10 @@ public class ZoomControl extends JPanel implements CompActivationListener {
         OpenComps.addActivationListener(this);
     }
 
-    private void zoomAccordingToTheSlider(CompositionView cv) {
+    private void zoomAccordingToTheSlider(View view) {
         int sliderValue = zoomSlider.getValue();
         ZoomLevel zoomLevel = zoomLevels[sliderValue];
-        cv.setZoomAtCenter(zoomLevel);
+        view.setZoomAtCenter(zoomLevel);
         setNewZoomText(zoomLevel);
     }
 
@@ -143,8 +143,8 @@ public class ZoomControl extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void compActivated(CompositionView oldIC, CompositionView newIC) {
-        setToNewZoom(newIC.getZoomLevel());
+    public void compActivated(View oldView, View newView) {
+        setToNewZoom(newView.getZoomLevel());
     }
 
     @Override

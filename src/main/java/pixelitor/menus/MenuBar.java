@@ -45,11 +45,11 @@ import pixelitor.filters.painters.TextFilter;
 import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.CompositionView;
 import pixelitor.gui.Navigator;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.PreferencesPanel;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;
@@ -123,8 +123,8 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.OpenComps.duplicateActive;
 import static pixelitor.gui.OpenComps.getActiveCompOrNull;
 import static pixelitor.gui.OpenComps.getActiveCompositeImage;
-import static pixelitor.gui.OpenComps.getActiveView;
 import static pixelitor.gui.OpenComps.getActiveLayerOrNull;
+import static pixelitor.gui.OpenComps.getActiveView;
 import static pixelitor.gui.OpenComps.onActiveDrawable;
 import static pixelitor.gui.OpenComps.onActiveImageLayer;
 import static pixelitor.gui.OpenComps.onActiveTextLayer;
@@ -479,8 +479,8 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                CompositionView cv = getActiveView();
-                Composition comp = cv.getComp();
+                View view = getActiveView();
+                Composition comp = view.getComp();
                 Layer layer = comp.getActiveLayer();
 
                 layer.deleteMask(true);
@@ -492,8 +492,8 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                CompositionView cv = getActiveView();
-                Layer layer = cv.getComp().getActiveLayer();
+                View view = getActiveView();
+                Layer layer = view.getComp().getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
                     Messages.showNotImageLayerError();
@@ -1012,7 +1012,7 @@ public class MenuBar extends JMenuBar {
 
         JCheckBoxMenuItem showPixelGridMI = new JCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
-                CompositionView.setShowPixelGrid(showPixelGridMI.getState()));
+            View.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 
         viewMenu.addSeparator();
