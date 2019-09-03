@@ -123,7 +123,7 @@ public final class NewImage {
             JTextField tf = new JTextField(String.valueOf(value));
             tf.setName(name);
             gbh.addLabelWithTwoControls(labelText,
-                    TextFieldValidator.createIntOnlyLayerFor(tf),
+                TextFieldValidator.createPositiveIntLayerFor(tf, false),
                     new JLabel("pixels"));
             return tf;
         }
@@ -132,12 +132,16 @@ public final class NewImage {
         public ValidationResult checkValidity() {
             ValidationResult retVal = ValidationResult.ok();
             try {
-                getSelectedWidth();
+                int width = getSelectedWidth();
+                retVal = retVal.addErrorIfZero(width, "Width");
+                retVal = retVal.addErrorIfNegative(width, "Width");
             } catch (NumberFormatException e) {
                 retVal = retVal.addError("The width must be an integer.");
             }
             try {
-                getSelectedHeight();
+                int height = getSelectedHeight();
+                retVal = retVal.addErrorIfZero(height, "Height");
+                retVal = retVal.addErrorIfNegative(height, "Height");
             } catch (NumberFormatException e) {
                 retVal = retVal.addError("The height must be an integer.");
             }

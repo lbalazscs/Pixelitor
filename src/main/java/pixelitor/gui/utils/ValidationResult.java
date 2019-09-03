@@ -114,4 +114,20 @@ public class ValidationResult {
     public void showErrorDialog(Component dialogParent) {
         Dialogs.showErrorDialog(dialogParent, "Error", errorMsg);
     }
+
+    public ValidationResult addErrorIfZero(int value, String fieldName) {
+        if (value == 0) {
+            return addError(String.format("<html><b>\"%s\"</b> cannot be zero.", fieldName));
+        } else {
+            return this;
+        }
+    }
+
+    public ValidationResult addErrorIfNegative(int value, String fieldName) {
+        if (value < 0) {
+            return addError(String.format("<html><b>\"%s\"</b> cannot be negative.", fieldName));
+        } else {
+            return this;
+        }
+    }
 }

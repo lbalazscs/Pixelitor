@@ -37,20 +37,26 @@ public interface TextFieldValidator {
         return ValidationResult.ok();
     }
 
-    static ValidationResult hasValidInt(JTextField textField) {
+    static ValidationResult hasValidPositiveInt(JTextField textField, boolean allowZero) {
         String text = textField.getText().trim();
         try {
             //noinspection ResultOfMethodCallIgnored
-            Integer.parseInt(text);
+            int value = Integer.parseInt(text);
+            if (value == 0 && !allowZero) {
+                return ValidationResult.error("0 is not allowed here.");
+            }
+            if (value < 0) {
+                return ValidationResult.error("Negative numbers are not allowed here.");
+            }
         } catch (NumberFormatException ex) {
-            return ValidationResult.error(text + " is not a valid integer.");
+            return ValidationResult.error(text + " is not a valid number.");
         }
         return ValidationResult.ok();
     }
 
-    static JLayer<JTextField> createIntOnlyLayerFor(JTextField textField) {
+    static JLayer<JTextField> createPositiveIntLayerFor(JTextField tf, boolean allowZero) {
         TFValidationLayerUI layerUI = new TFValidationLayerUI(
-                TextFieldValidator::hasValidInt);
-        return new JLayer<>(textField, layerUI);
+            textField1 -> hasValidPositiveInt(textField1, allowZero));
+        return new JLayer<>(tf, layerUI);
     }
 }

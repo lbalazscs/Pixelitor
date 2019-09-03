@@ -234,11 +234,11 @@ public class AutoPaint {
             numStrokesTF = new JTextField(String.valueOf(defaultNumStrokes));
             numStrokesTF.setName("numStrokesTF");
             gbh.addLabelWithControl("Number of Strokes:",
-                    TextFieldValidator.createIntOnlyLayerFor(numStrokesTF));
+                TextFieldValidator.createPositiveIntLayerFor(numStrokesTF, false));
 
             lengthTF = new JTextField(String.valueOf(defaultLength));
             gbh.addLabelWithControl("Average Stroke Length:",
-                    TextFieldValidator.createIntOnlyLayerFor(lengthTF));
+                TextFieldValidator.createPositiveIntLayerFor(lengthTF, false));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
             gbh.addLabelWithControl("Stroke Length Variability (%):",
@@ -303,12 +303,16 @@ public class AutoPaint {
         public ValidationResult checkValidity() {
             ValidationResult retVal = ValidationResult.ok();
             try {
-                getNumStrokes();
+                int ns = getNumStrokes();
+                retVal = retVal.addErrorIfZero(ns, "Number of Strokes");
+                retVal = retVal.addErrorIfNegative(ns, "Number of Strokes");
             } catch (NumberFormatException e) {
                 retVal = retVal.addError("\"Number of Strokes\" must be an integer.");
             }
             try {
-                getStrokeLength();
+                int ln = getStrokeLength();
+                retVal = retVal.addErrorIfZero(ln, "Average Stroke Length");
+                retVal = retVal.addErrorIfNegative(ln, "Average Stroke Length");
             } catch (NumberFormatException e) {
                 retVal = retVal.addError("\"Average Stroke Length\" must be an integer.");
             }

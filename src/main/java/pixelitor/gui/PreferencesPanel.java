@@ -73,7 +73,7 @@ public class PreferencesPanel extends JPanel {
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
         gbh.addLabelWithControl("Undo/Redo Levels: ",
-                TextFieldValidator.createIntOnlyLayerFor(undoLevelsTF));
+            TextFieldValidator.createPositiveIntLayerFor(undoLevelsTF, true));
 
         IntChoiceParam.Value[] thumbSizes = {
                 new IntChoiceParam.Value("24x24 pixels", 24),
@@ -155,6 +155,9 @@ public class PreferencesPanel extends JPanel {
         boolean couldParse = true;
         try {
             undoLevels = getUndoLevels();
+            if (undoLevels < 0) {
+                couldParse = false;
+            }
         } catch (NumberFormatException ex) {
             couldParse = false;
         }
@@ -164,7 +167,7 @@ public class PreferencesPanel extends JPanel {
             return true;
         } else {
             Dialogs.showErrorDialog(d, "Error",
-                    "<html>The <b>Undo/Redo Levels</b> must be an integer.");
+                "<html>The <b>Undo/Redo Levels</b> must be a positive integer.");
             return false;
         }
     }
