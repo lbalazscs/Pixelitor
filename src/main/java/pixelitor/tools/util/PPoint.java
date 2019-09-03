@@ -148,7 +148,7 @@ public abstract class PPoint {
     }
 
     public Composition getComp() {
-        return ((View) view).getComp();
+        return view.getComp();
     }
 
     /**

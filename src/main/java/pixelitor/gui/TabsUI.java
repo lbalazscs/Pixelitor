@@ -54,7 +54,6 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(Keys.CTRL_TAB, "navigateNext");
         inputMap.put(Keys.CTRL_SHIFT_TAB, "navigatePrevious");
-
     }
 
     private void tabsChanged() {
@@ -64,7 +63,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         int selectedIndex = getSelectedIndex();
         if (selectedIndex != -1) { // it is -1 if all tabs have been closed
             ImageTab tab = (ImageTab) getComponentAt(selectedIndex);
-            tab.onActivation();
+            tab.activated();
         }
     }
 
@@ -90,7 +89,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
 
         setTabComponentAt(myIndex, new TabTitleRenderer(view.getName(), tab));
         setSelectedIndex(myIndex);
-        tab.onActivation();
+        tab.activated();
     }
 
     private static void warnAndCloseTab(ImageTab tab) {
@@ -107,42 +106,16 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     public void selectTab(ImageTab tab) {
-        // expect that this call is not needed
-        // since new tabs are already selected
-        //assert getSelectedIndex() == indexOfComponent(tab);
-
-        // if implemented, it would be:
         setSelectedIndex(indexOfComponent(tab));
     }
 
     private JMenu createTabPlacementMenu() {
         JMenu menu = new JMenu("Tab Placement");
 
-        JRadioButtonMenuItem topMI = new JRadioButtonMenuItem(new AbstractAction("Top") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setTabPlacement(TOP);
-            }
-        });
-        JRadioButtonMenuItem bottomMI = new JRadioButtonMenuItem(new AbstractAction("Bottom") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setTabPlacement(BOTTOM);
-            }
-        });
-        JRadioButtonMenuItem leftMI = new JRadioButtonMenuItem(new AbstractAction("Left") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setTabPlacement(LEFT);
-            }
-        });
-        JRadioButtonMenuItem rightMI = new JRadioButtonMenuItem(new AbstractAction("Right") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setTabPlacement(RIGHT);
-            }
-        });
-
+        JRadioButtonMenuItem topMI = createTabPlacementMenuItem("Top", TOP);
+        JRadioButtonMenuItem bottomMI = createTabPlacementMenuItem("Bottom", BOTTOM);
+        JRadioButtonMenuItem leftMI = createTabPlacementMenuItem("Left", LEFT);
+        JRadioButtonMenuItem rightMI = createTabPlacementMenuItem("Right", RIGHT);
 
         ButtonGroup group = new ButtonGroup();
         group.add(topMI);
@@ -156,6 +129,15 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         menu.add(leftMI);
         menu.add(rightMI);
         return menu;
+    }
+
+    private JRadioButtonMenuItem createTabPlacementMenuItem(String name, int pos) {
+        return new JRadioButtonMenuItem(new AbstractAction(name) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setTabPlacement(pos);
+            }
+        });
     }
 
     public JMenu getTabPlacementMenu() {

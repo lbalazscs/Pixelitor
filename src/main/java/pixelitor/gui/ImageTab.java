@@ -67,8 +67,8 @@ public class ImageTab extends JComponent implements ViewContainer {
         // nothing to do
     }
 
-    public void onActivation() {
-        OpenComps.imageActivated(view);
+    public void activated() {
+        OpenComps.viewActivated(view);
     }
 
     public View getView() {

@@ -123,7 +123,7 @@ public class FileChoosers {
     }
 
     private static void handleUnsupportedExtensionWhileOpening(String fileName) {
-        String extension = FileUtils.getExt(fileName).orElse("");
+        String extension = FileUtils.findExtension(fileName).orElse("");
         String msg = "Could not open " + fileName + ", because ";
         if (extension.isEmpty()) {
             msg += "it has no extension.";
@@ -179,7 +179,7 @@ public class FileChoosers {
     public static boolean saveWithChooser(Composition comp) {
         initSaveChooser();
 
-        String defaultExt = FileUtils.getExt(comp.getName()).orElse("jpg");
+        String defaultExt = FileUtils.findExtension(comp.getName()).orElse("jpg");
         saveChooser.setFileFilter(getFileFilterForExtension(defaultExt));
 
         return showSaveChooserAndSaveComp(comp, new SaveSettings());

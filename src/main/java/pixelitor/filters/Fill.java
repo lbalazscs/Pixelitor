@@ -22,6 +22,7 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 /**
  * Fills an image with a color
@@ -49,9 +50,7 @@ public class Fill extends Filter {
 
         int fillColor = c.getRGB();
 
-        for (int i = 0; i < pixels.length; i++) {
-            pixels[i] = fillColor;
-        }
+        Arrays.fill(pixels, fillColor);
     }
 
     @Override

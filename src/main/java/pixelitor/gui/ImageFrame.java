@@ -61,7 +61,7 @@ public class ImageFrame extends JInternalFrame
         // We can get here as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
-        OpenComps.imageActivated(view);
+        OpenComps.viewActivated(view);
     }
 
     @Override

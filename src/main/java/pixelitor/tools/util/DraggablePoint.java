@@ -330,7 +330,7 @@ public class DraggablePoint extends Point2D.Double {
 
     public Point getScreenCoords() {
         Point p = new Point((int) x, (int) y);
-        SwingUtilities.convertPointToScreen(p, (JComponent) view);
+        SwingUtilities.convertPointToScreen(p, view);
         return p;
     }
 

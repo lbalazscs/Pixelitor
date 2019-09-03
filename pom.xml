@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2018 Laszlo Balazs-Csiki and Contributors
+  ~ Copyright 2019 Laszlo Balazs-Csiki and Contributors
   ~
   ~ This file is part of Pixelitor. Pixelitor is free software: you
   ~ can redistribute it and/or modify it under the terms of the GNU
@@ -125,7 +125,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-swing-junit</artifactId>
-            <version>3.8.0</version>
+            <version>3.9.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

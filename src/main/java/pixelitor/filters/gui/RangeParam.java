@@ -117,6 +117,15 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
+     * Makes sure that this {@link RangeParam} always has a higher
+     * or equal value than the given other {@link RangeParam}
+     */
+    public void ensureHigherValueThan(RangeParam other) {
+        // if the value is not higher, then make it equal
+        linkWith(other, () -> other.getValue() > this.getValue());
+    }
+
+    /**
      * Synchronizes the value of this object with the value of another
      * {@link RangeParam} if the given condition evaluates to true.
      */

@@ -198,9 +198,6 @@ public class PaintBucketTool extends Tool {
         // Needed because the tolerance: we cannot assume that
         // if the pixel is within the target range, it has been processed
         boolean[] checkedPixels = new boolean[pixels.length];
-        for (int i = 0; i < checkedPixels.length; i++) {
-            checkedPixels[i] = false;
-        }
 
         // the double-ended queue is used as a simple LIFO stack
         Deque<Point> stack = new ArrayDeque<>();

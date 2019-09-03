@@ -364,7 +364,7 @@ public abstract class AbstractBrushTool extends Tool {
 //        cursor = Toolkit.getDefaultToolkit().createCustomCursor(
 //                cursorImage,
 //                new Point(cursorSize.width / 2, cursorSize.height / 2), "brush");
-//        ImageComponents.onAllImages(cv -> cv.setCursor(cursor));
+//        ImageComponents.onAllImages(view -> view.setCursor(cursor));
     }
 
     @Override
@@ -502,13 +502,13 @@ public abstract class AbstractBrushTool extends Tool {
     // TODO indicate the size of the brush
 //    @Override
 //    public void paintOverImage(Graphics2D g2, Canvas canvas,
-//                               View cv,
+//                               View view,
 //                               AffineTransform componentTransform,
 //                               AffineTransform imageTransform) {
 //        if(userDrag != null) {
 //            int x = userDrag.getCoEndX();
 //            int y = userDrag.getCoEndY();
-//            double radius = getRadius() * cv.getScaling();
+//            double radius = getRadius() * view.getScaling();
 //            double diameter = 2 * radius;
 //            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
 //                  diameter, diameter);

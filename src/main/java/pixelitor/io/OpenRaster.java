@@ -254,7 +254,7 @@ public class OpenRaster {
     }
 
     private static boolean hasPNGExtension(String name) {
-        return FileUtils.getExt(name)
+        return FileUtils.findExtension(name)
                 .filter(s -> s.equalsIgnoreCase("png"))
                 .isPresent();
     }

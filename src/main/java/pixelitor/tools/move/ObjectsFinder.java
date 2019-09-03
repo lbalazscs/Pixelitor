@@ -41,7 +41,7 @@ public class ObjectsFinder {
     public ObjectsFinder() {
     }
 
-    public ObjectsSelection findObjectAtPoint(Point2D p, Composition stage) {
+    public static ObjectsSelection findObjectAtPoint(Point2D p, Composition stage) {
         ObjectsSelection result;
 
         // search layers
@@ -59,7 +59,7 @@ public class ObjectsFinder {
         return new ObjectsSelection();
     }
 
-    public ObjectsSelection findGuideLineAtPoint(Point2D p, Composition stage) {
+    public static ObjectsSelection findGuideLineAtPoint(Point2D p, Composition stage) {
 
         ObjectsSelection result = new ObjectsSelection();
         // here guides selection, but it would be convenient to operate on objects
@@ -67,7 +67,7 @@ public class ObjectsFinder {
         return result;
     }
 
-    public ObjectsSelection findLayerAtPoint(Point2D p, Composition stage) {
+    public static ObjectsSelection findLayerAtPoint(Point2D p, Composition stage) {
         ObjectsSelection result = new ObjectsSelection();
         Point pPixel = new Point((int) p.getX(), (int) p.getY());
 

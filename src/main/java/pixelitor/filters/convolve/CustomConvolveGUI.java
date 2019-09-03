@@ -281,9 +281,6 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void reset(int size) {
         float[] defaultValues = new float[size * size];
-        for (int i = 0; i < defaultValues.length; i++) {
-            defaultValues[i] = 0.0f;
-        }
         defaultValues[defaultValues.length / 2] = 1.0f;
 
         setValues(defaultValues);

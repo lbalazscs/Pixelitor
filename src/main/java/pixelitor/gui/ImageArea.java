@@ -130,11 +130,11 @@ public class ImageArea {
 
         setupKeysAndDnD();
         if (mode == FRAMES) {
-            // make sure they start in the top-left
-            // corner when they are re-added
+            // make sure that the internal frames start
+            // in the top-left corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        OpenComps.forAllImages(ImageArea::addNewView);
+        OpenComps.forEachView(ImageArea::addNewView);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }

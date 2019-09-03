@@ -100,24 +100,12 @@ public class OpenComps {
         return views;
     }
 
-    private static void activateAViewIfNoneIs() {
-        if (!views.isEmpty()) {
-            boolean activeFound = false;
-            for (View view : views) {
-                if (view == activeView) {
-                    activeFound = true;
-                    break;
-                }
-            }
-
-            if (!activeFound) {
-                setActiveView(views.get(0), true);
-            }
-        }
-    }
-
     public static View getActiveView() {
         return activeView;
+    }
+
+    public static boolean isActive(View view) {
+        return view == activeView;
     }
 
     public static Composition getActiveCompOrNull() {
@@ -212,6 +200,22 @@ public class OpenComps {
         activateAViewIfNoneIs();
     }
 
+    private static void activateAViewIfNoneIs() {
+        if (!views.isEmpty()) {
+            boolean activeFound = false;
+            for (View view : views) {
+                if (view == activeView) {
+                    activeFound = true;
+                    break;
+                }
+            }
+
+            if (!activeFound) {
+                setActiveView(views.get(0), true);
+            }
+        }
+    }
+
     public static void setActiveView(View view, boolean activate) {
         if (activate) {
             if (view == null) {
@@ -251,14 +255,14 @@ public class OpenComps {
     }
 
     /**
-     * Another image became active
+     * Another view became active
      */
-    public static void imageActivated(View view) {
+    public static void viewActivated(View view) {
         if (view == activeView) {
             return;
         }
 
-        View oldCV = activeView;
+        View oldView = activeView;
 
         Composition comp = view.getComp();
         setActiveView(view, false);
@@ -266,7 +270,7 @@ public class OpenComps {
         view.activateUI(true);
 
         for (CompActivationListener listener : activationListeners) {
-            listener.compActivated(oldCV, view);
+            listener.compActivated(oldView, view);
         }
 
         Layer layer = comp.getActiveLayer();
@@ -304,10 +308,6 @@ public class OpenComps {
         if (activeView != null) {
             activeView.zoomToFit(autoZoom);
         }
-    }
-
-    public static boolean isActive(View view) {
-        return view == activeView;
     }
 
     public static void reloadActiveFromFileAsync() {
@@ -361,7 +361,7 @@ public class OpenComps {
         }
     }
 
-    public static void forAllImages(Consumer<View> action) {
+    public static void forEachView(Consumer<View> action) {
         for (View view : views) {
             action.accept(view);
         }
@@ -410,7 +410,7 @@ public class OpenComps {
 
     public static void addAsNewImage(Composition comp) {
         try {
-            assert comp.getView() == null : "already has view";
+            assert comp.getView() == null : "already has a view";
 
             View view = new View(comp);
             comp.addAllLayersToGUI();

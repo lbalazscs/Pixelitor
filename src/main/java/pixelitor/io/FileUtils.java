@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,17 +32,12 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    /**
-     * Returns the extension of the given file name
-     * or empty Optional if no extension found
-     */
-    public static Optional<String> getExt(String fileName) {
+    public static Optional<String> findExtension(String fileName) {
         int lastIndex = fileName.lastIndexOf('.');
         if (lastIndex == -1) {
             return Optional.empty();
         }
-        return Optional.of(fileName
-                .substring(lastIndex + 1));
+        return Optional.of(fileName.substring(lastIndex + 1));
     }
 
     public static String stripExtension(String fileName) {
@@ -68,7 +63,7 @@ public class FileUtils {
     }
 
     private static boolean hasSupportedExt(String fileName) {
-        return getExt(fileName)
+        return findExtension(fileName)
                 .map(String::toLowerCase)
                 .filter(SUPPORTED_EXTENSIONS::contains)
                 .isPresent();
@@ -80,7 +75,7 @@ public class FileUtils {
     }
 
     public static String replaceExt(String fileName, String newExt) {
-        if (!getExt(fileName).isPresent()) {
+        if (!findExtension(fileName).isPresent()) {
             return fileName + '.' + newExt;
         }
         String woExt = stripExtension(fileName);

@@ -292,7 +292,7 @@ public class AnchorPoint extends DraggablePoint {
         });
 
         try {
-            p.show((JComponent) view, x, y);
+            p.show(view, x, y);
         } catch (IllegalComponentStateException e) {
             // ignore: happens in RandomGUITest, but works OK otherwise
             // ("component must be showing on the screen to determine its location")

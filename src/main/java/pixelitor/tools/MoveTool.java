@@ -60,7 +60,7 @@ public class MoveTool extends DragTool {
 
         if (autoSelectCheckBox.isSelected()) {
             Point2D p = view.componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, view.getComp());
+            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
 
             if (objectsSelection.isEmpty()) {
                 view.setCursor(Cursors.DEFAULT);
@@ -75,7 +75,7 @@ public class MoveTool extends DragTool {
     public void dragStarted(PMouseEvent e) {
         if (autoSelectCheckBox.isSelected()) {
             Point2D p = e.getComp().getView().componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = objectFinder.findLayerAtPoint(p, e.getComp());
+            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
 
             if (objectsSelection.isEmpty()) {
                 userDrag.cancel();

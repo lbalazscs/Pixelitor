@@ -140,7 +140,7 @@ public class FractalTree extends ParametrizedFilter {
 
         for (int depth = 1; depth <= maxDepth; depth++) {
             float w1 = depth * width.getValueAsPercentage(0);
-            double trunkWidth = (double) width.getValueAsPercentage(1);
+            double trunkWidth = width.getValueAsPercentage(1);
             double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);

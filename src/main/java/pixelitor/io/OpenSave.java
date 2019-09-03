@@ -66,7 +66,7 @@ public class OpenSave {
     public static CompletableFuture<Composition> loadCompFromFileAsync(File file) {
         CompletableFuture<Composition> cf;
 
-        String ext = FileUtils.getExt(file.getName()).orElse("");
+        String ext = FileUtils.findExtension(file.getName()).orElse("");
         if ("pxc".equals(ext)) {
             cf = loadLayered(file, "pxc");
         } else if ("ora".equals(ext)) {
@@ -110,7 +110,7 @@ public class OpenSave {
         String msg = format("Could not load \"%s\" as an image file.",
                 file.getName());
 
-        String ext = FileUtils.getExt(file.getName()).orElse("");
+        String ext = FileUtils.findExtension(file.getName()).orElse("");
         if (ext.startsWith("tif") && getJavaMainVersion() == 8) {
             msg += "\nNote that TIFF files are supported only when Pixelitor is running on Java 9+.";
             msg += "\nCurrently it is running on Java 8.";

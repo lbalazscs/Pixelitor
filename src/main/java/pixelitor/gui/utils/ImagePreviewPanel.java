@@ -104,12 +104,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         File file;
         String propertyName = e.getPropertyName();
         switch (propertyName) {
-            case JFileChooser.DIRECTORY_CHANGED_PROPERTY:
-                file = null;
-                break;
             case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY:
                 file = (File) e.getNewValue();
                 break;
+            case JFileChooser.DIRECTORY_CHANGED_PROPERTY:
             default:
                 file = null;
         }
