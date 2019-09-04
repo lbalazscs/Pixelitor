@@ -91,7 +91,8 @@ public class History {
         if (ignoreEdits) {
             return;
         }
-        edit.getComp().setDirty(true);
+        Composition comp = edit.getComp();
+        comp.setDirty(true);
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);
@@ -105,7 +106,8 @@ public class History {
 
         if (Build.CURRENT != Build.FINAL) {
             Events.postAddToHistoryEvent(edit);
-            ConsistencyChecks.checkAll(edit.getComp(), false);
+
+            ConsistencyChecks.checkAll(comp, false);
         }
     }
 

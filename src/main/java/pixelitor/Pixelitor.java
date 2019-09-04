@@ -50,6 +50,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -72,6 +73,10 @@ public class Pixelitor {
             Utils.makeSureAssertionsAreEnabled();
             Build.CURRENT = Build.DEVELOPMENT;
         }
+
+        // Force using English locale, because using the default system
+        // settings leads to mixed-language problems (see issue #35)
+        Locale.setDefault(Locale.US);
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
