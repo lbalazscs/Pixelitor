@@ -334,6 +334,10 @@ public class Composition implements Serializable {
 
     public void duplicateActiveLayer() {
         Layer duplicate = activeLayer.duplicate(false);
+        if (duplicate == null) {
+            // there was an out of memory error
+            return;
+        }
         new LayerAdder(this)
                 .withHistory("Duplicate Layer")
                 .add(duplicate);

@@ -251,6 +251,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public ImageLayer duplicate(boolean sameName) {
         BufferedImage imageCopy = copyImage(image);
+        if (imageCopy == null) {
+            // there was an out of memory error
+            return null;
+        }
         String duplicateName = sameName ? name : Utils.createCopyName(name);
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName, null);
         d.setOpacity(opacity, false, false, true);

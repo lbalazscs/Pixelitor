@@ -275,7 +275,8 @@ public class Dialogs {
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +
                 "<li>decreasing the undo levels" +
                 "<li>decreasing the number of layers" +
-                "<li>working with smaller images";
+            "<li>working with smaller images" +
+            "<li>putting more RAM into your computer";
         String title = "Out of memory error.";
         Dialogs.showErrorDialog(title, msg);
     }

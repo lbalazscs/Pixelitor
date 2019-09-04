@@ -640,13 +640,14 @@ public class ImageUtils {
     public static BufferedImage copyImage(BufferedImage src) {
         assert src != null;
 
-        WritableRaster raster = null;
+        BufferedImage copy = null;
         try {
-            raster = src.copyData(null);
+            WritableRaster raster = src.copyData(null);
+            copy = new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         }
-        return new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
+        return copy;
     }
 
     /**
