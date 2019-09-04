@@ -530,7 +530,7 @@ public class OpenComps {
             }
         } else { // Tabs: check only the current view
             View view = getActiveView();
-            if (view.showPixelGridIfEnabled()) {
+            if (view != null && view.showPixelGridIfEnabled()) {
                 view.repaint();
             } else {
                 showPixelGridHelp();
