@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
 
@@ -160,8 +161,8 @@ public class ImageArea {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.cascadeWindows();
         } else {
-            // the "Cascade Windows" menu should be grayed out
-            throw new IllegalStateException();
+            // the "Cascade Windows" menu should be grayed out, but for safety:
+            showCascadeTileHelp();
         }
     }
 
@@ -170,8 +171,13 @@ public class ImageArea {
             FramesUI framesUI = (FramesUI) ui;
             framesUI.tileWindows();
         } else {
-            // the "Tile Windows" menu should be grayed out
-            throw new IllegalStateException();
+            // the "Tile Windows" menu should be grayed out, but for safety:
+            showCascadeTileHelp();
         }
+    }
+
+    private static void showCascadeTileHelp() {
+        Dialogs.showInfoDialog("Help", "<html><b>\"Cascade Windows\"</b> and <b>\"Tile Windows\"</b> works only<br>" +
+            "when images are displayed in internal windows, not tabs (see the Edit/Preferences dialog)");
     }
 }

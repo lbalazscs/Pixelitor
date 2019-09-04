@@ -103,6 +103,7 @@ import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
 
@@ -1107,25 +1108,28 @@ public class MenuBar extends JMenuBar {
     private static JMenu createArrangeWindowsSubmenu() {
         PMenu sub = new PMenu("Arrange Windows");
 
-        MenuAction cascadeAction = new MenuAction("Cascade") {
+        NamedAction cascadeAction = new NamedAction("Cascade") {
             @Override
-            public void onClick() {
+            public void actionPerformed(ActionEvent e) {
                 ImageArea.cascadeWindows();
             }
         };
-        sub.addAction(cascadeAction);
+        cascadeAction.setEnabled(ImageArea.currentModeIs(FRAMES));
+        sub.addSelfControlledAction(cascadeAction);
 
-        MenuAction tileAction = new MenuAction("Tile") {
+        NamedAction tileAction = new NamedAction("Tile") {
             @Override
-            public void onClick() {
+            public void actionPerformed(ActionEvent e) {
                 ImageArea.tileWindows();
             }
         };
-        sub.addAction(tileAction);
+        tileAction.setEnabled(ImageArea.currentModeIs(FRAMES));
+        sub.addSelfControlledAction(tileAction);
 
-        ImageArea.addUIChangeListener(mode -> {
-            cascadeAction.setEnabled(mode == FRAMES);
-            tileAction.setEnabled(mode == FRAMES);
+        // make sure that "Cascade" and "Tile" are grayed out in TABS mode
+        ImageArea.addUIChangeListener(newMode -> {
+            cascadeAction.setEnabled(newMode == FRAMES);
+            tileAction.setEnabled(newMode == FRAMES);
         });
 
         return sub;

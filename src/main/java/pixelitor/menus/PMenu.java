@@ -51,9 +51,15 @@ public class PMenu extends JMenu {
     }
 
     // Simple add without a builder
+    // Practically the same as the self-controlled add,
+    // but the name better expresses the intent
     public void addAlwaysEnabledAction(Action action) {
         JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
         add(menuItem);
+    }
+
+    public void addSelfControlledAction(Action action) {
+        add(new JMenuItem(action));
     }
 
     // Simple add without a builder
