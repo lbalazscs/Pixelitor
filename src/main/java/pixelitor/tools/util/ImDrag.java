@@ -125,7 +125,7 @@ public class ImDrag {
     }
 
     public boolean isClick() {
-        return ((startX == endX) && (startY == endY));
+        return startX == endX && startY == endY;
     }
 
     public Line2D asLine() {

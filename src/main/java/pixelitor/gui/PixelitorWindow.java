@@ -214,7 +214,7 @@ public class PixelitorWindow extends JFrame {
     }
 
     public boolean areToolsShown() {
-        return (toolsPanel.getParent() != null);
+        return toolsPanel.getParent() != null;
     }
 
     /**

@@ -26,8 +26,8 @@ public class Curve {
     }
     
     public Curve( Curve curve ) {
-        x = (float[])curve.x.clone();
-        y = (float[])curve.y.clone();
+        x = curve.x.clone();
+        y = curve.y.clone();
     }
 
     public int addKnot( float kx, float ky ) {

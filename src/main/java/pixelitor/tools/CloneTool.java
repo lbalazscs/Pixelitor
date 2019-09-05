@@ -141,8 +141,8 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        double x = e.getImX();
-        double y = e.getImY();
+//        double x = e.getImX();
+//        double y = e.getImY();
 
         if (e.isAltDown() || e.isRight()) {
             setCloningSource(e);

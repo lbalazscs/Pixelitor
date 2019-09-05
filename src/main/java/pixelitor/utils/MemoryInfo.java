@@ -58,7 +58,7 @@ public class MemoryInfo {
     }
 
     public long getAvailableMemoryMB() {
-        return (maxMemoryMB - usedMemoryMB);
+        return maxMemoryMB - usedMemoryMB;
     }
 
     @Override

@@ -23,7 +23,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * 2x2 magic square.
      */
-	protected final static int[] ditherMagic2x2Matrix = {
+    protected static final int[] ditherMagic2x2Matrix = {
 	 	 0, 2,
 	 	 3, 1
 	};
@@ -31,7 +31,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * 4x4 magic square.
      */
-	protected final static int[] ditherMagic4x4Matrix = {
+    protected static final int[] ditherMagic4x4Matrix = {
 	 	 0, 14,  3, 13,
 		11,  5,  8,  6,
 		12,  2, 15,  1,
@@ -41,7 +41,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * 4x4 ordered dither.
      */
-	public final static int[] ditherOrdered4x4Matrix = {
+    public static final int[] ditherOrdered4x4Matrix = {
 	 	 0,  8,  2, 10,
 		12,  4, 14,  6,
 		 3, 11,  1,  9,
@@ -51,7 +51,7 @@ public class DitherFilter extends PointFilter {
     /**
      * 4x4 lines.
      */
-	public final static int[] ditherLines4x4Matrix = {
+    public static final int[] ditherLines4x4Matrix = {
 	 	 0,  1,  2,  3,
 		 4,  5,  6,  7,
 		 8,  9, 10, 11,
@@ -61,7 +61,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * 6x6 90 degree halftone.
      */
-	public final static int[] dither90Halftone6x6Matrix = {
+    public static final int[] dither90Halftone6x6Matrix = {
 	 	29, 18, 12, 19, 30, 34,
 		17,  7,  4,  8, 20, 28,
 		11,  3,  0,  1,  9, 27,
@@ -78,7 +78,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * Order-6 ordered dither.
      */
-	public final static int[] ditherOrdered6x6Matrix = {
+    public static final int[] ditherOrdered6x6Matrix = {
 		 1, 59, 15, 55,  2, 56, 12, 52,
 		33, 17, 47, 31, 34, 18, 44, 28,
 		 9, 49,  5, 63, 10, 50,  6, 60,
@@ -92,7 +92,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * Order-8 ordered dither.
      */
-	public final static int[] ditherOrdered8x8Matrix = {
+    public static final int[] ditherOrdered8x8Matrix = {
 		  1,235, 59,219, 15,231, 55,215,  2,232, 56,216, 12,228, 52,212,
 		129, 65,187,123,143, 79,183,119,130, 66,184,120,140, 76,180,116,
 		 33,193, 17,251, 47,207, 31,247, 34,194, 18,248, 44,204, 28,244,
@@ -113,7 +113,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * Order-3 clustered dither.
      */
-	public final static int[] ditherCluster3Matrix = {
+    public static final int[] ditherCluster3Matrix = {
 		 9,11,10, 8, 6, 7,
 		12,17,16, 5, 0, 1,
 		13,14,15, 4, 3, 2,
@@ -124,7 +124,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * Order-4 clustered dither.
      */
-	public final static int[] ditherCluster4Matrix = {
+    public static final int[] ditherCluster4Matrix = {
 		18,20,19,16,13,11,12,15,
 		27,28,29,22, 4, 3, 2, 9,
 		26,31,30,21, 5, 0, 1,10,
@@ -137,7 +137,7 @@ public class DitherFilter extends PointFilter {
 	/**
      * Order-8 clustered dither.
      */
-	public final static int[] ditherCluster8Matrix = {
+    public static final int[] ditherCluster8Matrix = {
 		 64, 69, 77, 87, 86, 76, 68, 67, 63, 58, 50, 40, 41, 51, 59, 60,
 		 70, 94,100,109,108, 99, 93, 75, 57, 33, 27, 18, 19, 28, 34, 52,
 		 78,101,114,116,115,112, 98, 83, 49, 26, 13, 11, 12, 15, 29, 44,

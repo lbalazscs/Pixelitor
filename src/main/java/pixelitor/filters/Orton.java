@@ -67,7 +67,7 @@ public class Orton extends ParametrizedFilter {
         pt.unitsDone(blurWorkUnits / 2);
 
         if (radius > 0) {
-            if ((width == 1) || (height == 1)) {
+            if (width == 1 || height == 1) {
                 // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
                 return src;
             }

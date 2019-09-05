@@ -110,7 +110,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        return (defaultValue == currentValue);
+        return defaultValue == currentValue;
     }
 
     @Override
@@ -142,7 +142,7 @@ public class BooleanParam extends AbstractFilterParam {
                 adjustmentListener.paramAdjusted();
             }
         }
-        if (updateGUI && (paramGUI != null)) {
+        if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
     }

@@ -149,10 +149,10 @@ public class Shapes {
         double backAngle2 = 3.4033926 + angle;
         int arrowRadius = 20;
 
-        double arrowEnd1X = endX + (arrowRadius * Math.cos(backAngle1));
-        double arrowEnd1Y = endY + (arrowRadius * Math.sin(backAngle1));
-        double arrowEnd2X = endX + (arrowRadius * Math.cos(backAngle2));
-        double arrowEnd2Y = endY + (arrowRadius * Math.sin(backAngle2));
+        double arrowEnd1X = endX + arrowRadius * Math.cos(backAngle1);
+        double arrowEnd1Y = endY + arrowRadius * Math.sin(backAngle1);
+        double arrowEnd2X = endX + arrowRadius * Math.cos(backAngle2);
+        double arrowEnd2Y = endY + arrowRadius * Math.sin(backAngle2);
 
         GeneralPath.Double arrowHead = new Path2D.Double();
         arrowHead.moveTo(endX, endY);

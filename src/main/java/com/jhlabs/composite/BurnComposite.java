@@ -26,6 +26,7 @@ public final class BurnComposite extends RGBComposite {
         super(alpha);
     }
 
+    @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         return new Context(extraAlpha, srcColorModel, dstColorModel);
     }
@@ -35,6 +36,7 @@ public final class BurnComposite extends RGBComposite {
             super(alpha, srcColorModel, dstColorModel);
         }
 
+        @Override
         public void composeRGB(int[] src, int[] dst, float alpha) {
             int w = src.length;
 
@@ -62,7 +64,7 @@ public final class BurnComposite extends RGBComposite {
                 else
                     dob = sb;
 
-                float a = alpha * sa / 255f;
+                float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
 
                 dst[i] = (int) (a * dor + ac * dir);

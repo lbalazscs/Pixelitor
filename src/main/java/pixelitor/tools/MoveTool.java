@@ -39,7 +39,7 @@ import java.awt.geom.Point2D;
 public class MoveTool extends DragTool {
     private static final String AUTO_SELECT_LABEL = "Auto Select Layer";
     private final JCheckBox autoSelectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
-    private final ObjectsFinder objectFinder = new ObjectsFinder();
+//    private final ObjectsFinder objectFinder = new ObjectsFinder();
 
     public MoveTool() {
         super("Move", 'v', "move_tool_icon.png",

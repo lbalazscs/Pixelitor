@@ -31,17 +31,17 @@ public class PolarFilter extends TransformFilter {
     /**
      * Convert from rectangular to polar coordinates.
      */
-    public final static int RECT_TO_POLAR = 0;
+    public static final int RECT_TO_POLAR = 0;
 
     /**
      * Convert from polar to rectangular coordinates.
      */
-    public final static int POLAR_TO_RECT = 1;
+    public static final int POLAR_TO_RECT = 1;
 
     /**
      * Invert the image in a circle.
      */
-    public final static int INVERT_IN_CIRCLE = 2;
+    public static final int INVERT_IN_CIRCLE = 2;
 
     private int type;
     private float width, height;

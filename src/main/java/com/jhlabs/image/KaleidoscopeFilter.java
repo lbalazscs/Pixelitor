@@ -204,7 +204,7 @@ public class KaleidoscopeFilter extends TransformFilter {
         double dy = y - icentreY;
         double r = Math.sqrt(dx * dx + dy * dy);
         double theta = FastMath.atan2(dy, dx) - angle - angle2;
-        theta = ImageMath.triangle((float) (theta / Math.PI * sides * .5));
+        theta = ImageMath.triangle((float) (theta / Math.PI * sides * 0.5));
         if (radius != 0) {
             double c = FastMath.cos(theta);
             double radiusc = radius / c;

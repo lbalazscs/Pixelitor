@@ -241,13 +241,13 @@ public class RandomGUITest {
                 int max = forever ? Integer.MAX_VALUE : numTests;
 
                 for (int i = 0; i < max; i++) {
-                    if ((i % onePercent) == 0) {
+                    if (i % onePercent == 0) {
                         int percent = 100 * i / numTests;
                         System.out.print(percent + "% ");
                         if (PRINT_MEMORY) {
                             System.out.println(new MemoryInfo().toString());
                         } else {
-                            if (((percent + 1) % 20) == 0) {
+                            if ((percent + 1) % 20 == 0) {
                                 System.out.println();
                             }
                         }
@@ -471,8 +471,8 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                    (!(filter instanceof Fade)) &&
-                            (!(filter instanceof RandomFilter)));
+                !(filter instanceof Fade) &&
+                    !(filter instanceof RandomFilter));
         } else {
             f = preferredFilter;
         }
@@ -525,7 +525,7 @@ public class RandomGUITest {
             }
         }
         long runCountAfter = Filter.runCount;
-        if (runCountAfter != (runCountBefore + 1)) {
+        if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                     "runCountBefore = " + runCountBefore
                             + ", runCountAfter = " + runCountAfter);
@@ -581,7 +581,7 @@ public class RandomGUITest {
         dr.tweenCalculatingEnded();
 
         long runCountAfter = Filter.runCount;
-        if (runCountAfter != (runCountBefore + 1)) {
+        if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
                     "runCountBefore = " + runCountBefore
                             + ", runCountAfter = " + runCountAfter);

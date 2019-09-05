@@ -83,7 +83,7 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent e) {
-        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+        CardLayout cl = (CardLayout) cardPanel.getLayout();
         cl.show(cardPanel, (String) e.getItem());
     }
 }

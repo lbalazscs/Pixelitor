@@ -92,7 +92,7 @@ public class HueSat extends ParametrizedFilter {
             int a = rgb & 0xFF000000;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
-            int b = (rgb) & 0xFF;
+            int b = rgb & 0xFF;
 
             // for the multithreaded performance it is better to
             // create this array here instead of reusing it as a class field

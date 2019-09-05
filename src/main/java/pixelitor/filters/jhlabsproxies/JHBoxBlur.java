@@ -53,10 +53,10 @@ public class JHBoxBlur extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         float hRadius = radius.getValueAsFloat(0);
         float vRadius = radius.getValueAsFloat(1);
-        if ((hRadius == 0) && (vRadius == 0)) {
+        if (hRadius == 0 && vRadius == 0) {
             return src;
         }
-        if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+        if (src.getWidth() == 1 || src.getHeight() == 1) {
             // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
             return src;
         }

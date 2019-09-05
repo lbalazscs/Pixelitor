@@ -106,7 +106,7 @@ public class LayersContainer extends JPanel implements CompActivationListener {
     }
 
     public static boolean areLayersShown() {
-        return (INSTANCE.getParent() != null);
+        return INSTANCE.getParent() != null;
     }
 
     public static void showLayersFor(View view) {

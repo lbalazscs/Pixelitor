@@ -51,7 +51,7 @@ public class Keys {
     public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK + ALT_MASK);
     public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK);
 
-    private static final KeyStroke CTRL_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_MASK);
+    //    private static final KeyStroke CTRL_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_MASK);
     public static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = getKeyStroke('[', MENU_CTRL_MASK + SHIFT_MASK);
     public static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = getKeyStroke(']', MENU_CTRL_MASK + SHIFT_MASK);
     public static final KeyStroke CTRL_OPEN_BRACKET = getKeyStroke('[', MENU_CTRL_MASK);

@@ -19,8 +19,8 @@ package com.jhlabs.image;
 import pixelitor.utils.ProgressTracker;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * An image Quantizer based on the Octree algorithm. This is a very basic implementation
@@ -32,7 +32,7 @@ public class OctTreeQuantizer implements Quantizer {
     /**
      * The greatest depth the tree is allowed to reach
      */
-    final static int MAX_LEVEL = 5;
+    static final int MAX_LEVEL = 5;
 
     /**
      * An Octtree node.
@@ -41,7 +41,7 @@ public class OctTreeQuantizer implements Quantizer {
         int children;
         int level;
         OctTreeNode parent;
-        OctTreeNode[] leaf = new OctTreeNode[8];
+        final OctTreeNode[] leaf = new OctTreeNode[8];
         boolean isLeaf;
         int count;
         int totalRed;
@@ -69,17 +69,17 @@ public class OctTreeQuantizer implements Quantizer {
     }
 
     private int nodes = 0;
-    private OctTreeNode root;
+    private final OctTreeNode root;
     private int reduceColors;
     private int maximumColors;
     private int colors = 0;
-    private List<OctTreeNode>[] colorList;
+    private final List<OctTreeNode>[] colorList;
 
     public OctTreeQuantizer() {
         setup(256);
-        colorList = new Vector[MAX_LEVEL + 1];
+        colorList = new ArrayList[MAX_LEVEL + 1];
         for (int i = 0; i < MAX_LEVEL + 1; i++) {
-            colorList[i] = new Vector();
+            colorList[i] = new ArrayList();
         }
         root = new OctTreeNode();
     }

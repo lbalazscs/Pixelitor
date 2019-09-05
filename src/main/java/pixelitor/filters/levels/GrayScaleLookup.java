@@ -31,10 +31,10 @@ public class GrayScaleLookup {
     public GrayScaleLookup(int inputBlackValue, int inputWhiteValue,
                            int outputBlackValue, int outputWhiteValue) {
         for (int i = 0; i < mapping.length; i++) {
-            double multiplier = ((double) (outputWhiteValue - outputBlackValue))
-                    / ((double) (inputWhiteValue - inputBlackValue));
-            double constant = (outputBlackValue) - (multiplier * inputBlackValue);
-            mapping[i] = (short) PixelUtils.clamp((int) ((multiplier * i) + constant));
+            double multiplier = (double) (outputWhiteValue - outputBlackValue)
+                / (double) (inputWhiteValue - inputBlackValue);
+            double constant = outputBlackValue - multiplier * inputBlackValue;
+            mapping[i] = (short) PixelUtils.clamp((int) (multiplier * i + constant));
         }
     }
 

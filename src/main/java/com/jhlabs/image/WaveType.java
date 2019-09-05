@@ -27,19 +27,22 @@ public class WaveType {
     /**
      * Sine wave.
      */
-    public final static int SINE = 0;
+    public static final int SINE = 0;
     /**
      * Sawtooth wave.
      */
-    public final static int SAWTOOTH = 1;
+    public static final int SAWTOOTH = 1;
     /**
      * Triangle wave.
      */
-    public final static int TRIANGLE = 2;
+    public static final int TRIANGLE = 2;
     /**
      * Noise.
      */
-    public final static int NOISE = 3;
+    public static final int NOISE = 3;
+
+    private WaveType() {
+    }
 
     public static double wave(double in, int type) {
         switch (type) {

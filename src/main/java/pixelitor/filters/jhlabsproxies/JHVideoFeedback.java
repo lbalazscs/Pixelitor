@@ -55,7 +55,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if ((rotation.getValue() == 0) && (zoom.getValue() == 0)) {
+        if (rotation.getValue() == 0 && zoom.getValue() == 0) {
             return src;
         }
 

@@ -73,11 +73,11 @@ public class ColorUtils {
 
         int r1 = (rgb1 >>> 16) & 0xFF;
         int g1 = (rgb1 >>> 8) & 0xFF;
-        int b1 = (rgb1) & 0xFF;
+        int b1 = rgb1 & 0xFF;
 
         int r2 = (rgb2 >>> 16) & 0xFF;
         int g2 = (rgb2 >>> 8) & 0xFF;
-        int b2 = (rgb2) & 0xFF;
+        int b2 = rgb2 & 0xFF;
 
         int r = (r1 + r2) / 2;
         int g = (g1 + g2) / 2;
@@ -98,11 +98,11 @@ public class ColorUtils {
 
         int r1 = (rgb1 >>> 16) & 0xFF;
         int g1 = (rgb1 >>> 8) & 0xFF;
-        int b1 = (rgb1) & 0xFF;
+        int b1 = rgb1 & 0xFF;
 
         int r2 = (rgb2 >>> 16) & 0xFF;
         int g2 = (rgb2 >>> 8) & 0xFF;
-        int b2 = (rgb2) & 0xFF;
+        int b2 = rgb2 & 0xFF;
 
         float[] hsb1 = Color.RGBtoHSB(r1, g1, b1, null);
         float[] hsb2 = Color.RGBtoHSB(r2, g2, b2, null);
@@ -249,7 +249,7 @@ public class ColorUtils {
     }
 
     public static void copyColorToClipboard(Color c) {
-        String htmlHexString = format("%06X", (0xFFFFFF & c.getRGB()));
+        String htmlHexString = format("%06X", 0xFFFFFF & c.getRGB());
 
         Utils.copyStringToClipboard(htmlHexString);
     }

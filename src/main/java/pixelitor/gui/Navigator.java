@@ -195,7 +195,7 @@ public class Navigator extends JComponent
                                 boolean newCV,
                                 boolean cvSizeChanged,
                                 boolean navigatorResized) {
-        assert (newCV || cvSizeChanged || navigatorResized) : "why did you call me?";
+        assert newCV || cvSizeChanged || navigatorResized : "why did you call me?";
 
         if (newCV) {
             if (this.view != null) {

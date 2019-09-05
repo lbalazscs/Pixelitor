@@ -96,7 +96,7 @@ public class RandomSpheres extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
         float r = radius.getValueAsFloat();
-        int numCircles = (int) ((width * height * density.getValueAsPercentage()) / (r * r));
+        int numCircles = (int) (width * height * density.getValueAsPercentage() / (r * r));
 
         ProgressTracker pt = new StatusBarProgressTracker(NAME, numCircles);
 

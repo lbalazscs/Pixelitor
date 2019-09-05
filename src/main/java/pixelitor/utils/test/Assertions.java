@@ -66,7 +66,7 @@ public class Assertions {
     public static boolean checkRasterMinimum(BufferedImage newImage) {
         if (RandomGUITest.isRunning()) {
             WritableRaster raster = newImage.getRaster();
-            if ((raster.getMinX() != 0) || (raster.getMinY() != 0)) {
+            if (raster.getMinX() != 0 || raster.getMinY() != 0) {
                 throw new
                         IllegalArgumentException("Raster " + raster +
                         " has minX or minY not equal to zero: "

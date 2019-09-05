@@ -32,8 +32,8 @@ public class CheckFilter extends PointFilter {
     private float m10 = 0.0f;
     private float m11 = 1.0f;
 
-    float aaThresholdX = 0.05f;
-    float aaThresholdY = 0.05f;
+    private float aaThresholdX = 0.05f;
+    private float aaThresholdY = 0.05f;
     private float upperAaThresholdX;
     private float upperAaThresholdY;
 
@@ -44,7 +44,7 @@ public class CheckFilter extends PointFilter {
 
     private boolean straight;
 
-    public void setAaRes(int aaRes) {
+    private void setAaRes(int aaRes) {
         this.aaRes = aaRes;
         this.aaRes2 = aaRes * aaRes;
         this.aaShift = 0.5f - 1.0f / (2 * aaRes);
@@ -207,6 +207,7 @@ public class CheckFilter extends PointFilter {
         return angle;
     }
 
+    @Override
     public int filterRGB(int x, int y, int rgb) {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;

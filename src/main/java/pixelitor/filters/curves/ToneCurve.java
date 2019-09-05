@@ -199,7 +199,7 @@ public class ToneCurve {
     }
 
     public boolean isOverKnot(Point.Float p) {
-        return (getKnotIndexAt(p) >= 0);
+        return getKnotIndexAt(p) >= 0;
     }
 
     public boolean isOverKnot(int index) {

@@ -155,7 +155,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public boolean isSetToDefault() {
-        return (getValue() == defaultValue);
+        return getValue() == defaultValue;
     }
 
     public int getDefaultValue() {
@@ -173,7 +173,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public float getValueAsPercentage() {
-        return (getValueAsFloat()) / 100.0f;
+        return getValueAsFloat() / 100.0f;
     }
 
     /**

@@ -622,8 +622,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
         return outPixels;
     }
 
+    @Override
     public String toString() {
         return "Texture/Cellular...";
     }
-
 }

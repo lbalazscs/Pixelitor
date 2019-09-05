@@ -95,13 +95,7 @@ public class PMouseEvent extends PPoint.Lazy {
         view.repaint();
     }
 
-    // TODO this is a workaround so that the transform box
-    // demo can work without the main program
     public void imageChanged(Composition.ImageChangeActions actions) {
-        if (view instanceof View) {
-            getComp().imageChanged(actions);
-        } else {
-            view.repaint();
-        }
+        getComp().imageChanged(actions);
     }
 }

@@ -57,7 +57,7 @@ public class CardPanelWithCombo extends JPanel implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent e) {
-        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+        CardLayout cl = (CardLayout) cardPanel.getLayout();
         cl.show(cardPanel, (String) e.getItem());
     }
 

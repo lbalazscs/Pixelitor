@@ -22,30 +22,30 @@ import java.awt.Rectangle;
  * An edge-detection filter.
  */
 public class EdgeFilter extends WholeImageFilter {
-	
-	public final static float R2 = (float)Math.sqrt(2);
 
-	public final static float[] ROBERTS_V = {
+    public static final float R2 = (float) Math.sqrt(2);
+
+    public static final float[] ROBERTS_V = {
 		0,  0, -1,
 		0,  1,  0,
 		0,  0,  0,
 	};
-	public final static float[] ROBERTS_H = {
+    public static final float[] ROBERTS_H = {
 		-1,  0,  0,
 		0,  1,  0,
 		0,  0,  0,
 	};
-	public final static float[] PREWITT_V = {
+    public static final float[] PREWITT_V = {
 		-1,  0,  1,
 		-1,  0,  1,
 		-1,  0,  1,
 	};
-	public final static float[] PREWITT_H = {
+    public static final float[] PREWITT_H = {
 		-1, -1, -1,
 		0,  0,  0,
 		1,  1,  1,
 	};
-	public final static float[] SOBEL_V = {
+    public static final float[] SOBEL_V = {
 		-1,  0,  1,
 		-2,  0,  2,
 		-1,  0,  1,
@@ -55,7 +55,7 @@ public class EdgeFilter extends WholeImageFilter {
 		0,  0,  0,
 		1,  2,  1,
 	};
-	public final static float[] FREI_CHEN_V = {
+    public static final float[] FREI_CHEN_V = {
 		-1,  0,  1,
 		-R2,  0,  R2,
 		-1,  0,  1,

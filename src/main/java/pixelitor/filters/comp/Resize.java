@@ -51,7 +51,7 @@ public class Resize implements CompAction {
         int canvasCurrWidth = canvas.getImWidth();
         int canvasCurrHeight = canvas.getImHeight();
 
-        if ((canvasCurrWidth == canvasTargetWidth) && (canvasCurrHeight == canvasTargetHeight)) {
+        if (canvasCurrWidth == canvasTargetWidth && canvasCurrHeight == canvasTargetHeight) {
             return;
         }
 

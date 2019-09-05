@@ -128,7 +128,7 @@ public class Solarize extends ParametrizedFilter {
             } else {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
-                int b = (rgb) & 0xFF;
+                int b = rgb & 0xFF;
 
                 int newR = redLookup[r];
                 int newG = greenLookup[g];

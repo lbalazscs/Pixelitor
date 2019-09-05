@@ -42,6 +42,8 @@ import java.util.function.Consumer;
  * for any changes a new instance should be built.
  */
 public class Guides implements Serializable {
+    // for compatibility with Pixelitor 4.2.0
+    private static final long serialVersionUID = -1168950961227421664L;
 
     private final Composition comp;
     // all guides are stored as percentages so that resizing

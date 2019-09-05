@@ -66,7 +66,9 @@ public class MysticRose extends ShapeFilter {
 
         for (int i = 0; i < points.length; i++) {
             double theta = startAngle + 2 * Math.PI * i / numPoints;
-            points[i] = new Point2D.Double((cx + r * Math.cos(theta)), (cy + r * Math.sin(theta)));
+            points[i] = new Point2D.Double(
+                cx + r * Math.cos(theta),
+                cy + r * Math.sin(theta));
         }
         return points;
     }

@@ -59,7 +59,7 @@ public abstract class MenuAction extends NamedAction {
         }, IS_TEXT_LAYER("Not a text layer") {
             @Override
             boolean isAllowed(Layer layer) {
-                return (layer instanceof TextLayer);
+                return layer instanceof TextLayer;
             }
 
             @Override

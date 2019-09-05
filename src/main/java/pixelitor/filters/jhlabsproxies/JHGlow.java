@@ -51,7 +51,7 @@ public class JHGlow extends ParametrizedFilter {
             return src;
         }
 
-        if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+        if (src.getWidth() == 1 || src.getHeight() == 1) {
             // otherwise we get ArrayIndexOutOfBoundsException in BoxBlurFilter
             return src;
         }

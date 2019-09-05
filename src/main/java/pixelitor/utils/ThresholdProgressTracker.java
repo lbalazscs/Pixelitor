@@ -67,7 +67,7 @@ public abstract class ThresholdProgressTracker implements ProgressTracker {
         }
 
         if (showingProgress) {
-            int percent = ((int) (finished * 100.0 / numComputationUnits));
+            int percent = (int) (finished * 100.0 / numComputationUnits);
             if (percent > lastPercent) {
                 if (runningOnEDT) {
                     updateProgressTracking(percent);

@@ -153,12 +153,12 @@ public class VoronoiFilter extends PointFilter {
         int color = allPixels[pixelIndex];
         int colorLeft = allPixels[pixelIndex - 1];
         int colorRight = allPixels[pixelIndex + 1];
-        if ((color != colorLeft) || (color != colorRight)) {
+        if (color != colorLeft || color != colorRight) {
             return true;
         }
         int colorUp = allPixels[pixelIndex - width];
         int colorDown = allPixels[pixelIndex + width];
-        if ((color != colorUp) || (color != colorDown)) {
+        if (color != colorUp || color != colorDown) {
             return true;
         }
         return false;

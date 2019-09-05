@@ -148,7 +148,7 @@ public class ChannelInvert extends ParametrizedFilter {
             }
             int r = (srcPixel >>> 16) & 0xFF;
             int g = (srcPixel >>> 8) & 0xFF;
-            int b = (srcPixel) & 0xFF;
+            int b = srcPixel & 0xFF;
             hsb = Color.RGBtoHSB(r, g, b, hsb);
             int newRGB = 0;
 

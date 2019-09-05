@@ -27,18 +27,20 @@ public final class ColorComposite extends RGBComposite {
         super(alpha);
     }
 
+    @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         return new Context(extraAlpha, srcColorModel, dstColorModel);
     }
 
     static class Context extends RGBCompositeContext {
-        private float[] sHSB = new float[3];
-        private float[] dHSB = new float[3];
+        private final float[] sHSB = new float[3];
+        private final float[] dHSB = new float[3];
 
         public Context(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
             super(alpha, srcColorModel, dstColorModel);
         }
 
+        @Override
         public void composeRGB(int[] src, int[] dst, float alpha) {
             int w = src.length;
 
@@ -64,7 +66,7 @@ public final class ColorComposite extends RGBComposite {
                 dog = (doRGB & 0xff00) >> 8;
                 dob = (doRGB & 0xff);
 
-                float a = alpha * sa / 255f;
+                float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
 
                 dst[i] = (int) (a * dor + ac * dir);

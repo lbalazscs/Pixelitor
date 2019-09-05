@@ -16,13 +16,16 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 
 public class ZigzagStroke implements Stroke {
 	private float amplitude = 10.0f;
 	private float wavelength = 10.0f;
-    private Stroke stroke;
+    private final Stroke stroke;
 	private static final float FLATNESS = 1;
 
 	public ZigzagStroke( Stroke stroke, float amplitude, float wavelength ) {
@@ -31,10 +34,11 @@ public class ZigzagStroke implements Stroke {
         this.wavelength = wavelength;
 	}
 
-	public Shape createStrokedShape( Shape shape ) {
+    @Override
+    public Shape createStrokedShape(Shape shape) {
 		GeneralPath result = new GeneralPath();
 		PathIterator it = new FlatteningPathIterator( shape.getPathIterator( null ), FLATNESS );
-		float points[] = new float[6];
+        float[] points = new float[6];
 		float moveX = 0, moveY = 0;
 		float lastX = 0, lastY = 0;
 		float thisX = 0, thisY = 0;

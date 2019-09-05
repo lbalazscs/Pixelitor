@@ -18,18 +18,22 @@ package com.jhlabs.awt;
 
 import net.jafaran.MXSIntSeqRNG;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.BasicStroke;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.util.Random;
 
 public class WobbleStroke implements Stroke {
 	private float detail = 2;
 	private float amplitude = 2;
 	private static final float FLATNESS = 1;
-    private Random rand;
-    private float basicStrokeWidth;
+    private final Random rand;
+    private final float basicStrokeWidth;
 
-    private long seed;
+    private final long seed;
 
     public WobbleStroke(float detail, float amplitude, float basicStrokeWidth) {
 		this.detail	= detail;
@@ -40,13 +44,14 @@ public class WobbleStroke implements Stroke {
         seed = System.nanoTime();
 	}
 
-	public Shape createStrokedShape( Shape shape ) {
+    @Override
+    public Shape createStrokedShape(Shape shape) {
         rand.setSeed(seed);
 
 		GeneralPath result = new GeneralPath();
         shape = new BasicStroke(basicStrokeWidth).createStrokedShape( shape );
 		PathIterator it = new FlatteningPathIterator( shape.getPathIterator( null ), FLATNESS );
-		float points[] = new float[6];
+        float[] points = new float[6];
 		float moveX = 0, moveY = 0;
 		float lastX = 0, lastY = 0;
 		float thisX = 0, thisY = 0;

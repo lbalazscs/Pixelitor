@@ -212,10 +212,10 @@ public class Marble extends ParametrizedFilter {
 
             switch (type) {
                 case TYPE_LINES:
-                    c = (float) ((1 + wave((nx + f), waveType)) / 2);
+                    c = (float) ((1 + wave(nx + f, waveType)) / 2);
                     break;
                 case TYPE_GRID:
-                    float f2 = strength * (noise2(ny * -0.1f, nx * -0.1f));
+                    float f2 = strength * noise2(ny * -0.1f, nx * -0.1f);
                     if (smoothDetails) {
                         f2 += detailsStrength * turbulence2B(ny * -0.2f, nx * -0.2f, octaves);
                     } else {

@@ -108,7 +108,7 @@ public class Dialogs {
                 YES_NO_OPTION, messageType);
         GlobalEventWatch.setDialogActive(false);
 
-        return (reply == YES_OPTION);
+        return reply == YES_OPTION;
     }
 
     public static boolean showOKCancelWarningDialog(String msg, String title,

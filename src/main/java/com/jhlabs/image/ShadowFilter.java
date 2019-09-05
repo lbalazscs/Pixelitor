@@ -235,9 +235,9 @@ public class ShadowFilter extends AbstractBufferedImageOp {
             }
         }
 
-        float shadowR = ((shadowColor >> 16) & 0xff) / 255f;
-        float shadowG = ((shadowColor >> 8) & 0xff) / 255f;
-        float shadowB = (shadowColor & 0xff) / 255f;
+        float shadowR = ((shadowColor >> 16) & 0xff) / 255.0f;
+        float shadowG = ((shadowColor >> 8) & 0xff) / 255.0f;
+        float shadowB = (shadowColor & 0xff) / 255.0f;
 
         // Make a black mask from the image's alpha channel
         float[][] extractAlpha = {

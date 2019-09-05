@@ -111,7 +111,7 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public boolean isSetToDefault() {
-        return (angle == defaultVal);
+        return angle == defaultVal;
     }
 
     @Override
@@ -148,7 +148,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public void randomize() {
         double random = Math.random();
-        setValue((random * 2 * Math.PI - Math.PI), false);
+        setValue(random * 2 * Math.PI - Math.PI, false);
     }
 
     public AbstractAngleUI getAngleSelectorUI() {

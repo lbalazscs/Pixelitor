@@ -56,10 +56,10 @@ public class IntTextField extends JTextField implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
         char c = e.getKeyChar();
-        if (!((Character.isDigit(c) ||
-                (c == KeyEvent.VK_BACK_SPACE) ||
-                (c == KeyEvent.VK_ENTER) ||
-                (c == KeyEvent.VK_DELETE)))) {
+        if (!(Character.isDigit(c) ||
+            c == KeyEvent.VK_BACK_SPACE ||
+            c == KeyEvent.VK_ENTER ||
+            c == KeyEvent.VK_DELETE)) {
 
             if ((int) c != 26) { // 26 occurs while undoing a change, should not beep
                 getToolkit().beep();

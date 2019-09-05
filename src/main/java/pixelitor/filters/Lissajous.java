@@ -52,7 +52,7 @@ public class Lissajous extends ShapeFilter {
 
         double w = width / 2.0;
         double h = height / 2.0;
-        double dt = (2 * Math.PI) / NUMBER_OF_STEPS;
+        double dt = 2 * Math.PI / NUMBER_OF_STEPS;
 
         shape.moveTo(cx, cy);
         for (double t = 0; t < 2 * Math.PI; t += dt) {

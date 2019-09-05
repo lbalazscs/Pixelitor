@@ -110,7 +110,7 @@ public class FilterUtils {
             int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
-            int b = (rgb) & 0xFF;
+            int b = rgb & 0xFF;
 
             destData[i] = pixelOp.changeRGB(a, r, g, b);
         }

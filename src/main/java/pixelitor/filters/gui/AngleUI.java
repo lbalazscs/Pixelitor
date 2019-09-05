@@ -53,8 +53,8 @@ public class AngleUI extends AbstractAngleUI {
         double angle = model.getValueInRadians();
 
         int radius = SIZE / 2;
-        float endX = (float) (cx + (radius * Math.cos(angle)));
-        float endY = (float) (cy + (radius * Math.sin(angle)));
+        float endX = (float) (cx + radius * Math.cos(angle));
+        float endY = (float) (cy + radius * Math.sin(angle));
 
         drawArrow(g2, angle, cx, cy, endX, endY);
     }

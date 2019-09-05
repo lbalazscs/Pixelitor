@@ -59,8 +59,8 @@ public class BrickBlockFilter extends AbstractBufferedImageOp {
             verticalCount++;
 
             int hShift = 0;
-            if ((verticalCount % 2) == 0) {
-                hShift = (horBlockSize / 2);
+            if (verticalCount % 2 == 0) {
+                hShift = horBlockSize / 2;
                 replaceWithAverage(src, dst, width, height,
                         smallPixels, 0, y, horBlockSize / 2, verBlockSize);
             }

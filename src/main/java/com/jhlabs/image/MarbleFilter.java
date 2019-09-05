@@ -107,7 +107,7 @@ public class MarbleFilter extends TransformFilter {
     }
 
     static float average(float[] input) {
-        float sum = 0f;
+        float sum = 0.0f;
         for (float v : input) {
             sum += v;
         }

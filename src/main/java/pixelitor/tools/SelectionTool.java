@@ -135,7 +135,7 @@ public class SelectionTool extends DragTool {
         }
 
         boolean altDown = e.isAltDown();
-        boolean startFromCenter = (!altMeansSubtract) && altDown;
+        boolean startFromCenter = !altMeansSubtract && altDown;
         if (!altDown) {
             altMeansSubtract = false;
         }
@@ -176,7 +176,7 @@ public class SelectionTool extends DragTool {
         } else {
             restoreInteraction();
 
-            boolean startFromCenter = (!altMeansSubtract) && e.isAltDown();
+            boolean startFromCenter = !altMeansSubtract && e.isAltDown();
             userDrag.setStartFromCenter(startFromCenter);
 
             selectionBuilder.updateBuiltSelection(userDrag.toImDrag());

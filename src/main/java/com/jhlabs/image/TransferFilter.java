@@ -16,17 +16,18 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 
 public abstract class TransferFilter extends PointFilter {
 
     protected int[] rTable, gTable, bTable;
     protected boolean initialized = false;
-    
-    public TransferFilter(String filterName) {
+
+    protected TransferFilter(String filterName) {
         super(filterName);
     }
 
+    @Override
     public int filterRGB(int x, int y, int rgb) {
         int a = rgb & 0xff000000;
         int r = (rgb >> 16) & 0xff;
@@ -38,7 +39,8 @@ public abstract class TransferFilter extends PointFilter {
         return a | (r << 16) | (g << 8) | b;
     }
 
-    public BufferedImage filter( BufferedImage src, BufferedImage dst ) {
+    @Override
+    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         if (!initialized)
             initialize();
         return super.filter( src, dst );

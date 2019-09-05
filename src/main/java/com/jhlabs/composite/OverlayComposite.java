@@ -26,6 +26,7 @@ public final class OverlayComposite extends RGBComposite {
         super(alpha);
     }
 
+    @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         return new Context(extraAlpha, srcColorModel, dstColorModel);
     }
@@ -35,6 +36,7 @@ public final class OverlayComposite extends RGBComposite {
             super(alpha, srcColorModel, dstColorModel);
         }
 
+        @Override
         public void composeRGB(int[] src, int[] dst, float alpha) {
             int w = src.length;
 
@@ -72,7 +74,7 @@ public final class OverlayComposite extends RGBComposite {
                     dob = 2 * (255 - (((t >> 8) + t) >> 8));
                 }
 
-                float a = alpha * sa / 255f;
+                float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
 
                 int newRed = (int) (a * dor + ac * dir);

@@ -25,21 +25,21 @@ import java.util.Random;
  */
 public class Noise implements Function1D, Function2D, Function3D {
 
-    private static Random randomGenerator = new Random();
+    private static final Random randomGenerator = new Random();
 
     public static void reseed() {
         randomGenerator.setSeed(System.nanoTime());
         init();
     }
 
-    private final static int B = 0x100;
-    private final static int BM = 0xff;
-    private final static int N = 0x1000;
+    private static final int B = 0x100;
+    private static final int BM = 0xff;
+    private static final int N = 0x1000;
 
-    static int[] p = new int[B + B + 2];
-    static float[][] g3 = new float[B + B + 2][3];
-    static float[][] g2 = new float[B + B + 2][2];
-    static float[] g1 = new float[B + B + 2];
+    static final int[] p = new int[B + B + 2];
+    static final float[][] g3 = new float[B + B + 2][3];
+    static final float[][] g2 = new float[B + B + 2][2];
+    static final float[] g1 = new float[B + B + 2];
 //    static boolean start = true;
 
     private static float sCurve(float t) {
@@ -155,7 +155,9 @@ public class Noise implements Function1D, Function2D, Function3D {
      */
     public static float noise2(float x, float y) {
         int bx0, bx1, by0, by1, b00, b10, b01, b11;
-        float rx0, rx1, ry0, ry1, q[], sx, sy, a, b, t, u, v;
+        float rx0, rx1, ry0, ry1;
+        float[] q;
+        float sx, sy, a, b, t, u, v;
         int i, j;
 
 //        if (start) {
@@ -293,13 +295,13 @@ public class Noise implements Function1D, Function2D, Function3D {
         return a + t * (b - a);
     }
 
-    private static void normalize2(float v[]) {
+    private static void normalize2(float[] v) {
         float s = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1]);
         v[0] = v[0] / s;
         v[1] = v[1] / s;
     }
 
-    static void normalize3(float v[]) {
+    static void normalize3(float[] v) {
         float s = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
         v[0] = v[0] / s;
         v[1] = v[1] / s;

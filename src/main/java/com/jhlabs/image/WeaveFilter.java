@@ -140,6 +140,7 @@ public class WeaveFilter extends PointFilter {
         return shadeCrossings;
     }
 
+    @Override
     public int filterRGB(int x, int y, int rgb) {
         x += xWidth + xGap / 2;
         y += yWidth + yGap / 2;

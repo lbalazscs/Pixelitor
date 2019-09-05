@@ -118,7 +118,7 @@ public class UserDrag {
     }
 
     public boolean isClick() {
-        return ((coStartX == coEndX) && (coStartY == coEndY));
+        return coStartX == coEndX && coStartY == coEndY;
     }
 
     public ImDrag toImDrag() {

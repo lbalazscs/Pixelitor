@@ -70,7 +70,7 @@ public class DiffuseFilter extends TransformFilter {
         sinTable = new float[256];
         cosTable = new float[256];
         for (int i = 0; i < 256; i++) {
-            float angle = ImageMath.TWO_PI * i / 256f;
+            float angle = ImageMath.TWO_PI * i / 256.0f;
             sinTable[i] = (float) (scale * Math.sin(angle));
             cosTable[i] = (float) (scale * Math.cos(angle));
         }

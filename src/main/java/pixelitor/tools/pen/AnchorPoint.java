@@ -72,7 +72,7 @@ public class AnchorPoint extends DraggablePoint {
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
 
-        id = "AP" + (debugCounter++);
+        id = "AP" + debugCounter++;
     }
 
     public AnchorPoint(PPoint p, SubPath subPath) {

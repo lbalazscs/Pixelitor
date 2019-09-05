@@ -85,8 +85,7 @@ public class CloneBrush extends CopyBrush {
         // order, so start with the last transformation
         // that works when there is no scaling/rotating
         AffineTransform transform = AffineTransform.getTranslateInstance(
-                (dx - p.getImX()),
-                (dy - p.getImY()));
+            dx - p.getImX(), dy - p.getImY());
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);

@@ -143,7 +143,7 @@ public class AddNoise extends ParametrizedFilter {
             } else { // desaturate the random pixel
                 int r = (randomInt >>> 16) & 0xFF;
                 int g = (randomInt >>> 8) & 0xFF;
-                int b = (randomInt) & 0xFF;
+                int b = randomInt & 0xFF;
 
                 Color.RGBtoHSB(r, g, b, tmpHSV);
                 float newSaturation = ImageMath.lerp(saturationPercentage, 0.0f, tmpHSV[1]);

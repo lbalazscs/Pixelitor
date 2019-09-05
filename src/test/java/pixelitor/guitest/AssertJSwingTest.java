@@ -3130,7 +3130,7 @@ public class AssertJSwingTest {
 
         ApplicationLauncher
             .application("pixelitor.Pixelitor")
-            .withArgs((new File(inputDir, "a.jpg")).getPath())
+            .withArgs(new File(inputDir, "a.jpg").getPath())
             .start();
 
         new PixelitorEventListener().register();

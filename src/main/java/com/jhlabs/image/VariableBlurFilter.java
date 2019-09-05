@@ -163,9 +163,9 @@ public class VariableBlurFilter extends AbstractBufferedImageOp {
                 int ra;
                 if (blurMask != null) {
 					if (pass == 1) {
-						ra = (int) ((mask[x] & 0xff) * hRadius / 255f);
+                        ra = (int) ((mask[x] & 0xff) * hRadius / 255.0f);
 					} else {
-						ra = (int) ((mask[x] & 0xff) * vRadius / 255f);
+                        ra = (int) ((mask[x] & 0xff) * vRadius / 255.0f);
 					}
                 } else {
 					if (pass == 1) {

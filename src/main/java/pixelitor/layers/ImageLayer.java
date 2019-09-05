@@ -576,7 +576,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                     float maskAlpha = (maskPixel & 0xff) / 255.0f;
                     int imageAlpha = (imagePixel >> 24) & 0xff;
                     int layerAlpha = (int) (imageAlpha * maskAlpha);
-                    return imagePixel & 0x00ffffff | (layerAlpha << 24);
+                    return (imagePixel & 0x00ffffff) | (layerAlpha << 24);
                 }
             }
 
@@ -589,7 +589,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasImBounds();
         Rectangle imageBounds = getImageBounds();
-        boolean needsEnlarging = !(imageBounds.contains(canvasBounds));
+        boolean needsEnlarging = !imageBounds.contains(canvasBounds);
         return needsEnlarging;
     }
 

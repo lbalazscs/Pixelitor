@@ -60,7 +60,7 @@ public class CachedFloatRandom {
     }
 
     public void setSeed(int seed) {
-        assert(seed > 0);
+        assert seed > 0;
         index = seed % CACHE_SIZE;
         instanceRandom.setSeed(seed);
     }

@@ -241,7 +241,7 @@ public enum ShapeType {
 
         @Override
         public Shape getShape(double x, double y, double diameter) {
-            double middleY = (y + diameter / 2.0);
+            double middleY = y + diameter / 2.0;
             ImDrag imDrag = new ImDrag(
                     x,
                     middleY,

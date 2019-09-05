@@ -81,9 +81,9 @@ public class ColorWheel extends ParametrizedFilter {
                                       int cx, int cy, float hueShift,
                                       float saturation, float brightness) {
         for (int x = 0; x < width; x++) {
-            double yDiff = (double) (cy - y);
-            double xDiff = (double) x - cx;
-            float angle = (float) (FastMath.atan2(yDiff, xDiff)) + hueShift;
+            int yDiff = cy - y;
+            int xDiff = x - cx;
+            float angle = (float) FastMath.atan2(yDiff, xDiff) + hueShift;
             float hue = (float) (angle / (2 * Math.PI));
 
             destData[x + y * width] = Color.HSBtoRGB(hue, saturation, brightness);

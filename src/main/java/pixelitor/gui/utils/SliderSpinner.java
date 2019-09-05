@@ -82,7 +82,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         colorsUsed = leftColor != null;
 
         if (textPosition == TextPosition.BORDER) {
-            if ((leftColor != null) && (rightColor != null)) {
+            if (leftColor != null && rightColor != null) {
                 Border gradientBorder = new GradientBorder(leftColor, rightColor);
                 this.setBorder(createTitledBorder(gradientBorder, model.getName()));
             } else {

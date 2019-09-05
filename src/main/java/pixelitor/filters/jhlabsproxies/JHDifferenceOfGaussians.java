@@ -56,7 +56,7 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
             filter = new DoGFilter(NAME);
         }
 
-        if ((src.getWidth() == 1) || (src.getHeight() == 1)) {
+        if (src.getWidth() == 1 || src.getHeight() == 1) {
             // BoxBlurFilter throws ArrayIndexOutOfBoundsException for such images
 
             // Give up. A workaround would be to use a filter that can use another

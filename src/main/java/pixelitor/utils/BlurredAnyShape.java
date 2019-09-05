@@ -115,8 +115,8 @@ public class BlurredAnyShape implements BlurredShape {
 
         // cast first to int in order to avoid fractional blurring
         int numIterations = 3;
-        float hRadius = (float) ((int) (shapeStartX / numIterations));
-        float vRadius = (float) ((int) (shapeStartY / numIterations));
+        float hRadius = (float) (int) (shapeStartX / numIterations);
+        float vRadius = (float) (int) (shapeStartY / numIterations);
         BoxBlurFilter blurFilter = new BoxBlurFilter(
                 hRadius, vRadius, numIterations, "");
         blurFilter.setPremultiplyAlpha(false);

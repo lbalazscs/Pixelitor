@@ -95,18 +95,18 @@ public class RectGuideline {
         Line2D[] lines = new Line2D.Double[4];
 
         // vertical lines
-        x1 = (rect.getX() + sectionWidth);
-        x2 = (rect.getX() + rect.getWidth() - sectionWidth);
+        x1 = rect.getX() + sectionWidth;
+        x2 = rect.getX() + rect.getWidth() - sectionWidth;
         y1 = rect.getY();
-        y2 = (rect.getY() + rect.getHeight());
+        y2 = rect.getY() + rect.getHeight();
         lines[0] = new Line2D.Double(x1, y1, x1, y2);
         lines[1] = new Line2D.Double(x2, y1, x2, y2);
 
         // horizontal lines
         x1 = rect.getX();
-        x2 = (rect.getX() + rect.getWidth());
-        y1 = (rect.getY() + sectionHeight);
-        y2 = (rect.getY() + rect.getHeight() - sectionHeight);
+        x2 = rect.getX() + rect.getWidth();
+        y1 = rect.getY() + sectionHeight;
+        y2 = rect.getY() + rect.getHeight() - sectionHeight;
         lines[2] = new Line2D.Double(x1, y1, x2, y1);
         lines[3] = new Line2D.Double(x1, y2, x2, y2);
 
@@ -127,32 +127,32 @@ public class RectGuideline {
 
         if (rect.getWidth() >= rect.getHeight()) {
             y1 = rect.getY();
-            y2 = (rect.getY() + rect.getHeight());
+            y2 = rect.getY() + rect.getHeight();
 
             // from left
             x1 = rect.getX();
-            x2 = (rect.getX() + rect.getHeight());
+            x2 = rect.getX() + rect.getHeight();
             lines[0] = new Line2D.Double(x1, y1, x2, y2);
             lines[1] = new Line2D.Double(x1, y2, x2, y1);
 
             // from right
-            x1 = (rect.getX() + rect.getWidth());
-            x2 = (rect.getX() + rect.getWidth() - rect.getHeight());
+            x1 = rect.getX() + rect.getWidth();
+            x2 = rect.getX() + rect.getWidth() - rect.getHeight();
             lines[2] = new Line2D.Double(x1, y1, x2, y2);
             lines[3] = new Line2D.Double(x1, y2, x2, y1);
         } else {
             x1 = rect.getX();
-            x2 = (rect.getX() + rect.getWidth());
+            x2 = rect.getX() + rect.getWidth();
 
             // from top
             y1 = rect.getY();
-            y2 = (rect.getY() + rect.getWidth());
+            y2 = rect.getY() + rect.getWidth();
             lines[0] = new Line2D.Double(x1, y1, x2, y2);
             lines[1] = new Line2D.Double(x1, y2, x2, y1);
 
             // from bottom
-            y1 = (rect.getY() + rect.getHeight());
-            y2 = (rect.getY() + rect.getHeight() - rect.getWidth());
+            y1 = rect.getY() + rect.getHeight();
+            y2 = rect.getY() + rect.getHeight() - rect.getWidth();
             lines[2] = new Line2D.Double(x1, y1, x2, y2);
             lines[3] = new Line2D.Double(x1, y2, x2, y1);
         }
@@ -225,7 +225,7 @@ public class RectGuideline {
         Line2D[] lines = new Line2D.Double[3];
         double x1, x2, y1, y2;
 
-        if ((orientation % 2) == 0) {
+        if (orientation % 2 == 0) {
             // diagonal line from top left to bottom right
             x1 = rect.getX();
             y1 = rect.getY();
@@ -277,8 +277,8 @@ public class RectGuideline {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                (center.getX() - arcWidth),
-                (center.getY() - arcHeight),
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
                 arcWidth * 2,
                 arcHeight * 2,
                 angle,
@@ -303,8 +303,8 @@ public class RectGuideline {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                (center.getX() - arcWidth),
-                (center.getY() - arcHeight),
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
                 arcWidth * 2,
                 arcHeight * 2,
                 angle,
@@ -329,8 +329,8 @@ public class RectGuideline {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                (center.getX() - arcWidth),
-                (center.getY() - arcHeight),
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
                 arcWidth * 2,
                 arcHeight * 2,
                 angle,
@@ -355,8 +355,8 @@ public class RectGuideline {
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                (center.getX() - arcWidth),
-                (center.getY() - arcHeight),
+                center.getX() - arcWidth,
+                center.getY() - arcHeight,
                 arcWidth * 2,
                 arcHeight * 2,
                 angle,

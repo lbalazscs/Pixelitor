@@ -36,46 +36,46 @@ public class Gradient extends ArrayColormap implements Cloneable {
     /**
      * Interpolate in RGB space.
      */
-    public final static int RGB = 0x00;
+    public static final int RGB = 0x00;
 
     /**
      * Interpolate hue clockwise.
      */
-    public final static int HUE_CW = 0x01;
+    public static final int HUE_CW = 0x01;
 
     /**
      * Interpolate hue counter clockwise.
      */
-    public final static int HUE_CCW = 0x02;
+    public static final int HUE_CCW = 0x02;
 
 
     /**
      * Interpolate linearly.
      */
-    public final static int LINEAR = 0x10;
+    public static final int LINEAR = 0x10;
 
     /**
      * Interpolate using a spline.
      */
-    public final static int SPLINE = 0x20;
+    public static final int SPLINE = 0x20;
 
     /**
      * Interpolate with a rising circle shape curve.
      */
-    public final static int CIRCLE_UP = 0x30;
+    public static final int CIRCLE_UP = 0x30;
 
     /**
      * Interpolate with a falling circle shape curve.
      */
-    public final static int CIRCLE_DOWN = 0x40;
+    public static final int CIRCLE_DOWN = 0x40;
 
     /**
      * Don't tnterpolate - just use the starting value.
      */
-    public final static int CONSTANT = 0x50;
+    public static final int CONSTANT = 0x50;
 
-    private final static int COLOR_MASK = 0x03;
-    private final static int BLEND_MASK = 0x70;
+    private static final int COLOR_MASK = 0x03;
+    private static final int BLEND_MASK = 0x70;
 
     private int numKnots = 4;
     private int[] xKnots = {

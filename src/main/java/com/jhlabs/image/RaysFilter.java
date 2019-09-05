@@ -186,7 +186,7 @@ public class RaysFilter extends MotionBlurOp {
 
                 if (colormap != null) {
                     int l = r + g + b;
-                    rgb = colormap.getColor(l * strength * (1 / 3f));
+                    rgb = colormap.getColor(l * strength * (1 / 3.0f));
                 } else {
                     r = PixelUtils.max255((int) (r * strength));
                     g = PixelUtils.max255((int) (g * strength));

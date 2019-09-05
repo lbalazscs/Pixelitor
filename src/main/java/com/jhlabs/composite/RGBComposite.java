@@ -26,11 +26,11 @@ public abstract class RGBComposite implements Composite {
 
     protected float extraAlpha;
 
-    public RGBComposite() {
+    protected RGBComposite() {
         this(1.0f);
     }
 
-    public RGBComposite(float alpha) {
+    protected RGBComposite(float alpha) {
         if (alpha < 0.0f || alpha > 1.0f)
             throw new IllegalArgumentException("RGBComposite: alpha must be between 0 and 1");
         this.extraAlpha = alpha;
@@ -40,6 +40,7 @@ public abstract class RGBComposite implements Composite {
         return extraAlpha;
     }
 
+    @Override
     public int hashCode() {
         return Float.floatToIntBits(extraAlpha);
     }
@@ -48,6 +49,7 @@ public abstract class RGBComposite implements Composite {
         this.extraAlpha = extraAlpha;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof RGBComposite))
             return false;
@@ -60,16 +62,17 @@ public abstract class RGBComposite implements Composite {
 
     public abstract static class RGBCompositeContext implements CompositeContext {
 
-        private float alpha;
-        private ColorModel srcColorModel;
-        private ColorModel dstColorModel;
+        private final float alpha;
+        private final ColorModel srcColorModel;
+        private final ColorModel dstColorModel;
 
-        public RGBCompositeContext(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
+        protected RGBCompositeContext(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
             this.alpha = alpha;
             this.srcColorModel = srcColorModel;
             this.dstColorModel = dstColorModel;
         }
 
+        @Override
         public void dispose() {
         }
 
@@ -85,6 +88,7 @@ public abstract class RGBComposite implements Composite {
 
         public abstract void composeRGB(int[] src, int[] dst, float alpha);
 
+        @Override
         public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
             float alpha = this.alpha;
 

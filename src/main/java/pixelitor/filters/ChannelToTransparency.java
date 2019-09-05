@@ -90,7 +90,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 filter = new ChannelToTransparencyFilter(NAME, invert) {
                     @Override
                     int getChannelValue(int rgb) {
-                        int b = (rgb) & 0xFF;
+                        int b = rgb & 0xFF;
                         return b;
                     }
                 };

@@ -91,7 +91,7 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
     }
 
     public boolean isShown() {
-        return (getParent() != null);
+        return getParent() != null;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
             if (a > 0) {
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
-                int b = (rgb) & 0xFF;
+                int b = rgb & 0xFF;
 
                 reds[r]++;
                 greens[g]++;
@@ -137,9 +137,9 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
                 // Add one before taking the logarithm to avoid calculating log(0)
                 // Note that log(1) = 0, which is just perfect
                 // Also multiply with a big number to avoid rounding errors
-                reds[i] = (int) (1000.0 * (Math.log(reds[i] + 1)));
-                greens[i] = (int) (1000.0 * (Math.log(greens[i] + 1)));
-                blues[i] = (int) (1000.0 * (Math.log(blues[i] + 1)));
+                reds[i] = (int) (1000.0 * Math.log(reds[i] + 1));
+                greens[i] = (int) (1000.0 * Math.log(greens[i] + 1));
+                blues[i] = (int) (1000.0 * Math.log(blues[i] + 1));
             }
         }
 

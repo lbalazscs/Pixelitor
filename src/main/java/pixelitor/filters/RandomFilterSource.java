@@ -76,10 +76,9 @@ public class RandomFilterSource {
 
     public Filter getRandom() {
         Filter randomFilter = FilterUtils.getRandomFilter(filter ->
-                (filter != lastFilter
-                        && (!(filter instanceof Fade))
-                        && (!(filter instanceof RandomFilter))
-                        ));
+            filter != lastFilter
+                && !(filter instanceof Fade)
+                && !(filter instanceof RandomFilter));
 
         if (lastFilter != null) { // not the first call
             previousIndex++;

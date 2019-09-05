@@ -70,7 +70,7 @@ public class AngleGradientPaint implements Paint {
     public int getTransparency() {
         int a1 = startColor.getAlpha();
         int a2 = endColor.getAlpha();
-        return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
+        return (a1 & a2) == 0xFF ? OPAQUE : TRANSLUCENT;
     }
 
     private static class AngleGradientPaintContext implements PaintContext {
@@ -191,7 +191,7 @@ public class AngleGradientPaint implements Paint {
 
             // relativeAngle is now between -2*PI and 2*PI, and the -2*PI..0 range is the same as 0..2*PI
 
-            double interpolation = (relativeAngle / (Math.PI * 2)) + 1.0; // between 0..2
+            double interpolation = relativeAngle / (Math.PI * 2) + 1.0; // between 0..2
             interpolation %= 1.0f; // between 0..1
 
             if (cycleMethod == REFLECT) {
@@ -232,7 +232,7 @@ public class AngleGradientPaint implements Paint {
             for (int j = 0; j < height; j++) {
                 int y = startY + j;
                 for (int i = 0; i < width; i++) {
-                    int base = (j * width + i);
+                    int base = j * width + i;
                     int x = startX + i;
                     double interpolation = getInterpolation(x, y);
 

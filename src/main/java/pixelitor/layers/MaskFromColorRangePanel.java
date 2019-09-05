@@ -136,7 +136,7 @@ public class MaskFromColorRangePanel extends JPanel {
 
     private ColorPickerThumbnailPanel getColorPickerPanel(BufferedImage image, Dimension thumbDim) {
         ColorPickerThumbnailPanel colorPickerPanel =
-                new ColorPickerThumbnailPanel(thumb, (c) -> {
+            new ColorPickerThumbnailPanel(thumb, c -> {
                     lastColor = c;
                     updatePreview(c);
                 });

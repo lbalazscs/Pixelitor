@@ -28,7 +28,8 @@ public class CurvesFilter extends TransferFilter {
         curves[2] = new Curve();
         curves[3] = new Curve();
     }
-    
+
+    @Override
     protected void initialize() {
         initialized = true;
         if ( curves.length == 1 )

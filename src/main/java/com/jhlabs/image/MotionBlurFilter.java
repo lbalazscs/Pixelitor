@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
     private float angle = 0.0f;
-    private float falloff = 1.0f;
+    private final float falloff = 1.0f;
     private float distance = 1.0f;
     private float zoom = 0.0f;
     private float rotation = 0.0f;

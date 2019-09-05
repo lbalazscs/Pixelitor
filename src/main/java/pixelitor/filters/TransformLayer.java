@@ -82,7 +82,7 @@ public class TransformLayer extends ParametrizedFilter {
 
         int scaleX = scaleParam.getValue(0);
         int scaleY = scaleParam.getValue(1);
-        if ((scaleX != 100) || (scaleY != 100)) {
+        if (scaleX != 100 || scaleY != 100) {
             transform.translate(centerShiftX, centerShiftY);
             transform.scale(scaleX / 100.0, scaleY / 100.0);
             transform.translate(-centerShiftX, -centerShiftY);
@@ -90,7 +90,7 @@ public class TransformLayer extends ParametrizedFilter {
 
         int shearX = shearParam.getValue(0);
         int shearY = shearParam.getValue(1);
-        if ((shearX != 0) || (shearY != 0)) {
+        if (shearX != 0 || shearY != 0) {
             transform.translate(centerShiftX, centerShiftY);
             transform.shear(shearX / 100.0, shearY / 100.0);
             transform.translate(-centerShiftX, -centerShiftY);

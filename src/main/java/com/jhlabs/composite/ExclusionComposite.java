@@ -26,6 +26,7 @@ public final class ExclusionComposite extends RGBComposite {
         super(alpha);
     }
 
+    @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         return new Context(extraAlpha, srcColorModel, dstColorModel);
     }
@@ -35,6 +36,7 @@ public final class ExclusionComposite extends RGBComposite {
             super(alpha, srcColorModel, dstColorModel);
         }
 
+        @Override
         public void composeRGB(int[] src, int[] dst, float alpha) {
             int w = src.length;
 
@@ -53,7 +55,7 @@ public final class ExclusionComposite extends RGBComposite {
                 dog = dig + multiply255(sg, (255 - dig - dig));
                 dob = dib + multiply255(sb, (255 - dib - dib));
 
-                float a = alpha * sa / 255f;
+                float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
 
                 dst[i] = (int) (a * dor + ac * dir);

@@ -81,8 +81,8 @@ public class RadialWavesFilter extends CenteredTransformFilter {
         float u = (float) (zoomedR * FastMath.cos(angle));
         float v = (float) (zoomedR * FastMath.sin(angle));
 
-        out[0] = (u + cx);
-        out[1] = (v + cy);
+        out[0] = u + cx;
+        out[1] = v + cy;
     }
 
     public void setPhase(float phase) {

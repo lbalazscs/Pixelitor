@@ -16,21 +16,26 @@ limitations under the License.
 
 package com.jhlabs.awt;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 
 public class ShapeStroke implements Stroke {
-	private Shape shapes[];
-	private float advance;
-	private boolean repeat = true;
-	private AffineTransform t = new AffineTransform();
+	private final Shape[] shapes;
+	private final float advance;
+	private final boolean repeat = true;
+	private final AffineTransform t = new AffineTransform();
 	private static final float FLATNESS = 1;
 
 	public ShapeStroke( Shape shapes, float advance ) {
 		this( new Shape[] { shapes }, advance );
 	}
 
-	public ShapeStroke( Shape shapes[], float advance ) {
+	public ShapeStroke(Shape[] shapes, float advance) {
 		this.advance = advance;
 		this.shapes = new Shape[shapes.length];
 
@@ -41,10 +46,11 @@ public class ShapeStroke implements Stroke {
 		}
 	}
 
-	public Shape createStrokedShape( Shape shape ) {
+	@Override
+	public Shape createStrokedShape(Shape shape) {
 		GeneralPath result = new GeneralPath();
 		PathIterator it = new FlatteningPathIterator( shape.getPathIterator( null ), FLATNESS );
-		float points[] = new float[6];
+		float[] points = new float[6];
 		float moveX = 0, moveY = 0;
 		float lastX = 0, lastY = 0;
 		float thisX = 0, thisY = 0;

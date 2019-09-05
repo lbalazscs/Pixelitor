@@ -152,7 +152,7 @@ public final class AppPreferences {
 
         Dimension screen = GUIUtils.getMaxWindowSize();
 
-        if ((width <= 0) || (height <= 0)) {
+        if (width <= 0 || height <= 0) {
             width = screen.width;
             height = screen.height;
         }
@@ -163,7 +163,7 @@ public final class AppPreferences {
             height = screen.height;
         }
 
-        if ((x < 0) || (y < 0)) {
+        if (x < 0 || y < 0) {
             x = 0;
             y = 0;
         }
@@ -355,7 +355,7 @@ public final class AppPreferences {
 
     private static int getDefaultUndoLevels() {
         int sizeInMegaBytes = Utils.getMaxHeapInMegabytes();
-        int retVal = 1 + (sizeInMegaBytes / 50);
+        int retVal = 1 + sizeInMegaBytes / 50;
 
         // rounds up to the nearest multiple of 5
         return ((retVal + 4) / 5) * 5;
@@ -374,7 +374,7 @@ public final class AppPreferences {
         return toolsNode.get(LAST_TOOL_KEY, BrushTool.NAME);
     }
 
-    public static void saveLastToolName() {
+    private static void saveLastToolName() {
         toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getName());
     }
 

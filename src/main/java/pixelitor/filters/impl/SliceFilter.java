@@ -39,7 +39,7 @@ public class SliceFilter extends RotatedEffectFilter {
 
     @Override
     protected double transformY(double ii, double jj) {
-        return (jj + calcShift(ii, shiftHorizontal));
+        return jj + calcShift(ii, shiftHorizontal);
     }
 
     private double calcShift(double coord, double shift) {

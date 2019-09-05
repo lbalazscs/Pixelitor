@@ -24,9 +24,7 @@ import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.filters.Invert;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
 import pixelitor.utils.debug.BufferedImageNode;
 
@@ -120,7 +118,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage createSysCompatibleImage(int width, int height) {
-        assert (width > 0) && (height > 0);
+        assert width > 0 && height > 0;
 
         return graphicsConfiguration.createCompatibleImage(width, height, TRANSLUCENT);
     }
@@ -377,7 +375,7 @@ public class ImageUtils {
 //                int a = (rgb >>> 24) & 0xFF;
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
-                int b = (rgb) & 0xFF;
+                int b = rgb & 0xFF;
                 averageRed += r;
                 averageGreen += g;
                 averageBlue += b;
@@ -1003,7 +1001,7 @@ public class ImageUtils {
         Graphics2D g = image.createGraphics();
         g.setColor(BLACK);
 
-        ZoomLevel zoomLevel = OpenComps.getActiveView().getZoomLevel();
+//        ZoomLevel zoomLevel = OpenComps.getActiveView().getZoomLevel();
 
 //        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 

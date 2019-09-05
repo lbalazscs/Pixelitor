@@ -42,7 +42,7 @@ public final class ToolSettingsPanelContainer extends JPanel {
     }
 
     public void showSettingsFor(Tool tool) {
-        CardLayout cl = (CardLayout) (getLayout());
+        CardLayout cl = (CardLayout) getLayout();
         cl.show(this, tool.getName());
     }
 

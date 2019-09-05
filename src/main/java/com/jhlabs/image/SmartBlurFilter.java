@@ -216,7 +216,8 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
 		return threshold;
 	}
 
-	public String toString() {
-		return "Blur/Smart Blur...";
-	}
+    @Override
+    public String toString() {
+        return "Blur/Smart Blur...";
+    }
 }

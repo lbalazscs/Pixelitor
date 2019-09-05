@@ -25,12 +25,12 @@ import java.awt.image.WritableRaster;
 
 public class MiscCompositeContext implements CompositeContext {
 
-    private int rule;
-    private float alpha;
-    private ColorModel srcColorModel;
-    private ColorModel dstColorModel;
-    private ColorSpace srcColorSpace;
-    private ColorSpace dstColorSpace;
+    private final int rule;
+    private final float alpha;
+    private final ColorModel srcColorModel;
+    private final ColorModel dstColorModel;
+    private final ColorSpace srcColorSpace;
+    private final ColorSpace dstColorSpace;
     private boolean srcNeedsConverting;
     private boolean dstNeedsConverting;
 
@@ -49,6 +49,7 @@ public class MiscCompositeContext implements CompositeContext {
 //		dstNeedsConverting = !dstColorModel.equals(srgbCM);
     }
 
+    @Override
     public void dispose() {
     }
 
@@ -62,6 +63,7 @@ public class MiscCompositeContext implements CompositeContext {
         return a < 0 ? 0 : a > 255 ? 255 : a;
     }
 
+    @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
         float a = 0, ac = 0;
         float alpha = this.alpha;
@@ -334,7 +336,7 @@ public class MiscCompositeContext implements CompositeContext {
                         break;
                 }
 
-                a = alpha * sa / 255f;
+                a = alpha * sa / 255.0f;
                 ac = 1 - a;
 
                 dstPix[i] = (int) (a * dor + ac * dir);

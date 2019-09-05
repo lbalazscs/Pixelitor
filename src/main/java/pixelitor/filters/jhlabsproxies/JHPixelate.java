@@ -99,7 +99,7 @@ public class JHPixelate extends ParametrizedFilter {
         }
 
 //        if ((style == STYLE_3D) || (style == STYLE_GRID_ONLY || (style == STYLE_EMBEDDED))) {
-        if ((style == STYLE_3D) || (style == STYLE_EMBEDDED)) {
+        if (style == STYLE_3D || style == STYLE_EMBEDDED) {
             int width = dest.getWidth();
             int height = dest.getHeight();
 

@@ -212,7 +212,7 @@ public class PaintBucketTool extends Tool {
             // find the last replaceable point to the left
             int scanlineMinX = x - 1;
             int offset = y * imgWidth;
-            while ((scanlineMinX >= 0)
+            while (scanlineMinX >= 0
                     && isSimilar(pixels[scanlineMinX + offset], rgbAtMouse, tolerance)) {
                 scanlineMinX--;
             }
@@ -220,7 +220,7 @@ public class PaintBucketTool extends Tool {
 
             // find the last replaceable point to the right
             int scanlineMaxX = x + 1;
-            while ((scanlineMaxX < img.getWidth())
+            while (scanlineMaxX < img.getWidth()
                     && isSimilar(pixels[scanlineMaxX + offset], rgbAtMouse, tolerance)) {
                 scanlineMaxX++;
             }

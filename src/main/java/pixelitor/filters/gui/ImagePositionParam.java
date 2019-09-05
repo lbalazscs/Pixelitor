@@ -93,7 +93,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     public void setRelativeValues(float relX, float relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
         this.relativeX = relX;
         this.relativeY = relY;
-        if (updateGUI && (paramGUI != null)) {
+        if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
         if (trigger && !isAdjusting) {

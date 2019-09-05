@@ -103,8 +103,8 @@ public class LinearDabsStrategy implements DabsStrategy {
         }
 
         if(drew) {
-            double remainingDx = (endX - x);
-            double remainingDy = (endY - y);
+            double remainingDx = endX - x;
+            double remainingDy = endY - y;
             distFromLastDab = Math.sqrt(remainingDx * remainingDx
                     + remainingDy * remainingDy);
         } else {

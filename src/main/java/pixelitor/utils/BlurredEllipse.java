@@ -102,10 +102,10 @@ public class BlurredEllipse implements BlurredShape {
         double dx2 = dx * dx;
         double dy2 = dy * dy;
 
-        if (dy2 >= (outerRadiusY2 - (outerRadiusY2 * dx2) / outerRadiusX2)) {  // outside
+        if (dy2 >= outerRadiusY2 - outerRadiusY2 * dx2 / outerRadiusX2) {  // outside
             return 1.0;
         }
-        if (dy2 <= (innerRadiusY2 - (innerRadiusY2 * dx2) / innerRadiusX2)) { // innermost region
+        if (dy2 <= innerRadiusY2 - innerRadiusY2 * dx2 / innerRadiusX2) { // innermost region
             return 0.0;
         } else { // between the inner and outer radius
             // we are on an ellipse with unknown a and b semi major/minor axes

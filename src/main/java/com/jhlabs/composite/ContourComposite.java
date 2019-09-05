@@ -29,12 +29,13 @@ import java.awt.image.WritableRaster;
  */
 public final class ContourComposite implements Composite {
 
-    private int offset;
+    private final int offset;
 
     public ContourComposite(int offset) {
         this.offset = offset;
     }
 
+    @Override
     public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints) {
         return new ContourCompositeContext(offset, srcColorModel, dstColorModel);
     }
@@ -53,15 +54,17 @@ public final class ContourComposite implements Composite {
 
 class ContourCompositeContext implements CompositeContext {
 
-    private int offset;
+    private final int offset;
 
     public ContourCompositeContext(int offset, ColorModel srcColorModel, ColorModel dstColorModel) {
         this.offset = offset;
     }
 
+    @Override
     public void dispose() {
     }
 
+    @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
         int x = src.getMinX();
         int y = src.getMinY();

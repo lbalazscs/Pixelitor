@@ -87,7 +87,7 @@ public class Fade extends ParametrizedFilter {
             int a = (rgb >>> 24) & 0xFF;
             int r = (rgb >>> 16) & 0xFF;
             int g = (rgb >>> 8) & 0xFF;
-            int b = (rgb) & 0xFF;
+            int b = rgb & 0xFF;
 
             int prevRGB = prevData[i];
             int prevA = (prevRGB >>> 24) & 0xFF;

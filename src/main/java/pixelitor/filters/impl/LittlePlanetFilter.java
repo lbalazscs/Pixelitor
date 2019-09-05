@@ -48,7 +48,7 @@ public class LittlePlanetFilter extends CenteredTransformFilter {
         if (angle > (2 * Math.PI)) {
             angle -= 2 * Math.PI;
         }
-        float nx = (float) ((angle * srcWidth) / (2 * Math.PI));
+        float nx = (float) (angle * srcWidth / (2 * Math.PI));
         float ratio = (float) (r / radius);
         float correctedRatio = ImageMath.bias(ratio, innerZoom);
         float ny = correctedRatio * srcHeight;

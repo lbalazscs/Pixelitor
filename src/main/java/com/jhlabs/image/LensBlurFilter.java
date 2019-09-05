@@ -29,7 +29,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
     private float radius = 10;
     private float bloom = 2;
     private float bloomThreshold = 192;
-    private float angle = 0;
+    private final float angle = 0;
     private int sides = 5;
 
     public LensBlurFilter(String filterName) {
@@ -167,8 +167,8 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         int i = 0;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                double dx = x - w / 2f;
-                double dy = y - h / 2f;
+                double dx = x - w / 2.0f;
+                double dy = y - h / 2.0f;
                 double r = dx * dx + dy * dy;
                 double f = r < r2 ? 1 : 0;
                 if (f != 0) {

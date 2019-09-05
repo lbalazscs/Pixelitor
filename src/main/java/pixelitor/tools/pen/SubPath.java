@@ -81,7 +81,7 @@ public class SubPath implements Serializable {
         assert comp != null;
         this.path = path;
         this.comp = comp;
-        id = "SP" + (debugCounter++);
+        id = "SP" + debugCounter++;
     }
 
     public SubPath copyForUndo(Path copyParent) {

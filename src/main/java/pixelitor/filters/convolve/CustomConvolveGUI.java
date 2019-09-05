@@ -223,10 +223,10 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
     }
 
     private void init3x3Presets() {
-        initPreset("Corner Blur", (new float[]{
+        initPreset("Corner Blur", new float[]{
                 0.25f, 0.0f, 0.25f,
                 0.0f, 0.0f, 0.0f,
-                0.25f, 0.0f, 0.25f}));
+            0.25f, 0.0f, 0.25f});
 
         initPreset("\"Gaussian\" Blur", new float[]{
                 1 / 16.0f, 2 / 16.0f, 1 / 16.0f,

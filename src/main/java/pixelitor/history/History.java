@@ -145,7 +145,7 @@ public class History {
                 rect
         );
 
-        assert (origImage != null);
+        assert origImage != null;
         if (rect.isEmpty()) {
             return null;
         }

@@ -201,7 +201,7 @@ public class FractalTree extends ParametrizedFilter {
             } else {
                 g.setPaint(new GradientPaint(
                         (float) x1, (float) y1, colorLookup[depth],
-                        (float) x2, (float) y2, colorLookup[(nextDepth)]));
+                    (float) x2, (float) y2, colorLookup[nextDepth]));
             }
         } else {
             g.setColor(colorLookup[depth]);

@@ -955,12 +955,12 @@ public class Composition implements Serializable {
     }
 
     public boolean hasSelection() {
-        return (selection != null);
+        return selection != null;
     }
 
     @VisibleForTesting
     public boolean hasBuiltSelection() {
-        return (builtSelection != null);
+        return builtSelection != null;
     }
 
     /**
@@ -968,7 +968,7 @@ public class Composition implements Serializable {
      * even if the selection is not yet finished
      */
     public boolean showsSelection() {
-        return (selection != null || builtSelection != null);
+        return selection != null || builtSelection != null;
     }
 
     /**
@@ -1053,7 +1053,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActive() {
-        return (OpenComps.getActiveCompOrNull() == this);
+        return OpenComps.getActiveCompOrNull() == this;
     }
 
     public void activeLayerToCanvasSize() {

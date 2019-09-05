@@ -16,8 +16,9 @@
  */
 package pixelitor.filters.impl;
 
-import net.jafama.FastMath;
 import pixelitor.filters.GlassTiles;
+
+import static net.jafama.FastMath.tan;
 
 /**
  * The implementation of the {@link GlassTiles} filter.
@@ -54,12 +55,12 @@ public class TilesFilter extends RotatedEffectFilter {
 
     @Override
     protected double transformX(double ii, double jj) {
-        return ii + (curvatureX * FastMath.tan(ii * sizeX - shiftX / (double) sizeX));
+        return ii + (curvatureX * tan(ii * sizeX - shiftX / (double) sizeX));
     }
 
     @Override
     protected double transformY(double ii, double jj) {
-        return jj + (curvatureY * FastMath.tan(jj * sizeY - shiftY / (double) sizeY));
+        return jj + (curvatureY * tan(jj * sizeY - shiftY / (double) sizeY));
     }
 
     public void setShiftX(float shiftX) {

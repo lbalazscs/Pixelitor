@@ -70,7 +70,7 @@ public class Path implements Serializable {
         if (setAsActive) {
             comp.setActivePath(this);
         }
-        id = "P" + (debugCounter++);
+        id = "P" + debugCounter++;
         buildState = BuildState.NO_INTERACTION;
     }
 

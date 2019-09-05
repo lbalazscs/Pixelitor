@@ -112,7 +112,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private boolean pixelsSelected() {
-        return (pixelPercentChooser1.getSelectedIndex() == 0);
+        return pixelPercentChooser1.getSelectedIndex() == 0;
     }
 
     private boolean constrainProportions() {
