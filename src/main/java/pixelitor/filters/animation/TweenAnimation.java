@@ -24,6 +24,8 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.io.File;
 
+import static java.nio.file.Files.isWritable;
+
 public class TweenAnimation {
     private ParametrizedFilter filter;
     private ParamSetState initialState;
@@ -106,7 +108,17 @@ public class TweenAnimation {
             }
         } else { // file
             if (output.exists()) {
-                return showFileExistsDialog(dialogParent);
+                boolean overwrite = showFileExistsDialog(dialogParent);
+                if (overwrite) {
+                    if (isWritable(output.toPath())) {
+                        return true;
+                    } else {
+                        Dialogs.showFileNotWritableDialog(output);
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             } else {
                 return true;
             }

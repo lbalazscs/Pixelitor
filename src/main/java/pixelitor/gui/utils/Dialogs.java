@@ -36,6 +36,7 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.io.File;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CompletionException;
@@ -138,6 +139,17 @@ public class Dialogs {
         GlobalEventWatch.setDialogActive(true);
         JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalEventWatch.setDialogActive(false);
+    }
+
+    public static void showFileNotWritableDialog(File file) {
+        showFileNotWritableDialog(getParent(), file);
+    }
+
+    public static void showFileNotWritableDialog(Component parent, File file) {
+        showErrorDialog(parent, "File not writable",
+            format("<html>The file <b>%s</b> is not writable." +
+                "<br>To keep your changes, save the image with a new name or in another folder.", file
+                .getAbsolutePath()));
     }
 
     public static void showWarningDialog(String title, String msg) {

@@ -327,11 +327,11 @@ public class OpenComps {
 
         if (!file.exists()) {
             String msg = format(
-                "The image '%s' cannot be reloaded because the file\n" +
-                    "%s\n" +
+                "<html>The image '%s' cannot be reloaded because the file<br>" +
+                    "<b>%s</b><br>" +
                     "does not exist anymore.",
                 comp.getName(), file.getAbsolutePath());
-            Messages.showError("No file found", msg);
+            Messages.showError("File not found", msg);
             return;
         }
 

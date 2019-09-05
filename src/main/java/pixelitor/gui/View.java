@@ -130,7 +130,7 @@ public class View extends JComponent
         History.addEdit(edit);
 
         String msg = format(
-                "The image '%s' was reloaded from the file %s.",
+            "<html>The image '%s' was reloaded from the file <b>%s</b>.",
                 newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
 

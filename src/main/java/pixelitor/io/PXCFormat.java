@@ -34,6 +34,7 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -124,7 +125,7 @@ public class PXCFormat {
                 }
             }
         } catch (IOException e) {
-            Messages.showException(e);
+            throw new UncheckedIOException(e);
         }
         mainPT.finished();
         mainPT = null;

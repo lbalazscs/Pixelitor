@@ -76,7 +76,7 @@ public class Messages {
 
     public static void showFilesSavedMessage(int numFiles, File dir) {
         assert dir.isDirectory();
-        String msg = numFiles + " files saved to " + dir.getAbsolutePath();
+        String msg = "<html>" + numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>";
         showInStatusBar(msg);
     }
 

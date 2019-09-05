@@ -20,6 +20,7 @@ package pixelitor.io;
 import pixelitor.Composition;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -38,6 +39,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
+import static java.nio.file.Files.isWritable;
 import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
@@ -152,7 +154,8 @@ public class OpenSave {
     }
 
     /**
-     * Returns true if the file was saved, false if the user cancels the saving
+     * Returns true if the file was saved,
+     * false if the user cancels the saving or if it could not be saved
      */
     public static boolean save(Composition comp, boolean saveAs) {
         boolean needsFileChooser = saveAs || (comp.getFile() == null);
@@ -160,6 +163,12 @@ public class OpenSave {
             return FileChoosers.saveWithChooser(comp);
         } else {
             File file = comp.getFile();
+            if (file.exists()) { // if it was not deleted in the meantime...
+                if (!isWritable(file.toPath())) {
+                    Dialogs.showFileNotWritableDialog(file);
+                    return false;
+                }
+            }
             OutputFormat outputFormat = OutputFormat.fromFile(file);
             SaveSettings saveSettings = new SaveSettings(outputFormat, file);
             comp.saveAsync(saveSettings, true);
@@ -240,7 +249,7 @@ public class OpenSave {
         CompletableFuture
                 .supplyAsync(() -> exportLayersToPNG(comp), IOThread.getExecutor())
                 .thenAcceptAsync(numImg -> Messages.showInStatusBar(
-                        "Saved " + numImg + " images to " + Dirs.getLastSave())
+                    "<html>Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
                         , EventQueue::invokeLater)
                 .exceptionally(Messages::showExceptionOnEDT);
     }

@@ -55,8 +55,19 @@ public class TrackedIO {
                              File file) throws IOException {
         ProgressTracker pt = new StatusBarProgressTracker("Writing " + file.getName(), 100);
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
-            writeToIOS(img, ios, formatName, pt);
+            if (ios != null) {
+                writeToIOS(img, ios, formatName, pt);
+            } else {
+                throwNoIOSErrorFor(file);
+            }
         }
+    }
+
+    public static void throwNoIOSErrorFor(File file) throws IOException {
+        // sadly createImageOutputStream swallows the original IO exception
+        // for IO errors like "Access is denied" and returns null,
+        // so we can only throw a generic exception
+        throw new IOException("Could not save to " + file.getPath());
     }
 
     public static void writeToStream(BufferedImage img,
@@ -64,7 +75,11 @@ public class TrackedIO {
                                      String formatName,
                                      ProgressTracker pt) throws IOException {
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
-            writeToIOS(img, ios, formatName, pt);
+            if (ios != null) {
+                writeToIOS(img, ios, formatName, pt);
+            } else {
+                throw new IOException("could not open ImageOutputStream");
+            }
         }
     }
 
@@ -73,9 +88,10 @@ public class TrackedIO {
                                    String formatName,
                                    ProgressTracker pt) throws IOException {
         assert !EventQueue.isDispatchThread();
+        assert ios != null;
 
         ImageTypeSpecifier type =
-                ImageTypeSpecifier.createFromRenderedImage(img);
+            ImageTypeSpecifier.createFromRenderedImage(img);
         Iterator<ImageWriter> writers = ImageIO.getImageWriters(type, formatName);
 
         if (!writers.hasNext()) {
@@ -101,7 +117,7 @@ public class TrackedIO {
 
     public static BufferedImage read(File file) throws IOException {
         ProgressTracker pt = new StatusBarProgressTracker(
-                "Reading " + file.getName(), 100);
+            "Reading " + file.getName(), 100);
 
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
@@ -187,7 +203,7 @@ public class TrackedIO {
                     // the image is shrunk by 2x or greater
                     BufferedImage image = reader.read(0);
                     BufferedImage thumb = createThumbnail(image,
-                            Math.min(thumbMaxWidth, thumbMaxHeight), null);
+                        Math.min(thumbMaxWidth, thumbMaxHeight), null);
                     return new ThumbInfo(thumb, imgWidth, imgHeight);
                 }
 
@@ -200,7 +216,7 @@ public class TrackedIO {
 
                 ImageReadParam imageReaderParams = reader.getDefaultReadParam();
                 int subsampling = calcSubsamplingCols(imgWidth, imgHeight,
-                        thumbMaxWidth, thumbMaxHeight);
+                    thumbMaxWidth, thumbMaxHeight);
 
                 imageReaderParams.setSourceSubsampling(subsampling, subsampling, 0, 0);
                 BufferedImage image = reader.read(0, imageReaderParams);

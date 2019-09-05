@@ -1185,17 +1185,23 @@ public class Composition implements Serializable {
 
         // set to not dirty already at the beginning of the saving process,
         // so that subsequent closing does not trigger another, parallel save
+        boolean wasDirty = isDirty();
         setDirty(false);
 
         return CompletableFuture
-                .runAsync(saveTask,
-                        IOThread.getExecutor())
-                .thenAcceptAsync(v -> afterSaveActions(file, addToRecentMenus),
-                        EventQueue::invokeLater)
-                .exceptionally(Messages::showExceptionOnEDT);
+            .runAsync(saveTask, IOThread.getExecutor())
+            .handle((v, e) -> {
+                if (e != null) {
+                    Messages.showExceptionOnEDT(e);
+                    setDirty(wasDirty);
+                } else {
+                    EventQueue.invokeLater(() -> afterSuccessfulSaveActions(file, addToRecentMenus));
+                }
+                return null;
+            });
     }
 
-    private void afterSaveActions(File file, boolean addToRecentMenus) {
+    private void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
         setFile(file);

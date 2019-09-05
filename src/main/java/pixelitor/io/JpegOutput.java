@@ -49,10 +49,11 @@ public final class JpegOutput {
 
     public static void writeJPG(BufferedImage image, File file, JpegSettings settings) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-        if (ios != null) {
-            ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
-            writeJPGtoStream(image, ios, settings, tracker);
+        if (ios == null) {
+            TrackedIO.throwNoIOSErrorFor(file);
         }
+        ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+        writeJPGtoStream(image, ios, settings, tracker);
     }
 
     public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegSettings settings, ProgressTracker pt) {

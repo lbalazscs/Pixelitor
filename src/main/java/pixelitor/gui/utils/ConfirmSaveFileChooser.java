@@ -20,6 +20,8 @@ package pixelitor.gui.utils;
 import javax.swing.*;
 import java.io.File;
 
+import static java.nio.file.Files.isWritable;
+
 /**
  * A save file chooser that confirms before overwriting a file
  */
@@ -37,7 +39,12 @@ public class ConfirmSaveFileChooser extends JFileChooser {
         File f = getSelectedFile();
         if (f.exists()) {
             String msg = f.getName() + " exists already. Overwrite?";
-            if (!Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg)) {
+            boolean overWrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
+            if (!overWrite) {
+                return;
+            }
+            if (!isWritable(f.toPath())) {
+                Dialogs.showFileNotWritableDialog(this, f);
                 return;
             }
         }
