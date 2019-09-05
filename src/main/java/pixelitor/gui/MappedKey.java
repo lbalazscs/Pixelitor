@@ -81,4 +81,15 @@ public class MappedKey {
         }
         actionMap.put(actionMapKey, action);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getClass().getSimpleName());
+        sb.append("{ actionMapKey='").append(actionMapKey).append('\'');
+        sb.append(", activationChar=").append(activationChar);
+        sb.append(", caseInsensitive=").append(caseInsensitive);
+        sb.append(", keyStroke=").append(keyStroke);
+        sb.append('}');
+        return sb.toString();
+    }
 }

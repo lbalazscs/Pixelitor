@@ -19,6 +19,8 @@ package pixelitor.menus.view;
 import pixelitor.layers.LayersContainer;
 import pixelitor.utils.AppPreferences;
 
+import java.awt.event.ActionEvent;
+
 /**
  * The action that either shows or hides the layers,
  * depending on the current visibility
@@ -41,7 +43,7 @@ public class ShowHideLayersAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean value) {
+    public void setVisibility(boolean value, ActionEvent e) {
         AppPreferences.WorkSpace.setLayersVisibility(value);
     }
 }
