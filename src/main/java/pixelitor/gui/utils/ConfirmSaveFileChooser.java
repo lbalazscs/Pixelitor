@@ -23,22 +23,28 @@ import java.io.File;
 import static java.nio.file.Files.isWritable;
 
 /**
- * A save file chooser that confirms before overwriting a file
+ * A save file chooser that confirms before overwriting a file,
+ * and also does some other validations (valid file name, writable file).
  */
 public class ConfirmSaveFileChooser extends JFileChooser {
+    private static final char[] INVALID_CHARACTERS =
+        {'`', '?', '*', '\\', '<', '>', '|', '\"', ':'};
+
     public ConfirmSaveFileChooser(File currentDir) {
         super(currentDir);
-    }
-
-    public ConfirmSaveFileChooser(String currentDirPath) {
-        super(currentDirPath);
     }
 
     @Override
     public void approveSelection() {
         File f = getSelectedFile();
+        String fileName = f.getName();
+
+        if (invalidFileName(fileName)) {
+            return;
+        }
+
         if (f.exists()) {
-            String msg = f.getName() + " exists already. Overwrite?";
+            String msg = fileName + " exists already. Overwrite?";
             boolean overWrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
             if (!overWrite) {
                 return;
@@ -48,6 +54,21 @@ public class ConfirmSaveFileChooser extends JFileChooser {
                 return;
             }
         }
+
         super.approveSelection();
+    }
+
+    // an incomplete check but it should cover the most common cases
+    private boolean invalidFileName(String fileName) {
+        for (char ch : INVALID_CHARACTERS) {
+            if (fileName.indexOf(ch) != -1) {
+                // no HTML in the message, because then the display
+                // of the < and > characters becomes problematic
+                Dialogs.showErrorDialog(this, "Invalid filename",
+                    "The file name cannot contain the character " + ch + ".");
+                return true;
+            }
+        }
+        return false;
     }
 }
