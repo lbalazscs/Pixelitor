@@ -116,7 +116,12 @@ public class GlobalEventWatch {
                 }
                 break;
             case KeyEvent.VK_SPACE:
-                if (!dialogActive) {
+                // Alt-space is not treated as space-down because on Windows
+                // this opens the system menu, and we get the space-pressed
+                // event, but not the space released-event, and the app gets
+                // stuck in Hand mode, which looks like a freeze when there
+                // are no scrollbars. See issue #29
+                if (!dialogActive && !e.isAltDown()) {
                     keyListener.spacePressed();
                     spaceDown = true;
                     e.consume();
