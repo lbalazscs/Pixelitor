@@ -151,6 +151,11 @@ public abstract class PPoint {
         return view.getComp();
     }
 
+    @Override
+    public String toString() {
+        return String.format("[imX = %.1f, imY = %.1f]", imX, imY);
+    }
+
     /**
      * A lazy {@link PPoint}, which converts component
      * space coordinates to image space coordinates only

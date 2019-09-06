@@ -31,10 +31,18 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
  * The brush used by the Clone Tool
  */
 public class CloneBrush extends CopyBrush {
-    private double srcX;
-    private double srcY;
+    // The coordinates of the original source relative to the source image.
+    // The actually used source coordinates change during a cloning stroke.
+    private double origSrcX;
+    private double origSrcY;
+
+    // The relative distances between the source and destination coordinates.
+    // These do not change during a cloning stroke.
     private double dx;
     private double dy;
+
+    // In aligned mode dx and dy don't change for new cloning strokes,
+    // only after a new source point is set
     private boolean aligned = true;
 
     // if a new source point was just set, the distances
@@ -51,12 +59,15 @@ public class CloneBrush extends CopyBrush {
 
     public void setSource(BufferedImage image, double x, double y) {
         this.sourceImage = image;
-        this.srcX = x;
-        this.srcY = y;
+        this.origSrcX = x;
+        this.origSrcY = y;
         newSourcePointWasJustSet = true;
     }
 
-    // marks the point where the cloning was started
+    /**
+     * Marks the point where the cloning was started.
+     * Called at the beginning of a new cloning stroke
+     */
     public void setCloningDestPoint(PPoint p) {
         double destX = p.getImX();
         double destY = p.getImY();
@@ -70,31 +81,39 @@ public class CloneBrush extends CopyBrush {
         newSourcePointWasJustSet = false;
 
         if (reinitializeDistance) {
-            this.dx = -srcX + destX + radius;
-            this.dy = -srcY + destY + radius;
+            this.dx = destX - origSrcX;
+            this.dy = destY - origSrcY;
         }
     }
 
+    /**
+     * Recalculates the brush stamp image before each dab
+     */
     @Override
     void setupBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();
 
         type.beforeDrawImage(g);
 
+        // the current sampling coordinates relative to the source image
+        double currSrcX = dx - p.getImX();
+        double currSrcY = dy - p.getImY();
+
+        // Now calculate the transformation from the source to the brush image.
         // Concatenated transformations have a last-specified-first-applied
         // order, so start with the last transformation
         // that works when there is no scaling/rotating
         AffineTransform transform = AffineTransform.getTranslateInstance(
-            dx - p.getImX(), dy - p.getImY());
+            currSrcX + radius, currSrcY + radius);
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             // we need to scale/rotate the image
             // around the source point, so translate first
-            transform.translate(srcX, srcY);
+            transform.translate(origSrcX, origSrcY);
             transform.scale(scaleX, scaleY);
             transform.rotate(rotate);
-            transform.translate(-srcX, -srcY);
+            transform.translate(-origSrcX, -origSrcY);
         }
 
         g.drawImage(sourceImage, transform, null);
@@ -136,8 +155,8 @@ public class CloneBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDouble("srcX", srcX);
-        node.addDouble("srcY", srcY);
+        node.addDouble("origSrcX", origSrcX);
+        node.addDouble("origSrcY", origSrcY);
         node.addDouble("dx", dx);
         node.addDouble("dy", dy);
         node.addDouble("scaleX", scaleX);
