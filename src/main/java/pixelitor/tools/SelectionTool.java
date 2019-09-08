@@ -222,6 +222,24 @@ public class SelectionTool extends DragTool {
                 "selection is outside";
     }
 
+    @Override
+    public void altPressed() {
+        if (!altDown && !altMeansSubtract && userDrag != null && userDrag.isDragging()) {
+            userDrag.setStartFromCenter(true);
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
+        }
+        altDown = true;
+    }
+
+    @Override
+    public void altReleased() {
+        if (!altMeansSubtract && userDrag != null && userDrag.isDragging()) {
+            userDrag.setStartFromCenter(false);
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
+        }
+        altDown = false;
+    }
+
     private static void deselect(Composition comp, boolean addToHistory) {
         if (comp.hasSelection()) {
             comp.deselect(addToHistory);

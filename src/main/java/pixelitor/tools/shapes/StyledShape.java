@@ -34,6 +34,7 @@ import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -44,7 +45,6 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.tools.shapes.ShapesTool.STROKE_FOR_OPEN_SHAPES;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
 /**
@@ -52,6 +52,8 @@ import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
  * that can paint itself on a given {@link Graphics2D}
  */
 public class StyledShape implements Cloneable {
+    private static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
+
     private final ShapeSettings settings;
     private ShapeType shapeType;
     private Shape shape; // the current shape, in image-space
@@ -149,12 +151,13 @@ public class StyledShape implements Cloneable {
         return fillPaintType != NONE;
     }
 
-    public void setImDrag(ImDrag imDrag) {
+    public void updateFromDrag(UserDrag userDrag) {
         assert !insideBox;
 
-        if (imDrag.isClick()) {
+        if (userDrag.isClick()) {
             return;
         }
+        ImDrag imDrag = userDrag.toImDrag();
 
         this.origImDrag = imDrag;
         unTransformedShape = shapeType.getShape(imDrag);

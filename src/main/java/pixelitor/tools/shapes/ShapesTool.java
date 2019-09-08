@@ -40,7 +40,6 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -68,14 +67,12 @@ public class ShapesTool extends DragTool {
 
     private JDialog effectsDialog;
 
-    public static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
-
     private StyledShape styledShape;
     private TransformBox transformBox;
 
     private ShapesToolState state = NO_INTERACTION;
 
-    private final Action convertAction = new AbstractAction("Convert to Selection...") {
+    private final Action convertToSelectionAction = new AbstractAction("Convert to Selection...") {
         @Override
         public void actionPerformed(ActionEvent e) {
             convertToSelection();
@@ -90,7 +87,7 @@ public class ShapesTool extends DragTool {
             Cursors.DEFAULT, true, true,
             false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
-        convertAction.setEnabled(false);
+        convertToSelectionAction.setEnabled(false);
     }
 
     @Override
@@ -107,7 +104,7 @@ public class ShapesTool extends DragTool {
         settingsPanel.addButton("Effects...",
             e -> showEffectsDialog());
 
-        settingsPanel.addButton(convertAction, "convertToSelection",
+        settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
             "Convert the active shape to a selection");
 
         updateStrokeEnabledState();
@@ -156,7 +153,7 @@ public class ShapesTool extends DragTool {
         Composition comp = e.getComp();
 
         assert styledShape != null;
-        styledShape.setImDrag(userDrag.toImDrag());
+        styledShape.updateFromDrag(userDrag);
         // this will trigger paintOverLayer, therefore the continuous drawing of the shape
         // TODO it could be optimized not to repaint the whole image, however
         // it is not easy as some shapes extend beyond their drag rectangle
@@ -204,12 +201,40 @@ public class ShapesTool extends DragTool {
         }
     }
 
+    @Override
+    public void altPressed() {
+        if (!altDown && state == INITIAL_DRAG && userDrag.isDragging()) {
+            userDrag.setStartFromCenter(true);
+
+            assert styledShape != null;
+            styledShape.updateFromDrag(userDrag);
+
+            Composition comp = OpenComps.getActiveCompOrNull();
+            comp.imageChanged(REPAINT);
+        }
+        altDown = true;
+    }
+
+    @Override
+    public void altReleased() {
+        if (state == INITIAL_DRAG && userDrag.isDragging()) {
+            userDrag.setStartFromCenter(false);
+
+            assert styledShape != null;
+            styledShape.updateFromDrag(userDrag);
+
+            Composition comp = OpenComps.getActiveCompOrNull();
+            comp.imageChanged(REPAINT);
+        }
+        altDown = false;
+    }
+
     private void setState(ShapesToolState newState) {
         state = newState;
 
         assert state.isOK(this);
 
-        convertAction.setEnabled(newState == TRANSFORM);
+        convertToSelectionAction.setEnabled(newState == TRANSFORM);
     }
 
     /**
@@ -381,7 +406,7 @@ public class ShapesTool extends DragTool {
     }
 
     /**
-     * Restores a previously deleted box as part of an undo/redo operation
+     * Restores a previously removed transform box as part of an undo/redo operation
      */
     public void restoreBox(StyledShape shape, TransformBox box) {
         // at this point we could have an active StyledShape, if
@@ -406,7 +431,7 @@ public class ShapesTool extends DragTool {
         assert state == TRANSFORM : "state = " + state;
 
         this.styledShape = styledShape;
-        transformBox.setTransformListener(styledShape::transform);
+        transformBox.replaceTransformListener(styledShape::transform);
         settings.restoreFrom(styledShape);
     }
 
@@ -414,28 +439,26 @@ public class ShapesTool extends DragTool {
     protected void toolEnded() {
         super.toolEnded();
 
-        // finalize existing box
-        if (transformBox != null) {
-            assert styledShape != null;
-            assert state == TRANSFORM : "state = " + state;
-            finalizeShape(OpenComps.getActiveCompOrNull());
-        }
+        finalizeBoxIfExists(OpenComps.getActiveCompOrNull());
 
         resetInitialState();
     }
 
     @Override
     public void compActivated(View oldCV, View newCV) {
-        // finalize existing box
-        if (transformBox != null) {
-            assert styledShape != null;
-            assert state == TRANSFORM : "state = " + state;
-            finalizeShape(oldCV.getComp());
-        } else {
-            assert styledShape == null;
+        if (oldCV != null) {
+            finalizeBoxIfExists(oldCV.getComp());
         }
 
         super.compActivated(oldCV, newCV);
+    }
+
+    private void finalizeBoxIfExists(Composition comp) {
+        if (transformBox != null) {
+            assert styledShape != null;
+            assert state == TRANSFORM : "state = " + state;
+            finalizeShape(comp);
+        }
     }
 
     @VisibleForTesting

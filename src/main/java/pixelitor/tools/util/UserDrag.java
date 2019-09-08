@@ -320,8 +320,8 @@ public class UserDrag {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
             x = coEndX - displayBgWidth / 2.0
-                    + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                    * coDx / (double) displayBgWidth);
+                + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                * coDx / (double) displayBgWidth);
         }
         double y;
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
@@ -339,8 +339,8 @@ public class UserDrag {
         } else {
             // display it so that it has no sudden jumps
             y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
-                    + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                    * coDy / (double) DragDisplay.TWO_LINER_BG_HEIGHT);
+                + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                * coDy / (double) DragDisplay.TWO_LINER_BG_HEIGHT);
         }
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 
@@ -350,6 +350,6 @@ public class UserDrag {
     @Override
     public String toString() {
         return format("(%.2f, %.2f) => (%.2f, %.2f)",
-                coStartX, coStartY, coEndX, coEndY);
+            coStartX, coStartY, coEndX, coEndY);
     }
 }

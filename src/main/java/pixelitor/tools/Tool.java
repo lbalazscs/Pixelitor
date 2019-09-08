@@ -46,7 +46,9 @@ import java.awt.geom.AffineTransform;
  * mouse and key events and a {@link Composition}
  */
 public abstract class Tool implements KeyListener {
-    private boolean altDown = false;
+    // holding the alt key down generates continuously
+    // altPressed calls, but only the first one is relevant
+    protected boolean altDown = false;
 
     private ToolButton toolButton;
 

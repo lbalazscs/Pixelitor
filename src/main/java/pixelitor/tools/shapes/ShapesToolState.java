@@ -24,7 +24,7 @@ package pixelitor.tools.shapes;
  */
 public enum ShapesToolState {
     /**
-     * The initial state and the state after Esc
+     * The initial state and the state after finalizing the shape
      */
     NO_INTERACTION {
         @Override
@@ -42,7 +42,7 @@ public enum ShapesToolState {
         }
     },
     /**
-     * The state when transform box is visible
+     * The state when the transform box is visible
      */
     TRANSFORM {
         @Override

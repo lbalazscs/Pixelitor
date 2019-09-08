@@ -31,11 +31,16 @@ import java.awt.Stroke;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
 
+/**
+ * The GUI-independent settings associated with a shape.
+ * They are in a separate class in the anticipation
+ * of a possible 'shape layer' feature.
+ */
 public class ShapeSettings {
     private boolean regenerate = true;
 
     private final EnumComboBoxModel<ShapeType> typeModel
-            = new EnumComboBoxModel<>(ShapeType.class);
+        = new EnumComboBoxModel<>(ShapeType.class);
     private final EnumComboBoxModel<TwoPointPaintType> fillPaintModel
         = new EnumComboBoxModel<>(TwoPointPaintType.class);
     private final EnumComboBoxModel<TwoPointPaintType> strokePaintModel

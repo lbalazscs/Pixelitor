@@ -24,16 +24,16 @@ import java.awt.geom.Rectangle2D;
  * The abstract JDK {@link Dimension2D} class doesn't have
  * a subclass with double precision in the JDK, so this is one.
  */
-public class DoubleDim2D extends Dimension2D {
+public class DDimension extends Dimension2D {
     private double width;
     private double height;
 
-    public DoubleDim2D(double width, double height) {
+    public DDimension(double width, double height) {
         this.width = width;
         this.height = height;
     }
 
-    public DoubleDim2D(Rectangle2D rect) {
+    public DDimension(Rectangle2D rect) {
         this.width = rect.getWidth();
         this.height = rect.getHeight();
     }

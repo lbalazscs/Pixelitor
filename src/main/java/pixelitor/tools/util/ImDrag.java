@@ -281,7 +281,7 @@ public class ImDrag {
 
     @Override
     public String toString() {
-        return format("(%.2f, %.2f) => (%.2f, %.2f)",
-                startX, startY, endX, endY);
+        return format("(%.2f, %.2f) => (%.2f, %.2f), center start = %s",
+            startX, startY, endX, endY, startFromCenter);
     }
 }

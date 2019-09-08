@@ -29,9 +29,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 /**
- * A tool where only matters where the user
- * started dragging and where the user finished dragging,
- * and not the intermediate mouse point positions.
+ * A tool where where only the drag start and end positions
+ * matter, and not the intermediate mouse point positions.
  */
 public abstract class DragTool extends Tool {
     protected UserDrag userDrag;
