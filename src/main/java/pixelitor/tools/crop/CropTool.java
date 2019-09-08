@@ -87,11 +87,11 @@ public class CropTool extends DragTool {
 
     public CropTool() {
         super("Crop", 'c', "crop_tool_icon.png",
-                "<b>drag</b> to start, " +
-                        "hold down <b>SPACE</b> to move the entire region. " +
+            "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
+                "Holding down <b>SPACE</b> moves the entire region. " +
                         "After the handles appear: " +
-                        "<b>Shift-drag</b> the handles to keep the aspect ratio. " +
-                        "<b>Double-click</b> to crop, or press <b>Esc</b> to cancel.",
+                "<b>Shift-drag</b> keeps the aspect ratio. " +
+                "<b>Double-click</b> crops, <b>Esc</b> cancels.",
                 Cursors.DEFAULT, false,
                 true, false, ClipStrategy.CUSTOM);
         spaceDragStartPoint = true;
@@ -250,7 +250,11 @@ public class CropTool extends DragTool {
     public void ongoingDrag(PMouseEvent e) {
         if (state == TRANSFORM) {
             cropBox.mouseDragged(e);
+        } else if (userDrag != null) {
+            userDrag.setStartFromCenter(e.isAltDown());
         }
+        // in the USER_DRAG state this will also
+        // cause the painting of the darkening overlay
         e.repaint();
     }
 
