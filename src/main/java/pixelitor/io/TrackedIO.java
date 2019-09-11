@@ -17,6 +17,7 @@
 
 package pixelitor.io;
 
+import pd.GifDecoder;
 import pixelitor.gui.utils.ThumbInfo;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -34,6 +35,7 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -112,7 +114,35 @@ public class TrackedIO {
             return read(file);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            boolean isGif = FileUtils.findExtension(file.getName())
+                .map(String::toLowerCase)
+                .filter(s -> s.equals("gif"))
+                .isPresent();
+            if (isGif) {
+                // perhaps this is issue #40, try another decoder
+                // also see https://stackoverflow.com/questions/22259714/arrayindexoutofboundsexception-4096-while-reading-gif-file
+                return alternativeGifRead(file);
+            } else {
+                throw e;
+            }
         }
+    }
+
+    // Currently using https://github.com/DhyanB/Open-Imaging
+    // Apache Imaging also has a fix, but they have not released yet a version with it
+    // see https://issues.apache.org/jira/browse/IMAGING-130
+    private static BufferedImage alternativeGifRead(File file) {
+        BufferedImage img = null;
+        try {
+            FileInputStream data = new FileInputStream(file);
+            GifDecoder.GifImage gif = GifDecoder.read(data);
+            img = gif.getFrame(0);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+
+        return img;
     }
 
     public static BufferedImage read(File file) throws IOException {

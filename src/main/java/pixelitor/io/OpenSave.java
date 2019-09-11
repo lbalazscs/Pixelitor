@@ -92,6 +92,8 @@ public class OpenSave {
     private static BufferedImage handleDecodingError(File file,
                                                      BufferedImage img,
                                                      Throwable e) {
+        // For some decoding problems (ImageIO bugs?) we get an
+        // exception here, for others we get a null img
         if (e != null) {
             assert img == null;
             Messages.showExceptionOnEDT(e);
