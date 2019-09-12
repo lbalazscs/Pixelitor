@@ -41,8 +41,7 @@ import pixelitor.tools.Tools;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Window;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -58,10 +57,13 @@ public final class AppPreferences {
     private static final String FRAME_WIDTH_KEY = "window_width";
     private static final String FRAME_HEIGHT_KEY = "window_height";
 
+    private static final String MAXIMIZED_KEY = "maximized";
+
     private static final String NEW_IMAGE_WIDTH = "new_image_width";
     private static final String NEW_IMAGE_HEIGHT = "new_image_height";
-    private static final String UI_KEY = "ui";
     private static Dimension newImageSize = null;
+
+    private static final String UI_KEY = "ui";
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
@@ -104,16 +106,57 @@ public final class AppPreferences {
     private AppPreferences() {
     }
 
-    private static void saveFramePosition(Window window) {
-        int x = window.getX();
-        int y = window.getY();
-        int width = window.getWidth();
-        int height = window.getHeight();
+    public static void loadFramePosition(PixelitorWindow pw) {
+        int x = mainNode.getInt(FRAME_X_KEY, 0);
+        int y = mainNode.getInt(FRAME_Y_KEY, 0);
+        int width = mainNode.getInt(FRAME_WIDTH_KEY, 0);
+        int height = mainNode.getInt(FRAME_HEIGHT_KEY, 0);
 
-        mainNode.putInt(FRAME_X_KEY, x);
-        mainNode.putInt(FRAME_Y_KEY, y);
-        mainNode.putInt(FRAME_WIDTH_KEY, width);
-        mainNode.putInt(FRAME_HEIGHT_KEY, height);
+        Dimension screen = GUIUtils.getMaxWindowSize();
+
+        if (width <= 0 || height <= 0) {
+            width = screen.width;
+            height = screen.height;
+        }
+        if (width > screen.width) {
+            width = screen.width;
+        }
+        if (height > screen.height) {
+            height = screen.height;
+        }
+
+        if (x < 0 || y < 0) {
+            x = 0;
+            y = 0;
+        }
+
+        boolean maximized = mainNode.getBoolean(MAXIMIZED_KEY, false);
+        if (maximized) {
+            pw.setSavedNormalBounds(new Rectangle(x, y, width, height));
+            pw.maximize();
+        } else {
+            pw.setBounds(x, y, width, height);
+        }
+    }
+
+    private static void saveFramePosition(PixelitorWindow pw) {
+        boolean maximized = pw.isMaximized();
+        Rectangle bounds;
+        if (maximized) {
+            bounds = pw.getNormalBounds();
+            if (bounds == null) { // Fallback for safety. Should not be necessary.
+                bounds = pw.getBounds();
+            }
+        } else {
+            bounds = pw.getBounds();
+        }
+
+        mainNode.putInt(FRAME_X_KEY, bounds.x);
+        mainNode.putInt(FRAME_Y_KEY, bounds.y);
+        mainNode.putInt(FRAME_WIDTH_KEY, bounds.width);
+        mainNode.putInt(FRAME_HEIGHT_KEY, bounds.height);
+
+        mainNode.putBoolean(MAXIMIZED_KEY, maximized);
     }
 
     public static Dimension getNewImageSize() {
@@ -142,34 +185,6 @@ public final class AppPreferences {
             mainNode.putInt(NEW_IMAGE_WIDTH, lastSize.width);
             mainNode.putInt(NEW_IMAGE_HEIGHT, lastSize.height);
         }
-    }
-
-    public static void loadFramePosition(Window window) {
-        int x = mainNode.getInt(FRAME_X_KEY, 0);
-        int y = mainNode.getInt(FRAME_Y_KEY, 0);
-        int width = mainNode.getInt(FRAME_WIDTH_KEY, 0);
-        int height = mainNode.getInt(FRAME_HEIGHT_KEY, 0);
-
-        Dimension screen = GUIUtils.getMaxWindowSize();
-
-        if (width <= 0 || height <= 0) {
-            width = screen.width;
-            height = screen.height;
-        }
-        if (width > screen.width) {
-            width = screen.width;
-        }
-        if (height > screen.height) {
-            height = screen.height;
-        }
-
-        if (x < 0 || y < 0) {
-            x = 0;
-            y = 0;
-        }
-
-        window.setLocation(new Point(x, y));
-        window.setSize(width, height);
     }
 
     public static BoundedUniqueList<RecentFile> loadRecentFiles() {

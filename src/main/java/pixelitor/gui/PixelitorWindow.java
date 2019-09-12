@@ -33,6 +33,9 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
@@ -47,6 +50,10 @@ public class PixelitorWindow extends JFrame {
     private Box verticalBoxEast;
     private Box verticalBoxWest;
     private ToolsPanel toolsPanel;
+
+    // normal bounds: the window bounds when it is not maximized
+    private Rectangle lastNormalBounds; // the last one before maximization
+    private Rectangle savedNormalBounds; // the saved one
 
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
@@ -67,6 +74,41 @@ public class PixelitorWindow extends JFrame {
         GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
 
         AppPreferences.loadFramePosition(this);
+
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (!isMaximized()) {
+                    setLastNormalBounds(getBounds());
+                }
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                if (!isMaximized()) {
+                    setLastNormalBounds(getBounds());
+                }
+            }
+        });
+
+        // the purpose of this is to prevent the "visual resize" problem described here:
+        // https://stackoverflow.com/questions/13912692/can-i-set-jframes-normal-size-while-it-is-maximized
+        // actually (with Java 8) there would be no window-resize with setSize(savedNormalBounds),
+        // but a repeated content-layout would still be annoying
+        addWindowStateListener(e -> {
+            boolean wasMaximized = stateMaximized(e.getOldState());
+            boolean isMaximized = stateMaximized(e.getNewState());
+
+            // the first time the window is un-maximized, use the saved bounds
+            if (wasMaximized && !isMaximized) {
+                if (savedNormalBounds != null) {
+                    setBounds(savedNormalBounds);
+                    // now the saved bounds is realized, we can forget about it
+                    savedNormalBounds = null;
+                }
+            }
+        });
+
         setVisible(true);
     }
 
@@ -241,6 +283,40 @@ public class PixelitorWindow extends JFrame {
 
         // Deiconify the frame
         setExtendedState(state);
+    }
+
+    public void maximize() {
+        setExtendedState(getExtendedState() | Frame.MAXIMIZED_BOTH);
+    }
+
+    public boolean isMaximized() {
+        int extState = getExtendedState();
+        return stateMaximized(extState);
+    }
+
+    private static boolean stateMaximized(int extState) {
+        return (extState & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
+    }
+
+    private static boolean stateIconified(int extState) {
+        return (extState & Frame.ICONIFIED) == Frame.ICONIFIED;
+    }
+
+    public Rectangle getNormalBounds() {
+        if (savedNormalBounds != null) {
+            // this session was started and finished in maximized mode,
+            // but there is a saved normal size from a previous one
+            return savedNormalBounds;
+        }
+        return lastNormalBounds;
+    }
+
+    private void setLastNormalBounds(Rectangle normalBounds) {
+        this.lastNormalBounds = normalBounds;
+    }
+
+    public void setSavedNormalBounds(Rectangle normalBounds) {
+        this.savedNormalBounds = normalBounds;
     }
 }
 
