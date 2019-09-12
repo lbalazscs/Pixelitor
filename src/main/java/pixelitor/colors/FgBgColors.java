@@ -31,7 +31,7 @@ public class FgBgColors {
     }
 
     // during testing this is set to a mocked value
-    public static void setSelector(FgBgColorSelector selector) {
+    public static void setUI(FgBgColorSelector selector) {
         FgBgColors.selector = selector;
     }
 

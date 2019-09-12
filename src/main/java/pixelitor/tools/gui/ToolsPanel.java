@@ -17,13 +17,18 @@
 
 package pixelitor.tools.gui;
 
+import pixelitor.colors.FgBgColorSelector;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.MappedKey;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 /**
@@ -31,21 +36,30 @@ import java.awt.event.ActionEvent;
  */
 public class ToolsPanel extends JPanel {
 
-    public ToolsPanel() {
-        Box verticalBox = Box.createVerticalBox();
+    public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
         ButtonGroup group = new ButtonGroup();
+
+        Dimension buttonSize = calcToolButtonSize(screenSize);
 
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
-            ToolButton toolButton = new ToolButton(tool);
-            verticalBox.add(toolButton);
+            ToolButton toolButton = new ToolButton(tool, buttonSize);
+            toolButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+            add(toolButton);
             group.add(toolButton);
             setupKeyboardShortcut(tool);
         }
 
-        add(verticalBox);
+        add(Box.createVerticalGlue());
 
-        // there is not text tool, but pressing T should add a text layer
+        FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
+        FgBgColors.setUI(colorSelector);
+        colorSelector.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(colorSelector);
+
+        // there is no text tool, but pressing T should add a text layer
         // in the menu it was added using T, not t
         Action textToolAction = new AbstractAction() {
             @Override
@@ -55,6 +69,17 @@ public class ToolsPanel extends JPanel {
         };
         GlobalEventWatch.add(MappedKey.fromChar(
                 't', true, "text", textToolAction));
+    }
+
+    private static Dimension calcToolButtonSize(Dimension screen) {
+        // the icons are 30x30
+        Dimension buttonSize;
+        if (screen.height <= 768) { // many laptops have 1366x768, minus the taskbar
+            buttonSize = new Dimension(44, 38); // compromise
+        } else {
+            buttonSize = new Dimension(44, 44); // ideal
+        }
+        return buttonSize;
     }
 
     private static void setupKeyboardShortcut(Tool tool) {

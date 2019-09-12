@@ -31,7 +31,7 @@ import java.awt.Insets;
 public class ToolButton extends JToggleButton {
     private final Tool tool;
 
-    public ToolButton(Tool tool) {
+    public ToolButton(Tool tool, Dimension preferredSize) {
         this.tool = tool;
         tool.setButton(this);
 
@@ -56,9 +56,6 @@ public class ToolButton extends JToggleButton {
         setRolloverEnabled(false);
         addActionListener(e -> Tools.changeTo(tool));
 
-        int size = 44; // the icons are 30*30
-
-        Dimension preferredSize = new Dimension(size, size);
         setPreferredSize(preferredSize);
     }
 

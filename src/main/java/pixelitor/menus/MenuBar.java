@@ -1248,6 +1248,13 @@ public class MenuBar extends JMenuBar {
             }
         }, CTRL_K);
 
+        developMenu.addAlwaysEnabledAction(new MenuAction("frame size 1366x728") {
+            @Override
+            public void onClick() {
+                PixelitorWindow.getInstance().setSize(1366, 728);
+            }
+        });
+
         return developMenu;
     }
 

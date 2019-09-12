@@ -19,9 +19,8 @@ package pixelitor.gui;
 
 import pixelitor.Build;
 import pixelitor.Pixelitor;
-import pixelitor.colors.FgBgColorSelector;
-import pixelitor.colors.FgBgColors;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.tools.Tools;
@@ -31,6 +30,7 @@ import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -48,7 +48,6 @@ import java.util.List;
 public class PixelitorWindow extends JFrame {
     private HistogramsPanel histogramsPanel;
     private Box verticalBoxEast;
-    private Box verticalBoxWest;
     private ToolsPanel toolsPanel;
 
     // normal bounds: the window bounds when it is not maximized
@@ -58,12 +57,14 @@ public class PixelitorWindow extends JFrame {
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
 
+        Dimension screenSize = GUIUtils.getMaxWindowSize();
+
         setupWindowClosing();
 
         addMenus();
         addImagesArea();
         addLayersAndHistograms();
-        addToolsPanel();
+        addToolsPanel(screenSize);
         Tools.setDefaultTool();
         addStatusBar();
 
@@ -73,7 +74,7 @@ public class PixelitorWindow extends JFrame {
         GlobalEventWatch.addBrushSizeActions();
         GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
 
-        AppPreferences.loadFramePosition(this);
+        AppPreferences.loadFramePosition(this, screenSize);
 
         addComponentListener(new ComponentAdapter() {
             @Override
@@ -152,18 +153,13 @@ public class PixelitorWindow extends JFrame {
         add(verticalBoxEast, BorderLayout.EAST);
     }
 
-    private void addToolsPanel() {
-        verticalBoxWest = Box.createVerticalBox();
-        toolsPanel = new ToolsPanel();
+    private void addToolsPanel(Dimension screenSize) {
+        toolsPanel = new ToolsPanel(this, screenSize);
 
-        FgBgColors.setSelector(new FgBgColorSelector(this));
         if (AppPreferences.WorkSpace.getToolsVisibility()) {
-            verticalBoxWest.add(toolsPanel);
-            verticalBoxWest.add(FgBgColors.getGUI());
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
+            add(toolsPanel, BorderLayout.WEST);
         }
-
-        add(verticalBoxWest, BorderLayout.WEST);
     }
 
     private void addStatusBar() {
@@ -241,15 +237,13 @@ public class PixelitorWindow extends JFrame {
 
     public void setToolsVisibility(boolean v, boolean revalidate) {
         if (v) {
-            verticalBoxWest.add(toolsPanel);
-            verticalBoxWest.add(FgBgColors.getGUI());
+            add(toolsPanel, BorderLayout.WEST);
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
-
         } else {
-            verticalBoxWest.remove(toolsPanel);
-            verticalBoxWest.remove(FgBgColors.getGUI());
+            remove(toolsPanel);
             remove(ToolSettingsPanelContainer.INSTANCE);
         }
+
         if (revalidate) {
             getContentPane().revalidate();
         }

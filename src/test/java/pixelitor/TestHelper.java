@@ -77,7 +77,7 @@ public class TestHelper {
         FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
-        FgBgColors.setSelector(fgBgColorSelector);
+        FgBgColors.setUI(fgBgColorSelector);
     }
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
