@@ -88,9 +88,8 @@ public class CropTool extends DragTool {
     public CropTool() {
         super("Crop", 'c', "crop_tool_icon.png",
             "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
-                "Holding down <b>SPACE</b> moves the entire region. " +
                         "After the handles appear: " +
-                "<b>Shift-drag</b> keeps the aspect ratio. " +
+                "<b>Shift-drag</b> keeps the aspect ratio, " +
                 "<b>Double-click</b> crops, <b>Esc</b> cancels.",
                 Cursors.DEFAULT, false,
                 true, false, ClipStrategy.CUSTOM);

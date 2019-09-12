@@ -45,8 +45,8 @@ import static pixelitor.selection.SelectionInteraction.SUBTRACT;
  * The selection tool
  */
 public class SelectionTool extends DragTool {
-    private static final String HELP_TEXT = "<b>click and drag</b> to select an area. " +
-            "Hold <b>SPACE</b> down to move the entire selection. " +
+    private static final String HELP_TEXT = "<b>click and drag</b> creates a selection, " +
+        "<b>Space-drag</b> moves it. " +
             "<b>Shift-drag</b> adds to an existing selection, " +
             "<b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +

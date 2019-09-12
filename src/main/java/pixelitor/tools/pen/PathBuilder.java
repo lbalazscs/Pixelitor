@@ -53,11 +53,11 @@ public class PathBuilder implements PenToolMode {
     public static final PathBuilder INSTANCE = new PathBuilder();
     private static final String BUILDER_HELP_MESSAGE =
             "<html>Pen Tool Build Mode: " +
-                    "<b>click</b> and <b>drag</b> to create a Bezier curve. " +
-                    "<b>Ctrl-click</b> or close the path to finish. " +
+                "<b>click, drag</b> and repeat to create, " +
+                "<b>Ctrl-click</b> or close it to finish it. " +
                     "<b>Ctrl-drag</b> moves points, " +
                     "<b>Alt-drag</b> breaks handles, " +
-                    "<b>Shift</b> constrains angles.";
+                "<b>Shift-drag</b> constrains angles.";
 
 
     private PathBuilder() {
