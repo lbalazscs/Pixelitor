@@ -53,7 +53,7 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean value, ActionEvent e) {
+    public void setVisibility(boolean visible, ActionEvent e) {
         if (e != null) {
             // We want to control this only with null events
             // The "Hide All" JMenuItem gets activated when everything
@@ -63,31 +63,31 @@ public class ShowHideAllAction extends ShowHideAction {
         }
 
         PixelitorWindow pw = PixelitorWindow.getInstance();
-        if (!value) {
+        if (!visible) {
             histogramsWereShown = pw.areHistogramsShown();
             layersWereShown = LayersContainer.areLayersShown();
             statusBarWasShown = StatusBar.INSTANCE.isShown();
             toolsWereShown = pw.areToolsShown();
         }
         if (histogramsWereShown) {
-            pw.setHistogramsVisibility(value, false);
+            pw.setHistogramsVisibility(visible, false);
         }
 
         if (layersWereShown) {
-            pw.setLayersVisibility(value, false);
+            pw.setLayersVisibility(visible, false);
         }
 
         if (statusBarWasShown) {
-            pw.setStatusBarVisibility(value, false);
+            pw.setStatusBarVisibility(visible, false);
         }
 
         if (toolsWereShown) {
-            pw.setToolsVisibility(value, false);
+            pw.setToolsVisibility(visible, false);
         }
 
         pw.getContentPane().revalidate();
 
-        allHidden = !value;
+        allHidden = !visible;
     }
 
 }

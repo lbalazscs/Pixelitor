@@ -25,7 +25,6 @@ import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.History;
-import pixelitor.utils.DIContainer;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
@@ -229,8 +228,8 @@ public class Guides implements Serializable {
     }
 
     public void draw(Graphics2D g) {
-        GuidesRenderer glRenderer = DIContainer.get(GuidesRenderer.class, DIContainer.GUIDES_RENDERER);
-        glRenderer.draw(g, lines);
+        GuidesRenderer renderer = GuidesRenderer.GUIDES_INSTANCE.get();
+        renderer.draw(g, lines);
     }
 
     public void coCoordsChanged() {

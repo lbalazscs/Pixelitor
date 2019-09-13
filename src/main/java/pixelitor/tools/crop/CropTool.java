@@ -33,7 +33,6 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.Cursors;
-import pixelitor.utils.DIContainer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.DebugNode;
 
@@ -97,8 +96,8 @@ public class CropTool extends DragTool {
 
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
 
-        GuidesRenderer glRenderer = DIContainer.get(GuidesRenderer.class, DIContainer.CROP_GUIDES_RENDERER);
-        rectGuideline = new RectGuideline(glRenderer);
+        GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
+        rectGuideline = new RectGuideline(renderer);
     }
 
     private void maskOpacityChanged() {

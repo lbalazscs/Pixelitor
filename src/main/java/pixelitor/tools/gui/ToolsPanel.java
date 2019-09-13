@@ -32,17 +32,22 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 /**
- * A panel where the user can select the tools
+ * The panel with the tool buttons and the color selector
  */
 public class ToolsPanel extends JPanel {
-
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        addToolButtons(screenSize);
+        add(Box.createVerticalGlue());
+        addColorSelector(pw);
+
+        setupTShortCut();
+    }
+
+    private void addToolButtons(Dimension screenSize) {
         ButtonGroup group = new ButtonGroup();
-
         Dimension buttonSize = calcToolButtonSize(screenSize);
-
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
             ToolButton toolButton = new ToolButton(tool, buttonSize);
@@ -51,14 +56,16 @@ public class ToolsPanel extends JPanel {
             group.add(toolButton);
             setupKeyboardShortcut(tool);
         }
+    }
 
-        add(Box.createVerticalGlue());
-
+    private void addColorSelector(PixelitorWindow pw) {
         FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
         FgBgColors.setUI(colorSelector);
         colorSelector.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(colorSelector);
+    }
 
+    private static void setupTShortCut() {
         // there is no text tool, but pressing T should add a text layer
         // in the menu it was added using T, not t
         Action textToolAction = new AbstractAction() {
@@ -68,7 +75,7 @@ public class ToolsPanel extends JPanel {
             }
         };
         GlobalEventWatch.add(MappedKey.fromChar(
-                't', true, "text", textToolAction));
+            't', true, "text", textToolAction));
     }
 
     private static Dimension calcToolButtonSize(Dimension screen) {

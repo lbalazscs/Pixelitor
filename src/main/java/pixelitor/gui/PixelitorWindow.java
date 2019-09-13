@@ -47,7 +47,7 @@ import java.util.List;
  */
 public class PixelitorWindow extends JFrame {
     private HistogramsPanel histogramsPanel;
-    private Box verticalBoxEast;
+    private Box eastPanel;
     private ToolsPanel toolsPanel;
 
     // normal bounds: the window bounds when it is not maximized
@@ -76,39 +76,8 @@ public class PixelitorWindow extends JFrame {
 
         AppPreferences.loadFramePosition(this, screenSize);
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                if (!isMaximized()) {
-                    setLastNormalBounds(getBounds());
-                }
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                if (!isMaximized()) {
-                    setLastNormalBounds(getBounds());
-                }
-            }
-        });
-
-        // the purpose of this is to prevent the "visual resize" problem described here:
-        // https://stackoverflow.com/questions/13912692/can-i-set-jframes-normal-size-while-it-is-maximized
-        // actually (with Java 8) there would be no window-resize with setSize(savedNormalBounds),
-        // but a repeated content-layout would still be annoying
-        addWindowStateListener(e -> {
-            boolean wasMaximized = stateMaximized(e.getOldState());
-            boolean isMaximized = stateMaximized(e.getNewState());
-
-            // the first time the window is un-maximized, use the saved bounds
-            if (wasMaximized && !isMaximized) {
-                if (savedNormalBounds != null) {
-                    setBounds(savedNormalBounds);
-                    // now the saved bounds is realized, we can forget about it
-                    savedNormalBounds = null;
-                }
-            }
-        });
+        setupRememberingLastBounds();
+        setupFirstUnMaximization();
 
         setVisible(true);
     }
@@ -116,12 +85,12 @@ public class PixelitorWindow extends JFrame {
     private void setupWindowClosing() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(
-                new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent we) {
-                        Pixelitor.exitApp(PixelitorWindow.this);
-                    }
+            new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent we) {
+                    Pixelitor.exitApp(PixelitorWindow.this);
                 }
+            }
         );
     }
 
@@ -139,18 +108,18 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void addLayersAndHistograms() {
-        verticalBoxEast = Box.createVerticalBox();
+        eastPanel = Box.createVerticalBox();
         histogramsPanel = HistogramsPanel.INSTANCE;
         OpenComps.addActivationListener(histogramsPanel);
 
         if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
-            verticalBoxEast.add(histogramsPanel);
+            eastPanel.add(histogramsPanel);
         }
         if (AppPreferences.WorkSpace.getLayersVisibility()) {
-            verticalBoxEast.add(LayersContainer.INSTANCE);
+            eastPanel.add(LayersContainer.INSTANCE);
         }
 
-        add(verticalBoxEast, BorderLayout.EAST);
+        add(eastPanel, BorderLayout.EAST);
     }
 
     private void addToolsPanel(Dimension screenSize) {
@@ -196,27 +165,28 @@ public class PixelitorWindow extends JFrame {
         static final PixelitorWindow field = new PixelitorWindow();
     }
 
-    public void setStatusBarVisibility(boolean v, boolean revalidate) {
-        if (v) {
+    public void setStatusBarVisibility(boolean visible, boolean revalidate) {
+        if (visible) {
             add(StatusBar.INSTANCE, BorderLayout.SOUTH);
         } else {
             remove(StatusBar.INSTANCE);
         }
+
         if (revalidate) {
             getContentPane().revalidate();
         }
     }
 
-    public void setHistogramsVisibility(boolean v, boolean revalidate) {
-        if (v) {
-            verticalBoxEast.add(histogramsPanel);
-
+    public void setHistogramsVisibility(boolean visible, boolean revalidate) {
+        if (visible) {
+            eastPanel.add(histogramsPanel);
             OpenComps.onActiveComp(histogramsPanel::updateFromCompIfShown);
         } else {
-            verticalBoxEast.remove(histogramsPanel);
+            eastPanel.remove(histogramsPanel);
         }
+
         if (revalidate) {
-            verticalBoxEast.revalidate();
+            eastPanel.revalidate();
         }
     }
 
@@ -224,19 +194,20 @@ public class PixelitorWindow extends JFrame {
         return histogramsPanel.isShown();
     }
 
-    public void setLayersVisibility(boolean v, boolean revalidate) {
-        if (v) {
-            verticalBoxEast.add(LayersContainer.INSTANCE);
+    public void setLayersVisibility(boolean visible, boolean revalidate) {
+        if (visible) {
+            eastPanel.add(LayersContainer.INSTANCE);
         } else {
-            verticalBoxEast.remove(LayersContainer.INSTANCE);
+            eastPanel.remove(LayersContainer.INSTANCE);
         }
+
         if (revalidate) {
-            verticalBoxEast.revalidate();
+            eastPanel.revalidate();
         }
     }
 
-    public void setToolsVisibility(boolean v, boolean revalidate) {
-        if (v) {
+    public void setToolsVisibility(boolean visible, boolean revalidate) {
+        if (visible) {
             add(toolsPanel, BorderLayout.WEST);
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
         } else {
@@ -292,10 +263,6 @@ public class PixelitorWindow extends JFrame {
         return (extState & Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;
     }
 
-    private static boolean stateIconified(int extState) {
-        return (extState & Frame.ICONIFIED) == Frame.ICONIFIED;
-    }
-
     public Rectangle getNormalBounds() {
         if (savedNormalBounds != null) {
             // this session was started and finished in maximized mode,
@@ -311,6 +278,45 @@ public class PixelitorWindow extends JFrame {
 
     public void setSavedNormalBounds(Rectangle normalBounds) {
         this.savedNormalBounds = normalBounds;
+    }
+
+    private void setupRememberingLastBounds() {
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (!isMaximized()) {
+                    setLastNormalBounds(getBounds());
+                }
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                if (!isMaximized()) {
+                    setLastNormalBounds(getBounds());
+                }
+            }
+        });
+    }
+
+    private void setupFirstUnMaximization() {
+        // the purpose of this is to prevent the "visual resize" problem described here:
+        // https://stackoverflow.com/questions/13912692/can-i-set-jframes-normal-size-while-it-is-maximized
+        // actually (with Java 8) there would be no window-resize with setSize(savedNormalBounds),
+        // but a repeated content-layout would still be annoying
+        addWindowStateListener(e -> {
+            if (savedNormalBounds == null) {
+                return;
+            }
+            boolean wasMaximized = stateMaximized(e.getOldState());
+            boolean isMaximized = stateMaximized(e.getNewState());
+
+            // the first time the window is un-maximized, use the saved bounds
+            if (wasMaximized && !isMaximized) {
+                setBounds(savedNormalBounds);
+                // now the saved bounds is realized, we can forget about it
+                savedNormalBounds = null;
+            }
+        });
     }
 }
 

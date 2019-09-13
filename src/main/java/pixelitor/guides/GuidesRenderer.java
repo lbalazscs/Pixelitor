@@ -17,6 +17,9 @@
 
 package pixelitor.guides;
 
+import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Lazy;
+
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.util.List;
@@ -26,6 +29,11 @@ import java.util.List;
  */
 public class GuidesRenderer {
     private final GuideStyle guideStyle;
+
+    public static Lazy<GuidesRenderer> CROP_GUIDES_INSTANCE = Lazy.of(
+        () -> new GuidesRenderer(AppPreferences.getCropGuideStyle()));
+    public static Lazy<GuidesRenderer> GUIDES_INSTANCE = Lazy.of(
+        () -> new GuidesRenderer(AppPreferences.getGuideStyle()));
 
     public GuidesRenderer(GuideStyle guideStyle) {
         this.guideStyle = guideStyle;

@@ -38,7 +38,7 @@ public class ObjectsFinder {
     private static final float layerOpacityThreshold = 0.05f;
     private static final int pixelAlphaThreshold = 30;
 
-    public ObjectsFinder() {
+    private ObjectsFinder() {
     }
 
     public static ObjectsSelection findObjectAtPoint(Point2D p, Composition stage) {
