@@ -70,7 +70,7 @@ public class SelectionTool extends DragTool {
     private boolean displayWidthHeight = true;
 
     SelectionTool() {
-        super("Selection", 'm', "selection_tool_icon.png",
+        super("Selection", 'M', "selection_tool_icon.png",
                 HELP_TEXT, Cursors.DEFAULT, false,
                 true, false, ClipStrategy.FULL);
         spaceDragStartPoint = true;

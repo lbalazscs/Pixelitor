@@ -42,7 +42,7 @@ public class MoveTool extends DragTool {
 //    private final ObjectsFinder objectFinder = new ObjectsFinder();
 
     public MoveTool() {
-        super("Move", 'v', "move_tool_icon.png",
+        super("Move", 'V', "move_tool_icon.png",
                 "<b>drag</b> to move the active layer, " +
                         "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
                         "<b>Shift-drag</b> to constrain the movement.",

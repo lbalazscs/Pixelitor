@@ -75,7 +75,7 @@ public class ToolsPanel extends JPanel {
             }
         };
         GlobalEventWatch.add(MappedKey.fromChar(
-            't', true, "text", textToolAction));
+            'T', true, "text", textToolAction));
     }
 
     private static Dimension calcToolButtonSize(Dimension screen) {
@@ -100,7 +100,7 @@ public class ToolsPanel extends JPanel {
         };
 
         String toolName = tool.getName();
-        char activationChar = tool.getActivationKeyChar();
+        char activationChar = tool.getActivationKey();
 
         GlobalEventWatch.add(MappedKey.fromChar(
                 activationChar, true, toolName, activateAction));

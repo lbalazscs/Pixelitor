@@ -58,18 +58,20 @@ public abstract class Tool implements KeyListener {
     private final Cursor cursor;
     private final ClipStrategy clipStrategy;
 
-    private final char activationKeyChar;
+    private final char activationKey;
 
     protected ToolSettingsPanel settingsPanel;
     protected boolean ended = false;
 
     final ToolHandlerChain handlerChain;
 
-    protected Tool(String name, char activationKeyChar, String iconFileName,
+    protected Tool(String name, char activationKey, String iconFileName,
                    String toolMessage, Cursor cursor,
                    boolean allowOnlyDrawables, boolean handToolForwarding,
                    ClipStrategy clipStrategy) {
-        this.activationKeyChar = activationKeyChar;
+        this.activationKey = activationKey;
+        assert Character.isUpperCase(activationKey);
+
         this.name = name;
         this.iconFileName = iconFileName;
         this.toolMessage = toolMessage;
@@ -110,8 +112,8 @@ public abstract class Tool implements KeyListener {
         return iconFileName;
     }
 
-    public char getActivationKeyChar() {
-        return activationKeyChar;
+    public char getActivationKey() {
+        return activationKey;
     }
 
     protected void toolStarted() {

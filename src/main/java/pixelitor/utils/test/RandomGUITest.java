@@ -227,7 +227,12 @@ public class RandomGUITest {
 
     public static void stop() {
         keepRunning = false;
-        PixelitorWindow.getInstance().setAlwaysOnTop(false);
+        PixelitorWindow pw = PixelitorWindow.getInstance();
+        // the window can be null if an exception is thrown at startup,
+        // and we get here from the uncaught exception handler
+        if (pw != null) {
+            pw.setAlwaysOnTop(false);
+        }
     }
 
     private static SwingWorker<Void, Void> createOneRoundSwingWorker(Robot r,

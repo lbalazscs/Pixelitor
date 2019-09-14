@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import javax.swing.*;
+import java.awt.event.InputEvent;
 
 /**
  * Represents a keyboard shortcut that can be added
@@ -59,6 +60,10 @@ public class MappedKey {
 
         key.activationChar = activationChar;
         key.caseInsensitive = caseInsensitive;
+
+        // if it's case-insensitive, it must be given in upper case
+        assert !caseInsensitive || Character.isUpperCase(activationChar);
+
         key.actionMapKey = actionMapKey;
         key.action = action;
 
@@ -70,12 +75,13 @@ public class MappedKey {
             inputMap.put(keyStroke, actionMapKey);
         } else {
             if (caseInsensitive) {
-                char activationLC = Character.toLowerCase(activationChar);
-                char activationUC = Character.toUpperCase(activationChar);
+                assert Character.isUpperCase(activationChar);
 
-                inputMap.put(KeyStroke.getKeyStroke(activationLC), actionMapKey);
-                inputMap.put(KeyStroke.getKeyStroke(activationUC), actionMapKey);
+                // see issue #31 for why key codes and not key characters are used here
+                inputMap.put(KeyStroke.getKeyStroke(activationChar, InputEvent.SHIFT_MASK), actionMapKey);
+                inputMap.put(KeyStroke.getKeyStroke(activationChar, 0), actionMapKey);
             } else {
+                // for case-sensitive cases it is probably better to be char-based
                 inputMap.put(KeyStroke.getKeyStroke(activationChar), actionMapKey);
             }
         }

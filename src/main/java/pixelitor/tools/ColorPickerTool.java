@@ -41,7 +41,7 @@ public class ColorPickerTool extends Tool {
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
-        super("Color Picker", 'i', "color_picker_tool_icon.png",
+        super("Color Picker", 'I', "color_picker_tool_icon.png",
                 "<b>click</b> to pick the foreground color, " +
                         "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
                 Cursors.CROSSHAIR, false,

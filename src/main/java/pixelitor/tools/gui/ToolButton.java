@@ -47,9 +47,8 @@ public class ToolButton extends JToggleButton {
         assert icon.getIconWidth() == 30;
         assert icon.getIconHeight() == 30;
 
-        char c = tool.getActivationKeyChar();
-        String s = new String(new char[]{c}).toUpperCase();
-        setToolTipText("<html>" + tool.getName() + " Tool (<b>" + s + "</b>)");
+        char c = tool.getActivationKey();
+        setToolTipText("<html>" + tool.getName() + " Tool (<b>" + c + "</b>)");
 
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(true);

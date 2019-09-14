@@ -90,9 +90,9 @@ public abstract class AbstractBrushTool extends Tool {
 
     DrawDestination drawDestination;
 
-    AbstractBrushTool(String name, char activationKeyChar, String iconFileName,
+    AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
-        super(name, activationKeyChar, iconFileName, toolMessage,
+        super(name, activationKey, iconFileName, toolMessage,
                 cursor, true, true, ClipStrategy.CANVAS);
         this.canHaveSymmetry = canHaveSymmetry;
         if (canHaveSymmetry) {

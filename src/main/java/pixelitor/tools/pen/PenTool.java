@@ -79,7 +79,7 @@ public class PenTool extends Tool {
         "Stroke with Current Smudge", Tools.SMUDGE);
 
     public PenTool() {
-        super("Pen", 'p', "pen_tool_icon.png",
+        super("Pen", 'P', "pen_tool_icon.png",
             "", // getStatusBarMessage() is overridden
             Cursors.DEFAULT, false, true,
             ClipStrategy.FULL);

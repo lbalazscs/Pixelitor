@@ -306,9 +306,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalEventWatch.add(MappedKey.fromChar('d', true, "reset", resetToDefaultAction));
-        GlobalEventWatch.add(MappedKey.fromChar('x', true, "switch", swapColorsAction));
-        GlobalEventWatch.add(MappedKey.fromChar('r', true, "randomize", randomizeColorsAction));
+        GlobalEventWatch.add(MappedKey.fromChar('D', true, "reset", resetToDefaultAction));
+        GlobalEventWatch.add(MappedKey.fromChar('X', true, "switch", swapColorsAction));
+        GlobalEventWatch.add(MappedKey.fromChar('R', true, "randomize", randomizeColorsAction));
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {

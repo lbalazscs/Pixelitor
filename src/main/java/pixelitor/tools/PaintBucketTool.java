@@ -61,7 +61,7 @@ public class PaintBucketTool extends Tool {
             new String[]{ACTION_LOCAL, ACTION_GLOBAL});
 
     public PaintBucketTool() {
-        super("Paint Bucket", 'n',
+        super("Paint Bucket", 'N',
                 "paint_bucket_tool_icon.png",
                 "<b>click</b> to fill with the selected color.",
                 Cursors.DEFAULT, true,

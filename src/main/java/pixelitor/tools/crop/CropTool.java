@@ -85,7 +85,7 @@ public class CropTool extends DragTool {
     private final RectGuideline rectGuideline;
 
     public CropTool() {
-        super("Crop", 'c', "crop_tool_icon.png",
+        super("Crop", 'C', "crop_tool_icon.png",
             "<b>drag</b> to start or <b>Alt-drag</b> to start form the center. " +
                         "After the handles appear: " +
                 "<b>Shift-drag</b> keeps the aspect ratio, " +
