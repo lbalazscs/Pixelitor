@@ -42,7 +42,7 @@ public class SmudgeTool extends AbstractBrushTool {
         super("Smudge", 'k', "smudge_tool_icon.png",
                 "<b>click and drag</b> to smudge. " +
                         "<b>Click</b> and <b>Shift-click</b> to smudge along a line.",
-                Cursors.HAND);
+            Cursors.HAND, false);
 
         drawDestination = DrawDestination.DIRECT;
     }
@@ -107,7 +107,7 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        if (!withLine(e)) { // not a line-click
+        if (!isLineConnect(e)) { // not a line-click
             initStroke(sourceImage, e);
         }
         super.mousePressed(e);

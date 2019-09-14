@@ -61,6 +61,7 @@ public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
+    private final boolean canHaveSymmetry;
 
     private boolean respectSelection = true; // false while tracing a selection
 
@@ -72,8 +73,7 @@ public abstract class AbstractBrushTool extends Tool {
     private final RangeParam brushRadiusParam = new RangeParam("Radius",
             MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
-    private final EnumComboBoxModel<Symmetry> symmetryModel
-            = new EnumComboBoxModel<>(Symmetry.class);
+    private EnumComboBoxModel<Symmetry> symmetryModel;
 
     protected Brush brush;
     private SymmetryBrush symmetryBrush;
@@ -90,11 +90,17 @@ public abstract class AbstractBrushTool extends Tool {
 
     DrawDestination drawDestination;
 
-    AbstractBrushTool(String name, char activationKeyChar,
-                      String iconFileName, String toolMessage, Cursor cursor) {
+    AbstractBrushTool(String name, char activationKeyChar, String iconFileName,
+                      String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
         super(name, activationKeyChar, iconFileName, toolMessage,
                 cursor, true, true, ClipStrategy.CANVAS);
+        this.canHaveSymmetry = canHaveSymmetry;
+        if (canHaveSymmetry) {
+            symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
+        }
         initBrushVariables();
+
+        assert (symmetryBrush != null) == canHaveSymmetry;
     }
 
     protected void initBrushVariables() {
@@ -143,6 +149,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addSymmetryCombo() {
+        assert canHaveSymmetry;
+
         JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
         settingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
         symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(
@@ -221,19 +229,24 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        boolean withLine = withLine(e);
+        boolean withLine = isLineConnect(e);
         firstMouseDown = false;
 
-        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, withLine);
+        Drawable dr = e.getComp().getActiveDrawableOrThrow();
+        newMousePoint(dr, e, withLine);
 
-        if (withLine) {
-            affectedArea.updateWith(e);
-        } else {
-            affectedArea.initAt(e);
+        // it it can have symmetry, then the symmetry brush does
+        // the tracking of the affected area
+        if (!canHaveSymmetry) {
+            if (withLine) {
+                affectedArea.updateWith(e);
+            } else {
+                affectedArea.initAt(e);
+            }
         }
     }
 
-    protected boolean withLine(PMouseEvent e) {
+    protected boolean isLineConnect(PMouseEvent e) {
         // the first mousePressed event is not a line-connecting
         // one, even if the shift key is down
         return !firstMouseDown && e.isShiftDown();
@@ -461,6 +474,8 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected Symmetry getSymmetry() {
+        assert canHaveSymmetry;
+
         return symmetryModel.getSelectedItem();
     }
 

@@ -36,7 +36,10 @@ public class AffectedArea {
     }
 
     /**
-     * Initialize the area with a brush position
+     * Initialize the area with a brush position.
+     *
+     * Currently there is only one {@link AffectedArea} object for each
+     * brush tool, and it gets reinitialized for each independent brush stroke.
      */
     public void initAt(PPoint p) {
         double x = p.getImX();

@@ -73,7 +73,7 @@ public class CloneTool extends BlendingModeBrushTool {
         super("Clone Stamp", 's', "clone_tool_icon.png",
                 "<b>Alt-click</b> (or <b>right-click</b>) to select the source, " +
                     "then <b>drag</b> to paint. <b>Shift-click</b> to clone along a line.",
-                Cursors.CROSSHAIR);
+            Cursors.CROSSHAIR, false);
     }
 
     @Override
@@ -147,19 +147,18 @@ public class CloneTool extends BlendingModeBrushTool {
         if (e.isAltDown() || e.isRight()) {
             setCloningSource(e);
         } else {
-            boolean notWithLine = !withLine(e);
-
             if (state == NO_SOURCE) {
                 handleUndefinedSource(e);
                 return;
             }
-            startNewCloningStroke(e, notWithLine);
+            boolean lineConnect = isLineConnect(e);
+            startNewCloningStroke(e, lineConnect);
 
             super.mousePressed(e);
         }
     }
 
-    private void startNewCloningStroke(PPoint p, boolean notWithLine) {
+    private void startNewCloningStroke(PPoint p, boolean lineConnect) {
         state = CLONING;
 
         float scaleAbs = scaleParam.getValueAsPercentage();
@@ -170,7 +169,7 @@ public class CloneTool extends BlendingModeBrushTool {
         cloneBrush.setRotate(rotationParam.getValueInRadians());
 
         // when drawing with line, a mouse press should not change the destination
-        if (notWithLine) {
+        if (!lineConnect) {
             cloneBrush.setCloningDestPoint(p);
         }
     }

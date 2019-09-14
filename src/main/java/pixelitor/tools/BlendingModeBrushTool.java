@@ -32,8 +32,8 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
 
     protected BlendingModeBrushTool(String name, char activationKeyChar,
                                     String iconFileName, String toolMessage,
-                                    Cursor cursor) {
-        super(name, activationKeyChar, iconFileName, toolMessage, cursor);
+                                    Cursor cursor, boolean canHaveSymmetry) {
+        super(name, activationKeyChar, iconFileName, toolMessage, cursor, canHaveSymmetry);
         drawDestination = DrawDestination.TMP_LAYER;
     }
 

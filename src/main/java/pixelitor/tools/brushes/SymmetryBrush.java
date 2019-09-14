@@ -133,11 +133,14 @@ public class SymmetryBrush implements Brush {
     }
 
     public void startAt(int brushNo, PPoint p) {
+        // the tracking of the affected area is done at this level
         if(brushNo == 0) {
             affectedArea.initAt(p);
         } else {
             affectedArea.updateWith(p);
         }
+
+        // do the actual painting
         brushes[brushNo].startAt(p);
     }
 

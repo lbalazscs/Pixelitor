@@ -42,7 +42,7 @@ public class BrushTool extends BlendingModeBrushTool {
                 "<b>click</b> or <b>drag</b> to draw with the current brush, " +
                         "<b>Shift-click</b> to draw lines, " +
                         "<b>right-click</b> or <b>right-drag</b> to draw with the background color.",
-                Cursors.CROSSHAIR
+            Cursors.CROSSHAIR, true
         );
     }
 
