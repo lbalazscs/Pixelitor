@@ -418,7 +418,10 @@ public class Path implements Serializable {
     public List<TransformBox> createTransformBoxes() {
         List<TransformBox> boxes = new ArrayList<>();
         for (SubPath subPath : subPaths) {
-            boxes.add(subPath.createTransformBox());
+            TransformBox box = subPath.createTransformBox();
+            if (box != null) {
+                boxes.add(box);
+            }
         }
         return boxes;
     }

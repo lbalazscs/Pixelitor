@@ -17,7 +17,7 @@
 
 package pixelitor;
 
-import pixelitor.guitest.FixedFailOnThreadViolationRepaintManager;
+import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 
 /**
  * A way to run the app from the test directory,
@@ -28,7 +28,7 @@ public class TestMain {
     }
 
     public static void main(String[] args) {
-        FixedFailOnThreadViolationRepaintManager.install();
+        FailOnThreadViolationRepaintManager.install();
 
         Pixelitor.main(args);
     }

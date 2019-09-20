@@ -78,4 +78,6 @@ public interface Brush {
      * any spacing that looks good, or 0 to skip the decision.
      */
     double getPreferredSpacing();
+
+    PPoint getPrevious();
 }

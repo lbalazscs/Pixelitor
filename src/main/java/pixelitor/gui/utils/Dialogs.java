@@ -262,7 +262,7 @@ public class Dialogs {
         playWarningSound();
     }
 
-    private static void playWarningSound() {
+    public static void playWarningSound() {
         try {
             int maxVolume = 90;
             int sound = 65;

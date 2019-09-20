@@ -61,6 +61,10 @@ public class SmudgeBrush extends CopyBrush {
         firstUsageInStroke = true;
     }
 
+    public boolean firstPointWasInitialized() {
+        return last != null;
+    }
+
     @Override
     void setupBrushStamp(PPoint p) {
         Graphics2D g = brushImage.createGraphics();

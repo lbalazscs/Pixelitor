@@ -48,7 +48,6 @@ public class AnchorPoint extends DraggablePoint {
     private final SubPath subPath;
 
     private static long debugCounter = 0;
-    private final String id; // for debugging
 
     private AnchorPointType type = SYMMETRIC;
 
@@ -62,7 +61,7 @@ public class AnchorPoint extends DraggablePoint {
     public static AnchorPoint recentlyEditedPoint = null;
 
     public AnchorPoint(double x, double y, View view, SubPath subPath) {
-        super("anchor", x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
+        super("AP" + debugCounter++, x, y, view, ANCHOR_COLOR, ANCHOR_ACTIVE_COLOR);
         this.subPath = subPath;
 
         ctrlIn = new ControlPoint("ctrlIn", x, y, view, this,
@@ -71,8 +70,6 @@ public class AnchorPoint extends DraggablePoint {
                 CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
-
-        id = "AP" + debugCounter++;
     }
 
     public AnchorPoint(PPoint p, SubPath subPath) {
@@ -343,10 +340,6 @@ public class AnchorPoint extends DraggablePoint {
         return subPath;
     }
 
-    public String getId() {
-        return id;
-    }
-
     @Override
     public String getMoveEditName() {
         return "Move Anchor Point";
@@ -357,11 +350,5 @@ public class AnchorPoint extends DraggablePoint {
         System.out.println("    " + toColoredString());
         System.out.println("    " + ctrlIn.toColoredString());
         System.out.println("    " + ctrlOut.toColoredString());
-    }
-
-    // also includes the anchor point positions
-    @Override
-    public String toString() {
-        return id + "(" + x + ", " + y + ")";
     }
 }

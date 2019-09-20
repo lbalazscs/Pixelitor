@@ -30,6 +30,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.Events;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditListener;
@@ -181,8 +182,12 @@ public class History {
             numUndoneEdits++;
             undoManager.undo();
         } catch (CannotUndoException e) {
-            Messages.showInfo("No undo available",
+            if (RandomGUITest.isRunning()) {
+                throw new RuntimeException("No undo available", e);
+            } else {
+                Messages.showInfo("No undo available",
                     "No undo available, probably because the undo image was discarded in order to save memory");
+            }
         }
     }
 
@@ -332,12 +337,7 @@ public class History {
 
     @VisibleForTesting
     public static void assertEditToBeUndoneNameIs(String expected) {
-        PixelitorEdit editToBeUndone = undoManager.getEditToBeUndone();
-        if (editToBeUndone == null) {
-            throw new AssertionError("there is no edit to be undone, " +
-                    "expected " + expected);
-        }
-        String name = editToBeUndone.getName();
+        String name = getEditToBeUndoneName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
                     "Expected '%s', found '%s'", expected, name));
@@ -345,17 +345,30 @@ public class History {
     }
 
     @VisibleForTesting
-    public static void assertEditToBeRedoneNameIs(String expected) {
-        PixelitorEdit editToBeRedone = undoManager.getEditToBeRedone();
-        if (editToBeRedone == null) {
-            throw new AssertionError("there is no edit to be redone, " +
-                    "expected " + expected);
+    public static String getEditToBeUndoneName() {
+        PixelitorEdit editToBeUndone = undoManager.getEditToBeUndone();
+        if (editToBeUndone == null) {
+            throw new AssertionError("there is no edit to be undone");
         }
-        String name = editToBeRedone.getName();
+        return editToBeUndone.getName();
+    }
+
+    @VisibleForTesting
+    public static void assertEditToBeRedoneNameIs(String expected) {
+        String name = getEditToBeRedoneName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
                     "Expected '%s', found '%s'", expected, name));
         }
+    }
+
+    @VisibleForTesting
+    public static String getEditToBeRedoneName() {
+        PixelitorEdit editToBeRedone = undoManager.getEditToBeRedone();
+        if (editToBeRedone == null) {
+            throw new AssertionError("there is no edit to be redone");
+        }
+        return editToBeRedone.getName();
     }
 
     public static void setIgnoreEdits(boolean ignoreEdits) {

@@ -153,6 +153,13 @@ public class Mouse {
         robot.releaseMouse(MouseButton.LEFT_BUTTON);
     }
 
+    void doubleClick() {
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+    }
+
     void rightClick() {
         robot.pressMouse(MouseButton.RIGHT_BUTTON);
         robot.releaseMouse(MouseButton.RIGHT_BUTTON);
@@ -178,6 +185,11 @@ public class Mouse {
     void randomClick() {
         moveRandomlyWithinCanvas();
         click();
+    }
+
+    void randomDoubleClick() {
+        moveRandomlyWithinCanvas();
+        doubleClick();
     }
 
     void altClick() {

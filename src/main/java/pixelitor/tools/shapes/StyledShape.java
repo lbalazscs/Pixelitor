@@ -32,6 +32,7 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.BasicStroke;
@@ -109,7 +110,13 @@ public class StyledShape implements Cloneable {
         if (hasFillPaint()) {
             if (shapeType.isClosed()) {
                 fillPaintType.prepare(g, transformedImDrag);
-                g.fill(shape);
+                try {
+                    g.fill(shape);
+                } catch (NullPointerException e) {
+                    handleStrangeNPE(e, shape);
+                    return;
+                }
+
                 fillPaintType.finish(g);
             } else if (!hasStrokePaint()) {
                 // Special case: an open shape cannot be filled,
@@ -125,7 +132,13 @@ public class StyledShape implements Cloneable {
         if (hasStrokePaint()) {
             g.setStroke(stroke);
             strokePaintType.prepare(g, transformedImDrag);
-            g.draw(shape);
+            try {
+                g.draw(shape);
+            } catch (NullPointerException e) {
+                handleStrangeNPE(e, shape);
+                return;
+            }
+
             strokePaintType.finish(g);
         }
 
@@ -405,4 +418,18 @@ public class StyledShape implements Cloneable {
     public String toString() {
         return String.format("StyledShape, width = %.2f", strokeSettings.getWidth());
     }
+
+    public static void handleStrangeNPE(NullPointerException e, Shape shape) {
+        if (hadStrangeNPE) {
+            return;
+        }
+        // both the ductus and the marlin engines sometimes throw NPEs here...
+        Rectangle bounds = shape.getBounds();
+        System.out.println("StyledShape::paint: bounds = " + bounds);
+        Utils.debugShape(shape, "NPE shape");
+        hadStrangeNPE = true;
+        throw e;
+    }
+
+    private static boolean hadStrangeNPE = false;
 }

@@ -37,6 +37,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.Optional;
 
+import static java.lang.Double.isNaN;
+
 /**
  * A point that can be dragged with the help of a handle.
  * All coordinates are in component space unless otherwise noted.
@@ -92,6 +94,10 @@ public class DraggablePoint extends Point2D.Double {
         this.name = name;
         this.x = x;
         this.y = y;
+
+        assert !isNaN(x);
+        assert !isNaN(y);
+
         this.view = view;
 
         this.color = color;

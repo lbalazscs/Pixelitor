@@ -51,6 +51,11 @@ public class AffectedAreaTracker implements Brush {
     }
 
     @Override
+    public PPoint getPrevious() {
+        return delegate.getPrevious();
+    }
+
+    @Override
     public void startAt(PPoint p) {
         affectedArea.initAt(p);
         delegate.startAt(p);

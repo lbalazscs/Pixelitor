@@ -31,22 +31,9 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
-import static java.awt.event.KeyEvent.VK_0;
-import static java.awt.event.KeyEvent.VK_1;
-import static java.awt.event.KeyEvent.VK_2;
-import static java.awt.event.KeyEvent.VK_3;
-import static java.awt.event.KeyEvent.VK_4;
-import static java.awt.event.KeyEvent.VK_ADD;
-import static java.awt.event.KeyEvent.VK_CONTROL;
-import static java.awt.event.KeyEvent.VK_D;
-import static java.awt.event.KeyEvent.VK_ESCAPE;
-import static java.awt.event.KeyEvent.VK_I;
-import static java.awt.event.KeyEvent.VK_RIGHT;
-import static java.awt.event.KeyEvent.VK_SHIFT;
-import static java.awt.event.KeyEvent.VK_SUBTRACT;
-import static java.awt.event.KeyEvent.VK_Z;
+import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static pixelitor.guitest.AssertJSwingTest.ROBOT_DELAY_DEFAULT;
+import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
 
 /**
  * Keyboard input for {@link AssertJSwingTest}
@@ -58,12 +45,12 @@ public class Keyboard {
 
     private final FrameFixture pw;
     private final Robot robot;
-    private final AssertJSwingTest tester;
+    private final AppRunner runner;
 
-    public Keyboard(FrameFixture pw, Robot robot, AssertJSwingTest tester) {
+    public Keyboard(FrameFixture pw, Robot robot, AppRunner runner) {
         this.pw = pw;
         this.robot = robot;
-        this.tester = tester;
+        this.runner = runner;
     }
 
     void undo(String edit) {
@@ -86,6 +73,17 @@ public class Keyboard {
         robot.waitForIdle();
     }
 
+    // undo without expected edit name for random tests
+    void undo() {
+        if (osLevelKeyEvents) {
+            // press Ctrl-Z
+            pw.pressKey(VK_CONTROL).pressKey(VK_Z)
+                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+        } else {
+            EDT.undo();
+        }
+    }
+
     void redo(String edit) {
 //        Utils.debugCall(edit);
 
@@ -106,6 +104,17 @@ public class Keyboard {
         robot.waitForIdle();
     }
 
+    // redo without expected edit name for random tests
+    void redo() {
+        if (osLevelKeyEvents) {
+            // press Ctrl-Shift-Z
+            pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
+                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+        } else {
+            EDT.redo();
+        }
+    }
+
     void undoRedo(String edit) {
         undo(edit);
         redo(edit);
@@ -122,7 +131,7 @@ public class Keyboard {
             // press Ctrl-I
             pw.pressKey(VK_CONTROL).pressKey(VK_I).releaseKey(VK_I).releaseKey(VK_CONTROL);
         } else {
-            tester.runMenuCommand("Invert");
+            runner.runMenuCommand("Invert");
         }
     }
 
@@ -160,7 +169,7 @@ public class Keyboard {
             // press Ctrl-0
             pw.pressKey(VK_CONTROL).pressKey(VK_0).releaseKey(VK_0).releaseKey(VK_CONTROL);
         } else {
-            tester.runMenuCommand("Actual Pixels");
+            runner.runMenuCommand("Actual Pixels");
         }
     }
 
@@ -253,5 +262,29 @@ public class Keyboard {
         queue.postEvent(new KeyEvent(eventSource, KeyEvent.KEY_RELEASED,
                 System.currentTimeMillis(), modifiers,
                 keyCode, Character.MIN_VALUE));
+    }
+
+    public void pressCtrl() {
+        pw.pressKey(VK_CONTROL);
+    }
+
+    public void releaseCtrl() {
+        pw.releaseKey(VK_CONTROL);
+    }
+
+    public void pressAlt() {
+        pw.pressKey(VK_ALT);
+    }
+
+    public void releaseAlt() {
+        pw.releaseKey(VK_ALT);
+    }
+
+    public void pressShift() {
+        pw.pressKey(VK_SHIFT);
+    }
+
+    public void releaseShift() {
+        pw.releaseKey(VK_SHIFT);
     }
 }

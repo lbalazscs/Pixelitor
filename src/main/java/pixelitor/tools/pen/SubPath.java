@@ -505,7 +505,7 @@ public class SubPath implements Serializable {
         }
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
-            out.print(Ansi.purple("Point " + i + " (" + point.getId() + "): "));
+            out.print(Ansi.purple("Point " + i + " (" + point.getName() + "): "));
             if (point == getFirst()) {
                 out.print("first ");
             }
@@ -737,7 +737,7 @@ public class SubPath implements Serializable {
     public String toString() {
         return id + anchorPoints
                 .stream()
-                .map(AnchorPoint::getId)
+            .map(AnchorPoint::getName)
                 .collect(joining(",", " [", "]"));
     }
 
@@ -755,6 +755,11 @@ public class SubPath implements Serializable {
         GeneralPath gp = new GeneralPath();
         addToComponentSpaceShape(gp);
         Rectangle2D coBoundingBox = gp.getBounds2D();
+
+        if (Double.isNaN(coBoundingBox.getX())) {
+            // TODO in some cases x, y, width, height are all NaNs, why?
+            return null;
+        }
 
 //        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
         TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);

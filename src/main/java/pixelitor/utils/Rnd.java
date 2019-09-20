@@ -87,4 +87,21 @@ public class Rnd {
     public static double nextGaussian() {
         return rand.nextGaussian();
     }
+
+    public static double nextDouble() {
+        return rand.nextDouble();
+    }
+
+    public static float nextFloat() {
+        return rand.nextFloat();
+    }
+
+    public static boolean withProbability(double p, Runnable task) {
+        assert p >= 0 && p <= 1;
+        if (p > rand.nextDouble()) {
+            task.run();
+            return true;
+        }
+        return false;
+    }
 }

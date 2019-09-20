@@ -74,6 +74,11 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
+    public PPoint getPrevious() {
+        return brushes[0].getPrevious();
+    }
+
+    @Override
     public void startAt(PPoint p) {
         symmetry.startAt(this, p);
     }

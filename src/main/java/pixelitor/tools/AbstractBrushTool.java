@@ -79,11 +79,6 @@ public abstract class AbstractBrushTool extends Tool {
     private SymmetryBrush symmetryBrush;
     protected AffectedArea affectedArea;
 
-    // for the first click it shouldn't draw lines even if it is a shift-click
-    // TODO this shouldn't be necessary, but there are problems
-    // (exception after a first shift-click) in the smudge brush without it
-    private boolean firstMouseDown = true;
-
     private JButton brushSettingsButton;
 
     private JDialog settingsDialog;
@@ -159,7 +154,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected void addBrushSettingsButton() {
         brushSettingsButton = settingsPanel.addButton(
-                "Brush Settings",
+            "Settings...",
                 e -> brushSettingsButtonPressed());
 
         brushSettingsButton.setEnabled(false);
@@ -229,28 +224,20 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        boolean withLine = isLineConnect(e);
-        firstMouseDown = false;
+        boolean lineConnect = e.isShiftDown();
 
         Drawable dr = e.getComp().getActiveDrawableOrThrow();
-        newMousePoint(dr, e, withLine);
+        newMousePoint(dr, e, lineConnect);
 
         // it it can have symmetry, then the symmetry brush does
         // the tracking of the affected area
         if (!canHaveSymmetry) {
-            if (withLine) {
+            if (lineConnect) {
                 affectedArea.updateWith(e);
             } else {
                 affectedArea.initAt(e);
             }
         }
-    }
-
-    protected boolean isLineConnect(PMouseEvent e) {
-        // the first mousePressed event is not a line-connecting
-        // one, even if the shift key is down
-        return !firstMouseDown && e.isShiftDown();
-//        return e.isShiftDown();
     }
 
     @Override
@@ -398,7 +385,6 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void resetInitialState() {
-        firstMouseDown = true;
         respectSelection = true;
     }
 

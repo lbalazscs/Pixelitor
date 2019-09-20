@@ -235,8 +235,10 @@ public class PenTool extends Tool {
 
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit == null) {
-            Dialogs.showInfoDialog("No Selection",
-                "No selection was created because the path is outside the canvas.");
+            if (!RandomGUITest.isRunning()) {
+                Dialogs.showInfoDialog("No Selection",
+                    "No selection was created because the path is outside the canvas.");
+            }
             return;
         }
 

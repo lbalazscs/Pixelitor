@@ -30,6 +30,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
+import java.lang.ref.SoftReference;
 
 import static java.lang.String.format;
 
@@ -40,19 +41,21 @@ import static java.lang.String.format;
 public class PartialImageEdit extends FadeableEdit {
     private final Rectangle saveRect;
     private final boolean canRepeat;
-    private Raster backupRaster;
+    private SoftReference<Raster> backupRasterRef;
 
     private final Drawable dr;
 
     public PartialImageEdit(String name, Composition comp, Drawable dr,
                             BufferedImage image, Rectangle saveRect, boolean canRepeat) {
         super(name, comp, dr);
+//        Utils.debugCall(saveRect.toString());
 
         this.canRepeat = canRepeat;
         this.dr = dr;
         this.saveRect = saveRect;
 
-        backupRaster = image.getData(this.saveRect);
+        Raster backupRaster = image.getData(this.saveRect);
+        backupRasterRef = new SoftReference<>(backupRaster);
 
 //        EventQueue.invokeLater(() -> Utils.debugRaster(backupRaster, "Partial Image"));
     }
@@ -61,17 +64,29 @@ public class PartialImageEdit extends FadeableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        swapRasters();
+        if (!swapRasters()) {
+            throw new CannotUndoException();
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        swapRasters();
+        if (!swapRasters()) {
+            throw new CannotRedoException();
+        }
     }
 
-    private void swapRasters() {
+    /**
+     * Returns true if successful
+     */
+    private boolean swapRasters() {
+        Raster backupRaster = backupRasterRef.get();
+        if (backupRaster == null) {
+            return false;
+        }
+
         BufferedImage image = dr.getImage();
 
         Raster tmpRaster = null;
@@ -90,10 +105,12 @@ public class PartialImageEdit extends FadeableEdit {
             throw e;
         }
 
-        backupRaster = tmpRaster;
+        backupRasterRef = new SoftReference<>(tmpRaster);
 
         comp.imageChanged();
         dr.updateIconImage();
+
+        return true;
     }
 
     private static void debugRaster(String name, Raster raster) {
@@ -122,7 +139,7 @@ public class PartialImageEdit extends FadeableEdit {
     public void die() {
         super.die();
 
-        backupRaster = null;
+        backupRasterRef = null;
     }
 
     @Override
@@ -132,6 +149,14 @@ public class PartialImageEdit extends FadeableEdit {
 
     @Override
     public BufferedImage getBackupImage() {
+        if (backupRasterRef == null) { // died
+            return null;
+        }
+        Raster backupRaster = backupRasterRef.get();
+        if (backupRaster == null) { // soft reference lost
+            return null;
+        }
+
         // recreate the full image as if it was backed up entirely
         // because Fade expects to fade images of equal size
         // TODO this is not the optimal solution  - Fade should fade only the changed area
@@ -153,8 +178,16 @@ public class PartialImageEdit extends FadeableEdit {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addInt("Backup Image Width", backupRaster.getWidth());
-        node.addInt("Backup Image Height", backupRaster.getHeight());
+        int width = -1;
+        int height = -1;
+        Raster backupRaster = backupRasterRef.get();
+        if (backupRaster != null) {
+            width = backupRaster.getWidth();
+            height = backupRaster.getHeight();
+        }
+
+        node.addInt("Backup Image Width", width);
+        node.addInt("Backup Image Height", height);
 
         return node;
     }

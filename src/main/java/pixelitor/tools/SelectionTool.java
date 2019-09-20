@@ -312,6 +312,15 @@ public class SelectionTool extends DragTool {
         }
     }
 
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+
+        // otherwise in polygonal mode half-built selections
+        // remain visible after switching to another tool
+        stopBuildingSelection();
+    }
+
     @VisibleForTesting
     public SelectionType getSelectionType() {
         return (SelectionType) typeCombo.getSelectedItem();

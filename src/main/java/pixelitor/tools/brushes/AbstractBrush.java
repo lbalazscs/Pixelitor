@@ -99,6 +99,11 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
+    public PPoint getPrevious() {
+        return previous;
+    }
+
+    @Override
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("Brush", this);
         node.addClass();

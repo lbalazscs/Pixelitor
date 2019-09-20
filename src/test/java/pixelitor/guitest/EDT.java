@@ -130,8 +130,16 @@ public class EDT {
         });
     }
 
+    public static void undo() {
+        run(History::undo);
+    }
+
     public static void undo(String edit) {
         run(() -> History.undo(edit));
+    }
+
+    public static void redo() {
+        run(History::redo);
     }
 
     public static void redo(String edit) {

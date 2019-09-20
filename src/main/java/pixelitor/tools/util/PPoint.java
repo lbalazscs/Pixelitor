@@ -153,7 +153,7 @@ public abstract class PPoint {
 
     @Override
     public String toString() {
-        return String.format("[imX = %.1f, imY = %.1f]", imX, imY);
+        return String.format("[imX = %.1f, imY = %.1f]", getImX(), getImY());
     }
 
     /**

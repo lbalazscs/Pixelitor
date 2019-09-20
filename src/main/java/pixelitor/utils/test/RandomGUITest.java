@@ -137,7 +137,6 @@ public class RandomGUITest {
 
     private static final WeightedCaller weightedCaller = new WeightedCaller();
     private static final boolean PRINT_MEMORY = false;
-    private static KeyStroke stopKeyStroke;
 
     private static int numPastedImages = 0;
 
@@ -175,11 +174,11 @@ public class RandomGUITest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        stopKeyStroke = KeyStroke.getKeyStroke('w');
+        KeyStroke stopKeyStroke = KeyStroke.getKeyStroke('w');
         GlobalEventWatch.add(MappedKey.fromKeyStroke(stopKeyStroke, "stopTest", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nRandomGUITest: \"" + stopKeyStroke + "\" pressed");
+                System.err.println("\nRandomGUITest: '" + stopKeyStroke.getKeyChar() + "' pressed");
                 keepRunning = false;
             }
         }));
@@ -223,6 +222,11 @@ public class RandomGUITest {
 
     public static boolean isRunning() {
         return running;
+    }
+
+    // a hack so that other random tests also can avoid dialogs
+    public static void setRunning(boolean running) {
+        RandomGUITest.running = running;
     }
 
     public static void stop() {

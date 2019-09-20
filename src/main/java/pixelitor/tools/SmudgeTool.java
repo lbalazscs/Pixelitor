@@ -107,9 +107,16 @@ public class SmudgeTool extends AbstractBrushTool {
         // with the translation.
         BufferedImage sourceImage = dr.getCanvasSizedSubImage();
 
-        if (!isLineConnect(e)) { // not a line-click
+        if (e.isShiftDown()) {
+            // if we *start* with a shift-click, then we must initialize,
+            // but otherwise don't re-initialize for shift-clicks
+            if (!smudgeBrush.firstPointWasInitialized()) {
+                initStroke(sourceImage, e);
+            }
+        } else {
             initStroke(sourceImage, e);
         }
+
         super.mousePressed(e);
     }
 
