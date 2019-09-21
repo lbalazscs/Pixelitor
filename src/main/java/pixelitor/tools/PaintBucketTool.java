@@ -119,19 +119,19 @@ public class PaintBucketTool extends Tool {
 
         String fill = (String) fillComboBox.getSelectedItem();
         int rgbAtMouse = workingImage.getRGB(x, y);
-        int newRGB;
+        int fillRGB;
         switch (fill) {
             case FILL_FOREGROUND:
-                newRGB = getFGColor().getRGB();
+                fillRGB = getFGColor().getRGB();
                 break;
             case FILL_BACKGROUND:
-                newRGB = getBGColor().getRGB();
+                fillRGB = getBGColor().getRGB();
                 break;
             case FILL_TRANSPARENT:
-                newRGB = 0x00000000;
+                fillRGB = 0x00000000;
                 break;
             case FILL_CLICKED:
-                newRGB = rgbAtMouse;
+                fillRGB = rgbAtMouse;
                 break;
             default:
                 throw new IllegalStateException("fill = " + fill);
@@ -143,11 +143,11 @@ public class PaintBucketTool extends Tool {
         switch (action) {
             case ACTION_LOCAL:
                 replacedArea = scanlineFloodFill(workingImage,
-                        x, y, tolerance, rgbAtMouse, newRGB);
+                    x, y, tolerance, rgbAtMouse, fillRGB);
                 break;
             case ACTION_GLOBAL:
                 globalReplaceColor(workingImage,
-                        tolerance, rgbAtMouse, newRGB);
+                    tolerance, rgbAtMouse, fillRGB);
                 replacedArea = new Rectangle(0, 0, imgWidth, imgHeight);
                 break;
             default:
@@ -312,17 +312,20 @@ public class PaintBucketTool extends Tool {
             return true;
         }
 
+        int a1 = (color1 >>> 24) & 0xFF;
         int r1 = (color1 >>> 16) & 0xFF;
         int g1 = (color1 >>> 8) & 0xFF;
         int b1 = color1 & 0xFF;
 
+        int a2 = (color2 >>> 24) & 0xFF;
         int r2 = (color2 >>> 16) & 0xFF;
         int g2 = (color2 >>> 8) & 0xFF;
         int b2 = color2 & 0xFF;
 
         return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
                 (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
-                (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance);
+            (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
+            (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
     }
 
     @Override
