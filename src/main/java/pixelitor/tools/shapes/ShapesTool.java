@@ -229,6 +229,19 @@ public class ShapesTool extends DragTool {
         altDown = false;
     }
 
+    @Override
+    public void escPressed() {
+        // pressing Esc should work similarly to the Gradient Tool,
+        // or to clicking outside the transform box:
+        // the handles disappear, but the effect remains
+        if (state == TRANSFORM) {
+            Composition comp = OpenComps.getActiveCompOrNull();
+            if (comp != null) {
+                finalizeShape(comp);
+            }
+        }
+    }
+
     private void setState(ShapesToolState newState) {
         state = newState;
 

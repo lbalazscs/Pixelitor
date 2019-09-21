@@ -209,7 +209,10 @@ public class SelectionTool extends DragTool {
 
         super.mouseClicked(e);
 
-        Composition comp = e.getComp();
+        cancelSelection(e.getComp());
+    }
+
+    private void cancelSelection(Composition comp) {
         deselect(comp, true);
         assert !comp.hasBuiltSelection() : "built selection is = " + comp.getBuiltSelection();
 
@@ -220,6 +223,21 @@ public class SelectionTool extends DragTool {
         }
         assert ConsistencyChecks.selectionIsOK(comp) :
                 "selection is outside";
+    }
+
+    private static void deselect(Composition comp, boolean addToHistory) {
+        if (comp.hasSelection()) {
+            comp.deselect(addToHistory);
+        }
+    }
+
+    @Override
+    public void escPressed() {
+        // pressing Esc should work the same as clicking outside the selection
+        Composition comp = OpenComps.getActiveCompOrNull();
+        if (comp != null) {
+            cancelSelection(comp);
+        }
     }
 
     @Override
@@ -238,12 +256,6 @@ public class SelectionTool extends DragTool {
             selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
         }
         altDown = false;
-    }
-
-    private static void deselect(Composition comp, boolean addToHistory) {
-        if (comp.hasSelection()) {
-            comp.deselect(addToHistory);
-        }
     }
 
     @Override
