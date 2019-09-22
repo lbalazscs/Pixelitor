@@ -69,8 +69,8 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public double getActualRadius() {
-        return brushes[0].getActualRadius();
+    public double getEffectiveRadius() {
+        return brushes[0].getEffectiveRadius();
     }
 
     @Override

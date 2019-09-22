@@ -263,7 +263,7 @@ public abstract class AbstractBrushTool extends Tool {
     private void finishBrushStroke(Drawable dr) {
         BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
 
-        double brushRadius = brush.getActualRadius();
+        double brushRadius = brush.getEffectiveRadius();
         Rectangle rect = affectedArea.asRectangle(brushRadius);
         assert !rect.isEmpty() : "brush radius = " + brushRadius + ", affected area = " + affectedArea;
 

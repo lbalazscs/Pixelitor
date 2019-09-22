@@ -160,7 +160,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             pw.pressAndReleaseKeys(KeyEvent.VK_R);
         } else {
-            GuiActionRunner.execute(FgBgColors::randomizeColors);
+            GuiActionRunner.execute(FgBgColors::randomize);
         }
     }
 
@@ -206,6 +206,14 @@ public class Keyboard {
             } else {
                 EDT.decreaseZoom();
             }
+        }
+    }
+
+    void pressEnter() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_ENTER).releaseKey(VK_ENTER);
+        } else {
+            postKeyEventToEventQueue(0, VK_ENTER);
         }
     }
 

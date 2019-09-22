@@ -24,6 +24,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.NewImage;
 import pixelitor.automate.SingleDirChooser;
+import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
@@ -38,6 +39,7 @@ import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayerButton;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.ImDrag;
@@ -55,14 +57,16 @@ import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
+import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 
 /**
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
     private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
+    public static final int SPLASH_WIDTH = 400;
+    public static final int SPLASH_HEIGHT = 247;
 
     private SplashImageCreator() {
     }
@@ -76,7 +80,7 @@ public class SplashImageCreator {
         }
         File lastSaveDir = Dirs.getLastSave();
         MessageHandler msgHandler = Messages.getMessageHandler();
-        int numCreatedImages = 32;
+        int numCreatedImages = 64;
         String msg = format("Save %d Splash Images: ", numCreatedImages);
         ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
 
@@ -125,8 +129,25 @@ public class SplashImageCreator {
 
     public static Composition createSplashImage() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
+        FgBgColors.setFGColor(LayerButton.SELECTED_COLOR);
+        FgBgColors.setBGColor(new Color(3, 21, 19));
 
-        Composition comp = NewImage.addNewImage(FillType.WHITE, 400, 247, "Splash");
+        Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+        ImageLayer layer = (ImageLayer) comp.getLayer(0);
+
+        ImDrag imDrag = ImDrag.createRandom(SPLASH_WIDTH, SPLASH_HEIGHT);
+        Gradient gradient = new Gradient(imDrag, GradientType.SPIRAL_CW, REFLECT, FG_TO_BG, false, BlendingMode.MULTIPLY, 1.0f);
+        gradient.drawOn(layer);
+
+        addTextLayers(comp);
+
+        return comp;
+    }
+
+    public static Composition createOldSplashImage() {
+        assert EventQueue.isDispatchThread() : "not EDT thread";
+
+        Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         layer.setName("Color Wheel", true);
@@ -144,25 +165,30 @@ public class SplashImageCreator {
         layer.setOpacity(0.4f, true, true, true);
         layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
 
-        setFGColor(WHITE);
+        addTextLayers(comp);
+
+        return comp;
+    }
+
+    private static void addTextLayers(Composition comp) {
+        ImageLayer layer;
+        FgBgColors.setFGColor(WHITE);
         Font font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 48);
         layer = addRasterizedTextLayer(comp, "Pixelitor", WHITE,
-                font, -17, BlendingMode.NORMAL, 0.9f, false);
+            font, -17, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.BOLD, 22);
         layer = addRasterizedTextLayer(comp,
-                "Loading...",
-                WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
+            "Loading...",
+            WHITE, font, -70, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
 
         font = new Font(SPLASH_SCREEN_FONT, Font.PLAIN, 20);
         layer = addRasterizedTextLayer(comp,
-                "version " + Build.VERSION_NUMBER,
-                WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
+            "version " + Build.VERSION_NUMBER,
+            WHITE, font, 50, BlendingMode.NORMAL, 0.9f, false);
         addDropShadow(layer);
-
-        return comp;
     }
 
     private static void addDropShadow(ImageLayer layer) {

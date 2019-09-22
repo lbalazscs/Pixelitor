@@ -17,6 +17,7 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
 
 import java.awt.Color;
@@ -60,6 +61,18 @@ public class ImDrag {
         startY = r.getY();
         endX = startX + r.getWidth();
         endY = startY + r.getHeight();
+    }
+
+    public static ImDrag createRandom(int width, int height) {
+        int halfWidth = width / 2;
+        int halfHeight = height / 2;
+
+        int x1 = Rnd.nextInt(halfWidth);
+        int x2 = halfWidth + Rnd.nextInt(halfWidth);
+        int y1 = Rnd.nextInt(halfHeight);
+        int y2 = halfHeight + Rnd.nextInt(halfHeight);
+
+        return new ImDrag(x1, y1, x2, y2);
     }
 
     public ImDrag createTransformed(AffineTransform at) {

@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
@@ -53,7 +54,6 @@ import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
-import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.Tools.BRUSH;
@@ -149,7 +149,7 @@ public class AutoPaint {
 
     private static void setFgBgColors(Settings settings, Random rand) {
         if (settings.useRandomColors()) {
-            randomizeColors();
+            FgBgColors.randomize();
         } else if (settings.useInterpolatedColors()) {
             float interpolationRatio = rand.nextFloat();
             Color interpolated = ColorUtils.interpolateInRGB(

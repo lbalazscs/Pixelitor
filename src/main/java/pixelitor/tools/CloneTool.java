@@ -151,7 +151,7 @@ public class CloneTool extends BlendingModeBrushTool {
                 handleUndefinedSource(e);
                 return;
             }
-            boolean lineConnect = e.isShiftDown();
+            boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
             startNewCloningStroke(e, lineConnect);
 
             super.mousePressed(e);

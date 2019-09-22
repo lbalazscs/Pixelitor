@@ -211,9 +211,9 @@ public class FgBgColorSelector extends JLayeredPane {
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color rndColor1 = Rnd.createRandomColor(false);
+                Color rndColor1 = Rnd.createRandomColor();
                 setFgColor(rndColor1, false);
-                Color rndColor2 = Rnd.createRandomColor(false);
+                Color rndColor2 = Rnd.createRandomColor();
                 setBgColor(rndColor2, true);
             }
         };

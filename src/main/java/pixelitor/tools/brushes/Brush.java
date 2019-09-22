@@ -44,7 +44,7 @@ public interface Brush {
      * Note that this can be bigger than the radius, because
      * some brushes use randomness and paint outside their radius.
      */
-    double getActualRadius();
+    double getEffectiveRadius();
 
     /**
      * The start of a new brush stroke.
@@ -67,9 +67,10 @@ public interface Brush {
      */
     void finish();
 
+    /**
+     * Manually free the resources used by this brush.
+     */
     default void dispose() {}
-
-    DebugNode getDebugNode();
 
     /**
      * Returns the space between the dabs.
@@ -79,5 +80,18 @@ public interface Brush {
      */
     double getPreferredSpacing();
 
+    /**
+     * Returns the previous position of the brush.
+     */
     PPoint getPrevious();
+
+    /**
+     * Returns true if the brush has a previous position,
+     * and false if it was not used yet.
+     */
+    default boolean hasPrevious() {
+        return getPrevious() != null;
+    }
+
+    DebugNode getDebugNode();
 }

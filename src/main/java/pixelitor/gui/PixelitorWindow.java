@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Build;
+import pixelitor.Composition;
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
@@ -222,6 +223,19 @@ public class PixelitorWindow extends JFrame {
 
     public boolean areToolsShown() {
         return toolsPanel.getParent() != null;
+    }
+
+    /**
+     * Updates the app title with the name of the given {@link Composition}
+     */
+    public void updateTitle(Composition comp) {
+        String title;
+        if (comp != null) {
+            title = comp.getName() + " - " + Build.getPixelitorWindowFixTitle();
+        } else {
+            title = Build.getPixelitorWindowFixTitle();
+        }
+        setTitle(title);
     }
 
     /**

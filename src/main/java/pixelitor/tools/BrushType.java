@@ -35,7 +35,7 @@ public enum BrushType {
     IDEAL("Hard", false) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            return new IdealBrush(radius);
+            return new HardBrush(radius);
         }
     }, SOFT("Soft", false) {
         @Override

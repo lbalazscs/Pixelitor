@@ -151,7 +151,7 @@ public class TextSettings implements Serializable {
     public static TextSettings createRandomSettings(Random rand) {
         return new TextSettings(Rnd.createRandomString(10),
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
-            Rnd.createRandomColor(false),
+            Rnd.createRandomColor(),
                 AreaEffects.createRandom(rand),
                 HorizontalAlignment.CENTER,
                 VerticalAlignment.CENTER,

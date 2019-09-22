@@ -40,6 +40,10 @@ public class Rnd {
         return items.get(rand.nextInt(items.size()));
     }
 
+    public static Color createRandomColor() {
+        return createRandomColor(false);
+    }
+
     public static Color createRandomColor(boolean randomAlpha) {
         return createRandomColor(rand, randomAlpha);
     }

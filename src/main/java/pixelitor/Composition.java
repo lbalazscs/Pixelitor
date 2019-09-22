@@ -19,6 +19,7 @@ package pixelitor;
 
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
@@ -269,6 +270,7 @@ public class Composition implements Serializable {
         this.name = name;
         if (view != null) {
             view.updateTitle();
+            PixelitorWindow.getInstance().updateTitle(this);
         }
     }
 

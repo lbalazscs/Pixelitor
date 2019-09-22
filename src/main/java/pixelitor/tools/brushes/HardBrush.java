@@ -23,11 +23,11 @@ import pixelitor.tools.util.PPoint;
 import java.awt.geom.Ellipse2D;
 
 /**
- * A brush that paints with vector-based "perfect" circles
+ * A brush that paints with vector-based circles
  */
-public class IdealBrush extends StrokeBrush {
+public class HardBrush extends StrokeBrush {
 
-    public IdealBrush(double radius) {
+    public HardBrush(double radius) {
         super(radius, StrokeType.BASIC);
     }
 

@@ -95,8 +95,8 @@ public class LazyMouseBrush implements Brush {
     }
 
     @Override
-    public double getActualRadius() {
-        return delegate.getActualRadius();
+    public double getEffectiveRadius() {
+        return delegate.getEffectiveRadius();
     }
 
     @Override

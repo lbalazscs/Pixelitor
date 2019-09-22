@@ -37,6 +37,7 @@ class SystemInfoPanel extends JPanel {
     private void addSystemProperties() {
         gbh.addTwoLabels("Java Version:", System.getProperty("java.version"));
         gbh.addTwoLabels("Java VM:", System.getProperty("java.vm.name"));
+        gbh.addTwoLabels("Java vendor:", System.getProperty("java.vendor"));
         gbh.addTwoLabels("OS:", System.getProperty("os.name"));
     }
 

@@ -60,7 +60,7 @@ public class SprayBrush extends AbstractBrush {
     }
 
     @Override
-    public double getActualRadius() {
+    public double getEffectiveRadius() {
         // The points have a Gaussian distribution, so the actual
         // radius is theoretically infinite, so we return the maximum observed value
         return maxShapeRadius + maxRadiusSoFar;

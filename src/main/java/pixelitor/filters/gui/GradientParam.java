@@ -144,7 +144,7 @@ public class GradientParam extends AbstractFilterParam {
         if (randomizePolicy.allow()) {
             Color[] randomColors = new Color[defaultThumbPositions.length];
             for (int i = 0; i < randomColors.length; i++) {
-                randomColors[i] = Rnd.createRandomColor(false);
+                randomColors[i] = Rnd.createRandomColor();
             }
 
             trigger = false;

@@ -22,6 +22,7 @@ import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
@@ -101,7 +102,6 @@ import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
 import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
 import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
@@ -468,7 +468,7 @@ public class RandomGUITest {
 
     private static void randomColors() {
         log("randomize colors");
-        randomizeColors();
+        FgBgColors.randomize();
     }
 
     private static void randomFilter() {

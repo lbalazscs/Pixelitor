@@ -47,7 +47,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public double getActualRadius() {
+    public double getEffectiveRadius() {
         // add one to make sure rounding errors don't ruin the undo
         return radius + 1.0;
     }

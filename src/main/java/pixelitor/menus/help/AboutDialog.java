@@ -48,27 +48,28 @@ public class AboutDialog {
         tabbedPane.add("System Info", new SystemInfoPanel());
 
         new DialogBuilder()
-                .owner(pw)
-                .title("About Pixelitor")
-                .content(tabbedPane)
-                .withScrollbars()
-                .noCancelButton()
-                .show();
+            .owner(pw)
+            .title("About Pixelitor")
+            .content(tabbedPane)
+            .withScrollbars()
+            .noCancelButton()
+            .show();
     }
 
     private static JPanel createCreditsPanel() {
         JPanel p = new JPanel();
         String text = "<html>Pixelitor was written by <b>L\u00e1szl\u00f3 Bal\u00e1zs-Cs\u00edki</b>." +
-                "<br><br><b>Łukasz Kurzaj</b> contributed the Curves filter and" +
-                "<br>improvements to the Crop Tool (see the release notes)</b>." +
-                "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
-                "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
-                "<li>many components by <b>Jeremy Wood</b>" +
-                "<li>the fast math library by <b>Jeff Hain</b>" +
-                "<li>the metadata library by <b>Drew Noakes</b>" +
-                "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
-                "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
-                "<li>the SwingX library";
+            "<br><br><b>Łukasz Kurzaj</b> contributed the Curves filter and" +
+            "<br>improvements to the Crop Tool (see the release notes)</b>." +
+            "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
+            "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
+            "<li>many components by <b>Jeremy Wood</b>" +
+            "<li>the fast math library by <b>Jeff Hain</b>" +
+            "<li>the metadata library by <b>Drew Noakes</b>" +
+            "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
+            "<li>the GIF decoder by <b>Dhyan Blum</b>" +
+            "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
+            "<li>the SwingX library";
         p.add(new JLabel(text));
 
         return p;
@@ -82,8 +83,8 @@ public class AboutDialog {
         addLabel("<html><b><font size=+1>Pixelitor</font></b></html>");
         addLabel("Version " + Build.VERSION_NUMBER);
         box.add(Box.createRigidArea(new Dimension(10, 20)));
-        addLabel("<html><center> Copyright \u00A9 2009-2018 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
-                "<br>and Contributors<br><br>");
+        addLabel("<html><center> Copyright \u00A9 2009-2019 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
+            "<br>and Contributors<br><br>");
         addLabel("lbalazscs\u0040gmail.com");
 
         JButton linkButton = createLinkButton();

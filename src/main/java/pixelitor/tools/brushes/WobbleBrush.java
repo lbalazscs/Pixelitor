@@ -35,7 +35,7 @@ public class WobbleBrush extends StrokeBrush {
     }
 
     @Override
-    public double getActualRadius() {
+    public double getEffectiveRadius() {
         return 5.0 + radius * 1.5; // can be bigger because of the randomness
     }
 

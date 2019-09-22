@@ -90,12 +90,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    /**
-     * Whether the preview image is different from the normal image
-     * It makes sense only in PREVIEW mode
-     */
-    private transient boolean imageContentChanged = false;
-
     private static final long serialVersionUID = 2L;
 
     //
@@ -126,6 +120,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private transient Rectangle trimmedBoundingBox;
 
+    /**
+     * Whether the preview image is different from the normal image
+     * It makes sense only in PREVIEW mode
+     */
+    private transient boolean imageContentChanged = false;
+
     private ImageLayer(Composition comp, String name, Layer parent) {
         super(comp, name, parent);
     }
@@ -150,7 +150,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         ImageLayer imageLayer = new ImageLayer(comp, name, null);
 
         BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
-                comp.getCanvasImWidth(), comp.getCanvasImHeight());
+            comp.getCanvasImWidth(), comp.getCanvasImHeight());
         imageLayer.setImage(emptyImage);
         imageLayer.checkConstructorPostConditions();
 
@@ -174,11 +174,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int pastedHeight = pastedImage.getHeight();
 
         BufferedImage newImage = layer.calcNewImageFromPasted(pastedImage,
-                canvasWidth, canvasHeight, pastedWidth, pastedHeight);
+            canvasWidth, canvasHeight, pastedWidth, pastedHeight);
         layer.setImage(newImage);
 
         layer.setTranslationForPasted(canvasWidth, canvasHeight,
-                pastedWidth, pastedHeight);
+            pastedWidth, pastedHeight);
 
         layer.updateIconImage();
         layer.checkConstructorPostConditions();
@@ -190,7 +190,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
                                                  int canvasWidth, int canvasHeight,
                                                  int pastedWidth, int pastedHeight) {
         boolean pastedImageTooSmall = pastedWidth < canvasWidth
-                || pastedHeight < canvasHeight;
+            || pastedHeight < canvasHeight;
 
         BufferedImage newImage = pastedImage;
         if (pastedImageTooSmall) {
@@ -385,8 +385,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageContentChanged) {
             ImageEdit edit = new ImageEdit(filterName, comp, this,
-                    getSelectedSubImage(true),
-                    false, true);
+                getSelectedSubImage(true),
+                false, true);
             History.addEdit(edit);
         }
 
@@ -432,13 +432,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException(format(
-                    "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
-                    filterName, cr, this.getClass().getSimpleName()));
+                "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
+                filterName, cr, this.getClass().getSimpleName()));
         }
 
         assert previewImage != null :
-                format("previewImage was null with %s, changeReason = %s, class = %s",
-                        filterName, cr, this.getClass().getSimpleName());
+            format("previewImage was null with %s, changeReason = %s, class = %s",
+                filterName, cr, this.getClass().getSimpleName());
         assert img != null;
 
         if (img == image) {
@@ -479,7 +479,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // without a dialog
             if (cr != REPEAT_LAST) {
                 throw new IllegalStateException(filterName
-                        + " returned the original image, changeReason = " + cr);
+                    + " returned the original image, changeReason = " + cr);
             } else {
                 return;
             }
@@ -502,7 +502,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         assert imageForUndo != null;
         ImageEdit edit = new ImageEdit(filterName, comp, this,
-                imageForUndo, false, true);
+            imageForUndo, false, true);
         History.addEdit(edit);
 
         // otherwise the next filter run will take the old image source,
@@ -531,8 +531,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     public Rectangle getImageBounds() {
         return new Rectangle(
-                translationX, translationY,
-                image.getWidth(), image.getHeight());
+            translationX, translationY,
+            image.getWidth(), image.getHeight());
     }
 
     public void imageChanged() {
@@ -551,10 +551,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         return new Rectangle(
-                translationX + trimmedBoundingBox.x,
-                translationY + trimmedBoundingBox.y,
-                trimmedBoundingBox.width,
-                trimmedBoundingBox.height
+            translationX + trimmedBoundingBox.x,
+            translationY + trimmedBoundingBox.y,
+            trimmedBoundingBox.width,
+            trimmedBoundingBox.height
         );
     }
 
@@ -630,8 +630,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         Rectangle selBounds = selection.getShapeBounds();
         return image.getSubimage(
-                selBounds.x, selBounds.y,
-                selBounds.width, selBounds.height);
+            selBounds.x, selBounds.y,
+            selBounds.width, selBounds.height);
     }
 
     @Override
@@ -770,16 +770,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
             System.out.printf("ImageLayer.getCanvasSizedSubImage x = %d, y = %d, " +
-                            "canvasWidth = %d, canvasHeight = %d, " +
-                            "imageWidth = %d, imageHeight = %d%n",
-                    x, y, canvasWidth, canvasHeight,
-                    image.getWidth(), image.getHeight());
+                    "canvasWidth = %d, canvasHeight = %d, " +
+                    "imageWidth = %d, imageHeight = %d%n",
+                x, y, canvasWidth, canvasHeight,
+                image.getWidth(), image.getHeight());
             WritableRaster raster = image.getRaster();
 
             System.out.printf("ImageLayer.getCanvasSizedSubImage " +
-                            "minX = %d, minY = %d, width = %d, height=%d %n",
-                    raster.getMinX(), raster.getMinY(),
-                    raster.getWidth(), raster.getHeight());
+                    "minX = %d, minY = %d, width = %d, height=%d %n",
+                raster.getMinX(), raster.getMinY(),
+                raster.getWidth(), raster.getHeight());
 
             throw e;
         }
@@ -813,8 +813,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         // there is selection
         return ImageUtils.getSelectionSizedPartFrom(image,
-                selection,
-                getTX(), getTY());
+            selection, getTX(), getTY());
     }
 
     @Override
@@ -830,6 +829,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void crop(Rectangle2D cropRect,
                      boolean deleteCroppedPixels,
                      boolean allowGrowing) {
+        assert !cropRect.isEmpty() : "empty crop rectangle";
+
         if (!deleteCroppedPixels && !allowGrowing) {
             // the simple case: it is guaranteed that the image will
             // cover the new canvas, so just set the new translation
@@ -839,6 +840,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         int cropWidth = (int) cropRect.getWidth();
         int cropHeight = (int) cropRect.getHeight();
+        assert cropWidth > 0 : "cropRect = " + cropRect;
+        assert cropHeight > 0 : "cropRect = " + cropRect;
 
         // the cropRect is in image space, but relative to the canvas,
         // so it is translated to get the correct image coordinates
@@ -849,10 +852,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
             assert allowGrowing;
 
             boolean imageCoversNewCanvas =
-                    cropX >= 0
-                            && cropY >= 0
-                            && cropX + cropWidth <= image.getWidth()
-                            && cropY + cropHeight <= image.getHeight();
+                cropX >= 0
+                    && cropY >= 0
+                    && cropX + cropWidth <= image.getWidth()
+                    && cropY + cropHeight <= image.getHeight();
             if (imageCoversNewCanvas) {
                 // no need to change the image, just set the translation
                 super.crop(cropRect, false, allowGrowing);
@@ -864,11 +867,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
                 int newHeight = northEnlargement + Math.max(image.getHeight(), cropY + cropHeight);
 
                 BufferedImage newImage = ImageUtils
-                        .crop(image, -westEnlargement, -northEnlargement, newWidth, newHeight);
+                    .crop(image, -westEnlargement, -northEnlargement, newWidth, newHeight);
                 setImage(newImage);
                 setTranslation(
-                        Math.min(-cropX, 0),
-                        Math.min(-cropY, 0)
+                    Math.min(-cropX, 0),
+                    Math.min(-cropY, 0)
                 );
             }
             return;
@@ -896,7 +899,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if ((imageWidth > canvasWidth) || (imageHeight > canvasHeight)) {
             BufferedImage newImage = ImageUtils.crop(image,
-                    -getTX(), -getTY(), canvasWidth, canvasHeight);
+                -getTX(), -getTY(), canvasWidth, canvasHeight);
 
             BufferedImage tmp = image;
             setImage(newImage);
@@ -974,8 +977,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(
-                image, imgTargetWidth, imgTargetHeight,
-                VALUE_INTERPOLATION_BICUBIC);
+            image, imgTargetWidth, imgTargetHeight,
+            VALUE_INTERPOLATION_BICUBIC);
         setImage(resizedImg);
 
         if (bigLayer) {
@@ -1159,7 +1162,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (addToHistory) {
             History.addEdit(new ApplyLayerMaskEdit(
-                    comp, this, oldMask, oldImage, oldMode));
+                comp, this, oldMask, oldImage, oldMode));
         }
 
         updateIconImage();
@@ -1185,19 +1188,19 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     public String toDebugCanvasString() {
         return "{canvasWidth=" + canvas.getImWidth()
-                + ", canvasHeight=" + canvas.getImHeight()
-                + ", tx=" + translationX
-                + ", ty=" + translationY
-                + ", imgWidth=" + image.getWidth()
-                + ", imgHeight=" + image.getHeight()
-                + '}';
+            + ", canvasHeight=" + canvas.getImHeight()
+            + ", tx=" + translationX
+            + ", ty=" + translationY
+            + ", imgWidth=" + image.getWidth()
+            + ", imgHeight=" + image.getHeight()
+            + '}';
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{" + "state=" + state
-                + ", super=" + super.toString()
-                + '}';
+            + "{" + "state=" + state
+            + ", super=" + super.toString()
+            + '}';
     }
 }

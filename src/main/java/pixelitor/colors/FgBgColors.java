@@ -55,7 +55,7 @@ public class FgBgColors {
         selector.setBgColor(c, true);
     }
 
-    public static void randomizeColors() {
+    public static void randomize() {
         selector.randomize();
     }
 

@@ -1,6 +1,5 @@
 package pixelitor.guitest;
 
-import org.assertj.swing.core.Robot;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
@@ -36,43 +35,52 @@ import static pixelitor.tools.Tools.SELECTION;
 import static pixelitor.tools.Tools.SMUDGE;
 import static pixelitor.tools.Tools.ZOOM;
 
+/**
+ * A standalone program which tests the tools with randomly generated
+ * assertj-swing GUI actions. Not a unit test.
+ */
 public class RandomToolTest {
-    private static File inputDir;
-    private static AppRunner app;
-    private static Mouse mouse;
-    private static Robot robot;
-    private static Keyboard keyboard;
+    private File inputDir;
+    private final AppRunner app;
+    private final Mouse mouse;
+    private final Keyboard keyboard;
 
-    private static volatile boolean keepRunning = true;
-    private static long testNr = 1;
+    private final Object resumeMonitor = new Object();
+
+    private volatile boolean keepRunning = true;
+    private long testNr = 1;
 
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
         RandomGUITest.setRunning(true);
 
+        new RandomToolTest(args);
+    }
+
+    private RandomToolTest(String[] args) {
         parseCLArguments(args);
 
-        EDT.run(RandomToolTest::setupPauseKey);
-        EDT.run(RandomToolTest::setupExitKey);
+        EDT.run(this::setupPauseKey);
+        EDT.run(this::setupExitKey);
 
         app = new AppRunner(inputDir);
-        robot = app.getRobot();
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
 
         mainLoop();
     }
 
-    private static void mainLoop() {
+    private void mainLoop() {
         testLoop();
 
         //noinspection InfiniteLoopStatement
         while (true) {
             // wait for a signal from the EDT indicating that
-            synchronized (app) {
+            // a suspended test run should be resumed
+            synchronized (resumeMonitor) {
                 try {
-                    app.wait();
+                    resumeMonitor.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -81,7 +89,7 @@ public class RandomToolTest {
         }
     }
 
-    private static void testLoop() {
+    private void testLoop() {
         while (true) {
             Tool tool = Tools.getRandomTool();
             testTool(tool, testNr++);
@@ -93,7 +101,7 @@ public class RandomToolTest {
         }
     }
 
-    private static void setupPauseKey() {
+    private void setupPauseKey() {
         // make sure it can be paused by pressing a key
         KeyStroke pauseKeyStroke = KeyStroke.getKeyStroke('w');
         GlobalEventWatch.add(MappedKey.fromKeyStroke(pauseKeyStroke, "pauseTest", new AbstractAction() {
@@ -105,15 +113,17 @@ public class RandomToolTest {
                 } else {
                     System.err.println(pauseKeyStroke.getKeyChar() + " pressed, starting again.");
                     keepRunning = true;
-                    synchronized (app) {
-                        app.notify();
+                    synchronized (resumeMonitor) {
+                        // wake up the waiting main thread from the EDT
+                        resumeMonitor.notify();
                     }
                 }
             }
         }));
     }
 
-    private static void setupExitKey() {
+    @SuppressWarnings("MethodMayBeStatic")
+    private void setupExitKey() {
         // This key not only stops the testing, but also exits the app
         KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
         GlobalEventWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
@@ -126,7 +136,7 @@ public class RandomToolTest {
         }));
     }
 
-    private static void testTool(Tool tool, long testNr) {
+    private void testTool(Tool tool, long testNr) {
         Utils.sleep(200, MILLISECONDS);
         activate(tool, testNr);
         randomizeToolSettings(tool);
@@ -146,7 +156,7 @@ public class RandomToolTest {
         Utils.sleep(1, SECONDS);
     }
 
-    private static void activate(Tool tool, long testNr) {
+    private void activate(Tool tool, long testNr) {
         log(tool, "activating, starting test " + Ansi.red(testNr + "."));
         app.clickTool(tool);
     }
@@ -162,17 +172,29 @@ public class RandomToolTest {
         }
     }
 
-    private static void clickRandomly(Tool tool) {
+    private void clickRandomly(Tool tool) {
         Rnd.withProbability(0.3, () -> click(tool));
         Rnd.withProbability(0.3, () -> ctrlClick(tool));
         Rnd.withProbability(0.3, () -> altClick(tool));
         Rnd.withProbability(0.3, () -> shiftClick(tool));
         Rnd.withProbability(0.3, () -> doubleClick(tool));
+        Rnd.withProbability(0.1, () -> pressEnter(tool));
+        Rnd.withProbability(0.1, () -> pressEsc(tool));
 
         possiblyUndoRedo(tool);
     }
 
-    private static void cleanupAfterToolTest(Tool tool) {
+    private void pressEnter(Tool tool) {
+        log(tool, "pressing Enter");
+        keyboard.pressEnter();
+    }
+
+    private void pressEsc(Tool tool) {
+        log(tool, "pressing Esc");
+        keyboard.pressEsc();
+    }
+
+    private void cleanupAfterToolTest(Tool tool) {
         if (tool == MOVE) {
             Composition comp = EDT.getComp();
             if (comp.getNumLayers() > 1) {
@@ -182,9 +204,10 @@ public class RandomToolTest {
             ImageLayer layer = (ImageLayer) comp.getActiveLayer();
             int tx = layer.getTX();
             int ty = layer.getTY();
-            if (tx < 1000 || ty < 1000) {
+
+            if (tx < comp.getCanvasImWidth() || ty < comp.getCanvasImHeight()) {
                 cutBigLayer(tool);
-            } else {
+            } else if (tx < 0 || ty < 0) {
                 Rnd.withProbability(0.3, () -> cutBigLayer(tool));
             }
         }
@@ -194,13 +217,20 @@ public class RandomToolTest {
             Rnd.withProbability(0.5, () -> actualPixels(tool));
         }
 
+        Rnd.withProbability(0.05, () -> reload(tool));
+
         keyboard.randomizeColors();
 
         setStandardSize();
     }
 
+    private void reload(Tool tool) {
+        log(tool, "reloading the image");
+        app.runMenuCommand("Reload");
+    }
+
     // might be necessary because of the croppings
-    private static void setStandardSize() {
+    private void setStandardSize() {
         Canvas canvas = EDT.active(Composition::getCanvas);
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
@@ -209,27 +239,27 @@ public class RandomToolTest {
         }
     }
 
-    private static void deselect(Tool tool) {
+    private void deselect(Tool tool) {
         log(tool, "deselecting");
         Utils.sleep(200, MILLISECONDS);
         keyboard.deselect();
     }
 
-    private static void actualPixels(Tool tool) {
+    private void actualPixels(Tool tool) {
         log(tool, "actual pixels");
         Utils.sleep(200, MILLISECONDS);
         app.runMenuCommand("Actual Pixels");
     }
 
-    private static void dragRandomly(Tool tool) {
+    private void dragRandomly(Tool tool) {
         int numDrags = Rnd.intInRange(1, 5);
         for (int i = 0; i < numDrags; i++) {
             Utils.sleep(200, MILLISECONDS);
             mouse.moveRandomlyWithinCanvas();
 
-            boolean ctrlPressed = Rnd.withProbability(0.25, () -> keyboard.pressCtrl());
-            boolean altPressed = Rnd.withProbability(0.25, () -> keyboard.pressAlt());
-            boolean shiftPressed = Rnd.withProbability(0.25, () -> keyboard.pressShift());
+            boolean ctrlPressed = Rnd.withProbability(0.25, keyboard::pressCtrl);
+            boolean altPressed = Rnd.withProbability(0.25, keyboard::pressAlt);
+            boolean shiftPressed = Rnd.withProbability(0.25, keyboard::pressShift);
             String msg = "random ";
             if (ctrlPressed) {
                 msg += "ctrl-";
@@ -260,7 +290,7 @@ public class RandomToolTest {
         }
     }
 
-    private static void possiblyUndoRedo(Tool tool) {
+    private void possiblyUndoRedo(Tool tool) {
         if (!EDT.call(History::canUndo)) {
             return;
         }
@@ -273,51 +303,51 @@ public class RandomToolTest {
         }
     }
 
-    private static void click(Tool tool) {
+    private void click(Tool tool) {
         log(tool, "random click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomClick();
     }
 
-    private static void ctrlClick(Tool tool) {
+    private void ctrlClick(Tool tool) {
         log(tool, "random ctrl-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomCtrlClick();
     }
 
-    private static void altClick(Tool tool) {
+    private void altClick(Tool tool) {
         log(tool, "random alt-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomAltClick();
     }
 
-    private static void shiftClick(Tool tool) {
+    private void shiftClick(Tool tool) {
         log(tool, "random shift-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomShiftClick();
     }
 
-    private static void doubleClick(Tool tool) {
+    private void doubleClick(Tool tool) {
         log(tool, "random double click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomDoubleClick();
     }
 
-    private static void undo(Tool tool) {
+    private void undo(Tool tool) {
         String editName = EDT.call(History::getEditToBeUndoneName);
         log(tool, "random undo " + Ansi.yellow(editName));
         Utils.sleep(200, MILLISECONDS);
         keyboard.undo();
     }
 
-    private static void redo(Tool tool) {
+    private void redo(Tool tool) {
         String editName = EDT.call(History::getEditToBeRedoneName);
         log(tool, "random redo " + Ansi.yellow(editName));
         Utils.sleep(200, MILLISECONDS);
         keyboard.redo();
     }
 
-    private static void parseCLArguments(String[] args) {
+    private void parseCLArguments(String[] args) {
         assert args.length > 0 : "missing CL argument";
         inputDir = new File(args[0]);
         assert inputDir.exists() : "input dir doesn't exist";
@@ -328,25 +358,25 @@ public class RandomToolTest {
         System.out.println(Ansi.blue(tool.getName() + ": ") + msg);
     }
 
-    private static void cutBigLayer(Tool tool) {
+    private void cutBigLayer(Tool tool) {
         log(tool, "layer to canvas size");
         Utils.sleep(200, MILLISECONDS);
         app.runMenuCommand("Layer to Canvas Size");
     }
 
-    private static void flattenImage(Tool tool) {
+    private void flattenImage(Tool tool) {
         log(tool, "merge layers");
         Utils.sleep(200, MILLISECONDS);
         app.runMenuCommand("Flatten Image");
     }
 
-    private static void setSourceForCloneTool() {
+    private void setSourceForCloneTool() {
         log(CLONE, "setting source point");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomAltClick();
     }
 
-    private static void pushToolButtons(Tool tool) {
+    private void pushToolButtons(Tool tool) {
         Tool actual = EDT.call(Tools::getCurrent);
         if (actual != tool) {
             // this can happen in rare cases,
@@ -362,17 +392,17 @@ public class RandomToolTest {
         } else if (tool == CLONE || tool == SMUDGE) {
             Rnd.withProbability(0.2, () -> changeLazyMouseSetting(tool));
         } else if (tool == PEN) {
-            Rnd.withProbability(0.2, RandomToolTest::clickPenToolButton);
+            Rnd.withProbability(0.2, this::clickPenToolButton);
         } else if (tool == ZOOM || tool == HAND) {
             Rnd.withProbability(0.2, () -> clickZoomOrHandToolButton(tool));
         } else if (tool == CROP) {
-            Rnd.withProbability(0.5, RandomToolTest::clickCropToolButton);
+            Rnd.withProbability(0.5, this::clickCropToolButton);
         } else if (tool == SELECTION) {
-            Rnd.withProbability(0.5, RandomToolTest::clickSelectionToolButton);
+            Rnd.withProbability(0.5, this::clickSelectionToolButton);
         }
     }
 
-    private static void changeLazyMouseSetting(Tool tool) {
+    private void changeLazyMouseSetting(Tool tool) {
         app.findButtonByText("Lazy Mouse...").click();
         DialogFixture dialog = app.findDialogByTitle("Lazy Mouse");
 
@@ -384,7 +414,7 @@ public class RandomToolTest {
         dialog.button("ok").click();
     }
 
-    private static void changeBrushSetting(Tool tool) {
+    private void changeBrushSetting(Tool tool) {
         JButtonFixture button = app.findButtonByText("Settings...");
         if (!button.isEnabled()) {
             return;
@@ -399,7 +429,7 @@ public class RandomToolTest {
         dialog.button("ok").click();
     }
 
-    private static void clickPenToolButton() {
+    private void clickPenToolButton() {
         String[] texts = {
             "Stroke with Current Brush",
             "Stroke with Current Eraser",
@@ -409,7 +439,7 @@ public class RandomToolTest {
         clickRandomToolButton(PEN, texts);
     }
 
-    private static void clickZoomOrHandToolButton(Tool tool) {
+    private void clickZoomOrHandToolButton(Tool tool) {
         String[] texts = {
             "Actual Pixels",
             "Fit Space",
@@ -419,7 +449,7 @@ public class RandomToolTest {
         clickRandomToolButton(tool, texts);
     }
 
-    private static void clickCropToolButton() {
+    private void clickCropToolButton() {
         String[] texts = {
             "Crop",
             "Cancel",
@@ -427,7 +457,7 @@ public class RandomToolTest {
         clickRandomToolButton(CROP, texts);
     }
 
-    private static void clickSelectionToolButton() {
+    private void clickSelectionToolButton() {
         String[] texts = {
             "Crop Selection",
             "Convert to Path",
@@ -435,7 +465,7 @@ public class RandomToolTest {
         clickRandomToolButton(SELECTION, texts);
     }
 
-    private static void clickRandomToolButton(Tool tool, String[] texts) {
+    private void clickRandomToolButton(Tool tool, String[] texts) {
         String text = Rnd.chooseFrom(texts);
         JButtonFixture button = app.findButtonByText(text);
         if (button.isEnabled()) {

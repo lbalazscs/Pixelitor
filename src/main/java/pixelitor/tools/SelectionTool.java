@@ -226,7 +226,7 @@ public class SelectionTool extends DragTool {
     }
 
     private static void deselect(Composition comp, boolean addToHistory) {
-        if (comp.hasSelection()) {
+        if (comp.hasSelection() || comp.hasBuiltSelection()) {
             comp.deselect(addToHistory);
         }
     }

@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
@@ -249,8 +248,7 @@ public class OpenComps {
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
-        PixelitorWindow.getInstance()
-            .setTitle(Build.getPixelitorWindowFixTitle());
+        PixelitorWindow.getInstance().updateTitle(null);
         FramesUI.resetCascadeIndex();
     }
 
@@ -279,9 +277,7 @@ public class OpenComps {
         ZoomMenu.zoomChanged(view.getZoomLevel());
 
         Canvas.activeCanvasImSizeChanged(comp.getCanvas());
-        String title = comp.getName()
-            + " - " + Build.getPixelitorWindowFixTitle();
-        PixelitorWindow.getInstance().setTitle(title);
+        PixelitorWindow.getInstance().updateTitle(comp);
     }
 
     public static void repaintActive() {
