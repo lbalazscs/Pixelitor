@@ -69,6 +69,7 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.lang.String.format;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * The GUI component that shows a {@link Composition}
@@ -183,6 +184,10 @@ public class View extends JComponent
         updateNavigator(true);
 
         Tools.currentTool.compReplaced(oldComp, newComp);
+
+        if (ImageArea.currentModeIs(TABS)) {
+            repaint();
+        }
 
         return edit;
     }
