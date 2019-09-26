@@ -47,4 +47,10 @@ public class OutlineSquareBrush extends OutlineBrush {
 
         targetG.setStroke(savedStroke);
     }
+
+    @Override
+    public double getEffectiveRadius() {
+        // multiply with sqrt 2
+        return super.getEffectiveRadius() * 1.42;
+    }
 }

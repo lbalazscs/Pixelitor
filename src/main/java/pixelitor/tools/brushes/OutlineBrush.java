@@ -88,4 +88,12 @@ public abstract class OutlineBrush extends StrokeBrush {
 
         super.continueTo(p);
     }
+
+    @Override
+    public double getEffectiveRadius() {
+        // use the maximum radius for the undo, even if the
+        // speed-dependent drawing radius is smaller, see issue #57
+        // A +1 safety is also necessary (rounding errors?)
+        return origRadius + 1;
+    }
 }
