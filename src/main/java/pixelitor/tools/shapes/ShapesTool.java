@@ -26,6 +26,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Drawable;
+import pixelitor.menus.DrawableAction;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.Tools;
@@ -47,6 +48,8 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.shapes.ShapesToolState.INITIAL_DRAG;
 import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
 import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
@@ -258,18 +261,19 @@ public class ShapesTool extends DragTool {
         assert transformBox != null;
         assert styledShape != null;
 
-        styledShape.finalizeTo(comp, transformBox);
+        styledShape.finalizeTo(comp, transformBox, settings);
 
         styledShape = null;
         transformBox = null;
         setState(NO_INTERACTION);
     }
 
-    public void regenerateShape() {
-        // TODO do other check like in GradientTool
+    public void regenerateShape(String editName) {
         if (styledShape != null) {
             assert transformBox != null;
-            styledShape.regenerate(transformBox);
+
+            DrawableAction.run(editName,
+                    (dr) -> styledShape.regenerate(transformBox, settings, editName));
         }
     }
 
@@ -376,8 +380,9 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void fgBgColorsChanged() {
-        // calling with ACTION will make it use the new colors
-        regenerateShape();
+        if (styledShape != null) {
+            regenerateShape(ShapeSettings.CHANGE_SHAPE_COLORS);
+        }
     }
 
     @Override
@@ -445,6 +450,10 @@ public class ShapesTool extends DragTool {
 
         this.styledShape = styledShape;
         transformBox.replaceTransformListener(styledShape::transform);
+
+        setFGColor(styledShape.getFgColor(), false);
+        setBGColor(styledShape.getBgColor(), false);
+        
         settings.restoreFrom(styledShape);
     }
 

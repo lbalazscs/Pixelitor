@@ -28,7 +28,9 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 
@@ -60,6 +62,23 @@ public abstract class DrawableAction extends AbstractAction {
         setActionName(menuName);
 
         this.allowMasks = allowMasks;
+    }
+
+    /**
+     * Runs the given task if the active layer is drawable
+     */
+    public static void run(String taskName, Consumer<Drawable> task) {
+        DrawableAction action = new DrawableAction(taskName) {
+            @Override
+            protected void process(Drawable dr) {
+                task.accept(dr);
+            }
+        };
+        // Invoke later, because this is typically called from a GUI listener
+        // and showing a dialog right now can cause weird things (the combo box
+        // remains opened, the dialog button has to be pressed twice).
+        // Also it is nice to be sure that the effects of original GUI change are done.
+        EventQueue.invokeLater(() -> action.actionPerformed(null));
     }
 
     /**
@@ -99,9 +118,9 @@ public abstract class DrawableAction extends AbstractAction {
             String firstName = isNoun ? "The " + name  : name;
             String secondName = isNoun ? "the " + name  : name;
 
-            String msg = format("The active layer \"%s\" is a text layer.\n" +
-                                "%s needs pixels and cannot be used on text layers.\n" +
-                                "If you rasterize this text layer, you can use %s,\n" +
+            String msg = format("<html>The active layer <i>\"%s\"</i> is a text layer.<br><br>" +
+                            "%s needs pixels and cannot be used on text layers.<br>" +
+                            "If you rasterize this text layer, you can use %s,<br>" +
                                 "but the text will no longer be editable.",
                         layer.getName(), firstName, secondName);
 

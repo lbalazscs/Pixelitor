@@ -246,7 +246,7 @@ public class AutoPaint {
 
 
             colorsLabel = new JLabel("Random Colors:");
-            colorsCB = new JComboBox(COLOR_SETTINGS);
+            colorsCB = new JComboBox<>(COLOR_SETTINGS);
             colorsCB.setName("colorsCB");
             colorsCB.setSelectedItem(defaultColors);
             gbh.addTwoComponents(colorsLabel, colorsCB);

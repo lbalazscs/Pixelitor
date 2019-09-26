@@ -27,13 +27,15 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 public class GradientChangeEdit extends PixelitorEdit {
+    private final Drawable dr;
     private Gradient before;
     private Gradient after;
     private ImageEdit imageEdit;
     private final boolean imageEditNeeded;
 
-    public GradientChangeEdit(Drawable dr, Gradient before, Gradient after) {
-        super("Change Gradient", dr.getComp());
+    public GradientChangeEdit(String editName, Drawable dr, Gradient before, Gradient after) {
+        super(editName == null ? "Change Gradient" : editName, dr.getComp());
+        this.dr = dr;
         this.before = before;
         this.after = after;
 
@@ -52,7 +54,7 @@ public class GradientChangeEdit extends PixelitorEdit {
             imageEdit.undo();
         }
 
-        Tools.GRADIENT.setGradient(before, !imageEditNeeded, comp.getView());
+        Tools.GRADIENT.setGradient(before, !imageEditNeeded, dr);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class GradientChangeEdit extends PixelitorEdit {
             imageEdit.redo();
         }
 
-        Tools.GRADIENT.setGradient(after, !imageEditNeeded, comp.getView());
+        Tools.GRADIENT.setGradient(after, !imageEditNeeded, dr);
     }
 
     @Override

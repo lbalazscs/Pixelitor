@@ -163,6 +163,10 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             gbc.weightx = 0;
             add(new CloseTabButton(tab), gbc);
 
+            addRightClickTabPopup(tab);
+        }
+
+        private void addRightClickTabPopup(ImageTab tab) {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mousePressed(MouseEvent e) {

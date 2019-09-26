@@ -341,6 +341,7 @@ public abstract class AbstractBrushTool extends Tool {
                 brush.startAt(p);
             }
         } else {
+            assert brush.hasPrevious();
             brush.continueTo(p);
         }
     }

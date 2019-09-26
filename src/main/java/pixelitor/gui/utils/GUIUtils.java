@@ -18,15 +18,18 @@
 package pixelitor.gui.utils;
 
 import com.bric.util.JVM;
+import pixelitor.Composition;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.io.OpenSave;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -36,10 +39,13 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 import java.util.Timer;
@@ -301,5 +307,62 @@ public final class GUIUtils {
                 }
             }
         });
+    }
+
+    public static Action createShowInFileManagerAction(File file) {
+        String menuName;
+        if (JVM.isWindows) {
+            menuName = "Show in Explorer...";
+        } else if (JVM.isMac) {
+            menuName = "Show in Finder...";
+        } else {
+            menuName = "Show Folder...";
+        }
+        return new AbstractAction(menuName) {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // TODO in Java 9 it can be done in a platform-independent way
+                    // see https://stackoverflow.com/questions/7357969/how-to-use-java-code-to-open-windows-file-explorer-and-highlight-the-specified-f
+                    if (JVM.isWindows) {
+                        Runtime.getRuntime().exec("explorer.exe /select," + file.getCanonicalPath());
+                    } else if (JVM.isMac) {
+                        Runtime.getRuntime().exec("open -R " + file.getCanonicalPath());
+                    } else {
+                        // for now (java 8 compatibility) this only
+                        // opens the folder, but without selecting the file
+                        File dir = file.getParentFile();
+                        Desktop.getDesktop().open(dir);
+                    }
+                } catch (IOException ex) {
+                    Messages.showException(ex);
+                }
+            }
+        };
+    }
+
+    public static AbstractAction createPrintFileAction(Composition comp, File file) {
+        return new AbstractAction("Print...") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (comp.isDirty()) {
+                    String msg = "<html>The file <i>" + file.getName() +
+                            "</i> contains unsaved changes.<br>" +
+                            "Only the saved changes can be printed.<br>" +
+                            "Do you want to save your changes now?";
+                    boolean saveAndPrint = Dialogs.showOKCancelDialog(msg, "Unsaved Changes",
+                            new String[]{"Save and Print", "Cancel"}, 0, JOptionPane.QUESTION_MESSAGE);
+                    if (!saveAndPrint) {
+                        return;
+                    }
+                    OpenSave.save(comp, false);
+                }
+                try {
+                    Desktop.getDesktop().print(file);
+                } catch (IOException ex) {
+                    Messages.showException(ex);
+                }
+            }
+        };
     }
 }

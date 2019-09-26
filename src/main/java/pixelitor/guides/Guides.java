@@ -28,8 +28,8 @@ import pixelitor.history.History;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,14 +91,12 @@ public class Guides implements Serializable {
         return copy;
     }
 
-    public Guides copyForCrop(Rectangle2D cropRect) {
+    public Guides copyForCrop(Rectangle cropRect) {
         Canvas canvas = comp.getCanvas();
-        int northMargin = (int) cropRect.getY();
-        int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (canvas.getImHeight()
-                - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (canvas.getImWidth()
-                - cropRect.getWidth() - cropRect.getX());
+        int northMargin = cropRect.y;
+        int westMargin = cropRect.x;
+        int southMargin = canvas.getImHeight() - cropRect.height - cropRect.y;
+        int eastMargin = canvas.getImWidth() - cropRect.width - cropRect.x;
 
         // a crop is a negative enlargement
         return copyForEnlargedCanvas(

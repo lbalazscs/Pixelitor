@@ -19,6 +19,7 @@ package pixelitor.tools.gradient.history;
 
 import pixelitor.Composition;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.Drawable;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.Gradient;
 
@@ -27,23 +28,25 @@ import javax.swing.undo.CannotUndoException;
 
 public class GradientHandlesHiddenEdit extends PixelitorEdit {
     private final Gradient gradient;
+    private final Drawable dr;
 
     public GradientHandlesHiddenEdit(Composition comp, Gradient gradient) {
         super("Hide Gradient Handles", comp);
         this.gradient = gradient;
+        dr = comp.getActiveDrawableOrNull();
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Tools.GRADIENT.setGradient(gradient, false, comp.getView());
+        Tools.GRADIENT.setGradient(gradient, false, dr);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        Tools.GRADIENT.setGradient(null, false, comp.getView());
+        Tools.GRADIENT.setGradient(null, false, dr);
     }
 }

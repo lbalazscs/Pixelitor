@@ -17,6 +17,7 @@
 
 package pixelitor.tools.shapes;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
@@ -32,10 +33,10 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -46,19 +47,26 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
 /**
  * A shape with associated stroke, fill and effects
- * that can paint itself on a given {@link Graphics2D}
+ * that can paint itself on a given {@link Graphics2D},
+ * and can be transformed by a {@link TransformBox}
  */
 public class StyledShape implements Cloneable {
     private static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
 
-    private final ShapeSettings settings;
     private ShapeType shapeType;
-    private Shape shape; // the current shape, in image-space
+
+    // The styled shape is initially defined by a user drag,
+    // and then by a transform box
+    private boolean insideBox;
+
     private Shape unTransformedShape; // the original shape, in image-space
+    private Shape shape; // the current shape, in image-space
 
     // this doesn't change after the transform box appears,
     // so that another untransformed shape can be generated
@@ -78,17 +86,20 @@ public class StyledShape implements Cloneable {
     // to restore the the stroke GUI after undo
     private StrokeSettings strokeSettings;
 
-    private boolean insideBox;
+    private Color fgColor;
+    private Color bgColor;
 
     public StyledShape(ShapeSettings settings) {
-        this.settings = settings;
-        shapeType = settings.getSelectedType();
+        setType(settings.getSelectedType());
         setFillPaintType(settings.getSelectedFillPaint());
         setStrokePaintType(settings.getSelectedStrokePaint());
         setStroke(settings.getStroke());
         setEffects(settings.getEffects());
         this.strokeSettings = settings.getStrokeSettings();
         this.insideBox = false;
+
+        fgColor = getFGColor();
+        bgColor = getBGColor();
     }
 
     /**
@@ -104,19 +115,19 @@ public class StyledShape implements Cloneable {
         if (transformedImDrag.isClick()) {
             return;
         }
+        if (shape == null) { // should not happen
+            if (Build.isDevelopment()) {
+                throw new IllegalStateException();
+            }
+            return;
+        }
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         if (hasFillPaint()) {
             if (shapeType.isClosed()) {
                 fillPaintType.prepare(g, transformedImDrag);
-                try {
-                    g.fill(shape);
-                } catch (NullPointerException e) {
-                    handleStrangeNPE(e, shape);
-                    return;
-                }
-
+                g.fill(shape);
                 fillPaintType.finish(g);
             } else if (!hasStrokePaint()) {
                 // Special case: an open shape cannot be filled,
@@ -132,13 +143,7 @@ public class StyledShape implements Cloneable {
         if (hasStrokePaint()) {
             g.setStroke(stroke);
             strokePaintType.prepare(g, transformedImDrag);
-            try {
-                g.draw(shape);
-            } catch (NullPointerException e) {
-                handleStrangeNPE(e, shape);
-                return;
-            }
-
+            g.draw(shape);
             strokePaintType.finish(g);
         }
 
@@ -164,6 +169,7 @@ public class StyledShape implements Cloneable {
         return fillPaintType != NONE;
     }
 
+    // called during the initial drag, when there is no transform box yet
     public void updateFromDrag(UserDrag userDrag) {
         assert !insideBox;
 
@@ -173,14 +179,14 @@ public class StyledShape implements Cloneable {
         ImDrag imDrag = userDrag.toImDrag();
 
         this.origImDrag = imDrag;
-        unTransformedShape = shapeType.getShape(imDrag);
+        unTransformedShape = shapeType.createShape(imDrag);
 
-        // this method should be called only during the
-        // initial drag, when there is no transform box yet
+        // since there is no transform box yet
         this.transformedImDrag = imDrag;
         shape = unTransformedShape;
     }
 
+    // called by the transform box manipulations
     public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
         transformedImDrag = origImDrag.createTransformed(at);
@@ -202,19 +208,24 @@ public class StyledShape implements Cloneable {
         this.effects = effects;
     }
 
-    private void setType(ShapeType shapeType) {
+    private void changeTypeInBox(ShapeType shapeType) {
         assert insideBox;
-        this.shapeType = shapeType;
+        setType(shapeType);
 
         if (shapeType.isDirectional()) {
-            // TODO this ignores the height of the current box
-            unTransformedShape = shapeType.getShape(origImDrag.getCenterHorizontalDrag());
+            // make sure that the new directional shape is drawn
+            // along the direction of the existing box
+            // TODO this still ignores the height of the current box
+            unTransformedShape = shapeType.createShape(origImDrag.getCenterHorizontalDrag());
         } else {
-            unTransformedShape = shapeType.getShape(origImDrag);
+            unTransformedShape = shapeType.createShape(origImDrag);
         }
+        // the new transformed shape will be calculated later,
+        // after the other parameters have been set
+    }
 
-        // must be created before the next call to paint()
-        shape = null;
+    private void setType(ShapeType shapeType) {
+        this.shapeType = shapeType;
     }
 
     public TransformBox createBox(UserDrag userDrag, View view) {
@@ -237,7 +248,7 @@ public class StyledShape implements Cloneable {
         // Set the original shape to the horizontal shape.
         // It could also be rotated backwards with an AffineTransform.
         ImDrag imDrag = userDrag.toImDrag();
-        unTransformedShape = shapeType.getHorizontalShape(imDrag);
+        unTransformedShape = shapeType.createHorizontalShape(imDrag);
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
@@ -270,12 +281,19 @@ public class StyledShape implements Cloneable {
         return box;
     }
 
-    public void finalizeTo(Composition comp, TransformBox transformBox) {
+    public void finalizeTo(Composition comp, TransformBox transformBox, ShapeSettings settings) {
+        if (shape == null) { // should not happen
+            if (Build.isDevelopment()) {
+                throw new IllegalStateException();
+            }
+            return;
+        }
+
         PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawableOrNull();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
-            int thickness = calcThickness();
+            int thickness = calcThickness(settings);
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
@@ -291,7 +309,7 @@ public class StyledShape implements Cloneable {
             imageEdit, transformBox, this));
 
         if (imageEdit != null) {
-            paintShape(dr);
+            paintOnDrawable(dr);
             comp.imageChanged();
             dr.updateIconImage();
         } else {
@@ -300,7 +318,7 @@ public class StyledShape implements Cloneable {
         }
     }
 
-    private void paintShape(Drawable dr) {
+    private void paintOnDrawable(Drawable dr) {
         int tx = -dr.getTX();
         int ty = -dr.getTY();
 
@@ -308,14 +326,17 @@ public class StyledShape implements Cloneable {
         Graphics2D g2 = bi.createGraphics();
         g2.translate(tx, ty);
 
-//        Composition comp = dr.getComp();
-//        comp.applySelectionClipping(g2);
+        Composition comp = dr.getComp();
+        comp.applySelectionClipping(g2);
 
         paint(g2);
         g2.dispose();
     }
 
-    private int calcThickness() {
+    /**
+     * Calculate the extra thickness around the shape for the undo area
+     */
+    private int calcThickness(ShapeSettings settings) {
         int thickness = 0;
         int extraStrokeThickness = 0;
         if (hasStrokePaint()) {
@@ -351,24 +372,40 @@ public class StyledShape implements Cloneable {
         }
     }
 
-    public void regenerate(TransformBox transformBox) {
+    public void regenerate(TransformBox transformBox, ShapeSettings settings, String editName) {
         StyledShape backup = clone();
 
-        setType(settings.getSelectedType());
-        setFillPaintType(settings.getSelectedFillPaint());
-        setStrokePaintType(settings.getSelectedStrokePaint());
+        switch (editName) {
+            case ShapeSettings.CHANGE_SHAPE_TYPE:
+                changeTypeInBox(settings.getSelectedType());
 
-        setStroke(settings.getStroke());
-        strokeSettings = settings.getStrokeSettings();
-        settings.invalidateStroke();
-
-        setEffects(settings.getEffects());
-
-
-        transformBox.applyTransformation();
+                // calculate the new transformed shape
+                transformBox.applyTransformation();
+                break;
+            case ShapeSettings.CHANGE_SHAPE_FILL:
+                setFillPaintType(settings.getSelectedFillPaint());
+                break;
+            case ShapeSettings.CHANGE_SHAPE_STROKE:
+                setStrokePaintType(settings.getSelectedStrokePaint());
+                break;
+            case ShapeSettings.CHANGE_SHAPE_STROKE_SETTINGS:
+                setStroke(settings.getStroke());
+                strokeSettings = settings.getStrokeSettings();
+                settings.invalidateStroke();
+                break;
+            case ShapeSettings.CHANGE_SHAPE_EFFECTS:
+                setEffects(settings.getEffects());
+                break;
+            case ShapeSettings.CHANGE_SHAPE_COLORS:
+                setFgColor(getFGColor());
+                setBgColor(getBGColor());
+                break;
+            default:
+                throw new IllegalStateException("Unexpected edit: " + editName);
+        }
 
         Composition comp = OpenComps.getActiveCompOrNull();
-        History.addEdit(new StyledShapeEdit(comp, backup));
+        History.addEdit(new StyledShapeEdit(editName, comp, backup));
         comp.imageChanged();
     }
 
@@ -390,6 +427,22 @@ public class StyledShape implements Cloneable {
 
     public AreaEffects getEffects() {
         return effects;
+    }
+
+    public Color getFgColor() {
+        return fgColor;
+    }
+
+    public void setFgColor(Color fgColor) {
+        this.fgColor = fgColor;
+    }
+
+    public Color getBgColor() {
+        return bgColor;
+    }
+
+    public void setBgColor(Color bgColor) {
+        this.bgColor = bgColor;
     }
 
     /**
@@ -418,18 +471,4 @@ public class StyledShape implements Cloneable {
     public String toString() {
         return String.format("StyledShape, width = %.2f", strokeSettings.getWidth());
     }
-
-    public static void handleStrangeNPE(NullPointerException e, Shape shape) {
-        if (hadStrangeNPE) {
-            return;
-        }
-        // both the ductus and the marlin engines sometimes throw NPEs here...
-        Rectangle bounds = shape.getBounds();
-        System.out.println("StyledShape::paint: bounds = " + bounds);
-        Utils.debugShape(shape, "NPE shape");
-        hadStrangeNPE = true;
-        throw e;
-    }
-
-    private static boolean hadStrangeNPE = false;
 }

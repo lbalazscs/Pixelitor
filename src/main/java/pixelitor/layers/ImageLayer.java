@@ -976,6 +976,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
             }
         }
 
+        assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
+                "bigLayer = " + bigLayer + ", tx = " + getTX() + ", ty = " + getTY();
+
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(
             image, imgTargetWidth, imgTargetHeight,
             VALUE_INTERPOLATION_BICUBIC);

@@ -22,9 +22,9 @@ import pixelitor.Composition;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.menus.DrawableAction;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
@@ -40,12 +40,15 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
+import static pixelitor.colors.FgBgColors.setBGColor;
+import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
 
 /**
@@ -75,7 +78,7 @@ public class GradientTool extends DragTool {
         super("Gradient", 'G', "gradient_tool_icon.png",
                 "<b>click</b> and <b>drag</b> to draw a gradient, " +
                         "<b>Shift-drag</b> to constrain the direction. " +
-                        "Press <b>Esc</b> to hide the handles and the arrow.",
+                        "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
                 Cursors.DEFAULT, true, true,
                 true, ClipStrategy.FULL);
         spaceDragStartPoint = true;
@@ -98,7 +101,8 @@ public class GradientTool extends DragTool {
 
     private void addTypeSelector() {
         typeSelector = new JComboBox<>(GradientType.values());
-        typeSelector.addActionListener(e -> regenerateGradient(true));
+        typeSelector.addActionListener(e -> regenerateGradient(
+                true, "Change Gradient Type"));
         settingsPanel.addWithLabel("Type: ",
                 typeSelector, "gradientTypeSelector");
     }
@@ -107,41 +111,56 @@ public class GradientTool extends DragTool {
         // cycle methods cannot be put directly in the JComboBox,
         // because they would be all uppercase
         cycleMethodSelector = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodSelector.addActionListener(e -> regenerateGradient(true));
+        cycleMethodSelector.addActionListener(e -> regenerateGradient(
+                true, "Change Gradient Cycling"));
         settingsPanel.addWithLabel("Cycling: ",
                 cycleMethodSelector, "gradientCycleMethodSelector");
     }
 
     private void addColorTypeSelector() {
         colorTypeSelector = new JComboBox<>(GradientColorType.values());
-        colorTypeSelector.addActionListener(e -> regenerateGradient(true));
+        colorTypeSelector.addActionListener(e -> regenerateGradient(
+                true, "Change Gradient Colors"));
         settingsPanel.addWithLabel("Color: ",
                 colorTypeSelector, "gradientColorTypeSelector");
     }
 
     private void addRevertCheckBox() {
         revertCheckBox = new JCheckBox();
-        revertCheckBox.addActionListener(e -> regenerateGradient(true));
+        revertCheckBox.addActionListener(e -> regenerateGradient(
+                true, "Change Gradient Direction"));
         settingsPanel.addWithLabel("Revert: ", revertCheckBox, "gradientRevert");
     }
 
     private void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
-        blendingModePanel.addActionListener(e -> regenerateGradient(true));
+        blendingModePanel.addActionListener(this::blendingModePanelChanged);
         settingsPanel.add(blendingModePanel);
     }
 
-    private void regenerateGradient(boolean addToHistory) {
+    private void blendingModePanelChanged(ActionEvent e) {
+        String editName;
+        if (e.getSource() instanceof JComboBox) {
+            editName = "Change Gradient Blending Mode";
+        } else {
+            editName = "Change Gradient Opacity";
+        }
+        regenerateGradient(true, editName);
+    }
+
+    private void regenerateGradient(boolean addToHistory, String editName) {
         if (ignoreRegenerate) {
             return;
         }
-
-        Drawable dr = OpenComps.getActiveDrawableOrNull();
-        if (dr == null) {
-            Dialogs.showNotDrawableDialog();
+        if (handles == null) {
             return;
         }
 
+        DrawableAction.run(editName,
+                (dr) -> regenerateOnDrawable(addToHistory, dr, editName));
+    }
+
+    private void regenerateOnDrawable(boolean addToHistory, Drawable dr, String editName) {
         // regenerate the gradient if a tool setting
         // was changed while handles are present
         if (handles != null) {
@@ -149,7 +168,7 @@ public class GradientTool extends DragTool {
             if (view != null) {
                 ImDrag imDrag = handles.toImDrag(view);
                 if (!imDrag.isClick()) {
-                    drawGradient(dr, imDrag, addToHistory);
+                    drawGradient(dr, imDrag, addToHistory, editName);
                 }
             }
         }
@@ -190,6 +209,10 @@ public class GradientTool extends DragTool {
     @Override
     public void dragFinished(PMouseEvent e) {
         if (userDrag.isClick()) {
+            if (activePoint == null) {
+                // clicked outside the handles
+                hideHandles(e.getComp(), true);
+            }
             return;
         }
         ImDrag imDrag;
@@ -218,7 +241,7 @@ public class GradientTool extends DragTool {
 
         Composition comp = e.getComp();
         Drawable dr = comp.getActiveDrawableOrThrow();
-        drawGradient(dr, imDrag, true);
+        drawGradient(dr, imDrag, true, null);
     }
 
     @Override
@@ -251,7 +274,7 @@ public class GradientTool extends DragTool {
 
     @Override
     public void fgBgColorsChanged() {
-        regenerateGradient(true);
+        regenerateGradient(true, "Change Gradient Colors");
     }
 
     @Override
@@ -277,24 +300,26 @@ public class GradientTool extends DragTool {
 
     @Override
     public void compReplaced(Composition oldComp, Composition newComp) {
-        hideHandles(newComp.getView());
+        hideHandles(newComp, false);
     }
 
     @Override
     public void escPressed() {
         if (handles != null) {
             Composition comp = OpenComps.getActiveCompOrNull();
-            History.addEdit(new GradientHandlesHiddenEdit(comp, lastGradient));
-
-            hideHandles(comp.getView());
+            hideHandles(comp, true);
         }
     }
 
-    private void hideHandles(View view) {
+    private void hideHandles(Composition comp, boolean addHistory) {
+        if (addHistory) {
+            History.addEdit(new GradientHandlesHiddenEdit(comp, lastGradient));
+        }
+
         handles = null;
         activePoint = null;
         lastGradient = null;
-        view.repaint();
+        comp.repaint();
     }
 
     private CycleMethod getCycleType() {
@@ -310,7 +335,7 @@ public class GradientTool extends DragTool {
         return (GradientType) typeSelector.getSelectedItem();
     }
 
-    private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory) {
+    private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory, String editName) {
         Gradient gradient = new Gradient(imDrag,
                 getType(), getCycleType(), getGradientColorType(),
                 revertCheckBox.isSelected(),
@@ -323,7 +348,7 @@ public class GradientTool extends DragTool {
             if (isFirst) {
                 History.addEdit(new NewGradientEdit(dr, gradient));
             } else {
-                History.addEdit(new GradientChangeEdit(dr, lastGradient, gradient));
+                History.addEdit(new GradientChangeEdit(editName, dr, lastGradient, gradient));
             }
         }
 
@@ -393,13 +418,16 @@ public class GradientTool extends DragTool {
     }
 
     // called only by history edits
-    public void setGradient(Gradient gradient, boolean regenerate, View view) {
+    public void setGradient(Gradient gradient, boolean regenerate, Drawable dr) {
+        Composition comp = dr.getComp();
         if (gradient == null) {
-            hideHandles(view);
+            hideHandles(comp, false);
             return;
         }
 
         assert gradient != null;
+
+        View view = comp.getView();
         handles = gradient.createHandles(view);
 
         // set the settings
@@ -413,9 +441,12 @@ public class GradientTool extends DragTool {
         blendingModePanel.setBlendingMode(gradient.getBlendingMode());
         blendingModePanel.setOpacity(gradient.getOpacity());
 
+        setFGColor(gradient.getFgColor(), false);
+        setBGColor(gradient.getBgColor(), false);
+
         ignoreRegenerate = false;
         if (regenerate) {
-            regenerateGradient(false);
+            regenerateOnDrawable(false, dr, null);
         }
 
         lastGradient = gradient;

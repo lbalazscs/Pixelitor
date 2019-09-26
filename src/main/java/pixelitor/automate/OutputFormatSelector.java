@@ -23,7 +23,7 @@ import javax.swing.*;
 /**
  * A combo box for selecting an output format
  */
-public class OutputFormatSelector extends JComboBox {
+public class OutputFormatSelector extends JComboBox<OutputFormat> {
     public OutputFormatSelector() {
         super(OutputFormat.values());
         setSelectedItem(OutputFormat.getLastUsed());

@@ -43,7 +43,7 @@ public class NewGradientEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        Tools.GRADIENT.setGradient(null, false, comp.getView());
+        Tools.GRADIENT.setGradient(null, false, dr);
         imageEdit.undo();
         dr.updateIconImage();
     }
@@ -57,7 +57,7 @@ public class NewGradientEdit extends PixelitorEdit {
         imageEdit.redo();
 
         // set the handles
-        Tools.GRADIENT.setGradient(gradient, false, comp.getView());
+        Tools.GRADIENT.setGradient(gradient, false, dr);
 
         dr.updateIconImage();
     }

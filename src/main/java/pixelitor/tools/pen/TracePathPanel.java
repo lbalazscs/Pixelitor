@@ -40,7 +40,7 @@ public class TracePathPanel extends JPanel {
     private final StrokeParam strokeParam = new StrokeParam("");
     private JDialog owner;
     private final JRadioButton strokeRB;
-    private final JComboBox paintToolCB;
+    private final JComboBox<String> paintToolCB;
     private final JButton showStrokeSettingsButton;
 
     private TracePathPanel(Path path, Drawable dr) {
@@ -57,7 +57,7 @@ public class TracePathPanel extends JPanel {
         buttonGroup.add(toolRB);
         strokeRB.setSelected(true);
 
-        paintToolCB = new JComboBox(new String[]{
+        paintToolCB = new JComboBox<>(new String[]{
                 "Brush",
                 "Eraser",
                 "Smudge",

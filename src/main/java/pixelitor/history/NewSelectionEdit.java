@@ -31,6 +31,8 @@ public class NewSelectionEdit extends PixelitorEdit {
     public NewSelectionEdit(Composition comp, Shape shape) {
         super("Create Selection", comp);
 
+        assert comp.getView() != null;
+
         newShape = shape;
     }
 
@@ -38,12 +40,16 @@ public class NewSelectionEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
+        assert comp.getView() != null;
+
         comp.deselect(false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
+
+        assert comp.getView() != null;
 
         comp.createSelectionFromShape(newShape);
     }

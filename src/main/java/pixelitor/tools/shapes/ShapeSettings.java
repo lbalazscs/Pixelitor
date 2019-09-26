@@ -37,6 +37,13 @@ import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
  * of a possible 'shape layer' feature.
  */
 public class ShapeSettings {
+    public static final String CHANGE_SHAPE_FILL = "Change Shape Fill";
+    public static final String CHANGE_SHAPE_STROKE = "Change Shape Stroke";
+    public static final String CHANGE_SHAPE_STROKE_SETTINGS = "Change Shape Stroke Settings";
+    public static final String CHANGE_SHAPE_EFFECTS = "Change Shape Effects";
+    public static final String CHANGE_SHAPE_TYPE = "Change Shape Type";
+    public static final String CHANGE_SHAPE_COLORS = "Change Shape Colors";
+
     private boolean regenerate = true;
 
     private final EnumComboBoxModel<ShapeType> typeModel
@@ -58,28 +65,28 @@ public class ShapeSettings {
         this.tool = tool;
         fillPaintModel.setSelectedItem(RADIAL_GRADIENT);
 
-        strokeParam.setAdjustmentListener(this::guiChanged);
-        effectsParam.setAdjustmentListener(this::guiChanged);
+        strokeParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_STROKE_SETTINGS));
+        effectsParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_EFFECTS));
     }
 
-    private void guiChanged() {
+    private void guiChanged(String editName) {
         if (regenerate) {
-            tool.regenerateShape();
+            tool.regenerateShape(editName);
         }
         tool.updateStrokeEnabledState();
     }
 
     public JComboBox<TwoPointPaintType> createFillPaintCombo() {
-        JComboBox cb = new JComboBox<>(fillPaintModel);
+        JComboBox<TwoPointPaintType> cb = new JComboBox<>(fillPaintModel);
         cb.setMaximumRowCount(fillPaintModel.getSize());
-        cb.addActionListener(e -> guiChanged());
+        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_FILL));
         return cb;
     }
 
     public JComboBox<TwoPointPaintType> createStrokePaintCombo() {
-        JComboBox cb = new JComboBox<>(strokePaintModel);
+        JComboBox<TwoPointPaintType> cb = new JComboBox<>(strokePaintModel);
         cb.setMaximumRowCount(strokePaintModel.getSize());
-        cb.addActionListener(e -> guiChanged());
+        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_STROKE));
         return cb;
     }
 
@@ -87,7 +94,7 @@ public class ShapeSettings {
         JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(typeModel.getSize());
-        shapeTypeCB.addActionListener(e -> guiChanged());
+        shapeTypeCB.addActionListener(e -> guiChanged(CHANGE_SHAPE_TYPE));
         return shapeTypeCB;
     }
 

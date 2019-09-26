@@ -35,7 +35,7 @@ import java.util.Map;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurves {
-    private final EnumMap<ToneCurveType, ToneCurve> curve = new EnumMap(ToneCurveType.class);
+    private final EnumMap<ToneCurveType, ToneCurve> curve = new EnumMap<>(ToneCurveType.class);
     private ToneCurveType activeCurveType = ToneCurveType.RGB;
     private Graphics2D gr;
     private final BasicStroke gridStroke = new BasicStroke(1);

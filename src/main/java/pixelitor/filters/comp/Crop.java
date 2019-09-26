@@ -29,6 +29,7 @@ import pixelitor.history.MultiLayerEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
@@ -62,14 +63,13 @@ public class Crop implements CompAction {
             imCropRect = imCropRect.createIntersection(canvas.getImBounds());
         }
 
-        if (imCropRect.isEmpty()) {
-            // can't do anything useful
-            return;
-        }
+        Rectangle roundedImCropRect = roundCropRect(imCropRect);
+        assert !roundedImCropRect.isEmpty();
+
         Guides guides = comp.getGuides();
         Guides newGuides = null;
         if (guides != null) {
-            newGuides = guides.copyForCrop(imCropRect);
+            newGuides = guides.copyForCrop(roundedImCropRect);
             comp.setGuides(newGuides);
         }
 
@@ -85,22 +85,22 @@ public class Crop implements CompAction {
         } else {
             // if this crop was started from the crop tool, there
             // still could be a selection that needs to be cropped
-            comp.intersectSelection(imCropRect);
+            comp.intersectSelection(roundedImCropRect);
         }
 
         comp.forEachLayer(layer -> {
-            layer.crop(imCropRect, deleteCroppedPixels, allowGrowing);
+            layer.crop(roundedImCropRect, deleteCroppedPixels, allowGrowing);
             if (layer.hasMask()) {
-                layer.getMask().crop(imCropRect, deleteCroppedPixels, allowGrowing);
+                layer.getMask().crop(roundedImCropRect, deleteCroppedPixels, allowGrowing);
             }
         });
 
-        AffineTransform tx = createTransformForCropRect(imCropRect);
+        AffineTransform tx = createTransformForCropRect(roundedImCropRect);
         MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup, tx);
         History.addEdit(edit);
 
-        int newWidth = (int) imCropRect.getWidth();
-        int newHeight = (int) imCropRect.getHeight();
+        int newWidth = roundedImCropRect.width;
+        int newHeight = roundedImCropRect.height;
         canvas.changeImSize(newWidth, newHeight);
 
         // The intersected selection, tool widgets etc. have to be moved
@@ -124,6 +124,23 @@ public class Crop implements CompAction {
 
         Messages.showInStatusBar("Image cropped to "
                 + newWidth + " x " + newHeight + " pixels.");
+    }
+
+
+    // in zoomed-in images fractional widths and heights can happen
+    private static Rectangle roundCropRect(Rectangle2D rect) {
+        int x = (int) Math.round(rect.getX());
+        int y = (int) Math.round(rect.getY());
+        int width = (int) Math.round(rect.getWidth());
+        int height = (int) Math.round(rect.getHeight());
+
+        if (width == 0) {
+            width = 1;
+        }
+        if (height == 0) {
+            height = 1;
+        }
+        return new Rectangle(x, y, width, height);
     }
 
     /**

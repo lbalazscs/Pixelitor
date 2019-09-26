@@ -106,7 +106,7 @@ public class BlurredAnyShape implements BlurredShape {
         double shapeEndX = 2 * outerRadiusX - shapeStartX;
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
-        Shape shape = shapeType.getShape(
+        Shape shape = shapeType.createShape(
                 new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
         g2.setClip(shape);
         g2.setColor(Color.BLACK);

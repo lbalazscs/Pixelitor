@@ -32,9 +32,10 @@ import javax.swing.undo.CannotUndoException;
 public class StyledShapeEdit extends PixelitorEdit {
     private StyledShape backup;
 
-    public StyledShapeEdit(Composition comp,
+    public StyledShapeEdit(String editName,
+                           Composition comp,
                            StyledShape backup) {
-        super("Change Shape", comp);
+        super(editName, comp);
         this.backup = backup;
     }
 

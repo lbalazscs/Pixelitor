@@ -34,6 +34,8 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static pixelitor.colors.FgBgColors.getBGColor;
+import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
  * This class describes a gradient with all the information
@@ -49,6 +51,10 @@ public class Gradient {
     private final boolean reverted;
     private final BlendingMode blendingMode;
     private final float opacity;
+    private final Color[] colors;
+
+    private final Color fgColor;
+    private final Color bgColor;
 
     public Gradient(ImDrag imDrag, GradientType type,
                     CycleMethod cycleMethod, GradientColorType colorType,
@@ -61,6 +67,15 @@ public class Gradient {
         this.reverted = reverted;
         this.blendingMode = blendingMode;
         this.opacity = opacity;
+
+        Color startColor = colorType.getStartColor(reverted);
+        Color endColor = colorType.getEndColor(reverted);
+        assert startColor != null;
+        assert endColor != null;
+        colors = new Color[]{startColor, endColor};
+
+        fgColor = getFGColor();
+        bgColor = getBGColor();
     }
 
     public void drawOn(Drawable dr) {
@@ -82,12 +97,6 @@ public class Gradient {
         dr.getComp().applySelectionClipping(g);
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
-        Color startColor = colorType.getStartColor(reverted);
-        Color endColor = colorType.getEndColor(reverted);
-        assert startColor != null;
-        assert endColor != null;
-        Color[] colors = {startColor, endColor};
 
         Paint paint = type.createPaint(imDrag, colors, cycleMethod);
 
@@ -132,6 +141,14 @@ public class Gradient {
 
     public float getOpacity() {
         return opacity;
+    }
+
+    public Color getFgColor() {
+        return fgColor;
+    }
+
+    public Color getBgColor() {
+        return bgColor;
     }
 
     public GradientHandles createHandles(View view) {

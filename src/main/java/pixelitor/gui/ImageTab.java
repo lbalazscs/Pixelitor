@@ -17,10 +17,15 @@
 
 package pixelitor.gui;
 
+import pixelitor.Composition;
+import pixelitor.gui.utils.GUIUtils;
+
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.io.File;
 
 /**
  * A {@link ViewContainer} used in the tabs UI.
@@ -93,6 +98,23 @@ public class ImageTab extends JComponent implements ViewContainer {
         });
         popup.add(OpenComps.CLOSE_UNMODIFIED_ACTION);
         popup.add(OpenComps.CLOSE_ALL_ACTION);
+
+        if (Desktop.isDesktopSupported()) {
+            Composition comp = view.getComp();
+            File file = comp.getFile();
+            if (file != null && file.exists()) {
+                popup.addSeparator();
+                popup.add(GUIUtils.createShowInFileManagerAction(file));
+
+                String fileName = file.getName();
+                if (!fileName.endsWith("pxc")
+                        && !fileName.endsWith("ora")
+                        && Desktop.getDesktop().isSupported(Desktop.Action.PRINT)) {
+                    popup.add(GUIUtils.createPrintFileAction(comp, file));
+                }
+            }
+        }
+
         popup.addSeparator();
         popup.add(tabsUI.getTabPlacementMenu());
 

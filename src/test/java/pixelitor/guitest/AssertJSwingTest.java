@@ -1900,18 +1900,19 @@ public class AssertJSwingTest {
         keyboard.undoRedo("Create Shape");
 
         pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.FOREGROUND.toString());
+        keyboard.undoRedo("Change Shape Stroke");
         setupStrokeSettingsDialog();
-        keyboard.undoRedo("Change Shape");
+        keyboard.undoRedo("Change Shape Stroke Settings");
 
         mouse.moveToCanvas(200, 50);
         mouse.dragToCanvas(300, 100);
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.CAT.toString());
-        keyboard.undoRedo("Change Shape");
+        keyboard.undoRedo("Change Shape Type");
 
         // resize the transform box by the SE handle
         mouse.moveToCanvas(300, 100);
         mouse.dragToCanvas(500, 300);
-        keyboard.undoRedo("Transform Box Change");
+        keyboard.undoRedo("Change Transform Box");
 
         ShapeType[] shapeTypes = ShapeType.values();
         for (ShapeType shapeType : shapeTypes) {
@@ -1919,7 +1920,7 @@ public class AssertJSwingTest {
                 continue;
             }
             pw.comboBox("shapeTypeCB").selectItem(shapeType.toString());
-            keyboard.undoRedo("Change Shape");
+            keyboard.undoRedo("Change Shape Type");
         }
 
         TwoPointPaintType[] paintTypes = TwoPointPaintType.values();
@@ -1978,7 +1979,13 @@ public class AssertJSwingTest {
             .click();
         DialogFixture dialog = findDialogByTitle("Stroke Settings");
 
-        dialog.slider().slideTo(20);
+        JSliderFixture strokeWidthSlider = dialog.slider();
+        int value = strokeWidthSlider.target().getValue();
+        if (value == 5) { // 5 is the default stroke width
+            strokeWidthSlider.slideTo(20);
+        } else {
+            strokeWidthSlider.slideTo(5);
+        }
 
         dialog.button("ok").click();
         dialog.requireNotVisible();

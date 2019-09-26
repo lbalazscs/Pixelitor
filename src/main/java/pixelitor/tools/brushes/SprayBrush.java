@@ -124,7 +124,7 @@ public class SprayBrush extends AbstractBrush {
             }
 
             double shapeRadius = nextShapeRadius();
-            Shape shape = shapeType.getShape(
+            Shape shape = shapeType.createShape(
                     x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
             targetG.fill(shape);
 
@@ -184,9 +184,11 @@ public class SprayBrush extends AbstractBrush {
 
     @Override
     public void finish() {
-        super.finish();
+        assert timer != null;
 
-        timer.stop();
+        if (timer != null) {
+            timer.stop();
+        }
     }
 
     @Override

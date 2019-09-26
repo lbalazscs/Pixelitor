@@ -39,7 +39,7 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
                                    TransformBox.Memento before,
                                    TransformBox.Memento after,
                                    boolean simpleRepaint) {
-        super("Transform Box Change", comp);
+        super("Change Transform Box", comp);
         this.box = box;
         this.before = before;
         this.after = after;

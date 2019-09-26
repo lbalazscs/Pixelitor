@@ -45,6 +45,7 @@ public class DebugNode extends DefaultMutableTreeNode {
             return name + " = null";
         }
 
+        @SuppressWarnings("unchecked")
         Enumeration<TreeNode> childrenEnum = children();
 
         StringBuilder sb = new StringBuilder();

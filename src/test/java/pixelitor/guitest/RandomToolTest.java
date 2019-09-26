@@ -90,9 +90,19 @@ public class RandomToolTest {
     }
 
     private void testLoop() {
+        Tool[] preferredTools = {};
         while (true) {
-            Tool tool = Tools.getRandomTool();
-            testTool(tool, testNr++);
+            if (preferredTools.length == 0) {
+                // there is no preferred tool, each tool gets equal chance
+                testTool(Tools.getRandomTool(), testNr++);
+            } else {
+                // with 50% probability force using a preferred tool
+                if (Rnd.nextBoolean()) {
+                    testTool(Rnd.chooseFrom(preferredTools), testNr++);
+                } else {
+                    testTool(Tools.getRandomTool(), testNr++);
+                }
+            }
 
             if (!keepRunning) {
                 System.out.println("\n" + RandomToolTest.class.getSimpleName() + " paused.");
@@ -195,7 +205,7 @@ public class RandomToolTest {
     }
 
     private void cleanupAfterToolTest(Tool tool) {
-        if (tool == MOVE) {
+        if (tool == MOVE || tool == CROP) {
             Composition comp = EDT.getComp();
             if (comp.getNumLayers() > 1) {
                 flattenImage(tool);
@@ -205,7 +215,7 @@ public class RandomToolTest {
             int tx = layer.getTX();
             int ty = layer.getTY();
 
-            if (tx < comp.getCanvasImWidth() || ty < comp.getCanvasImHeight()) {
+            if (tx < -comp.getCanvasImWidth() || ty < -comp.getCanvasImHeight()) {
                 cutBigLayer(tool);
             } else if (tx < 0 || ty < 0) {
                 Rnd.withProbability(0.3, () -> cutBigLayer(tool));

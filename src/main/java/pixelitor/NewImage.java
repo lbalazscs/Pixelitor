@@ -114,7 +114,7 @@ public final class NewImage {
             heightTF = addTextField("heightTF", "Height:",
                     lastSize.height, gbh);
 
-            backgroundSelector = new JComboBox(FillType.values());
+            backgroundSelector = new JComboBox<>(FillType.values());
             gbh.addLabelWithLastControl("Fill:", backgroundSelector);
         }
 

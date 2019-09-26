@@ -159,7 +159,7 @@ public enum StrokeType {
             if (shapeType == null) {
                 shapeType = ShapeType.KIWI;
             }
-            return shapeType.getShape(new ImDrag(0, 0, size, size));
+            return shapeType.createShape(new ImDrag(0, 0, size, size));
         }
 
         @Override

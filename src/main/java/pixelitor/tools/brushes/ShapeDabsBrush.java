@@ -48,12 +48,12 @@ public class ShapeDabsBrush extends DabsBrush {
         double y = p.getImY();
         ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
         if (theta != 0) {
-            Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
+            Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
             AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
             Shape transformedShape = t.createTransformedShape(shape);
             targetG.fill(transformedShape);
         } else {
-            Shape shape = shapeType.getShape(x - radius, y - radius, diameter);
+            Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
         updateComp(p);

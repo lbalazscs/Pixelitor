@@ -60,7 +60,7 @@ public class PreferencesPanel extends JPanel {
 
         GridBagHelper gbh = new GridBagHelper(generalPanel);
 
-        JComboBox uiChooser = new JComboBox(ImageArea.Mode.values());
+        JComboBox<ImageArea.Mode> uiChooser = new JComboBox<>(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
         gbh.addLabelWithControl("Images In: ", uiChooser);

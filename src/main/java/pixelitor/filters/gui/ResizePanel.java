@@ -73,7 +73,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         newHeightInPercent = 100.0;
 
         String[] items = {"pixels", "percent"};
-        ComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel(items);
+        ComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>(items);
         JPanel p = new JPanel();
         p.setLayout(new GridBagLayout());
 
