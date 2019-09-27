@@ -110,6 +110,7 @@ public class Guides implements Serializable {
         new DialogBuilder()
                 .title("Add Grid Guides")
                 .content(panel)
+                .withScrollbars()
                 .okAction(() -> panel.createGuides(false))
                 .cancelAction(builder::resetOldGuides)
                 .show();
@@ -123,6 +124,7 @@ public class Guides implements Serializable {
         new DialogBuilder()
                 .title(dialogTitle)
                 .content(panel)
+                .withScrollbars()
                 .okAction(() -> panel.createGuides(false))
                 .cancelAction(builder::resetOldGuides)
                 .show();
