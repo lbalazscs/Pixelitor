@@ -63,6 +63,12 @@ public class Crop implements CompAction {
             imCropRect = imCropRect.createIntersection(canvas.getImBounds());
         }
 
+        if (imCropRect.isEmpty()) {
+            // we get here if the crop rectangle is
+            // outside the canvas bounds in the crop tool
+            return;
+        }
+
         Rectangle roundedImCropRect = roundCropRect(imCropRect);
         assert !roundedImCropRect.isEmpty();
 

@@ -24,6 +24,7 @@ import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.OpenComps;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Utils;
 
 import java.awt.EventQueue;
@@ -36,7 +37,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
 
 /**
- * Keyboard input for {@link AssertJSwingTest}
+ * Keyboard input for AssertJ-Swing based tests
  */
 public class Keyboard {
     // on some Linux environments it can happen that robot key events are
@@ -174,12 +175,28 @@ public class Keyboard {
     }
 
     void nudge() {
+        nudge(ArrowKey.SHIFT_RIGHT);
+    }
+
+    void nudge(ArrowKey key) {
+        int keyCode = key.getKeyCode();
+        boolean shiftDown = key.isShiftDown();
+
         if (osLevelKeyEvents) {
-            // TODO for some reason the shift is not detected
-            pw.pressKey(VK_SHIFT).pressKey(VK_RIGHT)
-                    .releaseKey(VK_RIGHT).releaseKey(VK_SHIFT);
+            if (shiftDown) {
+                // TODO for some reason the shift is not detected
+                pw.pressKey(VK_SHIFT).pressKey(keyCode)
+                        .releaseKey(VK_RIGHT).releaseKey(keyCode);
+
+            } else {
+                pw.pressKey(VK_RIGHT).releaseKey(VK_RIGHT);
+            }
         } else {
-            postKeyEventToEventQueue(KeyEvent.SHIFT_MASK, KeyEvent.VK_RIGHT);
+            if (shiftDown) {
+                postKeyEventToEventQueue(KeyEvent.SHIFT_MASK, keyCode);
+            } else {
+                postKeyEventToEventQueue(0, keyCode);
+            }
         }
     }
 

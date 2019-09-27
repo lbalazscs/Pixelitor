@@ -974,10 +974,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
             if (imgTargetHeight + newTy < canvasTargetHeight) {
                 imgTargetHeight++;
             }
-        }
 
-        assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
-                "bigLayer = " + bigLayer + ", tx = " + getTX() + ", ty = " + getTY();
+            assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
+                    ", tx = " + getTX() + ", ty = " + getTY()
+                            + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
+                            + ", canvasWidth = " + canvas.getImWidth() + ", canvasHeight = " + canvas.getImHeight()
+                            + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
+        }
 
         BufferedImage resizedImg = ImageUtils.getFasterScaledInstance(
             image, imgTargetWidth, imgTargetHeight,

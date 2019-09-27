@@ -340,9 +340,12 @@ public abstract class AbstractBrushTool extends Tool {
             } else {
                 brush.startAt(p);
             }
-        } else {
-            assert brush.hasPrevious();
+        } else if (brush.hasPrevious()) {
             brush.continueTo(p);
+        } else {
+            // there is a graphics, but the brush has no previous
+            // TODO why does this happen sometimes in random tests?
+            brush.startAt(p);
         }
     }
 

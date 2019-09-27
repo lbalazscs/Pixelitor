@@ -133,25 +133,25 @@ public class GlobalEventWatch {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.RIGHT(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.right(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.LEFT(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.left(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.UP(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.up(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (!dialogActive && keyListener.arrowKeyPressed(new ArrowKey.DOWN(e.isShiftDown()))) {
+                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.down(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;

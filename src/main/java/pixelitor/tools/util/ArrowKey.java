@@ -19,75 +19,97 @@ package pixelitor.tools.util;
 
 import java.awt.geom.AffineTransform;
 
+import static java.awt.event.KeyEvent.VK_DOWN;
+import static java.awt.event.KeyEvent.VK_LEFT;
+import static java.awt.event.KeyEvent.VK_RIGHT;
+import static java.awt.event.KeyEvent.VK_UP;
+
 /**
- * An enum-like collection of four static classes
- * that calculate the amount of keyboard nudging
- * in the move, selection and crop tools.
+ * Represents an arrow key (that can be used for nudging),
+ * possibly with a shift modifier (indicating a faster nudge).
  */
-public abstract class ArrowKey {
-    public static class UP extends ArrowKey {
-        public UP(boolean shiftDown) {
-            super(shiftDown);
-        }
-
+public enum ArrowKey {
+    UP(false, VK_UP) {
         @Override
-        protected int getDirX() {
+        public int getMoveX() {
             return 0;
         }
 
         @Override
-        protected int getDirY() {
+        public int getMoveY() {
             return -1;
         }
-    }
-
-    public static class DOWN extends ArrowKey {
-        public DOWN(boolean shiftDown) {
-            super(shiftDown);
-        }
-
+    }, SHIFT_UP(true, VK_UP) {
         @Override
-        protected int getDirX() {
+        public int getMoveX() {
             return 0;
         }
 
         @Override
-        protected int getDirY() {
-            return 1;
+        public int getMoveY() {
+            return -SHIFT_MULTIPLIER;
         }
-    }
-
-    public static class RIGHT extends ArrowKey {
-        public RIGHT(boolean shiftDown) {
-            super(shiftDown);
-        }
-
+    }, DOWN(false, VK_DOWN) {
         @Override
-        protected int getDirX() {
-            return 1;
-        }
-
-        @Override
-        protected int getDirY() {
+        public int getMoveX() {
             return 0;
         }
-    }
 
-    public static class LEFT extends ArrowKey {
-        public LEFT(boolean shiftDown) {
-            super(shiftDown);
+        @Override
+        public int getMoveY() {
+            return 1;
+        }
+    }, SHIFT_DOWN(true, VK_DOWN) {
+        @Override
+        public int getMoveX() {
+            return 0;
         }
 
         @Override
-        protected int getDirX() {
+        public int getMoveY() {
+            return SHIFT_MULTIPLIER;
+        }
+    }, RIGHT(false, VK_RIGHT) {
+        @Override
+        public int getMoveX() {
+            return 1;
+        }
+
+        @Override
+        public int getMoveY() {
+            return 0;
+        }
+    }, SHIFT_RIGHT(true, VK_RIGHT) {
+        @Override
+        public int getMoveX() {
+            return SHIFT_MULTIPLIER;
+        }
+
+        @Override
+        public int getMoveY() {
+            return 0;
+        }
+    }, LEFT(false, VK_LEFT) {
+        @Override
+        public int getMoveX() {
             return -1;
         }
 
         @Override
-        protected int getDirY() {
+        public int getMoveY() {
             return 0;
         }
-    }
+    }, SHIFT_LEFT(true, VK_LEFT) {
+        @Override
+        public int getMoveX() {
+            return -SHIFT_MULTIPLIER;
+        }
+
+        @Override
+        public int getMoveY() {
+            return 0;
+        }
+    };
 
     /**
      * When Shift is pressed, everything is nudged faster.
@@ -95,38 +117,45 @@ public abstract class ArrowKey {
     private static final int SHIFT_MULTIPLIER = 10;
 
     private final boolean shiftDown;
+    private final int keyCode;
 
-    private ArrowKey(boolean shiftDown) {
+    ArrowKey(boolean shiftDown, int keyCode) {
         this.shiftDown = shiftDown;
+        this.keyCode = keyCode;
     }
 
-    public int getMoveX() {
-        if (shiftDown) {
-            return SHIFT_MULTIPLIER * getDirX();
-        } else {
-            return getDirX();
-        }
+    public static ArrowKey up(boolean shift) {
+        return shift ? SHIFT_UP : UP;
     }
 
-    public int getMoveY() {
-        if (shiftDown) {
-            return SHIFT_MULTIPLIER * getDirY();
-        } else {
-            return getDirY();
-        }
+    public static ArrowKey down(boolean shift) {
+        return shift ? SHIFT_DOWN : DOWN;
     }
+
+    public static ArrowKey right(boolean shift) {
+        return shift ? SHIFT_RIGHT : RIGHT;
+    }
+
+    public static ArrowKey left(boolean shift) {
+        return shift ? SHIFT_LEFT : LEFT;
+    }
+
+    /**
+     * Returns the amount of nudging in the x direction
+     */
+    public abstract int getMoveX();
+
+    public abstract int getMoveY();
 
     public AffineTransform getTransform() {
         return AffineTransform.getTranslateInstance(getMoveX(), getMoveY());
     }
 
-    @Override
-    public String toString() {
-        String simpleName = getClass().getSimpleName();
-        return shiftDown ? "SHIFT" + simpleName : simpleName;
+    public boolean isShiftDown() {
+        return shiftDown;
     }
 
-    protected abstract int getDirX();
-
-    protected abstract int getDirY();
+    public int getKeyCode() {
+        return keyCode;
+    }
 }

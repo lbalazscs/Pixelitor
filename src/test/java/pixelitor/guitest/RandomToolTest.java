@@ -13,6 +13,7 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
@@ -21,6 +22,10 @@ import pixelitor.utils.test.RandomGUITest;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -50,6 +55,9 @@ public class RandomToolTest {
     private volatile boolean keepRunning = true;
     private long testNr = 1;
 
+    private List<Consumer<Tool>> events;
+    private final ArrowKey[] arrowKeys = ArrowKey.values();
+
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
@@ -68,7 +76,23 @@ public class RandomToolTest {
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
 
+        initEventList();
+
         mainLoop();
+    }
+
+    private void initEventList() {
+        events = new ArrayList<>();
+
+        events.add(this::click);
+        events.add(this::ctrlClick);
+        events.add(this::altClick);
+        events.add(this::shiftClick);
+        events.add(this::doubleClick);
+        events.add(this::pressEnter);
+        events.add(this::pressEsc);
+        events.add(this::nudge);
+        events.add(this::possiblyUndoRedo);
     }
 
     private void mainLoop() {
@@ -140,7 +164,7 @@ public class RandomToolTest {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nexiting because '" + exitKeyStroke
-                    .getKeyChar() + "' was pressed");
+                        .getKeyChar() + "' was pressed");
                 System.exit(1);
             }
         }));
@@ -156,9 +180,9 @@ public class RandomToolTest {
             setSourceForCloneTool();
         }
 
-        clickRandomly(tool);
+        randomEvents(tool);
         dragRandomly(tool);
-        clickRandomly(tool);
+        randomEvents(tool);
         pushToolButtons(tool);
 
         cleanupAfterToolTest(tool);
@@ -182,16 +206,11 @@ public class RandomToolTest {
         }
     }
 
-    private void clickRandomly(Tool tool) {
-        Rnd.withProbability(0.3, () -> click(tool));
-        Rnd.withProbability(0.3, () -> ctrlClick(tool));
-        Rnd.withProbability(0.3, () -> altClick(tool));
-        Rnd.withProbability(0.3, () -> shiftClick(tool));
-        Rnd.withProbability(0.3, () -> doubleClick(tool));
-        Rnd.withProbability(0.1, () -> pressEnter(tool));
-        Rnd.withProbability(0.1, () -> pressEsc(tool));
-
-        possiblyUndoRedo(tool);
+    private void randomEvents(Tool tool) {
+        Collections.shuffle(events);
+        for (Consumer<Tool> event : events) {
+            Rnd.withProbability(0.3, () -> event.accept(tool));
+        }
     }
 
     private void pressEnter(Tool tool) {
@@ -202,6 +221,13 @@ public class RandomToolTest {
     private void pressEsc(Tool tool) {
         log(tool, "pressing Esc");
         keyboard.pressEsc();
+    }
+
+    private void nudge(Tool tool) {
+        ArrowKey randomArrowKey = Rnd.chooseFrom(arrowKeys);
+        log(tool, "nudging: " + randomArrowKey);
+
+        keyboard.nudge(randomArrowKey);
     }
 
     private void cleanupAfterToolTest(Tool tool) {
@@ -305,10 +331,8 @@ public class RandomToolTest {
             return;
         }
 
-        Utils.sleep(200, MILLISECONDS);
-        boolean undone = Rnd.withProbability(0.25, () -> undo(tool));
+        boolean undone = Rnd.withProbability(0.5, () -> undo(tool));
         if (undone) {
-            Utils.sleep(200, MILLISECONDS);
             Rnd.withProbability(0.5, () -> redo(tool));
         }
     }
@@ -346,15 +370,17 @@ public class RandomToolTest {
     private void undo(Tool tool) {
         String editName = EDT.call(History::getEditToBeUndoneName);
         log(tool, "random undo " + Ansi.yellow(editName));
-        Utils.sleep(200, MILLISECONDS);
-        keyboard.undo();
+
+        // call the history directly instead of using keyboard
+        // events, because EDT.call(History::canUndo) calls cannot
+        // reliably be mixed with keyboard events
+        EDT.run(History::undo);
     }
 
     private void redo(Tool tool) {
         String editName = EDT.call(History::getEditToBeRedoneName);
         log(tool, "random redo " + Ansi.yellow(editName));
-        Utils.sleep(200, MILLISECONDS);
-        keyboard.redo();
+        EDT.run(History::redo);
     }
 
     private void parseCLArguments(String[] args) {
@@ -441,36 +467,36 @@ public class RandomToolTest {
 
     private void clickPenToolButton() {
         String[] texts = {
-            "Stroke with Current Brush",
-            "Stroke with Current Eraser",
-            "Stroke with Current Smudge",
-            "Convert to Selection"
+                "Stroke with Current Brush",
+                "Stroke with Current Eraser",
+                "Stroke with Current Smudge",
+                "Convert to Selection"
         };
         clickRandomToolButton(PEN, texts);
     }
 
     private void clickZoomOrHandToolButton(Tool tool) {
         String[] texts = {
-            "Actual Pixels",
-            "Fit Space",
-            "Fit Width",
-            "Fit Height"
+                "Actual Pixels",
+                "Fit Space",
+                "Fit Width",
+                "Fit Height"
         };
         clickRandomToolButton(tool, texts);
     }
 
     private void clickCropToolButton() {
         String[] texts = {
-            "Crop",
-            "Cancel",
+                "Crop",
+                "Cancel",
         };
         clickRandomToolButton(CROP, texts);
     }
 
     private void clickSelectionToolButton() {
         String[] texts = {
-            "Crop Selection",
-            "Convert to Path",
+                "Crop Selection",
+                "Convert to Path",
         };
         clickRandomToolButton(SELECTION, texts);
     }

@@ -37,7 +37,7 @@ import static java.awt.event.KeyEvent.VK_SHIFT;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
- * Mouse input for {@link AssertJSwingTest}
+ * Mouse input for AssertJ-Swing based tests
  */
 public class Mouse {
     private final Robot robot;
