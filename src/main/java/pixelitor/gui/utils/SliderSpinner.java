@@ -273,7 +273,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             label.setEnabled(enabled);
         }
         if (defaultButton != null) {
-            defaultButton.setEnabled(enabled && defaultButton.shouldBeEnabled());
+            defaultButton.setEnabled(enabled);
         }
     }
 

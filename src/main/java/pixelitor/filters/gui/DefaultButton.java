@@ -53,7 +53,8 @@ public class DefaultButton extends JButton {
         }
     }
 
-    public boolean shouldBeEnabled() {
-        return !resettable.isSetToDefault();
+    @Override
+    public void setEnabled(boolean b) {
+        super.setEnabled(b && !resettable.isSetToDefault());
     }
 }

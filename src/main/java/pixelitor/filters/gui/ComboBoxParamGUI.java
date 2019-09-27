@@ -25,11 +25,11 @@ import java.awt.FlowLayout;
  * Displays a JComboBox as the GUI for an
  * {@link IntChoiceParam} or an {@link EnumParam}
  */
-public class ComboBoxParamGUI extends JPanel implements ParamGUI {
-    private final JComboBox<IntChoiceParam.Value> comboBox;
+public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
+    private final JComboBox<E> comboBox;
     private final DefaultButton defaultButton;
 
-    public ComboBoxParamGUI(ComboBoxModel model, FilterAction action) {
+    public ComboBoxParamGUI(ComboBoxModel<E> model, FilterAction action) {
         assert model instanceof Resettable;
 
         comboBox = new JComboBox<>(model);
