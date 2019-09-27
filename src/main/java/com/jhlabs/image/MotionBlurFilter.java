@@ -122,7 +122,10 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
      */
     @Override
     public void setAngle(float angle) {
-        this.angle = angle;
+        // added pi to the angle so that the direction is
+        // consistent with MotionBlurOp
+        // see https://github.com/lbalazscs/Pixelitor/issues/67
+        this.angle = (float) (angle + Math.PI);
     }
 
     /**
