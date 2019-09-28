@@ -92,7 +92,7 @@ public class SmudgeTool extends AbstractBrushTool {
 
     private void addFingerPaintingSelector() {
         fingerPaintingCB = new JCheckBox();
-        settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB);
+        settingsPanel.addWithLabel("Finger Painting:", fingerPaintingCB, "fingerPaintingCB");
         fingerPaintingCB.setName("fingerPaintingCB");
         fingerPaintingCB.addActionListener(
                 e -> smudgeBrush.setFingerPainting(fingerPaintingCB.isSelected()));

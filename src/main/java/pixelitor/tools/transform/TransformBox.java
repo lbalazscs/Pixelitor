@@ -17,11 +17,14 @@
 
 package pixelitor.tools.transform;
 
+import pixelitor.Composition;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DDimension;
 import pixelitor.history.History;
 import pixelitor.tools.ToolWidget;
 import pixelitor.tools.transform.history.TransformBoxChangedEdit;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.AngleUnit;
@@ -381,12 +384,12 @@ public class TransformBox implements ToolWidget {
             }
             e.imageChanged(REPAINT);
             updateDirections(); // necessary only if dragged through the opposite corner
-            addMovementToHistory(e);
+            addMovementToHistory(e.getComp(), "Change Transform Box");
             return true;
         } else if (wholeBoxDrag) {
             dragBox(e);
             wholeBoxDrag = false;
-            addMovementToHistory(e);
+            addMovementToHistory(e.getComp(), "Drag Transform Box");
             return true;
         }
         // we shouldn't get here
@@ -440,9 +443,10 @@ public class TransformBox implements ToolWidget {
         return boxShape.contains(x, y);
     }
 
-    private void addMovementToHistory(PMouseEvent e) {
+    private void addMovementToHistory(Composition comp, String editName) {
+        assert editName != null;
         Memento afterMovement = copyState();
-        History.addEdit(new TransformBoxChangedEdit(e.getComp(),
+        History.addEdit(new TransformBoxChangedEdit(editName, comp,
                 this, beforeMovement, afterMovement, false));
     }
 
@@ -466,6 +470,12 @@ public class TransformBox implements ToolWidget {
         double dx = x - wholeBoxDragStartX;
         double dy = y - wholeBoxDragStartY;
 
+        Composition comp = e.getComp();
+
+        moveWholeBoxBy(dx, dy, comp);
+    }
+
+    private void moveWholeBoxBy(double dx, double dy, Composition comp) {
         nw.setLocation(
                 beforeMovement.nw.getX() + dx,
                 beforeMovement.nw.getY() + dy);
@@ -481,7 +491,7 @@ public class TransformBox implements ToolWidget {
 
         cornerHandlesMoved();
 
-        e.imageChanged(REPAINT);
+        comp.imageChanged(REPAINT);
     }
 
     public Point2D getCenter() {
@@ -506,7 +516,6 @@ public class TransformBox implements ToolWidget {
         }
 
         // rotate the rotation handle
-        rot.calcImCoords(); // might not be up to date
         rot.imTransformOnlyThis(at, false);
         recalcAngle();
 
@@ -515,6 +524,21 @@ public class TransformBox implements ToolWidget {
         updateBoxShape();
         applyTransformation();
         updateDirections();
+    }
+
+    @Override
+    public void arrowKeyPressed(ArrowKey key) {
+        saveState();
+
+        double dx = key.getMoveX();
+        double dy = key.getMoveY();
+        Composition comp = OpenComps.getActiveCompOrNull();
+        moveWholeBoxBy(dx, dy, comp);
+
+        String editName = key.isShiftDown()
+                ? "Shift-nudge Transform Box"
+                : "Nudge Transform Box";
+        addMovementToHistory(comp, editName);
     }
 
     public void setAngle(double angle) {

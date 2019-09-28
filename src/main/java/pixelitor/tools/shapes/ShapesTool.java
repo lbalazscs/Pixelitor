@@ -33,6 +33,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.ConvertShapeToSelectionEdit;
 import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
@@ -96,10 +97,13 @@ public class ShapesTool extends DragTool {
     @Override
     public void initSettingsPanel() {
         JComboBox<ShapeType> shapeTypeCB = settings.createShapeTypeCombo();
-        settingsPanel.addWithLabel("Shape:", shapeTypeCB, "shapeTypeCB");
+        settingsPanel.addComboBox("Shape:", shapeTypeCB, "shapeTypeCB");
 
-        settingsPanel.addWithLabel("Fill:", fillPaintCombo, "fillPaintCB");
-        settingsPanel.addWithLabel("Stroke:", strokePaintCombo, "strokePaintCB");
+        fillPaintCombo.setFocusable(false);
+        settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
+
+        strokePaintCombo.setFocusable(false);
+        settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
             e -> initAndShowStrokeSettingsDialog());
@@ -243,6 +247,15 @@ public class ShapesTool extends DragTool {
                 finalizeShape(comp);
             }
         }
+    }
+
+    @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        if (transformBox != null) {
+            transformBox.arrowKeyPressed(key);
+            return true;
+        }
+        return false;
     }
 
     private void setState(ShapesToolState newState) {

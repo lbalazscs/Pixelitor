@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.gui.View;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 
 import java.awt.Graphics2D;
@@ -48,4 +49,6 @@ public interface ToolWidget {
     void coCoordsChanged(View view);
 
     void imCoordsChanged(AffineTransform at);
+
+    void arrowKeyPressed(ArrowKey key);
 }

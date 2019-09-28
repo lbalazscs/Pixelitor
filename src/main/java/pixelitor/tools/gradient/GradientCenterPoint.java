@@ -54,11 +54,4 @@ public class GradientCenterPoint extends DraggablePoint {
         start.translateOnlyThis(dx, dy);
         end.translateOnlyThis(dx, dy);
     }
-
-    @Override
-    protected void afterMouseReleasedActions() {
-        calcImCoords();
-        start.calcImCoords();
-        end.calcImCoords();
-    }
 }

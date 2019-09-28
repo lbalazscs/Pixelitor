@@ -87,6 +87,23 @@ public class AppRunner {
         return pw;
     }
 
+    public void runTests(Runnable tests) {
+        try {
+            tests.run();
+        } catch (Throwable t) {
+            releaseModifierKeys();
+            throw t;
+        }
+    }
+
+    public void releaseModifierKeys() {
+        // make sure that the modifier keys don't remain
+        // pressed after an exception or a forced exit
+        keyboard.releaseCtrl();
+        keyboard.releaseAlt();
+        keyboard.releaseShift();
+    }
+
     void setupDelayBetweenEvents() {
         // for example -Drobot.delay.millis=500 could be added to
         // the command line to slow it down

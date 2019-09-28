@@ -77,7 +77,7 @@ public class CropTool extends DragTool {
     private final JLabel heightLabel = new JLabel("Height:");
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
-    private JComboBox guidesSelector;
+    private JComboBox guidesCB;
 
     private JCheckBox allowGrowingCB;
     private JCheckBox deleteCroppedPixelsCB;
@@ -145,14 +145,14 @@ public class CropTool extends DragTool {
     }
 
     private void addGuidesSelector() {
-        guidesSelector = new JComboBox<>(RectGuidelineType.values());
-        guidesSelector.setToolTipText("<html>Composition guides." +
+        guidesCB = new JComboBox<>(RectGuidelineType.values());
+        guidesCB.setToolTipText("<html>Composition guides." +
                 "<br><br>Press <b>O</b> to select the next guide." +
                 "<br>Press <b>Shift-O</b> to change the orientation.");
-        guidesSelector.setMaximumRowCount(guidesSelector.getItemCount());
+        guidesCB.setMaximumRowCount(guidesCB.getItemCount());
 //        guidesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
-        guidesSelector.addActionListener(e -> OpenComps.repaintActive());
-        settingsPanel.addWithLabel("Guides:", guidesSelector);
+        guidesCB.addActionListener(e -> OpenComps.repaintActive());
+        settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }
 
     private void addCropSizeControls() {
@@ -357,7 +357,7 @@ public class CropTool extends DragTool {
             g2.setClip(coVisiblePart);
 
             // draw guidelines
-            rectGuideline.setType((RectGuidelineType) guidesSelector.getSelectedItem());
+            rectGuideline.setType((RectGuidelineType) guidesCB.getSelectedItem());
             rectGuideline.draw(cropRect.getCo(), g2);
 
             cropBox.paintHandles(g2);
@@ -491,15 +491,15 @@ public class CropTool extends DragTool {
     }
 
     private void selectTheNextCompositionGuide() {
-        int index = guidesSelector.getSelectedIndex();
-        int itemCount = guidesSelector.getItemCount();
+        int index = guidesCB.getSelectedIndex();
+        int itemCount = guidesCB.getItemCount();
         int nextIndex;
         if (index == itemCount - 1) {
             nextIndex = 0;
         } else {
             nextIndex = index + 1;
         }
-        guidesSelector.setSelectedIndex(nextIndex);
+        guidesCB.setSelectedIndex(nextIndex);
     }
 
     @Override

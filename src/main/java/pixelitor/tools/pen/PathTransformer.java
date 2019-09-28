@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -46,6 +47,7 @@ public class PathTransformer implements PenToolMode {
 
     private List<TransformBox> boxes;
     private TransformBox draggedBox;
+    private TransformBox lastActiveBox;
 
     private PathTransformer() {
 
@@ -97,6 +99,7 @@ public class PathTransformer implements PenToolMode {
             if (hit != null) {
                 handleWasHit = true;
                 draggedBox = box;
+                lastActiveBox = box;
                 box.handleHitWhenPressed(hit, x, y);
                 break;
             }
@@ -110,6 +113,7 @@ public class PathTransformer implements PenToolMode {
             if (box.contains(x, y)) {
                 box.boxAreaHitWhenPressed(x, y);
                 draggedBox = box;
+                lastActiveBox = box;
                 e.repaint();
                 break;
             }
@@ -162,6 +166,12 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        lastActiveBox.arrowKeyPressed(key);
+        return true;
+    }
+
+    @Override
     public String getToolMessage() {
         return HELP_MESSAGE;
     }
@@ -175,6 +185,10 @@ public class PathTransformer implements PenToolMode {
     public void modeStarted(PenToolMode prevMode, Path path) {
         PenToolMode.super.modeStarted(prevMode, path);
         boxes = path.createTransformBoxes();
+
+        // arbitrary choice, but most of the time
+        // there will be only one box anyway
+        lastActiveBox = boxes.get(0);
     }
 
     @Override

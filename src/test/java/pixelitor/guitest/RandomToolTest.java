@@ -78,7 +78,7 @@ public class RandomToolTest {
 
         initEventList();
 
-        mainLoop();
+        app.runTests(this::mainLoop);
     }
 
     private void initEventList() {
@@ -165,6 +165,7 @@ public class RandomToolTest {
             public void actionPerformed(ActionEvent e) {
                 System.err.println("\nexiting because '" + exitKeyStroke
                         .getKeyChar() + "' was pressed");
+                app.releaseModifierKeys();
                 System.exit(1);
             }
         }));
@@ -276,9 +277,11 @@ public class RandomToolTest {
     }
 
     private void deselect(Tool tool) {
-        log(tool, "deselecting");
-        Utils.sleep(200, MILLISECONDS);
-        keyboard.deselect();
+        if (EDT.getSelection() != null) {
+            log(tool, "deselecting");
+            Utils.sleep(200, MILLISECONDS);
+            keyboard.deselect();
+        }
     }
 
     private void actualPixels(Tool tool) {
@@ -371,16 +374,14 @@ public class RandomToolTest {
         String editName = EDT.call(History::getEditToBeUndoneName);
         log(tool, "random undo " + Ansi.yellow(editName));
 
-        // call the history directly instead of using keyboard
-        // events, because EDT.call(History::canUndo) calls cannot
-        // reliably be mixed with keyboard events
-        EDT.run(History::undo);
+        keyboard.undo();
     }
 
     private void redo(Tool tool) {
         String editName = EDT.call(History::getEditToBeRedoneName);
         log(tool, "random redo " + Ansi.yellow(editName));
-        EDT.run(History::redo);
+
+        keyboard.redo();
     }
 
     private void parseCLArguments(String[] args) {

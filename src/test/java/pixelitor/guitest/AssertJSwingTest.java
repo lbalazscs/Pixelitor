@@ -208,8 +208,8 @@ public class AssertJSwingTest {
 
     private void resetSelectTool() {
         pw.toggleButton("Selection Tool Button").click();
-        pw.comboBox("selectionTypeCombo").selectItem("Rectangle");
-        pw.comboBox("selectionInteractionCombo").selectItem("Replace");
+        pw.comboBox("typeCB").selectItem("Rectangle");
+        pw.comboBox("interactionCB").selectItem("Replace");
     }
 
     private void resetShapesTool() {
@@ -245,7 +245,7 @@ public class AssertJSwingTest {
         System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
             target, maskMode, getCurrentTime());
 
-        target.run(this);
+        app.runTests(() -> target.run(this));
     }
 
     void testAll() {
@@ -2161,20 +2161,20 @@ public class AssertJSwingTest {
         boolean gradientCreated = false;
 
         for (GradientType gradientType : GradientType.values()) {
-            pw.comboBox("gradientTypeSelector").selectItem(gradientType.toString());
+            pw.comboBox("typeCB").selectItem(gradientType.toString());
             for (String cycleMethod : GradientTool.CYCLE_METHODS) {
-                pw.comboBox("gradientCycleMethodSelector").selectItem(cycleMethod);
+                pw.comboBox("cycleMethodCB").selectItem(cycleMethod);
                 GradientColorType[] gradientColorTypes = GradientColorType.values();
                 for (GradientColorType colorType : gradientColorTypes) {
                     if (skipThis()) {
                         continue;
                     }
-                    pw.comboBox("gradientColorTypeSelector").selectItem(colorType.toString());
+                    pw.comboBox("colorTypeCB").selectItem(colorType.toString());
 
                     if (random.nextBoolean()) {
-                        pw.checkBox("gradientRevert").uncheck();
+                        pw.checkBox("revertCB").uncheck();
                     } else {
-                        pw.checkBox("gradientRevert").check();
+                        pw.checkBox("revertCB").check();
                     }
 
                     // drag the gradient
@@ -2265,7 +2265,7 @@ public class AssertJSwingTest {
 
         boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
-            pw.comboBox("brushTypeSelector").selectItem(brushType.toString());
+            pw.comboBox("typeCB").selectItem(brushType.toString());
             if (brushType.hasSettings()) {
                 // TODO set random settings
             }
@@ -2382,7 +2382,7 @@ public class AssertJSwingTest {
     }
 
     private void testWithTwoEclipseSelections() {
-        pw.comboBox("selectionTypeCombo").selectItem("Ellipse");
+        pw.comboBox("typeCB").selectItem("Ellipse");
         EDT.assertActiveToolIs(Tools.SELECTION);
 
         // replace current selection with the first ellipse
@@ -2395,7 +2395,7 @@ public class AssertJSwingTest {
         EDT.assertThereIsSelection();
 
         // add second ellipse
-        pw.comboBox("selectionInteractionCombo").selectItem("Add");
+        pw.comboBox("interactionCB").selectItem("Add");
         EDT.assertSelectionInteractionIs(ADD);
 
         int e2X = 400;
@@ -2787,7 +2787,7 @@ public class AssertJSwingTest {
     private void addSomeContent() {
         // draw a radial gradient
         pw.toggleButton("Gradient Tool Button").click();
-        pw.comboBox("gradientTypeSelector").selectItem(GradientType.RADIAL.toString());
+        pw.comboBox("typeCB").selectItem(GradientType.RADIAL.toString());
         pw.checkBox("gradientRevert").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {

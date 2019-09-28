@@ -69,12 +69,6 @@ public class GradientDefiningPoint extends DraggablePoint {
     }
 
     @Override
-    protected void afterMouseReleasedActions() {
-        calcImCoords();
-        center.calcImCoords();
-    }
-
-    @Override
     public void paintHandle(Graphics2D g) {
         super.paintHandle(g);
         if (isActive()) {

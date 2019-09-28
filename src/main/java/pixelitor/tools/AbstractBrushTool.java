@@ -65,7 +65,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     private boolean respectSelection = true; // false while tracing a selection
 
-    private JComboBox<BrushType> typeSelector;
+    private JComboBox<BrushType> typeCB;
     protected JCheckBox lazyMouseCB;
     private JDialog lazyMouseDialog;
 
@@ -119,12 +119,12 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected void addTypeSelector() {
         BrushType[] brushTypes = BrushType.values();
-        typeSelector = new JComboBox<>(brushTypes);
-        settingsPanel.addWithLabel("Brush:", typeSelector, "brushTypeSelector");
-        typeSelector.addActionListener(e -> brushTypeChanged());
+        typeCB = new JComboBox<>(brushTypes);
+        settingsPanel.addComboBox("Brush:", typeCB, "typeCB");
+        typeCB.addActionListener(e -> brushTypeChanged());
 
         // make sure all values are visible without a scrollbar
-        typeSelector.setMaximumRowCount(brushTypes.length);
+        typeCB.setMaximumRowCount(brushTypes.length);
     }
 
     private void brushTypeChanged() {
@@ -146,16 +146,15 @@ public abstract class AbstractBrushTool extends Tool {
     protected void addSymmetryCombo() {
         assert canHaveSymmetry;
 
-        JComboBox<Symmetry> symmetryCombo = new JComboBox<>(symmetryModel);
-        settingsPanel.addWithLabel("Mirror:", symmetryCombo, "symmetrySelector");
-        symmetryCombo.addActionListener(e -> symmetryBrush.symmetryChanged(
+        JComboBox<Symmetry> symmetryCB = new JComboBox<>(symmetryModel);
+        settingsPanel.addComboBox("Mirror:", symmetryCB, "symmetrySelector");
+        symmetryCB.addActionListener(e -> symmetryBrush.symmetryChanged(
                 getSymmetry(), getRadius()));
     }
 
     protected void addBrushSettingsButton() {
         brushSettingsButton = settingsPanel.addButton(
-            "Settings...",
-                e -> brushSettingsButtonPressed());
+                "Settings...", e -> brushSettingsButtonPressed());
 
         brushSettingsButton.setEnabled(false);
     }
@@ -501,7 +500,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     private BrushType getBrushType() {
-        return (BrushType) typeSelector.getSelectedItem();
+        return (BrushType) typeCB.getSelectedItem();
     }
 
     // TODO indicate the size of the brush
@@ -542,7 +541,7 @@ public abstract class AbstractBrushTool extends Tool {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        if (typeSelector != null) { // can be null, for example in Clone
+        if (typeCB != null) { // can be null, for example in Clone
             node.addString("Brush Type", getBrushType().toString());
         }
         node.addInt("Radius", getRadius());

@@ -57,6 +57,7 @@ public class BlendingModePanel extends JPanel {
 
         BlendingMode[] blendingModes = BlendingMode.values();
         bmCombo = new JComboBox<>(blendingModes);
+        bmCombo.setFocusable(false);
         bmCombo.setMaximumRowCount(blendingModes.length);
         if (!forTools) {
             bmCombo.setName("layerBM");

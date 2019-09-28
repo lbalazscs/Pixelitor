@@ -556,7 +556,7 @@ public class PathBuilderTest {
             drag(startX + 10, startY - 10, DRAGGING_THE_CONTROL_OF_LAST);
             assertThat(firstAnchor.ctrlOut)
                     .isAt(startX + 10, startY - 10)
-                    .isAtIm(startX, startY);
+                    .isAtIm(startX + 10, startY - 10);
             drag(startX + 20, startY - 20, DRAGGING_THE_CONTROL_OF_LAST);
             drag(startX + 30, startY - 30, DRAGGING_THE_CONTROL_OF_LAST);
             assertThat(sp).numAnchorsIs(1);

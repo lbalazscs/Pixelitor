@@ -190,6 +190,9 @@ public abstract class Tool implements KeyListener {
         handlerChain.spaceReleased();
     }
 
+    /**
+     * Returns true if the key event was used for something
+     */
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         // empty for the convenience of subclasses

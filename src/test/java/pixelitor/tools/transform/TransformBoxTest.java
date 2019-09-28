@@ -372,7 +372,7 @@ public class TransformBoxTest {
         assertThat(se).isAt(100, 400).isAtIm(100, 400);
         assertThat(rot)
                 .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 250)
-                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 200);
+                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 250);
         assertThat(box).angleDegreesIs(270); // no change
 
         // rotate back

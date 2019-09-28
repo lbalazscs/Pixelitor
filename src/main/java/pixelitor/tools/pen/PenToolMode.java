@@ -21,6 +21,8 @@ import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.ArrowKey;
+import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.PathNode;
@@ -84,7 +86,13 @@ public interface PenToolMode {
                 comp.repaint();
             }
         }
+        DraggablePoint.lastActive = null;
     }
+
+    /**
+     * Returns true if the key event was used for something
+     */
+    boolean arrowKeyPressed(ArrowKey key);
 
     default DebugNode createDebugNode() {
         DebugNode node = new DebugNode("PenToolMode " + toString(), this);

@@ -71,10 +71,6 @@ public class CornerHandle extends PositionHandle {
         // the point is transformed with a rotation transform,
         // AffineTransform.transform calls it, and expects the simple behavior
         super.setLocation(x, y);
-
-        // the image space coordinates need to be updated continuously
-        // because the transform calculations are based on them
-        calcImCoords();
     }
 
     @Override

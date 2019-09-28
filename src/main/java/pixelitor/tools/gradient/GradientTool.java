@@ -30,6 +30,7 @@ import pixelitor.tools.DragTool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
 import pixelitor.tools.gradient.history.NewGradientEdit;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
@@ -65,10 +66,10 @@ public class GradientTool extends DragTool {
             REFLECT_AS_STRING,
             REPEAT_AS_STRING};
 
-    private JComboBox<GradientColorType> colorTypeSelector;
-    private JComboBox<GradientType> typeSelector;
-    private JComboBox<String> cycleMethodSelector;
-    private JCheckBox revertCheckBox;
+    private JComboBox<GradientColorType> colorTypeCB;
+    private JComboBox<GradientType> typeCB;
+    private JComboBox<String> cycleMethodCB;
+    private JCheckBox revertCB;
     private BlendingModePanel blendingModePanel;
 
     private Gradient lastGradient;
@@ -100,36 +101,36 @@ public class GradientTool extends DragTool {
     }
 
     private void addTypeSelector() {
-        typeSelector = new JComboBox<>(GradientType.values());
-        typeSelector.addActionListener(e -> regenerateGradient(
+        typeCB = new JComboBox<>(GradientType.values());
+        typeCB.addActionListener(e -> regenerateGradient(
                 true, "Change Gradient Type"));
-        settingsPanel.addWithLabel("Type: ",
-                typeSelector, "gradientTypeSelector");
+        settingsPanel.addComboBox("Type: ",
+                typeCB, "typeCB");
     }
 
     private void addCycleMethodSelector() {
         // cycle methods cannot be put directly in the JComboBox,
         // because they would be all uppercase
-        cycleMethodSelector = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodSelector.addActionListener(e -> regenerateGradient(
+        cycleMethodCB = new JComboBox<>(CYCLE_METHODS);
+        cycleMethodCB.addActionListener(e -> regenerateGradient(
                 true, "Change Gradient Cycling"));
-        settingsPanel.addWithLabel("Cycling: ",
-                cycleMethodSelector, "gradientCycleMethodSelector");
+        settingsPanel.addComboBox("Cycling: ",
+                cycleMethodCB, "cycleMethodCB");
     }
 
     private void addColorTypeSelector() {
-        colorTypeSelector = new JComboBox<>(GradientColorType.values());
-        colorTypeSelector.addActionListener(e -> regenerateGradient(
+        colorTypeCB = new JComboBox<>(GradientColorType.values());
+        colorTypeCB.addActionListener(e -> regenerateGradient(
                 true, "Change Gradient Colors"));
-        settingsPanel.addWithLabel("Color: ",
-                colorTypeSelector, "gradientColorTypeSelector");
+        settingsPanel.addComboBox("Color: ",
+                colorTypeCB, "colorTypeCB");
     }
 
     private void addRevertCheckBox() {
-        revertCheckBox = new JCheckBox();
-        revertCheckBox.addActionListener(e -> regenerateGradient(
+        revertCB = new JCheckBox();
+        revertCB.addActionListener(e -> regenerateGradient(
                 true, "Change Gradient Direction"));
-        settingsPanel.addWithLabel("Revert: ", revertCheckBox, "gradientRevert");
+        settingsPanel.addWithLabel("Revert: ", revertCB, "revertCB");
     }
 
     private void addBlendingModePanel() {
@@ -232,7 +233,7 @@ public class GradientTool extends DragTool {
             if (imDrag.isClick()) {
                 return;
             }
-        } else { // a gradient was dragged
+        } else { // the initial drag just ended
             imDrag = userDrag.toImDrag();
             handles = new GradientHandles(
                     userDrag.getCoStartX(), userDrag.getCoStartY(),
@@ -322,23 +323,41 @@ public class GradientTool extends DragTool {
         comp.repaint();
     }
 
+    @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        if (handles != null) {
+            handles.arrowKeyPressed(key);
+
+            Composition comp = OpenComps.getActiveCompOrNull();
+            Drawable dr = comp.getActiveDrawableOrThrow();
+            ImDrag imDrag = handles.toImDrag(comp.getView());
+            String editName = key.isShiftDown()
+                    ? "Shift-nudge Gradient"
+                    : "Nudge Gradient";
+            drawGradient(dr, imDrag, true, editName);
+
+            return true;
+        }
+        return false;
+    }
+
     private CycleMethod getCycleType() {
-        String typeString = (String) cycleMethodSelector.getSelectedItem();
+        String typeString = (String) cycleMethodCB.getSelectedItem();
         return getCycleMethodFromString(typeString);
     }
 
     private GradientColorType getGradientColorType() {
-        return (GradientColorType) colorTypeSelector.getSelectedItem();
+        return (GradientColorType) colorTypeCB.getSelectedItem();
     }
 
     private GradientType getType() {
-        return (GradientType) typeSelector.getSelectedItem();
+        return (GradientType) typeCB.getSelectedItem();
     }
 
     private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory, String editName) {
         Gradient gradient = new Gradient(imDrag,
                 getType(), getCycleType(), getGradientColorType(),
-                revertCheckBox.isSelected(),
+                revertCB.isSelected(),
                 blendingModePanel.getBlendingMode(),
                 blendingModePanel.getOpacity());
 
@@ -433,11 +452,11 @@ public class GradientTool extends DragTool {
         // set the settings
         ignoreRegenerate = true;
 
-        colorTypeSelector.setSelectedItem(gradient.getColorType());
-        typeSelector.setSelectedItem(gradient.getType());
-        cycleMethodSelector.setSelectedItem(
+        colorTypeCB.setSelectedItem(gradient.getColorType());
+        typeCB.setSelectedItem(gradient.getType());
+        cycleMethodCB.setSelectedItem(
                 cycleMethodAsString(gradient.getCycleMethod()));
-        revertCheckBox.setSelected(gradient.isReverted());
+        revertCB.setSelected(gradient.isReverted());
         blendingModePanel.setBlendingMode(gradient.getBlendingMode());
         blendingModePanel.setOpacity(gradient.getOpacity());
 
@@ -460,7 +479,7 @@ public class GradientTool extends DragTool {
         node.addString("Type", getType().toString());
         node.addString("Cycling", getCycleType().toString());
         node.addQuotedString("Color", getGradientColorType().toString());
-        node.addBoolean("Revert", revertCheckBox.isSelected());
+        node.addBoolean("Revert", revertCB.isSelected());
         node.addFloat("Opacity", blendingModePanel.getOpacity());
         node.addQuotedString("Blending Mode",
                 blendingModePanel.getBlendingMode().toString());

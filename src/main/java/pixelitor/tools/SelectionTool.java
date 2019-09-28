@@ -59,8 +59,8 @@ public class SelectionTool extends DragTool {
             "<b>Shift-drag</b> adds to an existing selection, " +
             "<b>Alt-drag</b> removes from it, <b>Shift+Alt drag</b> intersects.";
 
-    private JComboBox<SelectionType> typeCombo;
-    private JComboBox<SelectionInteraction> interactionCombo;
+    private JComboBox<SelectionType> typeCB;
+    private JComboBox<SelectionInteraction> interactionCB;
 
     private boolean altMeansSubtract = false;
     private SelectionInteraction originalSelectionInteraction;
@@ -78,15 +78,15 @@ public class SelectionTool extends DragTool {
 
     @Override
     public void initSettingsPanel() {
-        typeCombo = new JComboBox<>(SelectionType.values());
-        typeCombo.addActionListener(e -> selectionTypeChanged());
-        settingsPanel.addWithLabel("Type:", typeCombo, "selectionTypeCombo");
+        typeCB = new JComboBox<>(SelectionType.values());
+        typeCB.addActionListener(e -> selectionTypeChanged());
+        settingsPanel.addComboBox("Type:", typeCB, "typeCB");
 
         settingsPanel.addSeparator();
 
-        interactionCombo = new JComboBox<>(SelectionInteraction.values());
-        settingsPanel.addWithLabel("New Selection:",
-                interactionCombo, "selectionInteractionCombo");
+        interactionCB = new JComboBox<>(SelectionInteraction.values());
+        settingsPanel.addComboBox("New Selection:",
+                interactionCB, "interactionCB");
 
         settingsPanel.addSeparator();
 
@@ -335,16 +335,16 @@ public class SelectionTool extends DragTool {
 
     @VisibleForTesting
     public SelectionType getSelectionType() {
-        return (SelectionType) typeCombo.getSelectedItem();
+        return (SelectionType) typeCB.getSelectedItem();
     }
 
     @VisibleForTesting
     public SelectionInteraction getCurrentInteraction() {
-        return (SelectionInteraction) interactionCombo.getSelectedItem();
+        return (SelectionInteraction) interactionCB.getSelectedItem();
     }
 
     private void setCurrentInteraction(SelectionInteraction interaction) {
-        interactionCombo.setSelectedItem(interaction);
+        interactionCB.setSelectedItem(interaction);
     }
 
     @Override

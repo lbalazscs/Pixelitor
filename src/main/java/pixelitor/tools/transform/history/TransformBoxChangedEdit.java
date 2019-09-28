@@ -35,11 +35,11 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
     private final TransformBox.Memento after;
     private final boolean simpleRepaint;
 
-    public TransformBoxChangedEdit(Composition comp, TransformBox box,
+    public TransformBoxChangedEdit(String editName, Composition comp, TransformBox box,
                                    TransformBox.Memento before,
                                    TransformBox.Memento after,
                                    boolean simpleRepaint) {
-        super("Change Transform Box", comp);
+        super(editName, comp);
         this.box = box;
         this.before = before;
         this.after = after;

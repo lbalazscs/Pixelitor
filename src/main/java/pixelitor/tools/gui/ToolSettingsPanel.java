@@ -44,14 +44,16 @@ public class ToolSettingsPanel extends JPanel {
         add(separator);
     }
 
-    public void addWithLabel(String text, JComponent component) {
+    public void addWithLabel(String text, JComponent component, String name) {
         add(new JLabel(text));
         add(component);
+        component.setName(name);
     }
 
-    public void addWithLabel(String text, JComponent component, String name) {
-        addWithLabel(text, component);
-        component.setName(name);
+    public void addComboBox(String text, JComboBox<?> box, String name) {
+        box.setFocusable(false);
+
+        addWithLabel(text, box, name);
     }
 
     public JButton addButton(String text, ActionListener actionListener) {
@@ -99,7 +101,7 @@ public class ToolSettingsPanel extends JPanel {
         typeModel.setSelectedItem(defaultSelection);
         JComboBox<CopyBrushType> typeCB = new JComboBox<>(typeModel);
 
-        addWithLabel("Brush:", typeCB, "typeCB");
+        addComboBox("Brush:", typeCB, "typeCB");
         typeCB.addActionListener(e -> {
             CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
             listener.copyBrushTypeChanged(brushType);

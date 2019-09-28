@@ -74,6 +74,9 @@ public class DraggablePoint extends Point2D.Double {
     // time, it can be stored in this static variable
     public static DraggablePoint activePoint = null;
 
+    // the point that was active the last time
+    public static DraggablePoint lastActive;
+
     // transient: it has to be reset after deserialization
     @SuppressWarnings("TransientFieldNotInitialized")
     protected transient View view;
@@ -90,20 +93,15 @@ public class DraggablePoint extends Point2D.Double {
 
     public DraggablePoint(String name, double x, double y, View view, Color color, Color activeColor) {
         assert view != null;
-
-        this.name = name;
-        this.x = x;
-        this.y = y;
+        this.view = view;
 
         assert !isNaN(x);
         assert !isNaN(y);
+        setLocationOnlyForThis(x, y);
 
-        this.view = view;
-
+        this.name = name;
         this.color = color;
         this.activeColor = activeColor;
-        setShapes();
-        calcImCoordsOnlyForThis();
     }
 
     @Override
@@ -116,6 +114,9 @@ public class DraggablePoint extends Point2D.Double {
     public final void setLocationOnlyForThis(double x, double y) {
         this.x = x;
         this.y = y;
+
+        imX = view.componentXToImageSpace(x);
+        imY = view.componentYToImageSpace(y);
 
         setShapes();
     }
@@ -248,16 +249,6 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     protected void afterMouseReleasedActions() {
-        calcImCoords();
-    }
-
-    public void calcImCoords() {
-        calcImCoordsOnlyForThis();
-    }
-
-    public final void calcImCoordsOnlyForThis() {
-        imX = view.componentXToImageSpace(x);
-        imY = view.componentYToImageSpace(y);
     }
 
     /**
@@ -277,9 +268,14 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(newX, newY);
     }
 
-    public void setActive(boolean active) {
-        if (active) {
+    public void arrowKeyPressed(ArrowKey key) {
+        translate(key.getMoveX(), key.getMoveY());
+    }
+
+    public void setActive(boolean activate) {
+        if (activate) {
             DraggablePoint.activePoint = this;
+            DraggablePoint.lastActive = this;
         } else {
             DraggablePoint.activePoint = null;
         }

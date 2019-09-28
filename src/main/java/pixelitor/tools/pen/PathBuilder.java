@@ -22,6 +22,7 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -39,6 +40,7 @@ import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
+import static pixelitor.tools.util.DraggablePoint.lastActive;
 
 /**
  * A pen tool interaction mode where a path can be built from scratch.
@@ -51,6 +53,7 @@ public class PathBuilder implements PenToolMode {
     private double lastY;
 
     public static final PathBuilder INSTANCE = new PathBuilder();
+
     private static final String BUILDER_HELP_MESSAGE =
             "<html>Pen Tool Build Mode: " +
                 "<b>click, drag</b> and repeat to create, " +
@@ -147,7 +150,7 @@ public class PathBuilder implements PenToolMode {
         assert path.checkConsistency();
     }
 
-    private static boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
+    private boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
         // if we are over an old point, just move it
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
@@ -157,7 +160,7 @@ public class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private static boolean handleAltPressHitBeforeSubpath(double x, double y) {
+    private boolean handleAltPressHitBeforeSubpath(double x, double y) {
         // if only alt is down, then break control points
         DraggablePoint hit = path.handleWasHit(x, y, true);
         if (hit != null) {
@@ -172,7 +175,7 @@ public class PathBuilder implements PenToolMode {
         return false;
     }
 
-    private static void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
+    private void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
             startMovingPrevious(x, y, hit);
@@ -184,14 +187,14 @@ public class PathBuilder implements PenToolMode {
         }
     }
 
-    private static void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
+    private void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
         ap.retractHandles();
         // drag the retracted handles out
         ap.setType(SYMMETRIC);
         startMovingPrevious(x, y, ap.ctrlOut);
     }
 
-    private static void breakAndStartMoving(double x, double y, ControlPoint cp) {
+    private void breakAndStartMoving(double x, double y, ControlPoint cp) {
         if (!cp.isRetracted()) {
             // alt-press on an anchor point should break the handle
             cp.getAnchor().setType(CUSP);
@@ -203,7 +206,7 @@ public class PathBuilder implements PenToolMode {
         startMovingPrevious(x, y, cp);
     }
 
-    private static void startMovingPrevious(double x, double y, DraggablePoint point) {
+    private void startMovingPrevious(double x, double y, DraggablePoint point) {
         point.setActive(true);
         point.mousePressed(x, y);
         path.setBuildState(DRAG_EDITING_PREVIOUS, "startMovingPrevious");
@@ -413,6 +416,39 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void imCoordsChanged(AffineTransform at) {
         // do nothing
+    }
+
+    @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        if (path == null) {
+            // there's nothing to nudge
+            return false;
+        }
+
+        // an active point is always checked first
+        if (activePoint != null) {
+            activePoint.arrowKeyPressed(key);
+            return true;
+        }
+
+        BuildState state = path.getBuildState();
+        if (state == MOVING_TO_NEXT_ANCHOR || state == DRAGGING_THE_CONTROL_OF_LAST) {
+            // if we are in the act of building a new subpath,
+            // then move the last placed anchor point
+            AnchorPoint last = path.getLast();
+            if (last != null) {
+                last.arrowKeyPressed(key);
+                return true;
+            }
+        } else {
+            // move the last active
+            if (lastActive != null) {
+                lastActive.arrowKeyPressed(key);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

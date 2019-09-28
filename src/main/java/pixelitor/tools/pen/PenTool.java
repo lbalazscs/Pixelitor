@@ -29,6 +29,7 @@ import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.history.ConvertPathToSelectionEdit;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
@@ -109,9 +110,10 @@ public class PenTool extends Tool {
     public void initSettingsPanel() {
         JComboBox modeChooser = new JComboBox<>(modeModel);
         modeChooser.setName("modeChooser");
+        modeChooser.setFocusable(false);
 
         modeChooser.addActionListener(e -> onModeChooserAction());
-        settingsPanel.addWithLabel("Mode:", modeChooser);
+        settingsPanel.addWithLabel("Mode:", modeChooser, "modeChooser");
 
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
@@ -281,6 +283,19 @@ public class PenTool extends Tool {
                                AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         mode.paint(g2);
+    }
+
+    @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        View view = OpenComps.getActiveView();
+        if (view == null) {
+            return false;
+        }
+        if (mode.arrowKeyPressed(key)) {
+            view.repaint();
+            return true;
+        }
+        return false;
     }
 
     @Override

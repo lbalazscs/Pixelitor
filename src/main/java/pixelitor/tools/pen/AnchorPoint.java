@@ -58,6 +58,7 @@ public class AnchorPoint extends DraggablePoint {
     private static final Color CTRL_OUT_COLOR = Color.WHITE;
     private static final Color CTRL_OUT_ACTIVE_COLOR = Color.RED;
 
+    // not to be confused with DraggablePoint.lastActive!
     public static AnchorPoint recentlyEditedPoint = null;
 
     public AnchorPoint(double x, double y, View view, SubPath subPath) {
@@ -143,13 +144,6 @@ public class AnchorPoint extends DraggablePoint {
         ctrlOut.imTransformOnlyThis(at, useRefPoint);
     }
 
-    @Override
-    public void calcImCoords() {
-        super.calcImCoords();
-        ctrlIn.calcImCoords();
-        ctrlOut.calcImCoords();
-    }
-
     public DraggablePoint handleOrCtrlHandleWasHit(double x, double y,
                                                    boolean altDown) {
         if (altDown) {
@@ -177,11 +171,6 @@ public class AnchorPoint extends DraggablePoint {
             }
         }
         return null;
-    }
-
-    @Override
-    protected void afterMouseReleasedActions() {
-        calcImCoords();
     }
 
     public AnchorPointType getType() {

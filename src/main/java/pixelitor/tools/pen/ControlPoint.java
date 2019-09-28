@@ -76,7 +76,6 @@ public class ControlPoint extends DraggablePoint {
     }
 
     public void afterMovingActionsForThis() {
-        calcImCoords();
         rememberDistFromAnchor();
     }
 

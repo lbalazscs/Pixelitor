@@ -21,6 +21,7 @@ import pixelitor.Build;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
@@ -140,6 +141,11 @@ public class GradientHandles implements ToolWidget {
         start.imTransformOnlyThis(at, false);
         end.imTransformOnlyThis(at, false);
         middle.imTransformOnlyThis(at, false);
+    }
+
+    @Override
+    public void arrowKeyPressed(ArrowKey key) {
+        middle.arrowKeyPressed(key);
     }
 
     @VisibleForTesting

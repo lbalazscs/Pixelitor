@@ -53,7 +53,7 @@ public class PaintBucketTool extends Tool {
     private static final String FILL_CLICKED = "Clicked Pixel Color";
 
     private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
-    private final JComboBox<String> fillComboBox = new JComboBox<>(
+    private final JComboBox<String> fillCB = new JComboBox<>(
             new String[]{FILL_FOREGROUND, FILL_BACKGROUND,
                     FILL_TRANSPARENT, FILL_CLICKED}
     );
@@ -72,8 +72,8 @@ public class PaintBucketTool extends Tool {
     public void initSettingsPanel() {
         settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
-        settingsPanel.addWithLabel("Fill With:", fillComboBox);
-        settingsPanel.addWithLabel("Action:", actionCB);
+        settingsPanel.addComboBox("Fill With:", fillCB, "fillCB");
+        settingsPanel.addComboBox("Action:", actionCB, "actionCB");
     }
 
     @Override
@@ -117,7 +117,7 @@ public class PaintBucketTool extends Tool {
             workingImage = image;
         }
 
-        String fill = (String) fillComboBox.getSelectedItem();
+        String fill = (String) fillCB.getSelectedItem();
         int rgbAtMouse = workingImage.getRGB(x, y);
         int fillRGB;
         switch (fill) {
@@ -333,7 +333,7 @@ public class PaintBucketTool extends Tool {
         DebugNode node = super.getDebugNode();
 
         node.addInt("Tolerance", toleranceParam.getValue());
-        node.addQuotedString("Fill With", (String) fillComboBox.getSelectedItem());
+        node.addQuotedString("Fill With", (String) fillCB.getSelectedItem());
         node.addQuotedString("Action", (String) actionCB.getSelectedItem());
 
         return node;

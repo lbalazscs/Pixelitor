@@ -186,8 +186,7 @@ public class Keyboard {
             if (shiftDown) {
                 // TODO for some reason the shift is not detected
                 pw.pressKey(VK_SHIFT).pressKey(keyCode)
-                        .releaseKey(VK_RIGHT).releaseKey(keyCode);
-
+                        .releaseKey(keyCode).releaseKey(VK_SHIFT);
             } else {
                 pw.pressKey(VK_RIGHT).releaseKey(VK_RIGHT);
             }

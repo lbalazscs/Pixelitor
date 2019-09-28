@@ -20,6 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
+import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -32,6 +33,7 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
+import static pixelitor.tools.util.DraggablePoint.lastActive;
 
 /**
  * A pen tool interaction mode where a path can be edited
@@ -155,6 +157,20 @@ public class PathEditor implements PenToolMode {
                 return true;
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean arrowKeyPressed(ArrowKey key) {
+        if (activePoint != null) {
+            activePoint.arrowKeyPressed(key);
+            return true;
+        }
+        if (lastActive != null) {
+            lastActive.arrowKeyPressed(key);
+            return true;
+        }
+
         return false;
     }
 

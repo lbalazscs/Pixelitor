@@ -91,7 +91,6 @@ public class SubPath implements Serializable {
 
         for (AnchorPoint point : anchorPoints) {
             AnchorPoint ap = new AnchorPoint(point, copy, true);
-            ap.calcImCoords();
             copy.anchorPoints.add(ap);
         }
 

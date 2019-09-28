@@ -27,6 +27,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Dialog;
+import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Random;
@@ -34,7 +35,9 @@ import java.util.Random;
 import static java.awt.event.KeyEvent.VK_ALT;
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_SHIFT;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.swing.core.MouseButton.LEFT_BUTTON;
 
 /**
  * Mouse input for AssertJ-Swing based tests
@@ -63,9 +66,18 @@ public class Mouse {
 
     // drag relative to the screen
     void dragToScreen(int x, int y) {
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        Point currentLoc = MouseInfo.getPointerInfo().getLocation();
+
+        robot.pressMouse(LEFT_BUTTON);
+
+        Utils.sleep(50, MILLISECONDS);
+        moveToScreen((x + currentLoc.x) / 2, (y + currentLoc.y) / 2);
+
+        Utils.sleep(50, MILLISECONDS);
         moveToScreen(x, y);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+
+        Utils.sleep(50, MILLISECONDS);
+        robot.releaseMouse(LEFT_BUTTON);
         robot.waitForIdle();
     }
 
@@ -85,9 +97,9 @@ public class Mouse {
     void dragTo(DialogFixture dialog, int x, int y) {
         Dialog c = dialog.target();
 
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
+        robot.pressMouse(LEFT_BUTTON);
         robot.moveMouse(c, x, y);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.releaseMouse(LEFT_BUTTON);
     }
 
     void altDragToScreen(int x, int y) {
@@ -149,15 +161,15 @@ public class Mouse {
     }
 
     void click() {
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.pressMouse(LEFT_BUTTON);
+        robot.releaseMouse(LEFT_BUTTON);
     }
 
     void doubleClick() {
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
-        robot.pressMouse(MouseButton.LEFT_BUTTON);
-        robot.releaseMouse(MouseButton.LEFT_BUTTON);
+        robot.pressMouse(LEFT_BUTTON);
+        robot.releaseMouse(LEFT_BUTTON);
+        robot.pressMouse(LEFT_BUTTON);
+        robot.releaseMouse(LEFT_BUTTON);
     }
 
     void rightClick() {
