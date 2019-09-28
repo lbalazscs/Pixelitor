@@ -41,7 +41,7 @@ public class ElevationAngleParam extends AngleParam {
 
     @Override
     public void setValue(double r, boolean trigger) {
-        if (r > 1.5 * Math.PI) {
+        if (r >= 1.5 * Math.PI) {
             // values between 1.5*PI and 2*PI are coming
             // when the user drags the slider, they are OK
         } else if (r > 0) {

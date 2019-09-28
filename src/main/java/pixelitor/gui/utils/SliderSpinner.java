@@ -20,7 +20,6 @@ package pixelitor.gui.utils;
 import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.Resettable;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -42,9 +41,6 @@ import static javax.swing.BorderFactory.createTitledBorder;
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
-
-    // if set to non-null, its reset is called instead of the reset this object
-    private Resettable resettableParam;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
@@ -139,8 +135,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     private void createDefaultButton(RangeParam model) {
-        defaultButton = new DefaultButton(resettableParam == null
-                ? model : resettableParam);
+        defaultButton = new DefaultButton(model);
         if (colorsUsed) {
             defaultButton.setBackground(GRAY);
         }
@@ -249,8 +244,11 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         }
     }
 
-    public void resetToDefaultSettings() {
-        model.reset(false);
+    public void forceSpinnerValueOnly(int value) {
+        boolean oldSliderMoved = sliderMoved;
+        sliderMoved = true;
+        spinner.setValue(value);
+        sliderMoved = oldSliderMoved;
     }
 
     @Override
@@ -275,10 +273,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (defaultButton != null) {
             defaultButton.setEnabled(enabled);
         }
-    }
-
-    public void setResettable(Resettable param) {
-        resettableParam = param;
     }
 
     @Override

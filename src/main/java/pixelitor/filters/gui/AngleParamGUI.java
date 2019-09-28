@@ -64,15 +64,12 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         sliderModel.addChangeListener(e ->
                 sliderModelChanged(angleParam, sliderModel));
 
-        SliderSpinner retVal = new SliderSpinner(sliderModel, NONE, true);
-
-        retVal.setResettable(angleParam);
-
-        setupSliderTicks(angleParam, retVal);
+        SliderSpinner s = new SliderSpinner(sliderModel, NONE, true);
+        setupSliderTicks(s, angleParam.getMaxAngleInDegrees());
 
         angleParam.addChangeListener(e ->
                 angleParamChanged(angleParam, angleUI, sliderModel));
-        return retVal;
+        return s;
     }
 
     private void sliderModelChanged(AngleParam angleParam, RangeParam sliderModel) {
@@ -90,15 +87,22 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         angleUI.repaint();
         try {
             userChangedSlider = false;
-            sliderModel.setValue(angleParam.getValueInDegrees());
+            int degrees = angleParam.getValueInDegrees();
+            sliderModel.setValue(degrees);
+
+            // this is necessary because if a 359->360 change originated from
+            // the spinner, then the angle is reset to 0, this resets the slider
+            // to 0, but this won't set the spinner to 0, because it sees
+            // that the change came from the spinner... See issue #62
+            if (degrees == 0) {
+                sliderSpinner.forceSpinnerValueOnly(0);
+            }
         } finally {
             userChangedSlider = true;
         }
     }
 
-    private static void setupSliderTicks(AngleParam angleParam,
-                                         SliderSpinner sliderSpinner) {
-        int maxAngleInDegrees = angleParam.getMaxAngleInDegrees();
+    private static void setupSliderTicks(SliderSpinner sliderSpinner, int maxAngleInDegrees) {
         if (maxAngleInDegrees == 360) {
             sliderSpinner.setupTicks(180, 90);
         } else if (maxAngleInDegrees == 90) {
