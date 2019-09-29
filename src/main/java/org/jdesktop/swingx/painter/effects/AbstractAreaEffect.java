@@ -153,7 +153,7 @@ public class AbstractAreaEffect implements AreaEffect {
 
     transient BufferedImage _clipImage = null;
 
-    private BufferedImage getClipImage(final Rectangle effectBounds) {
+    protected BufferedImage getClipImage(final Rectangle effectBounds) {
         // set up a temp buffer
         if (_clipImage == null ||
                 _clipImage.getWidth() != effectBounds.width ||
@@ -330,7 +330,7 @@ public class AbstractAreaEffect implements AreaEffect {
     /**
      * Holds value of property effectWidth.
      */
-    private int effectWidth;
+    protected int effectWidth;
 
     /**
      * Getter for property effectWidth.
@@ -458,7 +458,7 @@ public class AbstractAreaEffect implements AreaEffect {
                 Boolean.valueOf(shapeMasked));
     }
 
-    private float opacity = 1.0f;
+    protected float opacity = 1.0f;
 
     // opacity support added by lbalazscs
     protected void setOpacity(float opacity) {

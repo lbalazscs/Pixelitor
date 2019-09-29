@@ -145,8 +145,8 @@ public class TextSettingsPanel extends FilterGUI
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
-        vAlignmentCB = new JComboBox(VerticalAlignment.values());
-        hAlignmentCB = new JComboBox(HorizontalAlignment.values());
+        vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
+        hAlignmentCB = new JComboBox<>(HorizontalAlignment.values());
         if (settings != null) {
             vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
             hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
@@ -208,7 +208,7 @@ public class TextSettingsPanel extends FilterGUI
         GridBagHelper gbh = new GridBagHelper(fontPanel);
 
         gbh.addLabel("Font Size:", 0, 0);
-        int defaultFontSize = settings == null ? 100 : settings.getFont().getSize();
+        int defaultFontSize = settings == null ? 120 : settings.getFont().getSize();
 
         RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, 1000);
         fontSizeSlider = SliderSpinner.simpleFrom(fontSizeParam);
@@ -219,7 +219,7 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLabel("Font Type:", 0, 1);
         GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         String[] availableFonts = localGE.getAvailableFontFamilyNames();
-        fontFamilyChooserCB = new JComboBox(availableFonts);
+        fontFamilyChooserCB = new JComboBox<>(availableFonts);
         if (settings != null) {
             // it is important to use Font.getName(), and not Font.getFontName(),
             // otherwise it might not be in the combo box

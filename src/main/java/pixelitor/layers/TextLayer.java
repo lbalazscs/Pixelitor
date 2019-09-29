@@ -95,6 +95,7 @@ public class TextLayer extends ContentLayer {
                 .content(p)
                 .owner(pw)
                 .title("Create Text Layer")
+                .withScrollbars()
                 .okAction(() -> {
                     textLayer.updateLayerName();
 
@@ -121,6 +122,7 @@ public class TextLayer extends ContentLayer {
                 .content(p)
                 .owner(pw)
                 .title("Edit Text Layer")
+                .withScrollbars()
                 .okAction(() -> commitSettings(oldSettings))
                 .cancelAction(() -> resetOldSettings(oldSettings))
                 .show();
