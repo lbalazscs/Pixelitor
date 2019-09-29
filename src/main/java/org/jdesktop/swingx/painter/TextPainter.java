@@ -31,7 +31,13 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
+import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
+import java.util.Map;
 
 import static org.jdesktop.swingx.painter.PainterUtils.getComponentFont;
 import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
@@ -210,7 +216,54 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         Font f = calculateFont(comp);
         String t = calculateText(comp);
         FontMetrics metrics = g2.getFontMetrics(f);
-        GlyphVector vect = f.createGlyphVector(g2.getFontRenderContext(), t);
-        return vect.getOutline(0f, 0f + metrics.getAscent());
+
+        FontRenderContext frc = g2.getFontRenderContext();
+
+        //        GlyphVector vect = f.createGlyphVector(frc, t);
+
+        // partial fix for issue #64 (fixes kerning and ligatures),
+        // also see https://community.oracle.com/thread/1289266
+        char[] chars = text.toCharArray();
+        GlyphVector vect = font.layoutGlyphVector(frc, chars, 0,
+                chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
+
+        Shape glyphsOutline = vect.getOutline(0.0f, metrics.getAscent());
+
+        Map<TextAttribute, ?> attributes = font.getAttributes();
+        boolean hasUnderline = TextAttribute.UNDERLINE_ON.equals(
+                attributes.get(TextAttribute.UNDERLINE));
+        boolean hasStrikeThrough = TextAttribute.STRIKETHROUGH_ON.equals(
+                attributes.get(TextAttribute.STRIKETHROUGH));
+
+        if (!hasUnderline && !hasStrikeThrough) {
+            // simple case: the glyphs contain all of the shape
+            return glyphsOutline;
+        }
+
+        LineMetrics lineMetrics = font.getLineMetrics(text, frc);
+        float ascent = lineMetrics.getAscent();
+        Area combinedOutline = new Area(glyphsOutline);
+
+        if (hasUnderline) {
+            float underlineOffset = lineMetrics.getUnderlineOffset();
+            float underlineThickness = lineMetrics.getUnderlineThickness();
+            Shape underLineShape = new Rectangle2D.Float(
+                    0.0f,
+                    ascent + underlineOffset - underlineThickness / 2.0f,
+                    metrics.stringWidth(text),
+                    underlineThickness);
+            combinedOutline.add(new Area(underLineShape));
+        }
+        if (hasStrikeThrough) {
+            float strikethroughOffset = lineMetrics.getStrikethroughOffset();
+            float strikethroughThickness = lineMetrics.getStrikethroughThickness();
+            Shape strikethroughShape = new Rectangle2D.Float(
+                    0.0f,
+                    ascent + strikethroughOffset - strikethroughThickness / 2.0f,
+                    metrics.stringWidth(text),
+                    strikethroughThickness);
+            combinedOutline.add(new Area(strikethroughShape));
+        }
+        return combinedOutline;
     }
 }

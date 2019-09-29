@@ -34,6 +34,7 @@ import java.awt.geom.Point2D;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GREEN;
+import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
 
 /**
@@ -108,7 +109,7 @@ public class EffectsPanel extends JPanel implements Resettable {
 
     private void initInnerGlowPanel(AreaEffects effects) {
         boolean enable = false;
-        Color color = WHITE;
+        Color color = RED;
         int width = 10;
         if (effects != null) {
             InnerGlowPathEffect effect = effects.getInnerGlowEffect();
