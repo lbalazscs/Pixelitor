@@ -407,23 +407,23 @@ public class MenuBar extends JMenuBar {
     private static JMenu createLayerStackSubmenu() {
         PMenu sub = new PMenu("Layer Stack");
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_UP, CTRL_CLOSE_BRACKET);
+        sub.addActionWithKey(LayerMoveAction.INSTANCE_UP, CTRL_ALT_R);
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_OPEN_BRACKET);
+        sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_ALT_L);
 
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_TOP) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveActiveLayerToTop();
             }
-        }, CTRL_SHIFT_CLOSE_BRACKET);
+        }, CTRL_SHIFT_ALT_R);
 
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_BOTTOM) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveActiveLayerToBottom();
             }
-        }, CTRL_SHIFT_OPEN_BRACKET);
+        }, CTRL_SHIFT_ALT_L);
 
         sub.addSeparator();
 
@@ -433,14 +433,14 @@ public class MenuBar extends JMenuBar {
                 Composition comp = getActiveCompOrNull();
                 comp.moveLayerSelectionUp();
             }
-        }, ALT_CLOSE_BRACKET);
+        }, CTRL_SHIFT_R);
 
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LOWER_LAYER_SELECTION) {
             @Override
             public void onClick() {
                 getActiveCompOrNull().moveLayerSelectionDown();
             }
-        }, ALT_OPEN_BRACKET);
+        }, CTRL_SHIFT_L);
 
         return sub;
     }

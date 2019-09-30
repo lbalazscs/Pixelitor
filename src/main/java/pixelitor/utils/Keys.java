@@ -51,11 +51,13 @@ public class Keys {
     public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK + ALT_MASK);
     public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK);
 
-    //    private static final KeyStroke CTRL_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_MASK);
-    public static final KeyStroke CTRL_SHIFT_OPEN_BRACKET = getKeyStroke('[', MENU_CTRL_MASK + SHIFT_MASK);
-    public static final KeyStroke CTRL_SHIFT_CLOSE_BRACKET = getKeyStroke(']', MENU_CTRL_MASK + SHIFT_MASK);
-    public static final KeyStroke CTRL_OPEN_BRACKET = getKeyStroke('[', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_CLOSE_BRACKET = getKeyStroke(']', MENU_CTRL_MASK);
+    public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_MASK);
+    public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', MENU_CTRL_MASK + ALT_MASK);
+    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_MASK + SHIFT_MASK);
+    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', MENU_CTRL_MASK + ALT_MASK + SHIFT_MASK);
+    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', MENU_CTRL_MASK + SHIFT_MASK);
+    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', MENU_CTRL_MASK + SHIFT_MASK);
+
     public static final KeyStroke CTRL_SHIFT_ALT_E = getKeyStroke('E', MENU_CTRL_MASK + ALT_MASK + SHIFT_MASK);
     public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', MENU_CTRL_MASK + SHIFT_MASK);
     public static final KeyStroke CTRL_BACKSPACE = getKeyStroke(VK_BACK_SPACE, MENU_CTRL_MASK);
@@ -93,8 +95,6 @@ public class Keys {
     public static final KeyStroke CTRL_1 = getKeyStroke('1', MENU_CTRL_MASK);
     public static final KeyStroke ALT_BACKSPACE = getKeyStroke(VK_BACK_SPACE, ALT_MASK);
     public static final KeyStroke T = getKeyStroke('T');
-    public static final KeyStroke ALT_CLOSE_BRACKET = getKeyStroke(']', ALT_MASK);
-    public static final KeyStroke ALT_OPEN_BRACKET = getKeyStroke('[', ALT_MASK);
     public static final KeyStroke F6 = getKeyStroke(VK_F6, 0);
     public static final KeyStroke F7 = getKeyStroke(VK_F7, 0);
     public static final KeyStroke F12 = getKeyStroke(VK_F12, 0);
