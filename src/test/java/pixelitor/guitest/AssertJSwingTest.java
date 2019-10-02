@@ -2241,10 +2241,10 @@ public class AssertJSwingTest {
     }
 
     private void enableLazyMouse(boolean b) {
-        findButtonByText(pw, "Lazy Mouse...")
+        pw.button("lazyMouseDialogButton")
             .requireEnabled()
             .click();
-        DialogFixture dialog = findDialogByTitle("Lazy Mouse");
+        DialogFixture dialog = findDialogByTitle("Lazy Mouse Settings");
         if (b) {
             dialog.checkBox().check();
             dialog.slider("distSlider")
@@ -2406,7 +2406,7 @@ public class AssertJSwingTest {
         mouse.dragToCanvas(e2X + e2Width, e2Y + e2Height);
 
         EDT.assertThereIsSelection();
-        Selection selection = EDT.getSelection();
+        Selection selection = EDT.getActiveSelection();
         Rectangle2D selectionBounds = selection.getShapeBounds2D();
         double selWidth = selectionBounds.getWidth();
         double selHeight = selectionBounds.getHeight();
@@ -2437,7 +2437,7 @@ public class AssertJSwingTest {
         EDT.assertThereIsNoSelection();
 
         keyboard.undo("Crop");
-        assertThat(EDT.getSelection())
+        assertThat(EDT.getActiveSelection())
             .isNotNull()
             .isAlive()
             .isMarching();
@@ -2788,7 +2788,7 @@ public class AssertJSwingTest {
         // draw a radial gradient
         pw.toggleButton("Gradient Tool Button").click();
         pw.comboBox("typeCB").selectItem(GradientType.RADIAL.toString());
-        pw.checkBox("gradientRevert").check();
+        pw.checkBox("revertCB").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {
             // otherwise location on screen can lead to crazy results

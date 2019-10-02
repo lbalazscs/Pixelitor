@@ -19,6 +19,7 @@ package pixelitor.guitest;
 
 import org.assertj.swing.edt.GuiActionRunnable;
 import org.assertj.swing.edt.GuiActionRunner;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
@@ -67,6 +68,10 @@ public class EDT {
         return call(OpenComps::getActiveCompOrNull);
     }
 
+    public static Canvas getCanvas() {
+        return call(() -> OpenComps.getActiveCompOrNull().getCanvas());
+    }
+
     /**
      * Returns the given property of the active composition
      */
@@ -78,8 +83,8 @@ public class EDT {
         return call(() -> fun.apply(Tools.getCurrent()));
     }
 
-    public static Selection getSelection() {
-        return active(Composition::getSelection);
+    public static Selection getActiveSelection() {
+        return call(OpenComps::getActiveSelection);
     }
 
     public static Guides getGuides() {
@@ -91,13 +96,13 @@ public class EDT {
     }
 
     public static void assertThereIsSelection() {
-        if (getSelection() == null) {
+        if (getActiveSelection() == null) {
             throw new AssertionError("no selection found");
         }
     }
 
     public static void assertThereIsNoSelection() {
-        if (getSelection() != null) {
+        if (getActiveSelection() != null) {
             throw new AssertionError("selection found");
         }
     }

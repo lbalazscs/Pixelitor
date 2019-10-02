@@ -24,6 +24,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
+import java.awt.EventQueue;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -88,20 +89,14 @@ public class AppRunner {
     }
 
     public void runTests(Runnable tests) {
+        assert !EventQueue.isDispatchThread();
+
         try {
             tests.run();
         } catch (Throwable t) {
-            releaseModifierKeys();
+            keyboard.releaseModifierKeys();
             throw t;
         }
-    }
-
-    public void releaseModifierKeys() {
-        // make sure that the modifier keys don't remain
-        // pressed after an exception or a forced exit
-        keyboard.releaseCtrl();
-        keyboard.releaseAlt();
-        keyboard.releaseShift();
     }
 
     void setupDelayBetweenEvents() {

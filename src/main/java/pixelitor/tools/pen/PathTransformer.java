@@ -186,9 +186,11 @@ public class PathTransformer implements PenToolMode {
         PenToolMode.super.modeStarted(prevMode, path);
         boxes = path.createTransformBoxes();
 
-        // arbitrary choice, but most of the time
-        // there will be only one box anyway
-        lastActiveBox = boxes.get(0);
+        if (!boxes.isEmpty()) {
+            lastActiveBox = boxes.get(0);
+        } else {
+            lastActiveBox = null;
+        }
     }
 
     @Override

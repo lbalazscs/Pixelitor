@@ -1205,7 +1205,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public String toString() {
         return getClass().getSimpleName()
-            + "{" + "state=" + state
+                + "{img=" + image.getWidth() + "x" + image.getHeight()
+                + ", state=" + state
             + ", super=" + super.toString()
             + '}';
     }

@@ -710,6 +710,43 @@ public class SubPath implements Serializable {
         nextIn.afterMovingActionsForThis();
     }
 
+    public TransformBox createTransformBox() {
+        storeTransformRefPoints();
+
+        GeneralPath gp = new GeneralPath();
+        addToComponentSpaceShape(gp);
+        Rectangle2D coBoundingBox = gp.getBounds2D();
+
+        if (Double.isNaN(coBoundingBox.getX())) {
+            // TODO in some cases x, y, width, height are all NaNs, why?
+            return null;
+        }
+
+//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
+        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);
+        return box;
+    }
+
+    @VisibleForTesting
+    public void refTransform(AffineTransform at) {
+        for (AnchorPoint point : anchorPoints) {
+            point.imTransform(at, true);
+        }
+    }
+
+    public void transform(AffineTransform at) {
+        for (AnchorPoint point : anchorPoints) {
+            point.imTransform(at, false);
+        }
+    }
+
+    @VisibleForTesting
+    public void storeTransformRefPoints() {
+        for (AnchorPoint point : anchorPoints) {
+            point.storeTransformRefPoint();
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -746,42 +783,5 @@ public class SubPath implements Serializable {
                 .stream()
                 .map(AnchorPoint::toString)
                 .collect(joining(",", " [", "]"));
-    }
-
-    public TransformBox createTransformBox() {
-        storeTransformRefPoints();
-
-        GeneralPath gp = new GeneralPath();
-        addToComponentSpaceShape(gp);
-        Rectangle2D coBoundingBox = gp.getBounds2D();
-
-        if (Double.isNaN(coBoundingBox.getX())) {
-            // TODO in some cases x, y, width, height are all NaNs, why?
-            return null;
-        }
-
-//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
-        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);
-        return box;
-    }
-
-    @VisibleForTesting
-    public void refTransform(AffineTransform at) {
-        for (AnchorPoint point : anchorPoints) {
-            point.imTransform(at, true);
-        }
-    }
-
-    public void transform(AffineTransform at) {
-        for (AnchorPoint point : anchorPoints) {
-            point.imTransform(at, false);
-        }
-    }
-
-    @VisibleForTesting
-    public void storeTransformRefPoints() {
-        for (AnchorPoint point : anchorPoints) {
-            point.storeTransformRefPoint();
-        }
     }
 }

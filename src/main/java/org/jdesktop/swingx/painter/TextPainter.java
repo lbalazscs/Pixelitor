@@ -39,6 +39,10 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
+import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
+import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
+import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
 import static org.jdesktop.swingx.painter.PainterUtils.getComponentFont;
 import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
 
@@ -144,6 +148,9 @@ public class TextPainter extends AbstractAreaPainter<Object> {
      */
     @Override
     protected void doPaint(Graphics2D g, Object component, int width, int height) {
+        g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
+        g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
+
         Font f = calculateFont(component);
         if (f != null) {
             g.setFont(f);
@@ -170,7 +177,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
             g.setPaint(paint);
         }
 
-        g.drawString(t, 0, 0 + metrics.getAscent());
+        g.drawString(t, 0, metrics.getAscent());
         if (getAreaEffects() != null) {
             Shape shape = provideShape(g, component, width, height);
             for (AreaEffect ef : getAreaEffects()) {
@@ -180,11 +187,11 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         g.translate(-res.x,-res.y);
     }
 
-    protected String calculateText(final Object component) {
+    protected String calculateText(Object component) {
         // prep the text
         String t = getText();
         //make components take priority if(text == null || text.trim().equals("")) {
-        if (t != null && !t.trim().equals("")) {
+        if (t != null && !t.trim().isEmpty()) {
             return t;
         }
         if (component instanceof JTextComponent) {
@@ -199,7 +206,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         return t;
     }
 
-    protected Font calculateFont(final Object component) {
+    protected Font calculateFont(Object component) {
         // prep the various text attributes
         Font f = getComponentFont(getFont(), component);
         if (f == null) {
@@ -213,8 +220,9 @@ public class TextPainter extends AbstractAreaPainter<Object> {
      */
     @Override
     protected Shape provideShape(Graphics2D g2, Object comp, int width, int height) {
-        Font f = calculateFont(comp);
-        String t = calculateText(comp);
+//        Font f = calculateFont(comp);
+        Font f = getFont();
+//        String t = calculateText(comp);
         FontMetrics metrics = g2.getFontMetrics(f);
 
         FontRenderContext frc = g2.getFontRenderContext();

@@ -31,6 +31,7 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
@@ -395,6 +396,23 @@ public class Path implements Serializable {
         return id;
     }
 
+    public List<TransformBox> createTransformBoxes() {
+        List<TransformBox> boxes = new ArrayList<>();
+        for (SubPath subPath : subPaths) {
+            TransformBox box = subPath.createTransformBox();
+            if (box != null) {
+                boxes.add(box);
+            }
+        }
+        return boxes;
+    }
+
+    @VisibleForTesting
+    public Rectangle getImBounds() {
+        Shape shape = toImageSpaceShape();
+        return shape.getBounds();
+    }
+
     @Override
     public String toString() {
         String s = getId() + " ";
@@ -413,16 +431,5 @@ public class Path implements Serializable {
                 .map(SubPath::toDetailedString)
                 .collect(joining(",", "[", "]"));
         return s;
-    }
-
-    public List<TransformBox> createTransformBoxes() {
-        List<TransformBox> boxes = new ArrayList<>();
-        for (SubPath subPath : subPaths) {
-            TransformBox box = subPath.createTransformBox();
-            if (box != null) {
-                boxes.add(box);
-            }
-        }
-        return boxes;
     }
 }

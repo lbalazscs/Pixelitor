@@ -32,6 +32,8 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
+import static java.awt.event.InputEvent.CTRL_MASK;
+import static java.awt.event.InputEvent.SHIFT_MASK;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
@@ -47,6 +49,10 @@ public class Keyboard {
     private final FrameFixture pw;
     private final Robot robot;
     private final AppRunner runner;
+
+    private boolean ctrlDown = false;
+    private boolean altDown = false;
+    private boolean shiftDown = false;
 
     public Keyboard(FrameFixture pw, Robot robot, AppRunner runner) {
         this.pw = pw;
@@ -159,7 +165,7 @@ public class Keyboard {
 
     void randomizeColors() {
         if (osLevelKeyEvents) {
-            pw.pressAndReleaseKeys(KeyEvent.VK_R);
+            pw.pressAndReleaseKeys(VK_R);
         } else {
             GuiActionRunner.execute(FgBgColors::randomize);
         }
@@ -192,7 +198,7 @@ public class Keyboard {
             }
         } else {
             if (shiftDown) {
-                postKeyEventToEventQueue(KeyEvent.SHIFT_MASK, keyCode);
+                postKeyEventToEventQueue(SHIFT_MASK, keyCode);
             } else {
                 postKeyEventToEventQueue(0, keyCode);
             }
@@ -246,16 +252,16 @@ public class Keyboard {
             pw.pressKey(VK_CONTROL).pressKey(VK_1)
                     .releaseKey(VK_1).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_1);
+            postKeyEventToEventQueue(CTRL_MASK, VK_1);
         }
     }
 
     public void pressCtrlTwo() {
         if (osLevelKeyEvents) {
             pw.pressKey(VK_CONTROL).pressKey(VK_2)
-                    .releaseKey(KeyEvent.VK_2).releaseKey(VK_CONTROL);
+                    .releaseKey(VK_2).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_2);
+            postKeyEventToEventQueue(CTRL_MASK, VK_2);
         }
     }
 
@@ -264,7 +270,7 @@ public class Keyboard {
             pw.pressKey(VK_CONTROL).pressKey(VK_3)
                     .releaseKey(VK_3).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_3);
+            postKeyEventToEventQueue(CTRL_MASK, VK_3);
         }
     }
 
@@ -273,42 +279,64 @@ public class Keyboard {
             pw.pressKey(VK_CONTROL).pressKey(VK_4)
                     .releaseKey(VK_4).releaseKey(VK_CONTROL);
         } else {
-            postKeyEventToEventQueue(KeyEvent.CTRL_MASK, VK_4);
+            postKeyEventToEventQueue(CTRL_MASK, VK_4);
         }
     }
 
     private void postKeyEventToEventQueue(int modifiers, int keyCode) {
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
         Frame eventSource = pw.target();
-        queue.postEvent(new KeyEvent(eventSource, KeyEvent.KEY_PRESSED,
+        queue.postEvent(new KeyEvent(eventSource, KEY_PRESSED,
                 System.currentTimeMillis(), modifiers,
                 keyCode, Character.MIN_VALUE));
-        queue.postEvent(new KeyEvent(eventSource, KeyEvent.KEY_RELEASED,
+        queue.postEvent(new KeyEvent(eventSource, KEY_RELEASED,
                 System.currentTimeMillis(), modifiers,
                 keyCode, Character.MIN_VALUE));
     }
 
     public void pressCtrl() {
         pw.pressKey(VK_CONTROL);
+        ctrlDown = true;
     }
 
     public void releaseCtrl() {
         pw.releaseKey(VK_CONTROL);
+        ctrlDown = false;
     }
 
     public void pressAlt() {
         pw.pressKey(VK_ALT);
+        altDown = true;
     }
 
     public void releaseAlt() {
         pw.releaseKey(VK_ALT);
+        altDown = false;
     }
 
     public void pressShift() {
         pw.pressKey(VK_SHIFT);
+        shiftDown = true;
     }
 
     public void releaseShift() {
         pw.releaseKey(VK_SHIFT);
+        shiftDown = false;
+    }
+
+    public void assertModifiersAreReleased() {
+        assert !ctrlDown;
+        assert !shiftDown;
+        assert !altDown;
+    }
+
+    // make sure that the modifier keys don't remain
+    // pressed after an exception or a forced pause/exit
+    public void releaseModifierKeys() {
+        assert !EventQueue.isDispatchThread();
+
+        releaseCtrl();
+        releaseAlt();
+        releaseShift();
     }
 }

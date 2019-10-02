@@ -108,12 +108,10 @@ public class PenTool extends Tool {
 
     @Override
     public void initSettingsPanel() {
-        JComboBox modeChooser = new JComboBox<>(modeModel);
-        modeChooser.setName("modeChooser");
-        modeChooser.setFocusable(false);
+        JComboBox<PenToolMode> modeChooser = new JComboBox<>(modeModel);
 
         modeChooser.addActionListener(e -> onModeChooserAction());
-        settingsPanel.addWithLabel("Mode:", modeChooser, "modeChooser");
+        settingsPanel.addComboBox("Mode:", modeChooser, "modeChooser");
 
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
@@ -145,8 +143,8 @@ public class PenTool extends Tool {
             return;
         }
         Path activePath = OpenComps.getActivePathOrNull();
-        assert activePath == PenTool.path : "active path = " + activePath
-            + ", PenTool.path = " + PenTool.path;
+        assert activePath == path : "active path = " + activePath
+                + ", PenTool.path = " + path;
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -169,6 +167,7 @@ public class PenTool extends Tool {
         assert checkPathConsistency();
     }
 
+    // starts either the editing or the transforming mode
     public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null) {
             if (Build.isUnitTesting()) {
@@ -178,11 +177,11 @@ public class PenTool extends Tool {
                 if (!RandomGUITest.isRunning()) {
                     String requestedAction = mode == EDIT ? "edit" : "transform";
                     Dialogs.showInfoDialog("No Path",
-                        "<html>There is no path to " + requestedAction + ". " +
-                            "You can create a path<ul>" +
-                            "<li>in build mode</li>" +
-                            "<li>by converting a selection into a path</li>" +
-                            "</ul>");
+                            "<html>There is no path to " + requestedAction + ". " +
+                                    "You can create a path<ul>" +
+                                    "<li>in build mode</li>" +
+                                    "<li>by converting a selection into a path</li>" +
+                                    "</ul>");
                 }
                 setModeChooserCombo(BUILD);
             });
@@ -412,7 +411,7 @@ public class PenTool extends Tool {
     }
 
     public void removePath() {
-        PenTool.path = null;
+        path = null;
         OpenComps.setActivePath(null);
         enableActionsBasedOnFinishedPath(false);
         if (mode.requiresExistingPath()) {
@@ -458,6 +457,11 @@ public class PenTool extends Tool {
 
     public static Action getTraceWithSmudge() {
         return traceWithSmudge;
+    }
+
+    @Override
+    public String getStateInfo() {
+        return mode.toString();
     }
 
     @Override

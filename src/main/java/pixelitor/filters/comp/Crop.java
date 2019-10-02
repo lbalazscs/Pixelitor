@@ -58,24 +58,27 @@ public class Crop implements CompAction {
 
     @Override
     public void process(Composition comp) {
+        Rectangle roundedImCropRect = roundCropRect(imCropRect);
         Canvas canvas = comp.getCanvas();
+
         if (!allowGrowing) {
-            imCropRect = imCropRect.createIntersection(canvas.getImBounds());
+            Rectangle canvasBounds = canvas.getImBounds();
+            roundedImCropRect = roundedImCropRect.intersection(canvasBounds);
         }
 
-        if (imCropRect.isEmpty()) {
+        // from here it is effectively final, so it can be used in a lambda
+        Rectangle cropRect = roundedImCropRect;
+
+        if (cropRect.isEmpty()) {
             // we get here if the crop rectangle is
             // outside the canvas bounds in the crop tool
             return;
         }
 
-        Rectangle roundedImCropRect = roundCropRect(imCropRect);
-        assert !roundedImCropRect.isEmpty();
-
         Guides guides = comp.getGuides();
         Guides newGuides = null;
         if (guides != null) {
-            newGuides = guides.copyForCrop(roundedImCropRect);
+            newGuides = guides.copyForCrop(cropRect);
             comp.setGuides(newGuides);
         }
 
@@ -91,22 +94,22 @@ public class Crop implements CompAction {
         } else {
             // if this crop was started from the crop tool, there
             // still could be a selection that needs to be cropped
-            comp.intersectSelection(roundedImCropRect);
+            comp.intersectSelection(cropRect);
         }
 
         comp.forEachLayer(layer -> {
-            layer.crop(roundedImCropRect, deleteCroppedPixels, allowGrowing);
+            layer.crop(cropRect, deleteCroppedPixels, allowGrowing);
             if (layer.hasMask()) {
-                layer.getMask().crop(roundedImCropRect, deleteCroppedPixels, allowGrowing);
+                layer.getMask().crop(cropRect, deleteCroppedPixels, allowGrowing);
             }
         });
 
-        AffineTransform tx = createTransformForCropRect(roundedImCropRect);
+        AffineTransform tx = createTransformForCropRect(cropRect);
         MultiLayerEdit edit = new MultiLayerEdit("Crop", comp, backup, tx);
         History.addEdit(edit);
 
-        int newWidth = roundedImCropRect.width;
-        int newHeight = roundedImCropRect.height;
+        int newWidth = cropRect.width;
+        int newHeight = cropRect.height;
         canvas.changeImSize(newWidth, newHeight);
 
         // The intersected selection, tool widgets etc. have to be moved

@@ -125,6 +125,15 @@ public class OpenComps {
         return null;
     }
 
+    public static Selection getActiveSelection() {
+        if (activeView != null) {
+            return activeView.getComp().getSelection();
+        }
+
+        // there is no open image
+        return null;
+    }
+
     public static void setActivePath(Path path) {
         if (activeView == null) {
             throw new IllegalStateException();

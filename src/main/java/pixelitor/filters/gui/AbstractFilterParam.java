@@ -108,6 +108,6 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public String getResetToolTip() {
-        return "<html>Reset the default value of <b>" + name + "</b>";
+        return "<html>Reset the value of <b>" + name + "</b>";
     }
 }

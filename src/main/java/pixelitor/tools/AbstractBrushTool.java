@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
@@ -84,6 +83,12 @@ public abstract class AbstractBrushTool extends Tool {
     private JDialog settingsDialog;
 
     DrawDestination drawDestination;
+    private RangeParam lazyMouseDist;
+    private RangeParam lazyMouseSpacing;
+    public static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
+
+//    double lastCoX;
+//    double lastCoY;
 
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
@@ -154,7 +159,8 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected void addBrushSettingsButton() {
         brushSettingsButton = settingsPanel.addButton(
-                "Settings...", e -> brushSettingsButtonPressed());
+                "Settings...", e -> brushSettingsButtonPressed(),
+                "brushSettingsDialogButton", "Configure the selected brush");
 
         brushSettingsButton.setEnabled(false);
     }
@@ -173,10 +179,9 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addLazyMouseDialogButton() {
-        JButton button = new JButton("Lazy Mouse...");
-        button.addActionListener(e -> showLazyMouseDialog());
-
-        settingsPanel.add(button);
+        settingsPanel.addButton("Lazy " + UNICODE_MOUSE_SYMBOL + " ...",
+                e -> showLazyMouseDialog(),
+                "lazyMouseDialogButton", "Configure brush smoothing");
     }
 
     private void showLazyMouseDialog() {
@@ -193,13 +198,13 @@ public abstract class AbstractBrushTool extends Tool {
         lazyMouseCB.addActionListener(e -> setLazyBrush());
         gbh.addLabelWithControlNoStretch("Enabled:", lazyMouseCB);
 
-        RangeParam lazyMouseDist = LazyMouseBrush.createDistParam();
+        lazyMouseDist = LazyMouseBrush.createDistParam();
         SliderSpinner distSlider = SliderSpinner.simpleFrom(lazyMouseDist);
         distSlider.setName("distSlider");
         distSlider.setEnabled(lazyMouseEnabledByDefault);
         gbh.addLabelWithControl(lazyMouseDist.getName() + ":", distSlider);
 
-        RangeParam lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
+        lazyMouseSpacing = LazyMouseBrush.createSpacingParam();
         SliderSpinner spacingSlider = SliderSpinner.simpleFrom(lazyMouseSpacing);
         spacingSlider.setEnabled(lazyMouseEnabledByDefault);
         spacingSlider.setName("spacingSlider");
@@ -213,7 +218,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         lazyMouseDialog = new DialogBuilder()
                 .content(p)
-                .title("Lazy Mouse")
+                .title("Lazy Mouse Settings")
                 .notModal()
                 .willBeShownAgain()
                 .okText("Close")
@@ -242,6 +247,9 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void mouseDragged(PMouseEvent e) {
         newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
+
+//        lastCoX = e.getCoX();
+//        lastCoY = e.getCoY();
     }
 
     @Override
@@ -471,15 +479,7 @@ public abstract class AbstractBrushTool extends Tool {
     protected int getRadius() {
         int value = brushRadiusParam.getValue();
 
-        // because of a JDK bug (?), sometimes it is possible
-        // to drag the slider to negative values
-        if (value < MIN_BRUSH_RADIUS) {
-            if (Build.isDevelopment()) {
-                Thread.dumpStack();
-            }
-            value = MIN_BRUSH_RADIUS;
-            brushRadiusParam.setValue(MIN_BRUSH_RADIUS);
-        }
+        assert value >= MIN_BRUSH_RADIUS : "value = " + value;
 
         return value;
     }
@@ -504,28 +504,24 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     // TODO indicate the size of the brush
+//    private static final Stroke stroke3 = new BasicStroke(3);
+//    private static final Stroke stroke1 = new BasicStroke(1);
 //    @Override
 //    public void paintOverImage(Graphics2D g2, Canvas canvas,
 //                               View view,
 //                               AffineTransform componentTransform,
 //                               AffineTransform imageTransform) {
-//        if(userDrag != null) {
-//            int x = userDrag.getCoEndX();
-//            int y = userDrag.getCoEndY();
-//            double radius = getRadius() * view.getScaling();
-//            double diameter = 2 * radius;
-//            Ellipse2D.Double shape = new Ellipse2D.Double(x - radius, y - radius,
-//                  diameter, diameter);
-//            g2.setStroke(stroke3);
-//            g2.setColor(Color.BLACK);
-//            g2.draw(shape);
-//            g2.setStroke(stroke1);
-//            g2.setColor(Color.WHITE);
-//            g2.draw(shape);
-//        }
+//        double radius = getRadius() * view.getScaling();
+//        double diameter = 2 * radius;
+//        Ellipse2D.Double shape = new Ellipse2D.Double(lastCoX - radius, lastCoY - radius,
+//                diameter, diameter);
+//        g2.setStroke(stroke3);
+//        g2.setColor(Color.BLACK);
+//        g2.draw(shape);
+//        g2.setStroke(stroke1);
+//        g2.setColor(Color.WHITE);
+//        g2.draw(shape);
 //    }
-//    private static final Stroke stroke3 = new BasicStroke(3);
-//    private static final Stroke stroke1 = new BasicStroke(1);
 
     @Override
     protected void closeToolDialogs() {
@@ -556,5 +552,34 @@ public abstract class AbstractBrushTool extends Tool {
         }
 
         return node;
+    }
+
+    @Override
+    public String getStateInfo() {
+        StringBuilder sb = new StringBuilder(20);
+        if (typeCB != null) { // not all subclasses have a type selector
+            sb.append(getBrushType()).append(", ");
+        }
+        sb.append("r=").append(getRadius());
+        if (canHaveSymmetry) {
+            sb.append(", sym=").append(getSymmetry());
+        }
+        boolean lazyMouse = false;
+        if (lazyMouseCB != null) {
+            if (lazyMouseCB.isSelected()) {
+                lazyMouse = true;
+                sb.append(", (lazy " + UNICODE_MOUSE_SYMBOL + " d=")
+                        .append(lazyMouseDist.getValue())
+                        .append(", sp=")
+                        .append(lazyMouseSpacing.getValue())
+                        .append(")");
+            }
+        }
+        if (!lazyMouse) {
+            sb.append(", eager ");
+            sb.append(UNICODE_MOUSE_SYMBOL);
+        }
+
+        return sb.toString();
     }
 }
