@@ -43,7 +43,7 @@ public class DropDownSlider extends JComponent {
 
     public DropDownSlider(int minValue, int value, int maxValue, boolean limitRange) {
         setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        textField = new IntTextField(String.valueOf(value), minValue, maxValue, limitRange, 4);
+        textField = new IntTextField(value, minValue, maxValue, limitRange, 4);
         add(textField);
 
         initDropDownButton();

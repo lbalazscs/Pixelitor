@@ -27,25 +27,27 @@ import static java.lang.Integer.parseInt;
  * of numbers and nothing else.
  */
 public class IntTextField extends JTextField implements KeyListener {
+    private int defaultValue;
     private int minValue;
     private int maxValue;
     private boolean limitRange;
 
-    public IntTextField(String text, int minValue, int maxValue, boolean limitRange, int columns) {
-        super(text, columns);
+    public IntTextField(int defaultValue, int minValue, int maxValue, boolean limitRange, int columns) {
+        super(String.valueOf(defaultValue), columns);
+
+        this.defaultValue = defaultValue;
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.limitRange = limitRange;
+
         init();
     }
 
-    public IntTextField(String text) {
-        super(text);
-        init();
-    }
+    public IntTextField(int defaultValue, int columns) {
+        super(String.valueOf(defaultValue), columns);
 
-    public IntTextField(int columns) {
-        super(columns);
+        this.defaultValue = defaultValue;
+
         init();
     }
 
@@ -79,7 +81,17 @@ public class IntTextField extends JTextField implements KeyListener {
 
     public int getIntValue() {
         String s = getText().trim();
-        int intValue = parseInt(s);
+
+        int intValue;
+        try {
+            intValue = parseInt(s);
+        } catch (NumberFormatException e) {
+            // still can happen if the value is
+            // too large for an int, like 9999999999999
+            intValue = defaultValue;
+            setText(String.valueOf(intValue));
+        }
+
         if (limitRange) {
             if (intValue > maxValue) {
                 intValue = maxValue;

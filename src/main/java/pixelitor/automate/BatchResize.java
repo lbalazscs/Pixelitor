@@ -64,15 +64,13 @@ public class BatchResize {
             JPanel sizePanel = new JPanel();
 
             sizePanel.add(new JLabel("Max Width:"));
-            widthTF = new IntTextField(5);
+            widthTF = new IntTextField(300, 5);
             widthTF.setName("widthTF");
-            widthTF.setText("300");
             sizePanel.add(widthTF);
 
             sizePanel.add(new JLabel("Max Height:"));
-            heightTF = new IntTextField(5);
+            heightTF = new IntTextField(300, 5);
             heightTF.setName("heightTF");
-            heightTF.setText("300");
             sizePanel.add(heightTF);
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
