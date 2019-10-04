@@ -55,7 +55,7 @@ import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
 @SuppressWarnings("nls")
 public class TextPainter extends AbstractAreaPainter<Object> {
     private String text = "";
-    private Font font = null;
+    protected Font font = null;
 
     // for compatibility with older pixelitor versions
     private static final long serialVersionUID = 8840747324227212590L;
@@ -227,7 +227,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
         FontRenderContext frc = g2.getFontRenderContext();
 
-        //        GlyphVector vect = f.createGlyphVector(frc, t);
+//                GlyphVector vect = f.createGlyphVector(frc, text);
 
         // partial fix for issue #64 (fixes kerning and ligatures),
         // also see https://community.oracle.com/thread/1289266
