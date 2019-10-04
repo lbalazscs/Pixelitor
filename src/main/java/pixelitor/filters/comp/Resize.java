@@ -32,16 +32,16 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
  * Resizes all content layers of a composition
  */
 public class Resize implements CompAction {
-    private int canvasTargetWidth;
-    private int canvasTargetHeight;
+    private final int targetWidth;
+    private final int targetHeight;
 
     // if true, resizes an image so that the proportions
     // are kept and the result fits into the given dimensions
     private final boolean resizeInBox;
 
-    public Resize(int canvasTargetWidth, int canvasTargetHeight, boolean resizeInBox) {
-        this.canvasTargetWidth = canvasTargetWidth;
-        this.canvasTargetHeight = canvasTargetHeight;
+    public Resize(int targetWidth, int targetHeight, boolean resizeInBox) {
+        this.targetWidth = targetWidth;
+        this.targetHeight = targetHeight;
         this.resizeInBox = resizeInBox;
     }
 
@@ -51,9 +51,16 @@ public class Resize implements CompAction {
         int canvasCurrWidth = canvas.getImWidth();
         int canvasCurrHeight = canvas.getImHeight();
 
-        if (canvasCurrWidth == canvasTargetWidth && canvasCurrHeight == canvasTargetHeight) {
+        if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
+            // nothing to do
             return;
         }
+
+        // it is important to use local copies of the final global
+        // variables, otherwise batch resize in box gets different
+        // values for each input image, see issue #74
+        int canvasTargetWidth = targetWidth;
+        int canvasTargetHeight = targetHeight;
 
         if (resizeInBox) {
             double heightScale = canvasTargetHeight / (double) canvasCurrHeight;
@@ -72,7 +79,7 @@ public class Resize implements CompAction {
         AffineTransform at = AffineTransform.getScaleInstance(sx, sy);
         comp.imCoordsChanged(at, false);
 
-        resizeLayers(comp);
+        resizeLayers(comp, canvasTargetWidth, canvasTargetHeight);
 
         MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, at);
         History.addEdit(edit);
@@ -91,11 +98,11 @@ public class Resize implements CompAction {
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
     }
 
-    private void resizeLayers(Composition comp) {
+    private void resizeLayers(Composition comp, int width, int height) {
         comp.forEachLayer(layer -> {
-            layer.resize(canvasTargetWidth, canvasTargetHeight);
+            layer.resize(width, height);
             if (layer.hasMask()) {
-                layer.getMask().resize(canvasTargetWidth, canvasTargetHeight);
+                layer.getMask().resize(width, height);
             }
         });
     }
