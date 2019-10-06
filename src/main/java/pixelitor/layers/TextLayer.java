@@ -80,7 +80,9 @@ public class TextLayer extends ContentLayer {
     public static void createNew(PixelitorWindow pw) {
         Composition comp = OpenComps.getActiveCompOrNull();
         if (comp == null) {
-            throw new IllegalStateException("no open image");
+            // It is possible to arrive here with no open images
+            // because the T hotkey is always active, see issue #77
+            return;
         }
         TextLayer textLayer = new TextLayer(comp);
 
