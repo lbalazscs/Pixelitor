@@ -473,6 +473,10 @@ public class CropTool extends DragTool {
             executeCropCommand();
             e.consume();
         } else if (e.getKeyCode() == KeyEvent.VK_O) {
+            if (e.isControlDown()) {
+                // ignore Ctrl-O see issue #81
+                return;
+            }
             if (e.isShiftDown()) {
                 // Shift-O: change the orientation
                 // within the current composition guide family
