@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public class MetaDataPanel extends JPanel implements DropTargetListener {
     private final JXTreeTable treeTable;
 
@@ -194,6 +196,15 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         File file = comp.getFile();
         if (file == null) {
             Dialogs.showInfoDialog(pw, "No file", "There is no file for " + comp.getName());
+            return;
+        }
+        if (!file.exists()) {
+            String msg = format(
+                    "<html>The metadata for '%s' cannot be shown because the file<br>" +
+                            "<b>%s</b><br>" +
+                            "does not exist anymore.",
+                    comp.getName(), file.getAbsolutePath());
+            Messages.showError("File not found", msg);
             return;
         }
         Metadata metadata = extractMetadata(file);
