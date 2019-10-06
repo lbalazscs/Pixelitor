@@ -36,6 +36,9 @@ public abstract class AbstractBrush implements Brush {
     protected double diameter;
     protected PPoint previous;
 
+    // true when the mouse is down
+    protected boolean drawing;
+
     protected AbstractBrush(double radius) {
         setRadius(radius);
     }
@@ -63,9 +66,20 @@ public abstract class AbstractBrush implements Brush {
         comp.updateRegion(previous, p, diameter);
     }
 
-    // always call it after updateComp!
+    // Same as setPrevious, but with a more expressive name.
+    // Always call it after updateComp!
     protected void rememberPrevious(PPoint p) {
         this.previous = p;
+    }
+
+    @Override
+    public void setPrevious(PPoint previous) {
+        this.previous = previous;
+    }
+
+    @Override
+    public PPoint getPrevious() {
+        return previous;
     }
 
     @Override
@@ -74,15 +88,27 @@ public abstract class AbstractBrush implements Brush {
         // variables should not be set to 0, 0
         // because it causes unnecessary repainting
         rememberPrevious(p);
+
+        initDrawing(p);
+    }
+
+    @Override
+    public void initDrawing(PPoint p) {
+        assert !drawing : "already initialized in " + getClass().getSimpleName();
+        drawing = true;
     }
 
     @Override
     public void lineConnectTo(PPoint p) {
-        if(previous == null) {
+        assert !drawing : "already initialized in " + getClass().getSimpleName();
+
+        if (previous == null) {
             // can happen if the first click (in the tool of after a
             // symmetry activation) is a shift-click
             startAt(p);
         } else {
+            initDrawing(p);
+
             // most brushes connect with lines anyway, but if there is an
             // extra smoothing, this must be overridden
             continueTo(p);
@@ -91,7 +117,8 @@ public abstract class AbstractBrush implements Brush {
 
     @Override
     public void finish() {
-        // do nothing
+        assert drawing : "uninitialized brush stroke in " + getClass().getSimpleName();
+        drawing = false;
     }
 
     public double getRadius() {
@@ -99,8 +126,8 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public PPoint getPrevious() {
-        return previous;
+    public boolean isDrawing() {
+        return drawing;
     }
 
     @Override

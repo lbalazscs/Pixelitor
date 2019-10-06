@@ -6,6 +6,7 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.ExceptionHandler;
 import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.MappedKey;
 import pixelitor.history.History;
@@ -89,6 +90,10 @@ public class RandomToolTest {
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
         robot = app.getRobot();
+        ExceptionHandler.INSTANCE.addFirstHandler((t, e) -> {
+            e.printStackTrace();
+            keyboard.releaseModifierKeysFromAnyThread();
+        });
 
         initEventList();
 

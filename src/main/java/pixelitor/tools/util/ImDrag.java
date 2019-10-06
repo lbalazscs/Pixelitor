@@ -63,16 +63,35 @@ public class ImDrag {
         endY = startY + r.getHeight();
     }
 
-    public static ImDrag createRandom(int width, int height) {
-        int halfWidth = width / 2;
-        int halfHeight = height / 2;
+    public static ImDrag createRandom(int width, int height, int minDist) {
+        int minDist2 = minDist * minDist;
+        ImDrag drag = null;
 
-        int x1 = Rnd.nextInt(halfWidth);
-        int x2 = halfWidth + Rnd.nextInt(halfWidth);
-        int y1 = Rnd.nextInt(halfHeight);
-        int y2 = halfHeight + Rnd.nextInt(halfHeight);
+        while (true) {
+            int x1 = Rnd.nextInt(width);
+            int x2 = Rnd.nextInt(width);
+            int y1 = Rnd.nextInt(height);
+            int y2 = Rnd.nextInt(height);
 
-        return new ImDrag(x1, y1, x2, y2);
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            if (dx * dx + dy * dy > minDist2) {
+                drag = new ImDrag(x1, y1, x2, y2);
+                break;
+            }
+        }
+        return drag;
+//
+//
+//        int halfWidth = width / 2;
+//        int halfHeight = height / 2;
+//
+//        int x1 = Rnd.nextInt(halfWidth);
+//        int x2 = halfWidth + Rnd.nextInt(halfWidth);
+//        int y1 = Rnd.nextInt(halfHeight);
+//        int y2 = halfHeight + Rnd.nextInt(halfHeight);
+//
+//        return new ImDrag(x1, y1, x2, y2);
     }
 
     public ImDrag createTransformed(AffineTransform at) {

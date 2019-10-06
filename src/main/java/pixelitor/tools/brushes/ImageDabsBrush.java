@@ -56,26 +56,25 @@ public class ImageDabsBrush extends DabsBrush {
     @Override
     void setupBrushStamp(PPoint p) {
         assert diameter > 0 : "zero diameter in " + getClass().getName();
-        Color c = targetG.getColor();
+        Color currColor = targetG.getColor();
 
-        if (!c.equals(lastColor)) {
-            colorizeBrushImage(c);
-            lastColor = c;
-            resizeBrushImage(diameter, true);
+        if (!currColor.equals(lastColor)) {
+            colorizeBrushImage(currColor);
+            lastColor = currColor;
+            recreateBrushImage(diameter, true);
         } else {
-            resizeBrushImage(diameter, false);
+            recreateBrushImage(diameter, false);
         }
     }
 
-    /**
-     * This method assumes that the color of coloredBrushImg is OK
-     */
-    private void resizeBrushImage(double newSize, boolean force) {
-        if (!force) {
+    private void recreateBrushImage(double newSize, boolean colorChanged) {
+        if (!colorChanged) {
             if (finalScaledImg != null && finalScaledImg.getWidth() == newSize) {
+                // it already has the desired size
                 return;
             }
         }
+        // if the color changed, then recreate it no matter what the size is
 
         if (finalScaledImg != null) {
             finalScaledImg.flush();
@@ -117,6 +116,8 @@ public class ImageDabsBrush extends DabsBrush {
 
     @Override
     public void putDab(PPoint p, double theta) {
+        assert finalScaledImg != null;
+
         double x = p.getImX();
         double y = p.getImY();
         int drawStartX = (int) (x - radius);

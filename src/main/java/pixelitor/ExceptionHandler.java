@@ -17,34 +17,45 @@
 
 package pixelitor;
 
-import pixelitor.utils.Messages;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * Handles uncaught exceptions
  */
 public class ExceptionHandler implements Thread.UncaughtExceptionHandler {
     public static final ExceptionHandler INSTANCE = new ExceptionHandler();
+    private final List<BiConsumer<Thread, Throwable>> handlers = new ArrayList<>(1);
 
     private ExceptionHandler() {
+        Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
-    /**
-     * Should be called once, at startup
-     */
-    public void initialize() {
-        Thread.setDefaultUncaughtExceptionHandler(this);
+    public void addLastHandler(BiConsumer<Thread, Throwable> handler) {
+        handlers.add(handler);
+    }
+
+    // this can be used to make sure that the given
+    // handler runs before the standard message dialog
+    public void addFirstHandler(BiConsumer<Thread, Throwable> handler) {
+        handlers.add(0, handler);
     }
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        // avoid infinite loop where the exception is thrown
+        // from Messages.showException on the EDT
         StackTraceElement[] stackTrace = e.getStackTrace();
         for (StackTraceElement ste : stackTrace) {
             if (ste.getMethodName().equals("showException")) {
                 e.printStackTrace();
-                return; // avoid infinite loop
+                return;
             }
         }
 
-        Messages.showException(e, t);
+        for (BiConsumer<Thread, Throwable> handler : handlers) {
+            handler.accept(t, e);
+        }
     }
 }

@@ -41,7 +41,10 @@ public class SingleDirChooser extends ValidatedPanel {
     private OutputFormatSelector outputFormatSelector;
 
     private SingleDirChooser(String label, String initialPath,
-                             String fileChooserTitle, boolean addOutputChooser) {
+                             String fileChooserTitle,
+                             boolean addOutputChooser, OutputFormat outputFormat) {
+        assert addOutputChooser == (outputFormat != null);
+
         dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
@@ -51,7 +54,7 @@ public class SingleDirChooser extends ValidatedPanel {
             GridBagHelper gbh = new GridBagHelper(this);
             gbh.addLabelWithTwoControls(label, dirTF, browseButton);
 
-            outputFormatSelector = new OutputFormatSelector();
+            outputFormatSelector = new OutputFormatSelector(outputFormat);
 
             gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
         } else {
@@ -96,10 +99,11 @@ public class SingleDirChooser extends ValidatedPanel {
      * Lets the user select the output directory property of the application.
      * Returns true if a selection was made, false if the operation was cancelled.
      */
-    public static boolean selectOutputDir(boolean addOutputChooser) {
+    public static boolean selectOutputDir(boolean addOutputChooser,
+                                          OutputFormat defaultFormat) {
         SingleDirChooser chooserPanel = new SingleDirChooser("Output Folder:",
                 Dirs.getLastSave().getAbsolutePath(),
-                "Select Output Folder", addOutputChooser);
+                "Select Output Folder", addOutputChooser, defaultFormat);
 
         boolean[] selectionWasMade = {false};
         new DialogBuilder()
@@ -113,8 +117,8 @@ public class SingleDirChooser extends ValidatedPanel {
                 .show();
 
         if (addOutputChooser) {
-            OutputFormat outputFormat = chooserPanel.getSelectedFormat();
-            OutputFormat.setLastUsed(outputFormat);
+            OutputFormat selectedFormat = chooserPanel.getSelectedFormat();
+            OutputFormat.setLastUsed(selectedFormat);
         }
 
         return selectionWasMade[0];

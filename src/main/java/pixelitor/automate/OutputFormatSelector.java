@@ -24,9 +24,9 @@ import javax.swing.*;
  * A combo box for selecting an output format
  */
 public class OutputFormatSelector extends JComboBox<OutputFormat> {
-    public OutputFormatSelector() {
+    public OutputFormatSelector(OutputFormat defaultFormat) {
         super(OutputFormat.values());
-        setSelectedItem(OutputFormat.getLastUsed());
+        setSelectedItem(defaultFormat);
     }
 
     public OutputFormat getSelectedFormat() {

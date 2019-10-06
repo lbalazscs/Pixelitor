@@ -339,4 +339,13 @@ public class Keyboard {
         releaseAlt();
         releaseShift();
     }
+
+    public void releaseModifierKeysFromAnyThread() {
+        if (EventQueue.isDispatchThread()) {
+            Thread thread = new Thread(this::releaseModifierKeys);
+            thread.start();
+        } else {
+            releaseModifierKeys();
+        }
+    }
 }

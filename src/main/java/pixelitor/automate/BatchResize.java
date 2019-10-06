@@ -23,6 +23,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
+import pixelitor.io.OutputFormat;
 
 import javax.swing.*;
 
@@ -75,7 +76,8 @@ public class BatchResize {
 
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             add(sizePanel);
-            openSaveDirsPanel = new OpenSaveDirsPanel(false);
+            openSaveDirsPanel = new OpenSaveDirsPanel(
+                    false, OutputFormat.getLastUsed());
             add(openSaveDirsPanel);
         }
 

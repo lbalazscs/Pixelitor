@@ -34,7 +34,7 @@ import java.awt.Shape;
 public class SelectionBuilder {
     private final SelectionType selectionType;
     private final SelectionInteraction selectionInteraction;
-    private final Composition comp;
+//    private final Composition comp;
 
     private Shape replacedShape;
 
@@ -46,7 +46,6 @@ public class SelectionBuilder {
     public SelectionBuilder(SelectionType selectionType, SelectionInteraction selectionInteraction, Composition comp) {
         this.selectionInteraction = selectionInteraction;
         this.selectionType = selectionType;
-        this.comp = comp;
         Selection existingSelection = comp.getSelection();
 
         if (existingSelection == null) {
@@ -75,7 +74,7 @@ public class SelectionBuilder {
      * As the mouse is dragged or released, the current
      * built selection shape is continuously updated
      */
-    public void updateBuiltSelection(Object mouseInfo) {
+    public void updateBuiltSelection(Object mouseInfo, Composition comp) {
         Selection builtSelection = comp.getBuiltSelection();
         boolean noPreviousSelection = builtSelection == null;
 
@@ -99,7 +98,7 @@ public class SelectionBuilder {
      * The mouse has been released and the currently drawn shape must be combined
      * with the already existing shape according to the selection interaction type
      */
-    public void combineShapes() {
+    public void combineShapes(Composition comp) {
         Selection oldSelection = comp.getSelection();
         Selection builtSelection = comp.getBuiltSelection();
 
@@ -155,7 +154,7 @@ public class SelectionBuilder {
         finished = true;
     }
 
-    public void cancelIfNotFinished() {
+    public void cancelIfNotFinished(Composition comp) {
         if(!finished) {
             Selection builtSelection = comp.getBuiltSelection();
             if (builtSelection != null) {

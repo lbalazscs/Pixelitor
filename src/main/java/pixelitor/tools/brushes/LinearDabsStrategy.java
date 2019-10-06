@@ -44,7 +44,6 @@ public class LinearDabsStrategy implements DabsStrategy {
 
     @Override
     public void onStrokeStart(PPoint p) {
-        brush.setupBrushStamp(p);
         distFromLastDab = 0; // moved from reset()
 
         prev = p;
@@ -119,5 +118,10 @@ public class LinearDabsStrategy implements DabsStrategy {
         DabsBrushSettings settings = brush.getSettings();
         angleSettings = settings.getAngleSettings();
         spacingStrategy = settings.getSpacingStrategy();
+    }
+
+    @Override
+    public void setPrevious(PPoint previous) {
+        prev = previous;
     }
 }

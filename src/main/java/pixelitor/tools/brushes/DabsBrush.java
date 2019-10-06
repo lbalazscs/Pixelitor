@@ -68,6 +68,12 @@ public abstract class DabsBrush extends AbstractBrush {
     }
 
     @Override
+    public void initDrawing(PPoint p) {
+        super.initDrawing(p);
+        setupBrushStamp(p);
+    }
+
+    @Override
     public void continueTo(PPoint p) {
         dabsStrategy.onNewStrokePoint(p);
         updateComp(p);
@@ -80,6 +86,12 @@ public abstract class DabsBrush extends AbstractBrush {
 
     public void setSettings(DabsBrushSettings settings) {
         this.settings = settings;
+    }
+
+    @Override
+    public void setPrevious(PPoint previous) {
+        super.setPrevious(previous);
+        dabsStrategy.setPrevious(previous);
     }
 
     public void settingsChanged() {

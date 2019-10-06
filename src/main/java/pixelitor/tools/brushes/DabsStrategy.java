@@ -32,4 +32,6 @@ public interface DabsStrategy {
     void onNewStrokePoint(PPoint p);
 
     void settingsChanged();
+
+    void setPrevious(PPoint previous);
 }

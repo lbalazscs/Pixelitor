@@ -241,7 +241,7 @@ public class OpenSave {
     public static void exportLayersToPNGAsync() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        boolean okPressed = SingleDirChooser.selectOutputDir(false);
+        boolean okPressed = SingleDirChooser.selectOutputDir(false, null);
         if (!okPressed) {
             return;
         }
@@ -300,7 +300,8 @@ public class OpenSave {
     public static void saveCurrentImageInAllFormats() {
         Composition comp = OpenComps.getActiveCompOrNull();
 
-        boolean canceled = !SingleDirChooser.selectOutputDir(false);
+        boolean canceled = !SingleDirChooser.selectOutputDir(
+                false, null);
         if (canceled) {
             return;
         }

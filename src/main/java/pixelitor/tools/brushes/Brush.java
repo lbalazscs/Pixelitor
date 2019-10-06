@@ -30,7 +30,70 @@ import java.awt.Graphics2D;
  */
 public interface Brush {
     /**
-     * Sets the Composition and the Graphics2D object on which this brush will draw
+     * The start of a new brush stroke.
+     */
+    void startAt(PPoint p);
+
+    /**
+     * The brush stroke should be continued to the given point.
+     */
+    void continueTo(PPoint p);
+
+    /**
+     * The brush stroke should be connected by a straight line
+     * to the given point (usually because a shift-click happened),
+     * even if it was already finished.
+     */
+    void lineConnectTo(PPoint p);
+
+    /**
+     * The brush stroke should be finished.
+     */
+    void finish();
+
+    /**
+     * Returns whether the brush is currently drawing.
+     * This means that the mouse is down, except when automated (tracing, auto paint).
+     *
+     * While "brush stroke" methods are from the user perspective,
+     * this is a low-level method, used only by delegating brushes.
+     * In the case of shift-clicking, a single user-level brush stroke
+     * is composed of multiple drawing sessions.
+     */
+    boolean isDrawing();
+
+    /**
+     * Initializes the brush for drawing.
+     * This is a low-level method, used only by delegating brushes.
+     */
+    void initDrawing(PPoint p);
+
+    /**
+     * Manually free the resources used by this brush.
+     */
+    default void dispose() {}
+
+    /**
+     * Returns the previous position of the brush.
+     */
+    PPoint getPrevious();
+
+    /**
+     * Forces the given previous point on the brush
+     */
+    void setPrevious(PPoint previous);
+
+    /**
+     * Returns true if the brush has a previous position,
+     * and false if it was not used yet.
+     */
+    default boolean hasPrevious() {
+        return getPrevious() != null;
+    }
+
+    /**
+     * Sets the Composition and the Graphics2D object
+     * on which this brush will draw
      */
     void setTarget(Composition comp, Graphics2D g);
 
@@ -47,51 +110,12 @@ public interface Brush {
     double getEffectiveRadius();
 
     /**
-     * The start of a new brush stroke.
-     */
-    void startAt(PPoint p);
-
-    /**
-     * The brush stroke should be continued to the given point.
-     */
-    void continueTo(PPoint p);
-
-    /**
-     * The brush stroke should be connected by a straight line
-     * to the given point (usually because a shift-click happened)
-     */
-    void lineConnectTo(PPoint p);
-
-    /**
-     * The brush stroke should be finished.
-     */
-    void finish();
-
-    /**
-     * Manually free the resources used by this brush.
-     */
-    default void dispose() {}
-
-    /**
      * Returns the space between the dabs.
      *
      * If the brush doesn't use uniform spacing, it can return
      * any spacing that looks good, or 0 to skip the decision.
      */
     double getPreferredSpacing();
-
-    /**
-     * Returns the previous position of the brush.
-     */
-    PPoint getPrevious();
-
-    /**
-     * Returns true if the brush has a previous position,
-     * and false if it was not used yet.
-     */
-    default boolean hasPrevious() {
-        return getPrevious() != null;
-    }
 
     DebugNode getDebugNode();
 }

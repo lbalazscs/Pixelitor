@@ -95,6 +95,11 @@ public class LazyMouseBrush implements Brush {
     }
 
     @Override
+    public void setPrevious(PPoint previous) {
+        delegate.setPrevious(previous);
+    }
+
+    @Override
     public double getEffectiveRadius() {
         return delegate.getEffectiveRadius();
     }
@@ -102,6 +107,16 @@ public class LazyMouseBrush implements Brush {
     @Override
     public PPoint getPrevious() {
         return delegate.getPrevious();
+    }
+
+    @Override
+    public boolean isDrawing() {
+        return delegate.isDrawing();
+    }
+
+    @Override
+    public void initDrawing(PPoint p) {
+        delegate.initDrawing(p);
     }
 
     @Override
@@ -119,10 +134,10 @@ public class LazyMouseBrush implements Brush {
 
     @Override
     public void continueTo(PPoint p) {
-        advanceTo(p, false);
+        advanceTo(p);
     }
 
-    private void advanceTo(PPoint p, boolean lineConnect) {
+    private void advanceTo(PPoint p) {
         mouseX = p.getImX();
         mouseY = p.getImY();
 
@@ -141,25 +156,29 @@ public class LazyMouseBrush implements Brush {
         double minValue = minDist2 + spacing * spacing;
 
         while (dist2 > minValue) {
-            this.drawX += advanceDX;
-            this.drawY += advanceDY;
+            drawX += advanceDX;
+            drawY += advanceDY;
 
-            PPoint drawPoint = PPoint.eagerFromIm(this.drawX, this.drawY, view);
-            if (lineConnect) {
-                delegate.lineConnectTo(drawPoint);
-            } else {
+            PPoint drawPoint = PPoint.eagerFromIm(drawX, drawY, view);
+//            if (lineConnect) {
+//                delegate.lineConnectTo(drawPoint);
+//            } else {
                 delegate.continueTo(drawPoint);
-            }
+//            }
 
-            dx = mouseX - this.drawX;
-            dy = mouseY - this.drawY;
+            dx = mouseX - drawX;
+            dy = mouseY - drawY;
             dist2 = dx * dx + dy * dy;
         }
     }
 
     @Override
     public void lineConnectTo(PPoint p) {
-        advanceTo(p, true);
+        assert !isDrawing();
+        assert hasPrevious();
+        initDrawing(p);
+
+        advanceTo(p);
     }
 
     @Override
@@ -186,7 +205,7 @@ public class LazyMouseBrush implements Brush {
         RangeParam param = new RangeParam(
             "Distance (px)", MIN_DIST, minDist, MAX_DIST);
         param.setAdjustmentListener(() ->
-            LazyMouseBrush.setDist(param.getValue()));
+                setDist(param.getValue()));
         return param;
     }
 
@@ -194,7 +213,7 @@ public class LazyMouseBrush implements Brush {
         RangeParam param = new RangeParam(
             "Spacing (px)", MIN_SPACING, defaultSpacing, MAX_SPACING);
         param.setAdjustmentListener(() ->
-            LazyMouseBrush.setDefaultSpacing(param.getValue()));
+                setDefaultSpacing(param.getValue()));
         return param;
     }
 }

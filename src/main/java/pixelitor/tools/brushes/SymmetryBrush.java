@@ -33,7 +33,7 @@ public class SymmetryBrush implements Brush {
     private static final int MAX_BRUSHES = 4;
 
     private final Brush[] brushes = new Brush[MAX_BRUSHES];
-    private int numInstantiatedBrushes;
+    private int numBrushes;
     private final Tool tool;
     private BrushType brushType;
     private Symmetry symmetry;
@@ -45,8 +45,8 @@ public class SymmetryBrush implements Brush {
         this.brushType = brushType;
         this.symmetry = symmetry;
         this.affectedArea = new AffectedArea();
-        numInstantiatedBrushes = symmetry.getNumBrushes();
-        assert numInstantiatedBrushes <= MAX_BRUSHES;
+        numBrushes = symmetry.getNumBrushes();
+        assert numBrushes <= MAX_BRUSHES;
         brushTypeChanged(brushType, radius);
     }
 
@@ -56,16 +56,21 @@ public class SymmetryBrush implements Brush {
 
     @Override
     public void setTarget(Composition comp, Graphics2D g) {
-        for(int i = 0; i < numInstantiatedBrushes; i++) {
+        for (int i = 0; i < numBrushes; i++) {
             brushes[i].setTarget(comp, g);
         }
     }
 
     @Override
     public void setRadius(double radius) {
-        for(int i = 0; i < numInstantiatedBrushes; i++) {
+        for (int i = 0; i < numBrushes; i++) {
             brushes[i].setRadius(radius);
         }
+    }
+
+    @Override
+    public void setPrevious(PPoint previous) {
+        throw new IllegalStateException("should not be called");
     }
 
     @Override
@@ -76,6 +81,24 @@ public class SymmetryBrush implements Brush {
     @Override
     public PPoint getPrevious() {
         return brushes[0].getPrevious();
+    }
+
+    @Override
+    public boolean isDrawing() {
+        return brushes[0].isDrawing();
+    }
+
+    @Override
+    public void initDrawing(PPoint p) {
+        for (int i = 0; i < numBrushes; i++) {
+            PPoint transformed;
+            if (i == 0) {
+                transformed = p;
+            } else {
+                transformed = symmetry.transform(p, i);
+            }
+            brushes[i].initDrawing(transformed);
+        }
     }
 
     @Override
@@ -100,7 +123,7 @@ public class SymmetryBrush implements Brush {
 
     public void brushTypeChanged(BrushType brushType, double radius) {
         this.brushType = brushType;
-        for(int i = 0; i < numInstantiatedBrushes; i++) {
+        for (int i = 0; i < numBrushes; i++) {
             if(brushes[i] != null) {
                 brushes[i].dispose();
             }
@@ -111,26 +134,40 @@ public class SymmetryBrush implements Brush {
 
     public void symmetryChanged(Symmetry symmetry, double radius) {
         this.symmetry = symmetry;
-        if(symmetry.getNumBrushes() > numInstantiatedBrushes) {
+
+        int newNumBrushes = symmetry.getNumBrushes();
+        assert newNumBrushes <= MAX_BRUSHES;
+
+        if (newNumBrushes > numBrushes) {
             // we need to create more brushes of the same type
-            int newNumBrushes = symmetry.getNumBrushes();
-            assert newNumBrushes <= MAX_BRUSHES;
-            for(int i = numInstantiatedBrushes; i < newNumBrushes; i++) {
+            PPoint previous0 = brushes[0].getPrevious();
+            for (int i = numBrushes; i < newNumBrushes; i++) {
                 brushes[i] = brushType.createBrush(tool, radius);
+
+                // if the first brush has a previous point at the time of the
+                // symmetry change (it was already used), then propagate
+                // the previous coordinates to the newly created brushes
+                if (previous0 != null) {
+                    PPoint generatedPrevious = symmetry.transform(previous0, i);
+                    brushes[i].setPrevious(generatedPrevious);
+                }
             }
-            numInstantiatedBrushes = newNumBrushes;
+        } else if (newNumBrushes < numBrushes) {
+            for (int i = newNumBrushes; i < numBrushes; i++) {
+                brushes[i].dispose();
+                brushes[i] = null;
+            }
         }
+        numBrushes = newNumBrushes;
         assert allBrushesAreDifferentInstances();
     }
 
     // used in assertions
     private boolean allBrushesAreDifferentInstances() {
-        for (int i = 0; i < numInstantiatedBrushes; i++) {
-            for (int j = 0; j < numInstantiatedBrushes; j++) {
-                if(i != j) {
-                    if(brushes[i] == brushes[j]) {
-                        return false;
-                    }
+        for (int i = 0; i < numBrushes; i++) {
+            for (int j = 0; j < numBrushes; j++) {
+                if (i != j && brushes[i] == brushes[j]) {
+                    return false;
                 }
             }
         }
@@ -167,7 +204,7 @@ public class SymmetryBrush implements Brush {
     public DebugNode getDebugNode() {
         DebugNode node = new DebugNode("Symmetry Brush", this);
 
-        for (int i = 0; i < numInstantiatedBrushes; i++) {
+        for (int i = 0; i < numBrushes; i++) {
             node.add(brushes[i].getDebugNode());
         }
 

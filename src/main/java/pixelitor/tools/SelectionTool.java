@@ -141,7 +141,7 @@ public class SelectionTool extends DragTool {
         }
 
         userDrag.setStartFromCenter(startFromCenter);
-        selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
+        selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), e.getComp());
     }
 
     @Override
@@ -164,12 +164,12 @@ public class SelectionTool extends DragTool {
                 setupInteractionWithKeyModifiers(e);
                 selectionBuilder = new SelectionBuilder(getSelectionType(),
                         getCurrentInteraction(), comp);
-                selectionBuilder.updateBuiltSelection(e);
+                selectionBuilder.updateBuiltSelection(e, comp);
                 restoreInteraction();
             } else {
-                selectionBuilder.updateBuiltSelection(e);
+                selectionBuilder.updateBuiltSelection(e, comp);
                 if (e.isRight()) {
-                    selectionBuilder.combineShapes();
+                    selectionBuilder.combineShapes(comp);
                     stopBuildingSelection();
                 }
             }
@@ -179,8 +179,8 @@ public class SelectionTool extends DragTool {
             boolean startFromCenter = !altMeansSubtract && e.isAltDown();
             userDrag.setStartFromCenter(startFromCenter);
 
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
-            selectionBuilder.combineShapes();
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
+            selectionBuilder.combineShapes(comp);
             stopBuildingSelection();
 
             assert !comp.hasBuiltSelection();
@@ -194,11 +194,12 @@ public class SelectionTool extends DragTool {
 
     @Override
     public void mouseClicked(PMouseEvent e) {
+        Composition comp = e.getComp();
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
-                selectionBuilder.updateBuiltSelection(e);
-                selectionBuilder.combineShapes();
+                selectionBuilder.updateBuiltSelection(e, comp);
+                selectionBuilder.combineShapes(comp);
                 stopBuildingSelection();
                 return;
             } else {
@@ -209,7 +210,7 @@ public class SelectionTool extends DragTool {
 
         super.mouseClicked(e);
 
-        cancelSelection(e.getComp());
+        cancelSelection(comp);
     }
 
     private void cancelSelection(Composition comp) {
@@ -244,7 +245,7 @@ public class SelectionTool extends DragTool {
     public void altPressed() {
         if (!altDown && !altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(true);
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), OpenComps.getActiveCompOrNull());
         }
         altDown = true;
     }
@@ -253,7 +254,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(false);
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag());
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), OpenComps.getActiveCompOrNull());
         }
         altDown = false;
     }
@@ -319,7 +320,8 @@ public class SelectionTool extends DragTool {
 
     private void stopBuildingSelection() {
         if (selectionBuilder != null) {
-            selectionBuilder.cancelIfNotFinished();
+            Composition comp = OpenComps.getActiveCompOrNull();
+            selectionBuilder.cancelIfNotFinished(comp);
             selectionBuilder = null;
         }
     }

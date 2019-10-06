@@ -67,8 +67,8 @@ public class SprayBrush extends AbstractBrush {
     }
 
     @Override
-    public void startAt(PPoint p) {
-        super.startAt(p);
+    public void initDrawing(PPoint p) {
+        super.initDrawing(p);
 
         double shapeRadius = settings.getShapeRadius();
         float radiusVariability = settings.getRadiusVariability();
@@ -184,10 +184,21 @@ public class SprayBrush extends AbstractBrush {
 
     @Override
     public void finish() {
+        super.finish();
         assert timer != null;
 
         if (timer != null) {
             timer.stop();
+            timer = null;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        // should be stopped already, but to be sure
+        if (timer != null) {
+            timer.stop();
+            timer = null;
         }
     }
 

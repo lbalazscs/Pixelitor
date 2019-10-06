@@ -45,7 +45,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
 
     private final OutputFormatSelector outputFormatSelector;
 
-    OpenSaveDirsPanel(boolean allowSameDirs) {
+    OpenSaveDirsPanel(boolean allowSameDirs, OutputFormat outputFormat) {
         this.allowSameDirs = allowSameDirs;
         setLayout(new GridBagLayout());
         GridBagHelper gbh = new GridBagHelper(this);
@@ -53,7 +53,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
-        outputFormatSelector = new OutputFormatSelector();
+        outputFormatSelector = new OutputFormatSelector(outputFormat);
         gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
     }
 

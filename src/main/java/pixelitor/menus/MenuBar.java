@@ -294,6 +294,8 @@ public class MenuBar extends JMenuBar {
             }
         }).add();
 
+        // formats other than PNG are not supported in order
+        // to avoid problems with translucency
         sub.addAction(new MenuAction("Export Layers to PNG...") {
             @Override
             public void onClick() {

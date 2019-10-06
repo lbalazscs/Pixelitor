@@ -167,8 +167,11 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        lastActiveBox.arrowKeyPressed(key);
-        return true;
+        if (lastActiveBox != null) {
+            lastActiveBox.arrowKeyPressed(key);
+            return true;
+        }
+        return false;
     }
 
     @Override

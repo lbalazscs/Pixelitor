@@ -179,7 +179,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     protected void addLazyMouseDialogButton() {
-        settingsPanel.addButton("Lazy " + UNICODE_MOUSE_SYMBOL + " ...",
+        settingsPanel.addButton("Lazy Mouse...",
                 e -> showLazyMouseDialog(),
                 "lazyMouseDialogButton", "Configure brush smoothing");
     }
@@ -228,7 +228,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-        boolean lineConnect = e.isShiftDown();
+        boolean lineConnect = e.isShiftDown() && brush.hasPrevious();
 
         Drawable dr = e.getComp().getActiveDrawableOrThrow();
         newMousePoint(dr, e, lineConnect);
@@ -261,13 +261,14 @@ public abstract class AbstractBrushTool extends Tool {
             return;
         }
 
-        brush.finish();
-
         Composition comp = e.getComp();
-        finishBrushStroke(comp.getActiveDrawableOrThrow());
+        Drawable dr = comp.getActiveDrawableOrThrow();
+        finishBrushStroke(dr);
     }
 
     private void finishBrushStroke(Drawable dr) {
+        brush.finish();
+
         BufferedImage originalImage = drawDestination.getOriginalImage(dr, this);
 
         double brushRadius = brush.getEffectiveRadius();
@@ -428,6 +429,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         boolean brushStrokePrepared = false;
         float[] coords = new float[2];
+        int subPathIndex = -1;
         while (!fpi.isDone()) {
             int type = fpi.currentSegment(coords);
             double x = coords[0];
@@ -438,6 +440,7 @@ public abstract class AbstractBrushTool extends Tool {
             switch (type) {
                 case PathIterator.SEG_MOVETO:
                     // we can get here more than once if there are multiple subpaths!
+                    subPathIndex++;
                     startingPoint = p;
                     if (!brushStrokePrepared) {
                         // TODO this should not be here, and it should not need
@@ -445,6 +448,9 @@ public abstract class AbstractBrushTool extends Tool {
                         // in the clone and smudge tools need that point
                         prepareProgrammaticBrushStroke(dr, p);
                         brushStrokePrepared = true;
+                    }
+                    if (subPathIndex != 0) {
+                        brush.finish();
                     }
                     brush.startAt(p);
                     break;
