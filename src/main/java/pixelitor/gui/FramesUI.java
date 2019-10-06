@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -74,6 +75,11 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
 
     public void cascadeWindows() {
         List<View> views = OpenComps.getViews();
+        if (views.isEmpty()) {
+            Dialogs.showInfoDialog("No open windows",
+                    "There are no open internal windows to cascade.");
+            return;
+        }
         int locX = 0;
         int locY = 0;
         for (View view : views) {
@@ -106,6 +112,11 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     public void tileWindows() {
         List<View> views = OpenComps.getViews();
         int numWindows = views.size();
+        if (numWindows == 0) {
+            Dialogs.showInfoDialog("No open windows",
+                    "There are no open internal windows to tile.");
+            return;
+        }
 
         int numRows = (int) Math.sqrt(numWindows);
         int numCols = numWindows / numRows;
