@@ -161,10 +161,14 @@ public class Navigator extends JComponent
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
                 if (e.getWheelRotation() < 0) { // up, away from the user
-                    // this.view will be always the active image
-                    this.view.increaseZoom();
+                    // this.view will be always the active image...
+                    if (view != null) { // ...and it is null if all images are closed
+                        view.increaseZoom();
+                    }
                 } else {  // down, towards the user
-                    this.view.decreaseZoom();
+                    if (view != null) {
+                        view.decreaseZoom();
+                    }
                 }
             }
         });

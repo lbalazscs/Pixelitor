@@ -18,6 +18,7 @@
 package pixelitor.menus.view;
 
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
 
@@ -61,13 +62,13 @@ public class ZoomMenu extends PMenu {
     private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            OpenComps.getActiveView().increaseZoom();
+            OpenComps.onActiveView(View::increaseZoom);
         }
     };
     private static final Action ZOOM_OUT_ACTION = new AbstractAction("Zoom Out") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            OpenComps.getActiveView().decreaseZoom();
+            OpenComps.onActiveView(View::decreaseZoom);
         }
     };
 
