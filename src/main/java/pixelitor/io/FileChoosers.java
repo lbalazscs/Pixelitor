@@ -20,6 +20,7 @@ package pixelitor.io;
 import pixelitor.Composition;
 import pixelitor.gui.GlobalEventWatch;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
 import pixelitor.gui.utils.SaveFileChooser;
 import pixelitor.utils.Messages;
@@ -69,7 +70,21 @@ public class FileChoosers {
 
         if (openChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
-            openChooser = new JFileChooser(Dirs.getLastOpen());
+            openChooser = new JFileChooser(Dirs.getLastOpen()) {
+                @Override
+                public void approveSelection() {
+                    File f = getSelectedFile();
+                    if (!f.exists()) {
+                        Dialogs.showErrorDialog("File not found",
+                                "<html>The file <b>" + f.getAbsolutePath()
+                                        + " </b> does not exist. " +
+                                        "<br>Check the file name and try again."
+                        );
+                        return;
+                    }
+                    super.approveSelection();
+                }
+            };
             openChooser.setName("open");
 
             setDefaultOpenExtensions();
