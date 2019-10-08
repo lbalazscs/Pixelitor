@@ -227,17 +227,28 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
         FontRenderContext frc = g2.getFontRenderContext();
 
-//                GlyphVector vect = f.createGlyphVector(frc, text);
+        Map<TextAttribute, ?> attributes = font.getAttributes();
+        boolean hasKerning = TextAttribute.KERNING_ON.equals(
+                attributes.get(TextAttribute.KERNING));
+        boolean hasLigatures = TextAttribute.LIGATURES_ON.equals(
+                attributes.get(TextAttribute.LIGATURES));
 
-        // partial fix for issue #64 (fixes kerning and ligatures),
-        // also see https://community.oracle.com/thread/1289266
-        char[] chars = text.toCharArray();
-        GlyphVector vect = font.layoutGlyphVector(frc, chars, 0,
-                chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
+        GlyphVector vect;
+        if (!hasKerning && !hasLigatures && font.getSize() <= 100) {
+            // fix for issue #72: it seems that for some reason 100
+            // is a magic number, under which the old way of getting
+            // the shape works better
+            vect = f.createGlyphVector(frc, text);
+        } else {
+            // partial fix for issue #64 (fixes kerning and ligatures),
+            // also see https://community.oracle.com/thread/1289266
+            char[] chars = text.toCharArray();
+            vect = font.layoutGlyphVector(frc, chars, 0,
+                    chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
+        }
 
         Shape glyphsOutline = vect.getOutline(0.0f, metrics.getAscent());
 
-        Map<TextAttribute, ?> attributes = font.getAttributes();
         boolean hasUnderline = TextAttribute.UNDERLINE_ON.equals(
                 attributes.get(TextAttribute.UNDERLINE));
         boolean hasStrikeThrough = TextAttribute.STRIKETHROUGH_ON.equals(
