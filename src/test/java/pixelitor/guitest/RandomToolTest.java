@@ -1,3 +1,20 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
@@ -7,8 +24,7 @@ import org.assertj.swing.fixture.JButtonFixture;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
-import pixelitor.gui.GlobalEventWatch;
-import pixelitor.gui.MappedKey;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.Tool;
@@ -608,39 +624,38 @@ public class RandomToolTest {
     }
 
     private void setupPauseKey() {
-        KeyStroke pauseKeyStroke = KeyStroke.getKeyStroke('a');
-        GlobalEventWatch.add(MappedKey.fromKeyStroke(pauseKeyStroke, "pauseTest", new AbstractAction() {
+        char pauseKey = 'a';
+        GlobalEvents.addHotKey(pauseKey, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (paused) {
-                    System.err.println(pauseKeyStroke.getKeyChar() + " pressed, starting again.");
+                    System.err.println(pauseKey + " pressed, starting again.");
                     paused = false;
                     synchronized (resumeMonitor) {
                         // wake up the waiting main thread from the EDT
                         resumeMonitor.notify();
                     }
                 } else {
-                    System.err.println(pauseKeyStroke.getKeyChar() + " pressed, pausing.");
+                    System.err.println(pauseKey + " pressed, pausing.");
                     paused = true;
                 }
             }
-        }));
+        });
     }
 
     private void setupExitKey() {
         // This key not only pauses the testing, but also exits the app
-        KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
-        GlobalEventWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
+        char exitKey = 'j';
+        GlobalEvents.addHotKey(exitKey, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nexiting because '" + exitKeyStroke
-                        .getKeyChar() + "' was pressed");
+                System.err.println("\nexiting because '" + exitKey + "' was pressed");
 
                 // we are on the EDT now, and before exiting
                 // we want to wait until the modifier keys are released
                 exitInNewThread();
             }
-        }));
+        });
     }
 
     private void exitInNewThread() {

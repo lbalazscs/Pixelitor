@@ -19,8 +19,7 @@ package pixelitor.tools.gui;
 
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.GlobalEventWatch;
-import pixelitor.gui.MappedKey;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.tools.Tool;
@@ -68,14 +67,7 @@ public class ToolsPanel extends JPanel {
     private static void setupTShortCut() {
         // there is no text tool, but pressing T should add a text layer
         // in the menu it was added using T, not t
-        Action textToolAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddTextLayerAction.INSTANCE.actionPerformed(null);
-            }
-        };
-        GlobalEventWatch.add(MappedKey.fromChar(
-            'T', true, "text", textToolAction));
+        GlobalEvents.addHotKey('T', AddTextLayerAction.INSTANCE);
     }
 
     private static Dimension calcToolButtonSize(Dimension screen) {
@@ -99,10 +91,6 @@ public class ToolsPanel extends JPanel {
             }
         };
 
-        String toolName = tool.getName();
-        char activationChar = tool.getActivationKey();
-
-        GlobalEventWatch.add(MappedKey.fromChar(
-                activationChar, true, toolName, activateAction));
+        GlobalEvents.addHotKey(tool.getActivationKey(), activateAction);
     }
 }

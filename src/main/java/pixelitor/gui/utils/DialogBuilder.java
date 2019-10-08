@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 
 import javax.swing.*;
@@ -226,7 +226,7 @@ public class DialogBuilder {
         addButtons(d);
 
         if (reconfigureGlobalKeyWatch) {
-            GlobalEventWatch.setDialogActive(true);
+            GlobalEvents.setDialogActive(true);
         }
 
         Runnable cancelTask = () -> dialogCancelled(d);
@@ -328,7 +328,7 @@ public class DialogBuilder {
     private void closeDialog(JDialog d) {
         d.setVisible(false);
         if (reconfigureGlobalKeyWatch) {
-            GlobalEventWatch.setDialogActive(false);
+            GlobalEvents.setDialogActive(false);
         }
         // dispose should not be called if the dialog will be re-shown
         // because then AssertJ-Swing doesn't find it even if it is there

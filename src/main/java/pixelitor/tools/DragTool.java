@@ -18,7 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.Canvas;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -78,7 +78,7 @@ public abstract class DragTool extends Tool {
         userDrag.setEnd(e);
 
         if (spaceDragStartPoint) {
-            if (endPointInitialized && GlobalEventWatch.isSpaceDown()) {
+            if (endPointInitialized && GlobalEvents.isSpaceDown()) {
                 userDrag.adjustStartForSpaceDownDrag();
             }
 

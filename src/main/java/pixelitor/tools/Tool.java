@@ -20,7 +20,7 @@ package pixelitor.tools;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -119,7 +119,7 @@ public abstract class Tool implements KeyListener {
     protected void toolStarted() {
         ended = false;
 
-        GlobalEventWatch.setKeyListener(this);
+        GlobalEvents.setKeyListener(this);
         OpenComps.setCursorForAll(cursor);
     }
 

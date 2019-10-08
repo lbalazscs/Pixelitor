@@ -22,7 +22,7 @@ import com.bric.swing.ColorSwatch;
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
@@ -226,9 +226,9 @@ public class ColorUtils {
     // should not be called from dialogs because it sets dialogActive to false at the end
     public static Color showColorPickerDialog(PixelitorWindow pw, String title,
                                               Color selectedColor, boolean allowOpacity) {
-        GlobalEventWatch.setDialogActive(true);
+        GlobalEvents.setDialogActive(true);
         Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
-        GlobalEventWatch.setDialogActive(false);
+        GlobalEvents.setDialogActive(false);
         return color;
     }
 

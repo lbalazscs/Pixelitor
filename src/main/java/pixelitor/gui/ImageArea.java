@@ -89,8 +89,6 @@ public class ImageArea {
 
     private static void setupKeysAndDnD() {
         JComponent component = (JComponent) ui;
-        GlobalEventWatch.setAlwaysVisibleComponent(component);
-        GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
         new DropTarget(component, new DropListener(NEW_IMAGES));
     }
 

@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.gui.ToolSettingsPanel;
@@ -120,9 +120,9 @@ public class ToolTest {
         stroke(alt, ctrl, shift, mouseButton);
 
         // also test with space down
-        GlobalEventWatch.setSpaceDown(true);
+        GlobalEvents.setSpaceDown(true);
         stroke(alt, ctrl, shift, mouseButton);
-        GlobalEventWatch.setSpaceDown(false);
+        GlobalEvents.setSpaceDown(false);
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {

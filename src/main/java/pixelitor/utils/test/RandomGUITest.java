@@ -40,9 +40,8 @@ import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
-import pixelitor.gui.MappedKey;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -169,35 +168,32 @@ public class RandomGUITest {
         PixelitorWindow.getInstance().setAlwaysOnTop(true);
 
         new PixelitorEventListener().register();
-        GlobalEventWatch.registerDebugMouseWatching(true);
+        GlobalEvents.registerDebugMouseWatching(true);
 
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        KeyStroke stopKeyStroke = KeyStroke.getKeyStroke('w');
-        GlobalEventWatch.add(MappedKey.fromKeyStroke(stopKeyStroke, "stopTest", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.err.println("\nRandomGUITest: '" + stopKeyStroke.getKeyChar() + "' pressed");
-                keepRunning = false;
-            }
-        }));
+        GlobalEvents.addHotKey('a', new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.err.println("\nRandomGUITest: 'a' pressed");
+                        keepRunning = false;
+                    }
+                }
+        );
         keepRunning = true;
 
         // This key not only stops the testing, but also exits the app
-        KeyStroke exitKeyStroke = KeyStroke.getKeyStroke('j');
-        GlobalEventWatch.add(MappedKey.fromKeyStroke(exitKeyStroke, "exit", new AbstractAction() {
+        GlobalEvents.addHotKey('j', new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nRandomGUITest: exiting app because '" + exitKeyStroke
-                        .getKeyChar() + "' was pressed");
+                System.err.println("\nRandomGUITest: exiting app because 'j' was pressed");
                 System.exit(1);
             }
-        }));
+        });
 
-        System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
-                DATE_FORMAT.get().format(new Date()),
-                stopKeyStroke.getKeyChar(), exitKeyStroke.getKeyChar());
+        System.out.printf("RandomGUITest started at %s, the 'a' key stops, the 'j' key exits.%n",
+                DATE_FORMAT.get().format(new Date()));
 
         Robot r = null;
         try {
@@ -359,8 +355,8 @@ public class RandomGUITest {
         }
 
         Point randomPoint = new Point(
-            Rnd.intInRange(minX, maxX),
-            Rnd.intInRange(minY, maxY));
+                Rnd.intInRange(minX, maxX),
+                Rnd.intInRange(minY, maxY));
         return randomPoint;
     }
 
@@ -480,8 +476,8 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                !(filter instanceof Fade) &&
-                    !(filter instanceof RandomFilter));
+                    !(filter instanceof Fade) &&
+                            !(filter instanceof RandomFilter));
         } else {
             f = preferredFilter;
         }

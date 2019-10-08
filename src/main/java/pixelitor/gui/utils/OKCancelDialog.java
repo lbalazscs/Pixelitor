@@ -17,7 +17,7 @@
 
 package pixelitor.gui.utils;
 
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -61,7 +61,7 @@ public abstract class OKCancelDialog extends JDialog {
         JButton cancelButton = new JButton(cancelText);
         cancelButton.setName("cancel");
 
-        GlobalEventWatch.setDialogActive(true);
+        GlobalEvents.setDialogActive(true);
 
         GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
 
@@ -97,7 +97,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     public void close() {
         setVisible(false);
-        GlobalEventWatch.setDialogActive(false);
+        GlobalEvents.setDialogActive(false);
         dispose();
     }
 

@@ -42,7 +42,7 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.Navigator;
@@ -1318,7 +1318,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("debug mouse to sys.out") {
             @Override
             public void onClick() {
-                GlobalEventWatch.registerDebugMouseWatching(false);
+                GlobalEvents.registerDebugMouseWatching(false);
             }
         });
 

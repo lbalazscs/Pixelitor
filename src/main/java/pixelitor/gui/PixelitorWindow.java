@@ -71,9 +71,8 @@ public class PixelitorWindow extends JFrame {
 
         setupFrameIcons();
 
-        GlobalEventWatch.init();
-        GlobalEventWatch.addBrushSizeActions();
-        GlobalEventWatch.registerKeysOnAlwaysVisibleComponent();
+        GlobalEvents.init();
+        GlobalEvents.addBrushSizeActions();
 
         AppPreferences.loadFramePosition(this, screenSize);
 

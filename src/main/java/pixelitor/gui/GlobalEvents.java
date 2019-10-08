@@ -34,11 +34,12 @@ import java.awt.EventQueue;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -48,13 +49,10 @@ import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
 /**
  * A global listener for AWT/Swing events
  */
-public class GlobalEventWatch {
+public class GlobalEvents {
     private static boolean spaceDown = false;
     private static boolean dialogActive = false;
-    private static JComponent alwaysVisibleComponent;
     private static KeyListener keyListener;
-
-    private static final List<MappedKey> mappedKeys = new ArrayList<>();
 
     private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
         @Override
@@ -70,8 +68,46 @@ public class GlobalEventWatch {
         }
     };
 
-    private GlobalEventWatch() {
+    private static final Map<KeyStroke, Action> hotKeyMap = new HashMap<>();
+
+    static {
+        Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
+            KeyEvent keyEvent = (KeyEvent) event;
+            if (keyEvent.getID() != KeyEvent.KEY_PRESSED) {
+                // we are only interested in key pressed events
+                return;
+            }
+            if (keyEvent.getSource() instanceof JTextField) {
+                // hotkeys should be inactive while editing text
+                return;
+            }
+
+            KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(keyEvent);
+            Action action = hotKeyMap.get(keyStroke);
+            if (action != null) {
+                action.actionPerformed(null);
+            }
+        }, AWTEvent.KEY_EVENT_MASK);
+    }
+
+    private GlobalEvents() {
         // do not instantiate: only static utility methods
+    }
+
+    public static void addHotKey(char key, Action action) {
+        addHotKey(key, action, false);
+    }
+
+    private static void addHotKey(char key, Action action, boolean caseSensitive) {
+        if (caseSensitive) {
+            hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
+        } else {
+            assert Character.isUpperCase(key);
+
+            // see issue #31 for why key codes and not key characters are used here
+            hotKeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_MASK), action);
+            hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
+        }
     }
 
     public static void init() {
@@ -93,29 +129,22 @@ public class GlobalEventWatch {
         // so that they can be used to switch between tabs/internal frames.
         // Also remove Tab so that is works as Show/Hide All
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
-            .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
+                .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
         forwardKeys = new HashSet<>(forwardKeys); // make modifiable
         forwardKeys.remove(Keys.CTRL_TAB);
         forwardKeys.remove(Keys.TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
 
         Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
-            .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
+                .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
         backwardKeys = new HashSet<>(backwardKeys); // make modifiable
         backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
     }
 
     private static void keyPressed(KeyEvent e) {
-//        Utils.debugCall(Utils.debugKeyEvent(e));
-//
         int keyCode = e.getKeyCode();
         switch (keyCode) {
-//            case KeyEvent.VK_TAB:
-//                if (!dialogActive && !e.isControlDown()) {
-//                    ShowHideAllAction.INSTANCE.actionPerformed(null);
-//                }
-//                break;
             case KeyEvent.VK_SPACE:
                 // Alt-space is not treated as space-down because on Windows
                 // this opens the system menu, and we get the space-pressed
@@ -172,8 +201,6 @@ public class GlobalEventWatch {
     }
 
     private static void keyReleased(KeyEvent e) {
-//        Utils.debugCall(Utils.debugKeyEvent(e));
-//
         int keyCode = e.getKeyCode();
         switch (keyCode) {
             case KeyEvent.VK_SPACE:
@@ -194,7 +221,7 @@ public class GlobalEventWatch {
 
     @VisibleForTesting
     public static void setSpaceDown(boolean spaceDown) {
-        GlobalEventWatch.spaceDown = spaceDown;
+        GlobalEvents.spaceDown = spaceDown;
     }
 
     /**
@@ -202,36 +229,12 @@ public class GlobalEventWatch {
      * key for navigating the UI, and not for "Hide All"
      */
     public static void setDialogActive(boolean dialogActive) {
-        GlobalEventWatch.dialogActive = dialogActive;
-    }
-
-    public static void setAlwaysVisibleComponent(JComponent alwaysVisibleComponent) {
-        GlobalEventWatch.alwaysVisibleComponent = alwaysVisibleComponent;
-    }
-
-    public static void add(MappedKey key) {
-        // since the "always visible component" can change, we only
-        // store the keys, and re-register them after every change
-        mappedKeys.add(key);
-    }
-
-    public static void registerKeysOnAlwaysVisibleComponent() {
-        InputMap inputMap = alwaysVisibleComponent.getInputMap(
-            JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = alwaysVisibleComponent.getActionMap();
-
-        for (MappedKey key : mappedKeys) {
-            key.registerOn(inputMap, actionMap);
-        }
+        GlobalEvents.dialogActive = dialogActive;
     }
 
     public static void addBrushSizeActions() {
-        GlobalEventWatch.add(
-            MappedKey.fromChar(']', false,
-                "increment", INCREASE_ACTIVE_BRUSH_SIZE_ACTION));
-        GlobalEventWatch.add(
-            MappedKey.fromChar('[', false,
-                "decrement", DECREASE_ACTIVE_BRUSH_SIZE_ACTION));
+        addHotKey(']', INCREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
+        addHotKey('[', DECREASE_ACTIVE_BRUSH_SIZE_ACTION, true);
     }
 
     public static void registerDebugMouseWatching(boolean postEvents) {
@@ -241,30 +244,30 @@ public class GlobalEventWatch {
             String msg = null;
             if (e.getID() == MouseEvent.MOUSE_CLICKED) {
                 msg = "CLICKED"
-                    + " at (" + e.getX() + ", " + e.getY()
-                    + "), click count = " + e.getClickCount()
-                    + ", comp = " + componentDescr;
+                        + " at (" + e.getX() + ", " + e.getY()
+                        + "), click count = " + e.getClickCount()
+                        + ", comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
                 msg = "DRAGGED"
-                    + " at (" + e.getX() + ", " + e.getY()
-                    + "), comp = " + componentDescr;
+                        + " at (" + e.getX() + ", " + e.getY()
+                        + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
                 msg = "PRESSED"
-                    + " at (" + e.getX() + ", " + e.getY()
-                    + "), comp = " + componentDescr;
+                        + " at (" + e.getX() + ", " + e.getY()
+                        + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
                 msg = "RELEASED"
-                    + " at (" + e.getX() + ", " + e.getY()
-                    + "), comp = " + componentDescr;
+                        + " at (" + e.getX() + ", " + e.getY()
+                        + "), comp = " + componentDescr;
             } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
                 msg = "WHEEL"
-                    + " at (" + e.getX() + ", " + e.getY()
-                    + "), comp = " + componentDescr;
+                        + " at (" + e.getX() + ", " + e.getY()
+                        + "), comp = " + componentDescr;
             }
             if (msg != null) {
                 msg = Tools.getCurrent().getName() + " Tool: "
-                    + Utils.debugMouseModifiers(e)
-                    + msg;
+                        + Utils.debugMouseModifiers(e)
+                        + msg;
                 if (postEvents) {
                     Events.postMouseEvent(msg);
                 } else {
@@ -272,8 +275,8 @@ public class GlobalEventWatch {
                 }
             }
         }, AWTEvent.MOUSE_EVENT_MASK
-            | AWTEvent.MOUSE_MOTION_EVENT_MASK
-            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+                | AWTEvent.MOUSE_MOTION_EVENT_MASK
+                | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
     private static String getComponentDescription(MouseEvent e) {
@@ -290,7 +293,7 @@ public class GlobalEventWatch {
     }
 
     public static void setKeyListener(KeyListener keyListener) {
-        GlobalEventWatch.keyListener = keyListener;
+        GlobalEvents.keyListener = keyListener;
     }
 
     /**

@@ -17,7 +17,7 @@
 
 package pixelitor.tools.toolhandlers;
 
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.OpenComps;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
@@ -41,7 +41,7 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (GlobalEventWatch.isSpaceDown()) {
+        if (GlobalEvents.isSpaceDown()) {
             Tools.HAND.mousePressed(e);
             handToolForwarding = true;
             return true;

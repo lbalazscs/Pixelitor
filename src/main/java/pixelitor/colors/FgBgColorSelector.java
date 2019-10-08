@@ -19,8 +19,7 @@ package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
-import pixelitor.gui.GlobalEventWatch;
-import pixelitor.gui.MappedKey;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
@@ -306,9 +305,9 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void setupKeyboardShortcuts() {
-        GlobalEventWatch.add(MappedKey.fromChar('D', true, "reset", resetToDefaultAction));
-        GlobalEventWatch.add(MappedKey.fromChar('X', true, "switch", swapColorsAction));
-        GlobalEventWatch.add(MappedKey.fromChar('R', true, "randomize", randomizeColorsAction));
+        GlobalEvents.addHotKey('D', resetToDefaultAction);
+        GlobalEvents.addHotKey('X', swapColorsAction);
+        GlobalEvents.addHotKey('R', randomizeColorsAction);
     }
 
     public void setLayerMaskEditing(boolean layerMaskEditing) {

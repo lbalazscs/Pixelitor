@@ -18,7 +18,7 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
-import pixelitor.gui.GlobalEventWatch;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ImagePreviewPanel;
@@ -117,9 +117,9 @@ public class FileChoosers {
     public static void openAsync() {
         initOpenChooser();
 
-        GlobalEventWatch.setDialogActive(true);
+        GlobalEvents.setDialogActive(true);
         int status = openChooser.showOpenDialog(PixelitorWindow.getInstance());
-        GlobalEventWatch.setDialogActive(false);
+        GlobalEvents.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
@@ -160,9 +160,9 @@ public class FileChoosers {
             saveChooser.setCurrentDirectory(customSaveDir);
         }
 
-        GlobalEventWatch.setDialogActive(true);
+        GlobalEvents.setDialogActive(true);
         int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-        GlobalEventWatch.setDialogActive(false);
+        GlobalEvents.setDialogActive(false);
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
@@ -260,9 +260,9 @@ public class FileChoosers {
             initSaveChooser();
             setupFilterToOnlyOneFormat(saveChooser, fileFilter);
 
-            GlobalEventWatch.setDialogActive(true);
+            GlobalEvents.setDialogActive(true);
             int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-            GlobalEventWatch.setDialogActive(false);
+            GlobalEvents.setDialogActive(false);
 
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveChooser.getSelectedFile();
