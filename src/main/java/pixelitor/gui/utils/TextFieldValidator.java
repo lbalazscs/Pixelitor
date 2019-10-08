@@ -17,6 +17,8 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.utils.Utils;
+
 import javax.swing.*;
 
 /**
@@ -26,37 +28,51 @@ public interface TextFieldValidator {
     // the only non-static method in this interface
     ValidationResult check(JTextField textField);
 
-    static ValidationResult hasValidDouble(JTextField textField) {
+    static ValidationResult hasValidPositiveDouble(String label, JTextField textField) {
         String text = textField.getText().trim();
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            Double.parseDouble(text);
-        } catch (NumberFormatException ex) {
-            return ValidationResult.error(text + " is not a valid number.");
+        if (text.isEmpty()) {
+            return ValidationResult.error("<b>" + label + "</b> can't be empty.");
         }
-        return ValidationResult.ok();
+        double value;
+        try {
+            value = Utils.parseDouble(text);
+        } catch (NumberFormatException ex) {
+            return ValidationResult.error("" + text + " is not a valid number for <b>" + label + "</b>");
+        }
+        if (value > 0) {
+            return ValidationResult.ok();
+        } else if (value == 0) {
+            return ValidationResult.error("<b>" + label + "</b> can't be zero.");
+        } else {
+            return ValidationResult.error("<b>" + label + "</b> must be positive.");
+        }
     }
 
-    static ValidationResult hasValidPositiveInt(JTextField textField, boolean allowZero) {
+    static ValidationResult hasValidPositiveInt(String label, JTextField textField, boolean allowZero) {
         String text = textField.getText().trim();
+        if (text.isEmpty()) {
+            return ValidationResult.error("<b>" + label + "</b> can't be empty.");
+        }
         try {
             //noinspection ResultOfMethodCallIgnored
             int value = Integer.parseInt(text);
             if (value == 0 && !allowZero) {
-                return ValidationResult.error("0 is not allowed here.");
+                return ValidationResult.error("<b>" + label + "</b> can't be 0.");
             }
             if (value < 0) {
-                return ValidationResult.error("Negative numbers are not allowed here.");
+                return ValidationResult.error("<b>" + label + "</b> must be positive.");
             }
         } catch (NumberFormatException ex) {
-            return ValidationResult.error(text + " is not a valid number.");
+            return ValidationResult.error("<b>" + label + "</b> must be an integer.");
         }
         return ValidationResult.ok();
     }
 
-    static JLayer<JTextField> createPositiveIntLayerFor(JTextField tf, boolean allowZero) {
+    static JLayer<JTextField> createPositiveIntLayer(String label,
+                                                     JTextField tf,
+                                                     boolean allowZero) {
         TFValidationLayerUI layerUI = new TFValidationLayerUI(
-            textField1 -> hasValidPositiveInt(textField1, allowZero));
+                textField1 -> hasValidPositiveInt(label, textField1, allowZero));
         return new JLayer<>(tf, layerUI);
     }
 }

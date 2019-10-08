@@ -234,11 +234,13 @@ public class AutoPaint {
             numStrokesTF = new JTextField(String.valueOf(defaultNumStrokes));
             numStrokesTF.setName("numStrokesTF");
             gbh.addLabelWithControl("Number of Strokes:",
-                TextFieldValidator.createPositiveIntLayerFor(numStrokesTF, false));
+                    TextFieldValidator.createPositiveIntLayer(
+                            "Number of Strokes", numStrokesTF, false));
 
             lengthTF = new JTextField(String.valueOf(defaultLength));
             gbh.addLabelWithControl("Average Stroke Length:",
-                TextFieldValidator.createPositiveIntLayerFor(lengthTF, false));
+                    TextFieldValidator.createPositiveIntLayer(
+                            "Average Stroke Length", lengthTF, false));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
             gbh.addLabelWithControl("Stroke Length Variability (%):",

@@ -36,11 +36,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 
-import static java.lang.Double.parseDouble;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.FILE;
+import static pixelitor.utils.Utils.parseDouble;
 
 /**
  * The settings for the tweening animation output
@@ -185,20 +185,24 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
     @Override
     public ValidationResult check(JTextField textField) {
-        if (textField == numSecondsTF || textField == fpsTF) {
-            return TextFieldValidator.hasValidDouble(textField);
-        } else if (textField == fileNameTF) {
-            TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
-
-            String fileName = textField.getText().trim();
-            String errorMessage = outputType.isOK(new File(fileName));
-            if (errorMessage == null) {
-                return ValidationResult.ok();
-            } else {
-                return ValidationResult.error(errorMessage);
-            }
+        if (textField == numSecondsTF) {
+            return TextFieldValidator.hasValidPositiveDouble("Number of Seconds", textField);
+        } else if (textField == fpsTF) {
+            return TextFieldValidator.hasValidPositiveDouble("Frames per Second", textField);
         } else {
-            throw new IllegalStateException("unexpected JTextField");
+            if (textField == fileNameTF) {
+                TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
+
+                String fileName = textField.getText().trim();
+                String errorMessage = outputType.isOK(new File(fileName));
+                if (errorMessage == null) {
+                    return ValidationResult.ok();
+                } else {
+                    return ValidationResult.error(errorMessage);
+                }
+            } else {
+                throw new IllegalStateException("unexpected JTextField");
+            }
         }
     }
 

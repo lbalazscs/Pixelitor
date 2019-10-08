@@ -73,7 +73,8 @@ public class PreferencesPanel extends JPanel {
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
         gbh.addLabelWithControl("Undo/Redo Levels: ",
-            TextFieldValidator.createPositiveIntLayerFor(undoLevelsTF, true));
+                TextFieldValidator.createPositiveIntLayer("Undo/Redo Levels",
+                        undoLevelsTF, true));
 
         IntChoiceParam.Value[] thumbSizes = {
                 new IntChoiceParam.Value("24x24 pixels", 24),

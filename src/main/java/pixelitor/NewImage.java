@@ -123,7 +123,7 @@ public final class NewImage {
             JTextField tf = new JTextField(String.valueOf(value));
             tf.setName(name);
             gbh.addLabelWithTwoControls(labelText,
-                TextFieldValidator.createPositiveIntLayerFor(tf, false),
+                    TextFieldValidator.createPositiveIntLayer(labelText, tf, false),
                     new JLabel("pixels"));
             return tf;
         }

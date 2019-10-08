@@ -72,7 +72,7 @@ public class ValidationResult {
             if (other.isOK()) {
                 return this; // with our error message
             } else {
-                return error(errorMsg + "\n" + other.errorMsg);
+                return error(errorMsg + "<br>" + other.errorMsg);
             }
         }
     }
@@ -82,7 +82,7 @@ public class ValidationResult {
             assert this == okInstance;
             return new ValidationResult(false, msg);
         } else {
-            return new ValidationResult(false, this.errorMsg + "\n" + msg);
+            return new ValidationResult(false, this.errorMsg + "<br>" + msg);
         }
     }
 
@@ -100,7 +100,7 @@ public class ValidationResult {
             }
         } else {
             if (condition) {
-                return error(errorMsg + "\n" + msg);
+                return error(errorMsg + "<br>" + msg);
             } else {
                 return this;
             }
@@ -112,12 +112,13 @@ public class ValidationResult {
     }
 
     public void showErrorDialog(Component dialogParent) {
-        Dialogs.showErrorDialog(dialogParent, "Error", errorMsg);
+        assert !errorMsg.startsWith("<html>");
+        Dialogs.showErrorDialog(dialogParent, "Error", "<html>" + errorMsg);
     }
 
     public ValidationResult addErrorIfZero(int value, String fieldName) {
         if (value == 0) {
-            return addError(String.format("<html><b>\"%s\"</b> cannot be zero.", fieldName));
+            return addError(String.format("<b>%s</b> can't be zero.", fieldName));
         } else {
             return this;
         }
@@ -125,7 +126,7 @@ public class ValidationResult {
 
     public ValidationResult addErrorIfNegative(int value, String fieldName) {
         if (value < 0) {
-            return addError(String.format("<html><b>\"%s\"</b> cannot be negative.", fieldName));
+            return addError(String.format("<b>%s</b> must be positive.", fieldName));
         } else {
             return this;
         }

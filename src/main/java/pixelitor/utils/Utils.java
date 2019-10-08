@@ -610,5 +610,23 @@ public final class Utils {
         }
         return keyText;
     }
+
+    public static double parseDouble(String s) throws NumberFormatException {
+        // don't accept strings that end with an 'f' or 'd',
+        // which are accepted by Double.parseDouble(s)
+        if (s.lastIndexOf('f') != -1) {
+            throw new NumberFormatException();
+        }
+        if (s.lastIndexOf('F') != -1) {
+            throw new NumberFormatException();
+        }
+        if (s.lastIndexOf('d') != -1) {
+            throw new NumberFormatException();
+        }
+        if (s.lastIndexOf('D') != -1) {
+            throw new NumberFormatException();
+        }
+        return Double.parseDouble(s);
+    }
 }
 
