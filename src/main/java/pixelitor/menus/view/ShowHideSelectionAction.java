@@ -21,8 +21,6 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.selection.Selection;
 
-import java.awt.event.ActionEvent;
-
 /**
  * The action that either shows or hides the selection,
  * depending on the current visibility
@@ -51,7 +49,7 @@ public class ShowHideSelectionAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean value, ActionEvent e) {
+    public void setVisibility(boolean value) {
         OpenComps.onActiveSelection(
                 selection -> selection.setHidden(!value, true));
     }

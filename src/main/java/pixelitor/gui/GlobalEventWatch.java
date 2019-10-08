@@ -17,7 +17,6 @@
 
 package pixelitor.gui;
 
-import pixelitor.menus.view.ShowHideAllAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
@@ -90,12 +89,14 @@ public class GlobalEventWatch {
             return false;
         });
 
-        // remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
-        // so that they can be used to switch between tabs/internal frames
+        // Remove Ctrl-Tab and Ctrl-Shift-Tab as focus traversal keys
+        // so that they can be used to switch between tabs/internal frames.
+        // Also remove Tab so that is works as Show/Hide All
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
             .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
         forwardKeys = new HashSet<>(forwardKeys); // make modifiable
         forwardKeys.remove(Keys.CTRL_TAB);
+        forwardKeys.remove(Keys.TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
 
         Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
@@ -110,11 +111,11 @@ public class GlobalEventWatch {
 //
         int keyCode = e.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.VK_TAB:
-                if (!dialogActive && !e.isControlDown()) {
-                    ShowHideAllAction.INSTANCE.actionPerformed(null);
-                }
-                break;
+//            case KeyEvent.VK_TAB:
+//                if (!dialogActive && !e.isControlDown()) {
+//                    ShowHideAllAction.INSTANCE.actionPerformed(null);
+//                }
+//                break;
             case KeyEvent.VK_SPACE:
                 // Alt-space is not treated as space-down because on Windows
                 // this opens the system menu, and we get the space-pressed

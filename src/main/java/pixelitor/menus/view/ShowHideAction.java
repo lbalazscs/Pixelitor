@@ -52,10 +52,10 @@ public abstract class ShowHideAction extends NamedAction {
     public void actionPerformed(ActionEvent e) {
         String newName;
         if (getCurrentVisibility()) {
-            setVisibility(false, e);
+            setVisibility(false);
             newName = showName;
         } else {
-            setVisibility(true, e);
+            setVisibility(true);
             newName = hideName;
         }
         setName(newName);
@@ -83,5 +83,5 @@ public abstract class ShowHideAction extends NamedAction {
     /**
      * Hides or shows the controlled GUI area
      */
-    public abstract void setVisibility(boolean value, ActionEvent e);
+    public abstract void setVisibility(boolean value);
 }

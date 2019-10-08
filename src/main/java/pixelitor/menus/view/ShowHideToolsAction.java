@@ -19,8 +19,6 @@ package pixelitor.menus.view;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.AppPreferences;
 
-import java.awt.event.ActionEvent;
-
 /**
  * The action that either shows or hides the tools,
  * depending on the current visibility
@@ -43,7 +41,7 @@ public class ShowHideToolsAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean value, ActionEvent e) {
+    public void setVisibility(boolean value) {
         AppPreferences.WorkSpace.setToolsVisibility(value);
     }
 }

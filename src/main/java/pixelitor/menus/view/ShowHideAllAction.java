@@ -22,7 +22,6 @@ import pixelitor.gui.StatusBar;
 import pixelitor.layers.LayersContainer;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
 
 /**
  * An either "Show Hidden" or "Hide All" action,
@@ -53,15 +52,7 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean visible, ActionEvent e) {
-        if (e != null) {
-            // We want to control this only with null events
-            // The "Hide All" JMenuItem gets activated when everything
-            // is shown (because of the menu renaming?),
-            // and triggers non-null event which would hide all again
-            return;
-        }
-
+    public void setVisibility(boolean visible) {
         PixelitorWindow pw = PixelitorWindow.getInstance();
         if (!visible) {
             histogramsWereShown = pw.areHistogramsShown();
