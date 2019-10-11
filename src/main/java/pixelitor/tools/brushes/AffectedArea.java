@@ -27,10 +27,10 @@ import java.awt.Rectangle;
  */
 public class AffectedArea {
     // affected area coordinates (in image space)
-    private double minX = 0;
-    private double minY = 0;
-    private double maxX = 0;
-    private double maxY = 0;
+    private double minX = Double.POSITIVE_INFINITY;
+    private double minY = Double.POSITIVE_INFINITY;
+    private double maxX = Double.NEGATIVE_INFINITY;
+    private double maxY = Double.NEGATIVE_INFINITY;
 
     public AffectedArea() {
     }
@@ -58,13 +58,15 @@ public class AffectedArea {
         double y = p.getImY();
         if(x > maxX) {
             maxX = x;
-        } else if(x < minX) {
+        }
+        if (x < minX) {
             minX = x;
         }
 
         if(y > maxY) {
             maxY = y;
-        } else if(y < minY) {
+        }
+        if (y < minY) {
             minY = y;
         }
     }

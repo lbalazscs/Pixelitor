@@ -79,9 +79,9 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
     }
 
     public static boolean showYesNoQuestionDialog(String title, String msg) {
@@ -104,10 +104,10 @@ public class Dialogs {
 
     public static boolean showYesNoDialog(Component parent, String title,
                                           String msg, int messageType) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         int reply = JOptionPane.showConfirmDialog(parent, msg, title,
                 YES_NO_OPTION, messageType);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
 
         return reply == YES_OPTION;
     }
@@ -122,11 +122,11 @@ public class Dialogs {
                                              Object[] options,
                                              int initialOptionIndex,
                                              int messageType) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         int userAnswer = JOptionPane.showOptionDialog(getParent(), msg, title,
                 OK_CANCEL_OPTION, messageType, null,
                 options, options[initialOptionIndex]);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
 
         return userAnswer == OK_OPTION;
     }
@@ -136,9 +136,9 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
     }
 
     public static void showFileNotWritableDialog(File file) {
@@ -162,9 +162,9 @@ public class Dialogs {
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
     }
 
     public static void showNotImageLayerDialog() {
@@ -302,12 +302,13 @@ public class Dialogs {
                         "<br>Your changes will be lost if you don't save them.</html>",
                 compName);
 
-        GlobalEvents.setDialogActive(true);
+        String title = "Unsaved changes";
+        GlobalEvents.dialogOpened(title);
         int answer = JOptionPane.showOptionDialog(
                 PixelitorWindow.getInstance(), new JLabel(question),
-                "Unsaved changes", YES_NO_CANCEL_OPTION,
+                title, YES_NO_CANCEL_OPTION,
                 WARNING_MESSAGE, null, options, options[0]);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
         return answer;
     }
 }

@@ -22,6 +22,7 @@ import pixelitor.gui.PixelitorWindow;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.Window;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -46,7 +47,7 @@ public class DialogBuilder {
     private JFrame frameOwner;
     private JDialog dialogOwner;
     private String title;
-    private boolean reconfigureGlobalKeyWatch = true;
+    private boolean notifyGlobalEvents = true;
     private boolean modal = true;
     private boolean disposeWhenClosing = true;
 
@@ -113,6 +114,7 @@ public class DialogBuilder {
      * Uses the given component as the contents of the dialog.
      */
     public DialogBuilder content(JComponent form) {
+        assert form != null;
         this.content = form;
         return this;
     }
@@ -165,7 +167,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder noGlobalKeyChange() {
-        this.reconfigureGlobalKeyWatch = false;
+        this.notifyGlobalEvents = false;
         return this;
     }
 
@@ -225,10 +227,6 @@ public class DialogBuilder {
         addContent(d);
         addButtons(d);
 
-        if (reconfigureGlobalKeyWatch) {
-            GlobalEvents.setDialogActive(true);
-        }
-
         Runnable cancelTask = () -> dialogCancelled(d);
         GUIUtils.setupCancelWhenTheDialogIsClosed(d, cancelTask);
         GUIUtils.setupCancelWhenEscIsPressed(d, cancelTask);
@@ -243,12 +241,12 @@ public class DialogBuilder {
             d = dialogFactory.get();
         } else {
             if (frameOwner != null) {
-                d = new JDialog(frameOwner);
+                d = new BuiltDialog(frameOwner, notifyGlobalEvents);
             } else if (dialogOwner != null) {
-                d = new JDialog(dialogOwner);
+                d = new BuiltDialog(dialogOwner, notifyGlobalEvents);
             } else {
                 PixelitorWindow pw = PixelitorWindow.getInstance();
-                d = new JDialog(pw);
+                d = new BuiltDialog(pw, notifyGlobalEvents);
             }
         }
         return d;
@@ -327,9 +325,6 @@ public class DialogBuilder {
 
     private void closeDialog(JDialog d) {
         d.setVisible(false);
-        if (reconfigureGlobalKeyWatch) {
-            GlobalEvents.setDialogActive(false);
-        }
         // dispose should not be called if the dialog will be re-shown
         // because then AssertJ-Swing doesn't find it even if it is there
         if (disposeWhenClosing) {
@@ -343,6 +338,32 @@ public class DialogBuilder {
         }
         if (cancelText == null) {
             cancelText = DEFAULT_CANCEL_TEXT;
+        }
+    }
+
+    static class BuiltDialog extends JDialog {
+        private final boolean notifyGlobalEvents;
+
+        public BuiltDialog(Frame owner, boolean notifyGlobalEvents) {
+            super(owner);
+            this.notifyGlobalEvents = notifyGlobalEvents;
+        }
+
+        public BuiltDialog(Window owner, boolean notifyGlobalEvents) {
+            super(owner);
+            this.notifyGlobalEvents = notifyGlobalEvents;
+        }
+
+        @Override
+        public void setVisible(boolean b) {
+            if (notifyGlobalEvents) {
+                if (b) {
+                    GlobalEvents.dialogOpened(getTitle());
+                } else {
+                    GlobalEvents.dialogClosed(getTitle());
+                }
+            }
+            super.setVisible(b);
         }
     }
 }

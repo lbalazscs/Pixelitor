@@ -117,9 +117,9 @@ public class FileChoosers {
     public static void openAsync() {
         initOpenChooser();
 
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened("Open");
         int status = openChooser.showOpenDialog(PixelitorWindow.getInstance());
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed("Open");
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
@@ -160,9 +160,9 @@ public class FileChoosers {
             saveChooser.setCurrentDirectory(customSaveDir);
         }
 
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened("Save");
         int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed("Save");
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
@@ -260,9 +260,9 @@ public class FileChoosers {
             initSaveChooser();
             setupFilterToOnlyOneFormat(saveChooser, fileFilter);
 
-            GlobalEvents.setDialogActive(true);
+            GlobalEvents.dialogOpened("Save");
             int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
-            GlobalEvents.setDialogActive(false);
+            GlobalEvents.dialogClosed("Save");
 
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveChooser.getSelectedFile();

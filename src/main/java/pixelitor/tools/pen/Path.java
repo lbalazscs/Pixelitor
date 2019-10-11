@@ -17,7 +17,6 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -26,7 +25,6 @@ import pixelitor.tools.pen.history.PathEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
@@ -339,11 +337,11 @@ public class Path implements Serializable {
         if (this.buildState == newState) {
             return;
         }
-        if (Build.isDevelopment()) {
-            Messages.showInStatusBar("<html><font color=red>" + buildState
-                    + "</font> \u21e8 <font color=#004E00>" + newState
-                    + "</font> (" + reason + ")");
-        }
+//        if (Build.isDevelopment()) {
+//            Messages.showInStatusBar("<html><font color=red>" + buildState
+//                    + "</font> \u21e8 <font color=#004E00>" + newState
+//                    + "</font> (" + reason + ")");
+//        }
 
         prevBuildState = buildState;
 

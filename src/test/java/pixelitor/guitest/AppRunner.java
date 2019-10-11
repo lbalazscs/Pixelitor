@@ -1,3 +1,20 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package pixelitor.guitest;
 
 import com.bric.util.JVM;
@@ -28,6 +45,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -39,26 +57,30 @@ public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
     public static final int ROBOT_DELAY_SLOW = 300; // millis
     private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = ThreadLocal
-        .withInitial(() -> new SimpleDateFormat("HH:mm"));
+            .withInitial(() -> new SimpleDateFormat("HH:mm"));
 
     private final Robot robot;
     private final Mouse mouse;
     private final Keyboard keyboard;
     private final FrameFixture pw;
 
-    public AppRunner(File inputDir) {
+    public AppRunner(File inputDir, String... fileNames) {
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
+        String[] paths = Stream.of(fileNames)
+                .map(fileName -> new File(inputDir, fileName).getPath())
+                .toArray(String[]::new);
+
         ApplicationLauncher
-            .application("pixelitor.Pixelitor")
-            .withArgs(new File(inputDir, "a.jpg").getPath())
-            .start();
+                .application("pixelitor.Pixelitor")
+                .withArgs(paths)
+                .start();
 
         new PixelitorEventListener().register();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
-            .withTimeout(30, SECONDS)
-            .using(robot);
+                .withTimeout(30, SECONDS)
+                .using(robot);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
 
@@ -97,6 +119,7 @@ public class AppRunner {
             keyboard.releaseModifierKeys();
             throw t;
         }
+        keyboard.releaseModifierKeys();
     }
 
     void setupDelayBetweenEvents() {
@@ -183,8 +206,8 @@ public class AppRunner {
         DialogFixture dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
-            .deleteText()
-            .enterText(String.valueOf(targetWidth));
+                .deleteText()
+                .enterText(String.valueOf(targetWidth));
 
         // no need to also set the height, because
         // constrain proportions is checked by default
@@ -198,15 +221,15 @@ public class AppRunner {
         DialogFixture dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
-            .deleteText()
-            .enterText(String.valueOf(targetWidth));
+                .deleteText()
+                .enterText(String.valueOf(targetWidth));
 
         // disable constrain proportions
         dialog.checkBox().uncheck();
 
         dialog.textBox("heightTF")
-            .deleteText()
-            .enterText(String.valueOf(targetHeight));
+                .deleteText()
+                .enterText(String.valueOf(targetHeight));
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -214,8 +237,8 @@ public class AppRunner {
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
         findPopupMenuFixtureByText(popupMenu, text)
-            .requireEnabled()
-            .click();
+                .requireEnabled()
+                .click();
     }
 
     void expectAndCloseErrorDialog() {
@@ -301,73 +324,73 @@ public class AppRunner {
 
     static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
         JMenuItemFixture menuItemFixture = popupMenu.menuItem(
-            new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
-                @Override
-                protected boolean isMatching(JMenuItem menuItem) {
-                    if (!menuItem.isShowing()) {
-                        return false; // not interested in menuItems that are not currently displayed
+                new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+                    @Override
+                    protected boolean isMatching(JMenuItem menuItem) {
+                        if (!menuItem.isShowing()) {
+                            return false; // not interested in menuItems that are not currently displayed
+                        }
+                        String menuItemText = menuItem.getText();
+                        if (menuItemText == null) {
+                            menuItemText = "";
+                        }
+                        return menuItemText.equals(text);
                     }
-                    String menuItemText = menuItem.getText();
-                    if (menuItemText == null) {
-                        menuItemText = "";
-                    }
-                    return menuItemText.equals(text);
-                }
 
-                @Override
-                public String toString() {
-                    return "[Popup menu item Matcher, text = " + text + "]";
-                }
-            });
+                    @Override
+                    public String toString() {
+                        return "[Popup menu item Matcher, text = " + text + "]";
+                    }
+                });
 
         return menuItemFixture;
     }
 
     static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         JButtonFixture buttonFixture = container.button(
-            new GenericTypeMatcher<JButton>(JButton.class) {
-                @Override
-                protected boolean isMatching(JButton button) {
-                    if (!button.isShowing()) {
-                        return false; // not interested in buttons that are not currently displayed
+                new GenericTypeMatcher<JButton>(JButton.class) {
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        if (!button.isShowing()) {
+                            return false; // not interested in buttons that are not currently displayed
+                        }
+                        Action action = button.getAction();
+                        if (action == null) {
+                            return false;
+                        }
+                        String buttonActionName = (String) action.getValue(Action.NAME);
+                        return actionName.equals(buttonActionName);
                     }
-                    Action action = button.getAction();
-                    if (action == null) {
-                        return false;
-                    }
-                    String buttonActionName = (String) action.getValue(Action.NAME);
-                    return actionName.equals(buttonActionName);
-                }
 
-                @Override
-                public String toString() {
-                    return "[Button Action Name Matcher, action name = " + actionName + "]";
-                }
-            });
+                    @Override
+                    public String toString() {
+                        return "[Button Action Name Matcher, action name = " + actionName + "]";
+                    }
+                });
 
         return buttonFixture;
     }
 
     static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
         JButtonFixture buttonFixture = container.button(
-            new GenericTypeMatcher<JButton>(JButton.class) {
-                @Override
-                protected boolean isMatching(JButton button) {
-                    if (!button.isShowing()) {
-                        return false; // not interested in buttons that are not currently displayed
+                new GenericTypeMatcher<JButton>(JButton.class) {
+                    @Override
+                    protected boolean isMatching(JButton button) {
+                        if (!button.isShowing()) {
+                            return false; // not interested in buttons that are not currently displayed
+                        }
+                        String buttonToolTip = button.getToolTipText();
+                        if (buttonToolTip == null) {
+                            buttonToolTip = "";
+                        }
+                        return buttonToolTip.equals(toolTip);
                     }
-                    String buttonToolTip = button.getToolTipText();
-                    if (buttonToolTip == null) {
-                        buttonToolTip = "";
-                    }
-                    return buttonToolTip.equals(toolTip);
-                }
 
-                @Override
-                public String toString() {
-                    return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
-                }
-            });
+                    @Override
+                    public String toString() {
+                        return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
+                    }
+                });
 
         return buttonFixture;
     }

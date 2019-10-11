@@ -25,6 +25,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.tools.Tool;
@@ -65,6 +66,8 @@ import static pixelitor.tools.Tools.PEN;
 import static pixelitor.tools.Tools.SELECTION;
 import static pixelitor.tools.Tools.SMUDGE;
 import static pixelitor.tools.Tools.ZOOM;
+import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
+import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
 /**
  * A standalone program which tests the tools with randomly
@@ -102,7 +105,7 @@ public class RandomToolTest {
         EDT.run(this::setupPauseKey);
         EDT.run(this::setupExitKey);
 
-        app = new AppRunner(inputDir);
+        app = new AppRunner(inputDir, "b.jpg", "a.jpg");
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
         robot = app.getRobot();
@@ -115,6 +118,7 @@ public class RandomToolTest {
 
         app.runTests(this::mainLoop);
 
+        // It's the final countdown...
         mainThreadExitLatch.countDown();
     }
 
@@ -221,6 +225,7 @@ public class RandomToolTest {
         Utils.sleep(200, MILLISECONDS);
         activate(tool, testNr);
         randomizeToolSettings(tool);
+        GlobalEvents.assertDialogNestingIs(0);
 
         // set the source point for the clone tool
         if (tool == CLONE) {
@@ -231,7 +236,10 @@ public class RandomToolTest {
         dragRandomly(tool);
         randomEvents(tool);
         pushToolButtons(tool);
+        GlobalEvents.assertDialogNestingIs(0);
+
         cleanupAfterToolTest(tool);
+        GlobalEvents.assertDialogNestingIs(0);
 
         Utils.sleep(200, MILLISECONDS);
         checkControlVariables();
@@ -239,7 +247,12 @@ public class RandomToolTest {
 
     private void activate(Tool tool, long testNr) {
         log(tool, "activating, starting test " + Ansi.red(testNr + "."));
-        app.clickTool(tool);
+        boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+        if (toolsShown) {
+            app.clickTool(tool);
+        } else {
+            keyboard.pressChar(tool.getActivationKey());
+        }
     }
 
     private void randomizeToolSettings(Tool tool) {
@@ -263,6 +276,8 @@ public class RandomToolTest {
         events.add(this::doubleClick);
         events.add(this::pressEnter);
         events.add(this::pressEsc);
+        events.add(this::pressTab);
+        events.add(this::pressCtrlTab);
         events.add(this::nudge);
         events.add(this::possiblyUndoRedo);
     }
@@ -270,7 +285,7 @@ public class RandomToolTest {
     private void randomEvents(Tool tool) {
         Collections.shuffle(events);
         for (Consumer<Tool> event : events) {
-            Rnd.withProbability(0.3, () -> event.accept(tool));
+            Rnd.withProbability(0.2, () -> event.accept(tool));
             keyboard.assertModifiersAreReleased();
         }
     }
@@ -283,6 +298,16 @@ public class RandomToolTest {
     private void pressEsc(Tool tool) {
         log(tool, "pressing Esc");
         keyboard.pressEsc();
+    }
+
+    private void pressCtrlTab(Tool tool) {
+        log(tool, "pressing Ctrl-Tab");
+        keyboard.pressCtrlTab();
+    }
+
+    private void pressTab(Tool tool) {
+        log(tool, "pressing Tab");
+        keyboard.pressTab();
     }
 
     private void nudge(Tool tool) {
@@ -514,6 +539,11 @@ public class RandomToolTest {
     }
 
     private void pushToolButtons(Tool tool) {
+        boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+        if (!toolsShown) {
+            return;
+        }
+
         Tool actual = EDT.call(Tools::getCurrent);
         if (actual != tool) {
             // this can happen in rare cases,
@@ -624,19 +654,18 @@ public class RandomToolTest {
     }
 
     private void setupPauseKey() {
-        char pauseKey = 'a';
-        GlobalEvents.addHotKey(pauseKey, new AbstractAction() {
+        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (paused) {
-                    System.err.println(pauseKey + " pressed, starting again.");
+                    System.err.println(PAUSE_KEY_CHAR + " pressed, starting again.");
                     paused = false;
                     synchronized (resumeMonitor) {
                         // wake up the waiting main thread from the EDT
                         resumeMonitor.notify();
                     }
                 } else {
-                    System.err.println(pauseKey + " pressed, pausing.");
+                    System.err.println(PAUSE_KEY_CHAR + " pressed, pausing.");
                     paused = true;
                 }
             }
@@ -645,11 +674,10 @@ public class RandomToolTest {
 
     private void setupExitKey() {
         // This key not only pauses the testing, but also exits the app
-        char exitKey = 'j';
-        GlobalEvents.addHotKey(exitKey, new AbstractAction() {
+        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nexiting because '" + exitKey + "' was pressed");
+                System.err.println("\nexiting because '" + EXIT_KEY_CHAR + "' was pressed");
 
                 // we are on the EDT now, and before exiting
                 // we want to wait until the modifier keys are released
@@ -687,7 +715,7 @@ public class RandomToolTest {
             }
         } catch (InterruptedException e) {
             System.err.println("Unexpected InterruptedException");
-            System.exit(1);
+            System.exit(2);
         }
 
         // The EDT is still running => force the exit

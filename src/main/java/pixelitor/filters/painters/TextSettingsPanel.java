@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.ColorParamGUI;
@@ -33,7 +32,6 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.TextLayer;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -46,7 +44,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
-import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -361,17 +358,17 @@ public class TextSettingsPanel extends FilterGUI
         if (effectsPanel != null) {
             areaEffects = effectsPanel.getEffects();
 
-            // adjust the drop shadow angle so that it is
-            // in the right direction even if the text is rotated
-            ShadowPathEffect dropShadowEffect = areaEffects.getDropShadowEffect();
-            if (dropShadowEffect != null && textRotationAngle != 0) {
-                Point2D offset = dropShadowEffect.getOffset();
-                double distance = offset.distance(0, 0);
-                double angle = Math.atan2(offset.getY(), offset.getX());
-                angle -= textRotationAngle;
-                Point2D adjustedOffset = Utils.offsetFromPolar(distance, angle);
-                dropShadowEffect.setOffset(adjustedOffset);
-            }
+//            // adjust the drop shadow angle so that it is
+//            // in the right direction even if the text is rotated
+//            ShadowPathEffect dropShadowEffect = areaEffects.getDropShadowEffect();
+//            if (dropShadowEffect != null && textRotationAngle != 0) {
+//                Point2D offset = dropShadowEffect.getOffset();
+//                double distance = offset.distance(0, 0);
+//                double angle = Math.atan2(offset.getY(), offset.getX());
+//                angle -= textRotationAngle;
+//                Point2D adjustedOffset = Utils.offsetFromPolar(distance, angle);
+//                dropShadowEffect.setOffset(adjustedOffset);
+//            }
         }
 
         Font selectedFont = getSelectedFont();

@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import com.bric.geom.ShapeUtils;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -29,6 +30,7 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -715,10 +717,20 @@ public class SubPath implements Serializable {
 
         GeneralPath gp = new GeneralPath();
         addToComponentSpaceShape(gp);
+
+        assert ShapeUtils.isValid(gp) : "invalid shape for " + toDetailedString();
+
         Rectangle2D coBoundingBox = gp.getBounds2D();
 
-        if (Double.isNaN(coBoundingBox.getX())) {
-            // TODO in some cases x, y, width, height are all NaNs, why?
+        boolean badX = Double.isNaN(coBoundingBox.getX());
+        boolean badY = Double.isNaN(coBoundingBox.getY());
+        boolean badWidth = Double.isNaN(coBoundingBox.getWidth());
+        boolean badHeight = Double.isNaN(coBoundingBox.getHeight());
+        if (badX || badY || badWidth || badHeight) {
+            // TODO in some rare cases x, y, width, height are NaNs, why?
+            if (RandomGUITest.isRunning()) {
+                throw new IllegalStateException("bad coordinates for " + toDetailedString());
+            }
             return null;
         }
 

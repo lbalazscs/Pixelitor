@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class EffectsParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         assert adjustmentListener != null;
-        effectsPanel = new EffectsPanel(adjustmentListener, null);
+        ensureEffectsPanelIsCreated();
 
         if (separateDialog) {
             DefaultButton button = new DefaultButton(effectsPanel);
@@ -61,6 +61,8 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     public JDialog buildDialog(JDialog owner, boolean modal) {
+        ensureEffectsPanelIsCreated();
+
         DialogBuilder db = new DialogBuilder();
         if (owner != null) {
             db = db.owner(owner);
@@ -78,13 +80,15 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     public AreaEffects getEffects() {
-        // if a GUI filter is running without a GUI
-        // (for example in a RandomGUITest), the panel needs to be created here
+        ensureEffectsPanelIsCreated();
+
+        return effectsPanel.getEffects();
+    }
+
+    private void ensureEffectsPanelIsCreated() {
         if (effectsPanel == null) {
             effectsPanel = new EffectsPanel(adjustmentListener, null);
         }
-
-        return effectsPanel.getEffects();
     }
 
     public void setEffects(AreaEffects effects) {

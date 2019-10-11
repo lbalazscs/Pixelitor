@@ -62,8 +62,6 @@ public abstract class AbstractBrushTool extends Tool {
     public static final int DEFAULT_BRUSH_RADIUS = 10;
     private final boolean canHaveSymmetry;
 
-    private boolean respectSelection = true; // false while tracing a selection
-
     private JComboBox<BrushType> typeCB;
     protected JCheckBox lazyMouseCB;
     private JDialog lazyMouseDialog;
@@ -85,7 +83,7 @@ public abstract class AbstractBrushTool extends Tool {
     DrawDestination drawDestination;
     private RangeParam lazyMouseDist;
     private RangeParam lazyMouseSpacing;
-    public static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
+    private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
 
 //    double lastCoX;
 //    double lastCoY;
@@ -314,9 +312,7 @@ public abstract class AbstractBrushTool extends Tool {
         Graphics2D g = drawDestination.createGraphics(dr, composite);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initializeGraphics(g);
-        if (respectSelection) {
-            comp.applySelectionClipping(g);
-        }
+        comp.applySelectionClipping(g);
 
         brush.setTarget(comp, g);
         return g;
@@ -395,20 +391,13 @@ public abstract class AbstractBrushTool extends Tool {
         resetInitialState();
     }
 
-    @Override
-    public void resetInitialState() {
-        respectSelection = true;
-    }
-
     /**
      * Traces the given shape with the current brush tool
      */
     public void trace(Drawable dr, Shape shape) {
         try {
-            respectSelection = false;
-
+            affectedArea = new AffectedArea();
             doTrace(dr, shape);
-
             finishBrushStroke(dr);
         } finally {
             resetInitialState();

@@ -373,7 +373,7 @@ public class ShapesTool extends DragTool {
     private void convertToSelection() {
         assert state == TRANSFORM : "state = " + state;
 
-        Shape shape = styledShape.getEffectiveShape();
+        Shape shape = styledShape.getShapeForSelection();
 
         Composition comp = OpenComps.getActiveCompOrNull();
 
@@ -499,6 +499,14 @@ public class ShapesTool extends DragTool {
     @VisibleForTesting
     public ShapesToolState getState() {
         return state;
+    }
+
+    @Override
+    public String getStateInfo() {
+        return settings.getSelectedType()
+                + ", fp=" + settings.getSelectedFillPaint()
+                + ", sp=" + settings.getSelectedStrokePaint()
+                + ", state=" + state;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,7 +76,6 @@ public abstract class Wizard {
             protected void cancelAction() {
                 wizardPage.onWizardCanceled(dr);
                 super.cancelAction();
-                dispose();
             }
 
             @Override
@@ -107,7 +106,7 @@ public abstract class Wizard {
 
         WizardPage nextPage = wizardPage.getNext();
         if (nextPage == null) { // dialog finished
-            dialog.dispose();
+            dialog.close();
             finalAction();
         } else {
             JComponent panel = nextPage.getPanel(this, dr);

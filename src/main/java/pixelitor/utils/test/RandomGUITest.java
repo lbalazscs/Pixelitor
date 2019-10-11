@@ -38,6 +38,7 @@ import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.GlobalEvents;
@@ -116,6 +117,8 @@ import static pixelitor.gui.ImageArea.Mode.TABS;
  * can control other apps as well if they escape.
  */
 public class RandomGUITest {
+    public static final char EXIT_KEY_CHAR = 'J';
+    public static final char PAUSE_KEY_CHAR = 'A';
     private static final Random rand = new Random();
 
     // set to null to select random tools
@@ -145,7 +148,7 @@ public class RandomGUITest {
 
     private static Rectangle startBounds;
 
-    private static final boolean enableCopyPaste = Utils.getJavaMainVersion() != 11;
+    private static final boolean enableCopyPaste = false;
 
     /**
      * Utility class with static methods
@@ -173,10 +176,10 @@ public class RandomGUITest {
         numPastedImages = 0;
 
         // make sure it can be stopped by pressing a key
-        GlobalEvents.addHotKey('a', new AbstractAction() {
+        GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.err.println("\nRandomGUITest: 'a' pressed");
+                        System.err.printf("\nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                         keepRunning = false;
                     }
                 }
@@ -184,16 +187,17 @@ public class RandomGUITest {
         keepRunning = true;
 
         // This key not only stops the testing, but also exits the app
-        GlobalEvents.addHotKey('j', new AbstractAction() {
+        GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nRandomGUITest: exiting app because 'j' was pressed");
+                System.err.printf("\nRandomGUITest: exiting app because '%s' was pressed.%n",
+                        EXIT_KEY_CHAR);
                 System.exit(1);
             }
         });
 
-        System.out.printf("RandomGUITest started at %s, the 'a' key stops, the 'j' key exits.%n",
-                DATE_FORMAT.get().format(new Date()));
+        System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
+                DATE_FORMAT.get().format(new Date()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
 
         Robot r = null;
         try {
@@ -487,6 +491,9 @@ public class RandomGUITest {
 
         long runCountBefore = Filter.runCount;
 
+        if (f instanceof TextFilter) {
+            ((TextFilter) f).setSettings(TextSettings.createRandomSettings(rand));
+        }
         if (f instanceof FilterWithGUI) {
             ((FilterWithGUI) f).randomizeSettings();
         }
@@ -612,7 +619,8 @@ public class RandomGUITest {
 
     private static final int[] keyEvents = {VK_1,
             VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
-            VK_A, VK_B, VK_C,
+            // skip A, because it is the stop keystroke
+            VK_B, VK_C,
             VK_D, VK_E, VK_F,
             VK_G, VK_H, VK_I,
             // skip J, because it is the exit keystroke
@@ -623,7 +631,7 @@ public class RandomGUITest {
             // skip T, because it brings up the text layer dialog
             VK_U,
             // skip V, because too much Move Tool consumes all the memory
-            // skip W, because it is the stop keystroke
+            VK_W,
             VK_Z,
             VK_X,
             VK_Y,

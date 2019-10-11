@@ -59,7 +59,7 @@ public class PenTool extends Tool {
         new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
     private final AbstractAction toSelectionAction;
-    private final AbstractAction traceAction;
+    //    private final AbstractAction traceAction;
     private final AbstractAction dumpPathAction;
 
     private final JLabel rubberBandLabel = new JLabel("Show Rubber Band:");
@@ -90,12 +90,12 @@ public class PenTool extends Tool {
                 convertToSelection();
             }
         };
-        traceAction = new AbstractAction("Trace...") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                TracePathPanel.showInDialog(path);
-            }
-        };
+//        traceAction = new AbstractAction("Trace...") {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                TracePathPanel.showInDialog(path);
+//            }
+//        };
         dumpPathAction = new AbstractAction("Dump") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -323,6 +323,7 @@ public class PenTool extends Tool {
         }
 
         super.compActivated(oldCV, newCV);
+        path = newCV.getComp().getActivePath();
 
         assert OpenComps.getActiveView() == newCV;
         assert checkPathConsistency();
@@ -393,6 +394,7 @@ public class PenTool extends Tool {
             }
             comp.repaint();
         }
+        enableActionsBasedOnFinishedPath(path != null);
         return compPath;
     }
 
@@ -430,7 +432,12 @@ public class PenTool extends Tool {
     // TODO enable them while building, as soon as the path != null
     public void enableActionsBasedOnFinishedPath(boolean b) {
         toSelectionAction.setEnabled(b);
-        traceAction.setEnabled(b);
+
+        traceWithBrush.setEnabled(b);
+        traceWithEraser.setEnabled(b);
+        traceWithSmudge.setEnabled(b);
+//        traceAction.setEnabled(b);
+
         dumpPathAction.setEnabled(b);
     }
 
@@ -461,7 +468,7 @@ public class PenTool extends Tool {
 
     @Override
     public String getStateInfo() {
-        return mode.toString();
+        return mode + ", hasPath = " + hasPath();
     }
 
     @Override

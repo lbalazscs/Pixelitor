@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -95,8 +95,6 @@ public class DraggablePoint extends Point2D.Double {
         assert view != null;
         this.view = view;
 
-        assert !isNaN(x);
-        assert !isNaN(y);
         setLocationOnlyForThis(x, y);
 
         this.name = name;
@@ -112,6 +110,9 @@ public class DraggablePoint extends Point2D.Double {
     // setLocation is overridden in subclasses to also move related
     // points, but we also need a pure version, which is final
     public final void setLocationOnlyForThis(double x, double y) {
+        assert !isNaN(x);
+        assert !isNaN(y);
+
         this.x = x;
         this.y = y;
 
@@ -153,7 +154,7 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(p.getX(), p.getY());
     }
 
-    public final void setImLocationOnlyForThis(Point2D p) {
+    private void setImLocationOnlyForThis(Point2D p) {
         imX = p.getX();
         imY = p.getY();
         restoreCoordsFromImSpace(view);

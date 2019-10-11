@@ -354,7 +354,7 @@ public class SelectionTool extends DragTool {
         SelectionType type = getSelectionType();
         SelectionInteraction interaction = getCurrentInteraction();
 
-        return "type = " + type + ", interaction = " + interaction;
+        return type + ", " + interaction;
     }
 
     @Override

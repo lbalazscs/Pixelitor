@@ -17,6 +17,7 @@
 
 package pixelitor.tools.shapes;
 
+import com.jhlabs.awt.WobbleStroke;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.filters.gui.StrokeParam;
@@ -42,6 +43,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -124,12 +126,12 @@ public class StyledShape implements Cloneable {
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
-        if (hasFillPaint()) {
+        if (hasFill()) {
             if (shapeType.isClosed()) {
                 fillPaintType.prepare(g, transformedImDrag);
                 g.fill(shape);
                 fillPaintType.finish(g);
-            } else if (!hasStrokePaint()) {
+            } else if (!hasStroke()) {
                 // Special case: an open shape cannot be filled,
                 // it can be only stroked, even if stroke is disabled.
                 // So use the default stroke and the fill paint.
@@ -140,7 +142,7 @@ public class StyledShape implements Cloneable {
             }
         }
 
-        if (hasStrokePaint()) {
+        if (hasStroke()) {
             g.setStroke(stroke);
             strokePaintType.prepare(g, transformedImDrag);
             g.draw(shape);
@@ -148,24 +150,48 @@ public class StyledShape implements Cloneable {
         }
 
         if (effects != null) {
-            if (hasFillPaint()) {
-                effects.drawOn(g, shape);
-            } else if (hasStrokePaint()) {
-                // special case if there is only stroke:
-                // apply the effect on the stroke outline
-                Shape outline = stroke.createStrokedShape(shape);
-                effects.drawOn(g, outline);
-            } else { // "effects only"
-                effects.drawOn(g, shape);
+            if (hasStroke()) {
+                if (shapeType.isClosed()) {
+                    // add the outline area of the stroke to the shape area
+                    // to get the shape for the effects, but these Area operations
+                    // could be too slow for the WobbleStroke
+                    if (stroke instanceof WobbleStroke) {
+                        // give up, just draw something
+                        effects.drawOn(g, shape);
+                    } else {
+                        // do the correct thing
+                        Shape strokeOutline = stroke.createStrokedShape(shape);
+                        Area strokeOutlineArea = new Area(strokeOutline);
+                        Area combined = new Area(shape);
+                        combined.add(strokeOutlineArea);
+                        effects.drawOn(g, combined);
+                    }
+                } else {
+                    if (stroke instanceof WobbleStroke) {
+                        // be careful and consistent with the behavior above
+                        effects.drawOn(g, shape);
+                    } else {
+                        // Open shape with stroke: apply the effects on the stroke outline
+                        Shape outline = stroke.createStrokedShape(shape);
+                        effects.drawOn(g, outline);
+                    }
+                }
+            } else { // no stroke
+                if (shapeType.isClosed()) {
+                    effects.drawOn(g, shape); // simplest case
+                } else {
+                    Shape defaultOutline = STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
+                    effects.drawOn(g, defaultOutline);
+                }
             }
         }
     }
 
-    private boolean hasStrokePaint() {
+    private boolean hasStroke() {
         return strokePaintType != NONE;
     }
 
-    private boolean hasFillPaint() {
+    private boolean hasFill() {
         return fillPaintType != NONE;
     }
 
@@ -339,7 +365,7 @@ public class StyledShape implements Cloneable {
     private int calcThickness(ShapeSettings settings) {
         int thickness = 0;
         int extraStrokeThickness = 0;
-        if (hasStrokePaint()) {
+        if (hasStroke()) {
             StrokeParam strokeParam = settings.getStrokeParam();
 
             thickness = strokeParam.getStrokeWidth();
@@ -446,13 +472,14 @@ public class StyledShape implements Cloneable {
     }
 
     /**
-     * Return a shape that is guaranteed to be closed and
-     * corresponds to the displayed pixels (ignoring the effects)
+     * Return a shape that is guaranteed to be closed and corresponds
+     * to the displayed pixels. The effects are ignored and the stroke
+     * is considered only for open shapes.
      */
-    public Shape getEffectiveShape() {
+    public Shape getShapeForSelection() {
         if (shapeType.isClosed()) {
             return shape;
-        } else if (hasStrokePaint()) {
+        } else if (hasStroke()) {
             // the shape is not closed, but there is a stroke
             return stroke.createStrokedShape(shape);
         } else {

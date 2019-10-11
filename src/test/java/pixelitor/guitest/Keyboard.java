@@ -23,6 +23,7 @@ import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.colors.FgBgColors;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.OpenComps;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Utils;
@@ -32,6 +33,7 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
+import static java.awt.Event.TAB;
 import static java.awt.event.InputEvent.CTRL_MASK;
 import static java.awt.event.InputEvent.SHIFT_MASK;
 import static java.awt.event.KeyEvent.*;
@@ -186,10 +188,9 @@ public class Keyboard {
 
     void nudge(ArrowKey key) {
         int keyCode = key.getKeyCode();
-        boolean shiftDown = key.isShiftDown();
 
         if (osLevelKeyEvents) {
-            if (shiftDown) {
+            if (key.isShiftDown()) {
                 // TODO for some reason the shift is not detected
                 pw.pressKey(VK_SHIFT).pressKey(keyCode)
                         .releaseKey(keyCode).releaseKey(VK_SHIFT);
@@ -197,7 +198,7 @@ public class Keyboard {
                 pw.pressKey(VK_RIGHT).releaseKey(VK_RIGHT);
             }
         } else {
-            if (shiftDown) {
+            if (key.isShiftDown()) {
                 postKeyEventToEventQueue(SHIFT_MASK, keyCode);
             } else {
                 postKeyEventToEventQueue(0, keyCode);
@@ -283,6 +284,31 @@ public class Keyboard {
         }
     }
 
+    public void pressTab() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(TAB).releaseKey(TAB);
+        } else {
+            postKeyEventToEventQueue(0, TAB);
+        }
+    }
+
+    public void pressCtrlTab() {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(TAB)
+                    .releaseKey(TAB).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(CTRL_MASK, TAB);
+        }
+    }
+
+    public void pressChar(char c) {
+        if (osLevelKeyEvents) {
+            pw.pressKey(c).releaseKey(c);
+        } else {
+            postKeyEventToEventQueue(0, c);
+        }
+    }
+
     private void postKeyEventToEventQueue(int modifiers, int keyCode) {
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
         Frame eventSource = pw.target();
@@ -335,9 +361,12 @@ public class Keyboard {
     public void releaseModifierKeys() {
         assert !EventQueue.isDispatchThread();
 
-        releaseCtrl();
-        releaseAlt();
-        releaseShift();
+        // TODO it can release them only on the main window
+        if (EDT.call(() -> GlobalEvents.getNumNestedDialogs() == 0)) {
+            releaseCtrl();
+            releaseAlt();
+            releaseShift();
+        }
     }
 
     public void releaseModifierKeysFromAnyThread() {

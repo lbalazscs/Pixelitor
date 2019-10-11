@@ -226,9 +226,9 @@ public class ColorUtils {
     // should not be called from dialogs because it sets dialogActive to false at the end
     public static Color showColorPickerDialog(PixelitorWindow pw, String title,
                                               Color selectedColor, boolean allowOpacity) {
-        GlobalEvents.setDialogActive(true);
+        GlobalEvents.dialogOpened(title);
         Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
-        GlobalEvents.setDialogActive(false);
+        GlobalEvents.dialogClosed(title);
         return color;
     }
 

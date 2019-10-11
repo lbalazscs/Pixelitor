@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Pixelitor;
@@ -76,8 +77,11 @@ public class PixelitorWindow extends JFrame {
 
         AppPreferences.loadFramePosition(this, screenSize);
 
-        setupRememberingLastBounds();
-        setupFirstUnMaximization();
+        if (JVM.isWindows) {
+            // this is tricky code, and had problems on Linux
+            setupRememberingLastBounds();
+            setupFirstUnMaximization();
+        }
 
         setVisible(true);
     }

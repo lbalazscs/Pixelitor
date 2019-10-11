@@ -51,7 +51,10 @@ import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
  */
 public class GlobalEvents {
     private static boolean spaceDown = false;
-    private static boolean dialogActive = false;
+
+    // dialogs can be inside dialogs, and this keeps track of the nesting
+    private static int numNestedDialogs = 0;
+
     private static KeyListener keyListener;
 
     private static final Action INCREASE_ACTIVE_BRUSH_SIZE_ACTION = new AbstractAction() {
@@ -151,7 +154,7 @@ public class GlobalEvents {
                 // event, but not the space released-event, and the app gets
                 // stuck in Hand mode, which looks like a freeze when there
                 // are no scrollbars. See issue #29
-                if (!dialogActive && !e.isAltDown()) {
+                if (numNestedDialogs == 0 && !e.isAltDown()) {
                     keyListener.spacePressed();
                     spaceDown = true;
                     e.consume();
@@ -163,35 +166,35 @@ public class GlobalEvents {
                 // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
                 // because at least on windows actually VK_RIGHT is sent by the keypad keys
                 // but let's check them in order to be on the safe side
-                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.right(e.isShiftDown()))) {
+                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.right(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_LEFT:
             case KeyEvent.VK_KP_LEFT:
-                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.left(e.isShiftDown()))) {
+                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.left(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_UP:
             case KeyEvent.VK_KP_UP:
-                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.up(e.isShiftDown()))) {
+                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.up(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_DOWN:
             case KeyEvent.VK_KP_DOWN:
-                if (!dialogActive && keyListener.arrowKeyPressed(ArrowKey.down(e.isShiftDown()))) {
+                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.down(e.isShiftDown()))) {
                     e.consume();
                 }
                 break;
             case KeyEvent.VK_ESCAPE:
-                if (!dialogActive) {
+                if (numNestedDialogs == 0) {
                     keyListener.escPressed();
                 }
                 break;
             case KeyEvent.VK_ALT:
-                if (!dialogActive) {
+                if (numNestedDialogs == 0) {
                     keyListener.altPressed();
                 }
                 break;
@@ -208,7 +211,7 @@ public class GlobalEvents {
                 spaceDown = false;
                 break;
             case KeyEvent.VK_ALT:
-                if (!dialogActive) {
+                if (numNestedDialogs == 0) {
                     keyListener.altReleased();
                 }
                 break;
@@ -226,10 +229,36 @@ public class GlobalEvents {
 
     /**
      * The idea is that when we are in a dialog, we want to use the Tab
-     * key for navigating the UI, and not for "Hide All"
+     * key for navigating the UI, and not for "Hide All".
      */
-    public static void setDialogActive(boolean dialogActive) {
-        GlobalEvents.dialogActive = dialogActive;
+    public static void dialogOpened(String title) {
+//        System.out.println("--- dialog opened: " + title
+//                + ", nesting: " + numNestedDialogs
+//                + " => " + (numNestedDialogs + 1));
+        assert EventQueue.isDispatchThread();
+        numNestedDialogs++;
+    }
+
+    public static void dialogClosed(String title) {
+//        System.out.println("--- dialog closed: " + title
+//                + ", nesting: " + numNestedDialogs
+//                + " => " + (numNestedDialogs - 1));
+        assert EventQueue.isDispatchThread();
+        numNestedDialogs--;
+        assert numNestedDialogs >= 0;
+    }
+
+    @VisibleForTesting
+    public static void assertDialogNestingIs(int expected) {
+        if (numNestedDialogs != expected) {
+            throw new AssertionError("numNestedDialogs = " + numNestedDialogs
+                    + ", expected = " + expected);
+        }
+    }
+
+    @VisibleForTesting
+    public static int getNumNestedDialogs() {
+        return numNestedDialogs;
     }
 
     public static void addBrushSizeActions() {

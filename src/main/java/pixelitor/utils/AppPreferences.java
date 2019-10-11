@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import com.bric.util.JVM;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
@@ -121,6 +122,12 @@ public final class AppPreferences {
         if (height > screen.height) {
             height = screen.height;
         }
+        if (width < 300) { // something went wrong
+            width = 300;
+        }
+        if (height < 200) { // something went wrong
+            height = 200;
+        }
 
         if (x < 0 || y < 0) {
             x = 0;
@@ -128,7 +135,7 @@ public final class AppPreferences {
         }
 
         boolean maximized = mainNode.getBoolean(MAXIMIZED_KEY, false);
-        if (maximized) {
+        if (maximized && JVM.isWindows) {
             pw.setSavedNormalBounds(new Rectangle(x, y, width, height));
             pw.maximize();
         } else {
@@ -139,7 +146,7 @@ public final class AppPreferences {
     private static void saveFramePosition(PixelitorWindow pw) {
         boolean maximized = pw.isMaximized();
         Rectangle bounds;
-        if (maximized) {
+        if (maximized && JVM.isWindows) {
             bounds = pw.getNormalBounds();
             if (bounds == null) { // Fallback for safety. Should not be necessary.
                 bounds = pw.getBounds();

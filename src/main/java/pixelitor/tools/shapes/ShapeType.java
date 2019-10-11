@@ -27,7 +27,9 @@ import pixelitor.tools.shapes.custom.RabbitShape;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.UnicodeShapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Shape;
@@ -298,12 +300,90 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             return new RabbitShape(x, y, diameter, diameter);
         }
-        //    }, SKULL("Skull", true) {
+//    }, RND_ANIMAL_FACE("Random Animal Face", true, false) {
+//        final int[] codePoints = {
+//                0x1F428, // koala
+//                0x1F42D, // mouse
+//                0x1F42E, // cow
+//                0x1F42F, // tiger
+//                0x1F430, // rabbit
+//                0x1F431, // cat
+//              //  0x1F432, // dragon
+//                0x1F434, // horse
+//                0x1F435, // monkey
+//                0x1F436, // dog
+//                0x1F437, // pig
+//                0x1F438, // frog
+//                0x1F439, // hamster
+//                0x1F43A, // wolf
+//                0x1F43B, // bear
+//                0x1F43C, // panda
+//
+//                // from here not even on windows
+//                0x1F981, // lion
+//                0x1F984, // unicorn
+//                0x1F985, // eagle
+//                0x1F98A, // fox
+//                0x1F98C, // deer
+//                0x1F98D, // gorilla
+//                0x1F98F, // rhinoceros
+//                0x1F993, // zebra
+//                0x1F994, // hedgehog
+//                0x1F99D, // raccoon
+//        };
+//        // it seems that on Linux not all code points are supported
+//        final int[] supportedCodePoints = IntStream.of(codePoints)
+//                .filter(UnicodeShapes::isSupported)
+//                .toArray();
+//
 //        @Override
-//        public Shape getShape(UserDrag userDrag) {
-//            updateCoordinates(userDrag);
-//            return new Skull(x, y, width, height);
+//        public Shape createShape(ImDrag imDrag) {
+//            int codePoint = supportedCodePoints[Rnd.nextInt(supportedCodePoints.length)];
+//            System.out.printf("ShapeType::createShape: codePoint = 0x%x%n", codePoint);
+//            return UnicodeShapes.extract(codePoint,
+//                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
 //        }
+//
+//        @Override
+//        public Shape createShape(double x, double y, double diameter) {
+//            int codePoint = supportedCodePoints[Rnd.nextInt(supportedCodePoints.length)];
+//            return UnicodeShapes.extract(codePoint,
+//                    x, y, diameter, diameter);
+//        }
+    }, RND_CHESS("Random Chess Piece", true, false) {
+        final String[] chars = {"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659",
+                "\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"};
+
+        @Override
+        public Shape createShape(ImDrag imDrag) {
+            String uChar = Rnd.chooseFrom(chars);
+            return UnicodeShapes.extract(uChar,
+                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
+        }
+
+        @Override
+        public Shape createShape(double x, double y, double diameter) {
+            String uChar = Rnd.chooseFrom(chars);
+            return UnicodeShapes.extract(uChar,
+                    x, y, diameter, diameter);
+        }
+    }, RND_ZODIAC("Random Zodiac Sign", true, false) {
+        final String[] chars = {"\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D",
+                "\u264E", "\u264F", "\u2650", "\u2651", "\u2652", "\u2653"};
+
+        @Override
+        public Shape createShape(ImDrag imDrag) {
+            String uChar = Rnd.chooseFrom(chars);
+            return UnicodeShapes.extract(uChar,
+                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
+        }
+
+        @Override
+        public Shape createShape(double x, double y, double diameter) {
+            String uChar = Rnd.chooseFrom(chars);
+            return UnicodeShapes.extract(uChar,
+                    x, y, diameter, diameter);
+        }
     };
 
     private final String guiName;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,8 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if (settings.getText().isEmpty()) {
+        String text = settings.getText();
+        if (text.isEmpty()) {
             return src;
         }
 
@@ -85,9 +86,9 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void randomizeSettings() {
-        if(settings != null) {
-            settings.randomize();
-        }
+        // don't do null check: it is an error if the settings
+        // is null now, and *should* throw an exception
+        settings.randomize();
     }
 
     public void setSettings(TextSettings settings) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class TranslatedTextPainter extends TextPainter {
     private int translationX = 0;
     private int translationY = 0;
 
-    private transient RotatedRectangle rotatedLayout;
+    private transient RotatedRectangle rotatedRect;
     private double rotation = 0;
     private Rectangle boundingBox = new Rectangle();
 
@@ -54,7 +54,7 @@ public class TranslatedTextPainter extends TextPainter {
      * If text was not rendered yet, returned rectangle is empty
      */
     public Rectangle getBoundingBox() {
-        return rotatedLayout != null ? rotatedLayout.getBoundingBox() : boundingBox;
+        return rotatedRect != null ? rotatedRect.getBoundingBox() : boundingBox;
     }
 
     /**
@@ -63,14 +63,14 @@ public class TranslatedTextPainter extends TextPainter {
      * If text was not rendered yet, returned shape is empty
      */
     public Shape getBoundingShape() {
-        return rotatedLayout != null ? rotatedLayout.asShape() : boundingBox;
+        return rotatedRect != null ? rotatedRect.asShape() : boundingBox;
     }
 
     @Override
-    protected Rectangle calculateLayout(int contentWidth, int contentHeight, int width, int height) {
+    protected Rectangle calculateLayout(int textWidth, int textHeight, int canvasWidth, int canvasHeight) {
         if (rotation == 0) {
-            Rectangle layout = super.calculateLayout(contentWidth, contentHeight, width, height);
-            rotatedLayout = null;
+            Rectangle layout = super.calculateLayout(textWidth, textHeight, canvasWidth, canvasHeight);
+            rotatedRect = null;
 
             // support the Move tool
             layout.translate(translationX, translationY);
@@ -79,19 +79,20 @@ public class TranslatedTextPainter extends TextPainter {
         }
 
         // first calculate a rotated rectangle starting at 0, 0
-        rotatedLayout = new RotatedRectangle(0, 0, contentWidth, contentHeight, rotation);
-        Rectangle rotatedBounds = rotatedLayout.getBoundingBox();
+        rotatedRect = new RotatedRectangle(0, 0, textWidth, textHeight, rotation);
+        Rectangle rotatedBounds = rotatedRect.getBoundingBox();
 
         // use the rotated bounds to calculate the correct layout
-        Rectangle layout = super.calculateLayout(rotatedBounds.width, rotatedBounds.height, width, height);
+        Rectangle layout = super.calculateLayout(rotatedBounds.width, rotatedBounds.height, canvasWidth, canvasHeight);
+
+        // Also correct the rotatedRect, because it will be useful later.
+        // Do this before translating the layout!
+        int dx = layout.x - rotatedBounds.x;
+        int dy = layout.y - rotatedBounds.y;
+        rotatedRect.translate(dx + translationX, dy + translationY);
 
         // support the Move tool
         layout.translate(translationX, translationY);
-
-        // also correct the rotatedLayout, because it will be useful later
-        int dx = layout.x - rotatedBounds.x;
-        int dy = layout.y - rotatedBounds.y;
-        rotatedLayout.translate(dx + translationX, dy + translationY);
 
         return layout;
     }
@@ -100,7 +101,7 @@ public class TranslatedTextPainter extends TextPainter {
      * {@inheritDoc}
      */
     @Override
-    protected void doPaint(Graphics2D g, Object component, int width, int height) {
+    protected void doPaint(Graphics2D g, Object component, int canvasWidth, int canvasHeight) {
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
         g.setFont(font);
@@ -109,28 +110,28 @@ public class TranslatedTextPainter extends TextPainter {
         // before transforming the graphics
         Shape shape = null;
         AreaEffect[] effects = getAreaEffects();
-        if (effects != null) {
-            shape = provideShape(g, component, width, height);
+        if (effects.length != 0) {
+            shape = provideShape(g, component, canvasWidth, canvasHeight);
         }
 
         String text = getText();
         FontMetrics metrics = g.getFontMetrics(font);
 
-        int tw = metrics.stringWidth(text);
-        int th = metrics.getHeight();
-        boundingBox = calculateLayout(tw, th, width, height);
+        int textWidth = metrics.stringWidth(text);
+        int textHeight = metrics.getHeight();
+        boundingBox = calculateLayout(textWidth, textHeight, canvasWidth, canvasHeight);
 
         AffineTransform origTX = g.getTransform();
 
         if (rotation != 0) {
-            assert rotatedLayout != null;
+            assert rotatedRect != null;
 
-            double topLeftX = rotatedLayout.getTopLeftX();
-            double topLeftY = rotatedLayout.getTopLeftY();
+            double topLeftX = rotatedRect.getTopLeftX();
+            double topLeftY = rotatedRect.getTopLeftY();
             g.translate(topLeftX, topLeftY);
             g.rotate(rotation, 0, 0);
         } else {
-            assert rotatedLayout == null;
+            assert rotatedRect == null;
             g.translate(boundingBox.x, boundingBox.y);
         }
 
@@ -141,13 +142,18 @@ public class TranslatedTextPainter extends TextPainter {
 
         g.drawString(text, (float) 0, (float) metrics.getAscent());
 
+        // explicitly transform the shape and paint it with the original transform
+        // instead of simply painting the shape on the transformed graphics
+        // so that the direction of the drop shadow effect does not rotate
+        AffineTransform tx = g.getTransform();
+        g.setTransform(origTX);
+
         if (shape != null) { // has effects
+            Shape transformedShape = tx.createTransformedShape(shape);
             for (AreaEffect ef : effects) {
-                ef.apply(g, shape, width, height);
+                ef.apply(g, transformedShape, canvasWidth, canvasHeight);
             }
         }
-
-        g.setTransform(origTX);
     }
 
     @Override

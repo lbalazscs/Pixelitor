@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,8 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.*;
 import java.awt.Stroke;
 
+import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
-import static pixelitor.tools.shapes.TwoPointPaintType.RADIAL_GRADIENT;
 
 /**
  * The GUI-independent settings associated with a shape.
@@ -63,7 +63,7 @@ public class ShapeSettings {
 
     public ShapeSettings(ShapesTool tool) {
         this.tool = tool;
-        fillPaintModel.setSelectedItem(RADIAL_GRADIENT);
+        fillPaintModel.setSelectedItem(FOREGROUND);
 
         strokeParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_STROKE_SETTINGS));
         effectsParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_EFFECTS));

@@ -43,6 +43,7 @@ import pixelitor.Composition;
 import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
@@ -155,7 +156,7 @@ public class AssertJSwingTest {
     private AssertJSwingTest() {
         long startMillis = System.currentTimeMillis();
 
-        app = new AppRunner(inputDir);
+        app = new AppRunner(inputDir, "a.jpg");
 
         robot = app.getRobot();
         pw = app.getPW();
@@ -566,7 +567,7 @@ public class AssertJSwingTest {
 
         // press Ctrl-T
         pw.pressKey(VK_CONTROL).pressKey(VK_T);
-        checkConsistency();
+        checkConsistency(1);
 
         DialogFixture dialog = findDialogByTitle("Edit Text Layer");
         // needs to be released on the dialog, otherwise ActionFailedException
@@ -2862,8 +2863,13 @@ public class AssertJSwingTest {
         }
     }
 
-
     public void checkConsistency() {
+        checkConsistency(0);
+    }
+
+    public void checkConsistency(int expectedDialogNesting) {
+        GlobalEvents.assertDialogNestingIs(expectedDialogNesting);
+
         Layer layer = EDT.getActiveLayer();
         if (layer == null) { // no open image
             return;

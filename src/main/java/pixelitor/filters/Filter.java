@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
@@ -112,9 +112,9 @@ public abstract class Filter implements Serializable {
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);
         } catch (Throwable e) {
-            ImageLayer layer = (ImageLayer) dr;
+            Layer layer = (Layer) dr;
             if (layer instanceof LayerMask) {
-                layer = (ImageLayer) layer.getParent();
+                layer = layer.getParent();
             }
             String msg = String.format(
                     "Error while running the filter '%s'\n" +
