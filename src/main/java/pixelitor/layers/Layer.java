@@ -296,7 +296,7 @@ public abstract class Layer implements Serializable {
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
 
-        BufferedImage bwMask = addType.getBWImage(canvasWidth, canvasHeight, selection);
+        BufferedImage bwMask = addType.getBWImage(this, canvasWidth, canvasHeight, selection);
 
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();

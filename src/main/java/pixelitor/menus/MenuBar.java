@@ -66,7 +66,6 @@ import pixelitor.layers.DuplicateLayerAction;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
-import pixelitor.layers.LayerMaskAddType;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.MaskFromColorRangePanel;
 import pixelitor.layers.MaskViewMode;
@@ -131,6 +130,11 @@ import static pixelitor.gui.OpenComps.onActiveImageLayer;
 import static pixelitor.gui.OpenComps.onActiveTextLayer;
 import static pixelitor.gui.OpenComps.reloadActiveFromFileAsync;
 import static pixelitor.gui.OpenComps.repaintActive;
+import static pixelitor.layers.LayerMaskAddType.FROM_LAYER;
+import static pixelitor.layers.LayerMaskAddType.FROM_TRANSPARENCY;
+import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
+import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
 import static pixelitor.menus.EnabledIf.ACTION_ENABLED;
 import static pixelitor.menus.EnabledIf.CAN_REPEAT;
 import static pixelitor.menus.EnabledIf.REDO_POSSIBLE;
@@ -453,21 +457,35 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Add White (Reveal All)") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(LayerMaskAddType.REVEAL_ALL);
+                getActiveLayerOrNull().addMask(REVEAL_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add Black (Hide All)") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(LayerMaskAddType.HIDE_ALL);
+                getActiveLayerOrNull().addMask(HIDE_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add from Selection") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(LayerMaskAddType.REVEAL_SELECTION);
+                getActiveLayerOrNull().addMask(REVEAL_SELECTION);
+            }
+        });
+
+        sub.addAction(new MenuAction("Add from Transparency") {
+            @Override
+            public void onClick() {
+                getActiveLayerOrNull().addMask(FROM_TRANSPARENCY);
+            }
+        });
+
+        sub.addAction(new MenuAction("Add from Layer") {
+            @Override
+            public void onClick() {
+                getActiveLayerOrNull().addMask(FROM_LAYER);
             }
         });
 
@@ -478,6 +496,8 @@ public class MenuBar extends JMenuBar {
                 MaskFromColorRangePanel.showInDialog(layer, image);
             }
         });
+
+        sub.addSeparator();
 
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override

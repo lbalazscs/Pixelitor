@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.selection.Selection;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
@@ -34,32 +35,42 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum LayerMaskAddType {
     REVEAL_ALL("Reveal All", false) {
         @Override
-        BufferedImage getBWImage(int width, int height, Selection selection) {
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
             // a fully white image
             return createFilledImage(width, height, Color.WHITE, null, null);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
-        BufferedImage getBWImage(int width, int height, Selection selection) {
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
             // a fully black image
             return createFilledImage(width, height, Color.BLACK, null, null);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
-        BufferedImage getBWImage(int width, int height, Selection selection) {
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
             // back image, but the selection is white
             return createFilledImage(width, height, Color.BLACK, Color.WHITE, selection.getShape());
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
-        BufferedImage getBWImage(int width, int height, Selection selection) {
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
             // white image, but the selection is black
             return createFilledImage(width, height, Color.WHITE, Color.BLACK, selection.getShape());
+        }
+    }, FROM_TRANSPARENCY("From Transparency", false) {
+        @Override
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
+            return createMaskFromLayer(layer, true, width, height);
+        }
+    }, FROM_LAYER("From Layer", false) {
+        @Override
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
+            return createMaskFromLayer(layer, false, width, height);
         }
     }, PATTERN ("Pattern", false) { // only for debugging
 
         @Override
-        BufferedImage getBWImage(int width, int height, Selection selection) {
+        BufferedImage getBWImage(Layer layer, int width, int height, Selection selection) {
             BufferedImage bi = createFilledImage(width, height, Color.WHITE, null, null);
             Graphics2D g = bi.createGraphics();
             float cx = width / 2.0f;
@@ -96,6 +107,47 @@ public enum LayerMaskAddType {
         return bwImage;
     }
 
+    private static BufferedImage createMaskFromLayer(Layer layer,
+                                                     boolean onlyTransparency,
+                                                     int width, int height) {
+        if (layer instanceof ImageLayer) {
+            ImageLayer imageLayer = (ImageLayer) layer;
+            BufferedImage image = imageLayer.getCanvasSizedSubImage();
+            return createMaskFromImage(image, onlyTransparency, width, height);
+        } else if (layer instanceof TextLayer) {
+            TextLayer textLayer = (TextLayer) layer;
+            // the rasterized image is canvas-sized, exactly as we want it
+            BufferedImage rasterizedImage = textLayer.createRasterizedImage();
+            return createMaskFromImage(rasterizedImage, onlyTransparency, width, height);
+        } else {
+            // there is nothing better
+            return REVEAL_ALL.getBWImage(layer, width, height, null);
+        }
+    }
+
+    private static BufferedImage createMaskFromImage(BufferedImage image,
+                                                     boolean onlyTransparency,
+                                                     int width, int height) {
+        assert width == image.getWidth();
+        assert height == image.getHeight();
+
+        BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+        Graphics2D g = bwImage.createGraphics();
+
+        // fill the background with white so that transparent parts become white
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+
+        if (onlyTransparency) {
+            // with DstOut only the source alpha will matter
+            g.setComposite(AlphaComposite.DstOut);
+        }
+
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        return bwImage;
+    }
+
     private final String guiName;
     private final boolean needsSelection;
 
@@ -104,7 +156,7 @@ public enum LayerMaskAddType {
         this.needsSelection = needsSelection;
     }
 
-    abstract BufferedImage getBWImage(int width, int height, Selection selection);
+    abstract BufferedImage getBWImage(Layer layer, int width, int height, Selection selection);
 
     @Override
     public String toString() {
