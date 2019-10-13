@@ -21,15 +21,22 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.History;
+import pixelitor.history.MultiEdit;
 import pixelitor.history.MultiLayerBackup;
 import pixelitor.history.MultiLayerEdit;
+import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.Layer;
+import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 
+import javax.swing.*;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
@@ -186,15 +193,68 @@ public class Crop implements CompAction {
         try {
             Composition comp = OpenComps.getActiveCompOrNull();
             if (comp != null) {
-                //noinspection CodeBlock2Expr
-                comp.onSelection(sel -> {
-                    new Crop(sel.getShapeBounds2D(), true,
-                            true, true)
-                            .process(comp);
-                });
+                selectionCrop(comp);
             }
         } catch (Exception ex) {
             Messages.showException(ex);
         }
+    }
+
+    private static void selectionCrop(Composition comp) {
+        Selection sel = comp.getSelection();
+        if (sel == null) {
+            return;
+        }
+        Shape selShape = sel.getShape();
+        if (selShape instanceof Rectangle2D) {
+            plainRectangularCrop(comp, sel);
+        } else {
+            selectionCropWithQuestion(comp, sel);
+        }
+    }
+
+    private static void selectionCropWithQuestion(Composition comp, Selection sel) {
+        String question = "<html>You have a nonrectangular selection, but every image has to be rectangular." +
+                "<br>Pixelitor can crop to the rectangular bounds of the selection." +
+                "<br>It can also hide parts of the image using layer masks.";
+        // the yes-no-cancel dialog can actually show more than 3 options
+        int answer = Dialogs.showYesNoCancelDialog("Selection Crop Type",
+                new String[]{"Crop and Hide", "Only Crop", "Only Hide", "Cancel"},
+                question, JOptionPane.QUESTION_MESSAGE);
+        if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {
+            // canceled, do nothing
+        } else if (answer == 0) {
+            // crop and hide
+            addHidingMask(comp, sel);
+            plainRectangularCrop(comp, sel);
+        } else if (answer == 1) {
+            // only crop
+            plainRectangularCrop(comp, sel);
+        } else if (answer == 2) {
+            // only hide
+            addHidingMask(comp, sel);
+        } else {
+            throw new IllegalStateException("answer = " + answer);
+        }
+    }
+
+    private static void plainRectangularCrop(Composition comp, Selection sel) {
+        new Crop(sel.getShapeBounds2D(), true,
+                true, true)
+                .process(comp);
+    }
+
+    private static void addHidingMask(Composition comp, Selection sel) {
+        MultiEdit multiEdit = new MultiEdit("Add Hiding Mask", comp);
+
+        int numLayers = comp.getNumLayers();
+        for (int i = 0; i < numLayers; i++) {
+            Layer layer = comp.getLayer(i);
+            PixelitorEdit edit = layer.addHidingMask(sel);
+            multiEdit.add(edit);
+        }
+
+        // for now these edits will be independent of the crop edits
+        History.addEdit(multiEdit);
     }
 }

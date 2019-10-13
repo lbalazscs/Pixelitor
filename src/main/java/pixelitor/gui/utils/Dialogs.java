@@ -93,6 +93,23 @@ public class Dialogs {
         return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
     }
 
+    public static int showYesNoCancelDialog(String title, Object[] options,
+                                            String question, int messageType) {
+        return showYesNoCancelDialog(getParent(), title, options, question, messageType);
+    }
+
+    public static int showYesNoCancelDialog(Component parent, String title,
+                                            Object[] options, String question,
+                                            int messageType) {
+        GlobalEvents.dialogOpened(title);
+        int answer = JOptionPane.showOptionDialog(
+                parent, new JLabel(question),
+                title, YES_NO_CANCEL_OPTION,
+                messageType, null, options, options[0]);
+        GlobalEvents.dialogClosed(title);
+        return answer;
+    }
+
     public static boolean showYesNoWarningDialog(String title, String msg) {
         return showYesNoWarningDialog(getParent(), title, msg);
     }
@@ -303,12 +320,7 @@ public class Dialogs {
                 compName);
 
         String title = "Unsaved changes";
-        GlobalEvents.dialogOpened(title);
-        int answer = JOptionPane.showOptionDialog(
-                PixelitorWindow.getInstance(), new JLabel(question),
-                title, YES_NO_CANCEL_OPTION,
-                WARNING_MESSAGE, null, options, options[0]);
-        GlobalEvents.dialogClosed(title);
-        return answer;
+        return showYesNoCancelDialog(
+                title, options, question, WARNING_MESSAGE);
     }
 }

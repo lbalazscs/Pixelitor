@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
-import pixelitor.history.LinkedEdit;
+import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 
 import java.awt.Point;
@@ -119,7 +119,7 @@ public abstract class ContentLayer extends Layer {
         if (linkedEdit == null) {
             return ownEdit;
         } else {
-            return new LinkedEdit(ContentLayerMoveEdit.NAME, comp, ownEdit, linkedEdit);
+            return new MultiEdit(ContentLayerMoveEdit.NAME, comp, ownEdit, linkedEdit);
         }
     }
 

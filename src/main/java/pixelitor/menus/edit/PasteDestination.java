@@ -99,7 +99,8 @@ public enum PasteDestination {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");
             } else {
-                layer.addImageAsMask(bwImage, false, "Add Pasted Mask", false);
+                layer.addImageAsMask(bwImage, false, "Add Pasted Mask",
+                        false, true);
             }
         }
     };

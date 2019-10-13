@@ -27,6 +27,8 @@ import java.awt.RadialGradientPaint;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
@@ -97,11 +99,13 @@ public enum LayerMaskAddType {
 
         // fill foreground
         if(fg != null) {
-            if (shape != null) {
-                g.setClip(shape);
-            }
             g.setColor(fg);
-            g.fillRect(0, 0, width, height);
+            if (shape != null) {
+                g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+                g.fill(shape);
+            } else {
+                g.fillRect(0, 0, width, height);
+            }
         }
         g.dispose();
         return bwImage;

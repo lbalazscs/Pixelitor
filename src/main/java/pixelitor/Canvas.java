@@ -148,6 +148,14 @@ public class Canvas implements Serializable {
         assert shape != null;
 
         Rectangle2D canvasBounds = getImBounds();
+
+        if (shape instanceof Rectangle2D) {
+            // don't ruin the type information in the shape by
+            // creating an unnecessary Area, because it will be
+            // needed to determine the selection crop type
+            return ((Rectangle2D) shape).createIntersection(canvasBounds);
+        }        
+
         Area compBounds = new Area(canvasBounds);
         Area result = new Area(shape);
         result.intersect(compBounds);

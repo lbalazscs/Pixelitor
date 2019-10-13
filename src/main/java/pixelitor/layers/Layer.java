@@ -28,17 +28,20 @@ import pixelitor.history.DeleteLayerMaskEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.EnableLayerMaskEdit;
 import pixelitor.history.History;
+import pixelitor.history.ImageEdit;
 import pixelitor.history.LayerBlendingEdit;
 import pixelitor.history.LayerOpacityEdit;
 import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
-import pixelitor.history.LinkedEdit;
+import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -56,6 +59,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
+import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
  * The abstract superclass of all layer classes
@@ -280,6 +284,37 @@ public abstract class Layer implements Serializable {
         return mask != null;
     }
 
+    /**
+     * Adds a mask corresponding to the selection if there is no mask,
+     * or modifies the existing one. It doesn't deselect.
+     * It also doesn't add the edit to the history, only returns it.
+     */
+    public PixelitorEdit addHidingMask(Selection sel) {
+        if (mask == null) {
+            int canvasWidth = canvas.getImWidth();
+            int canvasHeight = canvas.getImHeight();
+
+            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.getBWImage(this, canvasWidth, canvasHeight, sel);
+            return addImageAsMask(bwMask, false, "Add Layer Mask",
+                    false, false);
+        } else {
+            BufferedImage maskImage = mask.getImage();
+            BufferedImage maskImageBackup = ImageUtils.copyImage(maskImage);
+            Graphics2D g = maskImage.createGraphics();
+
+            // fill the unselected part with black to hide it
+            Shape unselectedShape = comp.getCanvas().invertShape(sel.getShape());
+            g.setColor(Color.BLACK);
+            g.fill(unselectedShape);
+
+            g.dispose();
+            mask.updateFromBWImage();
+            comp.imageChanged(FULL);
+            return new ImageEdit("Modify Mask", comp, mask, maskImageBackup,
+                    true, false);
+        }
+    }
+
     public void addMask(LayerMaskAddType addType) {
         if (mask != null) {
             Messages.showInfo("Has layer mask",
@@ -304,11 +339,12 @@ public abstract class Layer implements Serializable {
             editName = "Layer Mask from Selection";
         }
 
-        addImageAsMask(bwMask, deselect, editName, false);
+        addImageAsMask(bwMask, deselect, editName, false, true);
     }
 
-    public void addImageAsMask(BufferedImage bwMask, boolean deselect,
-                               String editName, boolean inheritTranslation) {
+    public PixelitorEdit addImageAsMask(BufferedImage bwMask, boolean deselect,
+                                        String editName, boolean inheritTranslation,
+                                        boolean addEdit) {
         assert mask == null;
 
         mask = new LayerMask(comp, bwMask, this, inheritTranslation);
@@ -329,19 +365,24 @@ public abstract class Layer implements Serializable {
             if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
                 DeselectEdit deselectEdit = new DeselectEdit(
                         comp, backupShape, "nested deselect");
-                edit = new LinkedEdit(editName, comp, edit, deselectEdit);
+                edit = new MultiEdit(editName, comp, edit, deselectEdit);
             }
         }
 
-        History.addEdit(edit);
-        MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
+        if (addEdit) {
+            History.addEdit(edit);
+            MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
+            return null;
+        } else {
+            return edit;
+        }
     }
 
     public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
         if (hasMask()) {
             mask.replaceImage(bwMask, editName);
         } else {
-            addImageAsMask(bwMask, false, editName, true);
+            addImageAsMask(bwMask, false, editName, true, true);
         }
     }
 

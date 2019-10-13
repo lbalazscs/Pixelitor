@@ -1088,7 +1088,7 @@ public class Composition implements Serializable {
                 imageEdit = new ImageEdit(editName, this, layer, backupImage, true, false);
                 imageEdit.setFadeable(false);
             }
-            History.addEdit(new LinkedEdit(editName, this, translationEdit, imageEdit));
+            History.addEdit(new MultiEdit(editName, this, translationEdit, imageEdit));
         }
     }
 

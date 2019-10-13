@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,58 +22,73 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A PixelitorEdit that represents two edits
+ * A PixelitorEdit that represents multiple edits
  * that need to be undone/redone together.
  * Similar in purpose to javax.swing.undo.CompoundEdit
  */
-public class LinkedEdit extends PixelitorEdit {
-    private final PixelitorEdit first;
-    private final PixelitorEdit second;
+public class MultiEdit extends PixelitorEdit {
+    private final List<PixelitorEdit> edits;
 
-    public LinkedEdit(String name, Composition comp, PixelitorEdit first, PixelitorEdit second) {
+    public MultiEdit(String name, Composition comp, PixelitorEdit first, PixelitorEdit second) {
         super(name, comp);
-        this.first = first;
-        this.second = second;
+        edits = new ArrayList<>(2);
+        edits.add(first);
+        edits.add(second);
+    }
+
+    public MultiEdit(String name, Composition comp) {
+        super(name, comp);
+        edits = new ArrayList<>(2);
+    }
+
+    public void add(PixelitorEdit edit) {
+        edits.add(edit);
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        second.undo();
-        first.undo();
+        for (int i = edits.size() - 1; i >= 0; i--) { // undo in reverse order
+            PixelitorEdit edit = edits.get(i);
+            edit.undo();
+        }
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        first.redo();
-        second.redo();
+        for (PixelitorEdit edit : edits) {
+            edit.redo();
+        }
     }
 
     @Override
     public void die() {
         super.die();
 
-        comp = null;
-        first.die();
-        second.die();
+        for (PixelitorEdit edit : edits) {
+            edit.die();
+        }
     }
 
     @Override
     public boolean canRepeat() {
-        return first.canRepeat() && second.canRepeat();
+        return false;
     }
 
     @Override
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.add(first.getDebugNode());
-        node.add(second.getDebugNode());
+        for (PixelitorEdit edit : edits) {
+            node.add(edit.getDebugNode());
+        }
 
         return node;
     }

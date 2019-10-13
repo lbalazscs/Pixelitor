@@ -28,7 +28,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
-import pixelitor.history.LinkedEdit;
+import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
@@ -158,7 +158,7 @@ public class View extends JComponent
                     "Reload", this, oldComp, newComp, oldMode);
             if (oldComp.hasSelection()) {
                 DeselectEdit deselectEdit = oldComp.createDeselectEdit();
-                edit = new LinkedEdit("Reload", oldComp, deselectEdit, replaceEdit);
+                edit = new MultiEdit("Reload", oldComp, deselectEdit, replaceEdit);
                 oldComp.deselect(false);
 
                 // call explicitly with the new comp, because at this point oldComp

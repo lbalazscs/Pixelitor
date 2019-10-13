@@ -53,6 +53,7 @@ import java.util.function.Predicate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static javax.swing.JOptionPane.CANCEL_OPTION;
+import static javax.swing.JOptionPane.CLOSED_OPTION;
 import static javax.swing.JOptionPane.NO_OPTION;
 import static javax.swing.JOptionPane.YES_OPTION;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
@@ -484,17 +485,19 @@ public class OpenComps {
             if (comp.isDirty()) {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
-                if (answer == YES_OPTION) { // save
+                if (answer == YES_OPTION) { // "Save"
                     boolean fileSaved = OpenSave.save(comp, false);
                     if (fileSaved) {
                         view.close();
                     }
-                } else if (answer == NO_OPTION) { // don't save
+                } else if (answer == NO_OPTION) { // "Don't Save"
                     view.close();
-                } else if (answer == CANCEL_OPTION) { // cancel
+                } else if (answer == CANCEL_OPTION) {
                     // do nothing
-                } else { // dialog closed by pressing X
+                } else if (answer == CLOSED_OPTION) { // dialog closed by pressing X
                     // do nothing
+                } else {
+                    throw new IllegalStateException("answer = " + answer);
                 }
             } else {
                 view.close();

@@ -132,7 +132,6 @@ public class SelectionBuilder {
         } else {
             // we can get here if either (1) a new selection
             // was created or (2) a selection was replaced
-
             if (newShape.getBounds().isEmpty()) {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(false);
@@ -145,7 +144,7 @@ public class SelectionBuilder {
                 if (replacedShape != null) {
                     edit = new SelectionChangeEdit(selectionInteraction.getNameForUndo(), comp, replacedShape);
                 } else {
-                    edit = new NewSelectionEdit(comp, builtSelection.getShape());
+                    edit = new NewSelectionEdit(comp, newShape);
                 }
                 History.addEdit(edit);
             }
