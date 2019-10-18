@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -116,6 +116,11 @@ public class HueSat extends ParametrizedFilter {
             }
             if (shiftedBri > 1.0f) {
                 shiftedBri = 1.0f;
+            }
+
+            if (shiftedHue < 0 && shiftedHue > -0.00000003) {
+                // workaround for a bug in Color.HSBtoRGB, see issue #87
+                shiftedHue = 0;
             }
 
             int newRGB = Color.HSBtoRGB(shiftedHue, shiftedSat, shiftedBri);  // alpha is 255 here
