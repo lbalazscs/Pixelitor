@@ -20,12 +20,14 @@ package pixelitor.filters.comp;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
+import pixelitor.guides.Guides;
+import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
-import pixelitor.history.MultiLayerBackup;
-import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
+import pixelitor.selection.SelectionActions;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -55,29 +57,41 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void process(Composition comp) {
-        MultiLayerBackup backup = new MultiLayerBackup(comp,
-                getEditName(), changesCanvasDimensions);
+//        MultiLayerBackup backup = new MultiLayerBackup(comp,
+//                getEditName(), changesCanvasDimensions);
+//        Canvas oldCanvas = comp.getCanvas();
+        View view = comp.getView();
+        Composition newComp = comp.createCopy(true, true);
+        Canvas newCanvas = newComp.getCanvas();
 
-        Canvas canvas = comp.getCanvas();
+        AffineTransform canvasTX = createCanvasTX(newCanvas);
+        newComp.imCoordsChanged(canvasTX, false);
 
-        AffineTransform canvasTX = createCanvasTX(canvas);
-        comp.imCoordsChanged(canvasTX, false);
-
-        comp.forEachLayer(this::processLayer);
+        newComp.forEachLayer(this::processLayer);
 
         if (changesCanvasDimensions) {
-            changeCanvas(comp);
+            changeCanvas(newCanvas, view);
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
-        History.addEdit(edit);
+//        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
+        History.addEdit(new CompositionReplacedEdit(
+                getEditName(), view, comp, newComp));
+        view.replaceComp(newComp);
+        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+
+        Guides guides = comp.getGuides();
+        if (guides != null) {
+            Guides newGuides = createGuidesCopy(guides, view);
+            newComp.setGuides(newGuides);
+        }
+
 
         // Only after the shared canvas size was updated
-        comp.updateAllIconImages();
+        newComp.updateAllIconImages();
 
-        comp.imageChanged(REPAINT, true);
+        newComp.imageChanged(REPAINT, true);
         if (changesCanvasDimensions) {
-            comp.getView().revalidate(); // make sure the scrollbars are OK
+            view.revalidate(); // make sure the scrollbars are OK
         }
     }
 
@@ -92,11 +106,20 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         }
     }
 
-    protected abstract void changeCanvas(Composition comp);
+    protected abstract void changeCanvas(Canvas canvas, View view);
 
     protected abstract String getEditName();
 
+    /**
+     * Applies the transformation to the given content layer.
+     */
     protected abstract void applyTx(ContentLayer contentLayer);
 
+    /**
+     * Used to transform things that have coordinates relative to
+     * the canvas, like the selection, paths, tool widgets.
+     */
     protected abstract AffineTransform createCanvasTX(Canvas canvas);
+
+    protected abstract Guides createGuidesCopy(Guides guides, View view);
 }

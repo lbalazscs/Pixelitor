@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -304,7 +304,7 @@ public enum Symmetry {
     private static double compCenterX;
     private static double compCenterY;
 
-    public static void setCanvas(Canvas canvas) {
+    public static void setCanvasImSize(Canvas canvas) {
         compWidth = canvas.getImWidth();
         compHeight = canvas.getImHeight();
         compCenterX = compWidth / 2.0;

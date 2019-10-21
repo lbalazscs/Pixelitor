@@ -1168,7 +1168,7 @@ public class RandomGUITest {
             comp.clearGuides();
             return;
         }
-        new Guides.Builder(comp, false).build(false, guides -> {
+        new Guides.Builder(comp.getView(), false).build(false, guides -> {
             if (rand.nextBoolean()) {
                 log("add relative horizontal guide");
                 guides.addHorRelative(rand.nextFloat());

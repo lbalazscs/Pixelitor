@@ -22,6 +22,7 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
+import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
@@ -30,6 +31,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.VisibleForTesting;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -92,12 +94,18 @@ public class Tools {
         }
     }
 
+    @VisibleForTesting
+    public static void setCurrentTool(Tool currentTool) {
+        Tools.currentTool = currentTool;
+    }
+
     private static void changeToProgrammatically(Tool tool) {
         changeTo(tool);
 
         // changeTo doesn't select the button, because it is
         // either called by the button event handler or by testing code
-        currentTool.getButton().setSelected(true);
+        ToolButton button = currentTool.getButton();
+        button.setSelected(true);
     }
 
     public static void changeTo(Tool newTool) {

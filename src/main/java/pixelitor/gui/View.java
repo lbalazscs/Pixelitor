@@ -26,10 +26,7 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
-import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
-import pixelitor.history.MultiEdit;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
@@ -69,13 +66,12 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.lang.String.format;
-import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * The GUI component that shows a {@link Composition}
  */
 public class View extends JComponent
-    implements MouseListener, MouseMotionListener {
+        implements MouseListener, MouseMotionListener {
 
     private double scaling = 1.0f;
     private Canvas canvas;
@@ -111,7 +107,7 @@ public class View extends JComponent
 
         this.comp = comp;
         this.canvas = comp.getCanvas();
-        comp.setView(this); // also sets the view in the canvas
+        comp.setView(this);
 
         ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
         setZoom(fitZoom, null);
@@ -124,51 +120,28 @@ public class View extends JComponent
     void replaceJustReloadedComp(Composition newComp) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        PixelitorEdit edit = replaceComp(newComp,
-                MaskViewMode.NORMAL, true);
-
-        assert edit != null;
-        History.addEdit(edit);
+        // do this before actually replacing so that the old comp is
+        // deselected before its view is set to null
+        History.addEdit(new CompositionReplacedEdit(
+                "Reload", this, comp, newComp));
+        replaceComp(newComp, MaskViewMode.NORMAL);
+        SelectionActions.setEnabled(false, newComp);
 
         String msg = format(
-            "<html>The image '%s' was reloaded from the file <b>%s</b>.",
+                "<html>The image '%s' was reloaded from the file <b>%s</b>.",
                 newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
-
-        revalidate(); // make sure the scrollbars are OK if the new comp has a different size
-        canvasCoSizeChanged();
-        repaint();
     }
 
-    public PixelitorEdit replaceComp(Composition newComp,
-                                     MaskViewMode newMaskViewMode,
-                                     boolean addToHistory) {
-        assert newComp != null;
-        PixelitorEdit edit = null;
+    public void replaceComp(Composition newComp) {
+        replaceComp(newComp, getMaskViewMode());
+    }
 
-        MaskViewMode oldMode = maskViewMode;
+    public void replaceComp(Composition newComp, MaskViewMode newMaskViewMode) {
+        assert newComp != null;
 
         Composition oldComp = comp;
         comp = newComp;
-
-        // do this here so that the old comp is deselected before
-        // its view is set to null
-        if (addToHistory) {
-            PixelitorEdit replaceEdit = new CompositionReplacedEdit(
-                    "Reload", this, oldComp, newComp, oldMode);
-            if (oldComp.hasSelection()) {
-                DeselectEdit deselectEdit = oldComp.createDeselectEdit();
-                edit = new MultiEdit("Reload", oldComp, deselectEdit, replaceEdit);
-                oldComp.deselect(false);
-
-                // call explicitly with the new comp, because at this point oldComp
-                // is not the active comp anymore, so deselect didn't call it
-                assert !comp.hasSelection();
-                SelectionActions.setEnabled(false, comp);
-            } else {
-                edit = replaceEdit;
-            }
-        }
 
         oldComp.setView(null);
         comp.setView(this);
@@ -185,11 +158,13 @@ public class View extends JComponent
 
         Tools.currentTool.compReplaced(oldComp, newComp);
 
-        if (ImageArea.currentModeIs(TABS)) {
-            repaint();
-        }
+//        if (ImageArea.currentModeIs(TABS)) {
+//            repaint();
+//        }
 
-        return edit;
+        revalidate(); // make sure the scrollbars are OK if the new comp has a different size
+        canvasCoSizeChanged();
+        repaint();
     }
 
     private void addListeners() {
@@ -640,7 +615,7 @@ public class View extends JComponent
     private void setZoomLevel(ZoomLevel zoomLevel) {
         this.zoomLevel = zoomLevel;
         this.scaling = zoomLevel.getViewScale();
-        canvas.recalcCoSize();
+        canvas.recalcCoSize(this);
         updateTitle();
     }
 
@@ -755,8 +730,8 @@ public class View extends JComponent
         return new Rectangle.Double(
                 componentXToImageSpace(co.getX()),
                 componentYToImageSpace(co.getY()),
-            (co.getWidth() / scaling),
-            (co.getHeight() / scaling)
+                (co.getWidth() / scaling),
+                (co.getHeight() / scaling)
         );
     }
 
@@ -764,8 +739,8 @@ public class View extends JComponent
         return new Rectangle(
                 (int) imageXToComponentSpace(im.getX()),
                 (int) imageYToComponentSpace(im.getY()),
-            (int) (im.getWidth() * scaling),
-            (int) (im.getHeight() * scaling)
+                (int) (im.getWidth() * scaling),
+                (int) (im.getHeight() * scaling)
         );
     }
 

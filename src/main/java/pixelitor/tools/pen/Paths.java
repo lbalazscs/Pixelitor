@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,5 +51,13 @@ public class Paths implements Serializable {
         if (activePath != null) {
             activePath.imCoordsChanged(at);
         }
+    }
+
+    public Paths deepCopy(Composition newComp) {
+        Paths copy = new Paths();
+        if (activePath != null) {
+            copy.activePath = activePath.deepCopy(newComp);
+        }
+        return copy;
     }
 }

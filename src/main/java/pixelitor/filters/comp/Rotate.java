@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
+import pixelitor.gui.View;
+import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
@@ -38,9 +39,8 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvas(Composition comp) {
-        Canvas canvas = comp.getCanvas();
-        angle.changeCanvas(canvas);
+    protected void changeCanvas(Canvas canvas, View view) {
+        angle.changeCanvas(canvas, view);
     }
 
     @Override
@@ -58,14 +58,19 @@ public class Rotate extends SimpleCompAction {
         return angle.createCanvasTX(canvas);
     }
 
+    @Override
+    protected Guides createGuidesCopy(Guides guides, View view) {
+        return guides.copyForRotate(angle, view);
+    }
+
     public enum SpecialAngle {
         ANGLE_90(90, "Rotate 90\u00B0 CW") {
             @Override
-            public void changeCanvas(Canvas canvas) {
+            public void changeCanvas(Canvas canvas, View view) {
                 // switch width and height
                 int newWidth = canvas.getImHeight();
                 int newHeight = canvas.getImWidth();
-                canvas.changeImSize(newWidth, newHeight);
+                canvas.changeImSize(newWidth, newHeight, view);
             }
 
             @Override
@@ -78,15 +83,6 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage img) {
-                // switch width and height
-                int newWidth = img.getHeight();
-                int newHeight = img.getWidth();
-
-                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
-            }
-
-            @Override
             public AffineTransform createImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
@@ -94,9 +90,18 @@ public class Rotate extends SimpleCompAction {
                 at.quadrantRotate(1);
                 return at;
             }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage img) {
+                // switch width and height
+                int newWidth = img.getHeight();
+                int newHeight = img.getWidth();
+
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
+            }
         }, ANGLE_180(180, "Rotate 180\u00B0") {
             @Override
-            public void changeCanvas(Canvas canvas) {
+            public void changeCanvas(Canvas canvas, View view) {
                 // do nothing
             }
 
@@ -110,15 +115,6 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage img) {
-                // no change in width and height
-                int newWidth = img.getWidth();
-                int newHeight = img.getHeight();
-
-                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
-            }
-
-            @Override
             public AffineTransform createImageTX(ImageLayer layer) {
                 Canvas canvas = layer.getComp().getCanvas();
                 AffineTransform transform = createCanvasTX(canvas);
@@ -127,11 +123,20 @@ public class Rotate extends SimpleCompAction {
                 transform.translate(tx, ty);
                 return transform;
             }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage img) {
+                // no change in width and height
+                int newWidth = img.getWidth();
+                int newHeight = img.getHeight();
+
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
+            }
         }, ANGLE_270(270, "Rotate 90\u00B0 CCW") {
             @Override
-            public void changeCanvas(Canvas canvas) {
+            public void changeCanvas(Canvas canvas, View view) {
                 // same as for 90
-                ANGLE_90.changeCanvas(canvas);
+                ANGLE_90.changeCanvas(canvas, view);
             }
 
             @Override
@@ -144,21 +149,21 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public BufferedImage createDestImage(BufferedImage img) {
-                // switch width and height
-                int newWidth = img.getHeight();
-                int newHeight = img.getWidth();
-
-                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
-            }
-
-            @Override
             public AffineTransform createImageTX(ImageLayer layer) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         0, layer.getImage().getWidth());
                 at.quadrantRotate(3);
                 return at;
+            }
+
+            @Override
+            public BufferedImage createDestImage(BufferedImage img) {
+                // switch width and height
+                int newWidth = img.getHeight();
+                int newHeight = img.getWidth();
+
+                return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
         };
 
@@ -174,12 +179,8 @@ public class Rotate extends SimpleCompAction {
             return name;
         }
 
-        public abstract void changeCanvas(Canvas canvas);
+        public abstract void changeCanvas(Canvas canvas, View view);
 
-        /**
-         * Returns the transformation in canvas space.
-         * Needed for transforming the selection.
-         */
         public abstract AffineTransform createCanvasTX(Canvas canvas);
 
         /**

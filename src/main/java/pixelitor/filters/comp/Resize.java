@@ -19,9 +19,11 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.gui.View;
+import pixelitor.guides.Guides;
+import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
-import pixelitor.history.MultiLayerBackup;
-import pixelitor.history.MultiLayerEdit;
+import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
 import java.awt.geom.AffineTransform;
@@ -47,9 +49,9 @@ public class Resize implements CompAction {
 
     @Override
     public void process(Composition comp) {
-        Canvas canvas = comp.getCanvas();
-        int canvasCurrWidth = canvas.getImWidth();
-        int canvasCurrHeight = canvas.getImHeight();
+        Canvas oldCanvas = comp.getCanvas();
+        int canvasCurrWidth = oldCanvas.getImWidth();
+        int canvasCurrHeight = oldCanvas.getImHeight();
 
         if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
             // nothing to do
@@ -71,28 +73,44 @@ public class Resize implements CompAction {
             canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
         }
 
-        String editName = "Resize";
-        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
+        View view = comp.getView();
+        Composition newComp = comp.createCopy(true, true);
+        Canvas newCanvas = newComp.getCanvas();
+//        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
         double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
         double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
         AffineTransform at = AffineTransform.getScaleInstance(sx, sy);
-        comp.imCoordsChanged(at, false);
+        newComp.imCoordsChanged(at, false);
 
-        resizeLayers(comp, canvasTargetWidth, canvasTargetHeight);
+        resizeLayers(newComp, canvasTargetWidth, canvasTargetHeight);
 
-        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, at);
-        History.addEdit(edit);
+        newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, comp.getView());
 
-        canvas.changeImSize(canvasTargetWidth, canvasTargetHeight);
+
+//        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, at);
+//        History.addEdit(edit);
+
+        History.addEdit(new CompositionReplacedEdit(
+                "Resize", view, comp, newComp));
+        view.replaceComp(newComp);
+        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+
+        Guides guides = comp.getGuides();
+        if (guides != null) {
+            // in the case of resize the guides don't
+            // need transforming, just a correct canvas size
+            Guides newGuides = guides.copyForNewComp(view);
+            newComp.setGuides(newGuides);
+        }
 
         // Only after the shared canvas size was updated.
         // The icon image could change if the proportions were
         // changed or if it was resized to a very small size
-        comp.updateAllIconImages();
+        newComp.updateAllIconImages();
 
-        comp.imageChanged(REPAINT, true);
-        comp.getView().revalidate(); // make sure the scrollbars are OK
+        newComp.imageChanged(REPAINT, true);
+        newComp.getView().revalidate(); // make sure the scrollbars are OK
 
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");

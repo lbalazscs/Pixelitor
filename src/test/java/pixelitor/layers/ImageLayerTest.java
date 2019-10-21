@@ -462,7 +462,9 @@ public class ImageLayerTest {
                         expectedImWidth, expectedImHeight));
         iconUpdates.check(0, 0);
 
-        comp.getCanvas().changeImSize((int) expectedNewCanvas.getWidth(), (int) expectedNewCanvas.getHeight());
+        comp.getCanvas().changeImSize(
+                (int) expectedNewCanvas.getWidth(),
+                (int) expectedNewCanvas.getHeight(), comp.getView());
         ConsistencyChecks.imageCoversCanvas(layer);
     }
 

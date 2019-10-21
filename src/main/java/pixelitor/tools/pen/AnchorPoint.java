@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -306,7 +306,7 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void delete() {
-        SubPath backup = this.subPath.copyForUndo(subPath.getPath());
+        SubPath backup = this.subPath.deepCopy(subPath.getPath(), view.getComp());
         this.subPath.deletePoint(this);
         History.addEdit(new SubPathEdit("Delete Anchor Point",
                 backup, subPath));

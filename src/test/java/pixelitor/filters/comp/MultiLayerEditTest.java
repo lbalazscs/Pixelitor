@@ -26,12 +26,14 @@ import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
+import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.testutils.NumLayers;
 import pixelitor.testutils.WithMask;
 import pixelitor.testutils.WithSelection;
 import pixelitor.testutils.WithTranslation;
+import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
 import java.util.Arrays;
@@ -51,7 +53,6 @@ public class MultiLayerEditTest {
 
     private Composition comp;
 
-    private ImageLayer layer1;
     private ImageLayer layer2;
 
     private Rectangle origSelection;
@@ -96,13 +97,14 @@ public class MultiLayerEditTest {
     @BeforeClass
     public static void setupClass() {
         Build.setUnitTestingMode();
+
+        Tools.setCurrentTool(Tools.CROP);
     }
 
     @Before
     public void setUp() {
         comp = TestHelper.create2LayerComposition(true);
         assertThat(comp)
-                .isNotDirty()
                 .isNotEmpty()
                 .hasName("Test")
                 .numLayersIs(2)
@@ -112,7 +114,7 @@ public class MultiLayerEditTest {
                 .firstLayerHasMask()
                 .secondLayerHasMask();
 
-        layer1 = (ImageLayer) comp.getLayer(0);
+//        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
         layer2 = (ImageLayer) comp.getLayer(1);
 
         numLayers.setupFor(comp);
@@ -156,23 +158,23 @@ public class MultiLayerEditTest {
 
         checkEnlargeCanvasAfterState(north, east, south, west);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Enlarge Canvas");
-            checkOriginalState();
+        History.undo("Enlarge Canvas");
+        checkOriginalState();
 
-            History.redo("Enlarge Canvas");
-            checkEnlargeCanvasAfterState(north, east, south, west);
-        }
+        History.redo("Enlarge Canvas");
+        checkEnlargeCanvasAfterState(north, east, south, west);
+
     }
 
     private void checkEnlargeCanvasAfterState(int north, int east, int south, int west) {
         int newCanvasWidth = ORIG_CANVAS_WIDTH + west + east;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT + north + south;
 
-        assertThat(comp)
-                .isDirty()
+        Composition newComp = OpenComps.getActiveCompOrNull();
+
+        assertThat(newComp)
                 .invariantIsOK()
                 .canvasSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerTranslationIs(
@@ -185,7 +187,7 @@ public class MultiLayerEditTest {
         if (withSelection.isYes()) {
             Rectangle newSelection = new Rectangle(origSelection.x + west,
                     origSelection.y + north, origSelection.width, origSelection.height);
-            assertThat(comp).selectionBoundsIs(newSelection);
+            assertThat(newComp).selectionBoundsIs(newSelection);
         }
     }
 
@@ -199,32 +201,31 @@ public class MultiLayerEditTest {
 
         checkStateAfterResize();
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Resize");
-            checkOriginalState();
+        History.undo("Resize");
+        checkOriginalState();
 
-            History.redo("Resize");
-            checkStateAfterResize();
-        }
+        History.redo("Resize");
+        checkStateAfterResize();
     }
 
     private void checkStateAfterResize() {
+        Composition newComp = OpenComps.getActiveCompOrNull();
+
         if (withSelection.isYes()) {
             Rectangle halfOfOrigSelection = new Rectangle(
                     origSelection.x / 2,
                     origSelection.y / 2,
                     origSelection.width / 2,
                     origSelection.height / 2);
-            assertThat(comp).selectionBoundsIs(halfOfOrigSelection);
+            assertThat(newComp).selectionBoundsIs(halfOfOrigSelection);
         }
 
         int newCanvasWidth = ORIG_CANVAS_WIDTH / 2;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT / 2;
 
-        assertThat(comp)
-                .isDirty()
+        assertThat(newComp)
                 .invariantIsOK()
                 .canvasSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerAndMaskImageSizeIs(
@@ -241,15 +242,13 @@ public class MultiLayerEditTest {
         new Rotate(ANGLE_90).process(comp);
         checkStateAfterRotate(ANGLE_90);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Rotate 90° CW");
-            checkOriginalState();
+        History.undo("Rotate 90° CW");
+        checkOriginalState();
 
-            History.redo("Rotate 90° CW");
-            checkStateAfterRotate(ANGLE_90);
-        }
+        History.redo("Rotate 90° CW");
+        checkStateAfterRotate(ANGLE_90);
     }
 
     @Test
@@ -258,15 +257,13 @@ public class MultiLayerEditTest {
         new Rotate(ANGLE_180).process(comp);
         checkStateAfterRotate(ANGLE_180);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Rotate 180°");
-            checkOriginalState();
+        History.undo("Rotate 180°");
+        checkOriginalState();
 
-            History.redo("Rotate 180°");
-            checkStateAfterRotate(ANGLE_180);
-        }
+        History.redo("Rotate 180°");
+        checkStateAfterRotate(ANGLE_180);
     }
 
     @Test
@@ -275,27 +272,27 @@ public class MultiLayerEditTest {
         new Rotate(ANGLE_270).process(comp);
         checkStateAfterRotate(ANGLE_270);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Rotate 90° CCW");
-            checkOriginalState();
+        History.undo("Rotate 90° CCW");
+        checkOriginalState();
 
-            History.redo("Rotate 90° CCW");
-            checkStateAfterRotate(ANGLE_270);
-        }
+        History.redo("Rotate 90° CCW");
+        checkStateAfterRotate(ANGLE_270);
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
     private void checkStateAfterRotate(Rotate.SpecialAngle angle) {
+        Composition newComp = OpenComps.getActiveCompOrNull();
+
         if (angle == ANGLE_180) {
-            assertThat(comp)
+            assertThat(newComp)
                     .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                     .activeLayerAndMaskImageSizeIs(
                             origImageWidth,
                             origImageHeight);
         } else {
-            assertThat(comp)
+            assertThat(newComp)
                     .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
                     .activeLayerAndMaskImageSizeIs(
                             origImageHeight,
@@ -307,15 +304,15 @@ public class MultiLayerEditTest {
         int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
                 + withTranslation.getExpectedTX();
         if (angle == ANGLE_90) {
-            assertThat(comp).activeLayerTranslationIs(
+            assertThat(newComp).activeLayerTranslationIs(
                     canvasDistFromImgBottom,
                     withTranslation.getExpectedTX());
         } else if (angle == ANGLE_180) {
-            assertThat(comp).activeLayerTranslationIs(
+            assertThat(newComp).activeLayerTranslationIs(
                     canvasDistFromImgRight,
                     canvasDistFromImgBottom);
         } else if (angle == ANGLE_270) {
-            assertThat(comp).activeLayerTranslationIs(
+            assertThat(newComp).activeLayerTranslationIs(
                     withTranslation.getExpectedTY(),
                     canvasDistFromImgRight);
         }
@@ -348,7 +345,7 @@ public class MultiLayerEditTest {
                         origSelection.width);
             }
 
-            assertThat(comp).selectionBoundsIs(rotatedSelectionBounds);
+            assertThat(newComp).selectionBoundsIs(rotatedSelectionBounds);
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -356,7 +353,7 @@ public class MultiLayerEditTest {
             assertThat(layer2).translationIs(0, 0);
         }
 
-        assertThat(comp).isDirty().invariantIsOK();
+        assertThat(comp).invariantIsOK();
     }
 
     @Test
@@ -366,15 +363,13 @@ public class MultiLayerEditTest {
         new Flip(HORIZONTAL).process(comp);
         checkStateAfterFlip(HORIZONTAL);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Flip Horizontal");
-            checkOriginalState();
+        History.undo("Flip Horizontal");
+        checkOriginalState();
 
-            History.redo("Flip Horizontal");
-            checkStateAfterFlip(HORIZONTAL);
-        }
+        History.redo("Flip Horizontal");
+        checkStateAfterFlip(HORIZONTAL);
     }
 
     @Test
@@ -384,30 +379,29 @@ public class MultiLayerEditTest {
         new Flip(VERTICAL).process(comp);
         checkStateAfterFlip(VERTICAL);
 
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Flip Vertical");
-            checkOriginalState();
+        History.undo("Flip Vertical");
+        checkOriginalState();
 
-            History.redo("Flip Vertical");
-            checkStateAfterFlip(VERTICAL);
-        }
+        History.redo("Flip Vertical");
+        checkStateAfterFlip(VERTICAL);
     }
 
     private void checkStateAfterFlip(Flip.Direction direction) {
-        assertThat(comp)
-                .isDirty()
+        Composition newComp = OpenComps.getActiveCompOrNull();
+
+        assertThat(newComp)
                 .invariantIsOK()
                 .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 
         if (direction == HORIZONTAL) {
-            assertThat(comp).activeLayerTranslationIs(
+            assertThat(newComp).activeLayerTranslationIs(
                     -(origImageWidth - ORIG_CANVAS_WIDTH + origTX),
                     origTY);
         } else if (direction == VERTICAL) {
-            assertThat(comp).activeLayerTranslationIs(
+            assertThat(newComp).activeLayerTranslationIs(
                     origTX,
                     -(origImageHeight - ORIG_CANVAS_HEIGHT + origTY));
         } else {
@@ -428,7 +422,7 @@ public class MultiLayerEditTest {
             Rectangle flippedSelection = new Rectangle(
                     flippedX, flippedY, origSelection.width, origSelection.height
             );
-            assertThat(comp).selectionBoundsIs(flippedSelection);
+            assertThat(newComp).selectionBoundsIs(flippedSelection);
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -441,19 +435,20 @@ public class MultiLayerEditTest {
     public void testCrop() {
         checkOriginalState();
 
-        new Crop(new Rectangle(3, 3, 6, 3), false, false, true).process(comp);
+        Rectangle imCropRect = new Rectangle(3, 3, 6, 3);
+        Crop cropAction = new Crop(imCropRect,
+                false, false, true, false);
+        cropAction.process(comp);
         checkAfterCropState();
 
         // test undo with one layer
-        if (numLayers.canUndo()) {
-            History.assertNumEditsIs(1);
+        History.assertNumEditsIs(1);
 
-            History.undo("Crop");
-            checkOriginalState();
+        History.undo("Crop");
+        checkOriginalState();
 
-            History.redo("Crop");
-            checkAfterCropState();
-        }
+        History.redo("Crop");
+        checkAfterCropState();
 
         // TODO
         // test selection crop with selection
@@ -463,9 +458,15 @@ public class MultiLayerEditTest {
 
     private void checkAfterCropState() {
         String afterCropState = "{canvasWidth=6, canvasHeight=3, tx=0, ty=0, imgWidth=6, imgHeight=3}";
-        assertThat(layer1.toDebugCanvasString()).isEqualTo(afterCropState);
+
+        // the layer references have changed after the crop
+        Composition newComp = OpenComps.getActiveCompOrNull();
+        ImageLayer newLayer1 = (ImageLayer) newComp.getLayer(0);
+
+        assertThat(newLayer1.toDebugCanvasString()).isEqualTo(afterCropState);
         if (numLayers == NumLayers.MORE) {
-            assertThat(layer2.toDebugCanvasString()).isEqualTo(afterCropState);
+            ImageLayer newLayer2 = (ImageLayer) newComp.getLayer(1);
+            assertThat(newLayer2.toDebugCanvasString()).isEqualTo(afterCropState);
         }
         // TODO check translation, selection etc
     }

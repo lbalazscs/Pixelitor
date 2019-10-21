@@ -20,6 +20,8 @@ package pixelitor.guides;
 import pixelitor.Canvas;
 import pixelitor.CanvasMargins;
 import pixelitor.Composition;
+import pixelitor.filters.comp.Flip;
+import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
@@ -35,6 +37,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
+import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+
 /**
  * Represents a set of guides.
  * Objects of this class should be mutated only while building,
@@ -44,26 +52,91 @@ public class Guides implements Serializable {
     // for compatibility with Pixelitor 4.2.0
     private static final long serialVersionUID = -1168950961227421664L;
 
-    private final Composition comp;
-    // all guides are stored as percentages so that resizing
-    // does not affect their perceived position
+    // all guide positions are stored as ratios relative to the canvas
+    // so that resizing does not affect their perceived position
     private final List<Double> horizontals = new ArrayList<>();
     private final List<Double> verticals = new ArrayList<>();
 
     private List<Line2D> lines;
 
+    // used only for debugging
     private String name;
 
     @VisibleForTesting
-    Guides(Composition comp) {
-        this.comp = comp;
+    Guides() {
     }
 
-    public Guides copyForEnlargedCanvas(int north, int east, int south, int west) {
-        Guides copy = new Guides(comp);
+    public Guides copyForNewComp(View view) {
+        Guides copy = new Guides();
+        copy.name = name + " copy";
+
+        copy.horizontals.addAll(horizontals);
+        copy.verticals.addAll(verticals);
+
+        copy.regenerateLines(view);
+
+        return copy;
+    }
+
+    public Guides copyForFlip(Flip.Direction direction, View view) {
+        Guides copy = new Guides();
+        copy.name = name + " copy";
+
+        if (direction == HORIZONTAL) {
+            copy.horizontals.addAll(horizontals);
+            for (Double vertical : verticals) {
+                copy.verticals.add(1 - vertical);
+            }
+        } else if (direction == VERTICAL) {
+            copy.verticals.addAll(verticals);
+            for (Double horizontal : horizontals) {
+                copy.horizontals.add(1 - horizontal);
+            }
+        } else {
+            throw new IllegalStateException();
+        }
+
+        copy.regenerateLines(view);
+
+        return copy;
+    }
+
+    public Guides copyForRotate(Rotate.SpecialAngle angle, View view) {
+        Guides copy = new Guides();
+        copy.name = name + " copy";
+
+        if (angle == ANGLE_90) {
+            for (Double horizontal : horizontals) {
+                copy.verticals.add(1 - horizontal);
+            }
+            copy.horizontals.addAll(verticals);
+        } else if (angle == ANGLE_180) {
+            for (Double horizontal : horizontals) {
+                copy.horizontals.add(1 - horizontal);
+            }
+            for (Double vertical : verticals) {
+                copy.verticals.add(1 - vertical);
+            }
+        } else if (angle == ANGLE_270) {
+            copy.verticals.addAll(horizontals);
+            for (Double vertical : verticals) {
+                copy.horizontals.add(1 - vertical);
+            }
+        } else {
+            throw new IllegalStateException();
+        }
+
+        copy.regenerateLines(view);
+
+        return copy;
+    }
+
+    public Guides copyForEnlargedCanvas(int north, int east, int south, int west, View view) {
+        Guides copy = new Guides();
         copy.setName(String.format("enlarged : north = %d, east = %d, south = %d, west = %d%n",
                 north, east, south, west));
-        int oldWidth = comp.getCanvasImWidth();
+        Canvas canvas = view.getCanvas();
+        int oldWidth = canvas.getImWidth();
         if (west != 0 || east != 0) {
             int newWidth = oldWidth + east + west;
             for (Double h : verticals) {
@@ -75,7 +148,7 @@ public class Guides implements Serializable {
             copy.verticals.addAll(verticals);
         }
 
-        int oldHeight = comp.getCanvasImHeight();
+        int oldHeight = canvas.getImHeight();
         if (north != 0 || south != 0) {
             int newHeight = oldHeight + north + south;
             for (Double v : horizontals) {
@@ -87,12 +160,12 @@ public class Guides implements Serializable {
             copy.horizontals.addAll(horizontals);
         }
 
-        copy.regenerateLines();
+        copy.regenerateLines(view);
         return copy;
     }
 
-    public Guides copyForCrop(Rectangle cropRect) {
-        Canvas canvas = comp.getCanvas();
+    public Guides copyForCrop(Rectangle cropRect, View view) {
+        Canvas canvas = view.getCanvas();
         int northMargin = cropRect.y;
         int westMargin = cropRect.x;
         int southMargin = canvas.getImHeight() - cropRect.height - cropRect.y;
@@ -101,11 +174,12 @@ public class Guides implements Serializable {
         // a crop is a negative enlargement
         return copyForEnlargedCanvas(
                 -northMargin, -eastMargin,
-                -southMargin, -westMargin);
+                -southMargin, -westMargin,
+                view);
     }
 
-    public static void showAddGridDialog(Composition comp) {
-        Builder builder = new Builder(comp, true);
+    public static void showAddGridDialog(View view) {
+        Builder builder = new Builder(view, true);
         AddGridGuidesPanel panel = new AddGridGuidesPanel(builder);
         new DialogBuilder()
                 .title("Add Grid Guides")
@@ -116,9 +190,9 @@ public class Guides implements Serializable {
                 .show();
     }
 
-    public static void showAddSingleGuideDialog(Composition comp,
+    public static void showAddSingleGuideDialog(View view,
                                                 boolean horizontal) {
-        Builder builder = new Builder(comp, false);
+        Builder builder = new Builder(view, false);
         AddSingleGuidePanel panel = new AddSingleGuidePanel(builder, horizontal);
         String dialogTitle = horizontal ? "Add Horizontal Guide" : "Add Vertical Guide";
         new DialogBuilder()
@@ -134,8 +208,8 @@ public class Guides implements Serializable {
         horizontals.add(percent);
     }
 
-    public void addHorAbsolute(int pixels) {
-        double percent = pixels / (double) comp.getCanvasImWidth();
+    public void addHorAbsolute(int pixels, Canvas canvas) {
+        double percent = pixels / (double) canvas.getImWidth();
         horizontals.add(percent);
     }
 
@@ -143,8 +217,8 @@ public class Guides implements Serializable {
         verticals.add(percent);
     }
 
-    public void addVerAbsolute(int pixels) {
-        double percent = pixels / (double) comp.getCanvasImHeight();
+    public void addVerAbsolute(int pixels, Canvas canvas) {
+        double percent = pixels / (double) canvas.getImHeight();
         verticals.add(percent);
     }
 
@@ -167,10 +241,12 @@ public class Guides implements Serializable {
     public void addAbsoluteGrid(int horNumber, // number of horizontal lines
                                 int horDist,   // vertical abs. distance between them
                                 int verNumber,
-                                int verDist) {
+                                int verDist,
+                                View view) {
+        Canvas canvas = view.getCanvas();
         // horizontal lines
         int distFromTop = 0;
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasHeight = canvas.getImHeight();
         for (int i = 0; i < horNumber; i++) {
             distFromTop += horDist;
             double lineY = distFromTop / (double) canvasHeight;
@@ -179,7 +255,7 @@ public class Guides implements Serializable {
 
         // vertical lines
         int distFromLeft = 0;
-        int canvasWidth = comp.getCanvasImWidth();
+        int canvasWidth = canvas.getImWidth();
         for (int i = 0; i < verNumber; i++) {
             distFromLeft += verDist;
             double lineX = distFromLeft / (double) canvasWidth;
@@ -197,11 +273,11 @@ public class Guides implements Serializable {
         return verticals;
     }
 
-    private void regenerateLines() {
-        int width = comp.getCanvasImWidth();
-        int height = comp.getCanvasImHeight();
-        CanvasMargins margins = comp.getView().getCanvasMargins();
-        View view = comp.getView();
+    private void regenerateLines(View view) {
+        Canvas canvas = view.getCanvas();
+        int width = canvas.getImWidth();
+        int height = canvas.getImHeight();
+        CanvasMargins margins = view.getCanvasMargins();
 
         lines = new ArrayList<>();
         for (Double h : horizontals) {
@@ -232,8 +308,9 @@ public class Guides implements Serializable {
         renderer.draw(g, lines);
     }
 
-    public void coCoordsChanged() {
-        regenerateLines();
+    // the view parameter
+    public void coCoordsChanged(View view) {
+        regenerateLines(view);
     }
 
     private void copyValuesFrom(Guides other) {
@@ -256,17 +333,17 @@ public class Guides implements Serializable {
      */
     public static class Builder {
         private final BooleanParam clearExisting;
-        private final Composition comp;
+        private final View view;
         private final Guides oldGuides;
 
-        public Builder(Composition comp, boolean clearByDefault) {
-            this.comp = comp;
-            oldGuides = comp.getGuides();
+        public Builder(View view, boolean clearByDefault) {
+            this.view = view;
+            oldGuides = view.getComp().getGuides();
             clearExisting = new BooleanParam("Clear Existing Guides", clearByDefault);
         }
 
         public void build(boolean preview, Consumer<Guides> setup) {
-            Guides guides = new Guides(comp);
+            Guides guides = new Guides();
             boolean useExisting = !clearExisting.isChecked();
             if (useExisting && oldGuides != null) {
                 guides.copyValuesFrom(oldGuides);
@@ -274,7 +351,8 @@ public class Guides implements Serializable {
 
             setup.accept(guides);
 
-            guides.regenerateLines();
+            guides.regenerateLines(view);
+            Composition comp = view.getComp();
             comp.setGuides(guides);
             comp.repaint();
             if (!preview) {
@@ -283,8 +361,9 @@ public class Guides implements Serializable {
         }
 
         public void resetOldGuides() {
+            Composition comp = view.getComp();
             comp.setGuides(oldGuides);
-            comp.repaint();
+            view.repaint();
         }
 
         public BooleanParam getClearExisting() {
@@ -296,7 +375,7 @@ public class Guides implements Serializable {
         }
 
         public Canvas getCanvas() {
-            return comp.getCanvas();
+            return view.getCanvas();
         }
     }
 }

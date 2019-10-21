@@ -86,8 +86,8 @@ public class SubPath implements Serializable {
         id = "SP" + debugCounter++;
     }
 
-    public SubPath copyForUndo(Path copyParent) {
-        SubPath copy = new SubPath(copyParent, comp);
+    public SubPath deepCopy(Path copyParent, Composition newComp) {
+        SubPath copy = new SubPath(copyParent, newComp);
         copy.closed = closed;
         copy.finished = finished;
 

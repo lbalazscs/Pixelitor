@@ -102,12 +102,11 @@ public abstract class Layer implements Serializable {
         assert comp != null;
         assert name != null;
 
-        this.comp = comp;
+        setCompAndCanvas(comp);
         this.name = name;
         this.parent = parent;
         this.opacity = 1.0f;
 
-        canvas = comp.getCanvas();
 
         if (parent != null) { // this is a layer mask
             ui = parent.ui;
@@ -268,8 +267,12 @@ public abstract class Layer implements Serializable {
         return comp;
     }
 
-    public void setComp(Composition comp) {
+    public void setCompAndCanvas(Composition comp) {
         this.comp = comp;
+        canvas = comp.getCanvas();
+        if (hasMask()) {
+            mask.setCompAndCanvas(comp);
+        }
     }
 
     public void makeActive(boolean addToHistory) {
@@ -289,29 +292,37 @@ public abstract class Layer implements Serializable {
      * or modifies the existing one. It doesn't deselect.
      * It also doesn't add the edit to the history, only returns it.
      */
-    public PixelitorEdit addHidingMask(Selection sel) {
+    public PixelitorEdit addHidingMask(Selection sel, boolean createEdit) {
         if (mask == null) {
             int canvasWidth = canvas.getImWidth();
             int canvasHeight = canvas.getImHeight();
 
             BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.getBWImage(this, canvasWidth, canvasHeight, sel);
             return addImageAsMask(bwMask, false, "Add Layer Mask",
-                    false, false);
+                    false, false, createEdit);
         } else {
             BufferedImage maskImage = mask.getImage();
-            BufferedImage maskImageBackup = ImageUtils.copyImage(maskImage);
+            BufferedImage maskImageBackup = null;
+            if (createEdit) {
+                maskImageBackup = ImageUtils.copyImage(maskImage);
+            }
             Graphics2D g = maskImage.createGraphics();
 
             // fill the unselected part with black to hide it
             Shape unselectedShape = comp.getCanvas().invertShape(sel.getShape());
             g.setColor(Color.BLACK);
             g.fill(unselectedShape);
-
             g.dispose();
+
             mask.updateFromBWImage();
-            comp.imageChanged(FULL);
-            return new ImageEdit("Modify Mask", comp, mask, maskImageBackup,
-                    true, false);
+
+            if (createEdit) {
+                comp.imageChanged(FULL);
+                return new ImageEdit("Modify Mask", comp, mask, maskImageBackup,
+                        true, false);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -339,12 +350,12 @@ public abstract class Layer implements Serializable {
             editName = "Layer Mask from Selection";
         }
 
-        addImageAsMask(bwMask, deselect, editName, false, true);
+        addImageAsMask(bwMask, deselect, editName, false, true, true);
     }
 
     public PixelitorEdit addImageAsMask(BufferedImage bwMask, boolean deselect,
                                         String editName, boolean inheritTranslation,
-                                        boolean addEdit) {
+                                        boolean addEdit, boolean createEdit) {
         assert mask == null;
 
         mask = new LayerMask(comp, bwMask, this, inheritTranslation);
@@ -353,6 +364,12 @@ public abstract class Layer implements Serializable {
         // needs to be added first, because the inherited layer
         // mask constructor already will try to update the image
         ui.get().addMaskIconLabel();
+
+        if (!createEdit) {
+            // history and UI update will be handled in an
+            // enclosing nonrectangular selection crop
+            return null;
+        }
 
         comp.imageChanged();
 
@@ -382,7 +399,7 @@ public abstract class Layer implements Serializable {
         if (hasMask()) {
             mask.replaceImage(bwMask, editName);
         } else {
-            addImageAsMask(bwMask, false, editName, true, true);
+            addImageAsMask(bwMask, false, editName, true, true, true);
         }
     }
 
@@ -455,8 +472,6 @@ public abstract class Layer implements Serializable {
      * translations are taken into account
      */
     private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
-//        Canvas canvas = comp.getCanvas();
-
         // 1. create the masked image
         // TODO the masked image should be cached
         BufferedImage maskedImage = new BufferedImage(
@@ -514,10 +529,6 @@ public abstract class Layer implements Serializable {
 
     public LayerMask getMask() {
         return mask;
-    }
-
-    public void setCanvas(Canvas canvas) {
-        this.canvas = canvas;
     }
 
     public Object getVisibilityAsORAString() {

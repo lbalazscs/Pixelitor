@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,28 +23,18 @@ import pixelitor.Composition;
  * The number of layers which is present when a test runs
  */
 public enum NumLayers {
-    ONE(true) {
+    ONE() {
         @Override
         public void setupFor(Composition comp) {
-            // delete one layer so that we have undo
+            // delete one layer so that we have one left
             comp.deleteLayer(comp.getActiveLayer(), true, false);
         }
-    }, MORE(false) {
+    }, MORE() {
         @Override
         public void setupFor(Composition comp) {
 
         }
     };
 
-    private final boolean canUndo;
-
-    NumLayers(boolean canUndo) {
-        this.canUndo = canUndo;
-    }
-
     public abstract void setupFor(Composition comp);
-
-    public boolean canUndo() {
-        return canUndo;
-    }
 }

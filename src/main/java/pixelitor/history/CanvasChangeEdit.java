@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,7 @@ public class CanvasChangeEdit extends PixelitorEdit {
         int tmpWidth = canvas.getImWidth();
         int tmpHeight = canvas.getImHeight();
 
-        canvas.changeImSize(backupWidth, backupHeight);
+        canvas.changeImSize(backupWidth, backupHeight, comp.getView());
 
         backupWidth = tmpWidth;
         backupHeight = tmpHeight;

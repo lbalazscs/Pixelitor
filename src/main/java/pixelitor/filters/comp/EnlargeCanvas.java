@@ -21,16 +21,16 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.Guides;
-import pixelitor.guides.GuidesChangeEdit;
+import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
-import pixelitor.history.MultiLayerBackup;
-import pixelitor.history.MultiLayerEdit;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
+import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -58,42 +58,50 @@ public class EnlargeCanvas implements CompAction {
 
     @Override
     public void process(Composition comp) {
-        String editName = "Enlarge Canvas";
+//        String editName = "Enlarge Canvas";
 
-        Guides guides = comp.getGuides();
+        View view = comp.getView();
+        Guides oldGuides = comp.getGuides();
         Guides newGuides = null;
-        if (guides != null) {
-            newGuides = guides.copyForEnlargedCanvas(north, east, south, west);
+        if (oldGuides != null) {
+            newGuides = oldGuides.copyForEnlargedCanvas(north, east, south, west, view);
             comp.setGuides(newGuides);
         }
 
-        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
-        if (guides != null) {
-            GuidesChangeEdit gce = new GuidesChangeEdit(comp, guides, newGuides);
-            backup.setGuidesChangeEdit(gce);
-        }
+        Composition newComp = comp.createCopy(true, true);
+        Canvas newCanvas = newComp.getCanvas();
 
-        comp.forEachLayer(this::processLayer);
+//        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
+//        if (guides != null) {
+//            GuidesChangeEdit gce = new GuidesChangeEdit(comp, guides, newGuides);
+//            backup.setGuidesChangeEdit(gce);
+//        }
+
+        newComp.forEachLayer(this::processLayer);
 
         AffineTransform canvasTx = null;
         if (north > 0 || west > 0) {
             canvasTx = AffineTransform.getTranslateInstance(west, north);
-            comp.imCoordsChanged(
+            newComp.imCoordsChanged(
                     canvasTx, false);
         }
 
-        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, canvasTx);
+//        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, canvasTx);
+//        History.addEdit(edit);
 
-        History.addEdit(edit);
 
-        Canvas canvas = comp.getCanvas();
-        int newCanvasWidth = canvas.getImWidth() + east + west;
-        int newCanvasHeight = canvas.getImHeight() + north + south;
-        canvas.changeImSize(newCanvasWidth, newCanvasHeight);
+        int newCanvasWidth = newCanvas.getImWidth() + east + west;
+        int newCanvasHeight = newCanvas.getImHeight() + north + south;
+        newCanvas.changeImSize(newCanvasWidth, newCanvasHeight, view);
 
         // update the icon images only after the shared canvas size was
         // enlarged, because they are based on the canvas-sized subimage
         comp.updateAllIconImages();
+
+        History.addEdit(new CompositionReplacedEdit(
+                "Enlarge Canvas", view, comp, newComp));
+        view.replaceComp(newComp);
+        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
         comp.imageChanged(REPAINT, true);
 

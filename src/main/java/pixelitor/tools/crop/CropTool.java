@@ -17,6 +17,7 @@
 
 package pixelitor.tools.crop;
 
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.comp.Crop;
@@ -25,6 +26,8 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.Layer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.guidelines.RectGuideline;
@@ -136,6 +139,22 @@ public class CropTool extends DragTool {
         addCropControlCheckboxes();
 
         enableCropActions(false);
+
+        if (Build.isDevelopment()) {
+            JButton b = new JButton("Dump Canvas");
+            b.addActionListener(e -> {
+                View view = OpenComps.getActiveView();
+                Canvas canvas = view.getCanvas();
+                Layer firstLayer = view.getComp().getLayer(0);
+                if (firstLayer instanceof ImageLayer) {
+                    ImageLayer imageLayer = (ImageLayer) firstLayer;
+                    Rectangle imageBounds = imageLayer.getImageBounds();
+                    System.out.println("CropTool::initSettingsPanel: imageBounds = " + imageBounds);
+                }
+                System.out.println("CropTool::actionPerformed: canvas = " + canvas);
+            });
+            settingsPanel.add(b);
+        }
     }
 
     private void addMaskOpacitySelector() {

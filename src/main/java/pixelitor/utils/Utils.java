@@ -229,7 +229,7 @@ public final class Utils {
             comp.getActiveDrawableOrThrow().setImage(copy);
             if (canvas.getImWidth() != img.getWidth()
                     || canvas.getImHeight() != img.getHeight()) {
-                canvas.changeImSize(img.getWidth(), img.getHeight());
+                canvas.changeImSize(img.getWidth(), img.getHeight(), comp.getView());
             }
 
             comp.repaint();

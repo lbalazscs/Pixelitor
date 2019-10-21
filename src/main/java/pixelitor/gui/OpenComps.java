@@ -356,7 +356,9 @@ public class OpenComps {
 
     public static void duplicateActive() {
         assert activeView != null;
-        Composition newComp = Composition.createCopy(activeView.getComp(), false);
+
+        Composition activeComp = activeView.getComp();
+        Composition newComp = activeComp.createCopy(false, true);
 
         addAsNewImage(newComp);
     }

@@ -156,41 +156,52 @@ public class Composition implements Serializable {
         return new Composition(canvas);
     }
 
-    public static Composition createCopy(Composition orig, boolean forUndo) {
-        Canvas canvasCopy = new Canvas(orig.getCanvas());
-        Composition compCopy = new Composition(canvasCopy);
+    /**
+     * Creates and returns a deep copy of this composition.
+     */
+    public Composition createCopy(boolean forUndo, boolean copySelection) {
+        Canvas canvasCopy = new Canvas(canvas);
+        Composition copy = new Composition(canvasCopy);
 
         // copy layers
-        for (Layer layer : orig.layerList) {
+        for (Layer layer : layerList) {
             Layer layerCopy = layer.duplicate(true);
-            layerCopy.setComp(compCopy);
+            layerCopy.setCompAndCanvas(copy);
 
-            compCopy.layerList.add(layerCopy);
-            if (layer == orig.activeLayer) {
-                compCopy.activeLayer = layerCopy;
+            copy.layerList.add(layerCopy);
+            if (layer == activeLayer) {
+                copy.activeLayer = layerCopy;
             }
         }
 
-        compCopy.newLayerCount = orig.newLayerCount;
+        copy.newLayerCount = newLayerCount;
 
-        if (orig.selection != null) {
-            compCopy.setSelectionRef(new Selection(orig.selection, forUndo));
+        if (copySelection && selection != null) {
+            copy.setSelectionRef(new Selection(selection, forUndo));
         }
         if (forUndo) {
-            compCopy.dirty = orig.dirty;
-            compCopy.file = orig.file;
-            compCopy.name = orig.name;
-            compCopy.view = orig.view;
-        } else {
-            compCopy.dirty = true;
-            compCopy.file = null;
-            compCopy.name = createCopyName(stripExtension(orig.name));
-            compCopy.view = null;
+            copy.dirty = dirty;
+            copy.file = file;
+            copy.name = name;
+            copy.view = view;
+            // the guides and the paths of the copy are not set here, because
+            // they depend on the operation that needed this copy
+        } else { // duplicate
+            copy.dirty = true;
+            copy.file = null;
+            copy.name = createCopyName(stripExtension(name));
+            copy.view = null;
+            if (guides != null) {
+                copy.guides = guides.copyForNewComp(view);
+            }
+            if (paths != null) {
+                copy.paths = paths.deepCopy(copy);
+            }
         }
 
-        assert compCopy.checkInvariant();
+        assert copy.checkInvariant();
 
-        return compCopy;
+        return copy;
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -222,10 +233,16 @@ public class Composition implements Serializable {
 
     public void setView(View view) {
         this.view = view;
-        canvas.setView(view);
+        if (view != null) {
+            canvas.recalcCoSize(view);
+        }
 
         if (selection != null) { // can happen when duplicating
-            selection.setView(view);
+            if (view == null) {
+                throw new IllegalStateException(); // should deselect first
+            } else {
+                selection.setView(view);
+            }
         }
         if (paths != null) {
             if (view != null) { // the view can be null when reloading
@@ -1266,7 +1283,7 @@ public class Composition implements Serializable {
 
     public void coCoordsChanged() {
         if (guides != null) {
-            guides.coCoordsChanged();
+            guides.coCoordsChanged(view);
         }
     }
 

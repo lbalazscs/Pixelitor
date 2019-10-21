@@ -47,8 +47,6 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    private transient View view;
-
     // for compatibility with Pixelitor 2.1.0
     private static final long serialVersionUID = -1459254568616232274L;
 
@@ -67,12 +65,12 @@ public class Canvas implements Serializable {
     /**
      * Changes the size with values given in image space
      */
-    public void changeImSize(int newImWidth, int newImHeight) {
+    public void changeImSize(int newImWidth, int newImHeight, View view) {
         width = newImWidth;
         height = newImHeight;
 
         // also update the component space values
-        recalcCoSize();
+        recalcCoSize(view);
 
         Canvas.activeCanvasImSizeChanged(this);
     }
@@ -80,7 +78,7 @@ public class Canvas implements Serializable {
     /**
      * Recalculates the component-space (zoomed) size
      */
-    public void recalcCoSize() {
+    public void recalcCoSize(View view) {
         double viewScale = view.getScaling();
         zoomedWidth = (int) (viewScale * width);
         zoomedHeight = (int) (viewScale * height);
@@ -130,13 +128,6 @@ public class Canvas implements Serializable {
         return zoomedHeight;
     }
 
-    public void setView(View view) {
-        this.view = view;
-        if (view != null) {
-            recalcCoSize();
-        }
-    }
-
     public Shape invertShape(Shape shape) {
         Area area = new Area(shape);
         Area fullArea = new Area(getImBounds());
@@ -163,7 +154,7 @@ public class Canvas implements Serializable {
     }
 
     public static void activeCanvasImSizeChanged(Canvas canvas) {
-        Symmetry.setCanvas(canvas);
+        Symmetry.setCanvasImSize(canvas);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,8 @@
 package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
+import pixelitor.gui.View;
+import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 
@@ -36,7 +37,7 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvas(Composition comp) {
+    protected void changeCanvas(Canvas canvas, View view) {
         throw new IllegalStateException("should not be called");
     }
 
@@ -53,6 +54,11 @@ public class Flip extends SimpleCompAction {
     @Override
     protected AffineTransform createCanvasTX(Canvas canvas) {
         return direction.getCanvasTX(canvas);
+    }
+
+    @Override
+    protected Guides createGuidesCopy(Guides guides, View view) {
+        return guides.copyForFlip(direction, view);
     }
 
     /**

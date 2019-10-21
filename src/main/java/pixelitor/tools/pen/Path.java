@@ -73,10 +73,10 @@ public class Path implements Serializable {
         buildState = BuildState.NO_INTERACTION;
     }
 
-    public Path copyForUndo() {
-        Path copy = new Path(comp, false);
+    public Path deepCopy(Composition newComp) {
+        Path copy = new Path(newComp, false);
         for (SubPath sp : subPaths) {
-            copy.subPaths.add(sp.copyForUndo(copy));
+            copy.subPaths.add(sp.deepCopy(copy, newComp));
         }
         int activeIndex = subPaths.indexOf(activeSubPath);
         copy.activeSubPath = copy.subPaths.get(activeIndex);
@@ -290,7 +290,7 @@ public class Path implements Serializable {
     public void delete(SubPath subPath) {
         assert comp.getActivePath() == this;
 
-        Path backup = copyForUndo();
+        Path backup = deepCopy(comp);
         subPaths.removeIf(sp -> sp == subPath);
         assert subPaths.size() >= 1; // should never be called for the last subpath
         activeSubPath = subPaths.get(subPaths.size() - 1);

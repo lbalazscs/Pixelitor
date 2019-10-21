@@ -18,6 +18,7 @@
 package pixelitor;
 
 import org.mockito.MockingDetails;
+import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
@@ -59,6 +60,7 @@ import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.when;
@@ -69,6 +71,7 @@ import static pixelitor.layers.MaskViewMode.NORMAL;
 public class TestHelper {
     public static final int TEST_WIDTH = 20;
     public static final int TEST_HEIGHT = 10;
+    private static Composition currentComp;
 
     private TestHelper() {
     }
@@ -118,7 +121,6 @@ public class TestHelper {
         View view = createMockViewWithoutComp();
         when(view.getComp()).thenReturn(comp);
         when(view.getCanvas()).thenReturn(canvas);
-        canvas.setView(view);
 
         when(comp.getView()).thenReturn(view);
 
@@ -213,7 +215,23 @@ public class TestHelper {
     public static View setupMockViewFor(Composition comp) {
         View view = createMockViewWithoutComp();
 
-        when(view.getComp()).thenReturn(comp);
+//        when(view.getComp()).thenReturn(comp);
+
+        // the view should be able to return the *new* composition
+        // after a replaceComp call, therefore it always returns the
+        // currentComp filed, which initially is set to comp
+        currentComp = comp;
+
+        // when replaceComp() is called on the mock, then store the received
+        // Composition argument in the currentComp field
+        doAnswer(invocation -> {
+            currentComp = (Composition) invocation.getArguments()[0];
+            return null;
+        }).when(view).replaceComp(any(Composition.class));
+
+        // when getComp() is called on the mock, then return the currentComp field
+        when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
+
         when(view.activeIsDrawable()).thenAnswer(
                 invocation -> comp.activeIsDrawable());
 

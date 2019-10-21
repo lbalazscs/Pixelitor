@@ -1043,24 +1043,24 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Add Horizontal Guide...") {
             @Override
             public void onClick() {
-                Composition comp = OpenComps.getActiveCompOrNull();
-                Guides.showAddSingleGuideDialog(comp, true);
+                View view = getActiveView();
+                Guides.showAddSingleGuideDialog(view, true);
             }
         });
 
         viewMenu.addAction(new MenuAction("Add Vertical Guide...") {
             @Override
             public void onClick() {
-                Composition comp = OpenComps.getActiveCompOrNull();
-                Guides.showAddSingleGuideDialog(comp, false);
+                View view = getActiveView();
+                Guides.showAddSingleGuideDialog(view, false);
             }
         });
 
         viewMenu.addAction(new MenuAction("Add Grid Guides...") {
             @Override
             public void onClick() {
-                Composition comp = OpenComps.getActiveCompOrNull();
-                Guides.showAddGridDialog(comp);
+                View view = getActiveView();
+                Guides.showAddGridDialog(view);
             }
         });
 

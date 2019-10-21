@@ -106,7 +106,7 @@ public class PathTest {
 
     private void testConversionsFor(Shape shape) {
         Path path = Shapes.shapeToPath(shape, view);
-        Path copy = path.copyForUndo();
+        Path copy = path.deepCopy(view.getComp());
         Shape convertedShape = copy.toImageSpaceShape();
         assertThat(Shapes.pathIteratorIsEqual(shape, convertedShape, 0.01)).isTrue();
     }
