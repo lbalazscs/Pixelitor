@@ -339,6 +339,11 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
+    public BufferedImage getTmpLayerImage() {
+        return createRasterizedImage();
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName()
                 + "{text=" + (settings == null ? "null settings" : settings.getText())

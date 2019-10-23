@@ -432,8 +432,10 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp) {
-        resetInitialState();
+    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        if (reloaded) {
+            resetInitialState();
+        }
     }
 
     /**

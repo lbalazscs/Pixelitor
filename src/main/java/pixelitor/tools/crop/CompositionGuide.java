@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.guidelines;
+package pixelitor.tools.crop;
 
 import pixelitor.guides.GuidesRenderer;
 
@@ -28,25 +28,25 @@ import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 
 /**
- * Crop guidelines renderer
+ * Crop composition guides renderer
  */
-public class RectGuideline {
+public class CompositionGuide {
     private Graphics2D g2;
-    private RectGuidelineType type = RectGuidelineType.NONE;
+    private CompositionGuideType type = CompositionGuideType.NONE;
     private int orientation = 0;
     private final GuidesRenderer glRenderer;
     private static final double GOLDEN_RATIO = 1.618;
     private static final int NUM_SPIRAL_SEGMENTS = 11;
 
-    public RectGuideline(GuidesRenderer glRenderer) {
+    public CompositionGuide(GuidesRenderer glRenderer) {
         this.glRenderer = glRenderer;
     }
 
-    public RectGuidelineType getType() {
+    public CompositionGuideType getType() {
         return type;
     }
 
-    public void setType(RectGuidelineType type) {
+    public void setType(CompositionGuideType type) {
         this.type = type;
     }
 

@@ -151,20 +151,20 @@ import static pixelitor.utils.Utils.getJavaMainVersion;
 public class MenuBar extends JMenuBar {
 
     public MenuBar(PixelitorWindow pw) {
-        this.add(createFileMenu(pw));
-        this.add(createEditMenu());
-        this.add(createLayerMenu(pw));
-        this.add(createSelectMenu());
-        this.add(createImageMenu());
-        this.add(createColorMenu());
-        this.add(createFilterMenu());
-        this.add(createViewMenu(pw));
+        add(createFileMenu(pw));
+        add(createEditMenu());
+        add(createLayerMenu(pw));
+        add(createSelectMenu());
+        add(createImageMenu());
+        add(createColorMenu());
+        add(createFilterMenu());
+        add(createViewMenu(pw));
 
         if (Build.CURRENT != Build.FINAL) {
-            this.add(createDevelopMenu(pw));
+            add(createDevelopMenu(pw));
         }
 
-        this.add(createHelpMenu(pw));
+        add(createHelpMenu(pw));
     }
 
     private static JMenu createFileMenu(PixelitorWindow pw) {
@@ -347,7 +347,7 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // copy
-        editMenu.addActionWithKey(new CopyAction(CopySource.LAYER), CTRL_C);
+        editMenu.addActionWithKey(new CopyAction(CopySource.LAYER_OR_MASK), CTRL_C);
         editMenu.addActionWithKey(new CopyAction(CopySource.COMPOSITE), CTRL_SHIFT_C);
         // paste
         editMenu.buildAction(new PasteAction(PasteDestination.NEW_IMAGE))
@@ -489,11 +489,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        sub.addAction(new GetImageAction(
-                "Add from Color Range", true, false) {
+        sub.addAction(new MenuAction("Add/Replace from Color Range...") {
             @Override
-            protected void process(Layer layer, BufferedImage image) {
-                MaskFromColorRangePanel.showInDialog(layer, image);
+            public void onClick() {
+                MaskFromColorRangePanel.showInDialog();
             }
         });
 
@@ -1035,7 +1034,7 @@ public class MenuBar extends JMenuBar {
 
         JCheckBoxMenuItem showPixelGridMI = new OpenImageEnabledCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
-            View.setShowPixelGrid(showPixelGridMI.getState()));
+                View.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);
 
         viewMenu.addSeparator();
@@ -1067,7 +1066,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Clear Guides") {
             @Override
             public void onClick() {
-                Composition comp = OpenComps.getActiveCompOrNull();
+                Composition comp = getActiveCompOrNull();
                 comp.clearGuides();
             }
         });

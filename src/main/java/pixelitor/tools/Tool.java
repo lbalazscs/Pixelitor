@@ -254,7 +254,7 @@ public abstract class Tool implements KeyListener {
         }
     }
 
-    public void compReplaced(Composition oldComp, Composition newComp) {
+    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
         // empty instead of abstract for the convenience of subclasses
     }
 

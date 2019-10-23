@@ -110,14 +110,17 @@ public class DraggablePoint extends Point2D.Double {
     // setLocation is overridden in subclasses to also move related
     // points, but we also need a pure version, which is final
     public final void setLocationOnlyForThis(double x, double y) {
-        assert !isNaN(x);
-        assert !isNaN(y);
+        assert !isNaN(x) : this.x + " to NaN in " + this;
+        assert !isNaN(y) : this.y + " to NaN in " + this;
 
         this.x = x;
         this.y = y;
 
         imX = view.componentXToImageSpace(x);
         imY = view.componentYToImageSpace(y);
+
+        assert !isNaN(imX);
+        assert !isNaN(imY);
 
         setShapes();
     }
@@ -147,6 +150,10 @@ public class DraggablePoint extends Point2D.Double {
         } else {
             transformed = at.transform(getImLocationCopy(), null);
         }
+
+        assert !isNaN(transformed.getX()) : "at = " + at + ", useRefPoint = " + useRefPoint;
+        assert !isNaN(transformed.getY()) : "at = " + at + ", useRefPoint = " + useRefPoint;
+
         setImLocationOnlyForThis(transformed);
     }
 
@@ -157,6 +164,10 @@ public class DraggablePoint extends Point2D.Double {
     private void setImLocationOnlyForThis(Point2D p) {
         imX = p.getX();
         imY = p.getY();
+
+        assert !isNaN(imX);
+        assert !isNaN(imY);
+
         restoreCoordsFromImSpace(view);
     }
 
@@ -321,6 +332,9 @@ public class DraggablePoint extends Point2D.Double {
         setLocationOnlyForThis(that.x, that.y);
         this.imX = that.imX;
         this.imY = that.imY;
+
+        assert !isNaN(imX);
+        assert !isNaN(imY);
     }
 
     public Point2D getLocationCopy() {

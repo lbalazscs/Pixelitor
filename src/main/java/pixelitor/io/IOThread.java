@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.io;
 
 import pixelitor.ThreadPool;
 
-import java.io.File;
+import java.awt.EventQueue;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -36,7 +36,8 @@ public class IOThread {
     private static final ExecutorService executor
             = Executors.newSingleThreadExecutor(threadFactory);
 
-    private static final Set<String> currentPaths = new HashSet<>();
+    private static final Set<String> currentReadPaths = new HashSet<>();
+    private static final Set<String> currentWritePaths = new HashSet<>();
 
     // can be set to true for testing things like
     // multiple progress bars, but normally this is false
@@ -53,22 +54,56 @@ public class IOThread {
         return executor;
     }
 
-    /**
-     * Returns true if the file is currently processed or queued to be processed,
-     * otherwise it returns false and marks the file as processed
-     */
-    public static synchronized boolean isProcessing(File file) {
-        String path = file.getAbsolutePath();
-        if (currentPaths.contains(path)) {
+    public static synchronized boolean isProcessing(String absolutePath) {
+        assert EventQueue.isDispatchThread();
+
+        if (currentReadPaths.contains(absolutePath)) {
             return true;
         }
-        currentPaths.add(path);
+        if (currentWritePaths.contains(absolutePath)) {
+            return true;
+        }
         return false;
     }
 
-    public static synchronized void processingFinishedFor(File file) {
-        String path = file.getAbsolutePath();
-        boolean contained = currentPaths.remove(path);
+    public static synchronized void markReadProcessing(String path) {
+        mark(currentReadPaths, path);
+    }
+
+    public static void markWriteProcessing(String path) {
+        mark(currentWritePaths, path);
+    }
+
+    private static void mark(Set<String> trackingSet, String path) {
+        assert EventQueue.isDispatchThread();
+
+        trackingSet.add(path);
+    }
+
+    public static void readingFinishedFor(String path) {
+        unMark(currentReadPaths, path);
+    }
+
+    public static void writingFinishedFor(String path) {
+        unMark(currentWritePaths, path);
+    }
+
+    private static void unMark(Set<String> trackingSet, String path) {
+        assert EventQueue.isDispatchThread();
+
+        boolean contained = trackingSet.remove(path);
         assert contained;
+    }
+
+    public static boolean isBusyWriting() {
+        assert EventQueue.isDispatchThread();
+
+        return !currentWritePaths.isEmpty();
+    }
+
+    public static Set<String> getCurrentWritePaths() {
+        assert EventQueue.isDispatchThread();
+
+        return currentWritePaths;
     }
 }

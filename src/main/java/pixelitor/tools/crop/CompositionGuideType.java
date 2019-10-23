@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,12 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.guidelines;
+package pixelitor.tools.crop;
 
 /**
- * Crop guidelines types
+ * Crop composition guide types
  */
-public enum RectGuidelineType {
+public enum CompositionGuideType {
     NONE("None"),
     RULE_OF_THIRDS("Rule of Thirds"),
     GOLDEN_SECTIONS("Golden Sections"),
@@ -31,7 +31,7 @@ public enum RectGuidelineType {
 
     private final String guiName;
 
-    RectGuidelineType(String guiName) {
+    CompositionGuideType(String guiName) {
         this.guiName = guiName;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,7 @@ import java.awt.image.BufferedImage;
  * Represents the source of the image that will be copied to the clipboard
  */
 public enum CopySource {
-    LAYER {
+    LAYER_OR_MASK {
         @Override
         BufferedImage getImage(Composition comp) {
             Layer layer = comp.getActiveLayer();
@@ -93,7 +93,7 @@ public enum CopySource {
 
         @Override
         public String toString() {
-            return "Copy Layer";
+            return "Copy Layer/Mask";
         }
     }, COMPOSITE {
         @Override

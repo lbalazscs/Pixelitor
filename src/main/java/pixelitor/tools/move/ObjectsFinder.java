@@ -50,8 +50,8 @@ public class ObjectsFinder {
             return result;
         }
 
-        // search guidelines
-        result = findGuideLineAtPoint(p, stage);
+        // search guides
+        result = findGuideAtPoint(p, stage);
         if (!result.isEmpty()) {
             return result;
         }
@@ -59,7 +59,7 @@ public class ObjectsFinder {
         return new ObjectsSelection();
     }
 
-    public static ObjectsSelection findGuideLineAtPoint(Point2D p, Composition stage) {
+    public static ObjectsSelection findGuideAtPoint(Point2D p, Composition stage) {
 
         ObjectsSelection result = new ObjectsSelection();
         // here guides selection, but it would be convenient to operate on objects
@@ -83,10 +83,10 @@ public class ObjectsFinder {
         }
 
         // iterate in reverse order (we need to search layers from top to bottom)
-        List layers = stage.getLayers();
-        ListIterator li = layers.listIterator(layers.size());
+        List<Layer> layers = stage.getLayers();
+        ListIterator<Layer> li = layers.listIterator(layers.size());
         while (li.hasPrevious()) {
-            Layer layer = (Layer) li.previous();
+            Layer layer = li.previous();
             if (!(layer instanceof ContentLayer)) {
                 continue;
             }

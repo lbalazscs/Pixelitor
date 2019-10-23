@@ -179,13 +179,15 @@ public class Composition implements Serializable {
         if (copySelection && selection != null) {
             copy.setSelectionRef(new Selection(selection, forUndo));
         }
+        if (paths != null) {
+            copy.paths = paths.deepCopy(copy);
+        }
         if (forUndo) {
             copy.dirty = dirty;
             copy.file = file;
             copy.name = name;
             copy.view = view;
-            // the guides and the paths of the copy are not set here, because
-            // they depend on the operation that needed this copy
+            // the new guides are set in the action that needed the undo
         } else { // duplicate
             copy.dirty = true;
             copy.file = null;
@@ -193,9 +195,6 @@ public class Composition implements Serializable {
             copy.view = null;
             if (guides != null) {
                 copy.guides = guides.copyForNewComp(view);
-            }
-            if (paths != null) {
-                copy.paths = paths.deepCopy(copy);
             }
         }
 
@@ -1202,6 +1201,14 @@ public class Composition implements Serializable {
                                              boolean addToRecentMenus) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
+        // prevents starting a new save on the EDT while an asynchronous
+        // save is already scheduled or running on the IO thread
+        String path = file.getAbsolutePath();
+        if (IOThread.isProcessing(path)) {
+            return CompletableFuture.completedFuture(null);
+        }
+        IOThread.markWriteProcessing(path);
+
         // set to not dirty already at the beginning of the saving process,
         // so that subsequent closing does not trigger another, parallel save
         boolean wasDirty = isDirty();
@@ -1216,6 +1223,7 @@ public class Composition implements Serializable {
                 } else {
                     EventQueue.invokeLater(() -> afterSuccessfulSaveActions(file, addToRecentMenus));
                 }
+                EventQueue.invokeLater(() -> IOThread.writingFinishedFor(path));
                 return null;
             });
     }

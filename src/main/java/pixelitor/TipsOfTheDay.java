@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -56,7 +57,13 @@ public class TipsOfTheDay {
                 nextTip = tipCount - 1;
             }
 
-            JXTipOfTheDay tipOfTheDay = new JXTipOfTheDay(tipOfTheDayModel);
+            Dimension size = new Dimension(480, 230);
+            JXTipOfTheDay tipOfTheDay = new JXTipOfTheDay(tipOfTheDayModel) {
+                @Override
+                public Dimension getPreferredSize() {
+                    return size;
+                }
+            };
             tipOfTheDay.setCurrentTip(nextTip);
             tipOfTheDay.showDialog(parent, tipPrefs, force);  // this stops until the user hits close
 

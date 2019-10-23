@@ -52,8 +52,8 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTX(Canvas canvas) {
-        return direction.getCanvasTX(canvas);
+    protected AffineTransform createCanvasImTX(Canvas canvas) {
+        return direction.createCanvasImTX(canvas);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasImTX(Canvas canvas) {
                 AffineTransform at = new AffineTransform();
                 at.translate(canvas.getImWidth(), 0);
                 at.scale(-1, 1);
@@ -80,7 +80,7 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(ImageLayer layer) {
                 AffineTransform at = new AffineTransform();
                 at.translate(layer.getImage().getWidth(), 0);
                 at.scale(-1, 1);
@@ -93,7 +93,7 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasImTX(Canvas canvas) {
                 AffineTransform at = new AffineTransform();
                 at.translate(0, canvas.getImHeight());
                 at.scale(1, -1);
@@ -101,7 +101,7 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform getImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(ImageLayer layer) {
                 AffineTransform at = new AffineTransform();
                 at.translate(0, layer.getImage().getHeight());
                 at.scale(1, -1);
@@ -115,11 +115,11 @@ public class Flip extends SimpleCompAction {
          * Returns the transformation in canvas space.
          * Needed for transforming the selection.
          */
-        public abstract AffineTransform getCanvasTX(Canvas canvas);
+        public abstract AffineTransform createCanvasImTX(Canvas canvas);
 
         /**
          * Returns the transformation for the image.
          */
-        public abstract AffineTransform getImageTX(ImageLayer layer);
+        public abstract AffineTransform createImageTX(ImageLayer layer);
     }
 }

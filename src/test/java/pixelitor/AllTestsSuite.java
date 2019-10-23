@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import pixelitor.layers.LayerTest;
 import pixelitor.layers.TextLayerTest;
 import pixelitor.tools.AbstractBrushToolTest;
 import pixelitor.tools.gradient.GradientHandlesTest;
-import pixelitor.tools.guidelines.RectGuidelineTest;
+import pixelitor.tools.guidelines.CompositionGuideTest;
 import pixelitor.tools.transform.TransformBoxTest;
 import pixelitor.transform.TransformHelperTest;
 import pixelitor.utils.ShapesTest;
@@ -81,7 +81,7 @@ import pixelitor.utils.UtilsTest;
         PixelitorUndoManagerTest.class,
         RandomFilterSourceTest.class,
         RangeParamTest.class,
-        RectGuidelineTest.class,
+        CompositionGuideTest.class,
         ShapesTest.class,
         TextLayerTest.class,
         TrackedIOTest.class,

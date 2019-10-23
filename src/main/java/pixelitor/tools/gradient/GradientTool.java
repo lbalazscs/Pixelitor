@@ -300,8 +300,10 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp) {
-        hideHandles(newComp, false);
+    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        if (reloaded) {
+            hideHandles(newComp, false);
+        }
     }
 
     @Override

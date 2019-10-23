@@ -48,14 +48,14 @@ public class Resize implements CompAction {
     }
 
     @Override
-    public void process(Composition comp) {
+    public Composition process(Composition comp) {
         Canvas oldCanvas = comp.getCanvas();
         int canvasCurrWidth = oldCanvas.getImWidth();
         int canvasCurrHeight = oldCanvas.getImHeight();
 
         if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
             // nothing to do
-            return;
+            return comp;
         }
 
         // it is important to use local copies of the final global
@@ -76,7 +76,6 @@ public class Resize implements CompAction {
         View view = comp.getView();
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
-//        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
 
         double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
         double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
@@ -86,10 +85,6 @@ public class Resize implements CompAction {
         resizeLayers(newComp, canvasTargetWidth, canvasTargetHeight);
 
         newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, comp.getView());
-
-
-//        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, at);
-//        History.addEdit(edit);
 
         History.addEdit(new CompositionReplacedEdit(
                 "Resize", view, comp, newComp));
@@ -114,6 +109,7 @@ public class Resize implements CompAction {
 
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
+        return newComp;
     }
 
     private void resizeLayers(Composition comp, int width, int height) {

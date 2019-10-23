@@ -54,8 +54,8 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasTX(Canvas canvas) {
-        return angle.createCanvasTX(canvas);
+    protected AffineTransform createCanvasImTX(Canvas canvas) {
+        return angle.createCanvasImTX(canvas);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasImTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         canvas.getImHeight(), 0);
@@ -106,7 +106,7 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasImTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         canvas.getImWidth(), canvas.getImHeight());
@@ -117,7 +117,7 @@ public class Rotate extends SimpleCompAction {
             @Override
             public AffineTransform createImageTX(ImageLayer layer) {
                 Canvas canvas = layer.getComp().getCanvas();
-                AffineTransform transform = createCanvasTX(canvas);
+                AffineTransform transform = createCanvasImTX(canvas);
                 int tx = layer.getTX();
                 int ty = layer.getTY();
                 transform.translate(tx, ty);
@@ -140,7 +140,7 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasTX(Canvas canvas) {
+            public AffineTransform createCanvasImTX(Canvas canvas) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
                         0, canvas.getImWidth());
@@ -181,7 +181,7 @@ public class Rotate extends SimpleCompAction {
 
         public abstract void changeCanvas(Canvas canvas, View view);
 
-        public abstract AffineTransform createCanvasTX(Canvas canvas);
+        public abstract AffineTransform createCanvasImTX(Canvas canvas);
 
         /**
          * Return the transformation of the image

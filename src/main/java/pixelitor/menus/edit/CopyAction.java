@@ -55,7 +55,7 @@ public class CopyAction extends AbstractAction {
             View view = OpenComps.getActiveView();
             Composition comp = view.getComp();
 
-            if (source == CopySource.LAYER) {
+            if (source == CopySource.LAYER_OR_MASK) {
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof AdjustmentLayer) {
                     if (!RandomGUITest.isRunning()) {

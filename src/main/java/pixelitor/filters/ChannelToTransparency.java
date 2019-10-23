@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,13 +44,15 @@ public class ChannelToTransparency extends ParametrizedFilter {
             new Value("Blue", BLUE)
     });
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
+    private final BooleanParam keepParam = new BooleanParam("Keep Existing Transparency", true);
 
     public ChannelToTransparency() {
         super(ShowOriginal.YES);
 
         setParams(
                 channel,
-                invertParam
+                invertParam,
+                keepParam
         );
     }
 
@@ -58,10 +60,11 @@ public class ChannelToTransparency extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         ChannelToTransparencyFilter filter;
         boolean invert = invertParam.isChecked();
+        boolean keep = keepParam.isChecked();
 
         switch (channel.getValue()) {
             case LUMINOSITY:
-                filter = new ChannelToTransparencyFilter(NAME, invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
                     @Override
                     int getChannelValue(int rgb) {
                         return (int) LuminanceLookup.from(rgb);
@@ -69,7 +72,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 };
                 break;
             case RED:
-                filter = new ChannelToTransparencyFilter(NAME, invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
                     @Override
                     int getChannelValue(int rgb) {
                         int r = (rgb >>> 16) & 0xFF;
@@ -78,7 +81,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 };
                 break;
             case GREEN:
-                filter = new ChannelToTransparencyFilter(NAME, invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
                     @Override
                     int getChannelValue(int rgb) {
                         int g = (rgb >>> 8) & 0xFF;
@@ -87,7 +90,7 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 };
                 break;
             case BLUE:
-                filter = new ChannelToTransparencyFilter(NAME, invert) {
+                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
                     @Override
                     int getChannelValue(int rgb) {
                         int b = rgb & 0xFF;
@@ -109,15 +112,17 @@ public class ChannelToTransparency extends ParametrizedFilter {
 
     abstract static class ChannelToTransparencyFilter extends PointFilter {
         private final boolean invert;
+        private final boolean keep;
 
-        protected ChannelToTransparencyFilter(String filterName, boolean invert) {
+        protected ChannelToTransparencyFilter(String filterName, boolean invert, boolean keep) {
             super(filterName);
             this.invert = invert;
+            this.keep = keep;
         }
 
         @Override
-        public int filterRGB(int x, int y, int rgb) {
-            int v = getChannelValue(rgb);
+        public int filterRGB(int x, int y, int argb) {
+            int v = getChannelValue(argb);
             int alpha;
             if (invert) {
                 alpha = v;
@@ -125,8 +130,15 @@ public class ChannelToTransparency extends ParametrizedFilter {
                 alpha = 255 - v;
             }
 
-            rgb = rgb & 0x00FFFFFF; // clear alpha
-            return alpha << 24 | rgb;
+            if (keep) {
+                int origAlpha = (argb >>> 24) & 0xFF;
+                if (origAlpha < alpha) {
+                    alpha = origAlpha;
+                }
+            }
+
+            argb = argb & 0x00FFFFFF; // clear alpha
+            return alpha << 24 | argb;
         }
 
         abstract int getChannelValue(int rgb);

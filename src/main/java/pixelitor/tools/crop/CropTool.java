@@ -30,8 +30,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
-import pixelitor.tools.guidelines.RectGuideline;
-import pixelitor.tools.guidelines.RectGuidelineType;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -80,12 +78,12 @@ public class CropTool extends DragTool {
     private final JLabel heightLabel = new JLabel("Height:");
     private JSpinner wSizeSpinner;
     private JSpinner hSizeSpinner;
-    private JComboBox guidesCB;
+    private JComboBox<CompositionGuideType> guidesCB;
 
     private JCheckBox allowGrowingCB;
     private JCheckBox deleteCroppedPixelsCB;
 
-    private final RectGuideline rectGuideline;
+    private final CompositionGuide compositionGuide;
 
     public CropTool() {
         super("Crop", 'C', "crop_tool_icon.png",
@@ -100,7 +98,7 @@ public class CropTool extends DragTool {
         maskOpacity.addChangeListener(e -> maskOpacityChanged());
 
         GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
-        rectGuideline = new RectGuideline(renderer);
+        compositionGuide = new CompositionGuide(renderer);
     }
 
     private void maskOpacityChanged() {
@@ -164,12 +162,11 @@ public class CropTool extends DragTool {
     }
 
     private void addGuidesSelector() {
-        guidesCB = new JComboBox<>(RectGuidelineType.values());
+        guidesCB = new JComboBox<>(CompositionGuideType.values());
         guidesCB.setToolTipText("<html>Composition guides." +
                 "<br><br>Press <b>O</b> to select the next guide." +
                 "<br>Press <b>Shift-O</b> to change the orientation.");
         guidesCB.setMaximumRowCount(guidesCB.getItemCount());
-//        guidesSelector.setSelectedItem(RectGuidelineType.RULE_OF_THIRDS);
         guidesCB.addActionListener(e -> OpenComps.repaintActive());
         settingsPanel.addComboBox("Guides:", guidesCB, "guidesCB");
     }
@@ -252,7 +249,7 @@ public class CropTool extends DragTool {
         // if a new drag is started, then reset it
         ended = false;
 
-        state = state.getNextAfterMousePressed();
+        setState(state.getNextAfterMousePressed());
 
         if (state == TRANSFORM) {
             assert cropBox != null;
@@ -301,7 +298,7 @@ public class CropTool extends DragTool {
 
                 cropBox = new CropBox(rect, e.getView());
 
-                state = TRANSFORM;
+                setState(TRANSFORM);
                 break;
             case TRANSFORM:
                 if (cropBox == null) {
@@ -375,9 +372,9 @@ public class CropTool extends DragTool {
             // it is important to call this AFTER setting the unscaled transform
             g2.setClip(coVisiblePart);
 
-            // draw guidelines
-            rectGuideline.setType((RectGuidelineType) guidesCB.getSelectedItem());
-            rectGuideline.draw(cropRect.getCo(), g2);
+            // draw composition guides
+            compositionGuide.setType((CompositionGuideType) guidesCB.getSelectedItem());
+            compositionGuide.draw(cropRect.getCo(), g2);
 
             cropBox.paintHandles(g2);
         }
@@ -431,7 +428,7 @@ public class CropTool extends DragTool {
     public void resetInitialState() {
         ended = true;
         cropBox = null;
-        state = INITIAL;
+        setState(INITIAL);
 
         enableCropActions(false);
 
@@ -442,10 +439,21 @@ public class CropTool extends DragTool {
         OpenComps.setCursorForAll(Cursors.DEFAULT);
     }
 
+    private void setState(CropToolState newState) {
+        state = newState;
+    }
+
     @Override
     public void coCoordsChanged(View view) {
         if (cropBox != null && state == TRANSFORM) {
             cropBox.coCoordsChanged(view);
+        }
+    }
+
+    @Override
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        if (cropBox != null && state == TRANSFORM) {
+            cropBox.imCoordsChanged(comp, at);
         }
     }
 
@@ -500,8 +508,8 @@ public class CropTool extends DragTool {
                 // Shift-O: change the orientation
                 // within the current composition guide family
                 if (state == TRANSFORM) {
-                    int o = rectGuideline.getOrientation();
-                    rectGuideline.setOrientation(o + 1);
+                    int o = compositionGuide.getOrientation();
+                    compositionGuide.setOrientation(o + 1);
                     OpenComps.repaintActive();
                     e.consume();
                 }

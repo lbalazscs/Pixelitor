@@ -56,15 +56,12 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     }
 
     @Override
-    public void process(Composition comp) {
-//        MultiLayerBackup backup = new MultiLayerBackup(comp,
-//                getEditName(), changesCanvasDimensions);
-//        Canvas oldCanvas = comp.getCanvas();
+    public Composition process(Composition comp) {
         View view = comp.getView();
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
 
-        AffineTransform canvasTX = createCanvasTX(newCanvas);
+        AffineTransform canvasTX = createCanvasImTX(newCanvas);
         newComp.imCoordsChanged(canvasTX, false);
 
         newComp.forEachLayer(this::processLayer);
@@ -73,7 +70,6 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             changeCanvas(newCanvas, view);
         }
 
-//        MultiLayerEdit edit = new MultiLayerEdit(getEditName(), comp, backup, canvasTX);
         History.addEdit(new CompositionReplacedEdit(
                 getEditName(), view, comp, newComp));
         view.replaceComp(newComp);
@@ -85,7 +81,6 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             newComp.setGuides(newGuides);
         }
 
-
         // Only after the shared canvas size was updated
         newComp.updateAllIconImages();
 
@@ -93,6 +88,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         if (changesCanvasDimensions) {
             view.revalidate(); // make sure the scrollbars are OK
         }
+        return newComp;
     }
 
     private void processLayer(Layer layer) {
@@ -116,10 +112,10 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     protected abstract void applyTx(ContentLayer contentLayer);
 
     /**
-     * Used to transform things that have coordinates relative to
-     * the canvas, like the selection, paths, tool widgets.
+     * Returns the change made by this action as a transform in
+     * image-space coordinates relative to the canvas
      */
-    protected abstract AffineTransform createCanvasTX(Canvas canvas);
+    protected abstract AffineTransform createCanvasImTX(Canvas canvas);
 
     protected abstract Guides createGuidesCopy(Guides guides, View view);
 }

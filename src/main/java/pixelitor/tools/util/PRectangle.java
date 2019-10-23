@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,11 +17,14 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.utils.Shapes;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -103,6 +106,23 @@ public class PRectangle {
 
     public void recalcCo(View view) {
         coRect = view.imageToComponentSpace(imRect);
+    }
+
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        Point2D upperLeft = new Point2D.Double(
+                imRect.getX(), imRect.getY());
+        Point2D lowerRight = new Point2D.Double(
+                imRect.getX() + imRect.getWidth(),
+                imRect.getY() + imRect.getHeight());
+
+        Point2D newUpperLeft = at.transform(upperLeft, null);
+        Point2D newLowerRight = at.transform(lowerRight, null);
+
+        imRect = new Rectangle2D.Double(newUpperLeft.getX(), newUpperLeft.getY(),
+                newLowerRight.getX() - newUpperLeft.getX(),
+                newLowerRight.getY() - newUpperLeft.getY());
+
+        recalcCo(comp.getView());
     }
 
     public void recalcIm(View view) {

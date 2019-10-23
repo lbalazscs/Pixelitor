@@ -26,6 +26,8 @@ import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
@@ -61,26 +63,19 @@ public class LayersContainer extends JPanel implements CompActivationListener {
 
     private static JPanel initSouthPanel() {
         JPanel southPanel = new JPanel();
-        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.X_AXIS));
+        southPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 0));
 
-        southPanel.add(createButton(AddNewLayerAction.INSTANCE, "addLayer"));
-        southPanel.add(createButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
-        southPanel.add(createButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
-        southPanel.add(createButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
-        southPanel.add(createButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
+        southPanel.add(new SouthButton(AddNewLayerAction.INSTANCE, "addLayer"));
+        southPanel.add(new SouthButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));
+        southPanel.add(new SouthButton(DuplicateLayerAction.INSTANCE, "duplicateLayer"));
+        southPanel.add(new SouthButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
+        southPanel.add(new SouthButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
         if (Build.enableAdjLayers) {
-            southPanel.add(createButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
+            southPanel.add(new SouthButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 
         return southPanel;
-    }
-
-    private static JButton createButton(Action a, String name) {
-        JButton button = new JButton(a);
-        button.setHideActionText(true);
-        button.setName(name);
-        return button;
     }
 
     private void setLayersPanel(LayersPanel newLayersPanel) {
@@ -121,6 +116,26 @@ public class LayersContainer extends JPanel implements CompActivationListener {
     @VisibleForTesting
     public List<String> getLayerNames() {
         return layersPanel.getLayerNames();
+    }
+
+    static class SouthButton extends JButton {
+        private static final Dimension SIZE = new Dimension(44, 28);
+
+        public SouthButton(Action a, String name) {
+            super(a);
+            setHideActionText(true);
+            setName(name);
+        }
+
+        @Override
+        public Dimension getMinimumSize() {
+            return SIZE;
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return SIZE;
+        }
     }
 }
 

@@ -57,9 +57,7 @@ public class EnlargeCanvas implements CompAction {
     }
 
     @Override
-    public void process(Composition comp) {
-//        String editName = "Enlarge Canvas";
-
+    public Composition process(Composition comp) {
         View view = comp.getView();
         Guides oldGuides = comp.getGuides();
         Guides newGuides = null;
@@ -71,12 +69,6 @@ public class EnlargeCanvas implements CompAction {
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
 
-//        MultiLayerBackup backup = new MultiLayerBackup(comp, editName, true);
-//        if (guides != null) {
-//            GuidesChangeEdit gce = new GuidesChangeEdit(comp, guides, newGuides);
-//            backup.setGuidesChangeEdit(gce);
-//        }
-
         newComp.forEachLayer(this::processLayer);
 
         AffineTransform canvasTx = null;
@@ -85,10 +77,6 @@ public class EnlargeCanvas implements CompAction {
             newComp.imCoordsChanged(
                     canvasTx, false);
         }
-
-//        MultiLayerEdit edit = new MultiLayerEdit(editName, comp, backup, canvasTx);
-//        History.addEdit(edit);
-
 
         int newCanvasWidth = newCanvas.getImWidth() + east + west;
         int newCanvasHeight = newCanvas.getImHeight() + north + south;
@@ -107,6 +95,7 @@ public class EnlargeCanvas implements CompAction {
 
         Messages.showInStatusBar("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
+        return newComp;
     }
 
     private void processLayer(Layer layer) {

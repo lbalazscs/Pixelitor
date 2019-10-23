@@ -17,6 +17,7 @@
 
 package pixelitor.tools.crop;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.TransformHelper;
 import pixelitor.tools.util.ArrowKey;
@@ -30,6 +31,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
 import java.util.List;
@@ -218,6 +220,11 @@ public class CropBox {
 
     public void coCoordsChanged(View view) {
         rect.coCoordsChanged(view);
+        update(rect);
+    }
+
+    public void imCoordsChanged(Composition comp, AffineTransform at) {
+        rect.imCoordsChanged(comp, at);
         update(rect);
     }
 

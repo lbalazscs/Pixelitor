@@ -115,12 +115,11 @@ public class Automate {
                                        CompAction action) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        System.out.println("Automate::processFile: CALLED, comp = " + comp.getName());
-
         View view = comp.getView();
+        assert view != null : "no view for " + comp.getName();
 
         view.paintImmediately();
-        action.process(comp);
+        comp = action.process(comp);
         view.paintImmediately();
 
         return comp;
@@ -128,6 +127,8 @@ public class Automate {
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
         View view = comp.getView();
+        assert view != null : "no view for " + comp.getName();
+
         OutputFormat outputFormat = OutputFormat.getLastUsed();
         File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
         CompletableFuture<Void> retVal = null;

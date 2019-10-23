@@ -39,6 +39,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -53,7 +54,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
@@ -297,8 +300,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         Shape selectionShape = comp.getSelectionShape();
         if (selectionShape == null) {
             return newImg;
-        } else {
-            // the argument image pixels will replace the old ones only where selected
+        } else if (selectionShape instanceof Rectangle2D) {
+            // rectangular selection, simple clipping is good,
+            // because there are no aliasing problems
             Graphics2D g = src.createGraphics();
             g.translate(-getTX(), -getTY());
             g.setComposite(AlphaComposite.Src);
@@ -306,6 +310,37 @@ public class ImageLayer extends ContentLayer implements Drawable {
             Rectangle bounds = selectionShape.getBounds();
             g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
+            return src;
+        } else {
+            // nonrectangular selection, we want soft clipping, with anti-aliasing
+            // following ideas from https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
+            Rectangle bounds = selectionShape.getBounds();
+
+            BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
+            Graphics2D g2 = tmpImg.createGraphics();
+            // fill with transparent pixels
+            g2.setComposite(AlphaComposite.Clear);
+            g2.fillRect(0, 0, bounds.width, bounds.height);
+            // fill the transparent image with anti-aliased
+            // selection-shaped white
+            g2.setComposite(AlphaComposite.Src);
+            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.translate(-bounds.x, -bounds.y);
+            g2.fill(selectionShape);
+
+            // It is important to use SrcIn, and not SrcAtop like in the
+            // blog mentioned above, because the filtered image might also
+            // contain transparent pixels and we don't want to lose that information.
+            g2.setComposite(AlphaComposite.SrcIn);
+            g2.translate(bounds.x, bounds.y);
+            g2.drawImage(newImg, 0, 0, null);
+            g2.dispose();
+
+            Graphics2D srcG = src.createGraphics();
+            srcG.drawImage(tmpImg, bounds.x - getTX(), bounds.y - getTY(), null);
+            srcG.dispose();
+
             return src;
         }
     }
@@ -636,7 +671,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void flip(Flip.Direction direction) {
-        AffineTransform imageTx = direction.getImageTX(this);
+        AffineTransform imageTx = direction.createImageTX(this);
         int tXAbs = -getTX();
         int tYAbs = -getTY();
         int newTXAbs;
@@ -1190,6 +1225,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @VisibleForTesting
     public BufferedImage getPreviewImage() {
         return previewImage;
+    }
+
+    @Override
+    public BufferedImage getTmpLayerImage() {
+        return getCanvasSizedSubImage();
     }
 
     public String toDebugCanvasString() {

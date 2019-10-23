@@ -96,7 +96,6 @@ public class SubPath implements Serializable {
             copy.anchorPoints.add(ap);
         }
 
-        assert moving == null; // used in edit mode
         return copy;
     }
 
@@ -739,7 +738,6 @@ public class SubPath implements Serializable {
         return box;
     }
 
-    @VisibleForTesting
     public void refTransform(AffineTransform at) {
         for (AnchorPoint point : anchorPoints) {
             point.imTransform(at, true);

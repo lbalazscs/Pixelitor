@@ -51,6 +51,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -174,8 +175,43 @@ public class Pixelitor {
     }
 
     public static void exitApp(PixelitorWindow pw) {
-        if (OpenComps.thereAreUnsavedChanges()) {
-            String msg = "There are unsaved changes. Are you sure you want to exit?";
+        assert EventQueue.isDispatchThread();
+        Set<String> paths = IOThread.getCurrentWritePaths();
+        if (!paths.isEmpty()) {
+            String msg = "<html>The writing of the following files is not finished yet. Exit anyway?<br><ul>";
+            for (String path : paths) {
+                msg += "<li>" + path;
+            }
+            boolean wait = Dialogs.showOKCancelWarningDialog(
+                    msg,
+                    "Warning", new String[]{"Wait 10 seconds", "Exit now"},
+                    0);
+            if (wait && IOThread.isBusyWriting()) {
+                // wait on another thread so that the status bar
+                // can be updated while waiting
+                new Thread(() -> {
+                    Utils.sleep(10, TimeUnit.SECONDS);
+                    EventQueue.invokeLater(() -> exitApp(pw));
+                }).start();
+
+                return;
+            }
+        }
+
+        List<Composition> unsavedComps = OpenComps.getUnsavedComps();
+        if (!unsavedComps.isEmpty()) {
+            String msg;
+            if (unsavedComps.size() == 1) {
+                msg = format("There are unsaved changes in %s. Are you sure you want to exit?",
+                        unsavedComps.get(0).getName());
+            } else {
+                msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
+                        "<br>Unsaved images:<ul>";
+                for (Composition comp : unsavedComps) {
+                    msg += "<li>" + comp.getName();
+                }
+            }
+
             if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
                 pw.setVisible(false);
                 AppPreferences.savePrefsAndExit();

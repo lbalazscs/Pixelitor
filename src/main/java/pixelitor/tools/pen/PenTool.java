@@ -330,8 +330,8 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void compReplaced(Composition oldComp, Composition newComp) {
-        setPathFromComp();
+    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        setPathFromComp(newComp);
     }
 
     @Override
@@ -345,9 +345,18 @@ public class PenTool extends Tool {
     protected void toolStarted() {
         super.toolStarted();
 
-        Path compPath = setPathFromComp();
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            setPathFromComp(view.getComp());
 
-        mode.modeStarted(null, compPath);
+            // the coordinates might have changed while using another tool,
+            // but other tools don't update the path component coordinates
+            coCoordsChanged(view);
+        } else {
+            assert path == null;
+        }
+
+        mode.modeStarted(null, path);
 
         assert checkPathConsistency();
     }
@@ -373,13 +382,16 @@ public class PenTool extends Tool {
         return true;
     }
 
-    private Path setPathFromComp() {
-        Path compPath = null;
+    private void setPathFromComp() {
         Composition comp = OpenComps.getActiveCompOrNull();
+        setPathFromComp(comp);
+    }
+
+    private void setPathFromComp(Composition comp) {
         if (comp == null) {
             path = null;
         } else {
-            compPath = comp.getActivePath();
+            Path compPath = comp.getActivePath();
             if (compPath == null) {
                 path = null;
                 if (mode.requiresExistingPath()) {
@@ -388,14 +400,13 @@ public class PenTool extends Tool {
             } else {
                 path = compPath;
                 PenToolMode preferredMode = compPath.getPreferredPenToolMode();
-                if (preferredMode != null) {
+                if (preferredMode != null && preferredMode != mode) {
                     preferredMode.start();
                 }
             }
             comp.repaint();
         }
         enableActionsBasedOnFinishedPath(path != null);
-        return compPath;
     }
 
     public static Path getPath() {

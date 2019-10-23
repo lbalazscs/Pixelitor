@@ -82,7 +82,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             }
         }
 
-        view.replaceComp(oldComp, oldMaskViewMode);
+        view.replaceComp(oldComp, oldMaskViewMode, true);
 
         if (oldDeselectEdit != null) {
             oldDeselectEdit.undo();
@@ -110,7 +110,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             oldDeselectEdit.redo();
         }
 
-        view.replaceComp(newComp, MaskViewMode.NORMAL);
+        view.replaceComp(newComp, MaskViewMode.NORMAL, true);
 
         if (newDeselectEdit != null) {
             newDeselectEdit.undo();

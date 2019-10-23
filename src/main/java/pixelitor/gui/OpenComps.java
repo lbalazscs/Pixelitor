@@ -52,6 +52,7 @@ import java.util.function.Predicate;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.CANCEL_OPTION;
 import static javax.swing.JOptionPane.CLOSED_OPTION;
 import static javax.swing.JOptionPane.NO_OPTION;
@@ -91,9 +92,11 @@ public class OpenComps {
     private OpenComps() {
     }
 
-    public static boolean thereAreUnsavedChanges() {
+    public static List<Composition> getUnsavedComps() {
         return views.stream()
-            .anyMatch(View::isDirty);
+                .map(View::getComp)
+                .filter(Composition::isDirty)
+                .collect(toList());
     }
 
     public static List<View> getViews() {
@@ -331,26 +334,28 @@ public class OpenComps {
             return;
         }
 
+        String path = file.getAbsolutePath();
         if (!file.exists()) {
             String msg = format(
                 "<html>The image '%s' cannot be reloaded because the file<br>" +
                     "<b>%s</b><br>" +
                     "does not exist anymore.",
-                comp.getName(), file.getAbsolutePath());
+                    comp.getName(), path);
             Messages.showError("File not found", msg);
             return;
         }
 
         // prevents starting a new reload on the EDT while an asynchronous
         // reload is already scheduled or running on the IO thread
-        if (IOThread.isProcessing(file)) {
+        if (IOThread.isProcessing(path)) {
             return;
         }
+        IOThread.markReadProcessing(path);
 
         OpenSave.loadCompFromFileAsync(file)
             .thenAcceptAsync(view::replaceJustReloadedComp,
                 EventQueue::invokeLater)
-            .whenComplete((v, e) -> IOThread.processingFinishedFor(file))
+                .whenComplete((v, e) -> IOThread.readingFinishedFor(path))
             .exceptionally(Messages::showExceptionOnEDT);
     }
 

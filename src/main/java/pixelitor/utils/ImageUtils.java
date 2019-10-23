@@ -23,6 +23,7 @@ import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
+import pixelitor.Canvas;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
@@ -55,6 +56,7 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
+import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.net.URL;
@@ -117,10 +119,24 @@ public class ImageUtils {
         return output;
     }
 
+    public static BufferedImage createSysCompatibleImage(Canvas canvas) {
+        return createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
+    }
+
     public static BufferedImage createSysCompatibleImage(int width, int height) {
         assert width > 0 && height > 0;
 
         return graphicsConfiguration.createCompatibleImage(width, height, TRANSLUCENT);
+    }
+
+    public static VolatileImage createSysCompatibleVolatileImage(Canvas canvas) {
+        return createSysCompatibleVolatileImage(canvas.getImWidth(), canvas.getImHeight());
+    }
+
+    public static VolatileImage createSysCompatibleVolatileImage(int width, int height) {
+        assert width > 0 && height > 0;
+
+        return graphicsConfiguration.createCompatibleVolatileImage(width, height, TRANSLUCENT);
     }
 
     public static BufferedImage createImageWithSameCM(BufferedImage src) {
@@ -551,29 +567,28 @@ public class ImageUtils {
         int clipX2 = clipX + clipWidth;
         int clipY2 = clipY + clipHeight;
         g.drawImage(img, clipX, clipY, clipX2, clipY2, clipX, clipY, clipX2, clipY2, null);
+
+//        g.drawImage(img, 0, 0, null);
     }
 
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
         assert src != null;
 
-        Dimension thumbDim = calcThumbDimensions(src, size);
+        Dimension thumbDim = calcThumbDimensions(src.getWidth(), src.getHeight(), size);
 
         return downSizeFast(src, thumbDim.width, thumbDim.height, painter);
     }
 
-    public static Dimension calcThumbDimensions(BufferedImage src, int size) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-
+    public static Dimension calcThumbDimensions(int srcWidth, int srcHeight, int size) {
         int thumbWidth;
         int thumbHeight;
-        if (width > height) {
+        if (srcWidth > srcHeight) {
             thumbWidth = size;
-            float ratio = (float) width / (float) height;
+            float ratio = (float) srcWidth / (float) srcHeight;
             thumbHeight = (int) (size / ratio);
         } else {
             thumbHeight = size;
-            float ratio = (float) height / (float) width;
+            float ratio = (float) srcHeight / (float) srcWidth;
             thumbWidth = (int) (size / ratio);
         }
 

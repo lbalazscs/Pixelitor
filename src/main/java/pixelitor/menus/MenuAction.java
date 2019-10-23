@@ -56,6 +56,16 @@ public abstract class MenuAction extends NamedAction {
             public String getErrorMessage(Layer layer) {
                 return format("The layer \"%s\" has no layer mask.", layer.getName());
             }
+        }, NO_LAYER_MASK("Has layer mask") {
+            @Override
+            boolean isAllowed(Layer layer) {
+                return !layer.hasMask();
+            }
+
+            @Override
+            public String getErrorMessage(Layer layer) {
+                return format("The layer \"%s\" already has a layer mask.", layer.getName());
+            }
         }, IS_TEXT_LAYER("Not a text layer") {
             @Override
             boolean isAllowed(Layer layer) {

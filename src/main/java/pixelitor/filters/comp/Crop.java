@@ -32,6 +32,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -65,7 +66,7 @@ public class Crop implements CompAction {
     }
 
     @Override
-    public void process(Composition comp) {
+    public Composition process(Composition comp) {
         Rectangle roundedImCropRect = roundCropRect(imCropRect);
         Canvas oldCanvas = comp.getCanvas();
 
@@ -80,7 +81,7 @@ public class Crop implements CompAction {
         if (cropRect.isEmpty()) {
             // we get here if the crop rectangle is
             // outside the canvas bounds in the crop tool
-            return;
+            return comp;
         }
 
         AffineTransform cropRectTranslation = createTransformForCropRect(cropRect);
@@ -144,8 +145,8 @@ public class Crop implements CompAction {
 
         Messages.showInStatusBar("Image cropped to "
                 + newWidth + " x " + newHeight + " pixels.");
+        return newComp;
     }
-
 
     // in zoomed-in images fractional widths and heights can happen
     private static Rectangle roundCropRect(Rectangle2D rect) {
@@ -208,6 +209,13 @@ public class Crop implements CompAction {
         if (sel == null) {
             return;
         }
+
+        if (RandomGUITest.isRunning()) {
+            // ask no questions, just do the simplest crop
+            rectangularCrop(comp, sel, false);
+            return;
+        }
+
         Shape selShape = sel.getShape();
         if (selShape instanceof Rectangle2D) {
             rectangularCrop(comp, sel, false);

@@ -625,6 +625,12 @@ public abstract class Layer implements Serializable {
         return null;
     }
 
+    /**
+     * Return a canvas-sized image representing this layer.
+     * This can be the temporarily rasterized image of a text layer.
+     */
+    public abstract BufferedImage getTmpLayerImage();
+
     public boolean isMaskEnabled() {
         return maskEnabled;
     }

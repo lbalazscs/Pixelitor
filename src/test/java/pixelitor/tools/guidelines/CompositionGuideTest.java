@@ -20,6 +20,8 @@ package pixelitor.tools.guidelines;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import pixelitor.guides.GuidesRenderer;
+import pixelitor.tools.crop.CompositionGuide;
+import pixelitor.tools.crop.CompositionGuideType;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -38,9 +40,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.refEq;
 import static org.mockito.Mockito.verify;
 
-public class RectGuidelineTest {
+public class CompositionGuideTest {
 
-    private RectGuideline rectGuideline;
+    private CompositionGuide compositionGuide;
 
     @Test
     public void draw_Type_NONE() {
@@ -49,9 +51,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.NONE);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.NONE);
+        compositionGuide.draw(rect, g2);
 
         verify(glRenderer, never()).draw(g2, new ArrayList<>());
     }
@@ -63,9 +65,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.RULE_OF_THIRDS);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.RULE_OF_THIRDS);
+        compositionGuide.draw(rect, g2);
 
         Line2D[] lines = new Line2D[4];
         lines[0] = new Line2D.Double(30, 0, 30, 12);
@@ -83,9 +85,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.GOLDEN_SECTIONS);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.GOLDEN_SECTIONS);
+        compositionGuide.draw(rect, g2);
 
         double phi = 1.618;
         double sectionWidth = rect.getWidth() / phi;
@@ -108,9 +110,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.DIAGONALS);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.DIAGONALS);
+        compositionGuide.draw(rect, g2);
 
         Line2D[] lines = new Line2D[4];
         lines[0] = new Line2D.Double(0, 0, 12, 12);
@@ -129,9 +131,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.DIAGONALS);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.DIAGONALS);
+        compositionGuide.draw(rect, g2);
 
         Line2D[] lines = new Line2D[4];
         lines[0] = new Line2D.Double(0, 0, 12, 12);
@@ -150,10 +152,10 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.TRIANGLES);
-        rectGuideline.setOrientation(0);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.TRIANGLES);
+        compositionGuide.setOrientation(0);
+        compositionGuide.draw(rect, g2);
 
         Point.Double p = new Point.Double(5,5);
         Line2D[] lines = new Line2D[3];
@@ -172,10 +174,10 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.TRIANGLES);
-        rectGuideline.setOrientation(1);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.TRIANGLES);
+        compositionGuide.setOrientation(1);
+        compositionGuide.draw(rect, g2);
 
         Point.Double p = new Point.Double(5,5);
         Line2D[] lines = new Line2D[3];
@@ -193,9 +195,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.GRID);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.GRID);
+        compositionGuide.draw(rect, g2);
 
         // cross at the center (gridSize: 50)
         Line2D[] lines = new Line2D[2];
@@ -213,9 +215,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.GRID);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.GRID);
+        compositionGuide.draw(rect, g2);
 
         Line2D[] lines = new Line2D[6];
         // horizontal : cross at the center (gridSize: 50)
@@ -238,9 +240,9 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.GRID);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.GRID);
+        compositionGuide.draw(rect, g2);
 
         Line2D[] lines = new Line2D[6];
         // horizontal : cross at the center (gridSize: 50)
@@ -264,10 +266,10 @@ public class RectGuidelineTest {
         Graphics2D g2 = mock(Graphics2D.class);
         GuidesRenderer glRenderer = mock(GuidesRenderer.class);
 
-        rectGuideline = new RectGuideline(glRenderer);
-        rectGuideline.setType(RectGuidelineType.GOLDEN_SPIRAL);
-        rectGuideline.setOrientation(0);
-        rectGuideline.draw(rect, g2);
+        compositionGuide = new CompositionGuide(glRenderer);
+        compositionGuide.setType(CompositionGuideType.GOLDEN_SPIRAL);
+        compositionGuide.setOrientation(0);
+        compositionGuide.draw(rect, g2);
 
         verify(glRenderer).draw(refEq(g2), any());
     }

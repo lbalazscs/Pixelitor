@@ -119,12 +119,13 @@ public class View extends JComponent
 
     void replaceJustReloadedComp(Composition newComp) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert newComp != comp;
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
         History.addEdit(new CompositionReplacedEdit(
                 "Reload", this, comp, newComp));
-        replaceComp(newComp, MaskViewMode.NORMAL);
+        replaceComp(newComp, MaskViewMode.NORMAL, true);
         SelectionActions.setEnabled(false, newComp);
 
         String msg = format(
@@ -133,34 +134,35 @@ public class View extends JComponent
         Messages.showInStatusBar(msg);
     }
 
+    // the simple form of replacing, used by multi-layer edits
     public void replaceComp(Composition newComp) {
-        replaceComp(newComp, getMaskViewMode());
+        replaceComp(newComp, getMaskViewMode(), false);
     }
 
-    public void replaceComp(Composition newComp, MaskViewMode newMaskViewMode) {
+    public void replaceComp(Composition newComp, MaskViewMode newMaskViewMode, boolean reloaded) {
         assert newComp != null;
 
         Composition oldComp = comp;
         comp = newComp;
 
         oldComp.setView(null);
-        comp.setView(this);
+        newComp.setView(this);
         canvas = newComp.getCanvas();
 
         // refresh the layer buttons
         layersPanel = new LayersPanel();
-        comp.addAllLayersToGUI();
+        newComp.addAllLayersToGUI();
         LayersContainer.showLayersFor(this);
-        Layers.activeLayerChanged(comp.getActiveLayer());
+        Layers.activeLayerChanged(newComp.getActiveLayer());
 
-        newMaskViewMode.activate(this, comp.getActiveLayer(), "comp replaced");
+        newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
-
-        Tools.currentTool.compReplaced(oldComp, newComp);
 
 //        if (ImageArea.currentModeIs(TABS)) {
 //            repaint();
 //        }
+
+        Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
 
         revalidate(); // make sure the scrollbars are OK if the new comp has a different size
         canvasCoSizeChanged();
@@ -336,7 +338,10 @@ public class View extends JComponent
         // make a copy of the transform object
         AffineTransform componentTransform = g2.getTransform();
 
-        g2.translate(canvasStartX, canvasStartY);
+        // TODO casting to int seems necessary, otherwise the
+        //   checkerboard and the image might be painted on slightly different
+        //   coordinates and this is visible when using a dark theme
+        g2.translate((int) canvasStartX, (int) canvasStartY);
 
         boolean showMask = maskViewMode.showMask();
         if (!showMask) {

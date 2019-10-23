@@ -957,7 +957,7 @@ public class RandomGUITest {
     private static void randomCopy() {
         if (rand.nextBoolean()) {
             log("copy layer");
-            executeAction(new CopyAction(CopySource.LAYER));
+            executeAction(new CopyAction(CopySource.LAYER_OR_MASK));
         } else {
             log("copy composite");
             executeAction(new CopyAction(CopySource.COMPOSITE));

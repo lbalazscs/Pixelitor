@@ -91,6 +91,11 @@ public class RandomToolTest {
     private final ArrowKey[] arrowKeys = ArrowKey.values();
     private final Robot robot;
 
+    private static final String[] simpleMultiLayerEdits = {
+            "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
+            "Flip Horizontal", "Flip Vertical"
+    };
+
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
@@ -280,6 +285,7 @@ public class RandomToolTest {
         events.add(this::pressCtrlTab);
         events.add(this::nudge);
         events.add(this::possiblyUndoRedo);
+        events.add(this::randomMultiLayerEdit);
     }
 
     private void randomEvents(Tool tool) {
@@ -472,6 +478,12 @@ public class RandomToolTest {
         log(tool, "random redo " + Ansi.yellow(editName));
 
         keyboard.redo();
+    }
+
+    private void randomMultiLayerEdit(Tool tool) {
+        String command = Rnd.chooseFrom(simpleMultiLayerEdits);
+        log(tool, command);
+        app.runMenuCommand(command);
     }
 
     private void parseCLArguments(String[] args) {

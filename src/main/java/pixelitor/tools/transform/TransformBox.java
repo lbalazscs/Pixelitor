@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -215,6 +215,13 @@ public class TransformBox implements ToolWidget {
 
         // the two commented out translates above merged into one
         at.translate(-origImRect.getX(), -origImRect.getY());
+
+        assert !Double.isNaN(at.getTranslateX()) : "box = " + this;
+        assert !Double.isNaN(at.getTranslateY()) : "box = " + this;
+        assert !Double.isNaN(at.getScaleX()) : "box = " + this;
+        assert !Double.isNaN(at.getScaleY()) : "box = " + this;
+        assert !Double.isNaN(at.getShearX()) : "box = " + this;
+        assert !Double.isNaN(at.getShearY()) : "box = " + this;
 
         return at;
     }
