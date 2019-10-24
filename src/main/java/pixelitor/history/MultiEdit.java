@@ -45,6 +45,24 @@ public class MultiEdit extends PixelitorEdit {
         edits = new ArrayList<>(2);
     }
 
+    /**
+     * Combines two possibly null edits
+     */
+    public static PixelitorEdit combine(PixelitorEdit first,
+                                        PixelitorEdit second,
+                                        String name) {
+        PixelitorEdit combined = null;
+        if (first != null && second != null) {
+            assert first.getComp() == second.getComp();
+            combined = new MultiEdit(name, first.getComp(), first, second);
+        } else if (first != null) {
+            combined = first;
+        } else if (second != null) {
+            combined = second;
+        }
+        return combined;
+    }
+
     public void add(PixelitorEdit edit) {
         edits.add(edit);
     }

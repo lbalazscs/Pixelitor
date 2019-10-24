@@ -23,6 +23,7 @@ import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 /**
  * The "Pixelitor Point" represents an immutable point on an image both in
@@ -76,6 +77,20 @@ public abstract class PPoint {
      */
     public double getImY() {
         return imY;
+    }
+
+    /**
+     * Returns the image space coordinates as a Point2D
+     */
+    public Point2D asImPoint2D() {
+        return new Point2D.Double(getImX(), getImY());
+    }
+
+    /**
+     * Returns the component space coordinates as a Point2D
+     */
+    public Point2D asCoPoint2D() {
+        return new Point2D.Double(getCoX(), getCoY());
     }
 
     public View getView() {

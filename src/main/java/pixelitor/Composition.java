@@ -40,6 +40,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionInteraction;
 import pixelitor.tools.Tools;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
@@ -588,29 +589,56 @@ public class Composition implements Serializable {
         return dr;
     }
 
-    public void startMovement(boolean duplicateLayer) {
-        if (duplicateLayer) {
-            duplicateActiveLayer();
-        }
+    public void startMovement(MoveMode mode, boolean duplicateLayer) {
+        if (mode.movesTheLayer()) {
+            if (duplicateLayer) {
+                duplicateActiveLayer();
+            }
 
-        Layer layer = getActiveMaskOrLayer();
-        layer.startMovement();
+            Layer layer = getActiveMaskOrLayer();
+            layer.startMovement();
+        }
+        if (mode.movesTheSelection()) {
+            if (selection != null) {
+                selection.startMovement();
+            }
+        }
     }
 
-    public void moveActiveContentRelative(double relX, double relY) {
-        Layer layer = getActiveMaskOrLayer();
-        layer.moveWhileDragging(relX, relY);
+    public void moveActiveContentRelative(MoveMode mode,
+                                          double relImX, double relImY) {
+        if (mode.movesTheLayer()) {
+            Layer layer = getActiveMaskOrLayer();
+            layer.moveWhileDragging(relImX, relImY);
+        }
+        if (mode.movesTheSelection()) {
+            if (selection != null) {
+                selection.moveWhileDragging(relImX, relImY);
+            }
+        }
         imageChanged();
     }
 
-    public void endMovement() {
-        Layer layer = getActiveMaskOrLayer();
-        PixelitorEdit edit = layer.endMovement();
-        if (edit != null) {
-            // The layer, the mask, or both moved.
-            // We always should get here except if an adjustment
+    public void endMovement(MoveMode mode) {
+        PixelitorEdit layerEdit = null;
+        if (mode.movesTheLayer()) {
+            Layer layer = getActiveMaskOrLayer();
+            // the layer edit will be null if an adjustment
             // layer without a mask was moved.
-            History.addEdit(edit);
+            layerEdit = layer.endMovement();
+        }
+
+        PixelitorEdit selectionEdit = null;
+        if (mode.movesTheSelection()) {
+            if (selection != null) {
+                selectionEdit = selection.endMovement();
+            }
+        }
+
+        PixelitorEdit combinedEdit = MultiEdit.combine(
+                layerEdit, selectionEdit, "Move");
+        if (combinedEdit != null) {
+            History.addEdit(combinedEdit);
             imageChanged();
         }
     }

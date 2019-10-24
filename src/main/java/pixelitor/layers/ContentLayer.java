@@ -113,14 +113,13 @@ public abstract class ContentLayer extends Layer {
         tmpTX = 0;
         tmpTY = 0;
 
+        // possibly null if there is no linked mask
         PixelitorEdit linkedEdit = super.endMovement();
 
         ContentLayerMoveEdit ownEdit = createMovementEdit(oldTX, oldTY);
-        if (linkedEdit == null) {
-            return ownEdit;
-        } else {
-            return new MultiEdit(ContentLayerMoveEdit.NAME, comp, ownEdit, linkedEdit);
-        }
+        assert ownEdit != null;
+
+        return MultiEdit.combine(ownEdit, linkedEdit, ContentLayerMoveEdit.NAME);
     }
 
     abstract ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY);

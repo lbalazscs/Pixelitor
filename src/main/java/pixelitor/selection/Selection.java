@@ -20,7 +20,9 @@ package pixelitor.selection;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.View;
+import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionChangeEdit;
 import pixelitor.menus.view.ShowHideAction;
 import pixelitor.utils.debug.DebugNode;
@@ -59,6 +61,9 @@ public class Selection {
     private boolean hidden = false;
     private boolean dead = false;
     private boolean frozen = false;
+
+    // shape movement support variable
+    private Shape moveStartShape;
 
     public Selection(Shape shape, View view) {
         // TODO should not allow selections with null shape
@@ -305,6 +310,30 @@ public class Selection {
 
     public boolean isAlive() {
         return !dead;
+    }
+
+    public void startMovement() {
+        moveStartShape = shape;
+    }
+
+    public void moveWhileDragging(double relImX, double relImY) {
+        AffineTransform at = AffineTransform.getTranslateInstance(relImX, relImY);
+        shape = at.createTransformedShape(moveStartShape);
+    }
+
+    public PixelitorEdit endMovement() {
+        Composition comp = view.getComp();
+
+        shape = comp.clipShapeToCanvasSize(shape);
+        if (shape.getBounds().isEmpty()) { // moved outside the canvas
+            DeselectEdit deselectEdit = new DeselectEdit(comp, moveStartShape, "moved outside the canvas");
+            comp.deselect(false);
+            return deselectEdit;
+        }
+
+        SelectionChangeEdit edit = new SelectionChangeEdit("Move Selection", comp, moveStartShape);
+        moveStartShape = null;
+        return edit;
     }
 
     public DebugNode createDebugNode(String name) {

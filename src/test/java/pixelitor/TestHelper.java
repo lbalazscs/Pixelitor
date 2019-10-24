@@ -67,6 +67,7 @@ import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
+import static pixelitor.tools.move.MoveMode.MOVE_LAYER_ONLY;
 
 public class TestHelper {
     public static final int TEST_WIDTH = 20;
@@ -295,9 +296,9 @@ public class TestHelper {
 
     public static void moveLayer(Composition comp,
                                  boolean makeDuplicateLayer, int relX, int relY) {
-        comp.startMovement(makeDuplicateLayer);
-        comp.moveActiveContentRelative(relX, relY);
-        comp.endMovement();
+        comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
+        comp.moveActiveContentRelative(MOVE_LAYER_ONLY, relX, relY);
+        comp.endMovement(MOVE_LAYER_ONLY);
     }
 
     public static void addRectangleSelection(Composition comp, Rectangle rect) {

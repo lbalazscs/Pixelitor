@@ -29,6 +29,7 @@ import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
+import pixelitor.tools.move.MoveMode;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -106,7 +107,7 @@ public class ContentLayerTest {
 
         // endMovement is called on the composition
         // so that we have history
-        comp.endMovement();
+        comp.endMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterPositiveDrag();
         iconUpdates.check(1, 1);
@@ -117,7 +118,7 @@ public class ContentLayerTest {
 
         checkTranslationAfterNegativeDrag();
 
-        comp.endMovement();
+        comp.endMovement(MoveMode.MOVE_LAYER_ONLY);
 
         // No change:
         // ImageLayer: this time the layer was not enlarged

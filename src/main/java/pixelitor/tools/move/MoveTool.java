@@ -15,14 +15,14 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools;
+package pixelitor.tools.move;
 
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
-import pixelitor.tools.move.ObjectsFinder;
-import pixelitor.tools.move.ObjectsSelection;
+import pixelitor.tools.ClipStrategy;
+import pixelitor.tools.DragTool;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
@@ -37,9 +37,11 @@ import java.awt.geom.Point2D;
  * The move tool.
  */
 public class MoveTool extends DragTool {
-    private static final String AUTO_SELECT_LABEL = "Auto Select Layer";
-    private final JCheckBox autoSelectCheckBox = new JCheckBox(AUTO_SELECT_LABEL);
+    private final JCheckBox autoSelectCheckBox = new JCheckBox();
 //    private final ObjectsFinder objectFinder = new ObjectsFinder();
+
+    private final JComboBox<MoveMode> modeSelector = new JComboBox<>(MoveMode.values());
+    private MoveMode currentMode = (MoveMode) modeSelector.getSelectedItem();
 
     public MoveTool() {
         super("Move", 'V', "move_tool_icon.png",
@@ -51,40 +53,49 @@ public class MoveTool extends DragTool {
 
     @Override
     public void initSettingsPanel() {
-        settingsPanel.add(autoSelectCheckBox);
+        settingsPanel.addComboBox("Move:", modeSelector, "modeSelector");
+        modeSelector.addActionListener(e -> currentMode = (MoveMode) modeSelector.getSelectedItem());
+
+        settingsPanel.addSeparator();
+
+        settingsPanel.addWithLabel("Auto Select Layer:",
+                autoSelectCheckBox, "autoSelectCheckBox");
     }
 
     @Override
     public void mouseMoved(MouseEvent e, View view) {
         super.mouseMoved(e, view);
 
-        if (autoSelectCheckBox.isSelected()) {
-            Point2D p = view.componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
+        if (currentMode.movesTheLayer()) {
+            if (autoSelectCheckBox.isSelected()) {
+                Point2D p = view.componentToImageSpace(e.getPoint());
+                ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
 
-            if (objectsSelection.isEmpty()) {
-                view.setCursor(Cursors.DEFAULT);
-                return;
+                if (objectsSelection.isEmpty()) {
+                    view.setCursor(Cursors.DEFAULT);
+                    return;
+                }
             }
+            view.setCursor(Cursors.MOVE);
         }
-
-        view.setCursor(Cursors.MOVE);
     }
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        if (autoSelectCheckBox.isSelected()) {
-            Point2D p = e.getComp().getView().componentToImageSpace(e.getPoint());
-            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
+        if (currentMode.movesTheLayer()) {
+            if (autoSelectCheckBox.isSelected()) {
+                Point2D p = e.asImPoint2D();
+                ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
 
-            if (objectsSelection.isEmpty()) {
-                userDrag.cancel();
-                return;
+                if (objectsSelection.isEmpty()) {
+                    userDrag.cancel();
+                    return;
+                }
+                e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
             }
-            e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
         }
-
-        e.getComp().startMovement(e.isAltDown() || e.isRight());
+        e.getComp().startMovement(
+                currentMode, e.isAltDown() || e.isRight());
     }
 
     @Override
@@ -93,7 +104,7 @@ public class MoveTool extends DragTool {
         double relX = imDrag.getDX();
         double relY = imDrag.getDY();
 
-        e.getComp().moveActiveContentRelative(relX, relY);
+        e.getComp().moveActiveContentRelative(currentMode, relX, relY);
     }
 
     @Override
@@ -103,23 +114,24 @@ public class MoveTool extends DragTool {
 
     @Override
     public void dragFinished(PMouseEvent e) {
-        e.getComp().endMovement();
+        e.getComp().endMovement(currentMode);
     }
 
     /**
      * Moves the active layer programmatically.
      */
-    public static void move(Composition comp, int relX, int relY) {
-        comp.startMovement(false);
-        comp.moveActiveContentRelative(relX, relY);
-        comp.endMovement();
+    public static void move(Composition comp, MoveMode mode, int relX, int relY) {
+        comp.startMovement(mode, false);
+        comp.moveActiveContentRelative(mode, relX, relY);
+        comp.endMovement(mode);
     }
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         Composition comp = OpenComps.getActiveCompOrNull();
         if (comp != null) {
-            move(comp, key.getMoveX(), key.getMoveY());
+
+            move(comp, currentMode, key.getMoveX(), key.getMoveY());
             return true;
         }
         return false;
