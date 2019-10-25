@@ -21,6 +21,7 @@ import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
@@ -35,6 +36,7 @@ import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.LayerUI;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.TextLayer;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
@@ -50,6 +52,7 @@ import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -363,35 +366,44 @@ public class Composition implements Serializable {
         assert checkInvariant();
     }
 
+    public boolean canMergeDown(Layer layer) {
+        int index = layerList.indexOf(layer);
+        if (index > 0 && layer.isVisible()) {
+            Layer bellow = layerList.get(index - 1);
+            if (bellow instanceof ImageLayer && bellow.isVisible()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void mergeActiveLayerDown(boolean updateGUI) {
         assert checkInvariant();
 
-        int activeIndex = layerList.indexOf(activeLayer);
-        if (activeIndex > 0 && activeLayer.isVisible()) {
-            Layer bellow = layerList.get(activeIndex - 1);
-            if (bellow instanceof ImageLayer && bellow.isVisible()) {
-                mergeActiveLayerToImageLayer(activeIndex, (ImageLayer) bellow, updateGUI);
-            }
+        if (canMergeDown(activeLayer)) {
+            mergeDown(activeLayer, updateGUI);
         }
     }
 
-    private void mergeActiveLayerToImageLayer(int activeIndex,
-                                              ImageLayer imageLayer,
-                                              boolean updateGUI) {
+    // this method assumes that canMergeDown() previously returned true
+    public void mergeDown(Layer layer, boolean updateGUI) {
+        int layerIndex = layerList.indexOf(layer);
+        ImageLayer bellowLayer = (ImageLayer) layerList.get(layerIndex - 1);
+
         MaskViewMode maskViewModeBefore = view.getMaskViewMode();
-        BufferedImage imageBefore = ImageUtils.copyImage(imageLayer.getImage());
+        BufferedImage imageBefore = ImageUtils.copyImage(bellowLayer.getImage());
 
         // apply the effect of the merged layer to the image of the image layer
-        BufferedImage bellowImage = imageLayer.getImage();
+        BufferedImage bellowImage = bellowLayer.getImage();
         Graphics2D g = bellowImage.createGraphics();
-        g.translate(-imageLayer.getTX(), -imageLayer.getTY());
+        g.translate(-bellowLayer.getTX(), -bellowLayer.getTY());
         BufferedImage result = activeLayer.applyLayer(g, bellowImage, false);
         if (result != null) {  // this was an adjustment
-            imageLayer.setImage(result);
+            bellowLayer.setImage(result);
         }
         g.dispose();
 
-        imageLayer.updateIconImage();
+        bellowLayer.updateIconImage();
 
         // keep the reference because after deleting the
         // active merged layer, another layer will become active
@@ -400,7 +412,7 @@ public class Composition implements Serializable {
         deleteActiveLayer(updateGUI, false);
 
         History.addEdit(new MergeDownEdit(this, mergedLayer,
-                imageLayer, imageBefore, maskViewModeBefore, activeIndex));
+                bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
     }
 
     private void deleteLayer(int layerIndex, boolean addToHistory) {
@@ -963,20 +975,39 @@ public class Composition implements Serializable {
      * Creates a selection from a shape and also handles
      * existing selections
      */
-    public PixelitorEdit changeSelectionFromShape(Shape shape) {
+    public PixelitorEdit changeSelectionFromShape(Shape newShape) {
         PixelitorEdit edit;
-        shape = canvas.clipShapeToBounds(shape);
-        if (shape.getBounds().isEmpty()) {
+        newShape = canvas.clipShapeToBounds(newShape);
+        if (newShape.getBounds().isEmpty()) {
             // the new selection would be outside the canvas
             return null;
         }
 
         if (selection != null) {
+            int answer = Dialogs.showYesNoCancelDialog("Existing Selection",
+                    "<html>There is already a selection." +
+                            "<br>How do you want to combine new selection with the existing one?",
+                    new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
+                    JOptionPane.QUESTION_MESSAGE);
+            if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
+                // canceled
+                return null;
+            }
             Shape oldShape = selection.getShape();
-            selection.setShape(shape);
+            SelectionInteraction interaction = null;
+            if (answer == 0) { // replace
+                interaction = SelectionInteraction.REPLACE;
+            } else if (answer == 1) { // add
+                interaction = SelectionInteraction.ADD;
+            } else if (answer == 2) { // subtract
+                interaction = SelectionInteraction.SUBTRACT;
+            } else if (answer == 3) { // intersect
+                interaction = SelectionInteraction.INTERSECT;
+            }
+            selection.setShape(interaction.combine(oldShape, newShape));
             edit = new SelectionChangeEdit("Selection Change", this, oldShape);
-        } else {
-            createSelectionFromShape(shape);
+        } else { // no existing selection
+            createSelectionFromShape(newShape);
             edit = new NewSelectionEdit(this, selection.getShape());
         }
         return edit;
@@ -1166,6 +1197,14 @@ public class Composition implements Serializable {
             } else {
                 selection.setShape(intersection);
             }
+        }
+    }
+
+    public void createSelectionFromTextLayer() {
+        // this method will be called only the active layer is a text layer
+        if (activeLayer instanceof TextLayer) {
+            TextLayer textLayer = (TextLayer) activeLayer;
+            textLayer.createSelectionFromText();
         }
     }
 

@@ -564,6 +564,13 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        sub.addAction(new MenuAction("Selection from Text", IS_TEXT_LAYER) {
+            @Override
+            public void onClick() {
+                getActiveCompOrNull().createSelectionFromTextLayer();
+            }
+        });
+
         return sub;
     }
 

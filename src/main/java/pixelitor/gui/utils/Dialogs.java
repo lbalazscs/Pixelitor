@@ -93,13 +93,13 @@ public class Dialogs {
         return showYesNoDialog(parent, title, msg, QUESTION_MESSAGE);
     }
 
-    public static int showYesNoCancelDialog(String title, Object[] options,
-                                            String question, int messageType) {
-        return showYesNoCancelDialog(getParent(), title, options, question, messageType);
+    public static int showYesNoCancelDialog(String title, String question,
+                                            Object[] options, int messageType) {
+        return showYesNoCancelDialog(getParent(), title, question, options, messageType);
     }
 
     public static int showYesNoCancelDialog(Component parent, String title,
-                                            Object[] options, String question,
+                                            String question, Object[] options,
                                             int messageType) {
         GlobalEvents.dialogOpened(title);
         int answer = JOptionPane.showOptionDialog(
@@ -311,16 +311,13 @@ public class Dialogs {
     }
 
     public static int showCloseWarningDialog(String compName) {
-        Object[] options = {"Save",
-                "Don't Save",
-                "Cancel"};
+        Object[] options = {"Save", "Don't Save", "Cancel"};
         String question = format(
                 "<html><b>Do you want to save the changes made to %s?</b>" +
                         "<br>Your changes will be lost if you don't save them.</html>",
                 compName);
 
-        String title = "Unsaved changes";
-        return showYesNoCancelDialog(
-                title, options, question, WARNING_MESSAGE);
+        return showYesNoCancelDialog("Unsaved changes",
+                question, options, WARNING_MESSAGE);
     }
 }

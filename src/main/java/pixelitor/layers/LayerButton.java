@@ -171,6 +171,15 @@ public class LayerButton extends JToggleButton implements LayerUI {
                 // with the mask clicks
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     selectLayerIfIconClicked(e);
+                } else if (e.isPopupTrigger()) {
+                    layerPopupTriggered(e);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    layerPopupTriggered(e);
                 }
             }
         });
@@ -181,6 +190,13 @@ public class LayerButton extends JToggleButton implements LayerUI {
         add(layerIconLabel, LayerButtonLayout.LAYER);
 
         wireSelectionWithLayerActivation(layer);
+    }
+
+    private void layerPopupTriggered(MouseEvent e) {
+        JPopupMenu popup = layer.createLayerIconPopupMenu();
+        if (popup != null) {
+            popup.show(this, e.getX(), e.getY());
+        }
     }
 
     private static void configureLayerIcon(JLabel layerIcon, String name) {

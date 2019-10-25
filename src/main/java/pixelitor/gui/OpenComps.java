@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static java.lang.String.format;
@@ -412,6 +413,14 @@ public class OpenComps {
             TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
             action.accept(activeLayer);
         }
+    }
+
+    public static <T> T fromActiveTextLayer(Function<TextLayer, T> function) {
+        if (activeView != null) {
+            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
+            return function.apply(activeLayer);
+        }
+        return null;
     }
 
     public static void onActiveDrawable(Consumer<Drawable> action) {

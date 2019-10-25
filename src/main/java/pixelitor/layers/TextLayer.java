@@ -32,15 +32,19 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.history.NewLayerEdit;
+import pixelitor.history.PixelitorEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
+import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -49,6 +53,7 @@ import java.io.ObjectInputStream;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment.TOP;
+import static pixelitor.utils.Keys.CTRL_T;
 
 /**
  * A text layer
@@ -323,6 +328,10 @@ public class TextLayer extends ContentLayer {
         // TODO
     }
 
+    public Shape getTextShape() {
+        return painter.getTextShape(comp.getCanvas());
+    }
+
     @Override
     public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
         // the text will not be cropped, but the translations have to be adjusted
@@ -341,6 +350,43 @@ public class TextLayer extends ContentLayer {
     @Override
     public BufferedImage getTmpLayerImage() {
         return createRasterizedImage();
+    }
+
+    @Override
+    public JPopupMenu createLayerIconPopupMenu() {
+        JPopupMenu popup = super.createLayerIconPopupMenu();
+        if (popup == null) {
+            popup = new JPopupMenu();
+        }
+
+        JMenuItem editMenuItem = new JMenuItem("Edit");
+        editMenuItem.addActionListener(e -> edit(PixelitorWindow.getInstance()));
+        editMenuItem.setAccelerator(CTRL_T);
+        popup.add(editMenuItem);
+
+        popup.add(new AbstractAction("Rasterize") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                replaceWithRasterized();
+            }
+        });
+
+        popup.add(new AbstractAction("Selection from Text") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createSelectionFromText();
+            }
+        });
+
+        return popup;
+    }
+
+    public void createSelectionFromText() {
+        Shape shape = getTextShape();
+        PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
+        if (selectionEdit != null) {
+            History.addEdit(selectionEdit);
+        }
     }
 
     @Override

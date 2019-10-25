@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
+import pixelitor.Canvas;
 
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -27,6 +28,7 @@ import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
 import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
@@ -102,26 +104,47 @@ public class TranslatedTextPainter extends TextPainter {
      */
     @Override
     protected void doPaint(Graphics2D g, Object component, int canvasWidth, int canvasHeight) {
+        AffineTransform origTX = g.getTransform();
+        String text = getText();
+
+        FontMetrics metrics = setupGraphicsTX(g, canvasWidth, canvasHeight, text);
+
+        Paint paint = getFillPaint();
+        if (paint != null) {
+            g.setPaint(paint);
+        }
+
+        g.drawString(text, (float) 0, (float) metrics.getAscent());
+
+        // paint the effects on an explicitly transformed shape
+        // instead of simply painting them on the transformed graphics
+        // so that the direction of the drop shadow effect does not rotate
+        AffineTransform tx = g.getTransform();
+        g.setTransform(origTX);
+
+        AreaEffect[] effects = getAreaEffects();
+        if (effects.length != 0) {
+            // provideShape must be called on an untransformed shape
+            Shape shape = provideShape(g, component, canvasWidth, canvasHeight);
+            Shape transformedShape = tx.createTransformedShape(shape);
+            for (AreaEffect ef : effects) {
+                ef.apply(g, transformedShape, canvasWidth, canvasHeight);
+            }
+        }
+    }
+
+    // sets up the given Graphics2D so that it is usable
+    // from both doPaint and getTextShape
+    private FontMetrics setupGraphicsTX(Graphics2D g, int canvasWidth, int canvasHeight, String text) {
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
         g.setFont(font);
 
-        // it is important to get the shape for the effects
-        // before transforming the graphics
-        Shape shape = null;
-        AreaEffect[] effects = getAreaEffects();
-        if (effects.length != 0) {
-            shape = provideShape(g, component, canvasWidth, canvasHeight);
-        }
-
-        String text = getText();
         FontMetrics metrics = g.getFontMetrics(font);
 
         int textWidth = metrics.stringWidth(text);
         int textHeight = metrics.getHeight();
         boundingBox = calculateLayout(textWidth, textHeight, canvasWidth, canvasHeight);
-
-        AffineTransform origTX = g.getTransform();
 
         if (rotation != 0) {
             assert rotatedRect != null;
@@ -134,26 +157,26 @@ public class TranslatedTextPainter extends TextPainter {
             assert rotatedRect == null;
             g.translate(boundingBox.x, boundingBox.y);
         }
+        return metrics;
+    }
 
-        Paint paint = getFillPaint();
-        if (paint != null) {
-            g.setPaint(paint);
-        }
+    public Shape getTextShape(Canvas canvas) {
+        // create this image just to get a Graphics2D somehow...
+        BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = tmp.createGraphics();
+        AffineTransform imgOrigTX = g2.getTransform();
 
-        g.drawString(text, (float) 0, (float) metrics.getAscent());
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
+        setupGraphicsTX(g2, canvasWidth, canvasHeight, getText());
+        AffineTransform tx = g2.getTransform();
+        g2.setTransform(imgOrigTX); // provideShape must be called with untransformed Graphics
+        Shape shape = provideShape(g2, null, canvasWidth, canvasHeight);
 
-        // explicitly transform the shape and paint it with the original transform
-        // instead of simply painting the shape on the transformed graphics
-        // so that the direction of the drop shadow effect does not rotate
-        AffineTransform tx = g.getTransform();
-        g.setTransform(origTX);
+        g2.dispose();
+        tmp.flush();
 
-        if (shape != null) { // has effects
-            Shape transformedShape = tx.createTransformedShape(shape);
-            for (AreaEffect ef : effects) {
-                ef.apply(g, transformedShape, canvasWidth, canvasHeight);
-            }
-        }
+        return tx.createTransformedShape(shape);
     }
 
     @Override

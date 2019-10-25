@@ -40,12 +40,14 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 
+import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -669,6 +671,20 @@ public abstract class Layer implements Serializable {
         for (LayerChangeListener listener : layerChangeListeners) {
             listener.layerStateChanged();
         }
+    }
+
+    public JPopupMenu createLayerIconPopupMenu() {
+        if (comp.canMergeDown(this)) {
+            JPopupMenu popup = new JPopupMenu();
+            popup.add(new AbstractAction("Merge Down") {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    comp.mergeDown(Layer.this, true);
+                }
+            });
+            return popup;
+        }
+        return null;
     }
 
     @Override
