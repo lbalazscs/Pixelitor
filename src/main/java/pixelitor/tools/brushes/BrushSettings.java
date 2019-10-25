@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools.brushes;
 
+import pixelitor.tools.Tool;
 import pixelitor.utils.Lazy;
 
 import javax.swing.*;
@@ -28,6 +29,7 @@ import javax.swing.*;
  * of the same brush type
  */
 public abstract class BrushSettings {
+    protected Tool tool;
     private final Lazy<JPanel> configPanel = Lazy.of(this::createConfigPanel);
 
     public JPanel getConfigPanel() {
@@ -35,4 +37,8 @@ public abstract class BrushSettings {
     }
 
     protected abstract JPanel createConfigPanel();
+
+    public void setTool(Tool tool) {
+        this.tool = tool;
+    }
 }

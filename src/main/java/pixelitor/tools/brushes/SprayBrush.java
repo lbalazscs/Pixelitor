@@ -18,14 +18,17 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
+import pixelitor.colors.ColorUtils;
 import pixelitor.gui.View;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.CachedFloatRandom;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -47,6 +50,9 @@ public class SprayBrush extends AbstractBrush {
     private boolean isEraser;
     private final CachedFloatRandom rnd = new CachedFloatRandom();
 
+    private float colorRandomness;
+    private Color baseColor;
+
     public SprayBrush(double radius, SprayBrushSettings settings) {
         super(radius);
         this.settings = settings;
@@ -57,6 +63,7 @@ public class SprayBrush extends AbstractBrush {
         super.setTarget(comp, g);
         AlphaComposite ac = (AlphaComposite) g.getComposite();
         isEraser = ac.getRule() == AlphaComposite.DST_OUT;
+        baseColor = g.getColor();
     }
 
     @Override
@@ -79,6 +86,8 @@ public class SprayBrush extends AbstractBrush {
         shapeType = settings.getShapeType();
         randomOpacity = settings.randomOpacity();
         maxRadiusSoFar = Double.MIN_VALUE;
+
+        colorRandomness = settings.getColorRandomness();
 
         timer = new Timer(DELAY_MILLIS, e -> sprayOnce());
         timer.start();
@@ -121,6 +130,12 @@ public class SprayBrush extends AbstractBrush {
                     composite = AlphaComposite.SrcOver.derive(strength);
                 }
                 targetG.setComposite(composite);
+            }
+
+            if (!isEraser && colorRandomness > 0.0f) {
+                Color randomColor = Rnd.createRandomColor();
+                Color color = ColorUtils.interpolateInRGB(baseColor, randomColor, colorRandomness);
+                targetG.setColor(color);
             }
 
             double shapeRadius = nextShapeRadius();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.tools.brushes.AngleSettings.NOT_ANGLE_AWARE;
  * The brush types the user can use
  */
 public enum BrushType {
-    IDEAL("Hard", false) {
+    HARD("Hard", false) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
             return new HardBrush(radius);
@@ -182,6 +182,7 @@ public enum BrushType {
         }
         if (settings == null) {
             settings = settingsCreator.get();
+            settings.setTool(tool);
             settingsByTool.put(tool, settings);
         }
         assert settings != null;
