@@ -894,7 +894,7 @@ public class Composition implements Serializable {
         }
     }
 
-    public void deselect(boolean addToHistory) {
+    public DeselectEdit deselect(boolean addToHistory) {
 //        if(Build.isDevelopment()) {
 //            boolean hadSelection = selection != null;
 //            boolean hadSelectionShape = hadSelection && selection.getShape() != null;
@@ -908,12 +908,12 @@ public class Composition implements Serializable {
             builtSelection.die();
             builtSelection = null;
         }
+
+        DeselectEdit edit = null;
         if (selection != null) {
-            if (addToHistory) {
-                DeselectEdit edit = createDeselectEdit();
-                if (edit != null) {
-                    History.addEdit(edit);
-                }
+            edit = createDeselectEdit();
+            if (addToHistory && edit != null) {
+                History.addEdit(edit);
             }
 
             boolean wasHidden = selection.isHidden();
@@ -931,13 +931,14 @@ public class Composition implements Serializable {
         if (Build.isDevelopment() && isActive()) {
             ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
+        return edit;
     }
 
     public Shape clipShapeToCanvasSize(Shape shape) {
         return canvas.clipShapeToBounds(shape);
     }
 
-    public DeselectEdit createDeselectEdit() {
+    private DeselectEdit createDeselectEdit() {
         DeselectEdit edit = null;
         Shape shape = selection.getShape();
         if (shape != null) { // for a simple click without a previous selection this is null
@@ -1013,6 +1014,15 @@ public class Composition implements Serializable {
         return edit;
     }
 
+    // This should be called only if it can be assumed that there is
+    // no existing selection. Otherwise use changeSelectionFromShape
+    public void createSelectionFromShape(Shape shape) {
+        if (selection != null) {
+            throw new IllegalStateException("There is already a selection: " + selection);
+        }
+        setSelectionRef(new Selection(shape, view));
+    }
+
     /**
      * Changing the selection reference should be done only by using this method
      * (in order to make debugging easier)
@@ -1069,14 +1079,6 @@ public class Composition implements Serializable {
             SelectionChangeEdit edit = new SelectionChangeEdit("Invert Selection", this, backupShape);
             History.addEdit(edit);
         }
-    }
-
-    public void createSelectionFromShape(Shape shape) {
-        if (selection != null) {
-            throw new IllegalStateException("There is already a selection: "
-                + selection.toString());
-        }
-        setSelectionRef(new Selection(shape, view));
     }
 
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {

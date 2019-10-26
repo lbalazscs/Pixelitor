@@ -45,8 +45,14 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.prefs.Preferences;
 
+import static javax.swing.SwingConstants.BOTTOM;
+import static javax.swing.SwingConstants.LEFT;
+import static javax.swing.SwingConstants.RIGHT;
+import static javax.swing.SwingConstants.TOP;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
  * Static methods for saving and loading application preferences
@@ -380,13 +386,61 @@ public final class AppPreferences {
         return ((retVal + 4) / 5) * 5;
     }
 
-    public static ImageArea.Mode loadDesktopMode() {
-        String value = mainNode.get(UI_KEY, "Tabs");
-        return ImageArea.Mode.fromString(value);
+    public static ImageArea.SavedInfo loadDesktopMode() {
+        String value = mainNode.get(UI_KEY, "TabsN");
+        if (value.startsWith("Tabs")) {
+            return loadSavedTabsInfo(value);
+        } else {
+            // return TOP tab placement so that if the user
+            // changes the UI via preferences, this will be set
+            return new ImageArea.SavedInfo(FRAMES, TOP);
+        }
+    }
+
+    private static ImageArea.SavedInfo loadSavedTabsInfo(String value) {
+        int tabPlacement;
+        switch (value) {
+            case "TabsL":
+                tabPlacement = LEFT;
+                break;
+            case "TabsR":
+                tabPlacement = RIGHT;
+                break;
+            case "TabsB":
+                tabPlacement = BOTTOM;
+                break;
+            default:
+                tabPlacement = TOP;
+                break;
+        }
+        return new ImageArea.SavedInfo(TABS, tabPlacement);
     }
 
     private static void saveDesktopMode() {
-        mainNode.put(UI_KEY, ImageArea.getMode().toString());
+        String savedString;
+        ImageArea.Mode mode = ImageArea.getMode();
+        if (mode == FRAMES) {
+            savedString = "Frames";
+        } else {
+            int tabPlacement = ImageArea.getTabPlacement();
+            switch (tabPlacement) {
+                case TOP:
+                    savedString = "TabsT";
+                    break;
+                case LEFT:
+                    savedString = "TabsL";
+                    break;
+                case RIGHT:
+                    savedString = "TabsR";
+                    break;
+                case BOTTOM:
+                    savedString = "TabsB";
+                    break;
+                default:
+                    throw new IllegalStateException("tabPlacement = " + tabPlacement);
+            }
+        }
+        mainNode.put(UI_KEY, savedString);
     }
 
     public static String loadLastToolName() {

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static javax.swing.SwingConstants.TOP;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.io.DropListener.Destination.NEW_IMAGES;
@@ -47,14 +48,6 @@ public class ImageArea {
             this.guiName = guiName;
         }
 
-        public static Mode fromString(String value) {
-            if (value.equals(TABS.toString())) {
-                return TABS;
-            } else {
-                return FRAMES;
-            }
-        }
-
         @Override
         public String toString() {
             return guiName;
@@ -68,8 +61,14 @@ public class ImageArea {
 
     private static ImageAreaUI ui;
 
+    // the tab placement used for creating new
+    // tabbed panes and for saving the preferences
+    private static int tabPlacement = TOP;
+
     static {
-        mode = AppPreferences.loadDesktopMode();
+        SavedInfo savedInfo = AppPreferences.loadDesktopMode();
+        mode = savedInfo.getMode();
+        tabPlacement = savedInfo.getTabPlacement();
 
         setUI();
         setupKeysAndDnD();
@@ -83,7 +82,7 @@ public class ImageArea {
         if (mode == FRAMES) {
             ui = new FramesUI();
         } else {
-            ui = new TabsUI();
+            ui = new TabsUI(tabPlacement);
         }
     }
 
@@ -177,5 +176,31 @@ public class ImageArea {
     private static void showCascadeTileHelp() {
         Dialogs.showInfoDialog("Help", "<html><b>\"Cascade Windows\"</b> and <b>\"Tile Windows\"</b> works only<br>" +
             "when images are displayed in internal windows, not tabs (see the Edit/Preferences dialog)");
+    }
+
+    public static int getTabPlacement() {
+        return tabPlacement;
+    }
+
+    public static void setTabPlacement(int tabPlacement) {
+        ImageArea.tabPlacement = tabPlacement;
+    }
+
+    public static class SavedInfo {
+        private final Mode mode;
+        private final int tabPlacement;
+
+        public SavedInfo(Mode mode, int tabPlacement) {
+            this.mode = mode;
+            this.tabPlacement = tabPlacement;
+        }
+
+        public Mode getMode() {
+            return mode;
+        }
+
+        public int getTabPlacement() {
+            return tabPlacement;
+        }
     }
 }

@@ -21,7 +21,6 @@ import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.geom.AffineTransform;
@@ -83,10 +82,10 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(BufferedImage image) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        layer.getImage().getHeight(), 0);
+                        image.getHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -115,13 +114,12 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createImageTX(ImageLayer layer) {
-                Canvas canvas = layer.getComp().getCanvas();
-                AffineTransform transform = createCanvasImTX(canvas);
-                int tx = layer.getTX();
-                int ty = layer.getTY();
-                transform.translate(tx, ty);
-                return transform;
+            public AffineTransform createImageTX(BufferedImage image) {
+                // rotate, then translate to compensate
+                AffineTransform at = AffineTransform.getTranslateInstance(
+                        image.getWidth(), image.getHeight());
+                at.quadrantRotate(2);
+                return at;
             }
 
             @Override
@@ -149,10 +147,10 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createImageTX(ImageLayer layer) {
+            public AffineTransform createImageTX(BufferedImage image) {
                 // rotate, then translate to compensate
                 AffineTransform at = AffineTransform.getTranslateInstance(
-                        0, layer.getImage().getWidth());
+                        0, image.getWidth());
                 at.quadrantRotate(3);
                 return at;
             }
@@ -184,9 +182,10 @@ public class Rotate extends SimpleCompAction {
         public abstract AffineTransform createCanvasImTX(Canvas canvas);
 
         /**
-         * Return the transformation of the image
+         * Returns the transformation of the image,
+         * ignoring the canvas and the translation
          */
-        public abstract AffineTransform createImageTX(ImageLayer layer);
+        public abstract AffineTransform createImageTX(BufferedImage image);
 
         public int getAngleDegree() {
             return angleDegree;

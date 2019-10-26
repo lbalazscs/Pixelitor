@@ -27,9 +27,7 @@ import pixelitor.tools.shapes.custom.RabbitShape;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
-import pixelitor.utils.Rnd;
 import pixelitor.utils.Shapes;
-import pixelitor.utils.UnicodeShapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Shape;
@@ -350,40 +348,40 @@ public enum ShapeType {
 //            return UnicodeShapes.extract(codePoint,
 //                    x, y, diameter, diameter);
 //        }
-    }, RND_CHESS("Random Chess Piece", true, false) {
-        final String[] chars = {"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659",
-                "\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"};
-
-        @Override
-        public Shape createShape(ImDrag imDrag) {
-            String uChar = Rnd.chooseFrom(chars);
-            return UnicodeShapes.extract(uChar,
-                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double diameter) {
-            String uChar = Rnd.chooseFrom(chars);
-            return UnicodeShapes.extract(uChar,
-                    x, y, diameter, diameter);
-        }
-    }, RND_ZODIAC("Random Zodiac Sign", true, false) {
-        final String[] chars = {"\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D",
-                "\u264E", "\u264F", "\u2650", "\u2651", "\u2652", "\u2653"};
-
-        @Override
-        public Shape createShape(ImDrag imDrag) {
-            String uChar = Rnd.chooseFrom(chars);
-            return UnicodeShapes.extract(uChar,
-                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
-        }
-
-        @Override
-        public Shape createShape(double x, double y, double diameter) {
-            String uChar = Rnd.chooseFrom(chars);
-            return UnicodeShapes.extract(uChar,
-                    x, y, diameter, diameter);
-        }
+//    }, RND_CHESS("Random Chess Piece", true, false) {
+//        final String[] chars = {"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659",
+//                "\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"};
+//
+//        @Override
+//        public Shape createShape(ImDrag imDrag) {
+//            String uChar = Rnd.chooseFrom(chars);
+//            return UnicodeShapes.extract(uChar,
+//                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
+//        }
+//
+//        @Override
+//        public Shape createShape(double x, double y, double diameter) {
+//            String uChar = Rnd.chooseFrom(chars);
+//            return UnicodeShapes.extract(uChar,
+//                    x, y, diameter, diameter);
+//        }
+//    }, RND_ZODIAC("Random Zodiac Sign", true, false) {
+//        final String[] chars = {"\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D",
+//                "\u264E", "\u264F", "\u2650", "\u2651", "\u2652", "\u2653"};
+//
+//        @Override
+//        public Shape createShape(ImDrag imDrag) {
+//            String uChar = Rnd.chooseFrom(chars);
+//            return UnicodeShapes.extract(uChar,
+//                    imDrag.getStartX(), imDrag.getStartY(), imDrag.getDX(), imDrag.getDY());
+//        }
+//
+//        @Override
+//        public Shape createShape(double x, double y, double diameter) {
+//            String uChar = Rnd.chooseFrom(chars);
+//            return UnicodeShapes.extract(uChar,
+//                    x, y, diameter, diameter);
+//        }
     };
 
     private final String guiName;

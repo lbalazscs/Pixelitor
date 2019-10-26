@@ -827,7 +827,7 @@ public class CompositionTest {
 
         Tools.changeTo(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
 
-        AffineTransform tx = Crop.createTransformForCropRect(cropRect);
+        AffineTransform tx = Crop.createCanvasImTx(cropRect);
         comp.imCoordsChanged(tx, false);
 
         assertThat(comp)

@@ -271,5 +271,16 @@ public class CropBox {
         update(rect);
         view.repaint();
     }
+
+    @Override
+    public String toString() {
+        return "CropBox{ upperLeft=" + upperLeft +
+                ", lowerRight=" + lowerRight +
+                ", rect=" + rect +
+                ", adjusting=" + adjusting +
+                ", transformMode=" + transformMode +
+                ", aspectRatio=" + aspectRatio +
+                '}';
+    }
 }
 

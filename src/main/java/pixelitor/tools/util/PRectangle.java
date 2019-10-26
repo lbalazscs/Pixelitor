@@ -121,6 +121,7 @@ public class PRectangle {
         imRect = new Rectangle2D.Double(newUpperLeft.getX(), newUpperLeft.getY(),
                 newLowerRight.getX() - newUpperLeft.getX(),
                 newLowerRight.getY() - newUpperLeft.getY());
+        imRect = Shapes.toPositiveRect(imRect);
 
         recalcCo(comp.getView());
     }
@@ -131,5 +132,12 @@ public class PRectangle {
 
     public ImDrag toImDrag() {
         return new ImDrag(imRect);
+    }
+
+    @Override
+    public String toString() {
+        return "PRectangle{coRect=" + coRect +
+                ", imRect=" + imRect +
+                '}';
     }
 }

@@ -61,8 +61,8 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
 
-        AffineTransform canvasTX = createCanvasImTX(newCanvas);
-        newComp.imCoordsChanged(canvasTX, false);
+        AffineTransform canvasTx = createCanvasImTX(newCanvas);
+        newComp.imCoordsChanged(canvasTx, false);
 
         newComp.forEachLayer(this::processLayer);
 
@@ -71,7 +71,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         }
 
         History.addEdit(new CompositionReplacedEdit(
-                getEditName(), view, comp, newComp));
+                getEditName(), view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 

@@ -74,8 +74,7 @@ public class EnlargeCanvas implements CompAction {
         AffineTransform canvasTx = null;
         if (north > 0 || west > 0) {
             canvasTx = AffineTransform.getTranslateInstance(west, north);
-            newComp.imCoordsChanged(
-                    canvasTx, false);
+            newComp.imCoordsChanged(canvasTx, false);
         }
 
         int newCanvasWidth = newCanvas.getImWidth() + east + west;
@@ -87,7 +86,7 @@ public class EnlargeCanvas implements CompAction {
         comp.updateAllIconImages();
 
         History.addEdit(new CompositionReplacedEdit(
-                "Enlarge Canvas", view, comp, newComp));
+                "Enlarge Canvas", view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 

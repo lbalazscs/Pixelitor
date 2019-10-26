@@ -48,7 +48,8 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private final Lazy<JMenu> tabPlacementMenu = Lazy.of(this::createTabPlacementMenu);
     private boolean userInitiated = true;
 
-    public TabsUI() {
+    public TabsUI(int tabPlacement) {
+        setTabPlacement(tabPlacement);
         addChangeListener(e -> tabsChanged());
 
         InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -122,7 +123,17 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         group.add(bottomMI);
         group.add(leftMI);
         group.add(rightMI);
-        topMI.setSelected(true);
+
+        assert tabPlacement == ImageArea.getTabPlacement();
+        if (tabPlacement == TOP) {
+            topMI.setSelected(true);
+        } else if (tabPlacement == BOTTOM) {
+            bottomMI.setSelected(true);
+        } else if (tabPlacement == LEFT) {
+            leftMI.setSelected(true);
+        } else if (tabPlacement == RIGHT) {
+            rightMI.setSelected(true);
+        }
 
         menu.add(topMI);
         menu.add(bottomMI);
@@ -136,6 +147,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setTabPlacement(pos);
+                ImageArea.setTabPlacement(pos);
             }
         });
     }

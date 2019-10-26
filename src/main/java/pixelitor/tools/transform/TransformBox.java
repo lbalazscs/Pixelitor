@@ -216,12 +216,12 @@ public class TransformBox implements ToolWidget {
         // the two commented out translates above merged into one
         at.translate(-origImRect.getX(), -origImRect.getY());
 
-        assert !Double.isNaN(at.getTranslateX()) : "box = " + this;
-        assert !Double.isNaN(at.getTranslateY()) : "box = " + this;
-        assert !Double.isNaN(at.getScaleX()) : "box = " + this;
-        assert !Double.isNaN(at.getScaleY()) : "box = " + this;
-        assert !Double.isNaN(at.getShearX()) : "box = " + this;
-        assert !Double.isNaN(at.getShearY()) : "box = " + this;
+        assert !Double.isNaN(at.getTranslateX()) : "box = " + this + ", origImRect = " + origImRect;
+        assert !Double.isNaN(at.getTranslateY()) : "box = " + this + ", origImRect = " + origImRect;
+        assert !Double.isNaN(at.getScaleX()) : "box = " + this + ", origImRect = " + origImRect;
+        assert !Double.isNaN(at.getScaleY()) : "box = " + this + ", origImRect = " + origImRect;
+        assert !Double.isNaN(at.getShearX()) : "box = " + this + ", origImRect = " + origImRect;
+        assert !Double.isNaN(at.getShearY()) : "box = " + this + ", origImRect = " + origImRect;
 
         return at;
     }

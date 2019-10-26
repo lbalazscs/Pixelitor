@@ -124,7 +124,7 @@ public class View extends JComponent
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
         History.addEdit(new CompositionReplacedEdit(
-                "Reload", this, comp, newComp));
+                "Reload", this, comp, newComp, null));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
         SelectionActions.setEnabled(false, newComp);
 

@@ -79,15 +79,15 @@ public class Resize implements CompAction {
 
         double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
         double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-        AffineTransform at = AffineTransform.getScaleInstance(sx, sy);
-        newComp.imCoordsChanged(at, false);
+        AffineTransform canvasTx = AffineTransform.getScaleInstance(sx, sy);
+        newComp.imCoordsChanged(canvasTx, false);
 
         resizeLayers(newComp, canvasTargetWidth, canvasTargetHeight);
 
         newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, comp.getView());
 
         History.addEdit(new CompositionReplacedEdit(
-                "Resize", view, comp, newComp));
+                "Resize", view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 

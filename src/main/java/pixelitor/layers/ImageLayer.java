@@ -735,7 +735,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
 
-        g2.setTransform(angle.createImageTX(this));
+        g2.setTransform(angle.createImageTX(image));
 
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();

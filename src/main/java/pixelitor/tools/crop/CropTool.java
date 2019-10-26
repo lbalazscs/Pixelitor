@@ -26,8 +26,6 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.GuidesRenderer;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
 import pixelitor.tools.util.ArrowKey;
@@ -95,24 +93,8 @@ public class CropTool extends DragTool {
                 true, false, ClipStrategy.CUSTOM);
         spaceDragStartPoint = true;
 
-        maskOpacity.addChangeListener(e -> maskOpacityChanged());
-
         GuidesRenderer renderer = GuidesRenderer.CROP_GUIDES_INSTANCE.get();
         compositionGuide = new CompositionGuide(renderer);
-    }
-
-    private void maskOpacityChanged() {
-        float alpha = maskOpacity.getValueAsPercentage();
-        // because of a swing bug, the slider can get out of range
-        if (alpha < 0.0f) {
-            alpha = 0.0f;
-            maskOpacity.setValue(0);
-        } else if (alpha > 1.0f) {
-            alpha = 1.0f;
-            maskOpacity.setValue(100);
-        }
-        hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
-        OpenComps.repaintActive();
     }
 
     /**
@@ -139,26 +121,37 @@ public class CropTool extends DragTool {
         enableCropActions(false);
 
         if (Build.isDevelopment()) {
-            JButton b = new JButton("Dump Canvas");
+            JButton b = new JButton("Dump State");
             b.addActionListener(e -> {
                 View view = OpenComps.getActiveView();
                 Canvas canvas = view.getCanvas();
-                Layer firstLayer = view.getComp().getLayer(0);
-                if (firstLayer instanceof ImageLayer) {
-                    ImageLayer imageLayer = (ImageLayer) firstLayer;
-                    Rectangle imageBounds = imageLayer.getImageBounds();
-                    System.out.println("CropTool::initSettingsPanel: imageBounds = " + imageBounds);
-                }
                 System.out.println("CropTool::actionPerformed: canvas = " + canvas);
+                System.out.println("CropTool::initSettingsPanel: state = " + state);
+                System.out.println("CropTool::initSettingsPanel: cropBox = " + cropBox);
             });
             settingsPanel.add(b);
         }
     }
 
     private void addMaskOpacitySelector() {
+        maskOpacity.addChangeListener(e -> maskOpacityChanged());
         SliderSpinner maskOpacitySpinner = new SliderSpinner(
                 maskOpacity, WEST, false);
         settingsPanel.add(maskOpacitySpinner);
+    }
+
+    private void maskOpacityChanged() {
+        float alpha = maskOpacity.getValueAsPercentage();
+        // because of a swing bug, the slider can get out of range
+        if (alpha < 0.0f) {
+            alpha = 0.0f;
+            maskOpacity.setValue(0);
+        } else if (alpha > 1.0f) {
+            alpha = 1.0f;
+            maskOpacity.setValue(100);
+        }
+        hideComposite = AlphaComposite.getInstance(SRC_OVER, alpha);
+        OpenComps.repaintActive();
     }
 
     private void addGuidesSelector() {
@@ -479,7 +472,8 @@ public class CropTool extends DragTool {
             return;
         }
 
-        Crop.toolCropActiveImage(
+        Rectangle2D cropRect = getCropRect().getIm();
+        Crop.toolCropActiveImage(cropRect,
                 allowGrowingCB.isSelected(),
                 deleteCroppedPixelsCB.isSelected());
         resetInitialState();

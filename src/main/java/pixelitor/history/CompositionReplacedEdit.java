@@ -20,9 +20,12 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.MaskViewMode;
+import pixelitor.tools.Tools;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.lang.ref.SoftReference;
 
 /**
@@ -37,9 +40,13 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     private DeselectEdit oldDeselectEdit;
     private DeselectEdit newDeselectEdit;
 
+    private final AffineTransform canvasTx;
+    private AffineTransform inverseCanvasTx;
+
     public CompositionReplacedEdit(String name, View view,
                                    Composition oldComp,
-                                   Composition newComp) {
+                                   Composition newComp,
+                                   AffineTransform canvasTx) {
         super(name, newComp);
 
         assert oldComp != null;
@@ -53,13 +60,13 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         if (oldComp.hasSelection()) {
             // saved compositions should never have a live selection,
             // only a selection shape inside the DeselectEdit
-            oldDeselectEdit = oldComp.createDeselectEdit();
-            oldComp.deselect(false);
+            oldDeselectEdit = oldComp.deselect(false);
         }
 
         backupCompRef = new SoftReference<>(oldComp);
         oldMaskViewMode = view.getMaskViewMode();
         this.view = view;
+        this.canvasTx = canvasTx;
 
         assert !oldComp.hasSelection();
     }
@@ -77,8 +84,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             if (newDeselectEdit != null) { // undo after a redo
                 newDeselectEdit.redo();
             } else { // first undo
-                newDeselectEdit = comp.createDeselectEdit();
-                comp.deselect(false);
+                newDeselectEdit = comp.deselect(false);
             }
         }
 
@@ -95,6 +101,21 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         backupCompRef = new SoftReference<>(newComp);
 
         assert !newComp.hasSelection();
+
+        if (canvasTx != null) { // there was a transform
+            if (inverseCanvasTx == null) { // first undo
+                try {
+                    inverseCanvasTx = canvasTx.createInverse();
+                } catch (NoninvertibleTransformException e) {
+                    inverseCanvasTx = null;
+                }
+            }
+            if (inverseCanvasTx != null) { // successful inversion
+                // the path of the composition was restored together with
+                // the old comp, but the tool widgets need updating
+                Tools.imCoordsChanged(comp, inverseCanvasTx);
+            }
+        }
     }
 
     @Override
@@ -123,6 +144,10 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         backupCompRef = new SoftReference<>(oldComp);
 
         assert !oldComp.hasSelection();
+
+        if (canvasTx != null) { // there was a transform
+            Tools.imCoordsChanged(comp, canvasTx);
+        }
     }
 
     @Override

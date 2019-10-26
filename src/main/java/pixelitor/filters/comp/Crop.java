@@ -24,13 +24,13 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
+import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
-import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -84,7 +84,7 @@ public class Crop implements CompAction {
             return comp;
         }
 
-        AffineTransform cropRectTranslation = createTransformForCropRect(cropRect);
+        AffineTransform canvasTx = createCanvasImTx(cropRect);
 
         View view = comp.getView();
         Composition newComp = comp.createCopy(true, !selectionCrop);
@@ -117,14 +117,14 @@ public class Crop implements CompAction {
         // into the coordinate system of the new, cropped image.
         // It is important to call thins only AFTER the actual canvas size was changed
         // so that the component coords are calculated correctly from the new image coords.
-        newComp.imCoordsChanged(cropRectTranslation, false);
+        newComp.imCoordsChanged(canvasTx, false);
 
         if (addHidingMask) {
             assert selectionCrop;
             assert comp.hasSelection();
 
             Selection hidingSelection = new Selection(comp.getSelection(), true);
-            hidingSelection.transform(cropRectTranslation);
+            hidingSelection.transform(canvasTx);
             addHidingMask(newComp, hidingSelection, false);
         }
 
@@ -137,7 +137,7 @@ public class Crop implements CompAction {
 
         assert comp != newComp;
         History.addEdit(new CompositionReplacedEdit(
-                "Crop", view, comp, newComp));
+                "Crop", view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -168,7 +168,7 @@ public class Crop implements CompAction {
      * The returned transform describes how the image space
      * coordinates for a surviving pixel change after a crop
      */
-    public static AffineTransform createTransformForCropRect(Rectangle2D imCropRect) {
+    public static AffineTransform createCanvasImTx(Rectangle2D imCropRect) {
         double txx = -imCropRect.getX();
         double txy = -imCropRect.getY();
         return AffineTransform.getTranslateInstance(txx, txy);
@@ -177,11 +177,11 @@ public class Crop implements CompAction {
     /**
      * Crops the active image based on the crop tool
      */
-    public static void toolCropActiveImage(boolean allowGrowing,
+    public static void toolCropActiveImage(Rectangle2D cropRect,
+                                           boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
         try {
             OpenComps.onActiveComp(comp -> {
-                Rectangle2D cropRect = Tools.CROP.getCropRect().getIm();
                 new Crop(cropRect, false, allowGrowing, deleteCroppedPixels, false)
                         .process(comp);
             });
@@ -274,6 +274,9 @@ public class Crop implements CompAction {
         }
 
         if (addToHistory) {
+            DeselectEdit deselectEdit = comp.deselect(false);
+            multiEdit.add(deselectEdit);
+
             History.addEdit(multiEdit);
         }
     }
