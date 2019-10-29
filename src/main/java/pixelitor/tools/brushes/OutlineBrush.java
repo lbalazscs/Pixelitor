@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,7 +80,11 @@ public abstract class OutlineBrush extends StrokeBrush {
             }
 
             radius = scaledRadius;
-            diameter = 2 * scaledRadius;
+
+            // don't set the diameter according to the scale
+            // because the brush outline still has the full size,
+            // and the repaint region is based on the diameter
+//            diameter = 2 * scaledRadius;
 
             currentStroke = createStroke((float) (2 * scaledRadius));
             prevTime = timeNow;

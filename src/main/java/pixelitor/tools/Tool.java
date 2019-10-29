@@ -55,7 +55,7 @@ public abstract class Tool implements KeyListener {
     private final String name;
     private final String iconFileName;
     private final String toolMessage;
-    private final Cursor cursor;
+    protected Cursor cursor;
     private final ClipStrategy clipStrategy;
 
     private final char activationKey;
@@ -159,6 +159,14 @@ public abstract class Tool implements KeyListener {
     }
 
     public void mouseMoved(MouseEvent e, View view) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void mouseEntered(MouseEvent e, View view) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    public void mouseExited(MouseEvent e, View view) {
         // empty instead of abstract for the convenience of subclasses
     }
 

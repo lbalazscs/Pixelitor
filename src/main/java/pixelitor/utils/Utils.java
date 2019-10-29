@@ -30,6 +30,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -49,6 +50,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
+import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -212,13 +214,23 @@ public final class Utils {
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static void debugImage(BufferedImage img) {
+    public static void debugImage(Image img) {
         debugImage(img, "Debug");
     }
 
     @SuppressWarnings("WeakerAccess")
-    public static void debugImage(BufferedImage img, String name) {
-        BufferedImage copy = ImageUtils.copyImage(img);
+    public static void debugImage(Image img, String name) {
+        BufferedImage copy;
+        if (img instanceof BufferedImage) {
+            BufferedImage bufferedImage = (BufferedImage) img;
+            copy = ImageUtils.copyImage(bufferedImage);
+        } else if (img instanceof VolatileImage) {
+            VolatileImage volatileImage = (VolatileImage) img;
+            copy = volatileImage.getSnapshot();
+        } else {
+            throw new UnsupportedOperationException("img class is " + img.getClass().getName());
+        }
+
         View savedView = OpenComps.getActiveView();
 
         Optional<Composition> debugCompOpt = OpenComps.findCompositionByName(name);
@@ -227,9 +239,9 @@ public final class Utils {
             Composition comp = debugCompOpt.get();
             Canvas canvas = comp.getCanvas();
             comp.getActiveDrawableOrThrow().setImage(copy);
-            if (canvas.getImWidth() != img.getWidth()
-                    || canvas.getImHeight() != img.getHeight()) {
-                canvas.changeImSize(img.getWidth(), img.getHeight(), comp.getView());
+            if (canvas.getImWidth() != copy.getWidth()
+                    || canvas.getImHeight() != copy.getHeight()) {
+                canvas.changeImSize(copy.getWidth(), copy.getHeight(), comp.getView());
             }
 
             comp.repaint();

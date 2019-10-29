@@ -188,6 +188,10 @@ public class SprayBrush extends AbstractBrush {
 
     @Override
     public void continueTo(PPoint p) {
+        // this method does no painting, but the
+        // brush outline still has to be repainted
+        updateComp(p);
+
         rememberPrevious(p);
 
         mouseX = previous.getImX();

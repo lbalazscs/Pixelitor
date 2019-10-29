@@ -209,12 +209,12 @@ public class View extends JComponent
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        // not used in the tools
+        Tools.EventDispatcher.mouseEntered(e, this);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        // not used in the tools
+        Tools.EventDispatcher.mouseExited(e, this);
     }
 
     @Override
@@ -508,6 +508,17 @@ public class View extends JComponent
         repaint(area.getCo());
     }
 
+//    /**
+//     * All repaint requests go through this method,
+//     * it can be uncommented to debug repainting.
+//     */
+//    @Override
+//    public void repaint(long tm, int x, int y, int width, int height) {
+//        System.out.printf("View::repaint: tm = %d, x = %d, y = %d, width = %d, height = %d%n", tm, x, y, width, height);
+//        Thread.dumpStack();
+//        super.repaint(tm, x, y, width, height);
+//    }
+
     public void ensurePositiveLocation() {
         if (viewContainer != null) {
             viewContainer.ensurePositiveLocation();
@@ -648,12 +659,7 @@ public class View extends JComponent
     public void setSize(int width, int height) {
         super.setSize(width, height);
 
-        onSizeChanged();
-    }
-
-    private void onSizeChanged() {
         updateCanvasLocation();
-
         repaint();
     }
 

@@ -223,6 +223,16 @@ public class Tools {
             currentTool.mouseMoved(e, view);
         }
 
+        public static void mouseEntered(MouseEvent e, View view) {
+            // doesn't need to go through the handler chain
+            currentTool.mouseEntered(e, view);
+        }
+
+        public static void mouseExited(MouseEvent e, View view) {
+            // doesn't need to go through the handler chain
+            currentTool.mouseExited(e, view);
+        }
+
         public static void toolChanged(Tool oldTool, Tool newTool) {
             if (mouseDown) {
                 // We switched tools via keyboard in the middle of a drag

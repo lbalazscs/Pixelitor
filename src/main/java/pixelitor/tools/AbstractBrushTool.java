@@ -18,12 +18,15 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
+import pixelitor.gui.utils.SimpleCachedPainter;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
@@ -33,16 +36,27 @@ import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.Transparency;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.FlatteningPathIterator;
 import java.awt.geom.PathIterator;
 import java.awt.image.BufferedImage;
@@ -60,6 +74,11 @@ public abstract class AbstractBrushTool extends Tool {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 100;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
+
+    // some extra space is added to the repaint region
+    // since repaint() is asynchronous
+    private static final int REPAINT_EXTRA_SPACE = 20;
+
     private final boolean canHaveSymmetry;
 
     private JComboBox<BrushType> typeCB;
@@ -85,8 +104,10 @@ public abstract class AbstractBrushTool extends Tool {
     private RangeParam lazyMouseSpacing;
     private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
 
-//    double lastCoX;
-//    double lastCoY;
+    private int lastCoX;
+    private int lastCoY;
+    private final BrushOutlinePainter outlinePainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
+    private boolean paintBrushOutline = false;
 
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
@@ -244,10 +265,56 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
+        lastCoX = (int) e.getCoX();
+        lastCoY = (int) e.getCoY();
 
-//        lastCoX = e.getCoX();
-//        lastCoY = e.getCoY();
+        newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e, View view) {
+        repaintOutlineSinceLast(e.getX(), e.getY(), view);
+    }
+
+    private void repaintOutlineSinceLast(int x, int y, View view) {
+        int prevX = lastCoX;
+        int prevY = lastCoY;
+
+        lastCoX = x;
+        lastCoY = y;
+
+        Rectangle r = Shapes.toPositiveRect(prevX, lastCoX, prevY, lastCoY);
+
+        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+        r.grow(growth, growth);
+        view.repaint(r);
+    }
+
+    private void repaintOutline(View view) {
+        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+
+        view.repaint(lastCoX - growth, lastCoY - growth, 2 * growth, 2 * growth);
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e, View view) {
+        if (typeCB == null) {
+            paintBrushOutline = true;
+        } else if (getBrushType() != BrushType.ONE_PIXEL) {
+            paintBrushOutline = true;
+        } else {
+            // it should be false already, but set it for safety
+            paintBrushOutline = false;
+        }
+        lastCoX = e.getX();
+        lastCoY = e.getY();
+        repaintOutline(view);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e, View view) {
+        paintBrushOutline = false;
+        repaintOutlineSinceLast(e.getX(), e.getY(), view);
     }
 
     @Override
@@ -357,28 +424,22 @@ public abstract class AbstractBrushTool extends Tool {
         int newRadius = getRadius();
         brush.setRadius(newRadius);
 
-//        int desiredImgSize = 2 * newRadius;
-//        Dimension cursorSize = Toolkit.getDefaultToolkit().getBestCursorSize(
-//              desiredImgSize, desiredImgSize);
-//
-//        BufferedImage cursorImage = ImageUtils.createSysCompatibleImage(
-//              cursorSize.width, cursorSize.height);
-//        Graphics2D g = cursorImage.createGraphics();
-//        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-//        g.setColor(Color.RED);
-//        g.drawOval(0, 0, cursorSize.width, cursorSize.height);
-//        g.dispose();
-//
-//        cursor = Toolkit.getDefaultToolkit().createCustomCursor(
-//                cursorImage,
-//                new Point(cursorSize.width / 2, cursorSize.height / 2), "brush");
-//        ImageComponents.onAllImages(view -> view.setCursor(cursor));
+        outlinePainter.setRadius(newRadius);
+        if (paintBrushOutline) {
+            // changing the brush via keyboard shortcut
+            repaintOutline(OpenComps.getActiveView());
+        }
     }
 
     @Override
     protected void toolStarted() {
         super.toolStarted();
         resetInitialState();
+
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            outlinePainter.setView(view);
+        }
     }
 
     @Override
@@ -389,6 +450,17 @@ public abstract class AbstractBrushTool extends Tool {
     @Override
     public void compActivated(View oldCV, View newCV) {
         resetInitialState();
+        outlinePainter.setView(newCV);
+    }
+
+    @Override
+    public void coCoordsChanged(View view) {
+        EventQueue.invokeLater(() -> {
+            Point location = MouseInfo.getPointerInfo().getLocation();
+            SwingUtilities.convertPointFromScreen(location, view);
+            outlinePainter.setView(view);
+            repaintOutlineSinceLast(location.x, location.y, view);
+        });
     }
 
     /**
@@ -498,25 +570,15 @@ public abstract class AbstractBrushTool extends Tool {
         return (BrushType) typeCB.getSelectedItem();
     }
 
-    // TODO indicate the size of the brush
-//    private static final Stroke stroke3 = new BasicStroke(3);
-//    private static final Stroke stroke1 = new BasicStroke(1);
-//    @Override
-//    public void paintOverImage(Graphics2D g2, Canvas canvas,
-//                               View view,
-//                               AffineTransform componentTransform,
-//                               AffineTransform imageTransform) {
-//        double radius = getRadius() * view.getScaling();
-//        double diameter = 2 * radius;
-//        Ellipse2D.Double shape = new Ellipse2D.Double(lastCoX - radius, lastCoY - radius,
-//                diameter, diameter);
-//        g2.setStroke(stroke3);
-//        g2.setColor(Color.BLACK);
-//        g2.draw(shape);
-//        g2.setStroke(stroke1);
-//        g2.setColor(Color.WHITE);
-//        g2.draw(shape);
-//    }
+    @Override
+    public void paintOverImage(Graphics2D g2, Canvas canvas,
+                               View view,
+                               AffineTransform componentTransform,
+                               AffineTransform imageTransform) {
+        if (paintBrushOutline) {
+            outlinePainter.paint(g2, lastCoX, lastCoY);
+        }
+    }
 
     @Override
     protected void closeToolDialogs() {
@@ -576,5 +638,81 @@ public abstract class AbstractBrushTool extends Tool {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Paints the brush outline.
+     *
+     * This is necessary because (at least on Windows) it looks like
+     * cursors can't have an arbitrary size, so the outline cannot be
+     * made via custom brush images. See java.awt.Toolkit.getBestCursorSize.
+     */
+    static class BrushOutlinePainter extends SimpleCachedPainter {
+        private static final Stroke stroke3 = new BasicStroke(3);
+        private static final Stroke stroke1 = new BasicStroke(1);
+
+        private int imRadius;
+        private double coRadius;
+        private View view;
+        private double coDiameter;
+
+        public BrushOutlinePainter(int radius) {
+            super(Transparency.TRANSLUCENT);
+            this.imRadius = radius;
+        }
+
+        public void setView(View newView) {
+            view = newView;
+            calcCoRadius();
+        }
+
+        public void setRadius(int imRadius) {
+            this.imRadius = imRadius;
+            calcCoRadius();
+        }
+
+        private void calcCoRadius() {
+            if (view == null) {
+                return;
+            }
+            double radiusBefore = coRadius;
+            coRadius = view.getScaling() * imRadius;
+            if (radiusBefore != coRadius) {
+                coDiameter = 2 * coRadius;
+                invalidateCache();
+            }
+        }
+
+        @Override
+        public void doPaint(Graphics2D g, int width, int height) {
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+
+            // start at 1, 1 so that the full stroke width fits in the image
+            Shape shape = new Ellipse2D.Double(1, 1, coDiameter, coDiameter);
+
+            g.setStroke(stroke3);
+            g.setColor(Color.BLACK);
+            g.draw(shape);
+
+            g.setStroke(stroke1);
+            g.setColor(Color.WHITE);
+            g.draw(shape);
+        }
+
+        public void paint(Graphics2D g2, double x, double y) {
+            if (view == null) {
+                throw new IllegalStateException("brush outline not initialized");
+            }
+            AffineTransform origTX = g2.getTransform();
+
+            g2.translate(x - coRadius - 1, y - coRadius - 1);
+            super.paint(g2, null, 3 + (int) coDiameter, 3 + (int) coDiameter);
+
+            g2.setTransform(origTX);
+        }
+
+        public int getCoRadius() {
+            return (int) coRadius;
+        }
     }
 }
