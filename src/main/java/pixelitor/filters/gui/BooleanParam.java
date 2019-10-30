@@ -20,11 +20,11 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
+import java.awt.EventQueue;
 import java.awt.Rectangle;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -37,7 +37,7 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean addDefaultButton;
-    private List<ChangeListener> changeListenerList;
+    private List<ActionListener> actionListenerList;
 
     public BooleanParam(String name, boolean defaultV) {
         this(name, defaultV, ALLOW_RANDOMIZE);
@@ -60,14 +60,14 @@ public class BooleanParam extends AbstractFilterParam {
         paramGUI = gui;
         setParamGUIEnabledState();
 
-        if (changeListenerList != null) {
-            // some change listeners for the GUI
+        if (actionListenerList != null) {
+            // some action listeners for the GUI
             // were temporarily stored here
 
-            for (ChangeListener listener : changeListenerList) {
-                gui.addChangeListener(listener);
+            for (ActionListener listener : actionListenerList) {
+                gui.addActionListener(listener);
             }
-            changeListenerList.clear();
+            actionListenerList.clear();
         }
 
         return gui;
@@ -80,31 +80,30 @@ public class BooleanParam extends AbstractFilterParam {
 
     /**
      * Sets up the automatic enabling of another {@link FilterSetting}
-     * depending on the checked state of this one.
+     * whenever this one is checked.
      */
-    public void setupEnableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
-        // disable by default
-        other.setEnabled(false, EnabledReason.APP_LOGIC);
-        addChangeListener(e -> {
-            if (condition.test(isChecked())) {
-                other.setEnabled(true, EnabledReason.APP_LOGIC);
-            } else {
-                other.setEnabled(false, EnabledReason.APP_LOGIC);
-            }
+    public void setupEnableOtherIfChecked(FilterSetting other) {
+        other.setEnabled(isChecked(), EnabledReason.APP_LOGIC);
+        addActionListener(e -> {
+            // strangely this seems to work without invokeLater,
+            // but for safety call it after the pending events are processed
+            EventQueue.invokeLater(() ->
+                    other.setEnabled(isChecked(), EnabledReason.APP_LOGIC));
         });
     }
 
     /**
      * Sets up the automatic disabling of another {@link FilterSetting}
-     * depending on the checked state of this one.
+     * whenever this one is checked.
      */
-    public void setupDisableOtherIf(FilterSetting other, Predicate<Boolean> condition) {
-        addChangeListener(e -> {
-            if (condition.test(isChecked())) {
-                other.setEnabled(false, EnabledReason.APP_LOGIC);
-            } else {
-                other.setEnabled(true, EnabledReason.APP_LOGIC);
-            }
+    public void setupDisableOtherIfChecked(FilterSetting other) {
+        other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC);
+
+        addActionListener(e -> {
+            // invoke later because when this listener is called,
+            // isChecked does not contain yet the updated value.
+            EventQueue.invokeLater(() ->
+                    other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC));
         });
     }
 
@@ -172,19 +171,19 @@ public class BooleanParam extends AbstractFilterParam {
                 getClass().getSimpleName(), getName(), currentValue);
     }
 
-    public void addChangeListener(ChangeListener changeListener) {
+    public void addActionListener(ActionListener actionListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
             BooleanParamGUI selector = (BooleanParamGUI) paramGUI;
-            selector.addChangeListener(changeListener);
+            selector.addActionListener(actionListener);
             return;
         }
 
         // if there is no GUI, store the listener so that
         // it can be added to the GUI as soon as the GUI is created
-        if (changeListenerList == null) {
-            changeListenerList = new ArrayList<>(2);
+        if (actionListenerList == null) {
+            actionListenerList = new ArrayList<>(2);
         }
-        changeListenerList.add(changeListener);
+        actionListenerList.add(actionListener);
     }
 }

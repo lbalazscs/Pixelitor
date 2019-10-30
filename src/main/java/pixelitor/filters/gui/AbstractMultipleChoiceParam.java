@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public abstract class AbstractMultipleChoiceParam<E>
 
     @Override
     public JComponent createGUI() {
-        ComboBoxParamGUI gui = new ComboBoxParamGUI(this, action);
+        ComboBoxParamGUI<E> gui = new ComboBoxParamGUI<>(this, action);
         paramGUI = gui;
         setParamGUIEnabledState();
         return gui;
@@ -84,6 +84,7 @@ public abstract class AbstractMultipleChoiceParam<E>
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((E) getSelectedItem())) {
                     other.setEnabled(true, EnabledReason.APP_LOGIC);
@@ -110,6 +111,7 @@ public abstract class AbstractMultipleChoiceParam<E>
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((E) getSelectedItem())) {
                     other.setEnabled(false, EnabledReason.APP_LOGIC);

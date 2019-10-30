@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class Slice extends ParametrizedFilter {
     private final RangeParam size = new RangeParam("Size", 1, 75, 300);
     private final RangeParam offset = new RangeParam("Offset", 0, 10, 100);
     private final GroupedRangeParam shift = new GroupedRangeParam(
-            "Shift Effect", 0, 0, 100, false);
+            "Shift Effect (Size %)", 0, 0, 100, false);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
 
@@ -60,9 +60,9 @@ public class Slice extends ParametrizedFilter {
         }
 
         filter.setOffset(offset.getValue());
+        filter.setSize(size.getValue());
         filter.setShiftHorizontal(shift.getValueAsPercentage(0));
         filter.setShiftVertical(shift.getValueAsPercentage(1));
-        filter.setSize(size.getValue());
         filter.setAngle(angle.getValueInIntuitiveRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(TransformFilter.NEAREST_NEIGHBOUR); // no difference

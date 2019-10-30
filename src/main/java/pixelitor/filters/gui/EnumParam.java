@@ -56,6 +56,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void setSelectedItem(Object anItem) {
         setSelectedItem((E) anItem, true);
     }

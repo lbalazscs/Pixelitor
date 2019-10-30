@@ -75,10 +75,10 @@ public class RandomSpheres extends ParametrizedFilter {
     public RandomSpheres() {
         super(ShowOriginal.YES);
 
-        addHighLightsCB.setupDisableOtherIf(
-                highlightAngleSelector, checked -> !checked);
-        addHighLightsCB.setupDisableOtherIf(
-                highlightElevationSelector, checked -> !checked);
+        // enable "Light Direction" and "Highlight Elevation"
+        // only if "Add Highlights" is checked
+        addHighLightsCB.setupEnableOtherIfChecked(highlightAngleSelector);
+        addHighLightsCB.setupEnableOtherIfChecked(highlightElevationSelector);
 
         setParams(
                 radius.withAdjustedRange(0.1),

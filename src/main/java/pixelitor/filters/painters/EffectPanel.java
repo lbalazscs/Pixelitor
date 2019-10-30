@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.painters;
 
-import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
 import pixelitor.colors.ColorUtils;
@@ -25,7 +24,6 @@ import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.Resettable;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
@@ -92,12 +90,9 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     }
 
     private void showColorDialog() {
-        Color selectedColor = ColorPicker.showDialog(
-                PixelitorWindow.getInstance(),
-                "Select Color", color, true);
-        if (selectedColor != null) { // ok was pressed
-            setColor(selectedColor, true);
-        }
+        ColorUtils.selectColorWithDialog(this,
+                "Select Color", color, true,
+                c -> setColor(c, true));
     }
 
     public void setColor(Color newColor, boolean trigger) {

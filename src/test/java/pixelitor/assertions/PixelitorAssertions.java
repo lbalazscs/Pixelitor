@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,12 +80,14 @@ public class PixelitorAssertions extends Assertions {
         return new NamedActionAssert(actual);
     }
 
+    @SuppressWarnings("unchecked")
     public static LayerAssert assertThat(Layer actual) {
-        return new LayerAssert(actual, LayerAssert.class);
+        return new LayerAssert<>(actual, LayerAssert.class);
     }
 
+    @SuppressWarnings("unchecked")
     public static ContentLayerAssert assertThat(ContentLayer actual) {
-        return new ContentLayerAssert(actual, ContentLayerAssert.class);
+        return new ContentLayerAssert<>(actual, ContentLayerAssert.class);
     }
 
     public static ImageLayerAssert assertThat(ImageLayer actual) {
@@ -100,8 +102,9 @@ public class PixelitorAssertions extends Assertions {
         return new BufferedImageAssert(actual);
     }
 
+    @SuppressWarnings("unchecked")
     public static FilterParamAssert assertThat(FilterParam actual) {
-        return new FilterParamAssert(actual, FilterParamAssert.class);
+        return new FilterParamAssert<>(actual, FilterParamAssert.class);
     }
 
     public static IntChoiceParamAssert assertThat(IntChoiceParam actual) {

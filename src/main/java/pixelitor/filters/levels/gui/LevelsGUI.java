@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.filters.levels.OneChannelLevelsModel;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -46,14 +47,14 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
 
         setLayout(new BorderLayout());
 
-        selectorModel = new DefaultComboBoxModel();
-        JComboBox<String> selector = new JComboBox(selectorModel);
+        selectorModel = new DefaultComboBoxModel<>();
+        JComboBox<String> selector = new JComboBox<>(selectorModel);
         selector.addItemListener(this);
 
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new FlowLayout());
         northPanel.add(selector);
-        JButton resetAllButton = new JButton("Reset all");
+        JButton resetAllButton = new JButton("Reset all", Icons.getWestArrowIcon());
         resetAllButton.addActionListener(e -> model.resetToDefaultSettings());
         northPanel.add(resetAllButton);
         add(northPanel, BorderLayout.NORTH);

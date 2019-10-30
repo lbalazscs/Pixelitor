@@ -207,13 +207,22 @@ public class Selection {
         return shape;
     }
 
+    public boolean isRectangular() {
+        return shape instanceof Rectangle2D;
+    }
+
     /**
      * Returns the shape bounds of the selection
      * Like everything else in this class, this is in image coordinates
      * (but relative to the canvas, not to the image)
      */
-    public Rectangle getShapeBounds() {
-        return shape.getBounds();
+    public Rectangle getShapeBounds(int grow) {
+        Rectangle bounds = shape.getBounds();
+
+        // add a small extra space to avoid problems from anti-aliasing
+//        bounds.grow(grow, grow);
+
+        return bounds;
     }
 
     public Rectangle2D getShapeBounds2D() {
@@ -345,7 +354,7 @@ public class Selection {
         node.addBoolean("marching", isMarching());
 
         node.addString("Shape Class", shape.getClass().getName());
-        node.addString("Bounds", getShapeBounds().toString());
+        node.addString("Bounds", getShapeBounds(0).toString());
         node.addString("Bounds 2D", getShapeBounds2D().toString());
 
         return node;

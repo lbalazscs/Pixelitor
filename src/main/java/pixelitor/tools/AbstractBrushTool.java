@@ -170,7 +170,9 @@ public abstract class AbstractBrushTool extends Tool {
     protected void addSymmetryCombo() {
         assert canHaveSymmetry;
 
+        @SuppressWarnings("unchecked")
         JComboBox<Symmetry> symmetryCB = new JComboBox<>(symmetryModel);
+
         settingsPanel.addComboBox("Mirror:", symmetryCB, "symmetrySelector");
         symmetryCB.addActionListener(e -> symmetryBrush.symmetryChanged(
                 getSymmetry(), getRadius()));

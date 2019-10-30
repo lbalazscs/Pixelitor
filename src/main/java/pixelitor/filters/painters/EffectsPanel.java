@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -237,10 +237,16 @@ public class EffectsPanel extends JPanel implements Resettable {
 
     private void addTab(String name, EffectPanel configurator) {
         JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JCheckBox tabSelectionCB = new JCheckBox();
-        tabSelectionCB.setModel(configurator.getEnabledModel());
-        tabPanel.add(tabSelectionCB);
+        JCheckBox tabCB = new JCheckBox();
+        tabCB.setModel(configurator.getEnabledModel());
+        tabPanel.add(tabCB);
         tabPanel.add(new JLabel(name));
+
+        tabCB.addActionListener(e -> {
+            if (tabCB.isSelected()) {
+                tabs.setSelectedIndex(tabs.indexOfComponent(configurator));
+            }
+        });
 
         tabPanel.setOpaque(false);
 

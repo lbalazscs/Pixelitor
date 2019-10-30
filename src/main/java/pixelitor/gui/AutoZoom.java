@@ -34,12 +34,12 @@ public enum AutoZoom {
         public double calcImageToDesktopRatio(double hor, double ver) {
             return Math.max(hor, ver);
         }
-    }, WIDTH("Fit Width", "Fit the width of the image to the available space") {
+    }, WIDTH("Fit Width", "Fit the width of the image to the available horizontal space") {
         @Override
         public double calcImageToDesktopRatio(double hor, double ver) {
             return hor;
         }
-    }, HEIGHT("Fit Height", "Fit the height of the image to the available space") {
+    }, HEIGHT("Fit Height", "Fit the height of the image to the available vertical space") {
         @Override
         public double calcImageToDesktopRatio(double hor, double ver) {
             return ver;

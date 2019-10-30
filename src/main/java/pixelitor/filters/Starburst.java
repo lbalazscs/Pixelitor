@@ -63,8 +63,8 @@ public class Starburst extends ParametrizedFilter {
             new IntChoiceParam.Value("Tool Background", BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
-    private final ColorParam foreground = new ColorParam("Rays Color:", WHITE, NO_OPACITY);
-    private final BooleanParam randomColors = new BooleanParam("Use Random Colors for Rays", false, IGNORE_RANDOMIZE);
+    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, NO_OPACITY);
+    private final BooleanParam randomColors = new BooleanParam("Random Ray Colors", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
@@ -76,15 +76,19 @@ public class Starburst extends ParametrizedFilter {
         setParams(
                 numberOfRaysParam,
                 background,
-                foreground,
+                raysColor,
                 randomColors.withAction(reseedColorsAction),
                 center,
                 rotate
         );
 
         // enable the "Reseed Colors" button only if
-        // the "Use Random Colors for Rays" checkbox is checked
-        randomColors.setupEnableOtherIf(reseedColorsAction, checked -> checked);
+        // the "Random Ray Colors" checkbox is checked
+        randomColors.setupEnableOtherIfChecked(reseedColorsAction);
+
+        // enable the "Ray Color" color selector only if
+        // the "Random Ray Colors" checkbox is *not* checked
+        randomColors.setupDisableOtherIfChecked(raysColor);
     }
 
     @Override
@@ -116,7 +120,7 @@ public class Starburst extends ParametrizedFilter {
         float cy = height * center.getRelativeY();
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setColor(foreground.getColor());
+        g.setColor(raysColor.getColor());
 
         int numberOfRays = numberOfRaysParam.getValue();
         boolean useRandomColors = randomColors.isChecked();

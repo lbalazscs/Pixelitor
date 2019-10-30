@@ -40,6 +40,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -1115,7 +1116,7 @@ public class ImageUtils {
                                                           int tx, int ty) {
         assert selection != null;
 
-        Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
+        Rectangle bounds = selection.getShapeBounds(1); // relative to the canvas
 
         bounds.translate(-tx, -ty); // now relative to the image
 
@@ -1128,9 +1129,40 @@ public class ImageUtils {
             // this should not happen, because the selection should be
             // always within the canvas
             throw new IllegalStateException(format("tx = %d, ty = %d, bounds = %s",
-                    tx, ty, selection.getShapeBounds()));
+                    tx, ty, selection.getShapeBounds(1)));
         }
 
         return getCopyOfSubimage(src, bounds);
+    }
+
+    /**
+     * Sets up the given image to be temporary image needed for soft
+     * (anti-aliased) selection clipping, following ideas from
+     * https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
+     */
+    public static Graphics2D setupForSoftSelection(Image image, Shape selShape, int selStartX, int selStartY) {
+        Graphics2D tmpG = (Graphics2D) image.getGraphics();
+
+        // fill with transparent pixels
+        tmpG.setComposite(AlphaComposite.Clear);
+        tmpG.fillRect(0, 0, image.getWidth(null), image.getHeight(null));
+
+        // fill the transparent image with anti-aliased
+        // selection-shaped white
+        tmpG.setComposite(AlphaComposite.Src);
+        tmpG.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        tmpG.setColor(WHITE);
+        tmpG.translate(-selStartX, -selStartY); // because the selection shape is relative to the canvas
+        tmpG.fill(selShape);
+
+        // further drawing operations should not
+        // change the transparency of the image.
+        // It is important to use SrcIn, and not SrcAtop like in the
+        // blog mentioned above, because the new content might also
+        // contain transparent pixels and we don't want to lose that information.
+        tmpG.setComposite(AlphaComposite.SrcIn);
+        tmpG.translate(selStartX, selStartY);
+
+        return tmpG;
     }
 }

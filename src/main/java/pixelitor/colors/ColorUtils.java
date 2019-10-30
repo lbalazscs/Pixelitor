@@ -23,7 +23,6 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.Utils;
@@ -35,6 +34,8 @@ import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -223,13 +224,25 @@ public class ColorUtils {
         return "(a = " + a + ", r = " + r + ", g = " + g + ", b = " + b + ")";
     }
 
-    // should not be called from dialogs because it sets dialogActive to false at the end
-    public static Color showColorPickerDialog(PixelitorWindow pw, String title,
-                                              Color selectedColor, boolean allowOpacity) {
+    public static void selectColorWithDialog(JComponent component, String title,
+                                             Color selectedColor, boolean allowOpacity,
+                                             Consumer<Color> colorChangeListener) {
+        Window owner = SwingUtilities.getWindowAncestor(component);
+        selectColorWithDialog(owner, title, selectedColor, allowOpacity, colorChangeListener);
+    }
+
+    public static void selectColorWithDialog(Window owner, String title,
+                                             Color selectedColor, boolean allowOpacity,
+                                             Consumer<Color> colorChangeListener) {
+        Color prevColor = selectedColor;
         GlobalEvents.dialogOpened(title);
-        Color color = ColorPicker.showDialog(pw, title, selectedColor, allowOpacity);
+        Color color = ColorPicker.showDialog(owner, title, selectedColor,
+                allowOpacity, colorChangeListener);
         GlobalEvents.dialogClosed(title);
-        return color;
+
+        if (color == null) {  // Cancel was pressed, reset the old color
+            colorChangeListener.accept(prevColor);
+        }
     }
 
     public static Color toGray(Color c) {
@@ -320,7 +333,28 @@ public class ColorUtils {
         Window window = SwingUtilities.windowForComponent(parent);
         setupPasteColorPopupMenu(popup, window, colorSetter);
 
-        swatch.setComponentPopupMenu(popup);
+        // swatch.setComponentPopupMenu doesn't consider the disabled state
+        swatch.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showPopup(e);
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    showPopup(e);
+                }
+            }
+
+            private void showPopup(MouseEvent e) {
+                if (swatch.isEnabled()) {
+                    popup.show(swatch, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     public static void setupCopyColorPopupMenu(JPopupMenu popup, Supplier<Color> colorSupplier) {

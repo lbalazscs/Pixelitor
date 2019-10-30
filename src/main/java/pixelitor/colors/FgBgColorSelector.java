@@ -34,7 +34,7 @@ import java.awt.event.ActionEvent;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.colors.ColorUtils.showColorPickerDialog;
+import static pixelitor.colors.ColorUtils.selectColorWithDialog;
 
 /**
  * A panel that contains the buttons for selecting
@@ -236,30 +236,26 @@ public class FgBgColorSelector extends JLayeredPane {
         return button;
     }
 
-    private void bgButtonPressed() {
-        if (RandomGUITest.isRunning()) {
-            return;
-        }
-
-        Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
-        Color c = showColorPickerDialog(pw, "Set Background Color", selectedColor, false);
-
-        if (c != null) { // OK was pressed
-            setBgColor(c, true);
-        }
-    }
-
     private void fgButtonPressed() {
         if (RandomGUITest.isRunning()) {
             return;
         }
 
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
-        Color c = showColorPickerDialog(pw, "Set Foreground Color", selectedColor, false);
+        selectColorWithDialog(pw, "Foreground Color",
+                selectedColor, false,
+                color -> setFgColor(color, true));
+    }
 
-        if (c != null) { // OK was pressed
-            setFgColor(c, true);
+    private void bgButtonPressed() {
+        if (RandomGUITest.isRunning()) {
+            return;
         }
+
+        Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
+        selectColorWithDialog(pw, "Background Color",
+                selectedColor, false,
+                color -> setBgColor(color, true));
     }
 
     public Color getFgColor() {

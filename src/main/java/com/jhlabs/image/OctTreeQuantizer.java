@@ -75,11 +75,12 @@ public class OctTreeQuantizer implements Quantizer {
     private int colors = 0;
     private final List<OctTreeNode>[] colorList;
 
+    @SuppressWarnings("unchecked")
     public OctTreeQuantizer() {
         setup(256);
         colorList = new ArrayList[MAX_LEVEL + 1];
         for (int i = 0; i < MAX_LEVEL + 1; i++) {
-            colorList[i] = new ArrayList();
+            colorList[i] = new ArrayList<>();
         }
         root = new OctTreeNode();
     }

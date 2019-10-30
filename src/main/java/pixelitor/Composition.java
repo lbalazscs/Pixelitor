@@ -1071,6 +1071,10 @@ public class Composition implements Serializable {
         }
     }
 
+    public boolean needsSoftSelection() {
+        return selection != null && !selection.isRectangular();
+    }
+
     public void invertSelection() {
         if (selection != null) {
             Shape backupShape = selection.getShape();

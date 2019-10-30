@@ -142,8 +142,8 @@ public class Canvas implements Serializable {
 
         if (shape instanceof Rectangle2D) {
             // don't ruin the type information in the shape by
-            // creating an unnecessary Area, because it will be
-            // needed to determine the selection crop type
+            // creating an unnecessary Area, because this is useful
+            // info in many ways (crop selection, AA selection clipping)
             return ((Rectangle2D) shape).createIntersection(canvasBounds);
         }        
 

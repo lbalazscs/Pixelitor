@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -300,7 +300,8 @@ public final class GUIUtils {
             public void mouseReleased(MouseEvent e) {
                 // on Linux/Mac the popup trigger check is not enough
                 // probably because the popups are started by mousePressed
-                boolean showDialog = !e.isPopupTrigger()
+                boolean showDialog = colorSwatch.isEnabled()
+                        && !e.isPopupTrigger()
                         && SwingUtilities.isLeftMouseButton(e);
                 if (showDialog) {
                     showDialogAction.run();

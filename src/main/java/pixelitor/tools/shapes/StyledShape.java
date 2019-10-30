@@ -215,7 +215,7 @@ public class StyledShape implements Cloneable {
     // called by the transform box manipulations
     public void transform(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
-        transformedImDrag = origImDrag.createTransformed(at);
+        transformedImDrag = origImDrag.transform(at);
     }
 
     private void setFillPaintType(TwoPointPaintType fillPaintType) {

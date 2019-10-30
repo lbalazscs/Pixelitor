@@ -127,14 +127,22 @@ public class ColorSwatch extends JPanel {
 	@Override
 	public void paint(Graphics g0) {
 		super.paint(g0); //may be necessary for some look-and-feels?
-		
+
 		Graphics2D g = (Graphics2D)g0;
 		
 		Color c = getForeground();
 		int w2 = Math.min(getWidth(), w);
 		int h2 = Math.min(getHeight(), w);
 		Rectangle r = new Rectangle(getWidth()/2-w2/2,getHeight()/2-h2/2, w2, h2);
-		
+
+        if (!isEnabled()) {
+            // lbalazscs: respecting the enabled setting
+            g.setColor(getBackground());
+            g.fillRect(0, 0, getWidth(), getHeight());
+            PlafPaintUtils.drawBevel(g, r);
+            return;
+        }
+
 		if(c.getAlpha()<255) {
 			TexturePaint checkers = getCheckerPaint();
 			g.setPaint(checkers);

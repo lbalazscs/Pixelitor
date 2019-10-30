@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,9 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
     public void paint(Graphics g, JComponent c) {
         super.paint(g, c);
 
+        @SuppressWarnings("unchecked")
         JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
+
         JTextField textField = jLayer.getView();
         ValidationResult result = validator.check(textField);
         if (!result.isOK()) {

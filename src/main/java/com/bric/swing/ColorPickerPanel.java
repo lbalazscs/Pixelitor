@@ -96,35 +96,63 @@ public class ColorPickerPanel extends JPanel {
 	private Point point = new Point(0,0);
 	
 	private Vector<ChangeListener> changeListeners = new Vector<ChangeListener>();
-	
+
 	/* Floats from [0,1].  They must be kept distinct, because
 	 * when you convert them to RGB coordinates HSB(0,0,0) and HSB (.5,0,0)
 	 * and then convert them back to HSB coordinates, the hue always shifts back to zero.
 	 */
 	float hue = -1, sat = -1, bri = -1;
 	int red = -1, green = -1, blue = -1;
-	
+    int lastPressRed = -1, lastPressGreen = -1, lastPressBlue = -1;
+
+    // always true, except right after a mouse press or mouse release
+    private boolean adjusting = true;
+
 	MouseInputListener mouseListener = new MouseInputAdapter() {
 		@Override
-		public void mousePressed(MouseEvent e) {
-			requestFocus();
-			Point p = e.getPoint();
-			if(mode==ColorPicker.BRI || mode==ColorPicker.SAT ||
-					mode==ColorPicker.HUE) {
-				float[] hsb = getHSB(p);
-				setHSB(hsb[0], hsb[1], hsb[2]);
-			} else {
-				int[] rgb = getRGB(p);
-				setRGB(rgb[0], rgb[1], rgb[2]);
-			}
-		}
+        public void mousePressed(MouseEvent e) {
+            change(e, false);
+            lastPressRed = red;
+            lastPressGreen = green;
+            lastPressBlue = blue;
+            adjusting = true;
+        }
+
+        private void change(MouseEvent e, boolean adjusting) {
+            ColorPickerPanel.this.adjusting = adjusting;
+            requestFocus();
+            Point p = e.getPoint();
+            if (mode == ColorPicker.BRI || mode == ColorPicker.SAT ||
+                    mode == ColorPicker.HUE) {
+                float[] hsb = getHSB(p);
+                setHSB(hsb[0], hsb[1], hsb[2]);
+            } else {
+                int[] rgb = getRGB(p);
+                setRGB(rgb[0], rgb[1], rgb[2]);
+            }
+        }
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			mousePressed(e);
+            change(e, true);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            adjusting = false;
+            // always fire, except if this was a click, and the
+            // color is the same as at mousePressed
+            if (lastPressRed != red || lastPressGreen != green || lastPressBlue != blue) {
+                fireChangeListeners();
+            }
+            adjusting = true;
 		}
 	};
-	
+
+    public boolean isAdjusting() {
+        return adjusting;
+    }
+
 	KeyListener keyListener = new KeyAdapter() {
 		@Override
 		public void keyPressed(KeyEvent e) {
@@ -312,7 +340,7 @@ public class ColorPickerPanel extends JPanel {
 	 * @param g the green value of the selected color.
 	 * @param b the blue value of the selected color.
 	 */
-	public void setRGB(int r,int g,int b) {
+    public void setRGB(int r, int g, int b) {
 		if(r<0 || r>255)
 			throw new IllegalArgumentException("The red value ("+r+") must be between [0,255].");
 		if(g<0 || g>255)
@@ -463,7 +491,7 @@ public class ColorPickerPanel extends JPanel {
 	 * @param s the saturation value of the selected color.
 	 * @param b the brightness value of the selected color.
 	 */
-	public void setHSB(float h,float s,float b) {
+    public void setHSB(float h, float s, float b) {
 		//hue is cyclic: it can be any value
 		h = (float)(h-Math.floor(h));
 		

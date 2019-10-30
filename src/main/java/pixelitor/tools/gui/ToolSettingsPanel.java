@@ -108,6 +108,8 @@ public class ToolSettingsPanel extends JPanel {
                                          CopyBrushTypeChangedListener listener) {
         EnumComboBoxModel<CopyBrushType> typeModel = new EnumComboBoxModel<>(CopyBrushType.class);
         typeModel.setSelectedItem(defaultSelection);
+
+        @SuppressWarnings("unchecked")
         JComboBox<CopyBrushType> typeCB = new JComboBox<>(typeModel);
 
         addComboBox("Brush:", typeCB, "typeCB");

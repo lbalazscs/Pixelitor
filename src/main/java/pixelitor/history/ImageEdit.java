@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,6 +45,8 @@ public class ImageEdit extends FadeableEdit {
         assert dr != null;
         assert backupImage != null;
 
+//        Utils.debugImage(backupImage, "Backup for " + name);
+        
         // the backup image is stored in an SoftReference
         this.imgRef = new SoftReference<>(backupImage);
         this.dr = dr;
@@ -55,10 +57,10 @@ public class ImageEdit extends FadeableEdit {
 
     public static ImageEdit createEmbedded(Drawable dr) {
         // If there is a selection, only the bounds of the selected area is saved.
-        BufferedImage copy = dr.getSelectedSubImage(true);
+        BufferedImage backup = dr.getSelectedSubImage(true);
 
         ImageEdit edit = new ImageEdit("", dr.getComp(),
-                dr, copy,
+                dr, backup,
                 false, false);
 
         edit.setEmbedded(true);

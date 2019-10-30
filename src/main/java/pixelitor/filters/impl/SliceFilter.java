@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class SliceFilter extends RotatedEffectFilter {
 
     private double calcShift(double coord, double shift) {
 //        return offset * Math.signum(FastMath.cos(coord / (double) size - shift));
-        double mod = ImageMath.mod(coord + shift, 2 * size) - size;
+        double mod = ImageMath.mod(coord - shift, 2 * size) - size;
         if (mod >= 0) {
             return offset;
         }
@@ -52,11 +52,11 @@ public class SliceFilter extends RotatedEffectFilter {
     }
 
     public void setShiftHorizontal(double t) {
-        this.shiftHorizontal = t * 2 * Math.PI;
+        this.shiftHorizontal = t * size;
     }
 
     public void setShiftVertical(double t) {
-        this.shiftVertical = t * 2 * Math.PI;
+        this.shiftVertical = t * size;
     }
 
     public void setOffset(int offset) {

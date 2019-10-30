@@ -39,7 +39,6 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -54,9 +53,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
@@ -277,11 +274,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private void setPreviewWithSelection(BufferedImage newImage) {
-        previewImage = replaceSelectedPart(previewImage, newImage);
+        previewImage = replaceSelectedPart(previewImage, newImage, false);
     }
 
-    private void setImageWithSelection(BufferedImage newImage) {
-        image = replaceSelectedPart(image, newImage);
+    private void setImageWithSelection(BufferedImage newImage, boolean isUndoRedo) {
+        image = replaceSelectedPart(image, newImage, isUndoRedo);
         imageRefChanged();
 
         comp.imageChanged(INVALIDATE_CACHE);
@@ -292,48 +289,43 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * If there is a selection, copies newImg into src
      * according to the selection, and returns src
      */
-    private BufferedImage replaceSelectedPart(BufferedImage src, BufferedImage newImg) {
+    private BufferedImage replaceSelectedPart(BufferedImage src,
+                                              BufferedImage newImg,
+                                              boolean isUndoRedo) {
         assert src != null;
         assert newImg != null;
         assert Assertions.checkRasterMinimum(newImg);
 
-        Shape selectionShape = comp.getSelectionShape();
-        if (selectionShape == null) {
+        Selection selection = comp.getSelection();
+        if (selection == null) {
             return newImg;
-        } else if (selectionShape instanceof Rectangle2D) {
+        } else if (isUndoRedo) {
+            // when undoing something and there is a selection, the whole
+            // new image should be copied onto the old one, and the exact
+            // selection shape should not be considered because of AA effects
+            Graphics2D g = src.createGraphics();
+            Rectangle selBounds = selection.getShapeBounds(1);
+            g.drawImage(newImg, selBounds.x, selBounds.y, null);
+            g.dispose();
+            return src;
+        } else if (selection.isRectangular()) {
             // rectangular selection, simple clipping is good,
             // because there are no aliasing problems
             Graphics2D g = src.createGraphics();
             g.translate(-getTX(), -getTY());
             g.setComposite(AlphaComposite.Src);
-            g.setClip(selectionShape);
-            Rectangle bounds = selectionShape.getBounds();
+            Shape shape = selection.getShape();
+            g.setClip(shape);
+            // add 1 for consistency with other code
+            Rectangle bounds = selection.getShapeBounds(1);
             g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
             return src;
         } else {
-            // nonrectangular selection, we want soft clipping, with anti-aliasing
-            // following ideas from https://community.oracle.com/blogs/campbell/2006/07/19/java-2d-trickery-soft-clipping
-            Rectangle bounds = selectionShape.getBounds();
-
+            Rectangle bounds = selection.getShapeBounds(1);
             BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
-            Graphics2D g2 = tmpImg.createGraphics();
-            // fill with transparent pixels
-            g2.setComposite(AlphaComposite.Clear);
-            g2.fillRect(0, 0, bounds.width, bounds.height);
-            // fill the transparent image with anti-aliased
-            // selection-shaped white
-            g2.setComposite(AlphaComposite.Src);
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            g2.setColor(Color.WHITE);
-            g2.translate(-bounds.x, -bounds.y);
-            g2.fill(selectionShape);
+            Graphics2D g2 = ImageUtils.setupForSoftSelection(tmpImg, selection.getShape(), bounds.x, bounds.y);
 
-            // It is important to use SrcIn, and not SrcAtop like in the
-            // blog mentioned above, because the filtered image might also
-            // contain transparent pixels and we don't want to lose that information.
-            g2.setComposite(AlphaComposite.SrcIn);
-            g2.translate(bounds.x, bounds.y);
             g2.drawImage(newImg, 0, 0, null);
             g2.dispose();
 
@@ -524,7 +516,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert state == NORMAL;
 
         BufferedImage imageForUndo = getFilterSourceImage();
-        setImageWithSelection(transformedImage);
+        setImageWithSelection(transformedImage, false);
 
         if (!cr.needsUndo()) {
             return;
@@ -557,7 +549,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (ignoreSelection) {
             setImage(img);
         } else {
-            setImageWithSelection(img);
+            setImageWithSelection(img, true);
         }
     }
 
@@ -663,7 +655,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             return image;
         }
 
-        Rectangle selBounds = selection.getShapeBounds();
+        Rectangle selBounds = selection.getShapeBounds(1);
         return image.getSubimage(
             selBounds.x, selBounds.y,
             selBounds.width, selBounds.height);
@@ -756,8 +748,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public TmpDrawingLayer createTmpDrawingLayer(Composite c) {
-        tmpDrawingLayer = new TmpDrawingLayer(this, c);
+    public TmpDrawingLayer createTmpDrawingLayer(Composite c, boolean softSelection) {
+        tmpDrawingLayer = new TmpDrawingLayer(this, c, softSelection);
         return tmpDrawingLayer;
     }
 
@@ -776,11 +768,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     public BufferedImage createCanvasSizedTmpImage() {
-        int width = canvas.getImWidth();
-        int height = canvas.getImHeight();
         // it is important that the tmp image has transparency
         // even for layer masks, otherwise drawing is not possible
-        return ImageUtils.createSysCompatibleImage(width, height);
+        return ImageUtils.createSysCompatibleImage(canvas);
     }
 
     @Override

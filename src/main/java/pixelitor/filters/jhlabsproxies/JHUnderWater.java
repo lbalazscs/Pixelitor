@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,6 +46,7 @@ public class JHUnderWater extends ParametrizedFilter {
     public JHUnderWater() {
         super(ShowOriginal.YES);
 
+        ReseedNoiseFilterAction reseed = new ReseedNoiseFilterAction();
         setParams(
                 amount.withAdjustedRange(0.1),
                 scale.withAdjustedRange(0.3),
@@ -54,11 +55,16 @@ public class JHUnderWater extends ParametrizedFilter {
                 time,
                 edgeAction,
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction());
+        ).withAction(reseed);
+        amount.setupEnableOtherIfNotZero(reseed);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        if (amount.getValue() == 0) {
+            return src;
+        }
+        
         if(filter == null) {
             filter = new SwimFilter(NAME);
         }

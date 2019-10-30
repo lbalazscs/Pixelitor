@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,9 +35,9 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 public class JHTriTone extends ParametrizedFilter {
     public static final String NAME = "Tritone";
 
-    private final ColorParam shadowColor = new ColorParam("Shadow Color:", BLACK, NO_OPACITY);
-    private final ColorParam midtonesColor = new ColorParam("Midtones Color:", RED, NO_OPACITY);
-    private final ColorParam highlightsColor = new ColorParam("Highlights Color:", YELLOW, NO_OPACITY);
+    private final ColorParam shadowColor = new ColorParam("Shadow Color", BLACK, NO_OPACITY);
+    private final ColorParam midtonesColor = new ColorParam("Midtones Color", RED, NO_OPACITY);
+    private final ColorParam highlightsColor = new ColorParam("Highlights Color", YELLOW, NO_OPACITY);
 
     private TritoneFilter filter;
 

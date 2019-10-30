@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -114,6 +114,8 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         leftVerticalBox.add(cmLabel);
         EnumComboBoxModel<ConvolveMethod> convolveMethodModel
                 = filter.getConvolveMethodModel();
+
+        @SuppressWarnings("unchecked")
         JComboBox<ConvolveMethod> convolveMethodCB = new JComboBox<>(convolveMethodModel);
 
         convolveMethodCB.setAlignmentX(Component.LEFT_ALIGNMENT);

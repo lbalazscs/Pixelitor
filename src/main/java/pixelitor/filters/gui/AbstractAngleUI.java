@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,8 +39,8 @@ public abstract class AbstractAngleUI extends JComponent
         implements MouseListener, MouseMotionListener {
     static final int SIZE = 50;
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
-    private static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
-    private static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
+    protected static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
+    protected static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
 
     final AngleParam model;
     protected boolean enabled = true;

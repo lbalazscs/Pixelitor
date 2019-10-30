@@ -19,6 +19,13 @@
  */
 package com.bric.swing;
 
+import com.bric.plaf.ColorPickerSliderUI;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Dimension;
@@ -30,24 +37,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
-import com.bric.plaf.ColorPickerSliderUI;
+import java.util.function.Consumer;
 
 /** <p>This is a panel that offers a robust set of controls to pick a color.
  * <P>This was originally intended to replace the <code>JColorChooser</code>.
@@ -83,7 +73,8 @@ public class ColorPicker extends JPanel {
 	
 	/** The localized strings used in this (and related) panel(s). */
 	protected static ResourceBundle strings = ResourceBundle.getBundle("com.bric.swing.resources.ColorPicker");
-	
+    private Consumer<Color> adjustmentListener;
+
 	/** This creates a modal dialog prompting the user to select a color.
 	 * <P>This uses a generic dialog title: "Choose a Color", and does not include opacity.
 	 * 
@@ -107,8 +98,9 @@ public class ColorPicker extends JPanel {
 	 * @param includeOpacity whether to add a control for the opacity of the color.
 	 * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
 	 */
-	public static Color showDialog(Window owner,Color originalColor,boolean includeOpacity) {
-		return showDialog(owner, null, originalColor, includeOpacity );
+    public static Color showDialog(Window owner, Color originalColor,
+                                   boolean includeOpacity, Consumer<Color> listener) {
+        return showDialog(owner, null, originalColor, includeOpacity, listener);
 	}
 
 	/** This creates a modal dialog prompting the user to select a color.
@@ -121,12 +113,18 @@ public class ColorPicker extends JPanel {
 	 * @param includeOpacity whether to add a control for the opacity of the color.
 	 * @return the <code>Color</code> the user chooses, or <code>null</code> if the user cancels the dialog.
 	 */
-	public static Color showDialog(Window owner, String title,Color originalColor,boolean includeOpacity) {
+    public static Color showDialog(Window owner, String title, Color originalColor, boolean includeOpacity) {
+        return showDialog(owner, title, originalColor, includeOpacity, null);
+    }
+
+    public static Color showDialog(Window owner, String title,
+                                   Color originalColor, boolean includeOpacity,
+                                   Consumer<Color> adjustmentListener) {
 		ColorPickerDialog d;
 		if(owner instanceof Frame || owner==null) {
-			d = new ColorPickerDialog( (Frame)owner, originalColor, includeOpacity);
+            d = new ColorPickerDialog((Frame) owner, originalColor, includeOpacity, adjustmentListener);
 		} else if(owner instanceof Dialog){
-			d = new ColorPickerDialog( (Dialog)owner, originalColor, includeOpacity);
+            d = new ColorPickerDialog((Dialog) owner, originalColor, includeOpacity, adjustmentListener);
 		} else {
 			throw new IllegalArgumentException("the owner ("+owner.getClass().getName()+") must be a java.awt.Frame or a java.awt.Dialog");
 		}
@@ -205,7 +203,7 @@ public class ColorPicker extends JPanel {
 			} else if(src==colorPanel) {
 				if(adjustingColorPanel>0)
 					return;
-				
+
 				int mode = getMode();
 				if(mode==HUE || mode==BRI || mode==SAT) {
 					float[] hsb = colorPanel.getHSB();
@@ -220,7 +218,15 @@ public class ColorPicker extends JPanel {
 				
 				int v = slider.getValue();
 				Option option = getSelectedOption();
-				option.setValue(v);
+                try {
+                    // lbalazscs: increasing adjustingSpinners doesn't
+                    // work because the spinners must be triggered
+                    // in order to update the color
+                    sliderUpdatingSpinner = true;
+                    option.setValue(v);
+                } finally {
+                    sliderUpdatingSpinner = false;
+                }
 			} else if(alpha.contains(src)) {
 				if(adjustingOpacity>0)
 					return;
@@ -233,7 +239,7 @@ public class ColorPicker extends JPanel {
 			}
 		}
 	};
-	
+
 	ActionListener actionListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			Object src = e.getSource();
@@ -288,6 +294,9 @@ public class ColorPicker extends JPanel {
 			setRGB(red, green, blue);
 			pos = Math.min(pos, hexField.getText().length());
 			hexField.setCaretPosition(pos);
+            if (adjustmentListener != null && adjustingHexField == 0) {
+                adjustmentListener.accept(getColor());
+            }
 		}
 	}
 	
@@ -430,7 +439,11 @@ public class ColorPicker extends JPanel {
 	 * that's already responding to the user's actions.
 	 */
 	private int adjustingOpacity = 0;
-	
+
+    // lbalazscs: introducing a new flag because
+    // the variables above don't fully work as described.
+    private boolean sliderUpdatingSpinner = false;
+
 	/** The "expert" controls are the controls on the right side
 	 * of this panel: the labels/spinners/radio buttons.
 	 */
@@ -458,20 +471,20 @@ public class ColorPicker extends JPanel {
 	public ColorPicker(boolean showExpertControls,boolean includeOpacity) {
 		super(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		
+
 		Insets normalInsets = new Insets(3,3,3,3);
-		
+
 		JPanel options = new JPanel(new GridBagLayout());
 		c.gridx = 0; c.gridy = 0; c.weightx = 1; c.weighty = 1;
 		c.insets = normalInsets;
 		ButtonGroup bg = new ButtonGroup();
-		
-		//put them in order
+
+        //put them in order
 		Option[] optionsArray = new Option[] {
 				hue, sat, bri, red, green, blue
 		};
-		
-		for(int a = 0; a<optionsArray.length; a++) {
+
+        for (int a = 0; a < optionsArray.length; a++) {
 			if(a==3 || a==6) {
 				c.insets = new Insets(normalInsets.top+10,normalInsets.left,normalInsets.bottom,normalInsets.right);
 			} else {
@@ -506,46 +519,53 @@ public class ColorPicker extends JPanel {
 		c.gridx++;
 		c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
 		options.add(alpha.spinner,c);
-		
-		c.gridx = 0; c.gridy = 0; c.weightx = 1;
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
 		c.weighty = 1; c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.CENTER; c.insets = normalInsets;
 		c.gridwidth = 2;
 		add(colorPanel,c);
-		
-		c.gridwidth = 1;
+
+        c.gridwidth = 1;
 		c.insets = normalInsets;
 		c.gridx+=2; c.weighty = 1; c.gridwidth = 1;
 		c.fill = GridBagConstraints.VERTICAL; c.weightx = 0;
 		add(slider,c);
-		
-		c.gridx++; c.fill = GridBagConstraints.VERTICAL; c.gridheight = GridBagConstraints.REMAINDER;
+
+        c.gridx++;
+        c.fill = GridBagConstraints.VERTICAL;
+        c.gridheight = GridBagConstraints.REMAINDER;
 		c.anchor = GridBagConstraints.CENTER; c.insets = new Insets(0,0,0,0);
 		add(expertControls,c);
-		
-		c.gridx = 0; c.gridheight = 1;
+
+        c.gridx = 0;
+        c.gridheight = 1;
 		c.gridy = 1; c.weightx = 0; c.weighty = 0;
 		c.insets = normalInsets; c.anchor = GridBagConstraints.CENTER;
 		add(opacityLabel,c);
 		c.gridx++; c.gridwidth = 2;
 		c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL;
 		add(opacitySlider,c);
-		
-		c.gridx = 0; c.gridy = 0;
+
+        c.gridx = 0;
+        c.gridy = 0;
 		c.gridheight = 1; c.gridwidth = 1;
-		c.fill = GridBagConstraints.BOTH; 
-		c.weighty = 1; c.anchor = GridBagConstraints.CENTER; 
+        c.fill = GridBagConstraints.BOTH;
+        c.weighty = 1;
+        c.anchor = GridBagConstraints.CENTER;
 		c.weightx = 1;
 		c.insets = new Insets(normalInsets.top,normalInsets.left+8,normalInsets.bottom+10,normalInsets.right+8);
 		expertControls.add(preview,c);
 		c.gridy++; c.weighty = 0; c.anchor = GridBagConstraints.CENTER;
 		c.insets = new Insets(normalInsets.top,normalInsets.left,0,normalInsets.right);
 		expertControls.add(options,c);
-		
-		preview.setOpaque(true);
-		colorPanel.setPreferredSize(new Dimension(expertControls.getPreferredSize().height, 
-												expertControls.getPreferredSize().height));
-		
+
+        preview.setOpaque(true);
+        colorPanel.setPreferredSize(new Dimension(expertControls.getPreferredSize().height,
+                expertControls.getPreferredSize().height));
+
 		slider.addChangeListener(changeListener);
 		colorPanel.addChangeListener(changeListener);
 		slider.setUI(new ColorPickerSliderUI(slider,this));
@@ -553,17 +573,39 @@ public class ColorPicker extends JPanel {
 		setMode(BRI);
 
 		setExpertControlsVisible(showExpertControls);
-		
-		setOpacityVisible(includeOpacity);
-		
-		opacitySlider.addChangeListener(changeListener);
-		
-		setOpacity( 255 );
+
+        setOpacityVisible(includeOpacity);
+
+        opacitySlider.addChangeListener(changeListener);
+
+        setOpacity(255);
 		setOpaque(this,false);
-		
-		preview.setForeground( getColor() );
-	}
-	
+
+        preview.setForeground(getColor());
+    }
+
+    public void setupAdjListener(Consumer<Color> adjustmentListener) {
+        this.adjustmentListener = adjustmentListener;
+        if (adjustmentListener != null) {
+            // notify the listener, but only if the value is not adjusting
+            opacitySlider.addChangeListener(e -> {
+                if (adjustingOpacity == 0 && !opacitySlider.getValueIsAdjusting()) {
+                    adjustmentListener.accept(getColor());
+                }
+            });
+            slider.addChangeListener(e -> {
+                if (adjustingSlider == 0 && !slider.getValueIsAdjusting()) {
+                    adjustmentListener.accept(getColor());
+                }
+            });
+            colorPanel.addChangeListener(e -> {
+                if (adjustingColorPanel == 0 && !colorPanel.isAdjusting()) {
+                    adjustmentListener.accept(getColor());
+                }
+            });
+        }
+    }
+
 	private static void setOpaque(JComponent jc,boolean opaque) {
 		if(jc instanceof JTextField)
 			return;
@@ -956,6 +998,14 @@ public class ColorPicker extends JPanel {
 		public Option(String text,int max) {
 			spinner = new JSpinner(new SpinnerNumberModel(0,0,max,5));
 			spinner.addChangeListener(changeListener);
+            spinner.addChangeListener(e -> {
+                if (adjustmentListener != null
+                        && adjustingSpinners == 0
+                        && !sliderUpdatingSpinner
+                        && adjustingOpacity == 0) {
+                    adjustmentListener.accept(getColor());
+                }
+            });
 			
 			/*this tries out Tim Boudreaux's new slider UI.
 			* It's a good UI, but I think for the ColorPicker

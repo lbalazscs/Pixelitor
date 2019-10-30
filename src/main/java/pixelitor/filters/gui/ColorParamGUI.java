@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,8 @@
 
 package pixelitor.filters.gui;
 
-import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.ColorUtils;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
@@ -61,14 +59,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private void showColorDialog() {
 //        Color color = JColorChooser.showDialog(this, "Select Color", model.getColor());
 
-        // TODO why is PixelitorWindow the parent? What about GlobalKeyboardWatch.setDialogActive?
-        // see ColorUtils.showColorPickerDialog
-        Color color = ColorPicker.showDialog(PixelitorWindow.getInstance(),
-                "Select " + model.getName(), model.getColor(), model.allowOpacity());
-
-        if (color != null) { // ok was pressed
-            updateColor(color);
-        }
+        ColorUtils.selectColorWithDialog(this, model.getName(),
+                model.getColor(), model.allowOpacity(), this::updateColor);
     }
 
     private void updateColor(Color color) {
@@ -93,5 +85,11 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         colorSwatch.setToolTipText(tip);
 
 //        button.setToolTipText(tip);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled); // so that isEnabled() works
+        colorSwatch.setEnabled(enabled);
     }
 }

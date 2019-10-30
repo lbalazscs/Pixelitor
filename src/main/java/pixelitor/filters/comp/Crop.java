@@ -36,7 +36,6 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
@@ -216,8 +215,7 @@ public class Crop implements CompAction {
             return;
         }
 
-        Shape selShape = sel.getShape();
-        if (selShape instanceof Rectangle2D) {
+        if (sel.isRectangular()) {
             rectangularCrop(comp, sel, false);
         } else {
             selectionCropWithQuestion(comp, sel);

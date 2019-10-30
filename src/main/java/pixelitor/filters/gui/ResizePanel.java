@@ -108,7 +108,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         verticalBox.add(p);
 
         JPanel p2 = new JPanel();
-        constrainProportionsCB = new JCheckBox("Constrain Proportions");
+        constrainProportionsCB = new JCheckBox("Keep Proportions");
         constrainProportionsCB.setSelected(true);
         p2.add(constrainProportionsCB);
         p2.setLayout(new FlowLayout(FlowLayout.LEFT));

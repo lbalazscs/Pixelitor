@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -63,7 +63,10 @@ public class ParamSetState implements Iterable<ParamState> {
             // each ParamState is interpolated independently
             ParamState state = states.get(i);
             ParamState endParamState = endState.getParamState(i);
+
+            @SuppressWarnings("unchecked")
             ParamState interpolated = state.interpolate(endParamState, progress);
+
             interpolatedStates.add(interpolated);
         }
         return new ParamSetState(interpolatedStates);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package pixelitor.tools.gradient;
 
+import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
@@ -29,6 +31,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -44,7 +47,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * all vector graphics.
  */
 public class Gradient {
-    private final ImDrag imDrag;
+    private ImDrag imDrag;
     private final GradientType type;
     private final CycleMethod cycleMethod;
     private final GradientColorType colorType;
@@ -80,29 +83,34 @@ public class Gradient {
 
     public void drawOn(Drawable dr) {
         Graphics2D g;
-        int width;
-        int height;
+        Composition comp = dr.getComp();
+        Canvas canvas = comp.getCanvas();
+        int canvasWidth = canvas.getImWidth();
+        int canvasHeight = canvas.getImHeight();
+        boolean smallImage; // the temporary image might be smaller than the canvas, if there is selection
         if (dr instanceof LayerMask) {
             BufferedImage subImage = dr.getCanvasSizedSubImage();
             g = subImage.createGraphics();
-            width = subImage.getWidth();
-            height = subImage.getHeight();
+            assert canvasWidth == subImage.getWidth();
+            assert canvasHeight == subImage.getHeight();
+            smallImage = false;
         } else {
             Composite composite = blendingMode.getComposite(opacity);
-            TmpDrawingLayer tmpDrawingLayer = dr.createTmpDrawingLayer(composite);
+            TmpDrawingLayer tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
-            width = tmpDrawingLayer.getWidth();
-            height = tmpDrawingLayer.getHeight();
+            smallImage = tmpDrawingLayer.hasSmallImage();
+            imDrag = tmpDrawingLayer.translateDrag(imDrag);
         }
-        dr.getComp().applySelectionClipping(g);
 
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-
         Paint paint = type.createPaint(imDrag, colors, cycleMethod);
-
         g.setPaint(paint);
-
-        g.fillRect(0, 0, width, height);
+        if (smallImage) {
+            Rectangle bounds = comp.getSelection().getShapeBounds(0);
+            g.fillRect(0, 0, bounds.width, bounds.height);
+        } else {
+            g.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
 
         g.dispose();
         dr.mergeTmpDrawingLayerDown();

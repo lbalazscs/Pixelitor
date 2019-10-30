@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,8 @@
 
 package pixelitor.filters.painters;
 
-import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.ColorUtils;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 
 import java.awt.Color;
@@ -47,17 +45,13 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
         ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
                 this::getInnerColor, c -> setInnerColor(c, true));
 
-        gbh.addLabelWithControl("Inner Color:", innerColorSwatch);
+        gbh.addLabelWithControlNoStretch("Inner Color:", innerColorSwatch);
     }
 
     private void innerColorSwatchClicked() {
-        // TODO check owner
-        Color selectedColor = ColorPicker.showDialog(
-                PixelitorWindow.getInstance(), "Select Color",
-                this.innerColor, true);
-        if (selectedColor != null) { // ok was pressed
-            setInnerColor(selectedColor, true);
-        }
+        ColorUtils.selectColorWithDialog(this, "Inner Color",
+                innerColor, true,
+                color -> setInnerColor(color, true));
     }
 
     public void setInnerColor(Color selectedColor, boolean trigger) {

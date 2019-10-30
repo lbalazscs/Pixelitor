@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,10 +79,12 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         addFileSelector(tfLayerUI, gbh);
     }
 
+    @SuppressWarnings("unchecked")
     private void addOutputTypeSelector(GridBagHelper gbh) {
         //noinspection unchecked
         EnumComboBoxModel<TweenOutputType> model =
                 new EnumComboBoxModel(TweenOutputType.class);
+
         outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
@@ -111,6 +113,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         gbh.addLabelWithControl("Number of Frames:", numFramesLabel);
     }
 
+    @SuppressWarnings("unchecked")
     private void addInterpolationSelector(GridBagHelper gbh) {
         EnumComboBoxModel<Interpolation> ipCBM
                 = new EnumComboBoxModel<>(Interpolation.class);

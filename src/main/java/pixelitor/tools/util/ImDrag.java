@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,26 +81,20 @@ public class ImDrag {
             }
         }
         return drag;
-//
-//
-//        int halfWidth = width / 2;
-//        int halfHeight = height / 2;
-//
-//        int x1 = Rnd.nextInt(halfWidth);
-//        int x2 = halfWidth + Rnd.nextInt(halfWidth);
-//        int y1 = Rnd.nextInt(halfHeight);
-//        int y2 = halfHeight + Rnd.nextInt(halfHeight);
-//
-//        return new ImDrag(x1, y1, x2, y2);
     }
 
-    public ImDrag createTransformed(AffineTransform at) {
-        // TODO can be optimized?
+    public ImDrag transform(AffineTransform at) {
         Point2D start = new Point2D.Double(startX, startY);
         Point2D end = new Point2D.Double(endX, endY);
         at.transform(start, start);
         at.transform(end, end);
         return new ImDrag(start.getX(), start.getY(), end.getX(), end.getY());
+    }
+
+    public ImDrag translate(double dx, double dy) {
+        return new ImDrag(
+                startX + dx, startY + dy,
+                endX + dx, endY + dy);
     }
 
     public double getStartX() {

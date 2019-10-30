@@ -2489,8 +2489,8 @@ public class AssertJSwingTest {
 
         EDT.assertThereIsNoSelection();
         assertThat(EDT.active(Composition::getCanvas))
-                .hasImWidth((int) selWidth)
-                .hasImHeight((int) selHeight);
+                .hasImWidth((int) (selWidth + 0.5))
+                .hasImHeight((int) (selHeight + 0.5));
 
         keyboard.undo("Crop");
         EDT.assertThereIsSelection();

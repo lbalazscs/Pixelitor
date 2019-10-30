@@ -77,21 +77,27 @@ public class ShapeSettings {
     }
 
     public JComboBox<TwoPointPaintType> createFillPaintCombo() {
+        @SuppressWarnings("unchecked")
         JComboBox<TwoPointPaintType> cb = new JComboBox<>(fillPaintModel);
+
         cb.setMaximumRowCount(fillPaintModel.getSize());
         cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_FILL));
         return cb;
     }
 
     public JComboBox<TwoPointPaintType> createStrokePaintCombo() {
+        @SuppressWarnings("unchecked")
         JComboBox<TwoPointPaintType> cb = new JComboBox<>(strokePaintModel);
+
         cb.setMaximumRowCount(strokePaintModel.getSize());
         cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_STROKE));
         return cb;
     }
 
     public JComboBox<ShapeType> createShapeTypeCombo() {
+        @SuppressWarnings("unchecked")
         JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
+
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(typeModel.getSize());
         shapeTypeCB.addActionListener(e -> guiChanged(CHANGE_SHAPE_TYPE));

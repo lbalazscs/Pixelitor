@@ -31,6 +31,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 /** This wraps a <code>ColorPicker</code> in a simple dialog with "OK" and "Cancel" options.
  * <P>(This object is used by the static calls in <code>ColorPicker</code> to show a dialog.)
@@ -53,18 +54,18 @@ class ColorPickerDialog extends JDialog {
 		}
 	};
 	DialogFooter footer;
-	
-	public ColorPickerDialog(Frame owner, Color color,boolean includeOpacity) {
-		super(owner);
-		initialize(owner,color,includeOpacity);
-	}
 
-	public ColorPickerDialog(Dialog owner, Color color,boolean includeOpacity) {
+    public ColorPickerDialog(Frame owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
 		super(owner);
-		initialize(owner,color,includeOpacity);
-	}
-	
-	private void initialize(Component owner,Color color,boolean includeOpacity) {
+        initialize(owner, color, includeOpacity, adjustmentListener);
+    }
+
+    public ColorPickerDialog(Dialog owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
+		super(owner);
+        initialize(owner, color, includeOpacity, adjustmentListener);
+    }
+
+    private void initialize(Component owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
 		cp = new ColorPicker(true,includeOpacity);
 		setModal(true);
 		setResizable(false);
@@ -87,6 +88,8 @@ class ColorPickerDialog extends JDialog {
         setLocationRelativeTo(owner);
 		
 		footer.getButton(DialogFooter.OK_OPTION).addActionListener(okListener);
+
+        cp.setupAdjListener(adjustmentListener);
 	}
 	
 	/** @return the color committed when the user clicked 'OK'.  Note this returns <code>null</code>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class Colorize extends ParametrizedFilter {
     private final RangeParam adjustBrightness = new RangeParam(
             "Adjust Brightness", -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
-            "Color:", new Color(255, 207, 119), NO_OPACITY);
+            "Color", new Color(255, 207, 119), NO_OPACITY);
     private final RangeParam opacityParam = new RangeParam(
             "Amount (%)", 0, 100, 100);
 

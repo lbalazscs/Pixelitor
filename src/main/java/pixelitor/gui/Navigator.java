@@ -17,9 +17,9 @@
 
 package pixelitor.gui;
 
-import com.bric.swing.ColorPicker;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
+import pixelitor.colors.ColorUtils;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomLevel;
@@ -112,14 +112,16 @@ public class Navigator extends JComponent
         popup.add(new AbstractAction("View Box Color...") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Window owner = SwingUtilities.getWindowAncestor(Navigator.this);
-                Color newColor = ColorPicker.showDialog(owner, "View Box Color", viewBoxColor, true);
-                if (newColor != null) { // something was chosen
-                    viewBoxColor = newColor;
-                    repaint();
-                }
+                ColorUtils.selectColorWithDialog(Navigator.this,
+                        "View Box Color", viewBoxColor, true,
+                        Navigator.this::setNewViewBoxColor);
             }
         });
+    }
+
+    private void setNewViewBoxColor(Color newColor) {
+        viewBoxColor = newColor;
+        repaint();
     }
 
     private void setNavigatorSizeFromZoom(ZoomLevel zoom) {

@@ -20,6 +20,7 @@ package pixelitor.filters.curves;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.layers.Drawable;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -30,7 +31,6 @@ import java.awt.FlowLayout;
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesGUI extends FilterGUI {
-
     public ToneCurvesGUI(Filter filter, Drawable dr) {
         super(filter, dr);
 
@@ -44,16 +44,16 @@ public class ToneCurvesGUI extends FilterGUI {
         JPanel chartPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         chartPanel.add(curvesPanel);
 
-        JComboBox curveTypeSelect = new JComboBox<>(ToneCurveType.values());
+        JComboBox<ToneCurveType> curveTypeSelect = new JComboBox<>(ToneCurveType.values());
         curveTypeSelect.setMaximumRowCount(curveTypeSelect.getItemCount());
         curveTypeSelect.setSelectedItem(ToneCurveType.RGB);
         curveTypeSelect.addActionListener(e -> curvesPanel.setActiveCurve(
-            (ToneCurveType) curveTypeSelect.getSelectedItem()));
+                (ToneCurveType) curveTypeSelect.getSelectedItem()));
 
-        JButton resetChannel = new JButton("Reset channel");
+        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
         resetChannel.addActionListener(e -> curvesPanel.resetActiveCurve());
 
-        JButton resetAllBtn = new JButton("Reset All");
+        JButton resetAllBtn = new JButton("Reset All", Icons.getWestArrowIcon());
         resetAllBtn.addActionListener(e -> curvesPanel.reset());
 
         JPanel channelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));

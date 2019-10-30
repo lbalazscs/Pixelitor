@@ -116,6 +116,7 @@ public class CompositionIOTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testReadWritePXC() {
         // read and test
         String[] fileNames = {
@@ -170,6 +171,7 @@ public class CompositionIOTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testReadWriteORA() throws IOException {
         Consumer<Layer> extraCheck = secondLayer ->
                 assertThat(secondLayer)

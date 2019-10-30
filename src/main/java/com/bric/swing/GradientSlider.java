@@ -293,9 +293,16 @@ public class GradientSlider extends MultiThumbSlider {
 		Frame frame = getFrame();
 		
 		boolean includeOpacity = MultiThumbSliderUI.getProperty(this,"GradientSlider.colorPickerIncludesOpacity","true").equals("true");
-		colors[i] = ColorPicker.showDialog(frame, colors[i], includeOpacity);
-		if(colors[i]!=null)
-			setValues(getThumbPositions(), colors);
+        Color prevColor = colors[i];
+        colors[i] = ColorPicker.showDialog(frame, colors[i], includeOpacity,
+                color -> {
+                    colors[i] = color;
+                    setValues(getThumbPositions(), colors);
+                });
+        if (colors[i] == null) {  // canceled
+            colors[i] = prevColor;
+            setValues(getThumbPositions(), colors);
+        }
 		return true;
 	}
 	

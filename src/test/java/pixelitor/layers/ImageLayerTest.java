@@ -295,7 +295,7 @@ public class ImageLayerTest {
     @Test
     public void test_TmpDrawingLayer() {
         TmpDrawingLayer tmpDrawingLayer
-                = layer.createTmpDrawingLayer(AlphaComposite.SrcOver);
+                = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpDrawingLayer).isNotNull();
         assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getImWidth());
         assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getImHeight());

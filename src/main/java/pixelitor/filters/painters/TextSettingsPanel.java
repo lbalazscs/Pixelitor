@@ -84,7 +84,7 @@ public class TextSettingsPanel extends FilterGUI
     // called for image layers
     public TextSettingsPanel(TextFilter textFilter, Drawable dr) {
         super(textFilter, dr);
-        createGUI(null);
+        createGUI(null, dr.getComp().getCanvasImHeight());
 
         if(!textTF.getText().isEmpty()) {
             // a "last text" was set
@@ -96,18 +96,20 @@ public class TextSettingsPanel extends FilterGUI
     public TextSettingsPanel(TextLayer textLayer) {
         super(null, null);
         this.textLayer = textLayer;
-        createGUI(textLayer.getSettings());
+        createGUI(textLayer.getSettings(), textLayer.getComp().getCanvasImHeight());
 
         // make sure that the text layer has a settings object
         // even if the user presses OK without making any adjustments
         paramAdjusted();
+
+        textTF.selectAll();
     }
 
-    private void createGUI(TextSettings settings) {
+    private void createGUI(TextSettings settings, int canvasHeight) {
         setLayout(new VerticalLayout());
 
         add(createTextPanel(settings));
-        add(createFontPanel(settings));
+        add(createFontPanel(settings, canvasHeight));
 
         createEffectsPanel(settings);
         add(effectsPanel);
@@ -138,21 +140,21 @@ public class TextSettingsPanel extends FilterGUI
             defaultRotation = settings.getRotation();
         }
         rotationParam = new AngleParam("", defaultRotation);
-
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
-        vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
         hAlignmentCB = new JComboBox<>(HorizontalAlignment.values());
         if (settings != null) {
-            vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
             hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
         }
-
         gbh.addLabel("Horizontal Alignment:", 0, 2);
         hAlignmentCB.addActionListener(this);
         gbh.addControl(hAlignmentCB);
 
+        vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
+        if (settings != null) {
+            vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
+        }
         gbh.addLabel("Vertical Alignment:", 0, 3);
         vAlignmentCB.addActionListener(this);
         gbh.addControl(vAlignmentCB);
@@ -197,17 +199,32 @@ public class TextSettingsPanel extends FilterGUI
         });
     }
 
-    private JPanel createFontPanel(TextSettings settings) {
+    private JPanel createFontPanel(TextSettings settings, int canvasHeight) {
         JPanel fontPanel = new JPanel();
         fontPanel.setBorder(createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
 
         GridBagHelper gbh = new GridBagHelper(fontPanel);
 
-        gbh.addLabel("Font Size:", 0, 0);
-        int defaultFontSize = settings == null ? 120 : settings.getFont().getSize();
+        int maxFontSize = 1000;
+        int defaultFontSize;
+        if (settings == null) {
+            defaultFontSize = (int) (canvasHeight * 0.2);
+            if (canvasHeight > maxFontSize) {
+                maxFontSize = canvasHeight;
+            }
+        } else {
+            defaultFontSize = settings.getFont().getSize();
+            if (maxFontSize < defaultFontSize) {
+                // can get here if the canvas is downsized
+                // after the text later creation
+                maxFontSize = defaultFontSize;
+            }
+        }
 
-        RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, 1000);
+        gbh.addLabel("Font Size:", 0, 0);
+
+        RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, maxFontSize);
         fontSizeSlider = SliderSpinner.simpleFrom(fontSizeParam);
         fontSizeSlider.setSliderName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
@@ -232,10 +249,7 @@ public class TextSettingsPanel extends FilterGUI
             Font font = settings.getFont();
             defaultBold = font.isBold();
             defaultItalic = font.isItalic();
-            if (font.hasLayoutAttributes()) {
-                Map<TextAttribute, ?> attributes = font.getAttributes();
-                this.map = (Map<TextAttribute, Object>) attributes;
-            }
+            setAttributeMapFromFontSettings(font);
         }
 
         gbh.addLabel("Bold:", 0, 2);
@@ -251,6 +265,14 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addControl(showAdvancedSettingsButton);
 
         return fontPanel;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setAttributeMapFromFontSettings(Font font) {
+        if (font.hasLayoutAttributes()) {
+            Map<TextAttribute, ?> attributes = font.getAttributes();
+            this.map = (Map<TextAttribute, Object>) attributes;
+        }
     }
 
     private void onAdvancedSettingsClick() {

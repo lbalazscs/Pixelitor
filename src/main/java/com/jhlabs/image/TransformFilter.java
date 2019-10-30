@@ -260,6 +260,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         int outHeight = height;
 
         pt = createProgressTracker(outHeight);
+
+        @SuppressWarnings("unchecked")
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {
@@ -299,6 +301,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
 //		int index = 0;
 
         pt = createProgressTracker(outHeight);
+
+        @SuppressWarnings("unchecked")
         Future<int[]>[] resultLines = new Future[outHeight];
 
         for (int y = 0; y < outHeight; y++) {

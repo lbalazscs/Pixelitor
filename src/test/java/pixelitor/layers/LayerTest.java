@@ -127,6 +127,7 @@ public class LayerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void test_duplicate() {
         Layer copy = layer.duplicate(false);
         assertThat(copy)

@@ -109,7 +109,7 @@ public class View extends JComponent
         this.canvas = comp.getCanvas();
         comp.setView(this);
 
-        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
+        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, true);
         setZoom(fitZoom, null);
 
         layersPanel = new LayersPanel();

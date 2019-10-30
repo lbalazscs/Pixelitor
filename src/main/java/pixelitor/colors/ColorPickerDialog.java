@@ -17,12 +17,8 @@
 
 package pixelitor.colors;
 
-import com.bric.swing.ColorPicker;
 import com.bric.swing.ColorSwatch;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
-
-import java.awt.Color;
 
 /**
  * Color picker dialog helper class, to make using {@link ColorSwatch} easier.
@@ -39,17 +35,12 @@ public class ColorPickerDialog {
     }
 
     private void showColorDialog() {
-        Color color = ColorPicker.showDialog(
-            PixelitorWindow.getInstance(),
-            "Select Color",
-            colorSwatch.getForeground(),
-            false
+        ColorUtils.selectColorWithDialog(colorSwatch, "Select Color",
+                colorSwatch.getForeground(), false,
+                color -> {
+                    colorSwatch.setForeground(color);
+                    action.colorChanged(color);
+                }
         );
-
-        // ok was pressed
-        if (color != null) {
-            colorSwatch.setForeground(color);
-            this.action.colorChanged(color);
-        }
     }
 }
