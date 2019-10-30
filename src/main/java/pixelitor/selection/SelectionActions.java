@@ -22,6 +22,7 @@ import pixelitor.filters.comp.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.history.History;
@@ -31,6 +32,7 @@ import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
+import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Shapes;
 
 import javax.swing.*;
@@ -46,6 +48,7 @@ import static pixelitor.tools.pen.PenToolMode.EDIT;
  * only when there is a selection on the active composition.
  */
 public final class SelectionActions {
+    private static Shape copiedSelShape = null;
 
     private static final Action crop = new AbstractAction("Crop Selection") {
         @Override
@@ -77,6 +80,36 @@ public final class SelectionActions {
             selectionToPath(comp, true);
         }
     };
+
+    private static final Action copySel = new MenuAction("Copy Selection") {
+        @Override
+        public void onClick() {
+            copiedSelShape = getActiveCompOrNull().getSelectionShape();
+            pasteSel.setEnabled(true);
+        }
+    };
+
+    private static final Action pasteSel = new MenuAction("Paste Selection") {
+        @Override
+        public void onClick() {
+            getActiveCompOrNull().changeSelectionFromShape(copiedSelShape);
+        }
+    };
+
+    static {
+        pasteSel.setEnabled(false);
+        OpenComps.addActivationListener(new CompActivationListener() {
+            @Override
+            public void compActivated(View oldView, View newView) {
+                pasteSel.setEnabled(copiedSelShape != null);
+            }
+
+            @Override
+            public void allCompsClosed() {
+                pasteSel.setEnabled(false);
+            }
+        });
+    }
 
     public static void selectionToPath(Composition comp, boolean addToHistory) {
         Shape shape = comp.getSelection().getShape();
@@ -152,6 +185,7 @@ public final class SelectionActions {
         showHide.setEnabled(b);
         modify.setEnabled(b);
         convertToPath.setEnabled(b);
+        copySel.setEnabled(b);
     }
 
     public static boolean areEnabled() {
@@ -182,4 +216,11 @@ public final class SelectionActions {
         return modify;
     }
 
+    public static Action getCopy() {
+        return copySel;
+    }
+
+    public static Action getPaste() {
+        return pasteSel;
+    }
 }

@@ -986,8 +986,8 @@ public class Composition implements Serializable {
 
         if (selection != null) {
             int answer = Dialogs.showYesNoCancelDialog("Existing Selection",
-                    "<html>There is already a selection." +
-                            "<br>How do you want to combine new selection with the existing one?",
+                    "<html>There is already a selection on " + getName() +
+                            ".<br>How do you want to combine new selection with the existing one?",
                     new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
                     JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {

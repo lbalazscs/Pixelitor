@@ -600,13 +600,19 @@ public class MenuBar extends JMenuBar {
                 .withKey(CTRL_H)
                 .add();
 
+        selectMenu.addSeparator();
+
         selectMenu.buildAction(SelectionActions.getInvert())
                 .enableIf(ACTION_ENABLED)
                 .withKey(CTRL_SHIFT_I)
                 .add();
-        selectMenu.buildAction(SelectionActions.getModify())
-                .enableIf(ACTION_ENABLED)
-                .add();
+
+        selectMenu.addSelfControlledAction(SelectionActions.getModify());
+
+        selectMenu.addSeparator();
+
+        selectMenu.addSelfControlledAction(SelectionActions.getCopy());
+        selectMenu.addSelfControlledAction(SelectionActions.getPaste());
 
         return selectMenu;
     }
