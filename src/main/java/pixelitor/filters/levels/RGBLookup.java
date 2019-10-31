@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,28 +29,28 @@ import java.awt.image.LookupTable;
 public class RGBLookup {
     private static final int ARRAY_LENGTH = 256;
 
-    private short[] redMap;
-    private short[] greenMap;
-    private short[] blueMap;
+    private short[] redLUT;
+    private short[] greenLUT;
+    private short[] blueLUT;
 
     public RGBLookup() {
         allocateArrays();
     }
 
-    public RGBLookup(short[] redMap, short[] greenMap, short[] blueMap) {
-        this.redMap = redMap;
-        this.greenMap = greenMap;
-        this.blueMap = blueMap;
+    public RGBLookup(short[] redLUT, short[] greenLUT, short[] blueLUT) {
+        this.redLUT = redLUT;
+        this.greenLUT = greenLUT;
+        this.blueLUT = blueLUT;
     }
 
     public RGBLookup(GrayScaleLookup rgb) {
         allocateArrays();
 
         for (short i = 0; i < ARRAY_LENGTH; i++) {
-            short val = rgb.mapValue(i);
-            redMap[i] = val;
-            greenMap[i] = val;
-            blueMap[i] = val;
+            short val = rgb.map(i);
+            redLUT[i] = val;
+            greenLUT[i] = val;
+            blueLUT[i] = val;
         }
     }
 
@@ -65,47 +65,47 @@ public class RGBLookup {
         allocateArrays();
 
         for (short i = 0; i < ARRAY_LENGTH; i++) {
-            short rgbMapped = rgb.mapValue(i);
+            short rgbMapped = rgb.map(i);
 
-            redMap[i] = rgbMapped;
-            redMap[i] = r.mapValue(redMap[i]);
-            redMap[i] = rg.mapValue(redMap[i]);
-            redMap[i] = rb.mapValue(redMap[i]);
+            redLUT[i] = rgbMapped;
+            redLUT[i] = r.map(redLUT[i]);
+            redLUT[i] = rg.map(redLUT[i]);
+            redLUT[i] = rb.map(redLUT[i]);
 
-            greenMap[i] = rgbMapped;
-            greenMap[i] = g.mapValue(greenMap[i]);
-            greenMap[i] = rg.mapValue(greenMap[i]);
-            greenMap[i] = gb.mapValue(greenMap[i]);
+            greenLUT[i] = rgbMapped;
+            greenLUT[i] = g.map(greenLUT[i]);
+            greenLUT[i] = rg.map(greenLUT[i]);
+            greenLUT[i] = gb.map(greenLUT[i]);
 
-            blueMap[i] = rgbMapped;
-            blueMap[i] = b.mapValue(blueMap[i]);
-            blueMap[i] = rb.mapValue(blueMap[i]);
-            blueMap[i] = gb.mapValue(blueMap[i]);
+            blueLUT[i] = rgbMapped;
+            blueLUT[i] = b.map(blueLUT[i]);
+            blueLUT[i] = rb.map(blueLUT[i]);
+            blueLUT[i] = gb.map(blueLUT[i]);
         }
     }
 
     private void allocateArrays() {
-        redMap = new short[ARRAY_LENGTH];
-        greenMap = new short[ARRAY_LENGTH];
-        blueMap = new short[ARRAY_LENGTH];
+        redLUT = new short[ARRAY_LENGTH];
+        greenLUT = new short[ARRAY_LENGTH];
+        blueLUT = new short[ARRAY_LENGTH];
     }
 
     public LookupTable getLookupOp() {
-        return LookupFactory.createLookupFrom3Arrays(redMap, greenMap, blueMap);
+        return LookupFactory.createLookupFrom3Arrays(redLUT, greenLUT, blueLUT);
     }
 
     public void initFromPosterize(int numRedLevels, int numGreenLevels, int numBlueLevels) {
         for (int i = 0; i < ARRAY_LENGTH; i++) {
             int mapping = (ARRAY_LENGTH - 1) * (numRedLevels * i / ARRAY_LENGTH) / (numRedLevels - 1);
-            redMap[i] = (short) mapping;
+            redLUT[i] = (short) mapping;
         }
         for (int i = 0; i < ARRAY_LENGTH; i++) {
             int mapping = (ARRAY_LENGTH - 1) * (numGreenLevels * i / ARRAY_LENGTH) / (numGreenLevels - 1);
-            greenMap[i] = (short) mapping;
+            greenLUT[i] = (short) mapping;
         }
         for (int i = 0; i < ARRAY_LENGTH; i++) {
             int mapping = (ARRAY_LENGTH - 1) * (numBlueLevels * i / ARRAY_LENGTH) / (numBlueLevels - 1);
-            blueMap[i] = (short) mapping;
+            blueLUT[i] = (short) mapping;
         }
     }
 
@@ -116,9 +116,9 @@ public class RGBLookup {
         int g = (rgb >>> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        r = redMap[r];
-        g = greenMap[g];
-        b = blueMap[b];
+        r = redLUT[r];
+        g = greenLUT[g];
+        b = blueLUT[b];
 
         rgb = (a << 24) | (r << 16) | (g << 8) | b;
 
@@ -127,16 +127,16 @@ public class RGBLookup {
 
     @VisibleForTesting
     int mapRed(int input) {
-        return redMap[input];
+        return redLUT[input];
     }
 
     @VisibleForTesting
     int mapGreen(int input) {
-        return greenMap[input];
+        return greenLUT[input];
     }
 
     @VisibleForTesting
     int mapBlue(int input) {
-        return blueMap[input];
+        return blueLUT[input];
     }
 }

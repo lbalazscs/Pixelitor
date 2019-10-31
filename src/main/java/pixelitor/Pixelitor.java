@@ -202,7 +202,8 @@ public class Pixelitor {
         if (!unsavedComps.isEmpty()) {
             String msg;
             if (unsavedComps.size() == 1) {
-                msg = format("There are unsaved changes in %s. Are you sure you want to exit?",
+                msg = format("<html>There are unsaved changes in <b>%s</b>." +
+                                "<br>Are you sure you want to exit?",
                         unsavedComps.get(0).getName());
             } else {
                 msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
@@ -212,7 +213,7 @@ public class Pixelitor {
                 }
             }
 
-            if (Dialogs.showYesNoWarningDialog(pw, "Confirmation", msg)) {
+            if (Dialogs.showYesNoWarningDialog(pw, "Unsaved changes", msg)) {
                 pw.setVisible(false);
                 AppPreferences.savePrefsAndExit();
             }

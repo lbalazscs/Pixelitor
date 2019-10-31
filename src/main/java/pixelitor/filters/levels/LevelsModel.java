@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -99,10 +99,10 @@ public class LevelsModel {
     public ParamSet getParamSet() {
         List<FilterParam> params = new ArrayList<>();
         for (OneChannelLevelsModel subModel : subModels) {
-            params.add(subModel.getInputBlack());
-            params.add(subModel.getInputWhite());
-            params.add(subModel.getOutputBlack());
-            params.add(subModel.getOutputWhite());
+            params.add(subModel.getInputDark());
+            params.add(subModel.getInputLight());
+            params.add(subModel.getOutputDark());
+            params.add(subModel.getOutputLight());
         }
 
         return new ParamSet(params);

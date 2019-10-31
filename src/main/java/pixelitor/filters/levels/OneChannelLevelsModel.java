@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,15 +27,17 @@ import java.awt.Color;
  * for one channel in the Levels filter
  */
 public class OneChannelLevelsModel implements ParamAdjustmentListener {
-    private static final int BLACK_DEFAULT = 0;
-    private static final int WHITE_DEFAULT = 255;
+    public static final int MAX_VALUE = 255;
+    public static final int MIN_VALUE = 0;
+    private static final int DARK_DEFAULT = MIN_VALUE;
+    private static final int LIGHT_DEFAULT = MAX_VALUE;
 
     private GrayScaleLookup lookup = GrayScaleLookup.getIdentity();
 
-    private final RangeParam inputBlack;
-    private final RangeParam inputWhite;
-    private final RangeParam outputBlack;
-    private final RangeParam outputWhite;
+    private final RangeParam inputDark;
+    private final RangeParam inputLight;
+    private final RangeParam outputDark;
+    private final RangeParam outputLight;
     private final EditedChannelsType type;
     private final LevelsModel bigModel;
 
@@ -43,39 +45,66 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
         this.type = type;
         this.bigModel = bigModel;
 
-        inputBlack = new RangeParam("Input Dark", 0, BLACK_DEFAULT, 254);
-        inputWhite = new RangeParam("Input Light", 1, WHITE_DEFAULT, 255);
-        outputBlack = new RangeParam("Output Dark", 0, BLACK_DEFAULT, 254);
-        outputWhite = new RangeParam("Output Light", 1, WHITE_DEFAULT, 255);
+        inputDark = new RangeParam("Input Dark", MIN_VALUE, DARK_DEFAULT, MAX_VALUE);
+        inputLight = new RangeParam("Input Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
+        outputDark = new RangeParam("Output Dark", MIN_VALUE, DARK_DEFAULT, MAX_VALUE);
+        outputLight = new RangeParam("Output Light", MIN_VALUE, LIGHT_DEFAULT, MAX_VALUE);
 
-        inputBlack.setAdjustmentListener(this);
-        inputWhite.setAdjustmentListener(this);
-        outputBlack.setAdjustmentListener(this);
-        outputWhite.setAdjustmentListener(this);
+        ensureInputValueOrdering();
+
+        inputDark.setAdjustmentListener(this);
+        inputLight.setAdjustmentListener(this);
+        outputDark.setAdjustmentListener(this);
+        outputLight.setAdjustmentListener(this);
     }
 
-    public Color getBackColor() {
-        return type.getBackColor();
+    private void ensureInputValueOrdering() {
+        inputDark.addChangeListener(e -> {
+            int darkValue = inputDark.getValue();
+            int lightValue = inputLight.getValue();
+            if (lightValue <= darkValue) {
+                if (darkValue < MAX_VALUE) {
+                    inputLight.setValueNoTrigger(darkValue + 1);
+                } else {
+                    inputLight.setValueNoTrigger(MAX_VALUE);
+                }
+            }
+        });
+        inputLight.addChangeListener(e -> {
+            int darkValue = inputDark.getValue();
+            int lightValue = inputLight.getValue();
+            if (lightValue <= darkValue) {
+                if (lightValue > MIN_VALUE) {
+                    inputDark.setValueNoTrigger(lightValue - 1);
+                } else {
+                    inputDark.setValueNoTrigger(MIN_VALUE);
+                }
+            }
+        });
     }
 
-    public Color getWhiteColor() {
-        return type.getWhiteColor();
+    public Color getDarkColor() {
+        return type.getDarkColor();
     }
 
-    public RangeParam getInputBlack() {
-        return inputBlack;
+    public Color getLightColor() {
+        return type.getLightColor();
     }
 
-    public RangeParam getInputWhite() {
-        return inputWhite;
+    public RangeParam getInputDark() {
+        return inputDark;
     }
 
-    public RangeParam getOutputBlack() {
-        return outputBlack;
+    public RangeParam getInputLight() {
+        return inputLight;
     }
 
-    public RangeParam getOutputWhite() {
-        return outputWhite;
+    public RangeParam getOutputDark() {
+        return outputDark;
+    }
+
+    public RangeParam getOutputLight() {
+        return outputLight;
     }
 
     public String getName() {
@@ -95,17 +124,17 @@ public class OneChannelLevelsModel implements ParamAdjustmentListener {
 
     private void updateAdjustment() {
         lookup = new GrayScaleLookup(
-                inputBlack.getValue(),
-                inputWhite.getValue(),
-                outputBlack.getValue(),
-                outputWhite.getValue());
+                inputDark.getValue(),
+                inputLight.getValue(),
+                outputDark.getValue(),
+                outputLight.getValue());
     }
 
     public void resetToDefaults() {
-        inputBlack.reset(false);
-        inputWhite.reset(false);
-        outputBlack.reset(false);
-        outputWhite.reset(false);
+        inputDark.reset(false);
+        inputLight.reset(false);
+        outputDark.reset(false);
+        outputLight.reset(false);
 
         updateAdjustment();
     }

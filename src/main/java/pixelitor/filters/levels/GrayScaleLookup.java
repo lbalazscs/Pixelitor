@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,20 +26,32 @@ import com.jhlabs.image.PixelUtils;
 public class GrayScaleLookup {
     private static final GrayScaleLookup IDENTITY = new GrayScaleLookup(
             0, 255, 0, 255);
-    private final short[] mapping = new short[256];
+    private final short[] lut = new short[256];
 
-    public GrayScaleLookup(int inputBlackValue, int inputWhiteValue,
-                           int outputBlackValue, int outputWhiteValue) {
-        for (int i = 0; i < mapping.length; i++) {
-            double multiplier = (double) (outputWhiteValue - outputBlackValue)
-                / (double) (inputWhiteValue - inputBlackValue);
-            double constant = outputBlackValue - multiplier * inputBlackValue;
-            mapping[i] = (short) PixelUtils.clamp((int) (multiplier * i + constant));
+    public GrayScaleLookup(int inputDarkValue, int inputLightValue,
+                           int outputDarkValue, int outputLightValue) {
+        double multiplier;
+        double constant;
+
+        int inputDiff = inputLightValue - inputDarkValue;
+        if (inputDiff == 0) { // in Levels this should happen only if both are 0 or both are 255
+            multiplier = 0;
+            constant = 255 - inputDarkValue;
+        } else {
+            multiplier = (double) (outputLightValue - outputDarkValue)
+                    / (double) inputDiff;
+            constant = outputDarkValue - multiplier * inputDarkValue;
         }
+        for (int i = 0; i < lut.length; i++) {
+            lut[i] = (short) PixelUtils.clamp((int) (multiplier * i + constant));
+        }
+//        System.out.printf("GrayScaleLookup:: LUT: " +
+//                        "0 -> %d, 1 -> %d, 128 -> %d, 254 -> %d, 255 -> %d%n",
+//                lut[0], lut[1], lut[128], lut[254], lut[255]);
     }
 
-    public short mapValue(short input) {
-        return mapping[input];
+    public short map(short input) {
+        return lut[input];
     }
 
     public static GrayScaleLookup getIdentity() {

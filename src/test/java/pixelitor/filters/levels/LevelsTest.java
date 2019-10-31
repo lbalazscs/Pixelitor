@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,7 @@ public class LevelsTest {
 
     @Test
     public void pageRGB_inputBlack100() {
-        rgbPage.getInputBlack().setValue(100);
+        rgbPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
@@ -71,7 +71,7 @@ public class LevelsTest {
 
     @Test
     public void pageR_inputBlack100() {
-        rPage.getInputBlack().setValue(100);
+        rPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
@@ -81,7 +81,7 @@ public class LevelsTest {
 
     @Test
     public void pageRGB_inputWhite150() {
-        rgbPage.getInputWhite().setValue(150);
+        rgbPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
@@ -91,7 +91,7 @@ public class LevelsTest {
 
     @Test
     public void pageR_inputWhite150() {
-        rPage.getInputWhite().setValue(150);
+        rPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
@@ -101,7 +101,7 @@ public class LevelsTest {
 
     @Test
     public void pageRGB_outputBlack100() {
-        rgbPage.getOutputBlack().setValue(100);
+        rgbPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 100, 100, 100); // black becomes (100, 100, 100)
@@ -111,7 +111,7 @@ public class LevelsTest {
 
     @Test
     public void pageR_outputBlack100() {
-        rPage.getOutputBlack().setValue(100);
+        rPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 100, 0, 0); // only the red channel is affected
@@ -121,7 +121,7 @@ public class LevelsTest {
 
     @Test
     public void pageRGB_outputWhite150() {
-        rgbPage.getOutputWhite().setValue(150);
+        rgbPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
@@ -131,7 +131,7 @@ public class LevelsTest {
 
     @Test
     public void pageR_outputWhite150() {
-        rPage.getOutputWhite().setValue(150);
+        rPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
