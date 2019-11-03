@@ -75,14 +75,8 @@ public class LayerMask extends ImageLayer {
     public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
 
     public LayerMask(Composition comp, BufferedImage bwImage,
-                     Layer layer, boolean inheritTranslation) {
-        super(comp, bwImage, layer.getName() + " MASK", layer);
-
-        if (inheritTranslation && layer instanceof ContentLayer) {
-            ContentLayer contentLayer = (ContentLayer) layer;
-            translationX = contentLayer.getTX();
-            translationY = contentLayer.getTY();
-        }
+                     Layer layer, int tx, int ty) {
+        super(comp, bwImage, layer.getName() + " MASK", layer, tx, ty);
 
         assert bwImage.getType() == TYPE_BYTE_GRAY;
     }
@@ -147,11 +141,11 @@ public class LayerMask extends ImageLayer {
      * Duplicates this layer mask, and attaches the duplicated mask
      * to the given layer
      */
-    public LayerMask duplicate(Layer master) {
+    public LayerMask duplicate(Layer owner) {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
 
-        LayerMask d = new LayerMask(comp, maskImageCopy, master, false);
-        d.setTranslation(getTX(), getTY());
+        LayerMask d = new LayerMask(comp, maskImageCopy, owner,
+                getTX(), getTY());
 
         return d;
     }
@@ -189,11 +183,11 @@ public class LayerMask extends ImageLayer {
                                                      BufferedImage visibleImage,
                                                      boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTX(), getTY(), null);
-        Tools.SHAPES.paintOverLayer(g, comp);
+        Tools.SHAPES.paintOverActiveLayer(g, comp);
     }
 
     public BufferedImage getTransparencyImage() {
-        if(!parent.isMaskEditing() || !Tools.isShapesDrawing()) {
+        if (!owner.isMaskEditing() || !Tools.isShapesDrawing()) {
             // simple case
             return transparencyImage;
         } else { // drawing with the shapes tool while in Ctrl-3 mode
@@ -204,7 +198,7 @@ public class LayerMask extends ImageLayer {
                     image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
             Graphics2D tmpG = tmp.createGraphics();
             tmpG.drawImage(image, 0, 0, null);
-            Tools.SHAPES.paintOverLayer(tmpG, comp);
+            Tools.SHAPES.paintOverActiveLayer(tmpG, comp);
             tmpG.dispose();
 
             // ... and return a transparency image based on it

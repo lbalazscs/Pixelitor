@@ -188,7 +188,9 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        assert ConsistencyChecks.selectionIsOK(comp) :
+        assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) :
+                "selection is empty";
+        assert ConsistencyChecks.selectionIsInsideCanvas(comp) :
                 "selection is outside";
     }
 
@@ -216,14 +218,13 @@ public class SelectionTool extends DragTool {
     private void cancelSelection(Composition comp) {
         deselect(comp, true);
         assert !comp.hasBuiltSelection() : "built selection is = " + comp.getBuiltSelection();
+        assert !comp.hasSelection() : "selection is = " + comp.getSelection();
 
         altMeansSubtract = false;
 
         if (Build.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
-        assert ConsistencyChecks.selectionIsOK(comp) :
-                "selection is outside";
     }
 
     private static void deselect(Composition comp, boolean addToHistory) {
@@ -235,17 +236,15 @@ public class SelectionTool extends DragTool {
     @Override
     public void escPressed() {
         // pressing Esc should work the same as clicking outside the selection
-        Composition comp = OpenComps.getActiveCompOrNull();
-        if (comp != null) {
-            cancelSelection(comp);
-        }
+        OpenComps.onActiveComp(this::cancelSelection);
     }
 
     @Override
     public void altPressed() {
         if (!altDown && !altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(true);
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), OpenComps.getActiveCompOrNull());
+            Composition comp = OpenComps.getActiveCompOrNull();
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
         }
         altDown = true;
     }
@@ -254,7 +253,8 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(false);
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), OpenComps.getActiveCompOrNull());
+            Composition comp = OpenComps.getActiveCompOrNull();
+            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
         }
         altDown = false;
     }

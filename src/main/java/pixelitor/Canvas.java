@@ -87,10 +87,17 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Returns the bounds in image space, relative to the canvas
+     * Returns the bounds in image space
      */
     public Rectangle getImBounds() {
         return new Rectangle(0, 0, width, height);
+    }
+
+    /**
+     * Returns the size in image space
+     */
+    public Dimension getImSize() {
+        return new Dimension(width, height);
     }
 
     /**

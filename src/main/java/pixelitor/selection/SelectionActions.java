@@ -41,6 +41,7 @@ import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
 import static pixelitor.gui.OpenComps.getActiveCompOrNull;
+import static pixelitor.gui.OpenComps.getActiveSelection;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
@@ -155,7 +156,7 @@ public final class SelectionActions {
 
     private static void modifySelection(EnumParam<SelectionModifyType> type,
                                         RangeParam amount) {
-        Selection selection = getActiveCompOrNull().getSelection();
+        Selection selection = getActiveSelection();
         SelectionModifyType selectionModifyType = type.getSelected();
         if (selection != null) {
             selection.modify(selectionModifyType, amount.getValue());

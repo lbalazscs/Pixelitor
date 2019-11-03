@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,6 +51,17 @@ public class ImageDabsBrush extends DabsBrush {
         // of the symmetry, but the template image can be shared between them
         templateImg = templateImages.computeIfAbsent(imageBrushType,
                 ImageBrushType::createBWBrushImage);
+    }
+
+    @Override
+    public void setRadius(double radius) {
+        super.setRadius(radius);
+
+        // if the radius changes during the brush stroke via hotkeys,
+        // the brush image has to be recreated
+        if (targetG != null) {
+            setupBrushStamp(null); // the point argument is not used by this class
+        }
     }
 
     @Override

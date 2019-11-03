@@ -17,9 +17,11 @@
 
 package pixelitor.tools;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
+import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gui.ToolButton;
@@ -171,6 +173,13 @@ public class Tools {
 
     public static void imCoordsChanged(Composition comp, AffineTransform at) {
         currentTool.imCoordsChanged(comp, at);
+    }
+
+    public static void imageChanged(Layer layer) {
+        assert currentTool != null || Build.isUnitTesting();
+        if (currentTool != null) {
+            currentTool.imageChanged(layer);
+        }
     }
 
     public static class EventDispatcher {

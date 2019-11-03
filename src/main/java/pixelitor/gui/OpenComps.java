@@ -30,6 +30,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 import pixelitor.layers.TextLayer;
 import pixelitor.menus.MenuAction;
+import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.Selection;
@@ -61,13 +62,13 @@ import static javax.swing.JOptionPane.YES_OPTION;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 
 /**
- * Static methods related to the list of opened compositions
+ * Static methods related to the list of opened images
  */
 public class OpenComps {
     private static final List<View> views = new ArrayList<>();
     private static View activeView;
     private static final List<CompActivationListener> activationListeners
-        = new ArrayList<>();
+            = new ArrayList<>();
 
     public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
         @Override
@@ -121,6 +122,13 @@ public class OpenComps {
         return null;
     }
 
+    public static <T> T fromActiveComp(Function<Composition, T> function) {
+        if (activeView != null) {
+            return function.apply(activeView.getComp());
+        }
+        return null;
+    }
+
     public static Path getActivePathOrNull() {
         if (activeView != null) {
             return activeView.getComp().getActivePath();
@@ -157,15 +165,15 @@ public class OpenComps {
 
     public static Optional<Composition> findCompositionByName(String name) {
         return views.stream()
-            .map(View::getComp)
-            .filter(c -> c.getName().equals(name))
-            .findFirst();
+                .map(View::getComp)
+                .filter(c -> c.getName().equals(name))
+                .findFirst();
     }
 
     public static Layer getActiveLayerOrNull() {
         if (activeView != null) {
             return activeView.getComp()
-                .getActiveLayer();
+                    .getActiveLayer();
         }
 
         return null;
@@ -198,11 +206,7 @@ public class OpenComps {
     }
 
     public static BufferedImage getActiveCompositeImage() {
-        if (activeView != null) {
-            return activeView.getComp()
-                .getCompositeImage();
-        }
-        return null;
+        return fromActiveComp(Composition::getCompositeImage);
     }
 
     public static void imageClosed(View view) {
@@ -329,8 +333,8 @@ public class OpenComps {
         File file = comp.getFile();
         if (file == null) {
             String msg = format(
-                "The image '%s' cannot be reloaded because it was not yet saved.",
-                comp.getName());
+                    "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
+                    comp.getName());
             Messages.showError("No file", msg);
             return;
         }
@@ -338,9 +342,9 @@ public class OpenComps {
         String path = file.getAbsolutePath();
         if (!file.exists()) {
             String msg = format(
-                "<html>The image '%s' cannot be reloaded because the file<br>" +
-                    "<b>%s</b><br>" +
-                    "does not exist anymore.",
+                    "<html>The image <b>%s</b> can't be reloaded because the file" +
+                            "<br><b>%s</b>" +
+                            "<br>doesn't exist anymore.",
                     comp.getName(), path);
             Messages.showError("File not found", msg);
             return;
@@ -353,11 +357,11 @@ public class OpenComps {
         }
         IOThread.markReadProcessing(path);
 
-        OpenSave.loadCompFromFileAsync(file)
-            .thenAcceptAsync(view::replaceJustReloadedComp,
-                EventQueue::invokeLater)
+        OpenSave.loadCompAsync(file)
+                .thenAcceptAsync(view::replaceJustReloadedComp,
+                        EventQueue::invokeLater)
                 .whenComplete((v, e) -> IOThread.readingFinishedFor(path))
-            .exceptionally(Messages::showExceptionOnEDT);
+                .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public static void duplicateActive() {
@@ -430,6 +434,15 @@ public class OpenComps {
         }
     }
 
+    public static Composition addJustLoadedComp(Composition comp, File file) {
+        if (comp != null) { // there was no decoding problem
+            addAsNewImage(comp);
+            RecentFilesMenu.getInstance().addFile(file);
+            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
+        }
+        return comp;
+    }
+
     public static void addAsNewImage(Composition comp) {
         try {
             assert comp.getView() == null : "already has a view";
@@ -460,8 +473,8 @@ public class OpenComps {
         }
 
         throw new AssertionError(format(
-            "Expected %d images, found %d (%s)",
-            expected, numOpenImages, getOpenImageNamesAsString()));
+                "Expected %d images, found %d (%s)",
+                expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int expected) {
@@ -470,8 +483,8 @@ public class OpenComps {
             return;
         }
         throw new AssertionError(format(
-            "Expected at least %d images, found %d (%s)",
-            expected, numOpenImages, getOpenImageNamesAsString()));
+                "Expected at least %d images, found %d (%s)",
+                expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
@@ -481,14 +494,14 @@ public class OpenComps {
         ZoomLevel actual = activeView.getZoomLevel();
         if (actual != expected) {
             throw new AssertionError("expected = " + expected +
-                ", found = " + actual);
+                    ", found = " + actual);
         }
     }
 
     private static String getOpenImageNamesAsString() {
         return views.stream()
-            .map(View::getName)
-            .collect(joining(", ", "[", "]"));
+                .map(View::getName)
+                .collect(joining(", ", "[", "]"));
     }
 
     private static void warnAndCloseActive() {
@@ -573,8 +586,8 @@ public class OpenComps {
 
     private static void showPixelGridHelp() {
         Messages.showInfo("Pixel Grid",
-            "The pixel grid consists of lines between the pixels,\n" +
-                "and is shown only if the zoom is at least 1600%\n" +
-                "and there is no selection.");
+                "The pixel grid consists of lines between the pixels,\n" +
+                        "and is shown only if the zoom is at least 1600%\n" +
+                        "and there is no selection.");
     }
 }

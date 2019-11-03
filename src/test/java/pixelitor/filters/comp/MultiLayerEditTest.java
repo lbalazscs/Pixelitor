@@ -197,7 +197,7 @@ public class MultiLayerEditTest {
 
         int targetWidth = ORIG_CANVAS_WIDTH / 2;
         int targetHeight = ORIG_CANVAS_HEIGHT / 2;
-        new Resize(targetWidth, targetHeight, false).process(comp);
+        new Resize(targetWidth, targetHeight, false).process(comp).join();
 
         checkStateAfterResize();
 

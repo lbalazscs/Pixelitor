@@ -1336,7 +1336,7 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 Composition comp = getActiveCompOrNull();
-                HistogramsPanel.INSTANCE.updateFromCompIfShown(comp);
+                HistogramsPanel.INSTANCE.updateFrom(comp);
             }
         });
 

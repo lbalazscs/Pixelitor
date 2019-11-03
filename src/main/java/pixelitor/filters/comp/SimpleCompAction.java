@@ -32,6 +32,7 @@ import pixelitor.selection.SelectionActions;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
@@ -50,13 +51,11 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = OpenComps.getActiveCompOrNull();
-
-        process(comp);
+        OpenComps.onActiveComp(this::process);
     }
 
     @Override
-    public Composition process(Composition comp) {
+    public CompletableFuture<Composition> process(Composition comp) {
         View view = comp.getView();
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
@@ -71,7 +70,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         }
 
         History.addEdit(new CompositionReplacedEdit(
-                getEditName(), view, comp, newComp, canvasTx));
+                getEditName(), false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -88,7 +87,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         if (changesCanvasDimensions) {
             view.revalidate(); // make sure the scrollbars are OK
         }
-        return newComp;
+        return CompletableFuture.completedFuture(newComp);
     }
 
     private void processLayer(Layer layer) {

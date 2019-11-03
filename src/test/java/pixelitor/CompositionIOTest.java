@@ -55,7 +55,7 @@ public class CompositionIOTest {
     }
 
     private static void testSingleLayerRead(File f) {
-        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(f);
+        CompletableFuture<Composition> cf = OpenSave.loadCompAsync(f);
         checkLoadFuture(cf);
 
         Composition comp = cf.join();
@@ -75,7 +75,7 @@ public class CompositionIOTest {
     }
 
     private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        CompletableFuture<Composition> cf = OpenSave.loadCompFromFileAsync(f);
+        CompletableFuture<Composition> cf = OpenSave.loadCompAsync(f);
         checkLoadFuture(cf);
 
         Composition comp = cf.join();

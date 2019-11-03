@@ -242,10 +242,7 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM) {
-            Composition comp = OpenComps.getActiveCompOrNull();
-            if (comp != null) {
-                finalizeShape(comp);
-            }
+            OpenComps.onActiveComp(this::finalizeShape);
         }
     }
 
@@ -316,7 +313,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverLayer(Graphics2D g, Composition comp) {
+    public void paintOverActiveLayer(Graphics2D g, Composition comp) {
         // updates the shape continuously while drawing
         if (state == INITIAL_DRAG) {
             if (userDrag.isClick()) {
@@ -421,14 +418,13 @@ public class ShapesTool extends DragTool {
         styledShape = null;
         setState(NO_INTERACTION);
 
-        Composition comp = OpenComps.getActiveCompOrNull();
-        if (comp != null) { // this gets also called after a "close all"
+        OpenComps.onActiveComp(comp -> {
             if (hadShape) {
                 comp.imageChanged();
             } else {
                 comp.repaint();
             }
-        }
+        });
     }
 
     @Override

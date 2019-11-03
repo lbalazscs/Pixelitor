@@ -89,7 +89,7 @@ public class DropListener extends DropTargetAdapter {
                             OpenSave.addAsLayersAllImagesInDir(file, comp);
                         }
                     } else if (file.isFile()) {
-                        OpenSave.loadFileAndAddAsNewImageLayer(file, comp);
+                        OpenSave.loadToNewImageLayerAsync(file, comp);
                     }
                 }
             }

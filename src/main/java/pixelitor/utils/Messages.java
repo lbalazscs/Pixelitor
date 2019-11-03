@@ -84,6 +84,10 @@ public class Messages {
         msgHandler.showInStatusBar(msg);
     }
 
+    public static ProgressHandler startProgress(String msg, int max) {
+        return msgHandler.startProgress(msg, max);
+    }
+
     public static void showNotImageLayerError() {
         msgHandler.showNotImageLayerError();
     }

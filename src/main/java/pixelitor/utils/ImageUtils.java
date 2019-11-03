@@ -24,6 +24,7 @@ import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
+import pixelitor.ThreadPool;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
@@ -31,20 +32,7 @@ import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
@@ -62,6 +50,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -71,6 +60,7 @@ import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
@@ -156,19 +146,25 @@ public class ImageUtils {
     }
 
 
-    public static BufferedImage getFasterScaledInstance(BufferedImage img,
-                                                        int targetWidth,
-                                                        int targetHeight,
-                                                        Object hint) {
+    public static CompletableFuture<BufferedImage> resizeAsync(BufferedImage img,
+                                                               int targetWidth,
+                                                               int targetHeight) {
         boolean progressiveBilinear = false;
         if ((targetWidth < (img.getWidth() / 2))
                 || (targetHeight < (img.getHeight() / 2))) {
             progressiveBilinear = true;
         }
-        return getFasterScaledInstance(img, targetWidth, targetHeight, hint, progressiveBilinear);
+
+        assert !EventQueue.isDispatchThread();
+        boolean finalProgressive = progressiveBilinear;
+        return CompletableFuture.supplyAsync(
+                () -> getFasterScaledInstance(img, targetWidth, targetHeight,
+                        VALUE_INTERPOLATION_BICUBIC, finalProgressive),
+                ThreadPool.getExecutor());
     }
 
     // From the Filthy Rich Clients book
+
     /**
      * Convenience method that returns a scaled instance of the
      * provided BufferedImage.

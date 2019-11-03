@@ -24,6 +24,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.layers.Layer;
 import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.toolhandlers.ToolHandlerChain;
@@ -140,10 +141,10 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Paint over the active layer.
+     * Paint over the active layer, used only by the shapes tool.
      * The transform of the given Graphics2D is in image space.
      */
-    public void paintOverLayer(Graphics2D g, Composition comp) {
+    public void paintOverActiveLayer(Graphics2D g, Composition comp) {
         // empty instead of abstract for the convenience of subclasses
     }
 
@@ -263,6 +264,14 @@ public abstract class Tool implements KeyListener {
     }
 
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
+    /**
+     * Called after (1) a filter changes a drawable, or
+     * (2) the active layer changes or (3) the mask editing changes
+     */
+    public void imageChanged(Layer layer) {
         // empty instead of abstract for the convenience of subclasses
     }
 

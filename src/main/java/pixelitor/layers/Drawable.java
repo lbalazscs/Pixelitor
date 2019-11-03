@@ -35,9 +35,9 @@ public interface Drawable {
 
     void startPreviewing();
 
-    void onDialogAccepted(String filterName);
+    void onFilterDialogAccepted(String filterName);
 
-    void onDialogCanceled();
+    void onFilterDialogCanceled();
 
     void stopPreviewing();
 

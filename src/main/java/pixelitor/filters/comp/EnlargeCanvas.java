@@ -36,6 +36,7 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
@@ -57,7 +58,7 @@ public class EnlargeCanvas implements CompAction {
     }
 
     @Override
-    public Composition process(Composition comp) {
+    public CompletableFuture<Composition> process(Composition comp) {
         View view = comp.getView();
         Guides oldGuides = comp.getGuides();
         Guides newGuides = null;
@@ -86,7 +87,7 @@ public class EnlargeCanvas implements CompAction {
         comp.updateAllIconImages();
 
         History.addEdit(new CompositionReplacedEdit(
-                "Enlarge Canvas", view, comp, newComp, canvasTx));
+                "Enlarge Canvas", false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -94,7 +95,7 @@ public class EnlargeCanvas implements CompAction {
 
         Messages.showInStatusBar("Canvas enlarged to "
                 + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
-        return newComp;
+        return CompletableFuture.completedFuture(newComp);
     }
 
     private void processLayer(Layer layer) {

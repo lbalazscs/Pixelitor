@@ -43,7 +43,6 @@ import pixelitor.layers.TextLayer;
 import pixelitor.tools.gradient.Gradient;
 import pixelitor.tools.gradient.GradientType;
 import pixelitor.tools.util.ImDrag;
-import pixelitor.utils.MessageHandler;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
@@ -87,10 +86,9 @@ public class SplashImageCreator {
             return;
         }
         File lastSaveDir = Dirs.getLastSave();
-        MessageHandler msgHandler = Messages.getMessageHandler();
         int numCreatedImages = 64;
         String msg = format("Save %d Splash Images: ", numCreatedImages);
-        ProgressHandler progressHandler = msgHandler.startProgress(msg, numCreatedImages);
+        ProgressHandler progressHandler = Messages.startProgress(msg, numCreatedImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
         for (int i = 0; i < numCreatedImages; i++) {
@@ -98,11 +96,11 @@ public class SplashImageCreator {
             cf = cf.thenCompose(v -> makeSplashAsync(lastSaveDir, progressHandler, seqNo));
         }
         cf.thenRunAsync(() -> {
-                    progressHandler.stopProgress();
-                    msgHandler.showInStatusBar(format(
-                            "Finished saving %d splash images to %s",
-                            numCreatedImages, lastSaveDir));
-                }, EventQueue::invokeLater);
+            progressHandler.stopProgress();
+            Messages.showInStatusBar(format(
+                    "Finished saving %d splash images to %s",
+                    numCreatedImages, lastSaveDir));
+        }, EventQueue::invokeLater);
 
     }
 
@@ -194,12 +192,12 @@ public class SplashImageCreator {
 
         font = createSplashFont(Font.PLAIN, 22);
         addTextLayer(comp,
-            "Loading...",
+                "Loading...",
                 WHITE, font, -70, BlendingMode.NORMAL, 0.9f, true);
 
         font = createSplashFont(Font.PLAIN, 20);
         addTextLayer(comp,
-            "version " + Build.VERSION_NUMBER,
+                "version " + Build.VERSION_NUMBER,
                 WHITE, font, 50, BlendingMode.NORMAL, 0.9f, true);
     }
 

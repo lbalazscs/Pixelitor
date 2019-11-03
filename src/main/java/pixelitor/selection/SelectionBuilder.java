@@ -104,6 +104,9 @@ public class SelectionBuilder {
 
         Shape newShape = builtSelection.getShape();
         newShape = comp.clipShapeToCanvasSize(newShape);
+        if (newShape.getBounds2D().isEmpty()) {
+            return;
+        }
 
         if (oldSelection != null) { // needs to combine the shapes
             Shape oldShape = oldSelection.getShape();

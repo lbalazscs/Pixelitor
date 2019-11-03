@@ -38,6 +38,7 @@ import javax.swing.*;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
@@ -65,7 +66,7 @@ public class Crop implements CompAction {
     }
 
     @Override
-    public Composition process(Composition comp) {
+    public CompletableFuture<Composition> process(Composition comp) {
         Rectangle roundedImCropRect = roundCropRect(imCropRect);
         Canvas oldCanvas = comp.getCanvas();
 
@@ -80,7 +81,7 @@ public class Crop implements CompAction {
         if (cropRect.isEmpty()) {
             // we get here if the crop rectangle is
             // outside the canvas bounds in the crop tool
-            return comp;
+            return CompletableFuture.completedFuture(comp);
         }
 
         AffineTransform canvasTx = createCanvasImTx(cropRect);
@@ -136,7 +137,7 @@ public class Crop implements CompAction {
 
         assert comp != newComp;
         History.addEdit(new CompositionReplacedEdit(
-                "Crop", view, comp, newComp, canvasTx));
+                "Crop", false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -144,7 +145,7 @@ public class Crop implements CompAction {
 
         Messages.showInStatusBar("Image cropped to "
                 + newWidth + " x " + newHeight + " pixels.");
-        return newComp;
+        return CompletableFuture.completedFuture(newComp);
     }
 
     // in zoomed-in images fractional widths and heights can happen
@@ -194,10 +195,7 @@ public class Crop implements CompAction {
      */
     public static void selectionCropActiveImage() {
         try {
-            Composition comp = OpenComps.getActiveCompOrNull();
-            if (comp != null) {
-                selectionCrop(comp);
-            }
+            OpenComps.onActiveComp(Crop::selectionCrop);
         } catch (Exception ex) {
             Messages.showException(ex);
         }

@@ -25,7 +25,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.layers.TextLayer;
-import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -40,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
+import static pixelitor.gui.OpenComps.addJustLoadedComp;
 import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
@@ -50,22 +50,13 @@ public class OpenSave {
     }
 
     public static CompletableFuture<Composition> openFileAsync(File file) {
-        return loadCompFromFileAsync(file).
+        return loadCompAsync(file).
                 thenApplyAsync(comp -> addJustLoadedComp(comp, file),
                         EventQueue::invokeLater)
                 .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private static Composition addJustLoadedComp(Composition comp, File file) {
-        if (comp != null) { // there was no decoding problem
-            OpenComps.addAsNewImage(comp);
-            RecentFilesMenu.getInstance().addFile(file);
-            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
-        }
-        return comp;
-    }
-
-    public static CompletableFuture<Composition> loadCompFromFileAsync(File file) {
+    public static CompletableFuture<Composition> loadCompAsync(File file) {
         CompletableFuture<Composition> cf;
 
         String ext = FileUtils.findExtension(file.getName()).orElse("");
@@ -74,14 +65,16 @@ public class OpenSave {
         } else if ("ora".equals(ext)) {
             cf = loadLayered(file, "ora");
         } else {
-            cf = loadSimpleFile(file);
+            cf = loadSimple(file);
         }
 
         return cf;
     }
 
-    // loads an a file with a single-layer image format
-    private static CompletableFuture<Composition> loadSimpleFile(File file) {
+    /**
+     * Loads a composition from a file with a single-layer image format
+     */
+    private static CompletableFuture<Composition> loadSimple(File file) {
         return CompletableFuture.supplyAsync(
                 () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
                 .handle((img, e) -> handleDecodingError(file, img, e))
@@ -122,7 +115,8 @@ public class OpenSave {
         Messages.showError("Error", msg);
     }
 
-    public static CompletableFuture<Void> loadFileAndAddAsNewImageLayer(File file, Composition comp) {
+    public static CompletableFuture<Void> loadToNewImageLayerAsync(File file,
+                                                                   Composition comp) {
         return CompletableFuture.supplyAsync(
                 () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
                 .handle((img, e) -> handleDecodingError(file, img, e))
@@ -233,7 +227,7 @@ public class OpenSave {
         File[] files = FileUtils.listSupportedInputFilesIn(dir);
         if (files != null) {
             for (File file : files) {
-                loadFileAndAddAsNewImageLayer(file, comp);
+                loadToNewImageLayerAsync(file, comp);
             }
         }
     }

@@ -19,14 +19,22 @@ package pixelitor.filters.comp;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.ThreadPool;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressHandler;
+import pixelitor.utils.Utils;
 
+import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
@@ -48,14 +56,14 @@ public class Resize implements CompAction {
     }
 
     @Override
-    public Composition process(Composition comp) {
+    public CompletableFuture<Composition> process(Composition comp) {
         Canvas oldCanvas = comp.getCanvas();
         int canvasCurrWidth = oldCanvas.getImWidth();
         int canvasCurrHeight = oldCanvas.getImHeight();
 
         if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
             // nothing to do
-            return comp;
+            return CompletableFuture.completedFuture(comp);
         }
 
         // it is important to use local copies of the final global
@@ -72,22 +80,42 @@ public class Resize implements CompAction {
             canvasTargetWidth = (int) (scale * (double) canvasCurrWidth);
             canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
         }
+        Dimension targetSize = new Dimension(canvasTargetWidth, canvasTargetHeight);
 
-        View view = comp.getView();
-        Composition newComp = comp.createCopy(true, true);
+        // The resize runs outside the EDT so that the progress bar animation
+        // can update and multiple resizing operations can run in parallel
+        ProgressHandler progressHandler = Messages.startProgress("Resizing", -1);
+        return CompletableFuture
+                .supplyAsync(() -> comp.createCopy(true, true),
+                        ThreadPool.getExecutor())
+                .thenCompose(newComp -> resizeLayers(newComp, targetSize))
+                .thenApplyAsync(newComp -> afterResizeActions(comp, newComp, targetSize, progressHandler),
+                        EventQueue::invokeLater)
+                .handle((newComp, ex) -> {
+                    if (ex != null) {
+                        Messages.showExceptionOnEDT(ex);
+                    }
+                    return newComp;
+                });
+    }
+
+    private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension targetSize, ProgressHandler progressHandler) {
+        int canvasTargetWidth = targetSize.width;
+        int canvasTargetHeight = targetSize.height;
+
         Canvas newCanvas = newComp.getCanvas();
-
+        int canvasCurrWidth = newCanvas.getImWidth();
+        int canvasCurrHeight = newCanvas.getImHeight();
         double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
         double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
         AffineTransform canvasTx = AffineTransform.getScaleInstance(sx, sy);
         newComp.imCoordsChanged(canvasTx, false);
 
-        resizeLayers(newComp, canvasTargetWidth, canvasTargetHeight);
-
-        newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, comp.getView());
+        View view = newComp.getView();
+        newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, view);
 
         History.addEdit(new CompositionReplacedEdit(
-                "Resize", view, comp, newComp, canvasTx));
+                "Resize", false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -107,17 +135,25 @@ public class Resize implements CompAction {
         newComp.imageChanged(REPAINT, true);
         newComp.getView().revalidate(); // make sure the scrollbars are OK
 
+        progressHandler.stopProgress();
         Messages.showInStatusBar("Image resized to "
                 + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
         return newComp;
     }
 
-    private void resizeLayers(Composition comp, int width, int height) {
+    private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {
+        assert !EventQueue.isDispatchThread();
+
+        // Although at this point we already left the EDT, use new
+        // threads so that the layers are resized in parallel
+        List<CompletableFuture<?>> futures = new ArrayList<>();
         comp.forEachLayer(layer -> {
-            layer.resize(width, height);
+            futures.add(layer.resize(newSize));
             if (layer.hasMask()) {
-                layer.getMask().resize(width, height);
+                futures.add(layer.getMask().resize(newSize));
             }
         });
+        return Utils.allOfList(futures)
+                .thenApply(v -> comp);
     }
 }

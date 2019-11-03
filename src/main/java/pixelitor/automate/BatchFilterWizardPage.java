@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         @Override
         public void onWizardCanceled(Drawable dr) {
             // we get here only if the chosen filter is a filter with GUI
-            dr.onDialogCanceled();
+            dr.onFilterDialogCanceled();
         }
 
         @Override

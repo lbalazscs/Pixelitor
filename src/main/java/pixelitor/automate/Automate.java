@@ -119,7 +119,7 @@ public class Automate {
         assert view != null : "no view for " + comp.getName();
 
         view.paintImmediately();
-        comp = action.process(comp);
+        comp = action.process(comp).join();
         view.paintImmediately();
 
         return comp;

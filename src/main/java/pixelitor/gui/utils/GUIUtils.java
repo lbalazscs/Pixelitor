@@ -126,13 +126,13 @@ public final class GUIUtils {
                 .show();
     }
 
-    public static JPanel arrangeParamsInVerticalGridBag(Iterable<FilterParam> params) {
+    public static JPanel arrangeParamsVertically(Iterable<FilterParam> params) {
         JPanel p = new JPanel();
-        arrangeParamsInVerticalGridBag(p, params);
+        arrangeParamsVertically(p, params);
         return p;
     }
 
-    public static void arrangeParamsInVerticalGridBag(JPanel p, Iterable<FilterParam> params) {
+    public static void arrangeParamsVertically(JPanel p, Iterable<FilterParam> params) {
         p.setLayout(new GridBagLayout());
 
         int row = 0;

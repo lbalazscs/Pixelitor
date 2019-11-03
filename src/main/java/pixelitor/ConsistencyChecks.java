@@ -46,8 +46,11 @@ public final class ConsistencyChecks {
         assert comp != null;
 
         selectionActionsEnabledCheck(comp);
-        assert selectionIsOK(comp) : "selection outside the canvas in " + comp.getName();
+
+        assert selectionShapeIsNotEmpty(comp) : "empty selection in " + comp.getName();
+        assert selectionIsInsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
+
         if (checkImageCoversCanvas) {
             assert imageCoversCanvas(comp);
         }
@@ -127,7 +130,19 @@ public final class ConsistencyChecks {
         }
     }
 
-    public static boolean selectionIsOK(Composition comp) {
+    public static boolean selectionShapeIsNotEmpty(Composition comp) {
+        Selection selection = comp.getSelection();
+        if (selection == null) {
+            return true;
+        }
+        Rectangle2D shapeBounds = selection.getShapeBounds2D();
+        if (shapeBounds.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean selectionIsInsideCanvas(Composition comp) {
         Selection selection = comp.getSelection();
         if (selection == null) {
             return true;
@@ -136,10 +151,6 @@ public final class ConsistencyChecks {
         // increase the width/height because of rounding errors
         canvasSize = new Rectangle(0, 0, canvasSize.width + 1, canvasSize.height + 1);
         Rectangle2D shapeBounds = selection.getShapeBounds2D();
-        if (shapeBounds.isEmpty()) {
-            System.out.println("\nConsistencyChecks::selectionIsOK: empty shape = " + shapeBounds);
-            return false;
-        }
 
         // In principle the selection must be fully inside the canvas,
         // but this is hard to check since

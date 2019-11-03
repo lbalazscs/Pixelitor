@@ -86,7 +86,7 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
             OpenComps.getActiveComp().ifPresent(
-                    this::updateFromCompIfShown);
+                    this::updateFrom);
         }
     }
 
@@ -104,10 +104,10 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
 
     @Override
     public void compActivated(View oldView, View newView) {
-        updateFromCompIfShown(newView.getComp());
+        updateFrom(newView.getComp());
     }
 
-    public void updateFromCompIfShown(Composition comp) {
+    public void updateFrom(Composition comp) {
         Objects.requireNonNull(comp);
         if (!isShown()) {
             return;

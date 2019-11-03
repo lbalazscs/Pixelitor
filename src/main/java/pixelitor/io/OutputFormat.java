@@ -101,13 +101,13 @@ public enum OutputFormat {
         }
     }
 
-    private static volatile OutputFormat lastOutputFormat = JPG;
+    private static volatile OutputFormat lastUsed = JPG;
 
     public static OutputFormat getLastUsed() {
-        return lastOutputFormat;
+        return lastUsed;
     }
 
-    public static void setLastUsed(OutputFormat lastOutputFormat) {
-        OutputFormat.lastOutputFormat = lastOutputFormat;
+    public static void setLastUsed(OutputFormat format) {
+        OutputFormat.lastUsed = format;
     }
 }

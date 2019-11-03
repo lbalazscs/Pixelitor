@@ -94,9 +94,9 @@ public class ImageLayerTest {
 
         withTranslation.setupFor(layer);
 
-        int layerIconUpdatesAtStart = 1;
+        int layerIconUpdatesAtStart = 0;
         if (withTranslation.isYes()) {
-            layerIconUpdatesAtStart = 2;
+            layerIconUpdatesAtStart = 1;
         }
 
         iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, 1);
@@ -159,7 +159,7 @@ public class ImageLayerTest {
     public void test_onDialogAccepted() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.onDialogAccepted("filterName");
+        layer.onFilterDialogAccepted("filterName");
 
         assertThat(layer)
                 .stateIs(NORMAL)
@@ -169,14 +169,14 @@ public class ImageLayerTest {
 
     @Test(expected = AssertionError.class)
     public void test_onDialogCanceled_Fail() {
-        layer.onDialogCanceled();
+        layer.onFilterDialogCanceled();
     }
 
     @Test
     public void test_onDialogCanceled_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
-        layer.onDialogCanceled();
+        layer.onFilterDialogCanceled();
 
         assertThat(layer)
                 .stateIs(NORMAL)

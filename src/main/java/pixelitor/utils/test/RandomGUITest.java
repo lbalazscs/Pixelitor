@@ -521,9 +521,9 @@ public class RandomGUITest {
             }
 
             if (Math.random() > 0.3) {
-                dr.onDialogAccepted(filterName);
+                dr.onFilterDialogAccepted(filterName);
             } else {
-                dr.onDialogCanceled();
+                dr.onFilterDialogCanceled();
             }
         } else {
             BufferedImage src = dr.getFilterSourceImage();
@@ -807,7 +807,7 @@ public class RandomGUITest {
 
     private static void layerToCanvasSize() {
         log("layer to canvas size");
-        OpenComps.getActiveCompOrNull().activeLayerToCanvasSize();
+        OpenComps.onActiveComp(Composition::activeLayerToCanvasSize);
     }
 
     private static void invertSelection() {

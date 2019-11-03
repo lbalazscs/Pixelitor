@@ -24,6 +24,7 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.menus.DrawableAction;
 import pixelitor.tools.ClipStrategy;
 import pixelitor.tools.DragTool;
@@ -307,6 +308,11 @@ public class GradientTool extends DragTool {
     }
 
     @Override
+    public void imageChanged(Layer layer) {
+        hideHandles(layer.getComp(), false);
+    }
+
+    @Override
     public void escPressed() {
         if (handles != null) {
             Composition comp = OpenComps.getActiveCompOrNull();
@@ -362,7 +368,6 @@ public class GradientTool extends DragTool {
                 revertCB.isSelected(),
                 blendingModePanel.getBlendingMode(),
                 blendingModePanel.getOpacity());
-
 
         if (addToHistory) {
             boolean isFirst = lastGradient == null;

@@ -42,12 +42,14 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
     private final AffineTransform canvasTx;
     private AffineTransform inverseCanvasTx;
+    private final boolean reload;
 
-    public CompositionReplacedEdit(String name, View view,
+    public CompositionReplacedEdit(String name, boolean reload, View view,
                                    Composition oldComp,
                                    Composition newComp,
                                    AffineTransform canvasTx) {
         super(name, newComp);
+        this.reload = reload;
 
         assert oldComp != null;
         assert newComp != null;
@@ -88,7 +90,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             }
         }
 
-        view.replaceComp(oldComp, oldMaskViewMode, true);
+        view.replaceComp(oldComp, oldMaskViewMode, reload);
 
         if (oldDeselectEdit != null) {
             oldDeselectEdit.undo();
@@ -131,7 +133,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
             oldDeselectEdit.redo();
         }
 
-        view.replaceComp(newComp, MaskViewMode.NORMAL, true);
+        view.replaceComp(newComp, MaskViewMode.NORMAL, reload);
 
         if (newDeselectEdit != null) {
             newDeselectEdit.undo();
@@ -156,5 +158,9 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         backupCompRef = null;
         view = null;
+    }
+
+    public boolean isReload() {
+        return reload;
     }
 }

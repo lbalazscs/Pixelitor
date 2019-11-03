@@ -451,7 +451,7 @@ public class ChannelMixer extends ParametrizedFilter {
 
     private static RangeParam createParam(String first, String second, int defaultValue) {
         String name = "<html><b><font color=" + first + ">" + first
-                + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%):</html>";
+                + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%)";
         return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
     }
 

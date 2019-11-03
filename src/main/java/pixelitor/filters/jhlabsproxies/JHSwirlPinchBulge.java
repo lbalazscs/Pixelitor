@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam radius = new RangeParam("Radius", 1, 500, 999);
-    private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 90, 360);
+    private final RangeParam swirlAmount = new RangeParam("Swirl Amount", -360, 0, 360);
     private final RangeParam pinchBulgeAmount = new RangeParam("Pinch-Bulge Amount", -100, 0, 100);
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);

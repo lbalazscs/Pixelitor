@@ -336,7 +336,8 @@ public class PenTool extends Tool {
 
     @Override
     public void resetInitialState() {
-        setPathFromComp();
+        Composition comp = OpenComps.getActiveCompOrNull();
+        setPathFromComp(comp);
 
         assert checkPathConsistency();
     }
@@ -380,11 +381,6 @@ public class PenTool extends Tool {
             path.checkConsistency();
         }
         return true;
-    }
-
-    private void setPathFromComp() {
-        Composition comp = OpenComps.getActiveCompOrNull();
-        setPathFromComp(comp);
     }
 
     private void setPathFromComp(Composition comp) {

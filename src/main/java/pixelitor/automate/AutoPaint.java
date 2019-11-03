@@ -38,7 +38,6 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.MessageHandler;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
 
@@ -93,8 +92,7 @@ public class AutoPaint {
 
         String msg = format("Auto Paint with %s Tool: ", settings.getTool());
 
-        MessageHandler msgHandler = Messages.getMessageHandler();
-        ProgressHandler progressHandler = msgHandler.startProgress(msg, settings.getNumStrokes());
+        ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
         History.setIgnoreEdits(true);
@@ -109,7 +107,7 @@ public class AutoPaint {
                     dr, backupImage, false, false));
 
             progressHandler.stopProgress();
-            msgHandler.showInStatusBar(msg + "finished.");
+            Messages.showInStatusBar(msg + "finished.");
 
             // if colors were changed, restore the original
             if (settings.changeColors()) {

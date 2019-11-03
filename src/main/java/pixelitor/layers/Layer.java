@@ -36,6 +36,7 @@ import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.selection.Selection;
+import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
@@ -44,6 +45,7 @@ import javax.swing.*;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -69,27 +71,29 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 public abstract class Layer implements Serializable {
     private static final long serialVersionUID = 2L;
 
+    protected Composition comp;
     protected Canvas canvas;
     protected String name;
 
     // the real layer for layer masks,
     // null for real layers
-    protected final Layer parent;
+    protected final Layer owner;
 
     private boolean visible = true;
-    protected Composition comp;
+    private float opacity = 1.0f;
+    private BlendingMode blendingMode = BlendingMode.NORMAL;
+
     protected LayerMask mask;
     private boolean maskEnabled = true;
 
-    float opacity = 1.0f;
-    BlendingMode blendingMode = BlendingMode.NORMAL;
     protected boolean isAdjustment = false;
 
     // transient variables from here
 
     // The UI is lazily initialized so that it is created on the EDT
-    // even if the layer itself is created on another thread
-    private transient Lazy<LayerUI> ui = Lazy.of(this::createUI);
+    // even if the layer itself is created on another thread.
+    // A mask uses the UI of its owner.
+    private transient Lazy<LayerUI> ui;
 
     private transient List<LayerChangeListener> layerChangeListeners;
 
@@ -100,39 +104,40 @@ public abstract class Layer implements Serializable {
      */
     private transient boolean maskEditing = false;
 
-    Layer(Composition comp, String name, Layer parent) {
+    // can be called on any thread
+    Layer(Composition comp, String name, Layer owner) {
         assert comp != null;
         assert name != null;
 
         setCompAndCanvas(comp);
         this.name = name;
-        this.parent = parent;
-        this.opacity = 1.0f;
+        this.owner = owner;
+        opacity = 1.0f;
 
-
-        if (parent != null) { // this is a layer mask
-            ui = parent.ui;
+        assert ui == null : "initialized twice";
+        if (owner != null) { // this is a layer mask
+            ui = owner.ui;
         } else { // normal layer
-            createUI();
+            ui = Lazy.of(this::createUI);
         }
         layerChangeListeners = new ArrayList<>();
     }
 
+    // can be called on any thread
     private void readObject(ObjectInputStream in)
             throws IOException, ClassNotFoundException {
 
         // defaults for transient fields
-        ui = null;
         maskEditing = false;
-        ui = Lazy.of(this::createUI);
+        ui = null;
 
         in.defaultReadObject();
         layerChangeListeners = new ArrayList<>();
 
         // Creates a layer button only for real layers, because
-        // layer masks use the button of the real layer.
-        if (parent == null) { // not mask
-            createUI();
+        // layer masks use the button of their owner.
+        if (owner == null) { // not mask
+            ui = Lazy.of(this::createUI);
 
             if (mask != null) {
                 mask.setUI(ui);
@@ -144,16 +149,9 @@ public abstract class Layer implements Serializable {
         if (Build.isUnitTesting()) {
             return new TestLayerUI();
         }
+        assert EventQueue.isDispatchThread();
 
-        if (EventQueue.isDispatchThread()) {
-            return new LayerButton(this);
-        } else {
-            // preferably we should rarely get here
-            // TODO this branch is still called for pxc and ora files
-            CompletableFuture<LayerButton> future = CompletableFuture.supplyAsync(
-                () -> new LayerButton(this), EventQueue::invokeLater);
-            return future.join();
-        }
+        return new LayerButton(this);
     }
 
     public boolean isVisible() {
@@ -161,11 +159,11 @@ public abstract class Layer implements Serializable {
     }
 
     public void setVisible(boolean newVisibility, boolean addToHistory) {
-        if (this.visible == newVisibility) {
+        if (visible == newVisibility) {
             return;
         }
 
-        this.visible = newVisibility;
+        visible = newVisibility;
         comp.imageChanged();
         ui.get().setOpenEye(newVisibility);
 
@@ -187,7 +185,21 @@ public abstract class Layer implements Serializable {
      * If sameName is true, then the duplicate layer will
      * have the same name, otherwise a new "copy name" is generated
      */
-    public abstract Layer duplicate(boolean sameName);
+    public abstract Layer duplicate(boolean compCopy);
+
+    // helper method used in multiple subclasses
+    protected void duplicateMask(Layer duplicate, boolean compCopy) {
+        if (hasMask()) {
+            LayerMask newMask = mask.duplicate(duplicate);
+            if (compCopy) {
+                // we could be running outside the EDT, and anyway it is
+                // not necessary to add the duplicate to the GUI
+                duplicate.mask = newMask;
+            } else {
+                duplicate.addConfiguredMask(newMask);
+            }
+        }
+    }
 
     public float getOpacity() {
         return opacity;
@@ -202,7 +214,7 @@ public abstract class Layer implements Serializable {
 
         HistogramsPanel hp = HistogramsPanel.INSTANCE;
         if (hp.isShown()) {
-            hp.updateFromCompIfShown(comp);
+            hp.updateFrom(comp);
         }
     }
 
@@ -219,7 +231,7 @@ public abstract class Layer implements Serializable {
             History.addEdit(new LayerOpacityEdit(this, opacity));
         }
 
-        this.opacity = newOpacity;
+        opacity = newOpacity;
 
         if (updateGUI) {
             LayerBlendingModePanel.INSTANCE.setOpacityFromModel(newOpacity);
@@ -235,7 +247,7 @@ public abstract class Layer implements Serializable {
             History.addEdit(new LayerBlendingEdit(this, blendingMode));
         }
 
-        this.blendingMode = mode;
+        blendingMode = mode;
         if (updateGUI) {
             LayerBlendingModePanel.INSTANCE.setBlendingModeFromModel(mode);
         }
@@ -247,7 +259,7 @@ public abstract class Layer implements Serializable {
 
     public void setName(String newName, boolean addToHistory) {
         String previousName = name;
-        this.name = newName;
+        name = newName;
 
         // important because this might be called twice for a single rename
         if (name.equals(previousName)) {
@@ -296,10 +308,7 @@ public abstract class Layer implements Serializable {
      */
     public PixelitorEdit addHidingMask(Selection sel, boolean createEdit) {
         if (mask == null) {
-            int canvasWidth = canvas.getImWidth();
-            int canvasHeight = canvas.getImHeight();
-
-            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.getBWImage(this, canvasWidth, canvasHeight, sel);
+            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.getBWImage(this, canvas, sel);
             return addImageAsMask(bwMask, false, "Add Layer Mask",
                     false, false, createEdit);
         } else {
@@ -341,10 +350,7 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
-
-        BufferedImage bwMask = addType.getBWImage(this, canvasWidth, canvasHeight, selection);
+        BufferedImage bwMask = addType.getBWImage(this, canvas, selection);
 
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();
@@ -360,12 +366,19 @@ public abstract class Layer implements Serializable {
                                         boolean addEdit, boolean createEdit) {
         assert mask == null;
 
-        mask = new LayerMask(comp, bwMask, this, inheritTranslation);
+        int maskTx = 0;
+        int maskTy = 0;
+        if (inheritTranslation && this instanceof ContentLayer) {
+            ContentLayer contentLayer = (ContentLayer) this;
+            maskTx = contentLayer.getTX();
+            maskTy = contentLayer.getTY();
+        }
+
+        mask = new LayerMask(comp, bwMask, this, maskTx, maskTy);
         maskEnabled = true;
 
-        // needs to be added first, because the inherited layer
-        // mask constructor already will try to update the image
         ui.get().addMaskIconLabel();
+        mask.updateIconImage();
 
         if (!createEdit) {
             // history and UI update will be handled in an
@@ -411,7 +424,7 @@ public abstract class Layer implements Serializable {
      */
     public void addConfiguredMask(LayerMask mask) {
         assert mask != null;
-        assert mask.getParent() == this;
+        assert mask.getOwner() == this;
 
         this.mask = mask;
         comp.imageChanged();
@@ -425,7 +438,7 @@ public abstract class Layer implements Serializable {
         View view = comp.getView();
         MaskViewMode oldMode = view.getMaskViewMode();
         mask = null;
-        maskEditing = false;
+        setMaskEditing(false);
 
         comp.imageChanged();
 
@@ -519,7 +532,7 @@ public abstract class Layer implements Serializable {
      */
     protected abstract BufferedImage actOnImageFromLayerBellow(BufferedImage src);
 
-    public abstract void resize(int targetWidth, int targetHeight);
+    public abstract CompletableFuture<Void> resize(Dimension newSize);
 
     /**
      * The given crop rectangle is given in image space,
@@ -541,14 +554,21 @@ public abstract class Layer implements Serializable {
         comp.dragFinished(this, newIndex);
     }
 
-    public void setMaskEditing(boolean b) {
-        assert b ? hasMask() : true;
-        this.maskEditing = b;
-        ui.get().configureBorders(b); // sets the border around the icon
+    public void setMaskEditing(boolean newValue) {
+        //noinspection SimplifiableConditionalExpression
+        assert newValue ? hasMask() : true;
+
+        if (maskEditing != newValue) {
+            maskEditing = newValue;
+            ui.get().updateBorders(); // sets the border around the icon
+            Tools.imageChanged(this);
+        }
     }
 
     public boolean isMaskEditing() {
+        //noinspection SimplifiableConditionalExpression
         assert maskEditing ? hasMask() : true;
+
         return maskEditing;
     }
 
@@ -617,10 +637,10 @@ public abstract class Layer implements Serializable {
                 }
             }
         }
-        if (parent != null) { // we are in a mask
-            if (parent.isMaskEditing()) { // we are in the edited layer
+        if (owner != null) { // we are in a mask
+            if (owner.isMaskEditing()) { // we are in the edited layer
                 if (((LayerMask) this).isLinked()) {
-                    return parent;
+                    return owner;
                 }
             }
         }
@@ -654,8 +674,8 @@ public abstract class Layer implements Serializable {
         return mask != null && maskEnabled;
     }
 
-    public Layer getParent() {
-        return parent;
+    public Layer getOwner() {
+        return owner;
     }
 
     public void activateUI() {

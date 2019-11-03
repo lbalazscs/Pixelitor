@@ -78,7 +78,7 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void configureBorders(boolean b) {
+    public void updateBorders() {
 
     }
 

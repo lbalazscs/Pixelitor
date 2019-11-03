@@ -129,7 +129,7 @@ public class Tests3x3 {
         if(withMask) {
             BufferedImage maskImg = getStandardMaskImage();
             Layer layer = comp.getLayer(0);
-            LayerMask mask = new LayerMask(comp, maskImg, layer, false);
+            LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
             layer.addConfiguredMask(mask);
         }
         OpenComps.addAsNewImage(comp);
@@ -162,7 +162,7 @@ public class Tests3x3 {
     }
 
     public static void dumpCompositeOfActive() {
-        BufferedImage img = OpenComps.getActiveCompOrNull().calculateCompositeImage();
+        BufferedImage img = OpenComps.getActiveCompositeImage();
         String actual = getExpectedFromActual(img);
         System.out.println(format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
     }

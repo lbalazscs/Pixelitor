@@ -53,7 +53,7 @@ public class LayerBlendingModesTest {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
         TestHelper.setupMockViewFor(comp);
 
-        this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2", null);
+        this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2");
         comp.addLayerInInitMode(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);

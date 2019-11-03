@@ -40,6 +40,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -49,6 +50,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.concurrent.CompletableFuture;
 
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.LEFT;
@@ -151,8 +153,8 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public TextLayer duplicate(boolean sameName) {
-        String duplicateName = sameName ? name : Utils.createCopyName(name);
+    public TextLayer duplicate(boolean compCopy) {
+        String duplicateName = compCopy ? name : Utils.createCopyName(name);
         TextLayer d = new TextLayer(comp, duplicateName);
 
         d.translationX = translationX;
@@ -163,9 +165,7 @@ public class TextLayer extends ContentLayer {
 
         d.setSettings(new TextSettings(settings));
 
-        if (hasMask()) {
-            d.addConfiguredMask(mask.duplicate(d));
-        }
+        duplicateMask(d, compCopy);
 
         return d;
     }
@@ -209,7 +209,7 @@ public class TextLayer extends ContentLayer {
     public ImageLayer replaceWithRasterized() {
         BufferedImage rasterizedImage = createRasterizedImage();
 
-        ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName(), null);
+        ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
 
         TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
         History.addEdit(edit);
@@ -324,8 +324,9 @@ public class TextLayer extends ContentLayer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight) {
+    public CompletableFuture<Void> resize(Dimension newSize) {
         // TODO
+        return CompletableFuture.completedFuture(null);
     }
 
     public Shape getTextShape() {

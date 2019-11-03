@@ -30,6 +30,7 @@ import pixelitor.utils.VisibleForTesting;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -63,27 +64,41 @@ public class LayerButton extends JToggleButton implements LayerUI {
     // and in unit tests the drag handler is not added at all.
     private boolean maskAddedBeforeDragHandler;
 
+    /**
+     * Represents the selection state of the layer and mask icons.
+     */
     private enum SelectionState {
+        /**
+         * The layer is not the active layer.
+         */
         UNSELECTED {
             @Override
-            public void activate(JLabel layer, JLabel mask) {
-                layer.setBorder(unSelectedIconOnUnselectedLayerBorder);
+            public void show(JLabel layer, JLabel mask) {
+                layer.setBorder(unselectedIconOnUnselectedLayerBorder);
                 if (mask != null) {
-                    mask.setBorder(unSelectedIconOnUnselectedLayerBorder);
+                    mask.setBorder(unselectedIconOnUnselectedLayerBorder);
                 }
             }
-        }, SELECT_LAYER {
+        },
+        /**
+         * The layer is active, but not in mask editing mode.
+         */
+        SELECT_LAYER {
             @Override
-            public void activate(JLabel layer, JLabel mask) {
+            public void show(JLabel layer, JLabel mask) {
                 layer.setBorder(selectedBorder);
                 if (mask != null) {
-                    mask.setBorder(unSelectedIconOnSelectedLayerBorder);
+                    mask.setBorder(unselectedIconOnSelectedLayerBorder);
                 }
             }
-        }, SELECT_MASK {
+        },
+        /**
+         * The layer is active, and in mask editing mode.
+         */
+        SELECT_MASK {
             @Override
-            public void activate(JLabel layer, JLabel mask) {
-                layer.setBorder(unSelectedIconOnSelectedLayerBorder);
+            public void show(JLabel layer, JLabel mask) {
+                layer.setBorder(unselectedIconOnSelectedLayerBorder);
                 if (mask != null) {
                     mask.setBorder(selectedBorder);
                 }
@@ -102,26 +117,37 @@ public class LayerButton extends JToggleButton implements LayerUI {
             }
         }
 
+        // used only in other borders
         private static final Border darkBorder
                 = createLineBorder(SELECTED_COLOR, 1);
+
+        // indicates the selection of a layer or mask icon
         private static final Border selectedBorder
                 = createCompoundBorder(lightBorder, darkBorder);
-        private static final Border unSelectedIconOnSelectedLayerBorder
+
+        // the icon is unselected, but it is on a selected layer
+        private static final Border unselectedIconOnSelectedLayerBorder
                 = createLineBorder(SELECTED_COLOR, BORDER_WIDTH);
-        private static final Border unSelectedIconOnUnselectedLayerBorder
+
+        // the icon is unselected, and it is on a unselected layer
+        private static final Border unselectedIconOnUnselectedLayerBorder
                 = createLineBorder(UNSELECTED_COLOR, BORDER_WIDTH);
 
-        public abstract void activate(JLabel layer, JLabel mask);
+        /**
+         * Shows a selection state on a given layer and mask icon.
+         * The mask argument can be null, if there is no mask.
+         */
+        public abstract void show(JLabel layer, JLabel mask);
     }
 
-    private SelectionState selectionState = SelectionState.UNSELECTED;
+    private SelectionState selectionState;
 
     private final Layer layer;
     private boolean userInteraction = true;
 
     private JCheckBox visibilityCB;
     private LayerNameEditor nameEditor;
-    private final JLabel layerIconLabel;
+    private JLabel layerIconLabel;
     private JLabel maskIconLabel;
 
     /**
@@ -131,6 +157,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     public LayerButton(Layer layer) {
         assert !Build.isUnitTesting() : "Swing component in unit test";
+        assert EventQueue.isDispatchThread();
 
         this.layer = layer;
 
@@ -139,6 +166,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
         initVisibilityControl(layer);
         initLayerNameEditor(layer);
 
+        configureLayerIcon(layer);
+
+        if (layer.hasMask()) {
+            addMaskIconLabel();
+        }
+
+        wireSelectionWithLayerActivation(layer);
+    }
+
+    private void configureLayerIcon(Layer layer) {
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = Icons.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
@@ -184,12 +221,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
             }
         });
 
-        configureLayerIcon(layerIconLabel, "layerIcon");
-        configureBorders(layer.isMaskEditing());
-
+        layerIconLabel.setName("layerIcon");
         add(layerIconLabel, LayerButtonLayout.LAYER);
-
-        wireSelectionWithLayerActivation(layer);
     }
 
     private void layerPopupTriggered(MouseEvent e) {
@@ -197,10 +230,6 @@ public class LayerButton extends JToggleButton implements LayerUI {
         if (popup != null) {
             popup.show(this, e.getX(), e.getY());
         }
-    }
-
-    private static void configureLayerIcon(JLabel layerIcon, String name) {
-        layerIcon.setName(name);
     }
 
     public static void selectLayerIfIconClicked(MouseEvent e) {
@@ -233,21 +262,21 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void wireSelectionWithLayerActivation(Layer layer) {
-        addItemListener(e -> buttonSelectedOrDeselected(layer));
+        addItemListener(e ->
+                // invoke later, when isSelected() returns the correct value
+                EventQueue.invokeLater(() ->
+                        buttonActivationChanged(layer)));
     }
 
-    private void buttonSelectedOrDeselected(Layer layer) {
+    private void buttonActivationChanged(Layer layer) {
         if (isSelected()) {
+            // the layer was just activated
             layer.makeActive(userInteraction);
         } else {
+            // the layer was just deactivated
             nameEditor.disableEditing();
-            // Invoke later because we can get here in the middle
-            // of a new layer activation, when isSelected still
-            // returns false, but the layer will be selected during
-            // the same event processing.
-            SwingUtilities.invokeLater(() ->
-                    configureBorders(layer.isMaskEditing()));
         }
+        updateBorders();
     }
 
     @Override
@@ -327,30 +356,33 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void updateLayerIconImage(ImageLayer layer) {
+        assert EventQueue.isDispatchThread();
+
         boolean isMask = layer instanceof LayerMask;
 
         BufferedImage img = layer.getCanvasSizedSubImage();
 
         Runnable notEDT = () -> {
             CheckerboardPainter painter = null;
-            if(!isMask) {
+            if (!isMask) {
                 painter = checkerBoardPainter;
             }
 
             BufferedImage thumb = createThumbnail(img, thumbSize, painter);
 
             SwingUtilities.invokeLater(() ->
-                updateIconOnEDT(layer, isMask, thumb));
+                    updateIconOnEDT(layer, isMask, thumb));
         };
         ThreadPool.submit(notEDT);
     }
 
     private void updateIconOnEDT(ImageLayer layer, boolean isMask, BufferedImage thumb) {
+        assert EventQueue.isDispatchThread();
         if (isMask) {
             if (!hasMaskIcon()) {
                 return;
             }
-            boolean disabledMask = !layer.getParent().isMaskEnabled();
+            boolean disabledMask = !layer.getOwner().isMaskEnabled();
             if (disabledMask) {
                 ImageUtils.paintRedXOn(thumb);
             }
@@ -363,9 +395,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void addMaskIconLabel() {
+        assert !hasMaskIcon();
+
         maskIconLabel = new JLabel("", null, CENTER);
-        maskIconLabel
-            .setToolTipText("<html>" +
+        maskIconLabel.setToolTipText("<html>" +
                 "<b>Click</b> activates mask editing,<br>" +
                 "<b>Shift-click</b> disables/enables the mask,<br>" +
                 "<b>Alt-click</b> toggles mask/layer view,<br>" +
@@ -373,8 +406,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
                 "<b>Right-click</b> shows more options");
 
         LayerMaskActions.addPopupMenu(maskIconLabel, layer);
-        configureLayerIcon(maskIconLabel, "maskIcon");
-        configureBorders(layer.isMaskEditing());
+        maskIconLabel.setName("maskIcon");
         add(maskIconLabel, LayerButtonLayout.MASK);
 
         // there is another mouse listener for the right-click popups
@@ -401,8 +433,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         if (altClick && shiftClick) {
             String reason = "mask icon shift-alt-clicked";
-            // shift-alt-click switches to RUBYLITH except when
-            // it is already RUBYLITH
+            // shift-alt-click switches to RUBYLITH
+            // except when it already is in RUBYLITH
             View view = layer.getComp().getView();
             if (view.getMaskViewMode() == MaskViewMode.RUBYLITH) {
                 MaskViewMode.EDIT_MASK.activate(view, layer, reason);
@@ -411,8 +443,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
             }
         } else if (altClick) {
             String reason = "mask icon alt-clicked";
-            // alt-click switches to SHOW_MASK except when it
-            // already is in SHOW_MASK
+            // alt-click switches to SHOW_MASK
+            // except when it already is in SHOW_MASK
             View view = layer.getComp().getView();
             if (view.getMaskViewMode() == MaskViewMode.SHOW_MASK) {
                 MaskViewMode.EDIT_MASK.activate(view, layer, reason);
@@ -420,7 +452,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
                 MaskViewMode.SHOW_MASK.activate(view, layer, reason);
             }
         } else if (shiftClick) {
-            // shift-click disables except when it is already disabled
+            // shift-click disables, except when it is already disabled
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
         } else {
             View view = layer.getComp().getView();
@@ -434,8 +466,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void deleteMaskIconLabel() {
-        // TODO remove the two mouse listeners (left-click, right-click)?
-        // at least remove the drag reorder handler
+        // the two mouse listeners (left-click, right-click) could
+        // also be removed, but it is not important, because the
+        // the mask icon label is not going to be used again
         if (dragReorderHandler != null) { // null in unit tests
             dragReorderHandler.detachFromComponent(maskIconLabel);
         }
@@ -449,22 +482,29 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void configureBorders(boolean maskEditing) {
+    public void updateBorders() {
         SelectionState newSelectionState;
 
         if (!isSelected()) {
             newSelectionState = SelectionState.UNSELECTED;
         } else {
-            if (maskEditing) {
+            if (layer.isMaskEditing()) {
                 newSelectionState = SelectionState.SELECT_MASK;
             } else {
                 newSelectionState = SelectionState.SELECT_LAYER;
             }
         }
 
+//        System.out.println("LayerButton::updateBorders: "
+//                + "maskEditing = " + layer.isMaskEditing()
+//                + ", active = " + isSelected()
+//                + ", new selection state = " + newSelectionState
+//                + ", name = " + layer.getName());
+//        Thread.dumpStack();
+
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;
-            selectionState.activate(layerIconLabel, maskIconLabel);
+            selectionState.show(layerIconLabel, maskIconLabel);
         }
     }
 

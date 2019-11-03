@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,8 @@ public abstract class FilterWithGUI extends Filter {
                 .name("filterDialog")
                 .content(gui)
                 .withScrollbars()
-                .okAction(() -> dr.onDialogAccepted(getName()))
-                .cancelAction(dr::onDialogCanceled)
+                .okAction(() -> dr.onFilterDialogAccepted(getName()))
+                .cancelAction(dr::onFilterDialogCanceled)
                 .show();
     }
 }

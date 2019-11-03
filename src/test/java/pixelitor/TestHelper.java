@@ -86,7 +86,7 @@ public class TestHelper {
 
     public static ImageLayer createImageLayer(String layerName, Composition comp) {
         BufferedImage image = createImage();
-        ImageLayer layer = new ImageLayer(comp, image, layerName, null);
+        ImageLayer layer = new ImageLayer(comp, image, layerName);
 
         return layer;
     }

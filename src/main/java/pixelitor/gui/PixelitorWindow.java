@@ -184,7 +184,7 @@ public class PixelitorWindow extends JFrame {
     public void setHistogramsVisibility(boolean visible, boolean revalidate) {
         if (visible) {
             eastPanel.add(histogramsPanel);
-            OpenComps.onActiveComp(histogramsPanel::updateFromCompIfShown);
+            OpenComps.onActiveComp(histogramsPanel::updateFrom);
         } else {
             eastPanel.remove(histogramsPanel);
         }

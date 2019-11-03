@@ -194,7 +194,9 @@ public class FileChoosers {
     public static boolean saveWithChooser(Composition comp) {
         initSaveChooser();
 
-        String defaultExt = FileUtils.findExtension(comp.getName()).orElse("jpg");
+        String defaultExt = FileUtils
+                .findExtension(comp.getName())
+                .orElse(OutputFormat.getLastUsed().toString());
         saveChooser.setFileFilter(getFileFilterForExtension(defaultExt));
 
         return showSaveChooserAndSaveComp(comp, new SaveSettings());

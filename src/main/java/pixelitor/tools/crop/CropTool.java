@@ -437,6 +437,13 @@ public class CropTool extends DragTool {
     }
 
     @Override
+    public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        if (reloaded) {
+            resetInitialState();
+        }
+    }
+
+    @Override
     public void coCoordsChanged(View view) {
         if (cropBox != null && state == TRANSFORM) {
             cropBox.coCoordsChanged(view);

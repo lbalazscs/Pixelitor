@@ -34,6 +34,7 @@ import pixelitor.layers.LayerMaskActions.EnableDisableMaskAction;
 import pixelitor.layers.LayerMaskActions.LinkUnlinkMaskAction;
 import pixelitor.testutils.WithMask;
 
+import java.awt.Dimension;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -230,13 +231,14 @@ public class LayerTest {
     @Test
     public void test_resize() {
         Canvas canvas = layer.getComp().getCanvas();
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        Dimension origSize = canvas.getImSize();
 
-        layer.resize(canvasWidth, canvasHeight);
-        layer.resize(30, 25);
-        layer.resize(25, 30);
-        layer.resize(canvasWidth, canvasHeight);
+        layer.resize(origSize);
+        layer.resize(new Dimension(30, 25));
+        layer.resize(new Dimension(25, 30));
+        layer.resize(new Dimension(10, 1));
+        layer.resize(new Dimension(1, 10));
+        layer.resize(origSize);
 
         iconUpdates.check(0, 0);
     }

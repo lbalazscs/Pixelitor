@@ -217,17 +217,6 @@ public class Composition implements Serializable {
         builtSelection = null;
 
         in.defaultReadObject();
-
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ((ImageLayer) layer).updateIconImage();
-            }
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                mask.getUI().addMaskIconLabel();
-                mask.updateIconImage();
-            }
-        }
     }
 
     public View getView() {
@@ -304,8 +293,8 @@ public class Composition implements Serializable {
     }
 
     private void addBaseLayer(BufferedImage baseLayerImage) {
-        ImageLayer newLayer = new ImageLayer(this, baseLayerImage,
-                generateNewLayerName(), null);
+        ImageLayer newLayer = new ImageLayer(this,
+                baseLayerImage, generateNewLayerName());
 
         addLayerInInitMode(newLayer);
     }
@@ -424,20 +413,20 @@ public class Composition implements Serializable {
         deleteLayer(activeLayer, addToHistory, updateGUI);
     }
 
-    public void deleteLayer(Layer layerToBeDeleted, boolean addToHistory, boolean updateGUI) {
+    public void deleteLayer(Layer layer, boolean addToHistory, boolean updateGUI) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
 
-        int layerIndex = layerList.indexOf(layerToBeDeleted);
+        int layerIndex = layerList.indexOf(layer);
 
         if (addToHistory) {
-            History.addEdit(new DeleteLayerEdit(this, layerToBeDeleted, layerIndex));
+            History.addEdit(new DeleteLayerEdit(this, layer, layerIndex));
         }
 
-        layerList.remove(layerToBeDeleted);
+        layerList.remove(layer);
 
-        if (layerToBeDeleted == activeLayer) {
+        if (layer == activeLayer) {
             if (layerIndex > 0) {
                 setActiveLayer(layerList.get(layerIndex - 1), updateGUI);
             } else {  // deleted the fist layer, set the new first layer as active
@@ -446,7 +435,7 @@ public class Composition implements Serializable {
         }
 
         if (updateGUI) {
-            LayerUI ui = layerToBeDeleted.getUI();
+            LayerUI ui = layer.getUI();
             view.deleteLayerUI(ui);
 
             if (isActive()) {
@@ -484,6 +473,9 @@ public class Composition implements Serializable {
         if (addToHistory) {
             History.addEdit(new LayerSelectionChangeEdit(
                     editName, this, oldLayer, newActiveLayer));
+
+            // shouldn't run in initialization code
+            Tools.imageChanged(activeLayer);
         }
 
         assert checkInvariant();
@@ -667,11 +659,11 @@ public class Composition implements Serializable {
         int numLayers = getNumLayers();
         BufferedImage bi = getCompositeImage();
 
-        Layer flattenedLayer = new ImageLayer(this, bi, "flattened", null);
+        Layer flattened = new ImageLayer(this, bi, "flattened");
         new LayerAdder(this)
                 .atIndex(numLayers) // add to the top
                 .noRefresh()
-                .add(flattenedLayer);
+                .add(flattened);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
             deleteLayer(i, false);
@@ -841,7 +833,7 @@ public class Composition implements Serializable {
 
     public void addNewLayerFromComposite() {
         ImageLayer newLayer = new ImageLayer(this,
-                getCompositeImage(), "Composite", null);
+                getCompositeImage(), "Composite");
 
         new LayerAdder(this)
                 .withHistory("New Layer from Composite")
@@ -1131,7 +1123,7 @@ public class Composition implements Serializable {
         }
 
         if (actions.histogramChanged()) {
-            HistogramsPanel.INSTANCE.updateFromCompIfShown(this);
+            HistogramsPanel.INSTANCE.updateFrom(this);
         }
     }
 
@@ -1258,14 +1250,15 @@ public class Composition implements Serializable {
 
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
-        OutputFormat outputFormat = saveSettings.getOutputFormat();
+        OutputFormat format = saveSettings.getOutputFormat();
         File f = saveSettings.getFile();
 
         if (Build.isDevelopment()) {
             System.out.println("Composition::saveAsync: saving " + f.getAbsolutePath());
         }
 
-        Runnable saveTask = outputFormat.getSaveTask(this, saveSettings);
+        Runnable saveTask = format.getSaveTask(this, saveSettings);
+        OutputFormat.setLastUsed(format);
         return saveAsync(saveTask, f, addToRecentMenus);
     }
 
@@ -1414,7 +1407,7 @@ public class Composition implements Serializable {
 
     public static class LayerAdder {
         private final Composition comp;
-        private String historyName; // null if the add should not be added to history
+        private String editName; // null if the add should not be added to history
         private int newLayerIndex = -1;
         private boolean refresh = true;
 
@@ -1427,8 +1420,8 @@ public class Composition implements Serializable {
             this.comp = comp;
         }
 
-        public LayerAdder withHistory(String historyName) {
-            this.historyName = historyName;
+        public LayerAdder withHistory(String editName) {
+            this.editName = editName;
             return this;
         }
 
@@ -1477,7 +1470,7 @@ public class Composition implements Serializable {
         public void add(Layer newLayer) {
             Layer activeLayerBefore = null;
             MaskViewMode oldViewMode = null;
-            if (historyName != null) {
+            if (editName != null) {
                 activeLayerBefore = comp.activeLayer;
                 oldViewMode = comp.view.getMaskViewMode();
             }
@@ -1499,8 +1492,8 @@ public class Composition implements Serializable {
                     comp.imageChanged();
                 }
             }
-            if (historyName != null) {
-                History.addEdit(new NewLayerEdit(historyName,
+            if (editName != null) {
+                History.addEdit(new NewLayerEdit(editName,
                         comp, newLayer, activeLayerBefore, oldViewMode));
             }
             assert comp.checkInvariant();

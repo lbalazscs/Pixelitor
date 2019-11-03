@@ -22,11 +22,13 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.Utils;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A global adjustment to all the layers that are bellow this layer
@@ -51,21 +53,20 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public Layer duplicate(boolean sameName) {
+    public Layer duplicate(boolean compCopy) {
         // TODO the filter should be copied so that it can be adjusted independently
-        String duplicateName = sameName ? name : Utils.createCopyName(name);
+        String duplicateName = compCopy ? name : Utils.createCopyName(name);
         AdjustmentLayer d = new AdjustmentLayer(comp, duplicateName, filter);
 
-        if (hasMask()) {
-            d.addConfiguredMask(mask.duplicate(d));
-        }
+        duplicateMask(d, compCopy);
 
         return d;
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight) {
+    public CompletableFuture<Void> resize(Dimension newSize) {
         // do nothing
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override

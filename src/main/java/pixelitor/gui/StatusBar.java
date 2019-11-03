@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,10 +77,19 @@ public class StatusBar extends JPanel {
         private final JLabel msgLabel;
         private final JPanel leftPanel;
         private final JProgressBar progressBar;
+        private final boolean determinate;
 
         public StatusBarProgressHandler(JPanel leftPanel, String msg, int max) {
             this.leftPanel = leftPanel;
-            progressBar = new JProgressBar(0, max);
+
+            determinate = max > 0;
+
+            if (determinate) {
+                progressBar = new JProgressBar(0, max);
+            } else {
+                progressBar = new JProgressBar(0, 100);
+                progressBar.setIndeterminate(true);
+            }
             msgLabel = new JLabel(msg);
 
             leftPanel.add(msgLabel);
@@ -95,6 +104,7 @@ public class StatusBar extends JPanel {
         @Override
         public void updateProgress(int value) {
             assert EventQueue.isDispatchThread() : "not EDT thread";
+            assert determinate;
 
             progressBar.setValue(value);
             leftPanel.paintImmediately(progressBar.getBounds());
@@ -103,6 +113,12 @@ public class StatusBar extends JPanel {
         @Override
         public void stopProgress() {
             assert EventQueue.isDispatchThread() : "not EDT thread";
+
+            if (determinate) {
+                // not sure if this is necessary to stop the animation, but can't be bad
+                progressBar.setValue(100);
+                progressBar.setIndeterminate(false);
+            }
 
             leftPanel.remove(progressBar);
             leftPanel.remove(msgLabel);

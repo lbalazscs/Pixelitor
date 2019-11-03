@@ -27,6 +27,7 @@ import pixelitor.Layers;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
 import pixelitor.layers.LayerMask;
@@ -124,12 +125,12 @@ public class View extends JComponent
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
         History.addEdit(new CompositionReplacedEdit(
-                "Reload", this, comp, newComp, null));
+                "Reload", true, this, comp, newComp, null));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
         SelectionActions.setEnabled(false, newComp);
 
         String msg = format(
-                "<html>The image '%s' was reloaded from the file <b>%s</b>.",
+                "<html>The image <b>%s</b> was reloaded from the file <b>%s</b>.",
                 newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
     }
@@ -158,15 +159,12 @@ public class View extends JComponent
         newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
 
-//        if (ImageArea.currentModeIs(TABS)) {
-//            repaint();
-//        }
-
         Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
 
         revalidate(); // make sure the scrollbars are OK if the new comp has a different size
         canvasCoSizeChanged();
         repaint();
+        HistogramsPanel.INSTANCE.updateFrom(newComp);
     }
 
     private void addListeners() {
@@ -790,9 +788,18 @@ public class View extends JComponent
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = (LayerButton) newLayer.getUI();
         layersPanel.addLayerButton(layerButton, newLayerIndex);
+        layerButton.updateBorders();
 
         if (OpenComps.isActive(this)) {
             Layers.numLayersChanged(comp, comp.getNumLayers());
+        }
+
+        if (newLayer instanceof ImageLayer) {
+            ImageLayer imageLayer = (ImageLayer) newLayer;
+            imageLayer.updateIconImage();
+        }
+        if (newLayer.hasMask()) {
+            newLayer.getMask().updateIconImage();
         }
     }
 

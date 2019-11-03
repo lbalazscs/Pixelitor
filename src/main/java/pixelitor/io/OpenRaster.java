@@ -217,19 +217,20 @@ public class OpenRaster {
                 //workaround: paint.net exported files use "visible" attribute instead of "visibility"
                 layerVisibility = layerVisible;
             }
-            boolean visibility = layerVisibility == null ? true : layerVisibility.equals("visible");
+            boolean visibility = layerVisibility == null || layerVisibility.equals("visible");
 
-            ImageLayer layer = new ImageLayer(comp, image, layerName, null);
+            int tx = Utils.parseInt(layerX, 0);
+            int ty = Utils.parseInt(layerY, 0);
+            // TODO assuming that there is no layer mask
+            ImageLayer layer = new ImageLayer(comp, image, layerName,
+                    null, tx, ty);
+
             layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
             layer.setBlendingMode(blendingMode, false, false, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
             layer.setOpacity(opacity, false, false, false);
-            int tX = Utils.parseInt(layerX, 0);
-            int tY = Utils.parseInt(layerY, 0);
-            // TODO assuming that there is no layer mask
-            layer.setTranslation(tX, tY);
 
             comp.addLayerInInitMode(layer);
         }

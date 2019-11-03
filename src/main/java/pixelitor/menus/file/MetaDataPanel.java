@@ -195,14 +195,16 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         Composition comp = OpenComps.getActiveCompOrNull();
         File file = comp.getFile();
         if (file == null) {
-            Dialogs.showInfoDialog(pw, "No file", "There is no file for " + comp.getName());
+            Dialogs.showInfoDialog(pw, "No file", format(
+                    "<html>There is no file for <b>%s</b>.",
+                    comp.getName()));
             return;
         }
         if (!file.exists()) {
             String msg = format(
-                    "<html>The metadata for '%s' cannot be shown because the file<br>" +
+                    "<html>The metadata for <b>%s</b> cannot be shown because the file<br>" +
                             "<b>%s</b><br>" +
-                            "does not exist anymore.",
+                            "doesn't exist anymore.",
                     comp.getName(), file.getAbsolutePath());
             Messages.showError("File not found", msg);
             return;

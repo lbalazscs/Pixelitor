@@ -92,8 +92,10 @@ public class History {
         if (ignoreEdits) {
             return;
         }
+
         Composition comp = edit.getComp();
-        comp.setDirty(true);
+
+        makeDirty(edit, comp);
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);
@@ -109,6 +111,18 @@ public class History {
             Events.postAddToHistoryEvent(edit);
 
             ConsistencyChecks.checkAll(comp, false);
+        }
+    }
+
+    // every edit makes the comp dirty except a reload
+    // TODO there are other exceptions, like selection edits
+    private static void makeDirty(PixelitorEdit edit, Composition comp) {
+        boolean makesDirty = true;
+        if (edit instanceof CompositionReplacedEdit) {
+            makesDirty = !((CompositionReplacedEdit) edit).isReload();
+        }
+        if (makesDirty) {
+            comp.setDirty(true);
         }
     }
 

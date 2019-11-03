@@ -22,11 +22,13 @@ import pixelitor.filters.comp.Flip;
 import pixelitor.filters.comp.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
 
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A "smart object" that contains an embedded composition
@@ -61,7 +63,8 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public Layer duplicate(boolean sameName) {
+    public Layer duplicate(boolean compCopy) {
+
         return null; // TODO
     }
 
@@ -76,8 +79,8 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public void resize(int targetWidth, int targetHeight) {
-
+    public CompletableFuture<Void> resize(Dimension newSize) {
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override

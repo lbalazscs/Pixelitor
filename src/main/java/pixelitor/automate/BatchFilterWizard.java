@@ -22,6 +22,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Drawable;
 
 import java.awt.Component;
+import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.ChangeReason.BATCH_AUTOMATE;
 import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
@@ -56,7 +57,7 @@ public class BatchFilterWizard extends Wizard {
                     filter.run(
                             comp.getActiveDrawableOrThrow(),
                             BATCH_AUTOMATE, busyCursorParent);
-                    return comp;
+                    return CompletableFuture.completedFuture(comp);
                 },
                 dialogTitle);
     }

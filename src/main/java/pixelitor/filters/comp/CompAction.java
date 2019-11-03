@@ -18,9 +18,11 @@ package pixelitor.filters.comp;
 
 import pixelitor.Composition;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * An action that acts on a {@link Composition}
  */
 public interface CompAction {
-    Composition process(Composition comp);
+    CompletableFuture<Composition> process(Composition comp);
 }
