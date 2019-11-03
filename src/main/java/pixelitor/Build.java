@@ -19,6 +19,7 @@ package pixelitor;
 
 import org.jdesktop.swingx.plaf.basic.BasicHyperlinkUI;
 import org.jdesktop.swingx.plaf.macosx.MacOSXErrorPaneUI;
+import pixelitor.history.History;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 
@@ -83,6 +84,7 @@ public enum Build {
 
     public static void setUnitTestingMode() {
         unitTesting = true;
+        History.setUndoLevels(15);
         Utils.makeSureAssertionsAreEnabled();
     }
 }
