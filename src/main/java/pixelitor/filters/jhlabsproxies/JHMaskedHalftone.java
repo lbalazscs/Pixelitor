@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
 
     protected final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     protected final BooleanParam invert = new BooleanParam("Invert Pattern", false);
-    protected final RangeParam stripesDistance = new RangeParam("Stripes Distance (px)", 1, 20, 100);
+    protected final RangeParam stripesDistance = new RangeParam("Stripes Distance (px)", 1, 20, 101);
     protected final IntChoiceParam repetitionType = new IntChoiceParam("Stripes Type",
             new IntChoiceParam.Value[]{
                     new IntChoiceParam.Value("Symmetric", REPETITION_REFLECT),

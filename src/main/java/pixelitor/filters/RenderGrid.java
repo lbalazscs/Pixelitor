@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import java.awt.geom.Path2D;
  */
 public class RenderGrid extends ShapeFilter {
     private final GroupedRangeParam divisions = new GroupedRangeParam(
-            "Divisions", 1, 4, 50, false);
+            "Divisions", 1, 4, 49, false);
 
     public RenderGrid() {
         addParamsToFront(divisions);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,54 +30,53 @@ import java.awt.image.BufferedImage;
 public class BrightnessContrast extends ParametrizedFilter {
     public static final String NAME = "Brightness/Contrast";
 
-    private final RangeParam power = new RangeParam("Brightness Power (%)", 50, 100, 150);
-    private final RangeParam multiply = new RangeParam("Brightness Multiply (%)", 1, 100, 200);
-    private final RangeParam add = new RangeParam("Brightness Add", -255, 0, 255);
-    private final RangeParam contrast = new RangeParam("Contrast", -255, 0, 255);
+    private final RangeParam brightnessParam = new RangeParam("Brightness", -100, 0, 100);
+    private final RangeParam contrastParam = new RangeParam("Contrast", -100, 0, 100);
 
     public BrightnessContrast() {
         super(ShowOriginal.YES);
 
         setParams(
-                power,
-                multiply,
-                add,
-                contrast
+                brightnessParam,
+                contrastParam
         );
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int addValue = add.getValue();
-        int contrastValue = contrast.getValue();
-
-        if ((addValue == 0) && (multiply.getValue() == 100) && (power.getValue() == 100) && contrastValue == 0) {
+        if (brightnessParam.isZero() && contrastParam.isZero()) {
             return src;
         }
 
-        int[] srcData = ImageUtils.getPixelsAsArray(src);
-        int[] destData = ImageUtils.getPixelsAsArray(dest);
+        // prepare brightness
+        double brightnessValue = brightnessParam.getValue() / 10.0;
+        double pow = -brightnessValue + 1;
+        if(brightnessValue > 0) {
+            pow = 1.0 / (brightnessValue + 1);
+        }
+        double normalize = Math.pow(255, pow - 1);
 
-        float multiplyValue = multiply.getValueAsPercentage();
-        float powerValue = power.getValueAsPercentage();
-
-        int[] lookup = new int[256];
-
-
+        // prepare contrast
+        double contrastValue = contrastParam.getValue() * 2.55;
         double contrastFactor = (259.0 * (contrastValue + 255)) / (255.0 * (259 - contrastValue));
 
+        // create the lookup table
+        int[] lookup = new int[256];
         for (int i = 0; i < lookup.length; i++) {
-            float lookupValue = i; // by default do nothing
+            double lookupValue = i; // by default do nothing
 
-            lookupValue = (float) Math.pow(lookupValue, powerValue);
-            int lookupValueInt = ((int) (lookupValue * multiplyValue)) + addValue;
+            // modify for brightness
+            lookupValue = (float) Math.pow(lookupValue, pow) / normalize;
 
-            // contrastValue
-            lookupValueInt = (int) (contrastFactor * (lookupValueInt - 128) + 128);
+            // modify for contrast
+            lookupValue = (contrastFactor * (lookupValue - 128) + 128);
 
-            lookup[i] = PixelUtils.clamp(lookupValueInt);
+            lookup[i] = PixelUtils.clamp((int) lookupValue);
         }
 
+        // transform the image
+        int[] srcData = ImageUtils.getPixelsAsArray(src);
+        int[] destData = ImageUtils.getPixelsAsArray(dest);
         for (int i = 0; i < destData.length; i++) {
             int rgb = srcData[i];
 

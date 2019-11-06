@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class Voronoi extends ParametrizedFilter {
     public static final String NAME = "Voronoi Diagram";
 
-    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 10, 200);
+    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 10, 221);
     private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);

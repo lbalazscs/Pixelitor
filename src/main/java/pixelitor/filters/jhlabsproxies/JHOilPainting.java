@@ -45,7 +45,7 @@ public class JHOilPainting extends ParametrizedFilter {
     private final GroupedRangeParam brushSize = new GroupedRangeParam(
             "Brush Size", 0, 1, 10, false);
     private final RangeParam coarseness = new RangeParam(
-            "Coarseness", 2, 25, 255);
+            "Coarseness", 0, 25, 200);
     private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality",
             new Value[]{
                     new Value("Faster", FASTER),
@@ -74,7 +74,7 @@ public class JHOilPainting extends ParametrizedFilter {
         // is different for big and small images
         OilFilter filter = new OilFilter(NAME);
 
-        filter.setLevels(coarseness.getValue());
+        filter.setLevels(coarseness.getValue() + 1);
 
         ResizingFilterHelper r = new ResizingFilterHelper(src);
         if (r.shouldResize()) {

@@ -60,13 +60,13 @@ public class FractalTree extends ParametrizedFilter {
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 40, 100);
     private final GroupedRangeParam width = new GroupedRangeParam("Width",
             new RangeParam[]{
-                    new RangeParam("Overall", 100, 100, 300),
-                    new RangeParam("Trunk", 100, 200, 500),
+                    new RangeParam("Overall", 50, 100, 300),
+                    new RangeParam("Trunk", 50, 200, 500),
             },
             false);
 
-    private final RangeParam zoom = new RangeParam("Zoom", 10, 100, 200);
-    private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 50);
+    private final RangeParam zoom = new RangeParam("Zoom", 1, 100, 301);
+    private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 48);
     private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
             "Gravity", "Wind", -100, 0, 100, false);
     private final IntChoiceParam quality = new IntChoiceParam("Quality", new Value[]{
@@ -101,8 +101,8 @@ public class FractalTree extends ParametrizedFilter {
                 randomnessParam,
                 curvedness,
                 angle,
-                physics.setLinkable(false),
-                width.setLinkable(false),
+                physics.notLinkable(),
+                width.notLinkable().withAdjustedRange(0.5),
                 colors,
                 quality
         ).withAction(ReseedSupport.createAction());
@@ -113,7 +113,7 @@ public class FractalTree extends ParametrizedFilter {
         Random rand = ReseedSupport.reInitialize();
         leftFirst = true;
 
-        defaultLength = zoom.getValue() / 10.0;
+        defaultLength = src.getHeight() * zoom.getValueAsPercentage() / 100.0;
         randPercent = randomnessParam.getValue() / 100.0;
         hasRandomness = randomnessParam.getValue() > 0;
         lengthDeviation = defaultLength * randPercent;
@@ -169,7 +169,7 @@ public class FractalTree extends ParametrizedFilter {
         pt = new StatusBarProgressTracker(NAME, drawTreeCalls);
 
         drawTree(g, src.getWidth() / 2.0, src.getHeight(),
-                270 + calcAngleRandomness(rand), maxDepth, rand, c);
+                270 + genAngleRandomness(rand), maxDepth, rand, c);
 
         g.dispose();
         pt.finished();
@@ -191,8 +191,8 @@ public class FractalTree extends ParametrizedFilter {
         }
 
         double angleRad = Math.toRadians(angle);
-        double x2 = x1 + FastMath.cos(angleRad) * depth * calcRandomLength(rand);
-        double y2 = y1 + FastMath.sin(angleRad) * depth * calcRandomLength(rand);
+        double x2 = x1 + FastMath.cos(angleRad) * depth * genRandomLength(rand);
+        double y2 = y1 + FastMath.sin(angleRad) * depth * genRandomLength(rand);
 
         g.setStroke(widthLookup[depth]);
         if (quality.getValue() == QUALITY_BETTER) {
@@ -211,8 +211,8 @@ public class FractalTree extends ParametrizedFilter {
 
         int split = this.angle.getValue();
 
-        double leftBranchAngle = angle - split + calcAngleRandomness(rand);
-        double rightBranchAngle = angle + split + calcAngleRandomness(rand);
+        double leftBranchAngle = angle - split + genAngleRandomness(rand);
+        double rightBranchAngle = angle + split + genAngleRandomness(rand);
 
         pt.unitDone();
 
@@ -282,7 +282,7 @@ public class FractalTree extends ParametrizedFilter {
         }
     }
 
-    private double calcAngleRandomness(Random rand) {
+    private double genAngleRandomness(Random rand) {
         if (!hasRandomness) {
             return 0;
         }
@@ -290,7 +290,7 @@ public class FractalTree extends ParametrizedFilter {
         return -angleDeviation + rand.nextDouble() * 2 * angleDeviation;
     }
 
-    private double calcRandomLength(Random rand) {
+    private double genRandomLength(Random rand) {
         if (!hasRandomness) {
             return defaultLength;
         }

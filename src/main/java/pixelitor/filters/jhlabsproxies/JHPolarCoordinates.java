@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class JHPolarCoordinates extends ParametrizedFilter {
     private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
     private final AngleParam angle = new AngleParam("Angle", 0);
 
     private PolarFilter filter;

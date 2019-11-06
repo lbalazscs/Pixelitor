@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,7 @@ public class JHPointillize extends ParametrizedFilter {
 
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
-    private final RangeParam fuzziness = new RangeParam("Fuzziness (%)", 0, 0, 100);
+    private final RangeParam fuzziness = new RangeParam("Fill Fuzziness (%)", 0, 0, 100);
     private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, FREE_OPACITY);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
@@ -65,6 +65,10 @@ public class JHPointillize extends ParametrizedFilter {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
         }));
+
+        fadeEdges.setupDisableOtherIfChecked(edgeColor);
+        fadeEdges.setupDisableOtherIfChecked(dotSize);
+        fadeEdges.setupDisableOtherIfChecked(fuzziness);
     }
 
     @Override

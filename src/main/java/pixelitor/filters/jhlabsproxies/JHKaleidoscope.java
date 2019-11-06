@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
     private final RangeParam sides = new RangeParam("Sides", 0, 3, 10);
 //    private final RangeParam radius = new RangeParam("Radius", 0, 999, 0);
 
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 

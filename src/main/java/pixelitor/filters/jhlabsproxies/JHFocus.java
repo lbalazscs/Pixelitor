@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.jhlabsproxies;
 
+import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.VariableBlurFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
@@ -37,9 +38,9 @@ public class JHFocus extends ParametrizedFilter {
     public static final String NAME = "Focus";
 
     private final ImagePositionParam center = new ImagePositionParam("Focused Area Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 1, 200, 1000, false);
-    private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 99);
-    private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 50);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Focused Area Radius (Pixels)", 0, 200, 1000, false);
+    private final RangeParam softness = new RangeParam("Transition Softness", 0, 20, 100);
+    private final GroupedRangeParam blurRadius = new GroupedRangeParam("Blur Radius", 0, 10, 48);
     private final RangeParam numberOfIterations = new RangeParam("Blur Iterations (Quality)", 1, 3, 10);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
@@ -68,6 +69,12 @@ public class JHFocus extends ParametrizedFilter {
         int vRadius = blurRadius.getValue(1);
         if (hRadius == 0 && vRadius == 0) {
             return src;
+        }
+        if(radius.getValue(0) == 0 || radius.getValue(1) == 0) {
+            if(invert.isChecked()) {
+                return src;
+            }
+            return new BoxBlurFilter(hRadius, vRadius, numberOfIterations.getValue(), getName()).filter(src, dest);
         }
 
         if (src.getWidth() == 1 || src.getHeight() == 1) {

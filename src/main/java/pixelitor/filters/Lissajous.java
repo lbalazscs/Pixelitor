@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,8 +30,8 @@ import java.awt.geom.Path2D;
 public class Lissajous extends ShapeFilter {
     private static final int NUMBER_OF_STEPS = 2000;
 
-    private final RangeParam a = new RangeParam("a", 1, 4, 42);
-    private final RangeParam b = new RangeParam("b", 1, 5, 42);
+    private final RangeParam a = new RangeParam("a", 1, 4, 41);
+    private final RangeParam b = new RangeParam("b", 1, 5, 41);
 
     public Lissajous() {
         addParamsToFront(

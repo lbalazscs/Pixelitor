@@ -60,7 +60,7 @@ public class PhotoCollage extends ParametrizedFilter {
 
     private final GroupedRangeParam size = new GroupedRangeParam("Photo Size", 40, 200, 999);
     private final RangeParam marginSize = new RangeParam("Margin", 0, 5, 20);
-    private final RangeParam imageNumber = new RangeParam("Number of Images", 1, 10, 100);
+    private final RangeParam imageNumber = new RangeParam("Number of Images", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutside = new BooleanParam("Allow Outside", true);
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_OPACITY);

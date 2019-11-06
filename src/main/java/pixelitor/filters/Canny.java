@@ -32,9 +32,9 @@ import java.awt.image.BufferedImage;
  */
 public class Canny extends ParametrizedFilter {
     private final RangeParam lowThreshold = new RangeParam(
-            "Low Threshold", 1, 250, 1000);
+            "Low Threshold", 1, 250, 961);
     private final RangeParam highThreshold = new RangeParam(
-            "High Threshold", 1, 750, 1000);
+            "High Threshold", 1, 750, 961);
     private final RangeParam gaussianKernelWidth = new RangeParam(
             "Gaussian Kernel Width", 2, 16, 50);
     private final RangeParam gaussianKernelRadius = new RangeParam(

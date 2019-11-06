@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.jhlabsproxies.JHFourColorGradient;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -33,7 +34,7 @@ import java.util.List;
  */
 public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
-    private final boolean addGridLabels;
+    private boolean addGridLabels;
 
     public GridAdjustmentPanel(ParametrizedFilter filter, Drawable dr,
                                boolean addGridLabels, ShowOriginal showOriginal) {
@@ -43,6 +44,12 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
 
     @Override
     public JPanel createFilterParamsPanel(List<FilterParam> paramList) {
+        // hack, otherwise the setting of the flag in the constructor is too late,
+        // because this is called by the superclass constructor
+        if(filter instanceof JHFourColorGradient) {
+            addGridLabels = true;
+        }
+
         // the central panel, with max 4 controls
         JPanel gridPanel = new JPanel();
         GridLayout layout;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,8 +39,8 @@ public class JHEmboss extends ParametrizedFilter {
             "Light Direction (Azimuth) - Degrees", 0);
     private final ElevationAngleParam lightElevation = new ElevationAngleParam(
             "Light Elevation Angle - Degrees", INTUITIVE_RADIANS_30);
-    private final RangeParam bumpHeight = new RangeParam(
-            "Depth", 2, 100, 500);
+    private final RangeParam depth = new RangeParam(
+            "Depth", 2, 100, 502);
     private final BooleanParam texture = new BooleanParam(
             "Texture (Multiply with the Source Image)", false);
 
@@ -52,7 +52,7 @@ public class JHEmboss extends ParametrizedFilter {
         setParams(
                 lightDirection,
                 lightElevation,
-                bumpHeight,
+                depth,
                 texture
         );
     }
@@ -64,7 +64,7 @@ public class JHEmboss extends ParametrizedFilter {
         }
 
         filter.setAzimuth((float) lightDirection.getValueInIntuitiveRadians());
-        filter.setBumpHeight(bumpHeight.getValueAsPercentage());
+        filter.setBumpHeight(depth.getValueAsPercentage());
         filter.setElevation((float) lightElevation.getValueInIntuitiveRadians());
         filter.setEmboss(texture.isChecked());
 

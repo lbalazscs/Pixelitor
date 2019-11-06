@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class GlassTiles extends ParametrizedFilter {
         setParams(
                 size.withAdjustedRange(0.5),
                 curvature,
-                phase.setLinkable(false),
+                phase.notLinkable(),
                 angle,
                 edgeAction,
                 interpolation

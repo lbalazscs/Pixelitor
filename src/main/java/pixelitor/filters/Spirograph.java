@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class Spirograph extends ShapeFilter {
     private static final int TYPE_HYPOTROCHOID = 1;
     private static final int TYPE_EPITROCHOID = 2;
 
-    private final RangeParam time = new RangeParam("Time", 0, 185, 1000);
+    private final RangeParam time = new RangeParam("Time", 0, 185, 800);
     private final GroupedRangeParam radii = new GroupedRangeParam("Radii",
             new RangeParam[]{
                     new RangeParam("r", 1, 224, 500),
@@ -47,12 +47,12 @@ public class Spirograph extends ShapeFilter {
             new Value("Epitrochoid", TYPE_EPITROCHOID),
     }, IGNORE_RANDOMIZE);
 
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 1000);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 701);
 
     public Spirograph() {
         addParamsToFront(
                 time,
-                radii.setLinkable(false),
+                radii.notLinkable().withAdjustedRange(0.5),
                 type,
                 zoom
         );

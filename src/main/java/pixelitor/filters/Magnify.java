@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,9 +33,9 @@ import java.awt.image.BufferedImage;
 public class Magnify extends ParametrizedFilter {
     public static final String NAME = "Magnify";
 
-    private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 500);
+    private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 501);
     private final GroupedRangeParam outerRadius = new GroupedRangeParam("Radius", 0, 200, 999);
-    private final RangeParam outerInnerRadiusRatio = new RangeParam("Softness", 0, 100, 999);
+    private final RangeParam outerInnerRadiusRatio = new RangeParam("Softness", 0, 100, 1000);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final BooleanParam invert = new BooleanParam("Invert", false);

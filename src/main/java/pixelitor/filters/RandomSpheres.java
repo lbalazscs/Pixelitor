@@ -56,7 +56,7 @@ public class RandomSpheres extends ParametrizedFilter {
     private static final int COLORS_FG_BG = 2;
 
     private final RangeParam radius = new RangeParam("Radius", 2, 10, 100);
-    private final RangeParam density = new RangeParam("Density (%)", 1, 50, 200);
+    private final RangeParam density = new RangeParam("Density (%)", 1, 50, 221);
 
     private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source",
             new Value[]{

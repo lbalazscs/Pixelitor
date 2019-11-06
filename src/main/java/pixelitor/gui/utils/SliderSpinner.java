@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import static java.awt.Color.GRAY;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -150,18 +151,35 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     public void setupTicks() {
-        int range = model.getMaximum() - model.getMinimum();
-        int minorSpacing;
-        int majorSpacing;
-        if (range == 100) {
+        int max = model.getMaximum();
+        int min = model.getMinimum();
+        int range = max - min;
+        int minorSpacing = 0;
+        int majorSpacing = 0;
+
+        if (range == 90) {
+            minorSpacing = 0;
+            majorSpacing = 15;
+        } else if (range == 100) {
             minorSpacing = 0;
             majorSpacing = 25;
-//        } else if(range == 499) {
-//            minorSpacing = 25;
-//            majorSpacing = 100;
-        } else if (range >= 7) {
-            minorSpacing = (range + 1) / 8;
-            majorSpacing = 2 * minorSpacing;
+        } else if (range == 255) { // Levels, Solarize, etc.
+            minorSpacing = 0;
+            majorSpacing = 51;
+        } else if(min == 1 && max < 702 && range % 100 == 0) {
+            // special case for zoom sliders
+            setupZoomTicks(max);
+            return;
+        } else if (range >= 11) {
+            if (range % 4 == 0) {
+                majorSpacing = range / 4;
+                if (range % 8 == 0) {
+                    minorSpacing = range / 8;
+                }
+            } else {
+                minorSpacing = (range + 1) / 8;
+                majorSpacing = 2 * minorSpacing;
+            }
         } else { // dry brush has for example a range of only 5
             minorSpacing = 0;
             majorSpacing = 1;
@@ -178,10 +196,36 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             slider.setMinorTickSpacing(minorSpacing);
         }
 
+//        if(showMax) {
+//            // ensure that the max value is painted, see issue #91
+//            @SuppressWarnings("unchecked")
+//            Hashtable<Integer, JLabel> labels = slider.createStandardLabels(majorSpacing);
+//            labels.put(slider.getMaximum(), new JLabel(String.valueOf(slider.getMaximum())));
+//            slider.setLabelTable(labels);
+//        }
+
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
     }
 
+    private void setupZoomTicks(int max) {
+        @SuppressWarnings("unchecked")
+        Hashtable<Integer, JLabel> labels = slider.createStandardLabels(max + 1);
+
+        // so far the labels table contains only the minimum value
+        int percent = 100;
+        while(percent <= max) {
+            labels.put(percent, new JLabel(String.valueOf(percent)));
+            percent = percent + 100;
+        }
+
+        slider.setLabelTable(labels);
+
+        slider.setMajorTickSpacing(100);
+
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+    }
 
     public void showTicksAsFloat() {
         // TODO throws NullPointerException

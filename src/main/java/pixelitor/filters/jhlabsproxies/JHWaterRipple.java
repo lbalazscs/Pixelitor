@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class JHWaterRipple extends ParametrizedFilter {
 
     private final RangeParam radius = new RangeParam("Radius", 1, 300, 999);
     private final RangeParam wavelength = new RangeParam("Wavelength", 1, 25, 250);
-    private final RangeParam amplitude = new RangeParam("Amplitude", 1, 50, 100);
+    private final RangeParam amplitude = new RangeParam("Amplitude", 0, 50, 100);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
@@ -61,6 +61,10 @@ public class JHWaterRipple extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        if(amplitude.isZero()) {
+            return src;
+        }
+        
         if (filter == null) {
             filter = new WaterFilter(NAME);
         }

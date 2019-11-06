@@ -238,6 +238,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return (int) value;
     }
 
+    public boolean isZero() {
+        return getValue() == 0;
+    }
+
     public float getValueAsFloat() {
         return (float) value;
     }
@@ -351,6 +355,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             if (maxValue <= minValue) { // can happen with very small (for example 1x1) images
                 maxValue = minValue + 1;
             }
+
+            // make sure that the tic/label for max value is painted, see issue #91
+            maxValue += (4 - (maxValue - minValue) % 4);
+
             defaultValue = (int) (defaultToMaxRatio * maxValue);
             if (defaultValue > maxValue) {
                 defaultValue = maxValue;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,9 +31,9 @@ import java.awt.image.BufferedImage;
 public class RadialWaves extends ParametrizedFilter {
     public static final String NAME = "Radial Waves";
 
-    private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 100);
-    private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude", 0, 20, 100);
-    private final RangeParam phase = new RangeParam("Phase (time)", 0, 0, 360);
+    private final RangeParam angularDivision = new RangeParam("Angular Division", 1, 10, 101);
+    private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude (Amount)", 0, 20, 100);
+    private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();

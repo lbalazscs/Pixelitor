@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class JHWrapAroundArc extends ParametrizedFilter {
     private final RangeParam radius = new RangeParam("Radius", 0, 50, 500);
     private final RangeParam thickness = new RangeParam("Thickness", 0, 150, 500);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
-    private final RangeParam spread = new RangeParam("Divide Angle", 1, 2, 24);
+    private final RangeParam spread = new RangeParam("Divide Angle", 1, 2, 25);
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();

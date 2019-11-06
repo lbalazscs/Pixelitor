@@ -39,7 +39,7 @@ public class Morphology extends ParametrizedFilter {
     private static final int OP_OPEN = 10;
     private static final int OP_CLOSE = 11;
 
-    private final RangeParam radius = new RangeParam("Radius", 1, 1, 20);
+    private final RangeParam radius = new RangeParam("Radius", 1, 1, 21);
     private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Value[]{
             new Value("Diamond", MorphologyFilter.KERNEL_DIAMOND),
             new Value("Square", MorphologyFilter.KERNEL_SQUARE),

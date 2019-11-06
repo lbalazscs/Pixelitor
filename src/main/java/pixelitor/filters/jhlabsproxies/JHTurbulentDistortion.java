@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,8 +34,8 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     public static final String NAME = "Turbulent Distortion";
 
     private final RangeParam scale = new RangeParam("Size", 2, 20, 100);
-    private final RangeParam amount = new RangeParam("Amount", 1, 10, 100);
-    private final RangeParam turbulence = new RangeParam("Turbulence", 1, 50, 100);
+    private final RangeParam amount = new RangeParam("Amount", 0, 10, 100);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 50, 100);
     private final RangeParam time = new RangeParam("Time", 0, 0, 100);
 
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
@@ -58,6 +58,10 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        if(amount.isZero() || turbulence.isZero()) {
+            return src;
+        }
+
         if (filter == null) {
             filter = new MarbleFilter(NAME);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,12 +38,12 @@ public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
 
     private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), USER_ONLY_OPACITY);
-    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
     private final RangeParam dispersion = new RangeParam("Dispersion (Color Separation)", 0, 0, 100);
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 8);
-    private final RangeParam time = new RangeParam("Time", 0, 0, 999);
+    private final RangeParam time = new RangeParam("Time", 0, 0, 800);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
             true, BORDER, IGNORE_RANDOMIZE);
 
@@ -54,7 +54,7 @@ public class JHCaustics extends ParametrizedFilter {
 
         setParams(
                 bgColor,
-                scale.withAdjustedRange(0.5),
+                zoom,
                 brightness,
                 turbulence,
                 time,
@@ -75,7 +75,7 @@ public class JHCaustics extends ParametrizedFilter {
         filter.setBrightness(brightness.getValue());
         filter.setDispersion(dispersion.getValueAsPercentage());
         filter.setSamples(samples.getValue());
-        filter.setScale(scale.getValueAsFloat());
+        filter.setScale(zoom.getValueAsFloat());
         filter.setTime(time.getValueAsPercentage());
         filter.setTurbulence(turbulence.getValueAsFloat());
 

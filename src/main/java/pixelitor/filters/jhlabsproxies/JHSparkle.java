@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,10 +41,10 @@ public class JHSparkle extends ParametrizedFilter {
 
     private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 200, 500);
+    private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
-    private final RangeParam randomness = new RangeParam("Randomness", 0, 25, 50);
+    private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
 
     private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_OPACITY);
 

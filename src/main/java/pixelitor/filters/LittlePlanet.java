@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,8 +35,8 @@ public class LittlePlanet extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", -Math.PI / 2);
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 300);
-    private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 180);
+    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 301);
+    private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 170);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class Marble extends ParametrizedFilter {
     private final RangeParam time = new RangeParam("Time (Phase)", 0, 0, 100);
 
     private final RangeParam detailsLevel = new RangeParam("Level", 0, 3, 8);
-    private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 50);
+    private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 48);
 
     private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
             new Value("Lines", Impl.TYPE_LINES),
@@ -90,7 +90,7 @@ public class Marble extends ParametrizedFilter {
                 angle,
                 zoom.withAdjustedRange(0.25),
                 distortion,
-                details.setLinkable(false),
+                details.notLinkable(),
                 smoothDetails,
                 gradient
         ).withAction(new ReseedNoiseFilterAction());

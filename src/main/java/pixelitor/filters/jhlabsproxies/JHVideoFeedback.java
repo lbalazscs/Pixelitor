@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,8 @@ public class JHVideoFeedback extends ParametrizedFilter {
 
     private final RangeParam iterations = new RangeParam("Iterations", 2, 3, 30);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam rotation = new RangeParam("Rotation (degrees/iteration)", -30, 0, 30);
-    private final RangeParam zoom = new RangeParam("Zoom (percent/iteration)", -100, -10, -5);
+    private final RangeParam rotation = new RangeParam("Rotation (Degrees/Iteration)", -30, 0, 30);
+    private final RangeParam zoom = new RangeParam("Zoom (Percent/Iteration)", -100, -10, -4);
     private final RangeParam startOpacity = new RangeParam("Start Opacity (%)", 0, 100, 100);
     private final RangeParam endOpacity = new RangeParam("End Opacity (%)", 0, 100, 100);
 
@@ -55,7 +55,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (rotation.getValue() == 0 && zoom.getValue() == 0) {
+        if (rotation.isZero() && zoom.isZero()) {
             return src;
         }
 

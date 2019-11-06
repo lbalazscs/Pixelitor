@@ -49,7 +49,7 @@ public class Clouds extends ParametrizedFilter {
     }
 
     private final RangeParam scaleParam = new RangeParam("Zoom", 3, 100, 300);
-    private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 1, 50, 100);
+    private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 0, 50, 100);
 
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);

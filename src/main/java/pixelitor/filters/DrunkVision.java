@@ -56,7 +56,7 @@ public class DrunkVision extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (drunkenness.getValue() == 0) {
+        if (drunkenness.isZero()) {
             return src;
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,9 +102,10 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         }
     }
 
+    // necessary because SliderSpinner sets up the ticks only if it has TextPosition.BORDER
     private static void setupSliderTicks(SliderSpinner sliderSpinner, int maxAngleInDegrees) {
         if (maxAngleInDegrees == 360) {
-            sliderSpinner.setupTicks(180, 90);
+            sliderSpinner.setupTicks(90, 45);
         } else if (maxAngleInDegrees == 90) {
             sliderSpinner.setupTicks(15, 0);
         }

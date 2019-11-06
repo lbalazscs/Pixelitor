@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,7 @@ public class Flashlight extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
-    private final RangeParam softness = new RangeParam("Softness", 0, 20, 99);
+    private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final IntChoiceParam bg = new IntChoiceParam("Background", new Value[]{
             new Value("Black", Impl.BG_BLACK),

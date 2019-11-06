@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class JHWood extends ParametrizedFilter {
 
     private final RangeParam rings = new RangeParam("Rings", 1, 50, 100);
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
-    private final RangeParam stretch = new RangeParam("Stretch", 1, 10, 50);
+    private final RangeParam stretch = new RangeParam("Stretch", 0, 10, 50);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 100);
     private final RangeParam fibres = new RangeParam("Fibres", 0, 10, 100);
@@ -64,6 +64,8 @@ public class JHWood extends ParametrizedFilter {
                 fibres,
                 gain
         ).withAction(new ReseedNoiseFilterAction());
+
+        stretch.setupEnableOtherIfNotZero(angle);
     }
 
     @Override
@@ -74,7 +76,7 @@ public class JHWood extends ParametrizedFilter {
 
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
         filter.setScale(scale.getValueAsFloat());
-        filter.setStretch(stretch.getValueAsFloat());
+        filter.setStretch(stretch.getValueAsFloat() + 1.0f);
         filter.setRings(rings.getValueAsPercentage());
         filter.setTurbulence(turbulence.getValueAsPercentage());
         filter.setFibres(fibres.getValueAsPercentage());

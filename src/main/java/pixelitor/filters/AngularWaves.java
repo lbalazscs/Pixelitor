@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class AngularWaves extends ParametrizedFilter {
 
     private final RangeParam radialWL = new RangeParam("Radial Wavelength", 1, 20, 100);
     private final RangeParam amount = new RangeParam("Angular Amount (Degrees)", 0, 20, 90);
-    private final RangeParam phase = new RangeParam("Phase (time)", 0, 0, 360);
+    private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();

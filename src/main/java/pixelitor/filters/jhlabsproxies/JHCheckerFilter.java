@@ -43,7 +43,7 @@ public class JHCheckerFilter extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, NO_OPACITY);
     private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, NO_OPACITY);
-    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 50);
+    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 48);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
 //    private final RangeParam aaRes = new RangeParam("Anti-aliasing Quality", 1, 10, 2);

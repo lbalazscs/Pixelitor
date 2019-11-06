@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,10 @@ import java.awt.image.BufferedImage;
 public class JHPerspective extends ParametrizedFilter {
     public static final String NAME = "Perspective";
 
-    private final ImagePositionParam northWest = new ImagePositionParam("North West", 0.05f, 0.05f);
-    private final ImagePositionParam northEast = new ImagePositionParam("North East", 0.95f, 0.05f);
-    private final ImagePositionParam southWest = new ImagePositionParam("South West", 0.05f, 0.95f);
-    private final ImagePositionParam southEast = new ImagePositionParam("South East", 0.95f, 0.95f);
+    private final ImagePositionParam northWest = new ImagePositionParam("Northwest", 0.05f, 0.05f);
+    private final ImagePositionParam northEast = new ImagePositionParam("Northeast", 0.95f, 0.05f);
+    private final ImagePositionParam southWest = new ImagePositionParam("Southwest", 0.05f, 0.95f);
+    private final ImagePositionParam southEast = new ImagePositionParam("Southeast", 0.95f, 0.95f);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 
