@@ -210,7 +210,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
     private void setupZoomTicks(int max) {
         @SuppressWarnings("unchecked")
-        Hashtable<Integer, JLabel> labels = slider.createStandardLabels(max + 1);
+        Hashtable<Integer, JComponent> labels = slider.createStandardLabels(max + 1);
 
         // so far the labels table contains only the minimum value
         int percent = 100;
