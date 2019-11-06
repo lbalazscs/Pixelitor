@@ -1385,7 +1385,7 @@ public class MenuBar extends JMenuBar {
         sub.addAlwaysEnabledAction(new MenuAction("Create Splash Image") {
             @Override
             public void onClick() {
-                SplashImageCreator.createSplashImage();
+                SplashImageCreator.createSplashComp();
             }
         });
 

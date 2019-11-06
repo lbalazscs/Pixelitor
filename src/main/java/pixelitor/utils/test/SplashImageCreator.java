@@ -32,7 +32,6 @@ import pixelitor.filters.ValueNoise;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.View;
 import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
@@ -70,9 +69,10 @@ import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
  * Static methods for creating the splash images
  */
 public class SplashImageCreator {
-    private static final String SPLASH_SCREEN_FONT = "DejaVu Sans Light";
-    public static final int SPLASH_WIDTH = 400;
-    public static final int SPLASH_HEIGHT = 247;
+    private static final String SPLASH_SMALL_FONT = "DejaVu Sans Light";
+    private static final String SPLASH_MAIN_FONT = "Azonix";
+    private static final int SPLASH_WIDTH = 400;
+    private static final int SPLASH_HEIGHT = 247;
 
     private SplashImageCreator() {
     }
@@ -85,59 +85,45 @@ public class SplashImageCreator {
         if (!okPressed) {
             return;
         }
-        File lastSaveDir = Dirs.getLastSave();
-        int numCreatedImages = 64;
-        String msg = format("Save %d Splash Images: ", numCreatedImages);
-        ProgressHandler progressHandler = Messages.startProgress(msg, numCreatedImages);
+        int numImages = 64;
+        String msg = format("Save %d Splash Images: ", numImages);
+        ProgressHandler progressHandler = Messages.startProgress(msg, numImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
-        for (int i = 0; i < numCreatedImages; i++) {
+        for (int i = 0; i < numImages; i++) {
             int seqNo = i;
-            cf = cf.thenCompose(v -> makeSplashAsync(lastSaveDir, progressHandler, seqNo));
+            cf = cf.thenCompose(v -> makeSplashAsync(progressHandler, seqNo));
         }
-        cf.thenRunAsync(() -> {
-            progressHandler.stopProgress();
-            Messages.showInStatusBar(format(
-                    "Finished saving %d splash images to %s",
-                    numCreatedImages, lastSaveDir));
-        }, EventQueue::invokeLater);
-
+        cf.thenRunAsync(() -> cleanupAfterManySplashes(numImages, progressHandler),
+                EventQueue::invokeLater);
     }
 
-    private static CompletableFuture<Void> makeSplashAsync(File lastSaveDir,
-                                                           ProgressHandler progressHandler,
-                                                           int seqNo) {
-        return CompletableFuture.supplyAsync(() -> {
-            progressHandler.updateProgress(seqNo);
-
-            OutputFormat outputFormat = OutputFormat.getLastUsed();
-
-            String fileName = format("splash%04d.%s", seqNo, outputFormat.toString());
-
-            ValueNoise.reseed();
-            Composition comp = createSplashImage();
-            View view = comp.getView();
-
-            view.paintImmediately();
-
-            File f = new File(lastSaveDir, fileName);
-            comp.setFile(f);
-
-            return comp;
-        }, EventQueue::invokeLater).thenCompose(comp -> {
-            SaveSettings saveSettings = new SaveSettings(
-                    OutputFormat.getLastUsed(), comp.getFile());
-            return comp.saveAsync(saveSettings, false)
-                    // closed here because here we have a comp reference
-                    .thenAcceptAsync(v -> comp.getView().close(), EventQueue::invokeLater);
-        });
+    private static CompletableFuture<Void> makeSplashAsync(ProgressHandler ph, int seqNo) {
+        return CompletableFuture
+            .supplyAsync(() -> makeOneSplashImage(ph, seqNo), EventQueue::invokeLater)
+            .thenCompose(SplashImageCreator::saveAndCloseOneSplash);
     }
 
-    public static Composition createSplashImage() {
+    private static Composition makeOneSplashImage(ProgressHandler ph, int seqNo) {
+        ph.updateProgress(seqNo);
+
+        Composition comp = createSplashComp();
+        comp.getView().paintImmediately();
+
+        OutputFormat format = OutputFormat.getLastUsed();
+        String fileName = format("splash%04d.%s", seqNo, format.toString());
+        File f = new File(Dirs.getLastSave(), fileName);
+        comp.setFile(f);
+
+        return comp;
+    }
+
+    public static Composition createSplashComp() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
+
         FgBgColors.setFGColor(WHITE);
 //        FgBgColors.setBGColor(new Color(6, 83, 81));
-        FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker());
+        FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());
 
         Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
@@ -161,6 +147,7 @@ public class SplashImageCreator {
     public static Composition createOldSplashImage() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
+        ValueNoise.reseed();
         Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
@@ -186,30 +173,29 @@ public class SplashImageCreator {
 
     private static void addTextLayers(Composition comp) {
         FgBgColors.setFGColor(WHITE);
-        Font font = createSplashFont(Font.PLAIN, 48);
+        Font font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, 48);
         addTextLayer(comp, "Pixelitor", WHITE,
-                font, -17, BlendingMode.NORMAL, 0.9f, true);
+                font, -17, BlendingMode.NORMAL, 1.0f, true);
 
-        font = createSplashFont(Font.PLAIN, 22);
-        addTextLayer(comp,
-                "Loading...",
-                WHITE, font, -70, BlendingMode.NORMAL, 0.9f, true);
+        font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 22);
+        addTextLayer(comp, "Loading...",
+                WHITE, font, -70, BlendingMode.NORMAL, 1.0f, true);
 
-        font = createSplashFont(Font.PLAIN, 20);
-        addTextLayer(comp,
-                "version " + Build.VERSION_NUMBER,
-                WHITE, font, 50, BlendingMode.NORMAL, 0.9f, true);
+        font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
+        addTextLayer(comp, "version " + Build.VERSION_NUMBER,
+                WHITE, font, 50, BlendingMode.NORMAL, 1.0f, true);
     }
 
-    private static Font createSplashFont(int style, int size) {
-        Font font = new Font(SPLASH_SCREEN_FONT, style, size);
+    private static Font createSplashFont(String name, int style, int size) {
+        Font font = new Font(name, style, size);
 
-        assert font.getName().equals(SPLASH_SCREEN_FONT) : font.getName();
+        // check that the font exists
+        assert font.getName().equals(name) : font.getName();
 
-        Map<TextAttribute, Object> attributes = new HashMap<>();
-        attributes.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-        attributes.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
-        font = font.deriveFont(attributes);
+        Map<TextAttribute, Object> attr = new HashMap<>();
+        attr.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+        attr.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
+        font = font.deriveFont(attr);
 
         return font;
     }
@@ -295,5 +281,19 @@ public class SplashImageCreator {
                 false,
                 BlendingMode.NORMAL, 1.0f);
         gradient.drawOn(dr);
+    }
+
+    private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp) {
+        SaveSettings saveSettings = new SaveSettings(
+                OutputFormat.getLastUsed(), comp.getFile());
+        return comp.saveAsync(saveSettings, false)
+                .thenAcceptAsync(v -> comp.getView().close(), EventQueue::invokeLater);
+    }
+
+    private static void cleanupAfterManySplashes(int numCreatedImages, ProgressHandler progressHandler) {
+        progressHandler.stopProgress();
+        Messages.showInStatusBar(format(
+                "Finished saving %d splash images to %s",
+                numCreatedImages, Dirs.getLastSave()));
     }
 }

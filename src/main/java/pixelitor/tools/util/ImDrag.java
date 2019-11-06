@@ -65,13 +65,13 @@ public class ImDrag {
 
     public static ImDrag createRandom(int width, int height, int minDist) {
         int minDist2 = minDist * minDist;
-        ImDrag drag = null;
+        ImDrag drag;
 
         while (true) {
-            int x1 = Rnd.nextInt(width);
-            int x2 = Rnd.nextInt(width);
-            int y1 = Rnd.nextInt(height);
-            int y2 = Rnd.nextInt(height);
+            int x1 = Rnd.intInRange(-width, 2*width);
+            int x2 = Rnd.intInRange(-width, 2*width);
+            int y1 = Rnd.intInRange(-height, 2*height);
+            int y2 = Rnd.intInRange(-height, 2*height);
 
             int dx = x2 - x1;
             int dy = y2 - y1;

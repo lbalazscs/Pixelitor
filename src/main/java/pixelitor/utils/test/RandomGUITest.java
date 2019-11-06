@@ -211,7 +211,7 @@ public class RandomGUITest {
         r.mouseMove(p.x, p.y);
 
         log("initial splash");
-        SplashImageCreator.createSplashImage();
+        SplashImageCreator.createSplashComp();
         if (enableCopyPaste) {
             randomCopy(); // ensure an image is on the clipboard
         }
