@@ -501,21 +501,15 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                View view = getActiveView();
-                Composition comp = view.getComp();
-                Layer layer = comp.getActiveLayer();
-
-                layer.deleteMask(true);
-
-                comp.imageChanged();
+                OpenComps.onActiveLayer(layer ->
+                        layer.deleteMask(true));
             }
         });
 
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                View view = getActiveView();
-                Layer layer = view.getComp().getActiveLayer();
+                Layer layer = getActiveLayerOrNull();
 
                 if (!(layer instanceof ImageLayer)) {
                     Messages.showNotImageLayerError();
@@ -1176,6 +1170,8 @@ public class MenuBar extends JMenuBar {
         developMenu.add(createTestSubmenu());
         developMenu.add(createSplashSubmenu());
         developMenu.add(createExperimentalSubmenu());
+
+        developMenu.addFilter(PorterDuff.NAME, PorterDuff::new);
 
         developMenu.addAlwaysEnabledAction(new MenuAction("Filter Creator...") {
             @Override

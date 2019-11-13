@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,12 +36,12 @@ public class ShowHideLayersAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getVisibilityAtStartUp() {
+    public boolean getStartupVisibility() {
         return AppPreferences.WorkSpace.getLayersVisibility();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        AppPreferences.WorkSpace.setLayersVisibility(value);
+        AppPreferences.WorkSpace.setLayersVisibility(value, true);
     }
 }

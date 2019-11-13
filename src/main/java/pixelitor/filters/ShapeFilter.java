@@ -224,4 +224,9 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     protected boolean createDefaultDestImg() {
         return false;
     }
+
+    @Override
+    public boolean supportsGray() {
+        return !waterMark.isChecked();
+    }
 }

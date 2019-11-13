@@ -44,7 +44,7 @@ public class ShowHideSelectionAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getVisibilityAtStartUp() {
+    public boolean getStartupVisibility() {
         return true;
     }
 
@@ -52,5 +52,13 @@ public class ShowHideSelectionAction extends ShowHideAction {
     public void setVisibility(boolean value) {
         OpenComps.onActiveSelection(
                 selection -> selection.setHidden(!value, true));
+    }
+
+    public void updateTextFrom(Selection sel) {
+        if(sel == null) {
+            setHideText();
+        } else {
+            updateText(!sel.isHidden());
+        }
     }
 }

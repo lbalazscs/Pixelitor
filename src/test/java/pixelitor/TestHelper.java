@@ -17,7 +17,6 @@
 
 package pixelitor;
 
-import org.mockito.MockingDetails;
 import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
@@ -284,8 +283,7 @@ public class TestHelper {
     public static void addSelectionRectTo(Composition comp,
                                           int x, int y, int width, int height) {
         Rectangle shape = new Rectangle(x, y, width, height);
-        MockingDetails mockingDetails = mockingDetails(comp);
-        if (mockingDetails.isMock()) {
+        if (mockingDetails(comp).isMock()) {
             Selection selection = new Selection(shape, comp.getView());
             when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
@@ -301,8 +299,8 @@ public class TestHelper {
         comp.endMovement(MOVE_LAYER_ONLY);
     }
 
-    public static void addRectangleSelection(Composition comp, Rectangle rect) {
-        comp.setSelectionRef(new Selection(rect, comp.getView()));
+    public static void setRectangleSelection(Composition comp, Rectangle rect) {
+        comp.createSelectionFromShape(rect);
     }
 
     public static void setStandardTestTranslationToAllLayers(Composition comp,

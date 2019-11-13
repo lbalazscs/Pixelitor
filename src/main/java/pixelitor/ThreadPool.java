@@ -32,10 +32,10 @@ import java.util.concurrent.Future;
  * A thread pool for parallel execution on multiple CPU cores
  */
 public class ThreadPool {
-    private static final int NUM_AVAILABLE_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
 
     private static final ExecutorService executorService =
-            Executors.newFixedThreadPool(NUM_AVAILABLE_PROCESSORS);
+            Executors.newFixedThreadPool(NUM_CORES);
 
     private ThreadPool() {
     }

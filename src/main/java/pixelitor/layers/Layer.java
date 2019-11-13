@@ -196,7 +196,8 @@ public abstract class Layer implements Serializable {
                 // not necessary to add the duplicate to the GUI
                 duplicate.mask = newMask;
             } else {
-                duplicate.addConfiguredMask(newMask);
+                // already has a mask icon
+                duplicate.addConfiguredMask(newMask, false);
             }
         }
     }
@@ -422,13 +423,15 @@ public abstract class Layer implements Serializable {
      * Adds a mask that is already configured to be used
      * with this layer
      */
-    public void addConfiguredMask(LayerMask mask) {
+    public void addConfiguredMask(LayerMask mask, boolean addMaskIcon) {
         assert mask != null;
         assert mask.getOwner() == this;
 
         this.mask = mask;
         comp.imageChanged();
-        ui.get().addMaskIconLabel();
+        if(addMaskIcon) {
+            ui.get().addMaskIconLabel();
+        }
         Layers.maskAddedTo(this);
         mask.updateIconImage();
     }
@@ -440,8 +443,6 @@ public abstract class Layer implements Serializable {
         mask = null;
         setMaskEditing(false);
 
-        comp.imageChanged();
-
         if (addToHistory) {
             History.addEdit(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
@@ -450,6 +451,7 @@ public abstract class Layer implements Serializable {
         ui.get().deleteMaskIconLabel();
 
         MaskViewMode.NORMAL.activate(view, this, "mask deleted");
+        comp.imageChanged();
     }
 
     /**

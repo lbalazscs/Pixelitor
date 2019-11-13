@@ -29,7 +29,7 @@ public enum OutputFormat {
     JPG(false, false) {
     }, PNG(false, true) {
     }, TIFF(false, true) {
-    }, GIF(false, false) { // the format supports alpha, but the default encoder has bugs
+    }, GIF(false, true) {
     }, BMP(false, false) {
     }, PXC(true, true) {
         @Override
@@ -62,6 +62,8 @@ public enum OutputFormat {
         if (!supportsAlpha) {
             // no alpha support, convert first to RGB
             img = ImageUtils.convertToRGB(img, false);
+        } else if(this == GIF) {
+            img = ImageUtils.convertToIndexed(img, false);
         }
         OpenSave.saveImageToFile(img, settings);
     }

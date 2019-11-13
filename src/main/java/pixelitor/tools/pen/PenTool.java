@@ -142,9 +142,8 @@ public class PenTool extends Tool {
         if (ignoreModeChooser) {
             return;
         }
-        Path activePath = OpenComps.getActivePathOrNull();
-        assert activePath == path : "active path = " + activePath
-                + ", PenTool.path = " + path;
+
+        assert OpenComps.activePathIs(path);
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -331,6 +330,7 @@ public class PenTool extends Tool {
 
     @Override
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        assert newComp.isActive();
         setPathFromComp(newComp);
     }
 
@@ -364,10 +364,8 @@ public class PenTool extends Tool {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
-        assert path == OpenComps.getActivePathOrNull()
-            : "tool path = " + path +
-            ", active path = " + OpenComps.getActivePathOrNull() +
-            ", mode = " + Tools.PEN.getMode();
+        assert OpenComps.activePathIs(path);
+
         Composition activeComp = OpenComps.getActiveCompOrNull();
         if (activeComp == null) {
             return true;
@@ -410,7 +408,7 @@ public class PenTool extends Tool {
     }
 
     public void setPath(Path path) {
-        if (path == null) {
+        if (path == null) { // can happen when undoing
             removePath();
             return;
         }
@@ -475,7 +473,7 @@ public class PenTool extends Tool {
 
     @Override
     public String getStateInfo() {
-        return mode + ", hasPath = " + hasPath();
+        return mode + ", hasPath=" + hasPath();
     }
 
     @Override

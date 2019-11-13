@@ -260,9 +260,15 @@ public class StyledShape implements Cloneable {
 
         TransformBox box;
         if (shapeType.isDirectional()) {
+            // for directional shapes, zero-width or zero-height drags are allowed
             box = createRotatedBox(userDrag, view);
         } else {
-            box = new TransformBox(userDrag.toCoRect(), view, this::transform);
+            if(userDrag.hasZeroWidth() || userDrag.hasZeroHeight()) {
+                return null;
+            }
+            Rectangle origCoRect = userDrag.toPosCoRect();
+            assert !origCoRect.isEmpty() : "userDrag = " + userDrag;
+            box = new TransformBox(origCoRect, view, this::transform);
         }
         return box;
     }
@@ -294,6 +300,7 @@ public class StyledShape implements Cloneable {
                 userDrag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
                 coDist,
                 coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
+        assert !horizontalBoxBounds.isEmpty();
         TransformBox box = new TransformBox(horizontalBoxBounds, view, this::transform);
 
         // rotate the horizontal box into place

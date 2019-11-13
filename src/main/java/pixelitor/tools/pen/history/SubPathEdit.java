@@ -46,7 +46,7 @@ public class SubPathEdit extends PixelitorEdit {
         // the zoom might have changed
         before.coCoordsChanged(comp.getView());
 
-        path.changeSubPath(index, before);
+        path.replaceSubPath(index, before);
 
         comp.repaint();
     }
@@ -58,7 +58,7 @@ public class SubPathEdit extends PixelitorEdit {
         // the zoom might have changed
         after.coCoordsChanged(comp.getView());
 
-        path.changeSubPath(index, after);
+        path.replaceSubPath(index, after);
 
         comp.repaint();
     }

@@ -182,7 +182,9 @@ public class Mouse {
     JPopupMenuFixture showPopupAtCanvas(int x, int y) {
         moveToCanvas(x, y);
         rightClick();
-        return new JPopupMenuFixture(robot, robot.findActivePopupMenu());
+        JPopupMenu popup = robot.findActivePopupMenu();
+        assert popup != null : "no popup at (" + x + ", " + y + ")";
+        return new JPopupMenuFixture(robot, popup);
     }
 
     void clickScreen(int x, int y) {

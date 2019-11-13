@@ -25,7 +25,6 @@ import pixelitor.filters.comp.Crop;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
@@ -600,7 +599,7 @@ public class CompositionTest {
 
         // set a selection
         Rectangle2D originalSelectionRect = new Rectangle2D.Double(3, 3, 4, 4);
-        comp.setSelectionRef(new Selection(originalSelectionRect, comp.getView()));
+        comp.createSelectionFromShape(originalSelectionRect);
 
         assertThat(comp).hasSelection();
         assertThat(comp.getSelection())
@@ -790,7 +789,7 @@ public class CompositionTest {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
-        TestHelper.addRectangleSelection(comp, selectionShape);
+        TestHelper.setRectangleSelection(comp, selectionShape);
 
         assertThat(comp)
                 .hasSelection()
@@ -813,7 +812,7 @@ public class CompositionTest {
     @Test
     public void test_cropSelection() {
         Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
-        TestHelper.addRectangleSelection(comp, selectionShape);
+        TestHelper.setRectangleSelection(comp, selectionShape);
         assertThat(comp)
                 .hasSelection()
                 .selectionBoundsIs(selectionShape);
@@ -825,7 +824,7 @@ public class CompositionTest {
                 .hasSelection()
                 .selectionBoundsIs(new Rectangle(4, 4, 2, 2));
 
-        Tools.changeTo(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
+        Tools.setCurrentTool(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
 
         AffineTransform tx = Crop.createCanvasImTx(cropRect);
         comp.imCoordsChanged(tx, false);

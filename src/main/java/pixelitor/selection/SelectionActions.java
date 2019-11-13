@@ -27,7 +27,6 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
-import pixelitor.menus.view.ShowHideAction;
 import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
@@ -72,7 +71,7 @@ public final class SelectionActions {
         }
     };
 
-    private static final ShowHideAction showHide = new ShowHideSelectionAction();
+    private static final ShowHideSelectionAction showHide = new ShowHideSelectionAction();
 
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
@@ -205,7 +204,7 @@ public final class SelectionActions {
         return invert;
     }
 
-    public static ShowHideAction getShowHide() {
+    public static ShowHideSelectionAction getShowHide() {
         return showHide;
     }
 

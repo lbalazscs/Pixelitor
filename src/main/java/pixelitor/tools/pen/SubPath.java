@@ -719,6 +719,7 @@ public class SubPath implements Serializable {
 
         assert ShapeUtils.isValid(gp) : "invalid shape for " + toDetailedString();
 
+//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
         Rectangle2D coBoundingBox = gp.getBounds2D();
 
         boolean badX = Double.isNaN(coBoundingBox.getX());
@@ -733,7 +734,11 @@ public class SubPath implements Serializable {
             return null;
         }
 
-//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
+        if (coBoundingBox.isEmpty()) {
+            // it can happen that a subpath consists of a single point
+            return null;
+        }
+
         TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);
         return box;
     }

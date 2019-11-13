@@ -101,7 +101,7 @@ public class Automate {
 
     private static void processFile(File file, CompAction action, File saveDir) {
         OpenSave.openFileAsync(file)
-                .thenApplyAsync(
+                .thenComposeAsync(
                         comp -> Automate.process(comp, action),
                         EventQueue::invokeLater)
                 .thenComposeAsync(
@@ -111,18 +111,14 @@ public class Automate {
                 .join();
     }
 
-    private static Composition process(Composition comp,
+    private static CompletableFuture<Composition> process(Composition comp,
                                        CompAction action) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
 
-        view.paintImmediately();
-        comp = action.process(comp).join();
-        view.paintImmediately();
-
-        return comp;
+        return action.process(comp);
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {

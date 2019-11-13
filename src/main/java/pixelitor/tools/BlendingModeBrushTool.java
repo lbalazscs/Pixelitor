@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.tools;
 
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.OpenComps;
+import pixelitor.layers.Layer;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Composite;
@@ -37,6 +39,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         drawDestination = DrawDestination.TMP_LAYER;
     }
 
+    @Override
     public void setupMaskEditing(boolean isMask) {
         if (isMask) {
             drawDestination = DrawDestination.DIRECT;
@@ -44,6 +47,16 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         } else {
             drawDestination = DrawDestination.TMP_LAYER;
             blendingModePanel.setEnabled(true);
+        }
+    }
+
+    @Override
+    protected void toolStarted() {
+        super.toolStarted();
+
+        Layer activeLayer = OpenComps.getActiveLayerOrNull();
+        if(activeLayer != null) {
+            setupMaskEditing(activeLayer.isMaskEditing());
         }
     }
 

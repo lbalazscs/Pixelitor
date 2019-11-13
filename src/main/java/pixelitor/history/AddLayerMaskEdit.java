@@ -55,7 +55,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        layer.addConfiguredMask(layerMask);
+        layer.addConfiguredMask(layerMask, true);
 
         assert newMode != null;
         newMode.activate(comp, layer, "add mask redone");

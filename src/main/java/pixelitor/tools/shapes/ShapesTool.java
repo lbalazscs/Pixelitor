@@ -153,7 +153,7 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        assert state == INITIAL_DRAG;
+        assert state == INITIAL_DRAG : "state = " + state;
 
         userDrag.setStartFromCenter(e.isAltDown());
 
@@ -180,7 +180,7 @@ public class ShapesTool extends DragTool {
             return;
         }
 
-        assert state == INITIAL_DRAG;
+        assert state == INITIAL_DRAG : "state = " + state;
 
         if (userDrag.isClick()) {
             // cancel the shape started in dragStarted
@@ -193,6 +193,14 @@ public class ShapesTool extends DragTool {
         Composition comp = e.getComp();
 
         transformBox = styledShape.createBox(userDrag, e.getView());
+        if(transformBox == null) {
+            // The box could not be created.
+            // Cancel just as for empty clicks.
+            styledShape = null;
+            setState(NO_INTERACTION);
+            e.getView().repaint();
+            return;
+        }
 
         e.getView().repaint();
         setState(TRANSFORM);
@@ -342,7 +350,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public DragDisplayType getDragDisplayType() {
-        assert state == INITIAL_DRAG;
+        assert state == INITIAL_DRAG : "state = " + state;
         return settings.getSelectedType().getDragDisplayType();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.layers.LayersContainer;
@@ -42,7 +43,7 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public boolean getVisibilityAtStartUp() {
+    public boolean getStartupVisibility() {
         return !allHidden;
     }
 
@@ -52,33 +53,51 @@ public class ShowHideAllAction extends ShowHideAction {
     }
 
     @Override
-    public void setVisibility(boolean visible) {
+    public void setVisibility(boolean show) {
         PixelitorWindow pw = PixelitorWindow.getInstance();
-        if (!visible) {
-            histogramsWereShown = pw.areHistogramsShown();
-            layersWereShown = LayersContainer.areLayersShown();
-            statusBarWasShown = StatusBar.INSTANCE.isShown();
-            toolsWereShown = pw.areToolsShown();
-        }
-        if (histogramsWereShown) {
-            pw.setHistogramsVisibility(visible, false);
+        boolean histogramsAreShown = HistogramsPanel.INSTANCE.isShown();
+        boolean layersAreShown = LayersContainer.areLayersShown();
+        boolean statusBarIsShown = StatusBar.INSTANCE.isShown();
+        boolean toolsAreShown = pw.areToolsShown();
+
+        // remember the current visibility, but only when hiding
+        if(!show) {
+            histogramsWereShown = histogramsAreShown;
+            layersWereShown = layersAreShown;
+            statusBarWasShown = statusBarIsShown;
+            toolsWereShown = toolsAreShown;
         }
 
-        if (layersWereShown) {
-            pw.setLayersVisibility(visible, false);
+        // If "Hide All" is running (show=false), then nothing should be shown.
+        // If "Show Hidden" is running (show=true), then show something
+        // either because it was hidden by this action or because it is already shown.
+        boolean showHistograms = show && (histogramsWereShown || histogramsAreShown);
+        boolean showLayers = show && (layersWereShown || layersAreShown);
+        boolean showStatusBar = show && (statusBarWasShown || statusBarIsShown);
+        boolean showTools = show && (toolsWereShown || toolsAreShown);
+
+        if (histogramsAreShown != showHistograms) {
+            ShowHideHistogramsAction.INSTANCE.updateText(show);
+            pw.setHistogramsVisibility(showHistograms, false);
         }
 
-        if (statusBarWasShown) {
-            pw.setStatusBarVisibility(visible, false);
+        if (layersAreShown != showLayers) {
+            ShowHideLayersAction.INSTANCE.updateText(show);
+            pw.setLayersVisibility(showLayers, false);
         }
 
-        if (toolsWereShown) {
-            pw.setToolsVisibility(visible, false);
+        if (statusBarIsShown != showStatusBar) {
+            ShowHideStatusBarAction.INSTANCE.updateText(show);
+            pw.setStatusBarVisibility(showStatusBar, false);
+        }
+
+        if (toolsAreShown != showTools) {
+            ShowHideToolsAction.INSTANCE.updateText(show);
+            pw.setToolsVisibility(showTools, false);
         }
 
         pw.getContentPane().revalidate();
 
-        allHidden = !visible;
+        allHidden = !show;
     }
-
 }

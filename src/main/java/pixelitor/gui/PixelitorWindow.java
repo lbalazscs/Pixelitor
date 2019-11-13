@@ -48,7 +48,6 @@ import java.util.List;
  * The main application window.
  */
 public class PixelitorWindow extends JFrame {
-    private HistogramsPanel histogramsPanel;
     private Box eastPanel;
     private ToolsPanel toolsPanel;
 
@@ -113,11 +112,10 @@ public class PixelitorWindow extends JFrame {
 
     private void addLayersAndHistograms() {
         eastPanel = Box.createVerticalBox();
-        histogramsPanel = HistogramsPanel.INSTANCE;
-        OpenComps.addActivationListener(histogramsPanel);
+        OpenComps.addActivationListener(HistogramsPanel.INSTANCE);
 
         if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
-            eastPanel.add(histogramsPanel);
+            eastPanel.add(HistogramsPanel.INSTANCE);
         }
         if (AppPreferences.WorkSpace.getLayersVisibility()) {
             eastPanel.add(LayersContainer.INSTANCE);
@@ -183,10 +181,12 @@ public class PixelitorWindow extends JFrame {
 
     public void setHistogramsVisibility(boolean visible, boolean revalidate) {
         if (visible) {
-            eastPanel.add(histogramsPanel);
-            OpenComps.onActiveComp(histogramsPanel::updateFrom);
+            assert HistogramsPanel.INSTANCE.getParent() == null;
+            eastPanel.add(HistogramsPanel.INSTANCE);
+            OpenComps.onActiveComp(HistogramsPanel.INSTANCE::updateFrom);
         } else {
-            eastPanel.remove(histogramsPanel);
+            assert HistogramsPanel.INSTANCE.getParent() == eastPanel;
+            eastPanel.remove(HistogramsPanel.INSTANCE);
         }
 
         if (revalidate) {
@@ -194,14 +194,12 @@ public class PixelitorWindow extends JFrame {
         }
     }
 
-    public boolean areHistogramsShown() {
-        return histogramsPanel.isShown();
-    }
-
     public void setLayersVisibility(boolean visible, boolean revalidate) {
         if (visible) {
+            assert LayersContainer.INSTANCE.getParent() == null;
             eastPanel.add(LayersContainer.INSTANCE);
         } else {
+            assert LayersContainer.INSTANCE.getParent() == eastPanel;
             eastPanel.remove(LayersContainer.INSTANCE);
         }
 
@@ -212,9 +210,13 @@ public class PixelitorWindow extends JFrame {
 
     public void setToolsVisibility(boolean visible, boolean revalidate) {
         if (visible) {
+            assert toolsPanel.getParent() == null;
+            assert ToolSettingsPanelContainer.INSTANCE.getParent() == null;
             add(toolsPanel, BorderLayout.WEST);
             add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
         } else {
+            assert toolsPanel.getParent() == getContentPane();
+            assert ToolSettingsPanelContainer.INSTANCE.getParent() == getContentPane();
             remove(toolsPanel);
             remove(ToolSettingsPanelContainer.INSTANCE);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,57 +26,46 @@ import java.awt.event.ActionEvent;
  * depending on the current visibility
  */
 public abstract class ShowHideAction extends NamedAction {
-    private final String showName;
-    private final String hideName;
+    private final String showText;
+    private final String hideText;
 
-    protected ShowHideAction(String showName, String hideName) {
-        this.showName = showName;
-        this.hideName = hideName;
+    protected ShowHideAction(String showText, String hideText) {
+        this.showText = showText;
+        this.hideText = hideText;
+
         //noinspection AbstractMethodCallInConstructor
-        if (getVisibilityAtStartUp()) {
-            setHideName();
-        } else {
-            setShowName();
-        }
+        updateText(getStartupVisibility());
     }
 
-    public void setHideName() {
-        setName(hideName);
+    public void setHideText() {
+        setName(hideText);
     }
 
-    public void setShowName() {
-        setName(showName);
+    public void setShowText() {
+        setName(showText);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String newName;
-        if (getCurrentVisibility()) {
-            setVisibility(false);
-            newName = showName;
-        } else {
-            setVisibility(true);
-            newName = hideName;
-        }
-        setName(newName);
+        boolean currentVisibility = getCurrentVisibility();
+        setVisibility(!currentVisibility);
+        updateText(!currentVisibility);
     }
 
     /**
-     * The name is updated automatically when the visibility
-     * changes due to the direct menu action.
-     * However, the visibility can change in indirect ways
-     * (for example by resetting the workspace), and then this
-     * must be called.
+     * The name is updated via actionPerformed when the visibility
+     * changes due to direct menu action.
+     * In other cases this method can be called.
      */
-    public void updateName(boolean newVisibility) {
+    public void updateText(boolean newVisibility) {
         if (newVisibility) {
-            setName(hideName);
+            setHideText();
         } else {
-            setName(showName);
+            setShowText();
         }
     }
 
-    public abstract boolean getVisibilityAtStartUp();
+    public abstract boolean getStartupVisibility();
 
     public abstract boolean getCurrentVisibility();
 

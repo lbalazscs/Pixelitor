@@ -110,7 +110,7 @@ public class View extends JComponent
         this.canvas = comp.getCanvas();
         comp.setView(this);
 
-        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, true);
+        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
         setZoom(fitZoom, null);
 
         layersPanel = new LayersPanel();
@@ -154,7 +154,7 @@ public class View extends JComponent
         layersPanel = new LayersPanel();
         newComp.addAllLayersToGUI();
         LayersContainer.showLayersFor(this);
-        Layers.activeLayerChanged(newComp.getActiveLayer());
+        Layers.activeLayerChanged(newComp.getActiveLayer(), false);
 
         newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
         updateNavigator(true);
@@ -787,8 +787,14 @@ public class View extends JComponent
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
         LayerButton layerButton = (LayerButton) newLayer.getUI();
-        layersPanel.addLayerButton(layerButton, newLayerIndex);
-        layerButton.updateBorders();
+        try {
+            // otherwise loading multi-layer files makes the comp dirty
+            layerButton.setUserInteraction(false);
+            layersPanel.addLayerButton(layerButton, newLayerIndex);
+            layerButton.updateBorders();
+        } finally {
+            layerButton.setUserInteraction(true);
+        }
 
         if (OpenComps.isActive(this)) {
             Layers.numLayersChanged(comp, comp.getNumLayers());

@@ -122,6 +122,14 @@ public class OpenComps {
         return null;
     }
 
+    public static boolean checkActiveComp(Predicate<Composition> check, boolean ifNoImage) {
+        if (activeView != null) {
+            return check.test(activeView.getComp());
+        }
+
+        return ifNoImage;
+    }
+
     public static <T> T fromActiveComp(Function<Composition, T> function) {
         if (activeView != null) {
             return function.apply(activeView.getComp());
@@ -138,6 +146,26 @@ public class OpenComps {
         return null;
     }
 
+    // to be used in assertions
+    public static boolean activePathIs(Path path) {
+        if (activeView != null) {
+            Path activePath = activeView.getComp().getActivePath();
+            if (activePath == path) {
+                return true;
+            } else {
+                throw new AssertionError(format("active path = %s, path = %s",
+                        activePath, path));
+            }
+        }
+
+        // no open image
+        if (path == null) {
+            return true;
+        } else {
+            throw new AssertionError("there is no open image");
+        }
+    }
+
     public static Selection getActiveSelection() {
         if (activeView != null) {
             return activeView.getComp().getSelection();
@@ -148,10 +176,9 @@ public class OpenComps {
     }
 
     public static void setActivePath(Path path) {
-        if (activeView == null) {
-            throw new IllegalStateException();
+        if (activeView != null) {
+            activeView.getComp().setActivePath(path);
         }
-        activeView.getComp().setActivePath(path);
     }
 
     public static Optional<Composition> getActiveComp() {
@@ -172,8 +199,7 @@ public class OpenComps {
 
     public static Layer getActiveLayerOrNull() {
         if (activeView != null) {
-            return activeView.getComp()
-                    .getActiveLayer();
+            return activeView.getComp().getActiveLayer();
         }
 
         return null;
@@ -234,11 +260,17 @@ public class OpenComps {
     }
 
     public static void setActiveView(View view, boolean activate) {
+        if (view == activeView) {
+            return;
+        }
+
         if (activate) {
             if (view == null) {
                 throw new IllegalStateException("cannot activate null view");
             }
-            ImageArea.activateView(view);
+            if(!view.isMock()) {
+                ImageArea.activateView(view);
+            }
         }
         activeView = view;
     }
@@ -290,7 +322,8 @@ public class OpenComps {
         }
 
         Layer layer = comp.getActiveLayer();
-        Layers.activeLayerChanged(layer);
+        Layers.activeLayerChanged(layer, true);
+        Tools.setupMaskEditing(layer.isMaskEditing());
 
         ZoomMenu.zoomChanged(view.getZoomLevel());
 

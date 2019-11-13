@@ -49,7 +49,7 @@ public class PenToolTest {
 
     @Before
     public void setup() {
-        Tools.changeTo(Tools.PEN);
+        Tools.setCurrentTool(Tools.PEN);
 
         // a real comp that can store paths
         comp = TestHelper.createEmptyComposition(300, 300);
@@ -115,7 +115,7 @@ public class PenToolTest {
 
     @Test
     public void testConvertSelectionToPath() {
-        Tools.changeTo(Tools.SELECTION);
+        Tools.setCurrentTool(Tools.SELECTION);
         assertThat(Tools.SELECTION)
                 .isActive()
                 .selectionTypeIs(RECTANGLE)

@@ -262,10 +262,12 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void wireSelectionWithLayerActivation(Layer layer) {
-        addItemListener(e ->
+        addItemListener(e -> {
+            if(userInteraction) {
                 // invoke later, when isSelected() returns the correct value
-                EventQueue.invokeLater(() ->
-                        buttonActivationChanged(layer)));
+                EventQueue.invokeLater(() -> buttonActivationChanged(layer));
+            }
+        });
     }
 
     private void buttonActivationChanged(Layer layer) {

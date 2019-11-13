@@ -122,9 +122,7 @@ public enum MaskViewMode {
             FgBgColors.setLayerMaskEditing(editMask);
 
             if (!view.isMock()) {
-                Tools.BRUSH.setupMaskEditing(editMask);
-                Tools.CLONE.setupMaskEditing(editMask);
-                Tools.GRADIENT.setupMaskEditing(editMask);
+                Tools.setupMaskEditing(editMask);
             }
 
             boolean canFade;

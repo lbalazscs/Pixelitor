@@ -18,7 +18,6 @@
 package pixelitor.menus;
 
 import pixelitor.gui.OpenComps;
-import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
@@ -116,8 +115,7 @@ public abstract class MenuAction extends NamedAction {
             if (layerType == AllowedLayerType.ANY) {
                 onClick();
             } else {
-                View view = OpenComps.getActiveView();
-                Layer activeLayer = view.getComp().getActiveLayer();
+                Layer activeLayer = OpenComps.getActiveLayerOrNull();
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();
                 } else {

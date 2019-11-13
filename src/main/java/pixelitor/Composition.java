@@ -48,7 +48,6 @@ import pixelitor.tools.pen.Paths;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 
@@ -105,8 +104,7 @@ public class Composition implements Serializable {
     private transient File file;
     private transient boolean dirty = false;
 
-    private transient Lazy<BufferedImage> compositeImage
-            = Lazy.of(this::calculateCompositeImage);
+    private transient BufferedImage compositeImage;
 
     private transient View view;
 
@@ -209,7 +207,7 @@ public class Composition implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // init transient variables
-        compositeImage = Lazy.of(this::calculateCompositeImage);
+        compositeImage = null; // will be set when needed
         file = null; // will be set later
         dirty = false;
         view = null; // will be set later
@@ -467,7 +465,7 @@ public class Composition implements Serializable {
 
         if (updateGUI) {
             activeLayer.activateUI();
-            Layers.activeLayerChanged(newActiveLayer);
+            Layers.activeLayerChanged(newActiveLayer, false);
         }
 
         if (addToHistory) {
@@ -809,7 +807,7 @@ public class Composition implements Serializable {
     }
 
     public void updateRegion(PPoint start, PPoint end, double thickness) {
-        compositeImage.invalidate();
+        invalidateCompositeCache();
         if (view != null) { // during reload image it can be null
             view.updateRegion(start, end, thickness);
             view.updateNavigator(false);
@@ -817,7 +815,7 @@ public class Composition implements Serializable {
     }
 
     public void updateRegion(PRectangle area) {
-        compositeImage.invalidate();
+        invalidateCompositeCache();
         if (view != null) { // during reload image it can be null
             view.updateRegion(area);
             view.updateNavigator(false);
@@ -914,7 +912,7 @@ public class Composition implements Serializable {
 
             if (isActive()) {
                 if (wasHidden) {
-                    SelectionActions.getShowHide().setHideName();
+                    SelectionActions.getShowHide().setHideText();
                 }
             } else {
                 // we can get here from a DeselectEdit.redo on a non-active composition
@@ -998,7 +996,8 @@ public class Composition implements Serializable {
                 interaction = SelectionInteraction.INTERSECT;
             }
             selection.setShape(interaction.combine(oldShape, newShape));
-            edit = new SelectionChangeEdit("Selection Change", this, oldShape);
+            selection.setHidden(false, false);
+            edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);
         } else { // no existing selection
             createSelectionFromShape(newShape);
             edit = new NewSelectionEdit(this, selection.getShape());
@@ -1019,10 +1018,11 @@ public class Composition implements Serializable {
      * Changing the selection reference should be done only by using this method
      * (in order to make debugging easier)
      */
-    void setSelectionRef(Selection selection) {
+    private void setSelectionRef(Selection selection) {
         this.selection = selection;
         if (isActive()) {
             SelectionActions.setEnabled(selection != null, this);
+            SelectionActions.getShowHide().updateTextFrom(selection);
         }
     }
 
@@ -1072,8 +1072,8 @@ public class Composition implements Serializable {
             Shape backupShape = selection.getShape();
             Shape inverted = canvas.invertShape(backupShape);
             selection.setShape(inverted);
-            SelectionChangeEdit edit = new SelectionChangeEdit("Invert Selection", this, backupShape);
-            History.addEdit(edit);
+            History.addEdit(new SelectionShapeChangeEdit(
+                    "Invert Selection", this, backupShape));
         }
     }
 
@@ -1097,7 +1097,10 @@ public class Composition implements Serializable {
      * Returns the composite image, which has the same dimensions as the canvas.
      */
     public BufferedImage getCompositeImage() {
-        return compositeImage.get();
+        if(compositeImage == null) {
+            compositeImage = calculateCompositeImage();
+        }
+        return compositeImage;
     }
 
     public void imageChanged() {
@@ -1113,7 +1116,7 @@ public class Composition implements Serializable {
      * and additional actions might be necessary
      */
     public void imageChanged(ImageChangeActions actions, boolean sizeChanged) {
-        compositeImage.invalidate();
+        invalidateCompositeCache();
 
         if (actions.repaintNeeded()) {
             if (view != null) {
@@ -1125,6 +1128,13 @@ public class Composition implements Serializable {
         if (actions.histogramChanged()) {
             HistogramsPanel.INSTANCE.updateFrom(this);
         }
+    }
+
+    private void invalidateCompositeCache() {
+        if(compositeImage != null) {
+            compositeImage.flush();
+        }
+        compositeImage = null;
     }
 
     public boolean isActive() {

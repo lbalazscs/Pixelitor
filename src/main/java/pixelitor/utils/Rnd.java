@@ -31,6 +31,10 @@ public class Rnd {
         // do not instantiate
     }
 
+    public static int chooseFrom(int[] items) {
+        return items[rand.nextInt(items.length)];
+    }
+
     @SafeVarargs
     public static <T> T chooseFrom(T... items) {
         return items[rand.nextInt(items.length)];

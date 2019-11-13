@@ -30,6 +30,7 @@ import pixelitor.gui.utils.SimpleCachedPainter;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.LayerMask;
 import pixelitor.tools.brushes.AffectedArea;
 import pixelitor.tools.brushes.Brush;
 import pixelitor.tools.brushes.LazyMouseBrush;
@@ -378,6 +379,15 @@ public abstract class AbstractBrushTool extends Tool {
     private Graphics2D createGraphicsForNewBrushStroke(Drawable dr) {
         Composition comp = dr.getComp();
         Composite composite = getComposite();
+
+        // when editing masks, no tmp drawing layer should be used
+        assert !(dr instanceof LayerMask)
+                || drawDestination == DrawDestination.DIRECT :
+            "dr is " + dr.getClass().getSimpleName()
+                    + ", comp = " + comp.getName()
+                    + ", tool = " + getClass().getSimpleName()
+                    + ", drawDestination = " + drawDestination;
+
         Graphics2D g = drawDestination.createGraphics(dr, composite);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         initializeGraphics(g);
@@ -453,16 +463,27 @@ public abstract class AbstractBrushTool extends Tool {
     public void compActivated(View oldCV, View newCV) {
         resetInitialState();
         outlinePainter.setView(newCV);
+
+        // get rid of the outline on the old view
+        // (important in "Internal Windows" mode)
+        if(oldCV != null) {
+            oldCV.repaint();
+        }
+
+        // make sure that the mouse coordinates are correct relative to the new view
+        paintOutlineOnChangedView(newCV);
     }
 
     @Override
     public void coCoordsChanged(View view) {
-        EventQueue.invokeLater(() -> {
-            Point location = MouseInfo.getPointerInfo().getLocation();
-            SwingUtilities.convertPointFromScreen(location, view);
-            outlinePainter.setView(view);
-            repaintOutlineSinceLast(location.x, location.y, view);
-        });
+        EventQueue.invokeLater(() -> paintOutlineOnChangedView(view));
+    }
+
+    private void paintOutlineOnChangedView(View view) {
+        Point location = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(location, view);
+        outlinePainter.setView(view);
+        repaintOutlineSinceLast(location.x, location.y, view);
     }
 
     /**

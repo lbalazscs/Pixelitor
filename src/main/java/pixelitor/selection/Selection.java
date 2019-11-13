@@ -23,8 +23,7 @@ import pixelitor.gui.View;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
-import pixelitor.menus.view.ShowHideAction;
+import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -58,11 +57,16 @@ public class Selection {
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
 
+    // if true, then the "marching ants" are not painted at all
     private boolean hidden = false;
-    private boolean dead = false;
+
+    // if true, then the "marching ants" are not marching
     private boolean frozen = false;
 
-    // shape movement support variable
+    // if true, then this object should not be used anymore
+    private boolean dead = false;
+
+    // the original shape before a shape movement
     private Shape moveStartShape;
 
     public Selection(Shape shape, View view) {
@@ -242,7 +246,7 @@ public class Selection {
         Composition comp = view.getComp();
         boolean notEmpty = clipToCanvasSize(comp);
         if (notEmpty) {
-            SelectionChangeEdit edit = new SelectionChangeEdit(
+            SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit(
                     "Modify Selection", comp, backupShape);
             History.addEdit(edit);
         } else {
@@ -258,7 +262,7 @@ public class Selection {
 
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
-        History.addEdit(new SelectionChangeEdit(
+        History.addEdit(new SelectionShapeChangeEdit(
             "Nudge Selection", view.getComp(), backupShape));
     }
 
@@ -288,12 +292,7 @@ public class Selection {
 
         // if not called from the menu, update the menu name
         if(!fromMenu) {
-            ShowHideAction action = SelectionActions.getShowHide();
-            if(hide) {
-                action.setShowName();
-            } else {
-                action.setHideName();
-            }
+            SelectionActions.getShowHide().updateTextFrom(this);
         }
     }
 
@@ -340,7 +339,7 @@ public class Selection {
             return deselectEdit;
         }
 
-        SelectionChangeEdit edit = new SelectionChangeEdit("Move Selection", comp, moveStartShape);
+        SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit("Move Selection", comp, moveStartShape);
         moveStartShape = null;
         return edit;
     }

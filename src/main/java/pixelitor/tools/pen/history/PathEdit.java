@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,13 +56,16 @@ public class PathEdit extends PixelitorEdit {
         comp.setActivePath(path);
 
         if (Tools.PEN.isActive()) {
-            Tools.PEN.setPath(path);
             if (path == null) {
+                Tools.PEN.removePath();
                 Tools.PEN.startBuilding(false);
-            } else if (Tools.PEN.getMode() != modeBefore) {
-                // if the path is not null, return
-                // to the mode before the edit
-                modeBefore.start();
+            } else {
+                Tools.PEN.setPath(path);
+                if (Tools.PEN.getMode() != modeBefore) {
+                    // if the path is not null, return
+                    // to the mode before the edit
+                    modeBefore.start();
+                }
             }
             comp.repaint();
         }

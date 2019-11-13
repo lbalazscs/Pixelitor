@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
@@ -67,12 +68,16 @@ public interface PenToolMode {
     }
 
     default void modeEnded() {
-        // TODO should be cleaner
         if (PenTool.hasPath()) {
             Composition comp = OpenComps.getActiveCompOrNull();
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
+                    if(Build.isDevelopment()) {
+                        throw new IllegalStateException(
+                                "path's comp is " + path.getComp().getName()
+                                + ", active comp is " + comp.getName());
+                    }
                     // the pen tools has a path but it does not belong to the
                     // active composition - happened in Mac random gui tests
                     // what can we do? at least avoid consistency errors
@@ -85,6 +90,8 @@ public interface PenToolMode {
                 }
                 comp.repaint();
             }
+        } else { // no path in the pen tool
+            assert OpenComps.activePathIs(null);
         }
         DraggablePoint.lastActive = null;
     }

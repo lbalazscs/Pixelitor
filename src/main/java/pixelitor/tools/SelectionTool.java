@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -69,6 +70,11 @@ public class SelectionTool extends DragTool {
     private boolean polygonal = false;
     private boolean displayWidthHeight = true;
 
+    private final EnumComboBoxModel<SelectionType> typeModel
+            = new EnumComboBoxModel<>(SelectionType.class);
+    private final EnumComboBoxModel<SelectionInteraction> interactionModel
+            = new EnumComboBoxModel<>(SelectionInteraction.class);
+
     SelectionTool() {
         super("Selection", 'M', "selection_tool_icon.png",
                 HELP_TEXT, Cursors.DEFAULT, false,
@@ -77,14 +83,15 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void initSettingsPanel() {
-        typeCB = new JComboBox<>(SelectionType.values());
+        typeCB = new JComboBox<>(typeModel);
         typeCB.addActionListener(e -> selectionTypeChanged());
         settingsPanel.addComboBox("Type:", typeCB, "typeCB");
 
         settingsPanel.addSeparator();
 
-        interactionCB = new JComboBox<>(SelectionInteraction.values());
+        interactionCB = new JComboBox<>(interactionModel);
         settingsPanel.addComboBox("New Selection:",
                 interactionCB, "interactionCB");
 
@@ -337,16 +344,16 @@ public class SelectionTool extends DragTool {
 
     @VisibleForTesting
     public SelectionType getSelectionType() {
-        return (SelectionType) typeCB.getSelectedItem();
+        return typeModel.getSelectedItem();
     }
 
     @VisibleForTesting
     public SelectionInteraction getCurrentInteraction() {
-        return (SelectionInteraction) interactionCB.getSelectedItem();
+        return interactionModel.getSelectedItem();
     }
 
     private void setCurrentInteraction(SelectionInteraction interaction) {
-        interactionCB.setSelectedItem(interaction);
+        interactionModel.setSelectedItem(interaction);
     }
 
     @Override

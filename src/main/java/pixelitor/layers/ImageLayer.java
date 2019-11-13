@@ -399,6 +399,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             previewImage = image;
         }
         setState(PREVIEW);
+        Tools.imageChanged(this);
     }
 
     @Override
@@ -434,7 +435,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (imageContentChanged) {
             updateIconImage();
             invalidateTrimCache();
-            Tools.imageChanged(this);
         }
 
         previewImage = null;
@@ -1010,6 +1010,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
                     ", tx = " + getTX() + ", ty = " + getTY()
+                            + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
+                            + ", newSize.getWidth() = " + newSize.getWidth() + ", newSize.getHeight() = " + newSize.getHeight()
                             + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
                             + ", canvasWidth = " + canvas.getImWidth() + ", canvasHeight = " + canvas.getImHeight()
                             + ", horRatio = " + horRatio + ", verRatio = " + verRatio;

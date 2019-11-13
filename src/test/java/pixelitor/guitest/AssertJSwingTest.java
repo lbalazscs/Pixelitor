@@ -44,16 +44,21 @@ import pixelitor.automate.AutoPaint;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.OpenComps;
+import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.StatusBar;
 import pixelitor.gui.View;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
+import pixelitor.io.OutputFormat;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerButton;
+import pixelitor.layers.LayersContainer;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.Selection;
@@ -75,17 +80,20 @@ import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_ENTER;
 import static java.awt.event.KeyEvent.VK_T;
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertFalse;
@@ -231,6 +239,7 @@ public class AssertJSwingTest {
         String maskMode = System.getProperty("mask.mode");
         if (maskMode == null || maskMode.equalsIgnoreCase("all")) {
             usedMaskModes = MaskMode.values();
+            Collections.shuffle(Arrays.asList(usedMaskModes));
         } else {
             // if a specific test mode was configured, test only that
             MaskMode mode = MaskMode.valueOf(maskMode.toUpperCase());
@@ -836,7 +845,7 @@ public class AssertJSwingTest {
         preferencesTested = true;
     }
 
-    private void testImageMenu() {
+    void testImageMenu() {
         log(0, "testing the image menu");
 
         EDT.assertNumOpenImagesIs(1);
@@ -1008,8 +1017,9 @@ public class AssertJSwingTest {
 
         // create a new image to be saved
         String compName = createNewImage();
+        maskMode.set(this);
 
-        // this must run after a new, unsaved image was created
+        // the new image s unsaved => has no file
         assertThat(EDT.active(Composition::getFile)).isNull();
 
         // new unsaved image, will be saved as save as
@@ -1046,6 +1056,7 @@ public class AssertJSwingTest {
 
         runMenuCommand("Close");
         openFileWithDialog(baseTestingDir, fileName);
+        maskMode.set(this);
 
         // can be dirty if a masked mask mode is set
         boolean dirty = EDT.active(Composition::isDirty);
@@ -1056,6 +1067,7 @@ public class AssertJSwingTest {
             closeDoYouWantToSaveChangesDialog();
         }
 
+        maskMode.set(this);
         checkConsistency();
     }
 
@@ -1251,8 +1263,12 @@ public class AssertJSwingTest {
         log(1, "testing batch resize");
         maskMode.set(this);
 
-        Dirs.setLastOpen(inputDir);
-        Dirs.setLastSave(batchResizeOutputDir);
+        EDT.run(() -> {
+            Dirs.setLastOpen(inputDir);
+            Dirs.setLastSave(batchResizeOutputDir);
+            OutputFormat.setLastUsed(OutputFormat.JPG);
+        });
+
         runMenuCommand("Batch Resize...");
         DialogFixture dialog = findDialogByTitle("Batch Resize");
 
@@ -1261,7 +1277,15 @@ public class AssertJSwingTest {
         dialog.button("ok").click();
         dialog.requireNotVisible();
 
+        Utils.sleep(5, SECONDS);
         checkConsistency();
+
+        for (File inputFile : inputDir.listFiles()) {
+            String fileName = inputFile.getName();
+
+            File outFile = new File(batchResizeOutputDir, fileName);
+            assertThat(outFile).exists().isFile();
+        }
     }
 
     private void testBatchFilter() {
@@ -1271,6 +1295,7 @@ public class AssertJSwingTest {
         Dirs.setLastSave(batchFilterOutputDir);
 
         EDT.assertNumOpenImagesIsAtLeast(1);
+        maskMode.set(this);
 
         runMenuCommand("Batch Filter...");
         DialogFixture dialog = findDialogByTitle("Batch Filter");
@@ -1284,6 +1309,13 @@ public class AssertJSwingTest {
         app.waitForProgressMonitorEnd();
 
         checkConsistency();
+
+        for (File inputFile : inputDir.listFiles()) {
+            String fileName = inputFile.getName();
+
+            File outFile = new File(batchFilterOutputDir, fileName);
+            assertThat(outFile).exists().isFile();
+        }
     }
 
     private void testExportLayerToPNG() {
@@ -1386,7 +1418,8 @@ public class AssertJSwingTest {
         runMenuCommand("Reload");
 
         // reloading is asynchronous, wait a bit
-        Utils.sleep(5, SECONDS);
+        AppRunner.waitForIO();
+        Utils.sleep(1, SECONDS);
 
         keyboard.undoRedo("Reload");
         maskMode.set(this);
@@ -1408,18 +1441,58 @@ public class AssertJSwingTest {
         testHistory();
 
         runMenuCommand("Set Default Workspace");
+        assert EDT.call(StatusBar.INSTANCE::isShown);
+        assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
+        assert EDT.call(LayersContainer::areLayersShown);
+        assert EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+
         runMenuCommand("Hide Status Bar");
+        assert !EDT.call(StatusBar.INSTANCE::isShown);
+
         runMenuCommand("Show Status Bar");
+        assert EDT.call(StatusBar.INSTANCE::isShown);
+
         runMenuCommand("Show Histograms");
+        assert EDT.call(HistogramsPanel.INSTANCE::isShown);
+
         runMenuCommand("Hide Histograms");
+        assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
+
+        keyboard.press(KeyEvent.VK_F6);
+        assert EDT.call(HistogramsPanel.INSTANCE::isShown);
+
+        keyboard.press(KeyEvent.VK_F6);
+        assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
+
         runMenuCommand("Hide Layers");
+        assert !EDT.call(LayersContainer::areLayersShown);
+
         runMenuCommand("Show Layers");
+        assert EDT.call(LayersContainer::areLayersShown);
+
+        keyboard.press(KeyEvent.VK_F7);
+        assert !EDT.call(LayersContainer::areLayersShown);
+
+        keyboard.press(KeyEvent.VK_F7);
+        assert EDT.call(LayersContainer::areLayersShown);
 
         runMenuCommand("Hide Tools");
+        assert !EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+
         runMenuCommand("Show Tools");
+        assert EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
 
         runMenuCommand("Hide All");
+        assert !EDT.call(StatusBar.INSTANCE::isShown);
+        assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
+        assert !EDT.call(LayersContainer::areLayersShown);
+        assert !EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+
         runMenuCommand("Show Hidden");
+        assert EDT.call(StatusBar.INSTANCE::isShown);
+        assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
+        assert EDT.call(LayersContainer::areLayersShown);
+        assert EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
 
         testGuides();
 
@@ -1816,9 +1889,9 @@ public class AssertJSwingTest {
         }
 
         dialog.button("ok").click();
+        dialog.requireNotVisible();
 
         afterFilterRunActions(nameWithoutDots);
-        dialog.requireNotVisible();
     }
 
     private void afterFilterRunActions(String filterName) {
@@ -2751,8 +2824,13 @@ public class AssertJSwingTest {
 
     private static void cleanOutputs() {
         try {
-            Process process = Runtime.getRuntime().exec(cleanerScript.getCanonicalPath());
-            process.waitFor();
+            String cleanerScriptPath = cleanerScript.getCanonicalPath();
+            System.out.println("AssertJSwingTest::cleanOutputs: running " + cleanerScript);
+            Process process = Runtime.getRuntime().exec(cleanerScriptPath);
+            int exitValue = process.waitFor();
+            if(exitValue != 0) {
+                throw new IllegalStateException("Exit value for " + cleanerScriptPath + " was " + exitValue);
+            }
 
             assertThat(Files.fileNamesIn(batchResizeOutputDir.getPath(), false)).isEmpty();
             assertThat(Files.fileNamesIn(batchFilterOutputDir.getPath(), false)).isEmpty();
@@ -2830,7 +2908,7 @@ public class AssertJSwingTest {
         keyboard.pressEsc(); // hide the gradient handles
     }
 
-    private void deleteLayerMask() {
+    void deleteLayerMask() {
         runMenuCommand("Delete");
     }
 
@@ -2982,10 +3060,16 @@ public class AssertJSwingTest {
         openDialog.approve();
 
         // wait a bit to make sure that the async open completed
-        Utils.sleep(5, SECONDS);
+        AppRunner.waitForIO();
+        Utils.sleep(1, SECONDS);
         mouse.recalcCanvasBounds();
 
-        assert !EDT.active(Composition::isDirty);
+        if(EDT.active(Composition::isDirty)) {
+            String compName = EDT.active(Composition::getName);
+            throw new AssertionError(format("New comp '%s', loaded from %s is dirty",
+                    compName, fileName));            
+        }
+
         maskMode.set(this);
     }
 }

@@ -21,7 +21,7 @@ import pixelitor.Composition;
 import pixelitor.history.History;
 import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionChangeEdit;
+import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -33,7 +33,7 @@ import java.awt.Shape;
  */
 public class SelectionBuilder {
     private final SelectionType selectionType;
-    private final SelectionInteraction selectionInteraction;
+    private final SelectionInteraction interaction;
 //    private final Composition comp;
 
     private Shape replacedShape;
@@ -43,8 +43,8 @@ public class SelectionBuilder {
     /**
      * Called in mousePressed (or mouseReleased for polygonal selection)
      */
-    public SelectionBuilder(SelectionType selectionType, SelectionInteraction selectionInteraction, Composition comp) {
-        this.selectionInteraction = selectionInteraction;
+    public SelectionBuilder(SelectionType selectionType, SelectionInteraction interaction, Composition comp) {
+        this.interaction = interaction;
         this.selectionType = selectionType;
         Selection existingSelection = comp.getSelection();
 
@@ -56,7 +56,7 @@ public class SelectionBuilder {
 
         comp.setBuiltSelection(new Selection(null, comp.getView()));
 
-        if (selectionInteraction == SelectionInteraction.REPLACE) {
+        if (interaction == SelectionInteraction.REPLACE) {
             replacedShape = existingSelection.getShape();
             // At this point the mouse was pressed, and it is clear that the
             // old selection should go away, but we don't know yet whether the
@@ -110,7 +110,7 @@ public class SelectionBuilder {
 
         if (oldSelection != null) { // needs to combine the shapes
             Shape oldShape = oldSelection.getShape();
-            Shape combinedShape = selectionInteraction.combine(oldShape, newShape);
+            Shape combinedShape = interaction.combine(oldShape, newShape);
 
             Rectangle newBounds = combinedShape.getBounds();
 
@@ -122,14 +122,14 @@ public class SelectionBuilder {
 
                 if (!RandomGUITest.isRunning()) {
                     Messages.showInfo("Nothing selected", "As a result of the "
-                            + selectionInteraction.toString().toLowerCase() + " operation, nothing is selected now.");
+                            + interaction.toString().toLowerCase() + " operation, nothing is selected now.");
                 }
             } else {
                 oldSelection.die();
                 builtSelection.setShape(combinedShape);
                 comp.promoteSelection();
 
-                PixelitorEdit edit = new SelectionChangeEdit(selectionInteraction.getNameForUndo(), comp, oldShape);
+                PixelitorEdit edit = new SelectionShapeChangeEdit(interaction.getNameForUndo(), comp, oldShape);
                 History.addEdit(edit);
             }
         } else {
@@ -145,7 +145,7 @@ public class SelectionBuilder {
 
                 PixelitorEdit edit;
                 if (replacedShape != null) {
-                    edit = new SelectionChangeEdit(selectionInteraction.getNameForUndo(), comp, replacedShape);
+                    edit = new SelectionShapeChangeEdit(interaction.getNameForUndo(), comp, replacedShape);
                 } else {
                     edit = new NewSelectionEdit(comp, newShape);
                 }

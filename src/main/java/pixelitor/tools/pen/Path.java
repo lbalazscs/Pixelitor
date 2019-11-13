@@ -79,6 +79,7 @@ public class Path implements Serializable {
             copy.subPaths.add(sp.deepCopy(copy, newComp));
         }
         int activeIndex = subPaths.indexOf(activeSubPath);
+        assert  activeIndex != -1 : "Index of " + activeSubPath + " is -1 in " + this;
         copy.activeSubPath = copy.subPaths.get(activeIndex);
         return copy;
     }
@@ -323,8 +324,7 @@ public class Path implements Serializable {
         return subPaths.indexOf(subPath);
     }
 
-    public void changeSubPath(int index, SubPath subPath) {
-        assert activeSubPath == subPaths.get(index);
+    public void replaceSubPath(int index, SubPath subPath) {
         subPaths.set(index, subPath);
         activeSubPath = subPath;
     }

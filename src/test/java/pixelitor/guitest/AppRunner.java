@@ -36,6 +36,7 @@ import org.assertj.swing.fixture.JPopupMenuFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.io.IOThread;
 import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -45,6 +46,9 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -214,6 +218,8 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+
+        Utils.sleep(5, SECONDS);
     }
 
     void resize(int targetWidth, int targetHeight) {
@@ -233,6 +239,8 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+
+        Utils.sleep(5, SECONDS);
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
@@ -393,5 +401,21 @@ public class AppRunner {
                 });
 
         return buttonFixture;
+    }
+
+    // waits until the IO thread not busy
+    public static void waitForIO() {
+        // make sure that the task started executing
+        Utils.sleep(500, MILLISECONDS);
+
+        // waiting until an empty task finishes works
+        // because the IO thread pool has a single thread
+        ExecutorService executor = (ExecutorService) IOThread.getExecutor();
+        Future<?> future = executor.submit(() -> {});
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

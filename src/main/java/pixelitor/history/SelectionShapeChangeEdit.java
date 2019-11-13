@@ -29,10 +29,10 @@ import java.util.Objects;
  * Represents the change of a selection shape
  * (via add, subtract, intersect, invert, move)
  */
-public class SelectionChangeEdit extends PixelitorEdit {
+public class SelectionShapeChangeEdit extends PixelitorEdit {
     private Shape backupShape;
 
-    public SelectionChangeEdit(String name, Composition comp, Shape backupShape) {
+    public SelectionShapeChangeEdit(String name, Composition comp, Shape backupShape) {
         super(name, comp);
 
         this.backupShape = Objects.requireNonNull(backupShape);

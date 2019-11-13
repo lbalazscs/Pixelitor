@@ -283,6 +283,10 @@ public abstract class Tool implements KeyListener {
         // empty instead of abstract for the convenience of subclasses
     }
 
+    public void setupMaskEditing(boolean maskEditing) {
+        // empty instead of abstract for the convenience of subclasses
+    }
+
     /**
      * Called when the component space coordinates of the pixels changed,
      * but the image coordinates are still the same (zooming, view resizing).

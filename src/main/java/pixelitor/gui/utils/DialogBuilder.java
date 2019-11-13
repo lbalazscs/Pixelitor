@@ -343,15 +343,18 @@ public class DialogBuilder {
 
     static class BuiltDialog extends JDialog {
         private final boolean notifyGlobalEvents;
+        private final boolean rootDialog; // true if the owner is the main window
 
         public BuiltDialog(Frame owner, boolean notifyGlobalEvents) {
             super(owner);
             this.notifyGlobalEvents = notifyGlobalEvents;
+            rootDialog = true; // the main window is the only frame
         }
 
         public BuiltDialog(Window owner, boolean notifyGlobalEvents) {
             super(owner);
             this.notifyGlobalEvents = notifyGlobalEvents;
+            rootDialog = false;
         }
 
         @Override
@@ -359,8 +362,10 @@ public class DialogBuilder {
             if (notifyGlobalEvents) {
                 if (b) {
                     GlobalEvents.dialogOpened(getTitle());
+                    assert !rootDialog || GlobalEvents.getNumNestedDialogs() == 1;
                 } else {
                     GlobalEvents.dialogClosed(getTitle());
+                    assert !rootDialog || GlobalEvents.getNumNestedDialogs() == 0;
                 }
             }
             super.setVisible(b);

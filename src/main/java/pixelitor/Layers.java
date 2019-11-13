@@ -66,7 +66,7 @@ public class Layers {
         }
     }
 
-    public static void activeLayerChanged(Layer newActiveLayer) {
+    public static void activeLayerChanged(Layer newActiveLayer, boolean viewChanged) {
         assert newActiveLayer != null;
         for (GlobalLayerChangeListener listener : layerChangeListeners) {
             listener.activeLayerChanged(newActiveLayer);
@@ -78,8 +78,11 @@ public class Layers {
             // the active layer changes, but there is no view yet
             return;
         }
-        // always go to normal mask-viewing mode on the activated layer
-        MaskViewMode.NORMAL.activate(view, newActiveLayer, "active layer changed");
+        if(!viewChanged) {
+            // go to normal mask-viewing mode on the activated layer,
+            // except when we got here because of a view change
+            MaskViewMode.NORMAL.activate(view, newActiveLayer, "active layer changed");
+        }
     }
 
     public static void layerOrderChanged(Composition comp) {

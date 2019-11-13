@@ -32,7 +32,20 @@ import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
@@ -43,6 +56,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.awt.image.IndexColorModel;
 import java.awt.image.PixelGrabber;
 import java.awt.image.Raster;
 import java.awt.image.VolatileImage;
@@ -64,6 +78,7 @@ import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.awt.image.BufferedImage.TYPE_BYTE_INDEXED;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
@@ -155,7 +170,6 @@ public class ImageUtils {
             progressiveBilinear = true;
         }
 
-        assert !EventQueue.isDispatchThread();
         boolean finalProgressive = progressiveBilinear;
         return CompletableFuture.supplyAsync(
                 () -> getFasterScaledInstance(img, targetWidth, targetHeight,
@@ -550,6 +564,62 @@ public class ImageUtils {
         return dest;
     }
 
+    // based on http://gman.eichberger.de/2007/07/transparent-gifs-in-java.html
+    // TODO an optimized palette should be created based on the image content
+    public static BufferedImage convertToIndexed(BufferedImage src, boolean flushOld) {
+        assert src != null;
+
+        if(src.isAlphaPremultiplied()) {
+            // otherwise transparent parts will be black when
+            // this is drawn on the transparent image
+            src = convertToARGB(src, flushOld);
+            flushOld = true;
+        }
+
+        BufferedImage dest = new BufferedImage(
+                src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
+
+        Graphics2D g = dest.createGraphics();
+        // this hideous color will be transparent
+        g.setColor(new Color(231, 20, 189));
+        g.fillRect(0, 0, src.getWidth(), src.getHeight());
+        g.dispose();
+
+        dest = makeIndexedTransparent(dest, 0, 0);
+
+        g = dest.createGraphics();
+        g.drawImage(src, 0, 0, null);
+        g.dispose();
+
+        if (flushOld) {
+            src.flush();
+        }
+
+        return dest;
+    }
+
+    private static BufferedImage makeIndexedTransparent(BufferedImage image, int x, int y) {
+        ColorModel cm = image.getColorModel();
+        assert cm instanceof IndexColorModel;
+
+        IndexColorModel icm = (IndexColorModel) cm;
+        WritableRaster raster = image.getRaster();
+
+        int size = icm.getMapSize();
+        byte[] reds = new byte[size];
+        byte[] greens = new byte[size];
+        byte[] blues = new byte[size];
+        icm.getReds(reds);
+        icm.getGreens(greens);
+        icm.getBlues(blues);
+
+        int pixel = raster.getSample(x, y, 0);
+        IndexColorModel icm2 = new IndexColorModel(8, size, reds, greens, blues, pixel);
+
+        return new BufferedImage(icm2, raster, image.isAlphaPremultiplied(), null);
+    }
+
+
     // without this the drawing on large images would be very slow
     // TODO is this faster? the simple g.drawImage also respects the clipping
 
@@ -647,6 +717,8 @@ public class ImageUtils {
         g.dispose();
     }
 
+    // it seems that for images with an IndexColorModel this
+    // still returns an image with a shared raster (jdk bug?)
     public static BufferedImage copyImage(BufferedImage src) {
         assert src != null;
 

@@ -435,6 +435,17 @@ public class GradientTool extends DragTool {
         throw new IllegalStateException("should not get here");
     }
 
+    @Override
+    protected void toolStarted() {
+        super.toolStarted();
+
+        Layer activeLayer = OpenComps.getActiveLayerOrNull();
+        if(activeLayer != null) {
+            setupMaskEditing(activeLayer.isMaskEditing());
+        }
+    }
+
+    @Override
     public void setupMaskEditing(boolean editMask) {
         if (editMask) {
             blendingModePanel.setEnabled(false);

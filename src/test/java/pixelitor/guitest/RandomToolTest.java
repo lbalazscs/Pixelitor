@@ -25,9 +25,12 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.StatusBar;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
+import pixelitor.layers.LayersContainer;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
@@ -41,18 +44,23 @@ import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -95,6 +103,27 @@ public class RandomToolTest {
             "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
             "Flip Horizontal", "Flip Vertical"
     };
+
+    private static final int[] TOOL_HOTKEYS = {
+            KeyEvent.VK_V,
+            KeyEvent.VK_C,
+            KeyEvent.VK_M,
+            KeyEvent.VK_B,
+            KeyEvent.VK_S,
+            KeyEvent.VK_E,
+            KeyEvent.VK_K,
+            KeyEvent.VK_G,
+            KeyEvent.VK_N,
+            KeyEvent.VK_I,
+            KeyEvent.VK_P,
+            KeyEvent.VK_U,
+            KeyEvent.VK_H,
+            KeyEvent.VK_Z,
+    };
+    private static final String[] ADD_MASK_MENU_COMMANDS = {
+            "Add White (Reveal All)", "Add Black (Hide All)", "Add from Layer"};
+    private static final String[] REMOVE_MASK_MENU_COMMANDS = {
+            "Delete", "Apply"};
 
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
@@ -187,14 +216,15 @@ public class RandomToolTest {
         CompletableFuture<Void> cf = CompletableFuture.runAsync(
                 () -> testToolWithCleanup(tool, testNr));
         try {
-            cf.get(1, MINUTES);
+            cf.get(2, MINUTES);
         } catch (InterruptedException e) {
             stopped = true;
             System.err.println("task unexpectedly interrupted, exiting");
             exitInNewThread();
         } catch (TimeoutException e) {
             stopped = true;
-            System.err.println("task unexpectedly timed out, exiting");
+            System.err.println("task unexpectedly timed out, exiting." +
+                    "\nActive comp is: " + EDT.active(Composition::toString));
             exitInNewThread();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -286,6 +316,11 @@ public class RandomToolTest {
         events.add(this::nudge);
         events.add(this::possiblyUndoRedo);
         events.add(this::randomMultiLayerEdit);
+        events.add(this::randomShowHide);
+        events.add(this::randomKeyboardToolSwitch);
+        events.add(this::randomMaskEvent);
+        events.add(this::changeUI);
+        events.add(this::changeMaskView);
     }
 
     private void randomEvents(Tool tool) {
@@ -368,7 +403,8 @@ public class RandomToolTest {
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
         if (canvasWidth != 770 || canvasHeight != 600) {
-            log(tool, "resizing back to 770x600");
+            log(tool, format("resizing back from %dx%d to 770x600",
+                    canvasWidth, canvasHeight));
             app.resize(770, 600);
         }
     }
@@ -497,7 +533,13 @@ public class RandomToolTest {
         checkControlVariables();
 
         String toolInfo = tool.getName();
-        String stateInfo = EDT.call(tool::getStateInfo);
+
+        Tool current = EDT.call(Tools::getCurrent);
+        if(current != tool) {
+            toolInfo += (" => " + current);
+        }
+
+        String stateInfo = EDT.call(current::getStateInfo);
         if (stateInfo != null) {
             toolInfo += (" [" + stateInfo + "]");
         }
@@ -522,12 +564,16 @@ public class RandomToolTest {
     }
 
     private void cutBigLayerIfNecessary(Tool tool, Composition comp) {
-        ImageLayer layer = (ImageLayer) comp.getActiveLayer();
-        int tx = layer.getTX();
-        int ty = layer.getTY();
-        if (tx < -comp.getCanvasImWidth() || ty < -comp.getCanvasImHeight()) {
+        Rectangle imgSize = EDT.call(() ->
+                ((ImageLayer) comp.getActiveLayer()).getImageBounds());
+        Dimension canvasSize = EDT.call(() ->
+                comp.getCanvas().getImSize());
+
+        if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
+            // needs to be cut, otherwise there is a risk that
+            // the image will grow too large during the next resize
             cutBigLayer(tool);
-        } else if (tx < 0 || ty < 0) {
+        } else if (imgSize.width > canvasSize.width || imgSize.height > canvasSize.height) {
             Rnd.withProbability(0.3, () -> cutBigLayer(tool));
         }
     }
@@ -663,6 +709,81 @@ public class RandomToolTest {
             button.click();
             Utils.sleep(500, MILLISECONDS);
         }
+    }
+
+    // The Tab hotkey is tested separately,
+    // this is for hiding/showing with menu shortcuts
+    private void randomShowHide(Tool tool) {
+        int i = Rnd.nextInt(10);
+        if(i == 0) {
+            randomShowHide(tool, "Tools",
+                    () -> PixelitorWindow.getInstance().areToolsShown());
+        } else if (i == 1) {
+            randomShowHide(tool, "Layers",
+                    LayersContainer::areLayersShown);
+        } else if (i == 2) {
+            randomShowHide(tool, "Histograms",
+                    HistogramsPanel.INSTANCE::isShown);
+        } else if (i == 3) {
+            randomShowHide(tool, "Status Bar",
+                    StatusBar.INSTANCE::isShown);
+        } else {
+            // do nothing, this doesn't have to be tested all the time
+        }
+    }
+
+    private void randomShowHide(Tool tool, String name, Callable<Boolean> checkCurrent) {
+        boolean shownBefore = EDT.call(checkCurrent);
+        String cmd;
+        if(shownBefore) {
+            cmd = "Hide " + name;
+        } else {
+            cmd = "Show " + name;
+        }
+        log(tool, cmd);
+        app.runMenuCommand(cmd);
+
+        boolean shownAfter = EDT.call(checkCurrent);
+        assert shownAfter == !shownBefore;
+    }
+
+    private void randomKeyboardToolSwitch(Tool tool) {
+        int keyCode = Rnd.chooseFrom(TOOL_HOTKEYS);
+        log(tool, "random keyboard tool switch using " + Ansi.cyan(KeyEvent.getKeyText(keyCode)));
+        keyboard.press(keyCode);
+    }
+
+    private void changeUI(Tool tool) {
+        log(tool, "changing the UI (Ctrl-K)");
+        keyboard.ctrlPress(KeyEvent.VK_K);
+    }
+
+    private void changeMaskView(Tool tool) {
+        if(!EDT.activeLayerHasMask()) {
+            return;
+        }
+        int num = Rnd.nextInt(4) + 1;
+        log(tool, "changing the mask view mode: Ctrl-" + num);
+        if(num == 1) {
+            keyboard.pressCtrlOne();
+        } else if(num == 2) {
+            keyboard.pressCtrlTwo();
+        } else if(num == 3) {
+            keyboard.pressCtrlThree();
+        } else if(num == 4) {
+            keyboard.pressCtrlFour();
+        }
+    }
+
+    private void randomMaskEvent(Tool tool) {
+        String command;
+        if(EDT.activeLayerHasMask()) {
+            command = Rnd.chooseFrom(REMOVE_MASK_MENU_COMMANDS);
+        } else {
+            command = Rnd.chooseFrom(ADD_MASK_MENU_COMMANDS);
+        }
+        log(tool, "randomMaskEvent: " + command);
+        app.runMenuCommand(command);
     }
 
     private void setupPauseKey() {

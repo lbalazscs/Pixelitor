@@ -40,6 +40,7 @@ import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
@@ -49,6 +50,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
@@ -213,17 +215,24 @@ public final class Utils {
         return defaultValue;
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static void debugImage(Image img) {
         debugImage(img, "Debug");
     }
 
-    @SuppressWarnings("WeakerAccess")
     public static void debugImage(Image img, String name) {
+        if(!EventQueue.isDispatchThread()) {
+            EventQueue.invokeLater(() -> debugImage(img, name));
+            return;
+        }
+
         BufferedImage copy;
         if (img instanceof BufferedImage) {
             BufferedImage bufferedImage = (BufferedImage) img;
-            copy = ImageUtils.copyImage(bufferedImage);
+            if(bufferedImage.getColorModel() instanceof IndexColorModel) {
+                copy = ImageUtils.convertToARGB(bufferedImage, false);
+            } else {
+                copy = ImageUtils.copyImage(bufferedImage);
+            }
         } else if (img instanceof VolatileImage) {
             VolatileImage volatileImage = (VolatileImage) img;
             copy = volatileImage.getSnapshot();
@@ -338,7 +347,7 @@ public final class Utils {
         String s = "";
         int modifiers = keyStroke.getModifiers();
         if (modifiers > 0) {
-            s = KeyEvent.getKeyModifiersText(modifiers);
+            s = InputEvent.getModifiersExText(modifiers);
             s += " ";
         }
         int keyCode = keyStroke.getKeyCode();
@@ -612,9 +621,9 @@ public final class Utils {
 
     public static String debugKeyEvent(KeyEvent e) {
         String keyText = KeyEvent.getKeyText(e.getKeyCode());
-        int modifiers = e.getModifiers();
+        int modifiers = e.getModifiersEx();
         if (modifiers != 0) {
-            String modifiersText = KeyEvent.getKeyModifiersText(modifiers);
+            String modifiersText = InputEvent.getModifiersExText(modifiers);
             if (keyText.equals(modifiersText)) { // the key itself is the modifier
                 return modifiersText;
             }

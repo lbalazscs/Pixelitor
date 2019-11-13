@@ -101,7 +101,9 @@ public class TransformBox implements ToolWidget {
 
     public TransformBox(Rectangle2D origCoRect, View view,
                         Consumer<AffineTransform> transformListener) {
-        origCoRect = Shapes.toPositiveRect(origCoRect);
+        // it must be transformed to positive rectangle before calling this
+        assert !origCoRect.isEmpty();
+
         origImRect = view.componentToImageSpace(origCoRect);
         rotatedImSize = new DDimension(origImRect);
         this.view = view;

@@ -34,8 +34,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 
 import static java.awt.Event.TAB;
-import static java.awt.event.InputEvent.CTRL_MASK;
-import static java.awt.event.InputEvent.SHIFT_MASK;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
@@ -199,7 +197,7 @@ public class Keyboard {
             }
         } else {
             if (key.isShiftDown()) {
-                postKeyEventToEventQueue(SHIFT_MASK, keyCode);
+                postKeyEventToEventQueue(SHIFT_DOWN_MASK, keyCode);
             } else {
                 postKeyEventToEventQueue(0, keyCode);
             }
@@ -233,80 +231,56 @@ public class Keyboard {
     }
 
     void pressEnter() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_ENTER).releaseKey(VK_ENTER);
-        } else {
-            postKeyEventToEventQueue(0, VK_ENTER);
-        }
+        press(VK_ENTER);
     }
 
     void pressEsc() {
+        press(VK_ESCAPE);
+    }
+
+    public void pressChar(char c) {
+        press(c);
+    }
+
+    void press(int keyCode) {
         if (osLevelKeyEvents) {
-            pw.pressKey(VK_ESCAPE).releaseKey(VK_ESCAPE);
+            pw.pressKey(keyCode).releaseKey(keyCode);
         } else {
-            postKeyEventToEventQueue(0, VK_ESCAPE);
+            postKeyEventToEventQueue(0, keyCode);
+        }
+    }
+
+    void ctrlPress(int keyCode) {
+        if (osLevelKeyEvents) {
+            pw.pressKey(VK_CONTROL).pressKey(keyCode)
+                    .releaseKey(keyCode).releaseKey(VK_CONTROL);
+        } else {
+            postKeyEventToEventQueue(CTRL_DOWN_MASK, keyCode);
         }
     }
 
     public void pressCtrlOne() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_CONTROL).pressKey(VK_1)
-                    .releaseKey(VK_1).releaseKey(VK_CONTROL);
-        } else {
-            postKeyEventToEventQueue(CTRL_MASK, VK_1);
-        }
+        ctrlPress(VK_1);
     }
 
     public void pressCtrlTwo() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_CONTROL).pressKey(VK_2)
-                    .releaseKey(VK_2).releaseKey(VK_CONTROL);
-        } else {
-            postKeyEventToEventQueue(CTRL_MASK, VK_2);
-        }
+        ctrlPress(VK_2);
     }
 
     public void pressCtrlThree() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_CONTROL).pressKey(VK_3)
-                    .releaseKey(VK_3).releaseKey(VK_CONTROL);
-        } else {
-            postKeyEventToEventQueue(CTRL_MASK, VK_3);
-        }
+        ctrlPress(VK_3);
     }
 
     public void pressCtrlFour() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_CONTROL).pressKey(VK_4)
-                    .releaseKey(VK_4).releaseKey(VK_CONTROL);
-        } else {
-            postKeyEventToEventQueue(CTRL_MASK, VK_4);
-        }
+        ctrlPress(VK_4);
     }
 
     public void pressTab() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(TAB).releaseKey(TAB);
-        } else {
-            postKeyEventToEventQueue(0, TAB);
-        }
+        press(TAB);
     }
 
     public void pressCtrlTab() {
-        if (osLevelKeyEvents) {
-            pw.pressKey(VK_CONTROL).pressKey(TAB)
-                    .releaseKey(TAB).releaseKey(VK_CONTROL);
-        } else {
-            postKeyEventToEventQueue(CTRL_MASK, TAB);
-        }
-    }
-
-    public void pressChar(char c) {
-        if (osLevelKeyEvents) {
-            pw.pressKey(c).releaseKey(c);
-        } else {
-            postKeyEventToEventQueue(0, c);
-        }
+        ctrlPress(TAB);
     }
 
     private void postKeyEventToEventQueue(int modifiers, int keyCode) {

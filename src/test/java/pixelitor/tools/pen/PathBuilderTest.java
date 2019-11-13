@@ -54,7 +54,7 @@ public class PathBuilderTest {
     @BeforeClass
     public static void setupClass() {
         Build.setUnitTestingMode();
-        Tools.changeTo(Tools.PEN);
+        Tools.setCurrentTool(Tools.PEN);
     }
 
     @Before

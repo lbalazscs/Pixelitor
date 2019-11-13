@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.gui.OpenComps;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.AbstractUndoableEdit;
@@ -47,6 +48,8 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
+        activateComp();
+
         if (!embedded) {
             History.notifyMenus(this);
         }
@@ -56,9 +59,15 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
+        activateComp();
+
         if (!embedded) {
             History.notifyMenus(this);
         }
+    }
+
+    private void activateComp() {
+        OpenComps.setActiveView(comp.getView(), true);
     }
 
     public Composition getComp() {

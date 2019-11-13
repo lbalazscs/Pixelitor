@@ -148,8 +148,9 @@ public final class ConsistencyChecks {
             return true;
         }
         Rectangle canvasSize = comp.getCanvasImBounds();
-        // increase the width/height because of rounding errors
-        canvasSize = new Rectangle(0, 0, canvasSize.width + 1, canvasSize.height + 1);
+        // increase the size because of rounding errors
+        canvasSize = new Rectangle(-1, -1,
+                canvasSize.width + 2, canvasSize.height + 2);
         Rectangle2D shapeBounds = selection.getShapeBounds2D();
 
         // In principle the selection must be fully inside the canvas,
@@ -159,7 +160,7 @@ public final class ConsistencyChecks {
         // so check that it is not fully outside
         boolean ok = !canvasSize.createIntersection(shapeBounds).isEmpty();
         if (!ok) {
-            System.out.println("\nConsistencyChecks::selectionIsOK: no intersection: "
+            System.out.println("\nConsistencyChecks::selectionIsInsideCanvas: no intersection: "
                 + "canvasSize = " + canvasSize
                     + ", shapeBounds = " + shapeBounds);
         }

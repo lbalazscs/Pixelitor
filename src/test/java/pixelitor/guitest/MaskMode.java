@@ -42,9 +42,11 @@ enum MaskMode {
 
         @Override
         public void set(AssertJSwingTest tester) {
+            if(EDT.activeLayerHasMask()) {
+                tester.deleteLayerMask();
+            }
+            
             check();
-            // do nothing as initially the layers have no masks
-
             tester.checkConsistency();
         }
     },

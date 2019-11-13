@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,6 +121,14 @@ public class UserDrag {
         return coStartX == coEndX && coStartY == coEndY;
     }
 
+    public boolean hasZeroWidth() {
+        return coStartX == coEndX;
+    }
+
+    public boolean hasZeroHeight() {
+        return coStartY == coEndY;
+    }
+
     public ImDrag toImDrag() {
         ImDrag d = new ImDrag(imStartX, imStartY, imEndX, imEndY);
         d.setStartFromCenter(startFromCenter);
@@ -195,6 +203,10 @@ public class UserDrag {
         }
 
         return new Rectangle(x, y, width, height);
+    }
+
+    public Rectangle toPosCoRect() {
+        return Shapes.toPositiveRect(toCoRect());
     }
 
     public PRectangle toPosPRect() {

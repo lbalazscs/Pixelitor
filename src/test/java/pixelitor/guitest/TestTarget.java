@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,8 @@ package pixelitor.guitest;
  * "tools" (includes "Selection" menus),
  * "file", (the "File" menu with the exception of auto paint)
  * "autopaint",
- * "edit", ("Edit" and "Image" menus)
+ * "edit", ("Edit" menus)
+ * "image", ("Image" menus)
  * "filters" ("Colors" and "Filters" menus),
  * "layers" ("Layers" menus and layer buttons),
  * "rest" ("View" and "Help" menus)
@@ -53,6 +54,11 @@ public enum TestTarget {
         @Override
         public void run(AssertJSwingTest tester) {
             tester.testEditMenu();
+        }
+    }, IMAGE {
+        @Override
+        public void run(AssertJSwingTest tester) {
+            tester.testImageMenu();
         }
     }, FILTERS {
         @Override

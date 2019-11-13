@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,17 @@ public final class ToolSettingsPanelContainer extends JPanel {
         for (int i = 0; i < count; i++) {
             ToolSettingsPanel tsp = (ToolSettingsPanel) getComponent(i);
             if (tsp.isVisible()) {
-                GUIUtils.randomizeGUIWidgetsOn(tsp);
+                try {
+                    GUIUtils.randomizeGUIWidgetsOn(tsp);
+                } catch (Throwable e) {
+                    // assertj-swing sometimes loses the stack trace
+                    // of Errors, this is a workaround
+                    if(e instanceof AssertionError) {
+                        throw new RuntimeException(e);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
     }

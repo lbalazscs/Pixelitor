@@ -182,6 +182,10 @@ public class Tools {
         }
     }
 
+    public static void setupMaskEditing(boolean maskEditing) {
+        currentTool.setupMaskEditing(maskEditing);
+    }
+
     public static class EventDispatcher {
         private static boolean mouseDown = false;
         private static PMouseEvent lastEvent;
