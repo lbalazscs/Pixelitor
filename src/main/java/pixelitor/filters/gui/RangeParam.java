@@ -176,6 +176,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return getValueAsFloat() / 100.0f;
     }
 
+    public double getValueAsDPercentage() {
+        return getValueAsDouble() / 100.0;
+    }
+
     /**
      * Int values measured in degrees are transformed to radians
      */

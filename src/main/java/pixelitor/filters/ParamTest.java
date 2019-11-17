@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.LogZoomParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -84,6 +85,7 @@ public class ParamTest extends ParametrizedFilter {
                 new BlendingModeParam(BlendingMode.values()),
                 new BooleanParam("BooleanParam", false),
                 new TextParam("TextParam", "default value"),
+                new LogZoomParam("Zoom", 200, 200, 1000),
         };
     }
 }

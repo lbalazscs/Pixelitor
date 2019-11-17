@@ -85,8 +85,10 @@ public class ThreadPool {
             try {
                 future.get();
                 pt.unitDone();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.getCause().printStackTrace();
             }
         }
     }

@@ -62,6 +62,7 @@ import static pixelitor.tools.pen.PenToolMode.EDIT;
  * The main class
  */
 public class Pixelitor {
+    public static Locale SYS_LOCALE;
 
     private Pixelitor() {
         // should not be instantiated
@@ -76,7 +77,9 @@ public class Pixelitor {
         }
 
         // Force using English locale, because using the default system
-        // settings leads to mixed-language problems (see issue #35)
+        // settings leads to mixed-language problems (see issue #35),
+        // but keep the system locale for number formatting
+        SYS_LOCALE = Locale.getDefault();
         Locale.setDefault(Locale.US);
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");

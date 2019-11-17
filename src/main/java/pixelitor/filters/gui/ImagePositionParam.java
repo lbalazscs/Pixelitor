@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,7 +50,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         int defaultX = (int) (100 * defaultRelativeX);
-        int defaultY = (int) (100 * defaultRelativeX);
+        int defaultY = (int) (100 * defaultRelativeY);
 
         ImagePositionParamGUI gui = new ImagePositionParamGUI(this, defaultX, defaultY);
         paramGUI = gui;

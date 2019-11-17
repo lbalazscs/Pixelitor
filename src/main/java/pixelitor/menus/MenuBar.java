@@ -890,13 +890,13 @@ public class MenuBar extends JMenuBar {
         sub.addFilter(JHBrushedMetal.NAME, JHBrushedMetal::new);
         sub.addFilter(JHCaustics.NAME, JHCaustics::new);
         sub.addFilter(JHCells.NAME, JHCells::new);
-        sub.addFilter(FractalTree.NAME, FractalTree::new);
         sub.addFilter(Marble.NAME, Marble::new);
         sub.addFilter(Voronoi.NAME, Voronoi::new);
         sub.addFilter(JHWood.NAME, JHWood::new);
 
         sub.addSeparator();
 
+        sub.add(createRenderFractalsSubmenu());
         sub.add(createRenderGeometrySubmenu());
         sub.add(createRenderShapesSubmenu());
 
@@ -911,6 +911,16 @@ public class MenuBar extends JMenuBar {
         sub.addFilter("Lissajous Curve", Lissajous::new);
         sub.addFilter("Mystic Rose", MysticRose::new);
         sub.addFilter("Spirograph", Spirograph::new);
+
+        return sub;
+    }
+
+    private static JMenu createRenderFractalsSubmenu() {
+        PMenu sub = new PMenu("Fractals");
+
+        sub.addFilter(FractalTree.NAME, FractalTree::new);
+        sub.addFilter(JuliaSet.NAME, JuliaSet::new);
+        sub.addFilter(MandelbrotSet.NAME, MandelbrotSet::new);
 
         return sub;
     }
