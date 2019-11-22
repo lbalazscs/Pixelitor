@@ -918,6 +918,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createRenderFractalsSubmenu() {
         PMenu sub = new PMenu("Fractals");
 
+        sub.addFilter(ChaosGame.NAME, ChaosGame::new);
         sub.addFilter(FractalTree.NAME, FractalTree::new);
         sub.addFilter(JuliaSet.NAME, JuliaSet::new);
         sub.addFilter(MandelbrotSet.NAME, MandelbrotSet::new);
