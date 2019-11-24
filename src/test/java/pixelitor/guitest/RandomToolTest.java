@@ -26,10 +26,10 @@ import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
+import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.history.History;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.LayersContainer;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -52,13 +52,13 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -95,9 +95,10 @@ public class RandomToolTest {
 
     private long testNr = 1;
 
-    private List<Consumer<Tool>> events;
+    private List<Runnable> events;
     private final ArrowKey[] arrowKeys = ArrowKey.values();
     private final Robot robot;
+    private final List<Double> testTimes = new ArrayList<>();
 
     private static final String[] simpleMultiLayerEdits = {
             "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
@@ -150,6 +151,7 @@ public class RandomToolTest {
 
         initEventList();
 
+        app.runMenuCommand("Fit Space");
         app.runTests(this::mainLoop);
 
         // It's the final countdown...
@@ -164,6 +166,12 @@ public class RandomToolTest {
             } catch (StoppedException e) {
                 assert stopped;
                 System.out.println("\n" + RandomToolTest.class.getSimpleName() + " stopped.");
+
+                DoubleSummaryStatistics stats = testTimes.stream()
+                        .mapToDouble(s -> s)
+                        .summaryStatistics();
+                System.out.printf("time stats: count = %d, min = %.2fs, max = %.2fs, avg = %.2fs%n",
+                        stats.getCount(), stats.getMin(), stats.getMax(), stats.getAverage());
 
                 return; // if stopped, then exit the main loop
             } catch (PausedException e) {
@@ -198,33 +206,45 @@ public class RandomToolTest {
 
         // exit this infinite loop only by throwing an exception
         while (true) {
+            Tool selectedTool;
             if (preferredTools.length == 0) {
                 // there is no preferred tool, each tool gets equal chance
-                testToolWithTimeout(Tools.getRandomTool(), testNr++);
+                selectedTool = Tools.getRandomTool();
             } else {
                 // with 50% probability force using a preferred tool
                 if (Rnd.nextBoolean()) {
-                    testToolWithTimeout(Rnd.chooseFrom(preferredTools), testNr++);
+                    selectedTool = Rnd.chooseFrom(preferredTools);
                 } else {
-                    testToolWithTimeout(Tools.getRandomTool(), testNr++);
+                    selectedTool = Tools.getRandomTool();
                 }
             }
+            long startTime = System.nanoTime();
+
+            testNr++;
+            testWithTimeout(selectedTool);
+
+            double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+            System.out.println(format("Test \u001B[31m%d\u001B[0m (%s) took %.2f s",
+                    testNr, selectedTool.getName(), estimatedSeconds));
+            testTimes.add(estimatedSeconds);
         }
     }
 
-    private void testToolWithTimeout(Tool tool, long testNr) {
+    private void testWithTimeout(Tool tool) {
         CompletableFuture<Void> cf = CompletableFuture.runAsync(
-                () -> testToolWithCleanup(tool, testNr));
+                () -> testWithCleanup(tool));
         try {
-            cf.get(2, MINUTES);
+            cf.get(10, MINUTES);
         } catch (InterruptedException e) {
             stopped = true;
-            System.err.println("task unexpectedly interrupted, exiting");
+            System.err.println(AppRunner.getCurrentTimeHMS() + ": task unexpectedly interrupted, exiting");
             exitInNewThread();
         } catch (TimeoutException e) {
             stopped = true;
-            System.err.println("task unexpectedly timed out, exiting." +
-                    "\nActive comp is: " + EDT.active(Composition::toString));
+            System.err.printf("%s: task unexpectedly timed out, exiting.\n" +
+                            "Active comp is: %s%n",
+                    AppRunner.getCurrentTimeHMS(),
+                    EDT.active(Composition::toString));
             exitInNewThread();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -240,25 +260,25 @@ public class RandomToolTest {
         }
     }
 
-    private void testToolWithCleanup(Tool tool, long testNr) {
+    private void testWithCleanup(Tool tool) {
         try {
-            testTool(tool, testNr);
+            test(tool);
         } catch (PausedException e) {
             // do the cleanup if it is paused to that
             // it starts in a clean state if resumed later
             assert paused;
 
             paused = false; // prevent throwing another exception during the cleanup
-            cleanupAfterToolTest(tool);
+            cleanupAfterTool();
             paused = true;
 
             throw e;
         }
     }
 
-    private void testTool(Tool tool, long testNr) {
+    private void test(Tool tool) {
         Utils.sleep(200, MILLISECONDS);
-        activate(tool, testNr);
+        activate(tool);
         randomizeToolSettings(tool);
         GlobalEvents.assertDialogNestingIs(0);
 
@@ -267,36 +287,38 @@ public class RandomToolTest {
             setSourceForCloneTool();
         }
 
-        randomEvents(tool);
-        dragRandomly(tool);
-        randomEvents(tool);
-        pushToolButtons(tool);
+        randomEvents();
+        dragRandomly();
+        randomEvents();
+        pushToolButtons();
         GlobalEvents.assertDialogNestingIs(0);
+        randomEvents();
 
-        cleanupAfterToolTest(tool);
+        cleanupAfterTool();
         GlobalEvents.assertDialogNestingIs(0);
 
         Utils.sleep(200, MILLISECONDS);
         checkControlVariables();
     }
 
-    private void activate(Tool tool, long testNr) {
-        log(tool, "activating, starting test " + Ansi.red(testNr + "."));
+    private void activate(Tool tool) {
         boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
         if (toolsShown) {
+            log("activating " + tool.getName() + " by clicking on the button");
             app.clickTool(tool);
         } else {
+            log("activating " + tool.getName() + " with keyboard");
             keyboard.pressChar(tool.getActivationKey());
         }
     }
 
     private void randomizeToolSettings(Tool tool) {
-        log(tool, "randomize tool settings");
+        log("randomize the settings of " + tool.getName());
         EDT.run(ToolSettingsPanelContainer.INSTANCE::randomizeToolSettings);
 
         if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
             // prevent paths getting too large
-            log(tool, "removing the path");
+            log("removing the path");
             Rnd.withProbability(0.5, () -> EDT.run(PEN::removePath));
         }
     }
@@ -304,124 +326,143 @@ public class RandomToolTest {
     private void initEventList() {
         events = new ArrayList<>();
 
-        events.add(this::click);
-        events.add(this::ctrlClick);
-        events.add(this::altClick);
-        events.add(this::shiftClick);
-        events.add(this::doubleClick);
-        events.add(this::pressEnter);
-        events.add(this::pressEsc);
-        events.add(this::pressTab);
-        events.add(this::pressCtrlTab);
-        events.add(this::nudge);
-        events.add(this::possiblyUndoRedo);
-        events.add(this::randomMultiLayerEdit);
-        events.add(this::randomShowHide);
-        events.add(this::randomKeyboardToolSwitch);
-        events.add(this::randomMaskEvent);
-        events.add(this::changeUI);
-        events.add(this::changeMaskView);
+        addEvent(this::click, "click");
+
+        addEvent(this::ctrlClick, "ctrlClick");
+        addEvent(this::altClick, "altClick");
+        addEvent(this::shiftClick, "shiftClick");
+        addEvent(this::doubleClick, "doubleClick");
+        addEvent(this::pressEnter, "pressEnter");
+        addEvent(this::pressEsc, "pressEsc");
+        addEvent(this::pressTab, "pressTab");
+        addEvent(this::pressCtrlTab, "pressCtrlTab");
+        addEvent(this::nudge, "nudge");
+        addEvent(this::possiblyUndoRedo, "possiblyUndoRedo");
+        addEvent(this::randomMultiLayerEdit, "randomMultiLayerEdit");
+        addEvent(this::randomShowHide, "randomShowHide");
+        addEvent(this::randomMaskEvent, "randomMaskEvent");
+
+//        addEvent(this::randomKeyboardToolSwitch, "randomKeyboardToolSwitch");
+//        addEvent(this::changeUI, "changeUI");
+
+        // breaks assertj?
+//        addEvent(this::changeMaskView, "changeMaskView");
     }
 
-    private void randomEvents(Tool tool) {
+    private void addEvent(Runnable event, String name) {
+        events.add(new MeasuredTask(event, name));
+    }
+
+    private void randomEvents() {
         Collections.shuffle(events);
-        for (Consumer<Tool> event : events) {
-            Rnd.withProbability(0.2, () -> event.accept(tool));
+        for (Runnable event : events) {
+            Rnd.withProbability(0.2, event);
             keyboard.assertModifiersAreReleased();
         }
     }
 
-    private void pressEnter(Tool tool) {
-        log(tool, "pressing Enter");
+    private void pressEnter() {
+        log("pressing Enter");
         keyboard.pressEnter();
     }
 
-    private void pressEsc(Tool tool) {
-        log(tool, "pressing Esc");
+    private void pressEsc() {
+        log("pressing Esc");
         keyboard.pressEsc();
     }
 
-    private void pressCtrlTab(Tool tool) {
-        log(tool, "pressing Ctrl-Tab");
+    private void pressCtrlTab() {
+        log("pressing Ctrl-Tab");
         keyboard.pressCtrlTab();
     }
 
-    private void pressTab(Tool tool) {
-        log(tool, "pressing Tab");
+    private void pressTab() {
+        log("pressing Tab");
         keyboard.pressTab();
     }
 
-    private void nudge(Tool tool) {
+    private void nudge() {
         ArrowKey randomArrowKey = Rnd.chooseFrom(arrowKeys);
-        log(tool, "nudging: " + randomArrowKey);
+        log("nudging: " + randomArrowKey);
 
         keyboard.nudge(randomArrowKey);
     }
 
-    private void cleanupAfterToolTest(Tool tool) {
-        log(tool, "starting final cleanup");
+    private void cleanupAfterTool() {
+        Tool tool = EDT.call(Tools::getCurrent);
+        log("cleaning up after " + tool.getName());
 
         Composition comp = EDT.getComp();
         if (tool == MOVE || tool == CROP) {
             if (comp.getNumLayers() > 1) {
-                flattenImage(tool);
+                flattenImage();
             }
         }
         if (EDT.getActiveSelection() != null) {
-            Rnd.withProbability(0.2, () -> deselect(tool));
+            Rnd.withProbability(0.2, this::deselect);
         }
 
         if (tool == ZOOM) {
-            Rnd.withProbability(0.5, () -> actualPixels(tool));
+            Rnd.withProbability(0.5, this::actualPixels);
         }
 
-        Rnd.withProbability(0.05, () -> reload(tool));
-        randomizeColors(tool);
-        cutBigLayerIfNecessary(tool, comp);
-        setStandardSize(tool);
+        Rnd.withProbability(0.05, this::reload);
+        randomizeColors();
+        cutBigLayersIfNecessary(comp);
+        setStandardSize();
 
         // this shouldn't be necessary
         keyboard.releaseModifierKeys();
     }
 
-    private void reload(Tool tool) {
-        log(tool, "reloading the image");
+    private void reload() {
+        log("reloading the image");
         app.runMenuCommand("Reload");
     }
 
-    private void randomizeColors(Tool tool) {
+    private void randomizeColors() {
+        Tool tool = EDT.call(Tools::getCurrent);
         if (tool == ZOOM || tool == HAND || tool == CROP || tool == SELECTION || tool == PEN) {
             return;
         }
-        log(tool, "randomizing colors");
+        log("randomizing colors");
         keyboard.randomizeColors();
     }
 
     // might be necessary because of the croppings
-    private void setStandardSize(Tool tool) {
+    private void setStandardSize() {
         Canvas canvas = EDT.active(Composition::getCanvas);
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
-        if (canvasWidth != 770 || canvasHeight != 600) {
-            log(tool, format("resizing back from %dx%d to 770x600",
-                    canvasWidth, canvasHeight));
-            app.resize(770, 600);
+
+        boolean standardSize = canvasWidth == 770 && canvasHeight == 600;
+        if (standardSize) {
+            return;
         }
+
+        boolean rotatedSize = canvasWidth == 600 && canvasHeight == 770;
+        if (rotatedSize) {
+            return;
+        }
+
+        log(format("resizing from %dx%d to 770x600",
+                canvasWidth, canvasHeight));
+        app.resize(770, 600);
     }
 
-    private void deselect(Tool tool) {
-        log(tool, "deselecting");
+    private void deselect() {
+        log("deselecting");
         Utils.sleep(200, MILLISECONDS);
         keyboard.deselect();
     }
 
-    private void actualPixels(Tool tool) {
-        log(tool, "actual pixels");
+    private void actualPixels() {
+        log("actual pixels");
         Utils.sleep(200, MILLISECONDS);
         app.runMenuCommand("Actual Pixels");
     }
 
-    private void dragRandomly(Tool tool) {
+    private void dragRandomly() {
         int numDrags = Rnd.intInRange(1, 5);
         for (int i = 0; i < numDrags; i++) {
             Utils.sleep(200, MILLISECONDS);
@@ -441,7 +482,7 @@ public class RandomToolTest {
                 msg += "shift-";
             }
             msg += "drag";
-            log(tool, msg);
+            log(msg);
 
             Utils.sleep(200, MILLISECONDS);
             mouse.dragRandomlyWithinCanvas();
@@ -456,69 +497,71 @@ public class RandomToolTest {
                 keyboard.releaseShift();
             }
 
-            possiblyUndoRedo(tool);
+            possiblyUndoRedo();
             keyboard.assertModifiersAreReleased();
         }
     }
 
-    private void possiblyUndoRedo(Tool tool) {
+    private void possiblyUndoRedo() {
         if (!EDT.call(History::canUndo)) {
             return;
         }
 
-        boolean undone = Rnd.withProbability(0.5, () -> undo(tool));
+        boolean undone = Rnd.withProbability(0.5, this::undo);
         if (undone) {
-            Rnd.withProbability(0.5, () -> redo(tool));
+            Utils.sleep(200, MILLISECONDS);
+            assert EDT.call(History::canRedo);
+            Rnd.withProbability(0.5, this::redo);
         }
     }
 
-    private void click(Tool tool) {
-        log(tool, "random click");
+    private void click() {
+        log("random click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomClick();
     }
 
-    private void ctrlClick(Tool tool) {
-        log(tool, "random ctrl-click");
+    private void ctrlClick() {
+        log("random ctrl-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomCtrlClick();
     }
 
-    private void altClick(Tool tool) {
-        log(tool, "random alt-click");
+    private void altClick() {
+        log("random alt-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomAltClick();
     }
 
-    private void shiftClick(Tool tool) {
-        log(tool, "random shift-click");
+    private void shiftClick() {
+        log("random shift-click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomShiftClick();
     }
 
-    private void doubleClick(Tool tool) {
-        log(tool, "random double click");
+    private void doubleClick() {
+        log("random double click");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomDoubleClick();
     }
 
-    private void undo(Tool tool) {
+    private void undo() {
         String editName = EDT.call(History::getEditToBeUndoneName);
-        log(tool, "random undo " + Ansi.yellow(editName));
+        log("random undo " + Ansi.yellow(editName));
 
         keyboard.undo();
     }
 
-    private void redo(Tool tool) {
+    private void redo() {
         String editName = EDT.call(History::getEditToBeRedoneName);
-        log(tool, "random redo " + Ansi.yellow(editName));
+        log("random redo " + Ansi.yellow(editName));
 
         keyboard.redo();
     }
 
-    private void randomMultiLayerEdit(Tool tool) {
+    private void randomMultiLayerEdit() {
         String command = Rnd.chooseFrom(simpleMultiLayerEdits);
-        log(tool, command);
+        log(command);
         app.runMenuCommand(command);
     }
 
@@ -529,22 +572,18 @@ public class RandomToolTest {
         assert inputDir.isDirectory() : "input dir is not a directory";
     }
 
-    private void log(Tool tool, String msg) {
+    private void log(String msg) {
         checkControlVariables();
 
+        Tool tool = EDT.call(Tools::getCurrent);
         String toolInfo = tool.getName();
 
-        Tool current = EDT.call(Tools::getCurrent);
-        if(current != tool) {
-            toolInfo += (" => " + current);
-        }
-
-        String stateInfo = EDT.call(current::getStateInfo);
+        String stateInfo = EDT.call(tool::getStateInfo);
         if (stateInfo != null) {
             toolInfo += (" [" + stateInfo + "]");
         }
 
-        String printed = Ansi.blue(toolInfo + ": ") + msg;
+        String printed = Ansi.red(testNr + ".") + " " + Ansi.blue(toolInfo + ": ") + msg;
         if (EDT.getActiveSelection() != null) {
             printed += Ansi.red(" SEL");
         }
@@ -563,63 +602,65 @@ public class RandomToolTest {
         }
     }
 
-    private void cutBigLayerIfNecessary(Tool tool, Composition comp) {
-        Rectangle imgSize = EDT.call(() ->
-                ((ImageLayer) comp.getActiveLayer()).getImageBounds());
+    private void cutBigLayersIfNecessary(Composition comp) {
+        Rectangle imgSize = EDT.call(comp::getMaxImageSize);
         Dimension canvasSize = EDT.call(() ->
                 comp.getCanvas().getImSize());
 
         if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
             // needs to be cut, otherwise there is a risk that
             // the image will grow too large during the next resize
-            cutBigLayer(tool);
+            cutBigLayers();
         } else if (imgSize.width > canvasSize.width || imgSize.height > canvasSize.height) {
-            Rnd.withProbability(0.3, () -> cutBigLayer(tool));
+            Rnd.withProbability(0.3, this::cutBigLayers);
         }
     }
 
-    private void cutBigLayer(Tool tool) {
-        log(tool, "layer to canvas size");
+    private void cutBigLayers() {
+        log("layers to canvas size");
         Utils.sleep(200, MILLISECONDS);
-        app.runMenuCommand("Layer to Canvas Size");
+
+        int numImageLayers = EDT.call(() -> OpenComps.fromActiveComp(
+                Composition::getNumImageLayers));
+        if (numImageLayers == 1) {
+            app.runMenuCommand("Layer to Canvas Size");
+        } else if (numImageLayers > 1) {
+            EDT.run(() -> OpenComps.onActiveComp(
+                    Composition::allImageLayersToCanvasSize));
+        }
     }
 
-    private void flattenImage(Tool tool) {
-        log(tool, "merge layers");
+    private void flattenImage() {
+        log("merge layers");
         Utils.sleep(200, MILLISECONDS);
         app.runMenuCommand("Flatten Image");
     }
 
     private void setSourceForCloneTool() {
-        log(CLONE, "setting source point");
+        log("setting source point");
         Utils.sleep(200, MILLISECONDS);
         mouse.randomAltClick();
     }
 
-    private void pushToolButtons(Tool tool) {
+    private void pushToolButtons() {
         boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
         if (!toolsShown) {
             return;
         }
 
-        Tool actual = EDT.call(Tools::getCurrent);
-        if (actual != tool) {
-            // this can happen in rare cases,
-            // if an undo/redo also changes the tool
-            return;
-        }
+        Tool tool = EDT.call(Tools::getCurrent);
 
         // TODO Clone Transform
         // TODO Shape: "Stroke Settings...", "Effects...", "Convert to Selection"
         if (tool == BRUSH || tool == ERASER) {
-            Rnd.withProbability(0.2, () -> changeLazyMouseSetting(tool));
-            Rnd.withProbability(0.2, () -> changeBrushSetting(tool));
+            Rnd.withProbability(0.2, this::changeLazyMouseSetting);
+            Rnd.withProbability(0.2, this::changeBrushSetting);
         } else if (tool == CLONE || tool == SMUDGE) {
-            Rnd.withProbability(0.2, () -> changeLazyMouseSetting(tool));
+            Rnd.withProbability(0.2, this::changeLazyMouseSetting);
         } else if (tool == PEN) {
             Rnd.withProbability(0.4, this::clickPenToolButton);
         } else if (tool == ZOOM || tool == HAND) {
-            Rnd.withProbability(0.2, () -> clickZoomOrHandToolButton(tool));
+            Rnd.withProbability(0.2, this::clickZoomOrHandToolButton);
         } else if (tool == CROP) {
             Rnd.withProbability(0.5, this::clickCropToolButton);
         } else if (tool == SELECTION) {
@@ -627,11 +668,11 @@ public class RandomToolTest {
         }
     }
 
-    private void changeLazyMouseSetting(Tool tool) {
+    private void changeLazyMouseSetting() {
         app.findButton("lazyMouseDialogButton").click();
         DialogFixture dialog = app.findDialogByTitle("Lazy Mouse Settings");
 
-        log(tool, "changing the lazy mouse setting");
+        log("changing the lazy mouse setting");
         Utils.sleep(200, MILLISECONDS);
         dialog.checkBox().click();
         Utils.sleep(200, MILLISECONDS);
@@ -639,13 +680,13 @@ public class RandomToolTest {
         dialog.button("ok").click();
     }
 
-    private void changeBrushSetting(Tool tool) {
+    private void changeBrushSetting() {
         JButtonFixture button = app.findButtonByText("Settings...");
         if (!button.isEnabled()) {
             return;
         }
 
-        log(tool, "changing the brush setting");
+        log("changing the brush setting");
         button.click();
         DialogFixture dialog = app.findDialogByTitleStartingWith("Settings for the");
 
@@ -671,17 +712,17 @@ public class RandomToolTest {
                 "Stroke with Current Smudge",
                 "Convert to Selection"
         };
-        clickRandomToolButton(PEN, texts);
+        clickRandomToolButton(texts);
     }
 
-    private void clickZoomOrHandToolButton(Tool tool) {
+    private void clickZoomOrHandToolButton() {
         String[] texts = {
                 "Actual Pixels",
                 "Fit Space",
                 "Fit Width",
                 "Fit Height"
         };
-        clickRandomToolButton(tool, texts);
+        clickRandomToolButton(texts);
     }
 
     private void clickCropToolButton() {
@@ -689,7 +730,7 @@ public class RandomToolTest {
                 "Crop",
                 "Cancel",
         };
-        clickRandomToolButton(CROP, texts);
+        clickRandomToolButton(texts);
     }
 
     private void clickSelectionToolButton() {
@@ -697,14 +738,14 @@ public class RandomToolTest {
                 "Crop Selection",
                 "Convert to Path",
         };
-        clickRandomToolButton(SELECTION, texts);
+        clickRandomToolButton(texts);
     }
 
-    private void clickRandomToolButton(Tool tool, String[] texts) {
+    private void clickRandomToolButton(String[] texts) {
         String text = Rnd.chooseFrom(texts);
         JButtonFixture button = app.findButtonByText(text);
         if (button.isEnabled()) {
-            log(tool, "Clicking " + Ansi.cyan(text));
+            log("Clicking " + Ansi.cyan(text));
             Utils.sleep(200, MILLISECONDS);
             button.click();
             Utils.sleep(500, MILLISECONDS);
@@ -713,76 +754,77 @@ public class RandomToolTest {
 
     // The Tab hotkey is tested separately,
     // this is for hiding/showing with menu shortcuts
-    private void randomShowHide(Tool tool) {
+    private void randomShowHide() {
         int i = Rnd.nextInt(10);
-        if(i == 0) {
-            randomShowHide(tool, "Tools",
+        if (i == 0) {
+            randomShowHide("Tools",
                     () -> PixelitorWindow.getInstance().areToolsShown());
         } else if (i == 1) {
-            randomShowHide(tool, "Layers",
+            randomShowHide("Layers",
                     LayersContainer::areLayersShown);
         } else if (i == 2) {
-            randomShowHide(tool, "Histograms",
+            randomShowHide("Histograms",
                     HistogramsPanel.INSTANCE::isShown);
         } else if (i == 3) {
-            randomShowHide(tool, "Status Bar",
+            randomShowHide("Status Bar",
                     StatusBar.INSTANCE::isShown);
         } else {
             // do nothing, this doesn't have to be tested all the time
         }
     }
 
-    private void randomShowHide(Tool tool, String name, Callable<Boolean> checkCurrent) {
+    private void randomShowHide(String name, Callable<Boolean> checkCurrent) {
         boolean shownBefore = EDT.call(checkCurrent);
         String cmd;
-        if(shownBefore) {
+        if (shownBefore) {
             cmd = "Hide " + name;
         } else {
             cmd = "Show " + name;
         }
-        log(tool, cmd);
+        log(cmd);
         app.runMenuCommand(cmd);
 
         boolean shownAfter = EDT.call(checkCurrent);
         assert shownAfter == !shownBefore;
     }
 
-    private void randomKeyboardToolSwitch(Tool tool) {
+    private void randomKeyboardToolSwitch() {
         int keyCode = Rnd.chooseFrom(TOOL_HOTKEYS);
-        log(tool, "random keyboard tool switch using " + Ansi.cyan(KeyEvent.getKeyText(keyCode)));
+        log("random keyboard tool switch using " + Ansi.cyan(KeyEvent.getKeyText(keyCode)));
+        cleanupAfterTool();
         keyboard.press(keyCode);
     }
 
-    private void changeUI(Tool tool) {
-        log(tool, "changing the UI (Ctrl-K)");
+    private void changeUI() {
+        log("changing the UI (Ctrl-K)");
         keyboard.ctrlPress(KeyEvent.VK_K);
     }
 
-    private void changeMaskView(Tool tool) {
-        if(!EDT.activeLayerHasMask()) {
+    private void changeMaskView() {
+        if (!EDT.activeLayerHasMask()) {
             return;
         }
         int num = Rnd.nextInt(4) + 1;
-        log(tool, "changing the mask view mode: Ctrl-" + num);
-        if(num == 1) {
+        log("changing the mask view mode: Ctrl-" + num);
+        if (num == 1) {
             keyboard.pressCtrlOne();
-        } else if(num == 2) {
+        } else if (num == 2) {
             keyboard.pressCtrlTwo();
-        } else if(num == 3) {
+        } else if (num == 3) {
             keyboard.pressCtrlThree();
-        } else if(num == 4) {
+        } else if (num == 4) {
             keyboard.pressCtrlFour();
         }
     }
 
-    private void randomMaskEvent(Tool tool) {
+    private void randomMaskEvent() {
         String command;
-        if(EDT.activeLayerHasMask()) {
+        if (EDT.activeLayerHasMask()) {
             command = Rnd.chooseFrom(REMOVE_MASK_MENU_COMMANDS);
         } else {
             command = Rnd.chooseFrom(ADD_MASK_MENU_COMMANDS);
         }
-        log(tool, "randomMaskEvent: " + command);
+        log("randomMaskEvent: " + command);
         app.runMenuCommand(command);
     }
 
@@ -863,4 +905,31 @@ class PausedException extends TestControlException {
 }
 
 class StoppedException extends TestControlException {
+}
+
+class MeasuredTask implements Runnable {
+    private Runnable task;
+    private final String name;
+
+    public MeasuredTask(Runnable task, String name) {
+        this.task = task;
+        this.name = name;
+    }
+
+    @Override
+    public void run() {
+        long startTime = System.nanoTime();
+        long startFree = Runtime.getRuntime().freeMemory();
+
+        task.run();
+
+        double seconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
+        long allocatedKB = (startFree - Runtime.getRuntime().freeMemory()) / 1024;
+
+        System.out.println(format("%s was running for %.2f s, allocated %d kBytes",
+                name, seconds, allocatedKB));
+        if(allocatedKB > 100*1024) { // more than 100 mega: why?
+            System.exit(1);
+        }
+    }
 }

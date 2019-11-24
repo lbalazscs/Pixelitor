@@ -60,8 +60,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
     public static final int ROBOT_DELAY_SLOW = 300; // millis
-    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = ThreadLocal
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_HM = ThreadLocal
             .withInitial(() -> new SimpleDateFormat("HH:mm"));
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_HMS = ThreadLocal
+            .withInitial(() -> new SimpleDateFormat("HH:mm:ss"));
 
     private final Robot robot;
     private final Mouse mouse;
@@ -151,12 +153,18 @@ public class AppRunner {
 
     void clickTool(Tool tool) {
         pw.toggleButton(tool.getName() + " Tool Button").click();
+        //EDT.run(() -> Tools.changeTo(tool));
+
         Utils.sleep(200, MILLISECONDS);
         EDT.assertActiveToolIs(tool);
     }
 
     void runMenuCommand(String text) {
-        findMenuItemByText(text).click();
+//        JMenuItemFixture menuItem = EDT.call(() -> findMenuItemByText(text));
+//        menuItem.click();
+
+        findMenuItemByText(text).click(); //
+        Utils.sleep(200, MILLISECONDS);
     }
 
     void saveWithOverwrite(File baseTestingDir, String fileName) {
@@ -255,8 +263,12 @@ public class AppRunner {
         errorDialog.requireNotVisible();
     }
 
-    static String getCurrentTime() {
-        return DATE_FORMAT.get().format(new Date());
+    static String getCurrentTimeHM() {
+        return DATE_FORMAT_HM.get().format(new Date());
+    }
+
+    static String getCurrentTimeHMS() {
+        return DATE_FORMAT_HMS.get().format(new Date());
     }
 
     JMenuItemFixture findMenuItemByText(String guiName) {

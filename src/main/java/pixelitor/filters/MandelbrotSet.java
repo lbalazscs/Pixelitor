@@ -17,25 +17,25 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.impl.ComplexFractal;
+import pixelitor.filters.impl.ComplexFractalImpl;
 
 import java.awt.image.BufferedImage;
 
 /**
  * Renders a Mandelbrot Set, see https://en.wikipedia.org/wiki/Mandelbrot_set
  */
-public class MandelbrotSet extends FractalFilter {
+public class MandelbrotSet extends ComplexFractal {
     public static final String NAME = "Mandelbrot Set";
-    private MandelbrotFilter filter;
+    private MandelbrotSetImpl filter;
 
     public MandelbrotSet() {
-        super(100, 0.16f);
+        super(100, 0.2028f);
     }
 
     @Override
     public BufferedImage doTransformAA(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new MandelbrotFilter();
+            filter = new MandelbrotSetImpl();
         }
 
         filter.setZoom(zoomParam.getZoomPercentage());
@@ -49,8 +49,8 @@ public class MandelbrotSet extends FractalFilter {
     }
 }
 
-class MandelbrotFilter extends ComplexFractal {
-    protected MandelbrotFilter() {
+class MandelbrotSetImpl extends ComplexFractalImpl {
+    protected MandelbrotSetImpl() {
         super(MandelbrotSet.NAME, -2.2f, 0.7f, -1.2f, 1.2f);
     }
 

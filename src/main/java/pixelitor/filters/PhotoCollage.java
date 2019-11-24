@@ -21,6 +21,7 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -50,6 +51,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 
 /**
@@ -60,10 +62,11 @@ public class PhotoCollage extends ParametrizedFilter {
 
     private final GroupedRangeParam size = new GroupedRangeParam("Photo Size", 40, 200, 999);
     private final RangeParam marginSize = new RangeParam("Margin", 0, 5, 20);
-    private final RangeParam imageNumber = new RangeParam("Number of Images", 1, 10, 101);
+    private final RangeParam numImagesParam = new RangeParam("Number of Images", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutside = new BooleanParam("Allow Outside", true);
     private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_OPACITY);
+    private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_OPACITY);
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 0.7);
     private final RangeParam shadowDistance = new RangeParam("Shadow Distance", 0, 5, 20);
@@ -72,23 +75,27 @@ public class PhotoCollage extends ParametrizedFilter {
     public PhotoCollage() {
         super(ShowOriginal.YES);
 
-        setParams(
-                imageNumber,
-                size.withAdjustedRange(1.0),
-                randomRotation,
-                allowOutside,
-                marginSize.withAdjustedRange(0.02),
-                bgColor,
+        DialogParam shadowDialog = new DialogParam("Shadow Settings",
                 shadowOpacityParam,
                 shadowAngleParam,
                 shadowDistance.withAdjustedRange(0.02),
-                shadowSoftnessParam.withAdjustedRange(0.01)
+                shadowSoftnessParam.withAdjustedRange(0.01));
+        
+        setParams(
+                numImagesParam,
+                allowOutside,
+                size.withAdjustedRange(1.0),
+                randomRotation,
+                marginSize.withAdjustedRange(0.02),
+                bgColor,
+                marginColor,
+                shadowDialog
         ).withAction(ReseedSupport.createAction());
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int numImages = imageNumber.getValue();
+        int numImages = numImagesParam.getValue();
         ProgressTracker pt = new StatusBarProgressTracker(NAME, numImages);
 
         Random rand = ReseedSupport.reInitialize();
@@ -103,52 +110,42 @@ public class PhotoCollage extends ParametrizedFilter {
         g.setColor(bgColor.getColor());
         g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
-        Rectangle fullImageRect = new Rectangle(0, 0, xSize, ySize);
+        Rectangle photoRect = new Rectangle(0, 0, xSize, ySize);
         int margin = marginSize.getValue();
-        Rectangle imageRect = new Rectangle(fullImageRect);
-        imageRect.grow(-margin, -margin);
-
-        Paint imagePaint = new TexturePaint(src,
-                new Rectangle2D.Float(0, 0, src.getWidth(), src.getHeight()));
+        Rectangle photoWOMarginRect = new Rectangle(photoRect);
+        photoWOMarginRect.grow(-margin, -margin);
 
         // the shadow image must be larger than the image size
         // so that there is room for soft shadows
         int shadowSoftness = shadowSoftnessParam.getValue();
         int softShadowRoom = 1 + (int) (2.3 * shadowSoftness);
 
-        int shadowImgWidth = xSize + 2 * softShadowRoom;
-        int shadowImgHeight = ySize + 2 * softShadowRoom;
-        BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
-                shadowImgWidth, shadowImgHeight);
-
-        Graphics2D gShadow = shadowImage.createGraphics();
-        gShadow.setColor(BLACK);
-        gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);
-        gShadow.dispose();
-        if (shadowSoftness > 0) {
-            shadowImage = new BoxBlurFilter(shadowSoftness, shadowSoftness, 1, NAME)
-                    .filter(shadowImage, shadowImage);
-        }
+        BufferedImage shadowImage = createShadowImage(xSize, ySize, shadowSoftness, softShadowRoom);
 
         Point2D offset = Utils.offsetFromPolar(
                 shadowDistance.getValue(),
                 shadowAngleParam.getValueInRadians());
-        int shadowOffsetX = (int) offset.getX();
-        int shadowOffsetY = (int) offset.getY();
+        double shadowOffsetX = offset.getX();
+        double shadowOffsetY = offset.getY();
 
         // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
                 shadowOpacityParam.getValueAsPercentage());
 
+        Paint imagePaint = new TexturePaint(src,
+                new Rectangle2D.Float(0, 0, src.getWidth(), src.getHeight()));
+
         for (int i = 0; i < numImages; i++) {
             // Calculate the transform of the image
             // step 2: translate
-            int tx;
-            int ty;
+            double tx;
+            double ty;
             if (allowOutside.isChecked()) {
-                tx = rand.nextInt(dest.getWidth() + xSize) - xSize;
-                ty = rand.nextInt(dest.getHeight() + ySize) - ySize;
+                tx = rand.nextInt(dest.getWidth()) - xSize / 2.0;
+                ty = rand.nextInt(dest.getHeight()) - ySize / 2.0;
             } else {
+                // a small part could be still outside because of the rotation,
+                // which is ignored here, but it's not a big deal
                 int maxTranslateX = dest.getWidth() - xSize;
                 int maxTranslateY = dest.getHeight() - ySize;
                 if (maxTranslateX <= 0) {
@@ -157,22 +154,22 @@ public class PhotoCollage extends ParametrizedFilter {
                 if (maxTranslateY <= 0) {
                     maxTranslateY = 1;
                 }
-                tx = rand.nextInt(maxTranslateX);
-                ty = rand.nextInt(maxTranslateY);
+                tx = maxTranslateX * rand.nextDouble();
+                ty = maxTranslateY * rand.nextDouble();
             }
-            AffineTransform randomTransform = AffineTransform.getTranslateInstance(tx, ty);
+            AffineTransform imageTransform = AffineTransform.getTranslateInstance(tx, ty);
 
             // step 1: rotate
             // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0;
             double theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
             theta *= randomRotation.getValueAsPercentage();
-            randomTransform.rotate(theta, xSize / 2.0, ySize / 2.0);
+            imageTransform.rotate(theta, xSize / 2.0, ySize / 2.0);
 
             // Calculate the transform of the shadow
             // step 3: final shadow offset
             AffineTransform shadowTransform = AffineTransform.getTranslateInstance(shadowOffsetX, shadowOffsetY);
             // step 2: rotate and random translate
-            shadowTransform.concatenate(randomTransform);
+            shadowTransform.concatenate(imageTransform);
             // step 1: take shadowBorder into account
             shadowTransform.translate(-softShadowRoom, -softShadowRoom);
 
@@ -182,11 +179,11 @@ public class PhotoCollage extends ParametrizedFilter {
 
             // Draw the margin and the image
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
-            Shape transformedRect = randomTransform.createTransformedShape(fullImageRect);
+            Shape transformedRect = imageTransform.createTransformedShape(photoRect);
             Shape transformedImageRect;
             if (margin > 0) {
-                transformedImageRect = randomTransform.createTransformedShape(imageRect);
-                g.setColor(WHITE);
+                transformedImageRect = imageTransform.createTransformedShape(photoWOMarginRect);
+                g.setColor(marginColor.getColor());
                 g.fill(transformedRect);
             } else {
                 transformedImageRect = transformedRect;
@@ -201,5 +198,22 @@ public class PhotoCollage extends ParametrizedFilter {
 
         g.dispose();
         return dest;
+    }
+
+    private BufferedImage createShadowImage(int xSize, int ySize, int shadowSoftness, int softShadowRoom) {
+        int shadowImgWidth = xSize + 2 * softShadowRoom;
+        int shadowImgHeight = ySize + 2 * softShadowRoom;
+        BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(
+                shadowImgWidth, shadowImgHeight);
+
+        Graphics2D gShadow = shadowImage.createGraphics();
+        gShadow.setColor(BLACK);
+        gShadow.fillRect(softShadowRoom, softShadowRoom, xSize, ySize);
+        gShadow.dispose();
+        if (shadowSoftness > 0) {
+            shadowImage = new BoxBlurFilter(shadowSoftness, shadowSoftness, 1, NAME)
+                    .filter(shadowImage, shadowImage);
+        }
+        return shadowImage;
     }
 }

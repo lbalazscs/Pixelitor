@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 public class JHLensBlur extends ParametrizedFilter {
     public static final String NAME = "Lens Blur";
 
-    private final RangeParam amount = new RangeParam("Amount (Radius)", 0, 0, 100);
+    private final RangeParam amount = new RangeParam("Amount (Radius)", 1, 2, 101);
     private final RangeParam numberOfSides = new RangeParam("Number of Sides of the Aperture", 3, 5, 12);
     private final RangeParam bloomFactor = new RangeParam("Bloom Factor", 1, 1, 8);
     private final RangeParam bloomThreshold = new RangeParam("Bloom Threshold", 0, 200, 255);
@@ -44,7 +44,7 @@ public class JHLensBlur extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                amount,
+                amount.withDecimalPlaces(1),
                 numberOfSides,
                 bloomFactor,
                 bloomThreshold,
@@ -54,10 +54,9 @@ public class JHLensBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        int radius = amount.getValue();
-        if (radius == 0) {
-            return src;
-        }
+//        if (amount.isFloatingZero()) {
+//            return src;
+//        }
 
         if (filter == null) {
             filter = new LensBlurFilter(NAME);

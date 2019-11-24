@@ -29,6 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.text.DecimalFormat;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -126,11 +127,40 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     private JSpinner createSpinner(RangeParam model) {
-        JSpinner s = new JSpinner(new SpinnerNumberModel(
-                model.getValue(), //initial value
-                model.getMinimum(), //min
-                model.getMaximum(), //max
-                1));
+        SpinnerNumberModel spinnerModel;
+        int decimalPlaces = model.getDecimalPlaces();
+        if(decimalPlaces > 0) {
+            double stepSize;
+            if(decimalPlaces == 1) {
+                stepSize = 0.1;
+            } else if(decimalPlaces == 2) {
+                stepSize = 0.01;
+            } else {
+                throw new IllegalStateException();
+            }
+            spinnerModel = new SpinnerNumberModel(
+                    model.getValueAsDouble(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    stepSize);
+        } else {
+            spinnerModel = new SpinnerNumberModel(
+                    model.getValue(), //initial value
+                    model.getMinimum(), //min
+                    model.getMaximum(), //max
+                    1);
+        }
+        JSpinner s = new JSpinner(spinnerModel);
+
+        if(decimalPlaces > 0) {
+            JSpinner.NumberEditor editor = (JSpinner.NumberEditor) s.getEditor();
+            DecimalFormat format = editor.getFormat();
+            format.setMinimumFractionDigits(decimalPlaces);
+
+            // make sure that the fractional form is displayed
+            editor.getTextField().setValue(model.getValueAsDouble());
+        }
+
         s.addChangeListener(this);
         return s;
     }
@@ -266,9 +296,14 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
                 return;
             }
             // this gets called even if the slider is modified by the user
-            int currentValue = (Integer) spinner.getValue();
             spinnerMoved = true;
-            model.setValue(currentValue);
+            if(model.getDecimalPlaces() > 0) {
+                double value = (double) spinner.getValue();
+                model.setValue(value, true);
+            } else {
+                int currentValue = (Integer) spinner.getValue();
+                model.setValue(currentValue);
+            }
             spinnerMoved = false;
         }
 

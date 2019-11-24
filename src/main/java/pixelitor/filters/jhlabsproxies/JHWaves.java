@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,9 +44,9 @@ public class JHWaves extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                wavelengthParam.withAdjustedRange(0.2),
-                amplitudeParam.withAdjustedRange(0.2),
                 waveType,
+                wavelengthParam.withAdjustedRange(0.2).withDecimalPlaces(1),
+                amplitudeParam.withAdjustedRange(0.2),
                 phaseParam,
                 edgeAction,
                 interpolation
@@ -66,8 +66,8 @@ public class JHWaves extends ParametrizedFilter {
             filter = new RippleFilter(NAME);
         }
 
-        int xWavelength = wavelengthParam.getValue(0);
-        int yWavelength = wavelengthParam.getValue(1);
+        float xWavelength = wavelengthParam.getValueAsFloat(0);
+        float yWavelength = wavelengthParam.getValueAsFloat(1);
 
         filter.setXAmplitude(xAmplitude);
         filter.setXWavelength(xWavelength);

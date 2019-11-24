@@ -46,10 +46,10 @@ public class RadialWaves extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
+                waveType,
                 center,
                 angularDivision,
                 radialAmplitude.withAdjustedRange(1.0),
-                waveType,
                 phase,
                 zoom,
                 edgeAction,

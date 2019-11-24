@@ -216,10 +216,17 @@ public class OpenSave {
 
     public static void openAllImagesInDir(File dir) {
         File[] files = FileUtils.listSupportedInputFilesIn(dir);
+        boolean found = false;
         if (files != null) {
             for (File file : files) {
+                found = true;
                 openFileAsync(file);
             }
+        }
+        if(!found) {
+            Messages.showInfo("No files found",
+                    format("<html>No supported image files found in <b>%s</b>.",
+                            dir.getName()));
         }
     }
 

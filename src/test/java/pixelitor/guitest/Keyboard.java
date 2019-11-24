@@ -248,6 +248,7 @@ public class Keyboard {
         } else {
             postKeyEventToEventQueue(0, keyCode);
         }
+        Utils.sleep(100, MILLISECONDS);
     }
 
     void ctrlPress(int keyCode) {
@@ -257,6 +258,7 @@ public class Keyboard {
         } else {
             postKeyEventToEventQueue(CTRL_DOWN_MASK, keyCode);
         }
+        Utils.sleep(100, MILLISECONDS);
     }
 
     public void pressCtrlOne() {

@@ -39,7 +39,7 @@ public class CausticsFilter extends WholeImageFilter {
     private int samples = 2;
     private int bgColor = 0xff799fff;
 
-    private float s, c;
+//    private float sin, cos;
 
     public CausticsFilter(String filterName) {
         super(filterName);
@@ -217,15 +217,9 @@ public class CausticsFilter extends WholeImageFilter {
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
+//        sin = (float) Math.sin(0.1);
+//        cos = (float) Math.cos(0.1);
 
-        // the choice of random number generator here is pretty irrelevant because
-        // the bottleneck is the evaluate method
-
-        s = (float) Math.sin(0.1);
-        c = (float) Math.cos(0.1);
-
-//        int srcWidth = originalSpace.width;
-//        int srcHeight = originalSpace.height;
         int outWidth = transformedSpace.width;
         int outHeight = transformedSpace.height;
         int index = 0;
@@ -406,9 +400,10 @@ public class CausticsFilter extends WholeImageFilter {
     }
 
     private float evaluate(float x, float y) {
-        float xt = s * x + c * time;
-        float tt = c * x - c * time;
-        float f = turbulence == 0.0 ? Noise.noise3(xt, y, tt) : turbulence2(xt, y, tt, turbulence);
+        float xt = x + time;
+        float tt = x - time;
+//        float f = turbulence == 0.0 ? Noise.noise3(xt, y, tt) : turbulence2(xt, y, tt, turbulence);
+        float f = turbulence2(xt, y, tt, turbulence);
         return f;
     }
 

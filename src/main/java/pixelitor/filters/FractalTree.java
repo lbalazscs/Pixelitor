@@ -144,7 +144,7 @@ public class FractalTree extends ParametrizedFilter {
             double base = Math.pow(trunkWidth, 1.0 / (maxDepth - 1));
             double w2 = Math.pow(base, depth - 1);
             float strokeWidth = (float) (w1 * w2);
-            float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / zoom.getDefaultValue();
+            float zoomedStrokeWidth = (strokeWidth * zoom.getValue()) / (float)zoom.getDefaultValue();
             widthLookup[depth] = new BasicStroke(zoomedStrokeWidth, CAP_ROUND, JOIN_ROUND);
             // colors
             float where = ((float) depth) / iterations.getValue();

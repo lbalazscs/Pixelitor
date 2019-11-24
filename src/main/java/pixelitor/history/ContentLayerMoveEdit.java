@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
 /**
- * A PixelitorEdit hat represents the movement of a content layer.
+ * A PixelitorEdit representing the movement of a content layer.
  * (Move Tool)
  */
 public class ContentLayerMoveEdit extends PixelitorEdit {

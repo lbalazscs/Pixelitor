@@ -35,7 +35,7 @@ public class JHUnderWater extends ParametrizedFilter {
 
     private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
     private final RangeParam scale = new RangeParam("Scale", 1, 150, 300);
-    private final RangeParam stretch = new RangeParam("Stretch", 0, 0, 50);
+    private final RangeParam stretch = new RangeParam("Stretch", 0, 0, 200);
     private final RangeParam time = new RangeParam("Time", 0, 0, 1000);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
@@ -73,9 +73,9 @@ public class JHUnderWater extends ParametrizedFilter {
 
         filter.setAmount(amount.getValueAsFloat());
         filter.setScale(scale.getValueAsFloat());
-        filter.setStretch(stretch.getValueAsFloat() + 1.0f);
+        filter.setStretch((float) Math.pow(10.0, stretch.getValueAsDouble() / 100.0));
         filter.setTime(time.getValueAsPercentage());
-        filter.setAngle((float) angle.getValueInRadians());
+        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2.0));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

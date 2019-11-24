@@ -69,6 +69,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gradient.GradientColorType;
 import pixelitor.tools.gradient.GradientTool;
 import pixelitor.tools.gradient.GradientType;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.tools.transform.TransformBox;
@@ -99,7 +100,7 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.guitest.AppRunner.getCurrentTime;
+import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionInteraction.REPLACE;
@@ -179,7 +180,7 @@ public class AssertJSwingTest {
             app.delayBetweenEvents(AppRunner.ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testCropTool();
+            testMoveTool();
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -200,7 +201,7 @@ public class AssertJSwingTest {
 
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in 5 seconds",
-                getCurrentTime(),
+                getCurrentTimeHM(),
                 Utils.formatMillis(totalTimeMillis));
         Utils.sleep(5, SECONDS);
         app.exit();
@@ -254,7 +255,7 @@ public class AssertJSwingTest {
         app.setupDelayBetweenEvents();
 
         System.out.printf("AssertJSwingTest: target = %s, testingMode = %s, started at %s%n",
-                target, maskMode, getCurrentTime());
+                target, maskMode, getCurrentTimeHM());
 
         app.runTests(() -> target.run(this));
     }
@@ -1729,7 +1730,10 @@ public class AssertJSwingTest {
         testFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Brushed Metal...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
         testFilterWithDialog("Voronoi Diagram...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+
         testFilterWithDialog("Fractal Tree...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Julia Set...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Mandelbrot Set...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
         testFilterWithDialog("Checker Pattern...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Starburst...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
@@ -2631,46 +2635,74 @@ public class AssertJSwingTest {
     private void testMoveTool() {
         log(1, "testing the move tool");
 
+        addSelection(); // so that the moving of the selection can be tested
         app.clickTool(Tools.MOVE);
 
-        testMoveToolImpl(false);
-        testMoveToolImpl(true);
+        MoveMode[] moveModes = MoveMode.values();
+        for (MoveMode mode : moveModes) {
+            pw.comboBox("modeSelector").selectItem(mode.toString());
 
-        keyboard.nudge();
-        keyboard.undoRedoUndo("Move Layer");
+            testMoveToolImpl(mode, false);
+            testMoveToolImpl(mode, true);
+            EDT.assertNumLayersIs(1);
+
+            keyboard.nudge();
+            keyboard.undoRedoUndo(mode.getEditName());
+            EDT.assertNumLayersIs(1);
+        }
+
+        // check that all move-related edits have been undone
+        EDT.assertEditToBeUndoneNameIs("Create Selection");
+
+        mouse.click();
+        mouse.ctrlClick();
+        EDT.assertNumLayersIs(1);
+
+        mouse.altClick(); // this duplicates the layer
+        EDT.assertNumLayersIs(2);
+        pw.button("deleteLayer")
+                .requireEnabled()
+                .click();
+        EDT.assertNumLayersIs(1);
+        maskMode.set(this); 
 
         checkConsistency();
     }
 
-    private void testMoveToolImpl(boolean altDrag) {
+    private void testMoveToolImpl(MoveMode mode, boolean altDrag) {
         mouse.moveToCanvas(400, 400);
-        mouse.click();
+
         if (altDrag) {
             mouse.altDragToCanvas(300, 300);
         } else {
             View view = EDT.getActiveView();
             Drawable dr = view.getComp().getActiveDrawableOrThrow();
-            int tx = dr.getTX();
-            int ty = dr.getTY();
-            assert tx == 0 : "tx = " + tx;
-            assert ty == 0 : "ty = " + tx;
+            assert dr.getTX() == 0 : "tx = " + dr.getTX();
+            assert dr.getTY() == 0 : "ty = " + dr.getTX();
 
             mouse.dragToCanvas(200, 300);
 
-            tx = dr.getTX();
-            ty = dr.getTY();
-
-            // The translations will have these values only if we are at 100% zoom!
-            assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
-            assert tx == -200 : "tx = " + tx;
-            assert ty == -100 : "ty = " + tx;
+            if(mode.movesTheLayer()) {
+                // The translations will have these values only if we are at 100% zoom!
+                assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
+                assert dr.getTX() == -200 : "tx = " + dr.getTX();
+                assert dr.getTY() == -100 : "ty = " + dr.getTY();
+            } else {
+                assert dr.getTX() == 0 : "tx = " + dr.getTX();
+                assert dr.getTY() == 0 : "ty = " + dr.getTY();
+            }
         }
-        keyboard.undoRedoUndo("Move Layer");
-        if (altDrag) {
+
+        keyboard.undoRedoUndo(mode.getEditName());
+
+        if (altDrag && mode != MoveMode.MOVE_SELECTION_ONLY) {
             // TODO the alt-dragged movement creates two history edits:
             // a duplicate and a layer move. Now also undo the duplication
             keyboard.undo("Duplicate Layer");
         }
+
+        // check that all move-related edits have been undone
+        EDT.assertEditToBeUndoneNameIs("Create Selection");
     }
 
     private void testZoomTool() {
@@ -3023,7 +3055,7 @@ public class AssertJSwingTest {
         for (int i = 0; i < indent; i++) {
             System.out.print("    ");
         }
-        System.out.println(getCurrentTime() + ": " + msg
+        System.out.println(getCurrentTimeHM() + ": " + msg
                 + " (" + maskMode.toString() + ", "
                 + ImageArea.getMode() + ")");
     }

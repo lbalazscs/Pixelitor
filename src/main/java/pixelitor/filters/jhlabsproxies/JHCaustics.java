@@ -42,7 +42,7 @@ public class JHCaustics extends ParametrizedFilter {
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
     private final RangeParam dispersion = new RangeParam("Dispersion (Color Separation)", 0, 0, 100);
-    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 8);
+    private final RangeParam turbulence = new RangeParam("Turbulence", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time", 0, 0, 800);
     private final RangeParam samples = new RangeParam("Samples (Quality)", 1, 1, 10,
             true, BORDER, IGNORE_RANDOMIZE);
@@ -77,7 +77,7 @@ public class JHCaustics extends ParametrizedFilter {
         filter.setSamples(samples.getValue());
         filter.setScale(zoom.getValueAsFloat());
         filter.setTime(time.getValueAsPercentage());
-        filter.setTurbulence(turbulence.getValueAsFloat());
+        filter.setTurbulence(turbulence.getValueAsFloat() / 25.0f);
 
         dest = filter.filter(src, dest);
         return dest;

@@ -21,7 +21,7 @@ import com.jhlabs.image.PointFilter;
 
 import java.awt.image.BufferedImage;
 
-public abstract class ComplexFractal extends PointFilter {
+public abstract class ComplexFractalImpl extends PointFilter {
     // the bounds in the complex space
     private final double cxMin;
     private final double cxMax;
@@ -48,7 +48,7 @@ public abstract class ComplexFractal extends PointFilter {
 
     protected int[] colors;
 
-    protected ComplexFractal(String filterName, double cxMin, double cxMax, double cyMin, double cyMax) {
+    protected ComplexFractalImpl(String filterName, double cxMin, double cxMax, double cyMin, double cyMax) {
         super(filterName);
 
         this.cxMin = cxMin;

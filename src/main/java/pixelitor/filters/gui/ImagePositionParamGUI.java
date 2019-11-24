@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,14 +40,16 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private boolean slidersMovedByUser = true;
 
-    public ImagePositionParamGUI(ImagePositionParam model, int defaultX, int defaultY) {
+    public ImagePositionParamGUI(ImagePositionParam model, double defaultX, double defaultY) {
         this.model = model;
 
         xSliderModel = new RangeParam(
                 "Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
+        xSliderModel.setDecimalPlaces(model.getDecimalPlaces());
         ySliderModel = new RangeParam(
                 "Vertical Position (%)", 0, defaultY, 100, true, NORTH);
-
+        ySliderModel.setDecimalPlaces(model.getDecimalPlaces());
+        
         setBorder(createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
 

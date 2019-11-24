@@ -231,6 +231,10 @@ public class ParamSet {
         paramList.addAll(old);
     }
 
+    public void insertParamAtIndex(FilterParam param, int index) {
+        paramList.add(index, param);
+    }
+
     /**
      * Allows registering an action that will run before "reset all"
      */

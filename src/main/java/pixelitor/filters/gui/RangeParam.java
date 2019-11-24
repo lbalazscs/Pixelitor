@@ -42,7 +42,8 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
     private int minValue;
     private int maxValue;
-    private int defaultValue;
+    private double defaultValue;
+    private int decimalPlaces = 0;
 
     /**
      * This is not stored as an int in order to enable animation interpolations
@@ -61,16 +62,16 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean adjustMaxAccordingToImage = false;
     private double maxToImageSizeRatio;
 
-    public RangeParam(String name, int min, int def, int max) {
+    public RangeParam(String name, int min, double def, int max) {
         this(name, min, def, max, true, BORDER);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+    public RangeParam(String name, int min, double def, int max, boolean addDefaultButton,
                       SliderSpinner.TextPosition position) {
         this(name, min, def, max, addDefaultButton, position, ALLOW_RANDOMIZE);
     }
 
-    public RangeParam(String name, int min, int def, int max, boolean addDefaultButton,
+    public RangeParam(String name, int min, double def, int max, boolean addDefaultButton,
                       SliderSpinner.TextPosition position, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
@@ -125,6 +126,19 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         linkWith(other, () -> other.getValue() > this.getValue());
     }
 
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(int dp) {
+        this.decimalPlaces = dp;
+    }
+
+    public RangeParam withDecimalPlaces(int dp) {
+        setDecimalPlaces(dp);
+        return this;
+    }
+
     /**
      * Synchronizes the value of this object with the value of another
      * {@link RangeParam} if the given condition evaluates to true.
@@ -155,10 +169,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public boolean isSetToDefault() {
-        return getValue() == defaultValue;
+        return Math.abs(getValueAsDouble() - defaultValue) < 0.005;
     }
 
-    public int getDefaultValue() {
+    public double getDefaultValue() {
         return defaultValue;
     }
 
@@ -246,6 +260,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return getValue() == 0;
     }
 
+    public boolean isFloatingZero() {
+        return getValueAsDouble() == 0.0;
+    }
+
     public float getValueAsFloat() {
         return (float) value;
     }
@@ -263,23 +281,19 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         setValue(n, false);
     }
 
-    public void setValue(double n, boolean trigger) {
-        if (n > maxValue) {
-            n = maxValue;
+    public void setValue(double v, boolean trigger) {
+        if (v > maxValue) {
+            v = maxValue;
         }
-        if (n < minValue) {
-            n = minValue;
+        if (v < minValue) {
+            v = minValue;
         }
 
-        if (value != n) {
-            value = n;
+        if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
+            value = v;
             fireStateChanged(); // update the GUI
-            if (!adjusting) {
-                if (trigger) {
-                    if (adjustmentListener != null) {
-                        adjustmentListener.paramAdjusted(); // run the filter
-                    }
-                }
+            if (!adjusting && trigger && adjustmentListener != null) {
+                adjustmentListener.paramAdjusted(); // run the filter
             }
         }
     }
@@ -386,7 +400,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public ParamState copyState() {
+    public RPState copyState() {
         return new RPState(value);
     }
 
@@ -400,7 +414,64 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return this;
     }
 
-    private static class RPState implements ParamState {
+    public static class Builder {
+        private final String name;
+        private int min;
+        private double def;
+        private int max;
+        private boolean addDefaultButton = true;
+        private int decimalPlaces = 0;
+        private SliderSpinner.TextPosition textPosition = BORDER;
+        private RandomizePolicy randomizePolicy = ALLOW_RANDOMIZE;
+
+        public Builder(String name) {
+            this.name = name;
+        }
+
+        public Builder min(int min) {
+            this.min = min;
+            return this;
+        }
+
+        public Builder def(double def) {
+            this.def = def;
+            return this;
+        }
+
+        public Builder max(int max) {
+            this.max = max;
+            return this;
+        }
+
+        public Builder withDecimalPlaces(int dp) {
+            this.decimalPlaces = dp;
+            return this;
+        }
+
+        public Builder addDefaultButton(boolean addDefaultButton) {
+            this.addDefaultButton = addDefaultButton;
+            return this;
+        }
+
+        public Builder textPosition(SliderSpinner.TextPosition textPosition) {
+            this.textPosition = textPosition;
+            return this;
+        }
+
+        public Builder randomizePolicy(RandomizePolicy randomizePolicy) {
+            this.randomizePolicy = randomizePolicy;
+            return this;
+        }
+
+        public RangeParam build() {
+            RangeParam rp = new RangeParam(name, min, def, max,
+                    addDefaultButton, textPosition, randomizePolicy);
+            rp.setDecimalPlaces(decimalPlaces);
+            return rp;
+        }
+    }
+
+    private static class RPState implements ParamState<RPState> {
         final double value;
 
         public RPState(double value) {
@@ -408,9 +479,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
 
         @Override
-        public RPState interpolate(ParamState endState, double progress) {
-            RPState rpEndState = (RPState) endState;
-            double interpolated = ImageMath.lerp(progress, value, rpEndState.value);
+        public RPState interpolate(RPState endState, double progress) {
+            double interpolated = ImageMath.lerp(progress, value, endState.value);
             return new RPState(interpolated);
         }
 
@@ -421,7 +491,17 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public String getResetToolTip() {
-        return super.getResetToolTip() + " to " + defaultValue;
+        String defaultAsString;
+        if(decimalPlaces == 0) {
+            defaultAsString = String.valueOf((int)defaultValue);
+        } else if(decimalPlaces == 1) {
+            defaultAsString = format("%.1f", defaultValue);
+        } else if(decimalPlaces == 2) {
+            defaultAsString = format("%.2f", defaultValue);
+        } else {
+            throw new IllegalStateException();
+        }
+        return super.getResetToolTip() + " to " + defaultAsString;
     }
 
     @Override

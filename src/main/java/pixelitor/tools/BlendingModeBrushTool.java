@@ -19,11 +19,14 @@ package pixelitor.tools;
 
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.OpenComps;
+import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Composite;
 import java.awt.Cursor;
+import java.awt.Shape;
 
 /**
  * An {@link AbstractBrushTool} tool that can have blending mode controls.
@@ -58,6 +61,12 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         if(activeLayer != null) {
             setupMaskEditing(activeLayer.isMaskEditing());
         }
+    }
+
+    @Override
+    public void trace(Drawable dr, Shape shape) {
+        setupMaskEditing(dr instanceof LayerMask);
+        super.trace(dr, shape);
     }
 
     @Override

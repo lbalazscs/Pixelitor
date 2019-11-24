@@ -121,4 +121,8 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     public void addParamsToFront(FilterParam... params) {
         paramSet.addParamsToFront(params);
     }
+
+    public void insertParamAtIndex(FilterParam param, int index) {
+        paramSet.insertParamAtIndex(param, index);
+    }
 }

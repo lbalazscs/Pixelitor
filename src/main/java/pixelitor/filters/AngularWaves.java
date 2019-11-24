@@ -47,10 +47,10 @@ public class AngularWaves extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                center,
-                radialWL.withAdjustedRange(0.05),
-                amount,
                 waveType,
+                center,
+                radialWL.withAdjustedRange(0.05).withDecimalPlaces(1),
+                amount,
                 phase,
                 zoom,
                 edgeAction,

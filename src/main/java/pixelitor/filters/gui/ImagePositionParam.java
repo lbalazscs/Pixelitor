@@ -31,6 +31,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 public class ImagePositionParam extends AbstractFilterParam {
     private float relativeX = 0.5f;
     private float relativeY = 0.5f;
+    private int decimalPlaces = 1;
 
     private float defaultRelativeX = 0.5f;
     private float defaultRelativeY = 0.5f;
@@ -49,8 +50,8 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        int defaultX = (int) (100 * defaultRelativeX);
-        int defaultY = (int) (100 * defaultRelativeY);
+        double defaultX = 100 * defaultRelativeX;
+        double defaultY = 100 * defaultRelativeY;
 
         ImagePositionParamGUI gui = new ImagePositionParamGUI(this, defaultX, defaultY);
         paramGUI = gui;
@@ -118,8 +119,17 @@ public class ImagePositionParam extends AbstractFilterParam {
         return true;
     }
 
+    public ImagePositionParam withDecimalPlaces(int dp) {
+        decimalPlaces = dp;
+        return this;
+    }
+
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
     @Override
-    public ParamState copyState() {
+    public IPPState copyState() {
         return new IPPState(relativeX, relativeY);
     }
 
@@ -130,7 +140,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         relativeY = (float) s.relativeY;
     }
 
-    private static class IPPState implements ParamState {
+    private static class IPPState implements ParamState<IPPState> {
         private final double relativeX;
         private final double relativeY;
 
@@ -140,10 +150,9 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
 
         @Override
-        public ParamState interpolate(ParamState endState, double progress) {
-            IPPState ippEndState = (IPPState) endState;
-            double interpolatedX = ImageMath.lerp(progress, relativeX, ippEndState.relativeX);
-            double interpolatedY = ImageMath.lerp(progress, relativeY, ippEndState.relativeY);
+        public IPPState interpolate(IPPState endState, double progress) {
+            double interpolatedX = ImageMath.lerp(progress, relativeX, endState.relativeX);
+            double interpolatedY = ImageMath.lerp(progress, relativeY, endState.relativeY);
             return new IPPState(interpolatedX, interpolatedY);
         }
     }

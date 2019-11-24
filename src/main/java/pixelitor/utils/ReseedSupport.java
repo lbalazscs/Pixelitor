@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,11 +35,10 @@ public class ReseedSupport {
     }
 
     /**
-     * Reinitializes the random number generator in order to
+     * Reinitializes and returns the random number generator in order to
      * make sure that the filter runs with the same random numbers
-     * as before when the re-run is NOT caused by pressing
-     * the "reseed" button.
-     * Returns the random number generator which is reseeded.
+     * as before (when the filter execution is not started from
+     * the "reseed" button).
      * This must be called at the beginning of the filter.
      */
     public static Random reInitialize() {

@@ -113,7 +113,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
             // set the value of every other param to the value of the changed param
             for (RangeParam other : rangeParams) {
                 if (other != param) {
-                    int newValue = param.getValue();
+                    double newValue = param.getValueAsDouble();
                     other.setValueNoTrigger(newValue);
                 }
             }
@@ -251,7 +251,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState copyState() {
+    public GRState copyState() {
         double[] values = Arrays.stream(rangeParams)
                 .mapToDouble(RangeParam::getValue)
                 .toArray();
@@ -269,7 +269,18 @@ public class GroupedRangeParam extends AbstractFilterParam {
         }
     }
 
-    private static class GRState implements ParamState {
+    public void setDecimalPlaces(int dp) {
+        for (RangeParam param : rangeParams) {
+            param.setDecimalPlaces(dp);
+        }
+    }
+
+    public GroupedRangeParam withDecimalPlaces(int dp) {
+        setDecimalPlaces(dp);
+        return this;
+    }
+
+    private static class GRState implements ParamState<GRState> {
         private final double[] values;
 
         public GRState(double[] values) {
@@ -277,13 +288,11 @@ public class GroupedRangeParam extends AbstractFilterParam {
         }
 
         @Override
-        public ParamState interpolate(ParamState endState, double progress) {
-            GRState apEndState = (GRState) endState;
-
+        public GRState interpolate(GRState endState, double progress) {
             double[] interpolatedValues = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 interpolatedValues[i] = ImageMath.lerp(
-                        progress, values[i], apEndState.values[i]);
+                        progress, values[i], endState.values[i]);
             }
 
             return new GRState(interpolatedValues);

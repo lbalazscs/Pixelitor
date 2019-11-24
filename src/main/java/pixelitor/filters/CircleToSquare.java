@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,6 @@ public class CircleToSquare extends ParametrizedFilter {
     public CircleToSquare() {
         super(ShowOriginal.YES);
         showAffectedArea();
-
 
         setParams(
                 center,

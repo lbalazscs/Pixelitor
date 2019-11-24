@@ -24,6 +24,8 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -38,9 +40,11 @@ public class Canny extends ParametrizedFilter {
     private final RangeParam gaussianKernelWidth = new RangeParam(
             "Gaussian Kernel Width", 2, 16, 50);
     private final RangeParam gaussianKernelRadius = new RangeParam(
-            "Gaussian Kernel Radius", 1, 2, 10);
+            "Gaussian Kernel Radius", 0, 2, 10);
     private final BooleanParam contrastNormalized = new BooleanParam(
             "Contrast Normalized", false);
+    private final BooleanParam invert = new BooleanParam(
+            "Invert", false);
 
     public Canny() {
         super(ShowOriginal.YES);
@@ -49,14 +53,24 @@ public class Canny extends ParametrizedFilter {
                 lowThreshold,
                 highThreshold,
                 gaussianKernelWidth,
-                gaussianKernelRadius,
-                contrastNormalized
+                gaussianKernelRadius.withDecimalPlaces(1),
+                contrastNormalized,
+                invert
         );
         highThreshold.ensureHigherValueThan(lowThreshold);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        if(gaussianKernelRadius.getValueAsFloat() <= 0.1f) {
+            // return a black image to avoid exceptions
+            Graphics2D g = dest.createGraphics();
+            g.setColor(invert.isChecked() ? Color.WHITE : Color.BLACK);
+            g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+            g.dispose();
+            return dest;
+        }
+
         long estimatedMemoryMB = estimateNeededMemoryMB(src);
         System.gc(); // needed for the memory estimation
         MemoryInfo memoryInfo = new MemoryInfo();
@@ -81,6 +95,10 @@ public class Canny extends ParametrizedFilter {
 
         detector.process();
         dest = detector.getEdgesImage();
+
+        if(invert.isChecked()) {
+            Invert.quickInvert(dest);
+        }
 
         return dest;
     }

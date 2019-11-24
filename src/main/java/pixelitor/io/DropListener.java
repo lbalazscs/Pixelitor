@@ -53,8 +53,8 @@ public class DropListener extends DropTargetAdapter {
             public void handleDrop(List<File> list) {
                 for (File file : list) {
                     if (file.isDirectory()) {
-                        String question = format("You have dropped the folder \"%s\".\n " +
-                                "Do you want to open all image files inside it?", file.getName());
+                        String question = format("<html>You have dropped the folder <b>\"%s\"</b>." +
+                                "<br>Do you want to open all image files inside it?", file.getName());
 
                         if (Dialogs.showYesNoQuestionDialog("Question", question)) {
                             OpenSave.openAllImagesInDir(file);

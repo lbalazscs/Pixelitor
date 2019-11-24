@@ -17,18 +17,25 @@
 
 package pixelitor.tools.move;
 
+import pixelitor.history.ContentLayerMoveEdit;
+
 public enum MoveMode {
-    MOVE_BOTH("Layer and Selection", true, true) {
-    }, MOVE_SELECTION_ONLY("Selection Only", true, false) {
-    }, MOVE_LAYER_ONLY("Layer Only", false, true) {
+    MOVE_BOTH("Layer and Selection", "Move",
+            true, true) {
+    }, MOVE_SELECTION_ONLY("Selection Only", "Move Selection",
+            true, false) {
+    }, MOVE_LAYER_ONLY("Layer Only", ContentLayerMoveEdit.NAME,
+            false, true) {
     };
 
     private final String guiName;
+    private final String editName;
     private final boolean moveSelection;
     private final boolean moveLayer;
 
-    MoveMode(String guiName, boolean moveSelection, boolean moveLayer) {
+    MoveMode(String guiName, String editName, boolean moveSelection, boolean moveLayer) {
         this.guiName = guiName;
+        this.editName = editName;
         this.moveSelection = moveSelection;
         this.moveLayer = moveLayer;
     }
@@ -39,6 +46,10 @@ public enum MoveMode {
 
     public boolean movesTheLayer() {
         return moveLayer;
+    }
+
+    public String getEditName() {
+        return editName;
     }
 
     @Override

@@ -638,7 +638,7 @@ public class Composition implements Serializable {
         }
 
         PixelitorEdit combinedEdit = MultiEdit.combine(
-                layerEdit, selectionEdit, "Move");
+                layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
         if (combinedEdit != null) {
             History.addEdit(combinedEdit);
             imageChanged();
@@ -1141,6 +1141,33 @@ public class Composition implements Serializable {
         return OpenComps.getActiveCompOrNull() == this;
     }
 
+    @VisibleForTesting
+    public Rectangle getMaxImageSize() {
+        Rectangle max = new Rectangle(0, 0, 0, 0);
+        for (Layer layer : layerList) {
+            if(layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                Rectangle layerBounds = imageLayer.getImageBounds();
+                max.add(layerBounds);
+            }
+        }
+        return max;
+    }
+
+    /**
+     * Useful for testing, but not exposed in the UI, because
+     * it can create multiple undo events instead of just one
+     */
+    @VisibleForTesting
+    public void allImageLayersToCanvasSize() {
+        for (Layer layer : layerList) {
+            if(layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                imageLayerToCanvasSize(imageLayer);
+            }
+        }
+    }
+
     public void activeLayerToCanvasSize() {
         if (!(activeLayer instanceof ImageLayer)) {
             Messages.showNotImageLayerError();
@@ -1148,6 +1175,10 @@ public class Composition implements Serializable {
         }
 
         ImageLayer layer = (ImageLayer) this.activeLayer;
+        imageLayerToCanvasSize(layer);
+    }
+
+    private void imageLayerToCanvasSize(ImageLayer layer) {
         BufferedImage backupImage = layer.getImage();
 
         TranslationEdit translationEdit = new TranslationEdit(this, layer, true);

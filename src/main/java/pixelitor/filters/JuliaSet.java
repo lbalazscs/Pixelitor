@@ -19,16 +19,16 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.impl.ComplexFractal;
+import pixelitor.filters.impl.ComplexFractalImpl;
 
 import java.awt.image.BufferedImage;
 
 /**
  * Renders a Julia Set, see https://en.wikipedia.org/wiki/Julia_set
  */
-public class JuliaSet extends FractalFilter {
+public class JuliaSet extends ComplexFractal {
     public static final String NAME = "Julia Set";
-    private JuliaFilter filter;
+    private JuliaSetImpl filter;
 
     private final GroupedRangeParam cParam = new GroupedRangeParam("Complex Constant (*100)",
             new RangeParam[]{
@@ -39,13 +39,15 @@ public class JuliaSet extends FractalFilter {
     public JuliaSet() {
         super(300, 0.22f);
 
-        addParams(cParam);
+        insertParamAtIndex(
+                cParam.notLinkable().withDecimalPlaces(2),
+                3);
     }
 
     @Override
     public BufferedImage doTransformAA(BufferedImage src, BufferedImage dest) {
         if(filter == null) {
-            filter = new JuliaFilter();
+            filter = new JuliaSetImpl();
         }
 
         filter.setZoom(zoomParam.getZoomPercentage());
@@ -62,11 +64,11 @@ public class JuliaSet extends FractalFilter {
     }
 }
 
-class JuliaFilter extends ComplexFractal {
+class JuliaSetImpl extends ComplexFractalImpl {
     private double cx;
     private double cy;
 
-    protected JuliaFilter() {
+    protected JuliaSetImpl() {
         super(JuliaSet.NAME, -2.0f,  2.0f, -1.2f, 1.2f);
     }
 

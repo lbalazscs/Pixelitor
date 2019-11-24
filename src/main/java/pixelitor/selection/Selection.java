@@ -24,6 +24,7 @@ import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
+import pixelitor.tools.move.MoveMode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -339,7 +340,8 @@ public class Selection {
             return deselectEdit;
         }
 
-        SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit("Move Selection", comp, moveStartShape);
+        SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit(
+                MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, moveStartShape);
         moveStartShape = null;
         return edit;
     }

@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 public class JHGaussianBlur extends ParametrizedFilter {
     public static final String NAME = "Gaussian Blur";
 
-    private final RangeParam radius = new RangeParam("Radius", 0, 2, 100);
+    private final RangeParam radius = new RangeParam("Radius", 1, 2, 101);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 
     private GaussianFilter filter;
@@ -42,16 +42,16 @@ public class JHGaussianBlur extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                radius,
+                radius.withDecimalPlaces(1),
                 hpSharpening
         );
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (radius.isZero()) {
-            return src;
-        }
+//        if (radius.isFloatingZero()) {
+//            return src;
+//        }
 
         if (filter == null) {
             filter = new GaussianFilter(NAME);

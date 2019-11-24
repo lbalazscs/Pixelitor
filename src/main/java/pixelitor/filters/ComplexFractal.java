@@ -29,8 +29,12 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
-public abstract class FractalFilter extends ParametrizedFilter {
+/**
+ * Common superclass for the Julia and Mandelbrot sets
+ */
+public abstract class ComplexFractal extends ParametrizedFilter {
     private static final int COLORS_CONTRASTING = 1;
     private static final int COLORS_CONTINUOUS = 2;
     private static final int COLORS_BLUES = 3;
@@ -49,37 +53,43 @@ public abstract class FractalFilter extends ParametrizedFilter {
     private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new IntChoiceParam.Value[]{
             new IntChoiceParam.Value("None (Faster)", AA_NONE),
             new IntChoiceParam.Value("2x2 (Better, Slower)", AA_2x2),
-    });
+    }, IGNORE_RANDOMIZE);
 
-    protected FractalFilter(int defaultIterations, float zoomX) {
+    protected ComplexFractal(int defaultIterations, float zoomX) {
         super(ShowOriginal.NO);
 
-        iterationsParam = new RangeParam("Iterations",
-                2, defaultIterations, 998);
+        iterationsParam = new RangeParam.Builder("Iterations")
+                .min(2)
+                .def(defaultIterations)
+                .max(998)
+                .randomizePolicy(IGNORE_RANDOMIZE)
+                .build();
 
         zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);
         setParams(zoomParam,
-                zoomCenter,
-                colorsParam,
+                zoomCenter.withDecimalPlaces(2),
                 iterationsParam,
+                colorsParam,
                 aaParam);
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int aa = aaParam.getValue();
-        if(aa == AA_NONE) {
+        if (aa == AA_NONE) {
             return doTransformAA(src, dest);
-        } else if(aa == AA_2x2) {
+        } else if (aa == AA_2x2) {
             // transform an image with double size, then scale it down
             BufferedImage bigSrc = new BufferedImage(
                     src.getWidth() * 2, src.getHeight() * 2, src.getType());
             BufferedImage bigDest = doTransformAA(bigSrc, null);
+            bigSrc.flush();
             Graphics2D g2 = dest.createGraphics();
             g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             g2.scale(0.5, 0.5);
             g2.drawImage(bigDest, 0, 0, null);
             g2.dispose();
+            bigDest.flush();
             return dest;
         } else {
             throw new IllegalStateException("aa = " + aa);
@@ -93,7 +103,7 @@ public abstract class FractalFilter extends ParametrizedFilter {
         if (colorsParam.getValue() == COLORS_CONTRASTING) {
             double normalizer = Math.log(maxIterations + 1);
             for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float)(1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
+                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
                         maxIterations / (float) it,
                         0.9f,
@@ -102,7 +112,7 @@ public abstract class FractalFilter extends ParametrizedFilter {
         } else if (colorsParam.getValue() == COLORS_CONTINUOUS) {
             double normalizer = Math.log(maxIterations + 1);
             for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float)(1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
+                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
                         ((float) it / maxIterations),
                         0.9f,
@@ -111,7 +121,7 @@ public abstract class FractalFilter extends ParametrizedFilter {
         } else if (colorsParam.getValue() == COLORS_BLUES) {
             double normalizer = Math.log(maxIterations + 1);
             for (int it = 0; it <= maxIterations; it++) {
-                float bri = (float)(1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
+                float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
                         0.5f + ((float) it / (maxIterations * 10)),
                         ((float) it / maxIterations),
