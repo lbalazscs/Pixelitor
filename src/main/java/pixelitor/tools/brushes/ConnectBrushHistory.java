@@ -1,0 +1,141 @@
+/*
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ *
+ * This file is part of Pixelitor. Pixelitor is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License, version 3 as published by the Free
+ * Software Foundation.
+ *
+ * Pixelitor is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package pixelitor.tools.brushes;
+
+import pixelitor.Composition;
+import pixelitor.history.PixelitorEdit;
+import pixelitor.tools.util.PPoint;
+
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class ConnectBrushHistory {
+    private static final List<List<HistoryPoint>> history = new ArrayList<>();
+    private static List<HistoryPoint> lastStroke;
+    private static int numPoints;
+    private static int indexOfNextAdd = 0;
+
+    private ConnectBrushHistory() {
+    }
+
+    public static void drawConnectingLines(Graphics2D targetG,
+                                           ConnectBrushSettings settings,
+                                           PPoint p, double diamSq) {
+        HistoryPoint last = new HistoryPoint(p.getImX(), p.getImY());
+        lastStroke.add(last);
+        numPoints++;
+
+        if (numPoints > 2) {
+            int currentColor = targetG.getColor().getRGB();
+            int currentColorZeroAlpha = currentColor & 0x00FFFFFF;
+
+            double offSet = settings.getStyle().getOffset();
+            double density = settings.getDensity();
+
+            Line2D.Double line = new Line2D.Double();
+
+            ThreadLocalRandom rnd = ThreadLocalRandom.current();
+            for (int i = 0; i < indexOfNextAdd; i++) {
+                List<HistoryPoint> stroke = history.get(i);
+                for (HistoryPoint old : stroke) {
+                    double dx = old.x - last.x;
+                    double dy = old.y - last.y;
+                    double distSq = dx * dx + dy * dy;
+                    if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
+                        int alpha = (int) Math.min(255.0, 10000 / distSq);
+
+                        int rgbWithAlpha = (alpha << 24) | currentColorZeroAlpha;
+
+                        targetG.setColor(new Color(rgbWithAlpha, true));
+                        double xOffset = dx * offSet;
+                        double yOffset = dy * offSet;
+                        line.setLine(last.x - xOffset, last.y - yOffset,
+                                old.x + xOffset, old.y + yOffset);
+
+                        targetG.draw(line);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void startNewBrushStroke(PPoint p) {
+        lastStroke = new ArrayList<>();
+
+        // the entries after indexOfNextAdd will never be
+        // redone, they can be discarded
+        if (history.size() > indexOfNextAdd) {
+            history.subList(indexOfNextAdd, history.size()).clear();
+        }
+        
+        assert history.size() == indexOfNextAdd;
+        history.add(lastStroke);
+        indexOfNextAdd++;
+
+        lastStroke.add(new HistoryPoint(p.getImX(), p.getImY()));
+        numPoints++;
+    }
+
+    public static void clear() {
+        history.clear();
+        indexOfNextAdd = 0;
+        numPoints = 0;
+    }
+
+    public static void undo() {
+        indexOfNextAdd--;
+    }
+
+    public static void redo() {
+        indexOfNextAdd++;
+    }
+
+    private static class HistoryPoint {
+        final double x;
+        final double y;
+
+        HistoryPoint(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public static class Edit extends PixelitorEdit {
+        public Edit(Composition comp) {
+            super("Connect Brush History", comp);
+        }
+
+        @Override
+        public void undo() throws CannotUndoException {
+            super.undo();
+            ConnectBrushHistory.undo();
+        }
+
+        @Override
+        public void redo() throws CannotRedoException {
+            super.redo();
+            ConnectBrushHistory.redo();
+        }
+    }
+}

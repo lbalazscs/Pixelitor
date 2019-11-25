@@ -29,10 +29,13 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SimpleCachedPainter;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
+import pixelitor.history.MultiEdit;
+import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
 import pixelitor.tools.brushes.AffectedArea;
 import pixelitor.tools.brushes.Brush;
+import pixelitor.tools.brushes.ConnectBrushHistory;
 import pixelitor.tools.brushes.LazyMouseBrush;
 import pixelitor.tools.brushes.SymmetryBrush;
 import pixelitor.tools.util.PMouseEvent;
@@ -343,9 +346,17 @@ public abstract class AbstractBrushTool extends Tool {
         Rectangle rect = affectedArea.asRectangle(brushRadius);
         assert !rect.isEmpty() : "brush radius = " + brushRadius + ", affected area = " + affectedArea;
 
-        History.addToolArea(rect,
-                originalImage, dr,
+        PartialImageEdit imageEdit = History.createPartialImageEdit(rect, originalImage, dr,
                 false, getName());
+        Composition comp = dr.getComp();
+        if (imageEdit != null) {
+            if(typeCB != null && getBrushType() == BrushType.CONNECT) {
+                ConnectBrushHistory.Edit connectEdit = new ConnectBrushHistory.Edit(comp);
+                History.addEdit(new MultiEdit(imageEdit.getName(), comp, imageEdit, connectEdit));
+            } else {
+                History.addEdit(imageEdit);
+            }
+        }
 
         if (graphics != null) {
             graphics.dispose();
@@ -356,7 +367,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         dr.updateIconImage();
 
-        dr.getComp().imageChanged(HISTOGRAM);
+        comp.imageChanged(HISTOGRAM);
     }
 
     public void drawBrushStrokeProgrammatically(Drawable dr, PPoint start, PPoint end) {

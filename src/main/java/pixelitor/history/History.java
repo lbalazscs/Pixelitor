@@ -126,19 +126,6 @@ public class History {
         }
     }
 
-    /**
-     * Save only the affected area for undo.
-     */
-    public static void addToolArea(Rectangle rect, BufferedImage origImage,
-                                   Drawable dr, boolean relativeToImage,
-                                   String toolName) {
-        PartialImageEdit edit = createPartialImageEdit(rect, origImage, dr,
-                relativeToImage, toolName);
-        if (edit != null) {
-            addEdit(edit);
-        }
-    }
-
     public static PartialImageEdit createPartialImageEdit(Rectangle rect,
                                                           BufferedImage origImage,
                                                           Drawable dr,

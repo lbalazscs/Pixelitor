@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
+import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
@@ -155,8 +156,11 @@ public class PaintBucketTool extends Tool {
         }
 
         if (replacedArea != null) { // something was replaced
-            History.addToolArea(replacedArea,
-                    backupForUndo, dr, true, getName());
+            PartialImageEdit edit = History.createPartialImageEdit(replacedArea, backupForUndo, dr,
+                    true, getName());
+            if (edit != null) {
+                History.addEdit(edit);
+            }
 
             if (thereIsSelection) {
                 Graphics2D g = image.createGraphics();
