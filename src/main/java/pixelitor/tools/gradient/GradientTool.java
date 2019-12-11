@@ -302,14 +302,24 @@ public class GradientTool extends DragTool {
 
     @Override
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
-        if (reloaded) {
+        if (reloaded && handles != null) {
             hideHandles(newComp, false);
         }
     }
 
     @Override
-    public void imageChanged(Layer layer) {
-        hideHandles(layer.getComp(), false);
+    public void editedObjectChanged(Layer layer) {
+        if (handles != null) {
+            hideHandles(layer.getComp(), false);
+        }
+    }
+
+    @Override
+    public void firstModalDialogShown() {
+        if (handles != null) {
+            Composition comp = OpenComps.getActiveCompOrNull();
+            hideHandles(comp, false);
+        }
     }
 
     @Override
@@ -337,7 +347,14 @@ public class GradientTool extends DragTool {
             handles.arrowKeyPressed(key);
 
             Composition comp = OpenComps.getActiveCompOrNull();
-            Drawable dr = comp.getActiveDrawableOrThrow();
+            Drawable dr = comp.getActiveDrawableOrNull();
+            if(dr == null) {
+                // It shouldn't be possible to have handles without drawable,
+                // but if somehow it does happen, then just move the handles.
+                comp.repaint(); // make the arrow movement visible
+                return false;
+            }
+
             ImDrag imDrag = handles.toImDrag(comp.getView());
             String editName = key.isShiftDown()
                     ? "Shift-nudge Gradient"

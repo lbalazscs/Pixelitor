@@ -21,6 +21,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
@@ -83,7 +84,7 @@ public class ChaosGame extends ParametrizedFilter {
                 centerJump,
                 midpointJump,
                 restrict,
-                showPoly);
+                showPoly).withAction(ReseedNoiseFilterAction.noOpReseed());
     }
 
     @Override
@@ -285,6 +286,14 @@ public class ChaosGame extends ParametrizedFilter {
         g.dispose();
     }
 
+    @Override
+    public boolean supportsGray() {
+        return false;
+    }
+
+    /**
+     * A point with double precision and an associated color
+     */
     private static final class Point {
         double x;
         double y;

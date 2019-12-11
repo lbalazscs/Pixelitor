@@ -109,10 +109,6 @@ public class OpenComps {
         return activeView;
     }
 
-    public static boolean isActive(View view) {
-        return view == activeView;
-    }
-
     public static Composition getActiveCompOrNull() {
         if (activeView != null) {
             return activeView.getComp();

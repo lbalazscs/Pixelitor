@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,5 +77,10 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     @Override
     public void setToolTip(String tip) {
         comboBox.setToolTipText(tip);
+    }
+
+    @Override
+    public void setName(String name) {
+        comboBox.setName(name);
     }
 }

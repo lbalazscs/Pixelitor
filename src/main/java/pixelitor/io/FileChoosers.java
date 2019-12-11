@@ -104,13 +104,16 @@ public class FileChoosers {
     public static void initSaveChooser() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
+        File lastSaveDir = Dirs.getLastSave();
         if (saveChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
-            saveChooser = new SaveFileChooser(Dirs.getLastSave());
+            saveChooser = new SaveFileChooser(lastSaveDir);
             saveChooser.setName("save");
             saveChooser.setDialogTitle("Save As");
 
             setDefaultSaveExtensions();
+        } else {
+            saveChooser.setCurrentDirectory(lastSaveDir);
         }
     }
 
@@ -153,10 +156,9 @@ public class FileChoosers {
         String defaultFileName = FileUtils.stripExtension(comp.getName());
         saveChooser.setSelectedFile(new File(defaultFileName));
 
-        File customSaveDir = null;
         File file = comp.getFile();
-        if (file != null) {
-            customSaveDir = file.getParentFile();
+        if (file != null && Dirs.getLastSave() == null) {
+            File customSaveDir = file.getParentFile();
             saveChooser.setCurrentDirectory(customSaveDir);
         }
 
@@ -167,15 +169,7 @@ public class FileChoosers {
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
 
-            if (customSaveDir == null) {
-                // if the comp had no file, and lastSaveDir was used,
-                // then update lastSaveDir
-                Dirs.setLastSave(selectedFile.getParentFile());
-            } else {
-                // if a custom save directory (the file dir) was used,
-                // reset the directory stored inside the chooser
-                saveChooser.setCurrentDirectory(Dirs.getLastSave());
-            }
+            Dirs.setLastSave(selectedFile.getParentFile());
 
             String extension = saveChooser.getExtension();
             OutputFormat outputFormat = OutputFormat.fromExtension(extension);

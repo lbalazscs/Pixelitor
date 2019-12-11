@@ -225,7 +225,7 @@ public class OpenRaster {
             ImageLayer layer = new ImageLayer(comp, image, layerName,
                     null, tx, ty);
 
-            layer.setVisible(visibility, false);
+            layer.setVisible(visibility, false, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
             layer.setBlendingMode(blendingMode, false, false, false);
@@ -234,7 +234,6 @@ public class OpenRaster {
 
             comp.addLayerInInitMode(layer);
         }
-        comp.setActiveLayer(comp.getLayer(0), false);
 
         pt.finished();
 

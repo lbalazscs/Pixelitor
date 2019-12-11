@@ -94,4 +94,9 @@ public class TextFilter extends FilterWithGUI {
     public void setSettings(TextSettings settings) {
         this.settings = settings;
     }
+
+    @Override
+    public boolean supportsGray() {
+        return !settings.isWatermark();
+    }
 }

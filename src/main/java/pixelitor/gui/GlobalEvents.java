@@ -237,6 +237,9 @@ public class GlobalEvents {
 //                + " => " + (numNestedDialogs + 1));
         assert EventQueue.isDispatchThread();
         numNestedDialogs++;
+        if(numNestedDialogs == 1) {
+            Tools.firstModalDialogShown();
+        }
     }
 
     public static void dialogClosed(String title) {
@@ -246,6 +249,9 @@ public class GlobalEvents {
         assert EventQueue.isDispatchThread();
         numNestedDialogs--;
         assert numNestedDialogs >= 0;
+        if(numNestedDialogs == 0) {
+            Tools.firstModalDialogHidden();
+        }
     }
 
     @VisibleForTesting

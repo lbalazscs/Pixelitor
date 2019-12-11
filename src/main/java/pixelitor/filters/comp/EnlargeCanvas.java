@@ -148,7 +148,7 @@ public class EnlargeCanvas implements CompAction {
 
         private void addSliderSpinner(RangeParam range, String sliderName) {
             SliderSpinner s = new SliderSpinner(range, BORDER, false);
-            s.setSliderName(sliderName);
+            s.setName(sliderName);
             add(s);
         }
 

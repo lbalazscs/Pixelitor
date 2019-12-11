@@ -24,6 +24,7 @@ import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.ColorPickerThumbnailPanel;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.utils.Cursors;
@@ -35,6 +36,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -43,7 +45,7 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DstIn;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
 import static pixelitor.layers.LayerMask.RUBYLITH_COMPOSITE;
 import static pixelitor.layers.LayerMask.TRANSPARENCY_COLOR_MODEL;
@@ -76,7 +78,7 @@ public class MaskFromColorRangePanel extends JPanel {
     private final JComboBox<String> maskBaseCB = new JComboBox<>(
             new String[]{MASK_BASE_LAYER, MASK_BASE_COMP});
 
-    private JComboBox<Value> colorSpaceCombo;
+    private JComboBox<Value> distTypeCombo;
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
     private JCheckBox invertCheckBox;
@@ -132,11 +134,13 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void createColorSpaceComboBox() {
-        colorSpaceCombo = new JComboBox<>(new Value[]{
+        distTypeCombo = new JComboBox<>(new Value[]{
                 new Value("HSB", MaskFromColorRangeFilter.HSB),
+                new Value("Hue", MaskFromColorRangeFilter.HUE),
+                new Value("Sat", MaskFromColorRangeFilter.SAT),
                 new Value("RGB", MaskFromColorRangeFilter.RGB),
         });
-        colorSpaceCombo.setName("colorSpaceCombo");
+        distTypeCombo.setName("distTypeCombo");
     }
 
     private JPanel createNorthPanel() {
@@ -212,24 +216,29 @@ public class MaskFromColorRangePanel extends JPanel {
     private JPanel createSouthPanel() {
         JPanel southPanel = new JPanel(new BorderLayout());
 
-        JPanel southCenterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        JPanel southCenterPanel = new JPanel(new GridBagLayout());
         JPanel southEastPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
         southPanel.add(southCenterPanel, BorderLayout.CENTER);
         southPanel.add(southEastPanel, BorderLayout.EAST);
 
-        SliderSpinner toleranceSlider = new SliderSpinner(tolerance, WEST, false);
+        SliderSpinner toleranceSlider = new SliderSpinner(tolerance, NONE, false);
         toleranceSlider.setName("toleranceSlider");
 
-        SliderSpinner softnessSlider = new SliderSpinner(softness, WEST, false);
+        SliderSpinner softnessSlider = new SliderSpinner(softness, NONE, false);
         softnessSlider.setName("softnessSlider");
 
-        southCenterPanel.add(toleranceSlider);
-        southCenterPanel.add(softnessSlider);
-        southCenterPanel.add(new JLabel("   Invert:"));
-        southCenterPanel.add(invertCheckBox);
+        GridBagHelper gbh = new GridBagHelper(southCenterPanel);
+        gbh.addLabelWithControlNoStretch(tolerance.getName(), toleranceSlider);
+        gbh.addLabelWithControlNoStretch(softness.getName(), softnessSlider);
+        gbh.addLabelWithControl("Invert:", invertCheckBox);
 
-        southEastPanel.add(new JLabel("   Color Space:"));
-        southEastPanel.add(colorSpaceCombo);
+//        southCenterPanel.add(toleranceSlider);
+//        southCenterPanel.add(softnessSlider);
+//        southCenterPanel.add(new JLabel("   Invert:"));
+//        southCenterPanel.add(invertCheckBox);
+
+        southEastPanel.add(new JLabel("   Distance:"));
+        southEastPanel.add(distTypeCombo);
 
         ChangeListener changeListener = e -> updatePreview(lastColor);
         toleranceSlider.addChangeListener(changeListener);
@@ -237,7 +246,7 @@ public class MaskFromColorRangePanel extends JPanel {
         ActionListener actionListener = e -> updatePreview(lastColor);
         invertCheckBox.addActionListener(actionListener);
         previewModeCB.addActionListener(actionListener);
-        colorSpaceCombo.addActionListener(actionListener);
+        distTypeCombo.addActionListener(actionListener);
 
         return southPanel;
     }
@@ -253,8 +262,8 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        int colorSpace = ((Value) colorSpaceCombo.getSelectedItem()).getValue();
-        filter.setInterpolation(colorSpace);
+        int distType = ((Value) distTypeCombo.getSelectedItem()).getValue();
+        filter.setDistType(distType);
         filter.setColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getValueAsPercentage());
         filter.setInvert(invertCheckBox.isSelected());

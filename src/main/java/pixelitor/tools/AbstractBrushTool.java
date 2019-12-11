@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
@@ -104,12 +105,15 @@ public abstract class AbstractBrushTool extends Tool {
     private JDialog settingsDialog;
 
     DrawDestination drawDestination;
+
     private RangeParam lazyMouseDist;
     private RangeParam lazyMouseSpacing;
+    protected boolean lazyMouse;
+    protected LazyMouseBrush lazyMouseBrush;
     private static final String UNICODE_MOUSE_SYMBOL = new String(Character.toChars(0x1F42D));
 
-    private int lastCoX;
-    private int lastCoY;
+    private int outlineCoX;
+    private int outlineCoY;
     private final BrushOutlinePainter outlinePainter = new BrushOutlinePainter(DEFAULT_BRUSH_RADIUS);
     private boolean paintBrushOutline = false;
 
@@ -138,10 +142,14 @@ public abstract class AbstractBrushTool extends Tool {
     protected void setLazyBrush() {
         if (lazyMouseCB.isSelected()) {
             // set the decorated brush
-            brush = new LazyMouseBrush(symmetryBrush);
+            lazyMouseBrush = new LazyMouseBrush(symmetryBrush);
+            this.brush = lazyMouseBrush;
+            lazyMouse = true;
         } else {
             // set the normal brush
             brush = symmetryBrush;
+            lazyMouseBrush = null;
+            lazyMouse = false;
         }
     }
 
@@ -271,56 +279,16 @@ public abstract class AbstractBrushTool extends Tool {
 
     @Override
     public void mouseDragged(PMouseEvent e) {
-        lastCoX = (int) e.getCoX();
-        lastCoY = (int) e.getCoY();
-
         newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
-    }
 
-    @Override
-    public void mouseMoved(MouseEvent e, View view) {
-        repaintOutlineSinceLast(e.getX(), e.getY(), view);
-    }
-
-    private void repaintOutlineSinceLast(int x, int y, View view) {
-        int prevX = lastCoX;
-        int prevY = lastCoY;
-
-        lastCoX = x;
-        lastCoY = y;
-
-        Rectangle r = Shapes.toPositiveRect(prevX, lastCoX, prevY, lastCoY);
-
-        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
-        r.grow(growth, growth);
-        view.repaint(r);
-    }
-
-    private void repaintOutline(View view) {
-        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
-
-        view.repaint(lastCoX - growth, lastCoY - growth, 2 * growth, 2 * growth);
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e, View view) {
-        if (typeCB == null) {
-            paintBrushOutline = true;
-        } else if (getBrushType() != BrushType.ONE_PIXEL) {
-            paintBrushOutline = true;
+        if(lazyMouse) {
+            PPoint drawPoint = lazyMouseBrush.getDrawPoint();
+            outlineCoX = (int) drawPoint.getCoX();
+            outlineCoY = (int) drawPoint.getCoY();
         } else {
-            // it should be false already, but set it for safety
-            paintBrushOutline = false;
+            outlineCoX = (int) e.getCoX();
+            outlineCoY = (int) e.getCoY();
         }
-        lastCoX = e.getX();
-        lastCoY = e.getY();
-        repaintOutline(view);
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e, View view) {
-        paintBrushOutline = false;
-        repaintOutlineSinceLast(e.getX(), e.getY(), view);
     }
 
     @Override
@@ -332,9 +300,92 @@ public abstract class AbstractBrushTool extends Tool {
             return;
         }
 
+        // whether or not it is lazy mouse, set
+        // the outline back to the mouse coordinates
+        outlineCoX = (int) e.getCoX();
+        outlineCoY = (int) e.getCoY();
+
         Composition comp = e.getComp();
         Drawable dr = comp.getActiveDrawableOrThrow();
         finishBrushStroke(dr);
+
+        if(lazyMouse) {
+            // TODO two points have to be repainted:
+            //  1. the last draw point to clear the old outline
+            //  2. the actual mouse point to paint the new outline
+            comp.repaint();
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e, View view) {
+        startOutlinePaintingAt(e.getX(), e.getY(), view);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e, View view) {
+        stopOutlinePaintingAt(e.getX(), e.getY(), view);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e, View view) {
+        repaintOutlineSinceLast(e.getX(), e.getY(), view);
+    }
+
+    private void repaintOutlineSinceLast(int x, int y, View view) {
+        int prevX = outlineCoX;
+        int prevY = outlineCoY;
+
+        outlineCoX = x;
+        outlineCoY = y;
+
+        Rectangle r = Shapes.toPositiveRect(prevX, outlineCoX, prevY, outlineCoY);
+
+        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+        r.grow(growth, growth);
+        view.repaint(r);
+    }
+
+    private void repaintOutline(View view) {
+        int growth = outlinePainter.getCoRadius() + REPAINT_EXTRA_SPACE;
+
+        view.repaint(outlineCoX - growth, outlineCoY - growth, 2 * growth, 2 * growth);
+    }
+
+    private void startOutlinePainting(View view) {
+        Point mousePos = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mousePos, view);
+        Rectangle visiblePart = view.getVisiblePart();
+        if(visiblePart != null) {
+            if (visiblePart.contains(mousePos)) {
+                startOutlinePaintingAt(mousePos.x, mousePos.y, view);
+            }
+        } else if(!Build.isUnitTesting()) {
+            throw new IllegalStateException();
+        }
+    }
+
+    private void startOutlinePaintingAt(int x, int y, View view) {
+        if (typeCB == null) {
+            paintBrushOutline = true;
+        } else if (getBrushType() != BrushType.ONE_PIXEL) {
+            paintBrushOutline = true;
+        } else {
+            // it should be false already, but set it for safety
+            paintBrushOutline = false;
+        }
+        outlineCoX = x;
+        outlineCoY = y;
+        repaintOutline(view);
+    }
+
+    private void stopOutlinePainting(View view) {
+        stopOutlinePaintingAt(outlineCoX, outlineCoY, view);
+    }
+
+    private void stopOutlinePaintingAt(int x, int y, View view) {
+        paintBrushOutline = false;
+        repaintOutlineSinceLast(x, y, view);
     }
 
     private void finishBrushStroke(Drawable dr) {
@@ -462,6 +513,20 @@ public abstract class AbstractBrushTool extends Tool {
         View view = OpenComps.getActiveView();
         if (view != null) {
             outlinePainter.setView(view);
+
+            // If the tool is started with the hotkey, then there is
+            // no mouseEntered event to start the outline painting
+            startOutlinePainting(view);
+        }
+    }
+
+    @Override
+    protected void toolEnded() {
+        super.toolEnded();
+
+        View view = OpenComps.getActiveView();
+        if (view != null) {
+            stopOutlinePainting(view);
         }
     }
 
@@ -491,10 +556,28 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     private void paintOutlineOnChangedView(View view) {
-        Point location = MouseInfo.getPointerInfo().getLocation();
-        SwingUtilities.convertPointFromScreen(location, view);
+        Point mousePos = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mousePos, view);
         outlinePainter.setView(view);
-        repaintOutlineSinceLast(location.x, location.y, view);
+        repaintOutlineSinceLast(mousePos.x, mousePos.y, view);
+    }
+
+    @Override
+    public void firstModalDialogShown() {
+        // the outline has to be hidden, because there is no mouseExited event
+        View view = OpenComps.getActiveView();
+        if(view != null) {
+            stopOutlinePainting(view);
+        }
+    }
+
+    @Override
+    public void firstModalDialogHidden() {
+        // the outline has to be shown again, because there is no mouseEntered event
+        View view = OpenComps.getActiveView();
+        if(view != null) {
+            startOutlinePainting(view);
+        }
     }
 
     /**
@@ -610,7 +693,7 @@ public abstract class AbstractBrushTool extends Tool {
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
         if (paintBrushOutline) {
-            outlinePainter.paint(g2, lastCoX, lastCoY);
+            outlinePainter.paint(g2, outlineCoX, outlineCoY);
         }
     }
 

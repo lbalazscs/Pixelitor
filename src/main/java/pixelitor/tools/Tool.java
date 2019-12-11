@@ -92,7 +92,6 @@ public abstract class Tool implements KeyListener {
     }
 
     public void mouseClicked(PMouseEvent e) {
-        // empty for the convenience of subclasses
     }
 
     public void setButton(ToolButton toolButton) {
@@ -133,7 +132,6 @@ public abstract class Tool implements KeyListener {
     }
 
     protected void closeToolDialogs() {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public Cursor getStartingCursor() {
@@ -145,7 +143,6 @@ public abstract class Tool implements KeyListener {
      * The transform of the given Graphics2D is in image space.
      */
     public void paintOverActiveLayer(Graphics2D g, Composition comp) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
@@ -156,19 +153,15 @@ public abstract class Tool implements KeyListener {
                                View view,
                                AffineTransform componentTransform,
                                AffineTransform imageTransform) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void mouseMoved(MouseEvent e, View view) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void mouseEntered(MouseEvent e, View view) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void mouseExited(MouseEvent e, View view) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public abstract void mousePressed(PMouseEvent e);
@@ -204,7 +197,6 @@ public abstract class Tool implements KeyListener {
      */
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        // empty for the convenience of subclasses
         return false; // not consumed
     }
 
@@ -232,7 +224,6 @@ public abstract class Tool implements KeyListener {
 
     @Override
     public void otherKeyPressed(KeyEvent e) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     @Override
@@ -264,27 +255,28 @@ public abstract class Tool implements KeyListener {
     }
 
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
-     * Called after (1) a filter changes a drawable, or
-     * (2) the active layer changes or (3) the mask editing changes
+     * Called after (1) a filter without dialog ends, or
+     * (2) the active layer changes, or (3) the mask editing changes
      */
-    public void imageChanged(Layer layer) {
-        // empty instead of abstract for the convenience of subclasses
+    public void editedObjectChanged(Layer layer) {
+    }
+
+    public void firstModalDialogShown() {
+    }
+
+    public void firstModalDialogHidden() {
     }
 
     public void resetInitialState() {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void fgBgColorsChanged() {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void setupMaskEditing(boolean maskEditing) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
@@ -295,7 +287,6 @@ public abstract class Tool implements KeyListener {
      * from their image coordinates
      */
     public void coCoordsChanged(View view) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     /**
@@ -307,7 +298,6 @@ public abstract class Tool implements KeyListener {
      * therefore the component space coordinates also have to be recalculated.
      */
     public void imCoordsChanged(Composition comp, AffineTransform at) {
-        // empty instead of abstract for the convenience of subclasses
     }
 
     public void activate() {

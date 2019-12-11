@@ -175,11 +175,19 @@ public class Tools {
         currentTool.imCoordsChanged(comp, at);
     }
 
-    public static void imageChanged(Layer layer) {
+    public static void editedObjectChanged(Layer layer) {
         assert currentTool != null || Build.isUnitTesting();
         if (currentTool != null) {
-            currentTool.imageChanged(layer);
+            currentTool.editedObjectChanged(layer);
         }
+    }
+
+    public static void firstModalDialogShown() {
+        currentTool.firstModalDialogShown();
+    }
+
+    public static void firstModalDialogHidden() {
+        currentTool.firstModalDialogHidden();
     }
 
     public static void setupMaskEditing(boolean maskEditing) {

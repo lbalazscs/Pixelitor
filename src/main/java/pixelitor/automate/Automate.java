@@ -82,8 +82,10 @@ public class Automate {
 
                     File file = inputFiles[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
-                    progressMonitor.setNote("Processing " + file.getName());
-                    System.out.println("Processing " + file.getName());
+                    
+                    String msg = "Processing " + (i + 1) + " of " + nrOfFiles;
+                    progressMonitor.setNote(msg);
+                    System.out.println(msg);
 
                     processFile(file, action, saveDir);
 

@@ -399,7 +399,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
             previewImage = image;
         }
         setState(PREVIEW);
-        Tools.imageChanged(this);
     }
 
     @Override
@@ -550,7 +549,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         updateIconImage();
         comp.imageChanged();
         invalidateTrimCache();
-        Tools.imageChanged(this);
+        Tools.editedObjectChanged(this);
     }
 
     @Override
@@ -664,6 +663,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         Rectangle selBounds = selection.getShapeBounds(1);
+
+        assert image.getRaster().getBounds().contains(selBounds) :
+            "image bounds = " + image.getRaster().getBounds()
+                + ", selection bounds = " + selBounds;
+
         return image.getSubimage(
                 selBounds.x, selBounds.y,
                 selBounds.width, selBounds.height);

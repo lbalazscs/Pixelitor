@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,11 +61,15 @@ public class SmudgeTool extends AbstractBrushTool {
     @Override
     protected void setLazyBrush() {
         if (lazyMouseCB.isSelected()) {
+            lazyMouseBrush = new LazyMouseBrush(smudgeBrush);
             brush = new AffectedAreaTracker(
-                    new LazyMouseBrush(smudgeBrush),
+                    lazyMouseBrush,
                     affectedArea);
+            lazyMouse = true;
         } else {
             brush = new AffectedAreaTracker(smudgeBrush, affectedArea);
+            lazyMouseBrush = null;
+            lazyMouse = false;
         }
     }
 

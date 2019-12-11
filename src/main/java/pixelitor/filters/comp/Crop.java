@@ -136,8 +136,9 @@ public class Crop implements CompAction {
         view.ensurePositiveLocation();
 
         assert comp != newComp;
+        String editName = addHidingMask ? "Crop and Hide" : "Crop";
         History.addEdit(new CompositionReplacedEdit(
-                "Crop", false, view, comp, newComp, canvasTx));
+                editName, false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 

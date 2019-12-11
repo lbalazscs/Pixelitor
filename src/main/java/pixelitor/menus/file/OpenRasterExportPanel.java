@@ -27,6 +27,12 @@ import pixelitor.io.OpenRaster;
 import javax.swing.*;
 import java.io.File;
 
+import static javax.swing.JOptionPane.CANCEL_OPTION;
+import static javax.swing.JOptionPane.CLOSED_OPTION;
+import static javax.swing.JOptionPane.NO_OPTION;
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
+import static javax.swing.JOptionPane.YES_OPTION;
+
 /**
  * The configuration GUI for the export in OpenRaster format
  */
@@ -45,21 +51,45 @@ public class OpenRasterExportPanel extends JPanel {
     public static void showInDialog(JFrame owner) {
         Composition comp = OpenComps.getActiveCompOrNull();
         if (comp.getNumLayers() < 2) {
+            String msg = String.format(
+                    "<html><b>%s</b> has only one layer." +
+                            "<br>Are you sure that you want to export it in a layered format?",
+                    comp.getName());
             boolean exportAnyway = Dialogs.showYesNoQuestionDialog(
-                    "Only one layer", comp.getName() + " has only one layer.\n" +
-                    "Are you sure that you want to export it in a layered format?");
-            if(!exportAnyway) {
+                    "Only one layer", msg);
+            if (!exportAnyway) {
                 return;
             }
         }
+        if (comp.getNumTextLayers() > 0) {
+            String msg = String.format(
+                    "<html><b>%s</b> has text layer(s)." +
+                            "<br>Text layers can be preserved only in the PXC format." +
+                            "<br>In the OpenRaster format they can be rasterized or ignored.",
+                    comp.getName());
+            String[] options = {"Rasterize", "Ignore", "Cancel"};
+            int answer = Dialogs.showYesNoCancelDialog(
+                    "Text Layer Found", msg, options, QUESTION_MESSAGE);
+            if (answer == CANCEL_OPTION || answer == CLOSED_OPTION) {
+                return;
+            } else if (answer == YES_OPTION) { // rasterize
+                comp = comp.createCopy(false, false);
+                comp.rasterizeAllTextLayers();
+            } else if (answer == NO_OPTION) { // ignore
+                // they will be ignored
+            } else {
+                throw new IllegalStateException("answer = " + answer);
+            }
+        }
 
+        Composition finalComp = comp;
         OpenRasterExportPanel p = new OpenRasterExportPanel();
         new DialogBuilder()
                 .content(p)
                 .owner(owner)
                 .title("Export OpenRaster")
                 .okText("Export")
-                .okAction(() -> okPressedInDialog(comp, p))
+                .okAction(() -> okPressedInDialog(finalComp, p))
                 .show();
     }
 

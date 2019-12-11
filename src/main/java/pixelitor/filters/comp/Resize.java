@@ -100,6 +100,8 @@ public class Resize implements CompAction {
     }
 
     private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension targetSize, ProgressHandler progressHandler) {
+        assert EventQueue.isDispatchThread(): "called on " + Thread.currentThread().getName();
+        
         int canvasTargetWidth = targetSize.width;
         int canvasTargetHeight = targetSize.height;
 
@@ -117,7 +119,12 @@ public class Resize implements CompAction {
         History.addEdit(new CompositionReplacedEdit(
                 "Resize", false, view, comp, newComp, canvasTx));
         view.replaceComp(newComp);
-        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+
+        // the view was active when the resize started, but since the
+        // resize was asynchronous, this could have changed
+        if(view.isActive()) {
+            SelectionActions.setEnabled(newComp.hasSelection(), newComp);
+        }
 
         Guides guides = comp.getGuides();
         if (guides != null) {

@@ -159,13 +159,20 @@ public abstract class Layer implements Serializable {
     }
 
     public void setVisible(boolean newVisibility, boolean addToHistory) {
+        setVisible(newVisibility, addToHistory, true);
+    }
+
+    public void setVisible(boolean newVisibility, boolean addToHistory, boolean changeGUI) {
         if (visible == newVisibility) {
             return;
         }
 
         visible = newVisibility;
         comp.imageChanged();
-        ui.get().setOpenEye(newVisibility);
+
+        if(changeGUI) {
+            ui.get().setOpenEye(newVisibility);
+        }
 
         if (addToHistory) {
             History.addEdit(
@@ -375,10 +382,17 @@ public abstract class Layer implements Serializable {
             maskTy = contentLayer.getTY();
         }
 
+        // Get the layer button reference before creating the mask.
+        // This is important in the rare cases (like selection crop)
+        // when this is running on a comp which is not added yet to the GUI,
+        // and this call actually creates the button - it should created
+        // without the layer mask icon, which is added explicitly later.
+        LayerUI layerUI = ui.get();
+
         mask = new LayerMask(comp, bwMask, this, maskTx, maskTy);
         maskEnabled = true;
 
-        ui.get().addMaskIconLabel();
+        layerUI.addMaskIconLabel();
         mask.updateIconImage();
 
         if (!createEdit) {
@@ -563,7 +577,7 @@ public abstract class Layer implements Serializable {
         if (maskEditing != newValue) {
             maskEditing = newValue;
             ui.get().updateBorders(); // sets the border around the icon
-            Tools.imageChanged(this);
+            Tools.editedObjectChanged(this);
         }
     }
 

@@ -56,7 +56,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
  */
 public class TextSettingsPanel extends FilterGUI
         implements ParamAdjustmentListener, ActionListener {
-
+    private static final String DEFAULT_TEXT = "Pixelitor";
     private TextLayer textLayer;
 
     private JTextField textTF;
@@ -102,7 +102,9 @@ public class TextSettingsPanel extends FilterGUI
         // even if the user presses OK without making any adjustments
         paramAdjusted();
 
-        textTF.selectAll();
+        if(textTF.getText().equals(DEFAULT_TEXT)) {
+            textTF.selectAll();
+        }
     }
 
     private void createGUI(TextSettings settings, int canvasHeight) {
@@ -130,7 +132,7 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLabel("Color:", 0, 1);
         Color defaultColor = settings == null ? WHITE : settings.getColor();
         color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
-        ColorParamGUI colorParamGUI = new ColorParamGUI(color);
+        ColorParamGUI colorParamGUI = new ColorParamGUI(color, false);
         gbh.addControl(colorParamGUI);
         color.setAdjustmentListener(this);
 
@@ -172,7 +174,7 @@ public class TextSettingsPanel extends FilterGUI
                 defaultText = lastText;
             } else { // text layer mode
                 // no last text remembering when creating new text layers
-                defaultText = "Pixelitor";
+                defaultText = DEFAULT_TEXT;
             }
         } else {
             defaultText = settings.getText();
@@ -226,7 +228,7 @@ public class TextSettingsPanel extends FilterGUI
 
         RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, maxFontSize);
         fontSizeSlider = SliderSpinner.simpleFrom(fontSizeParam);
-        fontSizeSlider.setSliderName("fontSize");
+        fontSizeSlider.setName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
         gbh.addLastControl(fontSizeSlider);
 

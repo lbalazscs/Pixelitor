@@ -216,4 +216,8 @@ public class LazyMouseBrush implements Brush {
                 setDefaultSpacing(param.getValue()));
         return param;
     }
+
+    public PPoint getDrawPoint() {
+        return PPoint.eagerFromIm(drawX, drawY, view);
+    }
 }

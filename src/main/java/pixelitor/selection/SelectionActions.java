@@ -134,8 +134,13 @@ public final class SelectionActions {
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
             EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
-            gbh.addLabelWithControl("Amount", amount.createGUI());
-            gbh.addLabelWithControl("Type", type.createGUI());
+            JComponent amountGUI = amount.createGUI();
+            amountGUI.setName("amount");
+            gbh.addLabelWithControl("Amount", amountGUI);
+
+            JComponent typeGUI = type.createGUI();
+            typeGUI.setName("type");
+            gbh.addLabelWithControl("Type", typeGUI);
 
             new DialogBuilder()
                     .content(panel)
@@ -173,11 +178,13 @@ public final class SelectionActions {
     }
 
     /**
-     * All selection actions must be enabled only if
+     * Selection actions must be enabled only if
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert comp == null || OpenComps.getActiveCompOrNull() == comp;
+        assert comp == null || getActiveCompOrNull() == comp
+                : "comp = " + (comp == null ? "null" : comp.getName())
+                + ", active comp = " + (getActiveCompOrNull() == null ? "null" : getActiveCompOrNull().getName());
 
         crop.setEnabled(b);
         deselect.setEnabled(b);

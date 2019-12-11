@@ -110,7 +110,7 @@ public class TextLayer extends ContentLayer {
 
                     // now it is safe to add it to the history
                     NewLayerEdit newLayerEdit = new NewLayerEdit(
-                            "New Text Layer", comp, textLayer,
+                            "Add Text Layer", comp, textLayer,
                             activeLayerBefore, oldViewMode);
                     History.addEdit(newLayerEdit);
                 })
@@ -201,23 +201,34 @@ public class TextLayer extends ContentLayer {
         return 0x00000000;
     }
 
+    public ImageLayer replaceWithRasterized() {
+        return replaceWithRasterized(true, true);
+    }
+
     // TODO if a text layer has a mask, then this will apply the
     // mask to the layer, resulting in an image layer without a mask.
     // This probably should be considered a bug, and instead the mask
     // should be kept, and the rasterized pixels should not be affected
     // by the mask.
-    public ImageLayer replaceWithRasterized() {
+    public ImageLayer replaceWithRasterized(boolean addHistory, boolean updateGUI) {
         BufferedImage rasterizedImage = createRasterizedImage();
 
         ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
 
-        TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
-        History.addEdit(edit);
+        if(addHistory) {
+            TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
+            History.addEdit(edit);
+        }
 
-        new LayerAdder(comp)
+        LayerAdder layerAdder = new LayerAdder(comp)
                 .noRefresh()
-                .add(newImageLayer);
-        comp.deleteLayer(this, false, true);
+                .atIndex(comp.getLayerIndex(this));
+        if(!updateGUI) {
+            layerAdder = layerAdder.compInitMode();
+        }
+        layerAdder.add(newImageLayer);
+
+        comp.deleteLayer(this, false, updateGUI);
 
         return newImageLayer;
     }

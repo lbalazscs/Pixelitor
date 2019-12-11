@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -122,8 +122,12 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         DebugNode node = super.getDebugNode();
 
-        node.addDouble("lastImX", last.getImX());
-        node.addDouble("lastImY", last.getImY());
+        if(last != null) {
+            node.addDouble("lastImX", last.getImX());
+            node.addDouble("lastImY", last.getImY());
+        } else {
+            node.addString("last", "null");
+        }
         node.addFloat("strength", strength);
         node.addBoolean("firstUsageInStroke", firstUsageInStroke);
 

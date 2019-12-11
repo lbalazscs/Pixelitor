@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -132,9 +132,17 @@ public class StrokeSettingsPanel extends JPanel {
                         && strokeType != SHAPE);
 
         GridBagHelper gbh = new GridBagHelper(p);
-        gbh.addLabelWithControl("Line Type:", strokeTypeParam.createGUI());
-        gbh.addLabelWithControl("Shape:", shapeTypeParam.createGUI());
-        gbh.addLabelWithControl("Dashed:", dashedParam.createGUI());
+        JComponent strokeTypeGUI = strokeTypeParam.createGUI();
+        strokeTypeGUI.setName("strokeType");
+        gbh.addLabelWithControl("Line Type:", strokeTypeGUI);
+
+        JComponent shapeTypeGUI = shapeTypeParam.createGUI();
+        shapeTypeGUI.setName("shapeType");
+        gbh.addLabelWithControl("Shape:", shapeTypeGUI);
+
+        JComponent dashedGUI = dashedParam.createGUI();
+        dashedGUI.setName("dashed");
+        gbh.addLabelWithControl("Dashed:", dashedGUI);
 
         return p;
     }

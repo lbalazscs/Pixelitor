@@ -143,12 +143,12 @@ public class TextLayerTest {
                 .nameIs(newText);
         History.assertNumEditsIs(1);
 
-        History.undo("Text Layer Change");
+        History.undo("Edit Text Layer");
         assertThat(layer)
                 .textIs(oldText)
                 .nameIs(oldText);
 
-        History.redo("Text Layer Change");
+        History.redo("Edit Text Layer");
         assertThat(layer)
                 .textIs(newText)
                 .nameIs(newText);

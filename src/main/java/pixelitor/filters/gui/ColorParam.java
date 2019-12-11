@@ -50,7 +50,7 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        ColorParamGUI gui = new ColorParamGUI(this);
+        ColorParamGUI gui = new ColorParamGUI(this, true);
         paramGUI = gui;
         setParamGUIEnabledState();
 
@@ -116,7 +116,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState copyState() {
+    public CState copyState() {
         return new CState(color);
     }
 
@@ -125,7 +125,7 @@ public class ColorParam extends AbstractFilterParam {
         this.color = ((CState)state).color;
     }
 
-    private static class CState implements ParamState {
+    private static class CState implements ParamState<CState> {
         private final Color color;
 
         public CState(Color color) {
@@ -133,9 +133,9 @@ public class ColorParam extends AbstractFilterParam {
         }
 
         @Override
-        public ParamState interpolate(ParamState endState, double progress) {
-            Color endColor = ((CState) endState).color;
-            return new CState(ColorUtils.interpolateInRGB(color, endColor, (float) progress));
+        public CState interpolate(CState endState, double progress) {
+            return new CState(ColorUtils.interpolateInRGB(
+                    color, endState.color, (float) progress));
         }
     }
 

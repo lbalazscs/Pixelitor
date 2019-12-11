@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,9 @@ import java.awt.Color;
 class MaskFromColorRangeFilter extends PointFilter {
     public static final int RGB = 1;
     public static final int HSB = 2;
-    private int interpolation = HSB;
+    public static final int HUE = 3;
+    public static final int SAT = 4;
+    private int distType = HSB;
 
     private static final int WHITE_PIXEL = 0xFF_FF_FF_FF;
     private static final int BLACK_PIXEL = 0xFF_00_00_00;
@@ -51,7 +53,7 @@ class MaskFromColorRangeFilter extends PointFilter {
         refG = c.getGreen();
         refB = c.getBlue();
 
-        if (interpolation == HSB) {
+        if (distType != RGB) {
             float[] hsb = Color.RGBtoHSB(refR, refG, refB, null);
             refHue = hsb[0];
             refSat = hsb[1];
@@ -59,8 +61,8 @@ class MaskFromColorRangeFilter extends PointFilter {
         }
     }
 
-    public void setInterpolation(int interpolation) {
-        this.interpolation = interpolation;
+    public void setDistType(int distType) {
+        this.distType = distType;
     }
 
     public void setTolerance(double tolerance, double fuzziness) {
@@ -83,13 +85,13 @@ class MaskFromColorRangeFilter extends PointFilter {
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        if (interpolation == RGB) {
+        if (distType == RGB) {
             int deltaR = r - refR;
             int deltaG = g - refG;
             int deltaB = b - refB;
 
             dist = FastMath.sqrtQuick(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
-        } else if (interpolation == HSB) {
+        } else if (distType == HSB) {
             float[] hsb = Color.RGBtoHSB(r, g, b, null);
 
             float deltaHue = hsb[0] - refHue;
@@ -107,8 +109,22 @@ class MaskFromColorRangeFilter extends PointFilter {
 //            return 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
 
             dist = 150 * FastMath.sqrtQuick(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
+        } else if (distType == HUE) {
+            float[] hsb = Color.RGBtoHSB(r, g, b, null);
+            float deltaHue = hsb[0] - refHue;
+            // hue is an angle
+            if (deltaHue > 0.5f) {
+                deltaHue = 1.0f - deltaHue;
+            } else if (deltaHue < -0.5f) {
+                deltaHue = 1.0f + deltaHue;
+            }
+            dist =  Math.abs(1000 * deltaHue);
+        } else if (distType == SAT) {
+            float[] hsb = Color.RGBtoHSB(r, g, b, null);
+            float deltaSat = hsb[1] - refSat;
+            dist = 150 * Math.abs(deltaSat);
         } else {
-            throw new IllegalStateException("interpolation = " + interpolation);
+            throw new IllegalStateException("interpolation = " + distType);
         }
 
         if (dist > minTolerance) {

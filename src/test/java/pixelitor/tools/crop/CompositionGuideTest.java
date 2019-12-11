@@ -15,13 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.tools.guidelines;
+package pixelitor.tools.crop;
 
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import pixelitor.guides.GuidesRenderer;
-import pixelitor.tools.crop.CompositionGuide;
-import pixelitor.tools.crop.CompositionGuideType;
 
 import java.awt.Graphics2D;
 import java.awt.Point;

@@ -41,6 +41,11 @@ import static pixelitor.colors.ColorUtils.selectColorWithDialog;
  * the foreground and background colors
  */
 public class FgBgColorSelector extends JLayeredPane {
+    public static final String RANDOMIZE_COLORS_BUTTON_NAME = "randomizeColorsButton";
+    public static final String FG_BUTTON_NAME = "fgButton";
+    public static final String BG_BUTTON_NAME = "bgButton";
+    public static final String RESET_DEF_COLORS_BUTTON_NAME = "resetDefColorsButton";
+    public static final String SWAP_COLORS_BUTTON_NAME = "swapColorsButton";
     private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
@@ -80,7 +85,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initFGButton() {
-        fgButton = initButton("Set Foreground Color", BIG_BUTTON_SIZE, 2);
+        fgButton = initButton("Set Foreground Color",
+                BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME);
         fgButton.addActionListener(e -> fgButtonPressed());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
 
@@ -88,7 +94,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initBGButton() {
-        bgButton = initButton("Set Background Color", BIG_BUTTON_SIZE, 1);
+        bgButton = initButton("Set Background Color",
+                BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME);
         bgButton.addActionListener(e -> bgButtonPressed());
         bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
 
@@ -113,8 +120,8 @@ public class FgBgColorSelector extends JLayeredPane {
         });
 
         String mixTitle = fg
-                ? "HSB Mix with Background Variations..."
-                : "HSB Mix with Foreground Variations...";
+                ? "HSB Mix with Background..."
+                : "HSB Mix with Foreground...";
         menu.add(new MenuAction(mixTitle) {
             @Override
             public void onClick() {
@@ -123,8 +130,8 @@ public class FgBgColorSelector extends JLayeredPane {
         });
 
         String rgbMixTitle = fg
-                ? "RGB Mix with Background Variations..."
-                : "RGB Mix with Foreground Variations...";
+                ? "RGB Mix with Background..."
+                : "RGB Mix with Foreground...";
         menu.add(new MenuAction(rgbMixTitle) {
             @Override
             public void onClick() {
@@ -164,7 +171,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initResetDefaultsButton() {
-        JButton defaultsButton = initButton("Reset Default Colors (D)", SMALL_BUTTON_SIZE, 1);
+        JButton defaultsButton = initButton("Reset Default Colors (D)",
+                SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME);
         defaultsButton.setLocation(0, 0);
         resetToDefaultAction = new AbstractAction() {
             @Override
@@ -181,7 +189,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initSwapColorsButton() {
-        JButton swapButton = initButton("Swap Colors (X)", SMALL_BUTTON_SIZE, 1);
+        JButton swapButton = initButton("Swap Colors (X)",
+                SMALL_BUTTON_SIZE, 1, SWAP_COLORS_BUTTON_NAME);
         swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
         swapColorsAction = new AbstractAction() {
             @Override
@@ -205,7 +214,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initRandomizeButton() {
-        JButton randomizeButton = initButton("Randomize Colors (R)", SMALL_BUTTON_SIZE, 1);
+        JButton randomizeButton = initButton("Randomize Colors (R)",
+                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME);
         randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
         randomizeColorsAction = new AbstractAction() {
             @Override
@@ -228,10 +238,11 @@ public class FgBgColorSelector extends JLayeredPane {
         setMaximumSize(dim);
     }
 
-    private JButton initButton(String toolTip, int size, int layer) {
+    private JButton initButton(String toolTip, int size, int layer, String name) {
         JButton button = new JButton();
         button.setToolTipText(toolTip);
         button.setSize(size, size);
+        button.setName(name);
         add(button, Integer.valueOf(layer));
         return button;
     }

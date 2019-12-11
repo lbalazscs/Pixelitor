@@ -60,4 +60,12 @@ public class ReseedNoiseFilterAction extends FilterAction {
                 toolTipText, "reseed");
         setIgnoreFinalAnimationSettingMode(false);
     }
+
+    /**
+     * The returned action only re-runs the filter
+     * (can be useful when using ThreadLocalRandom)
+     */
+    public static ReseedNoiseFilterAction noOpReseed() {
+        return new ReseedNoiseFilterAction(e -> { });
+    }
 }

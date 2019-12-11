@@ -359,10 +359,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         // nothing to do
     }
 
-    public void setSliderName(String name) {
-        slider.setName(name);
-    }
-
     @Override
     public void setToolTip(String tip) {
         slider.setToolTipText(tip);

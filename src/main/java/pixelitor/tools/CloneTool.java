@@ -131,11 +131,15 @@ public class CloneTool extends BlendingModeBrushTool {
     @Override
     protected void setLazyBrush() {
         if (lazyMouseCB.isSelected()) {
+            lazyMouseBrush = new LazyMouseBrush(cloneBrush);
             brush = new AffectedAreaTracker(
-                    new LazyMouseBrush(cloneBrush),
+                    lazyMouseBrush,
                     affectedArea);
+            lazyMouse = true;
         } else {
             brush = new AffectedAreaTracker(cloneBrush, affectedArea);
+            lazyMouseBrush = null;
+            lazyMouse = false;
         }
     }
 

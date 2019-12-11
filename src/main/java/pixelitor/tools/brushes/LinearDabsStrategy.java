@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.util.PPoint;
+import pixelitor.utils.test.RandomGUITest;
 
 /**
  * The simplest dabs strategy: it places the dabs along the lines
@@ -70,7 +71,10 @@ public class LinearDabsStrategy implements DabsStrategy {
         double lineDist = end.imDist(prev);
 
         double spacing = spacingStrategy.getSpacing(brush.getRadius());
+        assert spacing >= SpacingStrategy.MIN_SPACING;
+
         double relativeSpacingDist = spacing / lineDist;
+
         double initialRelativeSpacingDist = (spacing - distFromLastDab) / lineDist;
 
         double theta = 0;
@@ -81,7 +85,16 @@ public class LinearDabsStrategy implements DabsStrategy {
         double x = prevX, y = prevY;
         boolean drew = false;
 
+        int steps = 0;
+
         for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
+            if(steps++ > 1_000 && RandomGUITest.isRunning()) {
+                // crazy big shapes can appear during
+                // random GUI testing, don't wait forever
+                System.out.printf("LinearDabsStrategy::onNewStrokePoint: breaking out, " +
+                        "spacing = %.5f, lineDist = %.2f%n", spacing, lineDist);
+                break;
+            }
             x = prevX + t * dx;
             y = prevY + t * dy;
             PPoint p = PPoint.eagerFromIm(x, y, end.getView());

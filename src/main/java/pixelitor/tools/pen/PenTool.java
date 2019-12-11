@@ -383,14 +383,11 @@ public class PenTool extends Tool {
 
     private void setPathFromComp(Composition comp) {
         if (comp == null) {
-            path = null;
+            setNullPath();
         } else {
             Path compPath = comp.getActivePath();
             if (compPath == null) {
-                path = null;
-                if (mode.requiresExistingPath()) {
-                    startBuilding(false);
-                }
+                setNullPath();
             } else {
                 path = compPath;
                 PenToolMode preferredMode = compPath.getPreferredPenToolMode();
@@ -401,6 +398,13 @@ public class PenTool extends Tool {
             comp.repaint();
         }
         enableActionsBasedOnFinishedPath(path != null);
+    }
+
+    private void setNullPath() {
+        path = null;
+        if (mode.requiresExistingPath()) {
+            startBuilding(false);
+        }
     }
 
     public static Path getPath() {
@@ -418,12 +422,9 @@ public class PenTool extends Tool {
     }
 
     public void removePath() {
-        path = null;
         OpenComps.setActivePath(null);
+        setNullPath();
         enableActionsBasedOnFinishedPath(false);
-        if (mode.requiresExistingPath()) {
-            startBuilding(false);
-        }
     }
 
     @Override

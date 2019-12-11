@@ -246,7 +246,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
         visibilityCB = new JCheckBox(CLOSED_EYE_ICON);
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
-        visibilityCB.setSelected(true);
+        // when loading pxc files, the layer might not be visible
+        visibilityCB.setSelected(layer.isVisible());
+
         visibilityCB.setToolTipText("<html><b>Click</b> to hide/show this layer.");
         visibilityCB.setSelectedIcon(OPEN_EYE_ICON);
         add(visibilityCB, LayerButtonLayout.CHECKBOX);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,13 +42,12 @@ public class SingleDirChooser extends ValidatedPanel {
 
     private SingleDirChooser(String label, String initialPath,
                              String fileChooserTitle,
-                             boolean addOutputChooser, OutputFormat outputFormat) {
-        assert addOutputChooser == (outputFormat != null);
-
+                             OutputFormat outputFormat) {
         dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
 
+        boolean addOutputChooser = (outputFormat != null);
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
             GridBagHelper gbh = new GridBagHelper(this);
@@ -95,15 +94,18 @@ public class SingleDirChooser extends ValidatedPanel {
         }
     }
 
+    public static boolean selectOutputDir() {
+        return selectOutputDir(null);
+    }
+
     /**
      * Lets the user select the output directory property of the application.
      * Returns true if a selection was made, false if the operation was cancelled.
      */
-    public static boolean selectOutputDir(boolean addOutputChooser,
-                                          OutputFormat defaultFormat) {
+    public static boolean selectOutputDir(OutputFormat defaultFormat) {
         SingleDirChooser chooserPanel = new SingleDirChooser("Output Folder:",
                 Dirs.getLastSave().getAbsolutePath(),
-                "Select Output Folder", addOutputChooser, defaultFormat);
+                "Select Output Folder", defaultFormat);
 
         boolean[] selectionWasMade = {false};
         new DialogBuilder()
@@ -116,7 +118,7 @@ public class SingleDirChooser extends ValidatedPanel {
                 })
                 .show();
 
-        if (addOutputChooser) {
+        if (defaultFormat != null) {
             OutputFormat selectedFormat = chooserPanel.getSelectedFormat();
             OutputFormat.setLastUsed(selectedFormat);
         }

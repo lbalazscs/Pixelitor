@@ -70,9 +70,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
@@ -384,7 +386,7 @@ public class Composition implements Serializable {
         BufferedImage bellowImage = bellowLayer.getImage();
         Graphics2D g = bellowImage.createGraphics();
         g.translate(-bellowLayer.getTX(), -bellowLayer.getTY());
-        BufferedImage result = activeLayer.applyLayer(g, bellowImage, false);
+        BufferedImage result = layer.applyLayer(g, bellowImage, false);
         if (result != null) {  // this was an adjustment
             bellowLayer.setImage(result);
         }
@@ -392,13 +394,9 @@ public class Composition implements Serializable {
 
         bellowLayer.updateIconImage();
 
-        // keep the reference because after deleting the
-        // active merged layer, another layer will become active
-        Layer mergedLayer = activeLayer;
+        deleteLayer(layer, false, updateGUI);
 
-        deleteActiveLayer(updateGUI, false);
-
-        History.addEdit(new MergeDownEdit(this, mergedLayer,
+        History.addEdit(new MergeDownEdit(this, layer,
                 bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
     }
 
@@ -471,9 +469,10 @@ public class Composition implements Serializable {
         if (addToHistory) {
             History.addEdit(new LayerSelectionChangeEdit(
                     editName, this, oldLayer, newActiveLayer));
+        }
 
-            // shouldn't run in initialization code
-            Tools.imageChanged(activeLayer);
+        if(view != null) {  // shouldn't run while loading the composition
+            Tools.editedObjectChanged(activeLayer);
         }
 
         assert checkInvariant();
@@ -507,6 +506,20 @@ public class Composition implements Serializable {
         return layerList.size();
     }
 
+    public int getNumLayers(Predicate<Layer> condition) {
+        return (int) layerList.stream()
+                .filter(condition)
+                .count();
+    }
+
+    public int getNumImageLayers() {
+        return getNumLayers(layer -> layer instanceof ImageLayer);
+    }
+
+    public int getNumTextLayers() {
+        return getNumLayers(layer -> layer instanceof TextLayer);
+    }
+
     public void forEachLayer(Consumer<Layer> action) {
         layerList.forEach(action);
     }
@@ -533,6 +546,21 @@ public class Composition implements Serializable {
 
     public void updateAllIconImages() {
         forEachDrawable(Drawable::updateIconImage);
+    }
+
+    public void rasterizeAllTextLayers() {
+        assert view == null;
+
+        // create a separate copy to avoid modification
+        // of the original list while iterating
+        List<TextLayer> textLayers = layerList.stream()
+                .filter(layer -> layer instanceof TextLayer)
+                .map(layer -> (TextLayer) layer)
+                .collect(toList());
+
+        for (TextLayer textLayer : textLayers) {
+            textLayer.replaceWithRasterized(false, false);
+        }
     }
 
     public boolean activeIsDrawable() {
@@ -1071,9 +1099,14 @@ public class Composition implements Serializable {
         if (selection != null) {
             Shape backupShape = selection.getShape();
             Shape inverted = canvas.invertShape(backupShape);
-            selection.setShape(inverted);
-            History.addEdit(new SelectionShapeChangeEdit(
-                    "Invert Selection", this, backupShape));
+            if(inverted.getBounds2D().isEmpty()) {
+                // presumably everything was selected, and now nothing is
+                deselect(true);
+            } else {
+                selection.setShape(inverted);
+                History.addEdit(new SelectionShapeChangeEdit(
+                        "Invert Selection", this, backupShape));
+            }
         }
     }
 
@@ -1264,16 +1297,6 @@ public class Composition implements Serializable {
                     .toString() + ")");
         }
         return true;
-    }
-
-    public int getNumImageLayers() {
-        int count = 0;
-        for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                count++;
-            }
-        }
-        return count;
     }
 
     public int calcNumImages() {

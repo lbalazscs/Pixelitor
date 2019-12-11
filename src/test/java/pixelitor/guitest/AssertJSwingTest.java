@@ -41,6 +41,7 @@ import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.automate.AutoPaint;
+import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.GlobalEvents;
@@ -51,6 +52,8 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.gui.View;
 import pixelitor.guides.GuideStrokeType;
+import pixelitor.guitest.AppRunner.Randomize;
+import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.io.OutputFormat;
@@ -100,10 +103,13 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 import static pixelitor.guitest.MaskMode.NO_MASK;
 import static pixelitor.selection.SelectionInteraction.ADD;
 import static pixelitor.selection.SelectionInteraction.REPLACE;
+import static pixelitor.selection.SelectionModifyType.EXPAND;
+import static pixelitor.selection.SelectionType.RECTANGLE;
 import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
 import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
 
@@ -129,10 +135,6 @@ public class AssertJSwingTest {
     private final Mouse mouse;
 
     private final Random random = new Random();
-
-    private enum Randomize {YES, NO}
-
-    private enum Reseed {YES, NO}
 
     private MaskMode maskMode = NO_MASK;
 
@@ -180,7 +182,7 @@ public class AssertJSwingTest {
             app.delayBetweenEvents(AppRunner.ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testMoveTool();
+            testSelectionToolAndMenus();
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -213,17 +215,17 @@ public class AssertJSwingTest {
         }
         openInputFileWithDialog("a.jpg");
 
-        resetSelectTool();
-        resetShapesTool();
+        clickAndResetSelectTool();
+        clickAndResetShapesTool();
     }
 
-    private void resetSelectTool() {
+    private void clickAndResetSelectTool() {
         pw.toggleButton("Selection Tool Button").click();
         pw.comboBox("typeCB").selectItem("Rectangle");
         pw.comboBox("interactionCB").selectItem("Replace");
     }
 
-    private void resetShapesTool() {
+    private void clickAndResetShapesTool() {
         pw.toggleButton("Shapes Tool Button").click();
     }
 
@@ -232,7 +234,17 @@ public class AssertJSwingTest {
         if (targetProp == null || targetProp.equalsIgnoreCase("all")) {
             return TestTarget.ALL; // default target
         }
-        return TestTarget.valueOf(targetProp.toUpperCase());
+
+        TestTarget target = null;
+        try {
+            target = TestTarget.valueOf(targetProp.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            String msg = "Target " + targetProp.toUpperCase() + " not found.\n" +
+                    "Available targets: " + Arrays.toString(TestTarget.values());
+            System.err.println(msg);
+            System.exit(1);
+        }
+        return target;
     }
 
     private static MaskMode[] decideMaskModes() {
@@ -243,7 +255,15 @@ public class AssertJSwingTest {
             Collections.shuffle(Arrays.asList(usedMaskModes));
         } else {
             // if a specific test mode was configured, test only that
-            MaskMode mode = MaskMode.valueOf(maskMode.toUpperCase());
+            MaskMode mode = null;
+            try {
+                mode = MaskMode.valueOf(maskMode.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                String msg = "Mask mode " + maskMode.toUpperCase() + " not found.\n" +
+                        "Available mask modes: " + Arrays.toString(MaskMode.values());
+                System.err.println(msg);
+                System.exit(1);
+            }
             usedMaskModes = new MaskMode[]{mode};
         }
         return usedMaskModes;
@@ -287,6 +307,7 @@ public class AssertJSwingTest {
             testPenTool();
             testHandTool();
             testZoomTool();
+            testColorSelector();
             maskIndependentToolsTested = true;
         }
 
@@ -556,7 +577,7 @@ public class AssertJSwingTest {
         dialog.slider("toleranceSlider").slideTo(20);
         dialog.slider("softnessSlider").slideTo(20);
         dialog.checkBox("invertCheckBox").check();
-        dialog.comboBox("colorSpaceCombo").selectItem("RGB");
+        dialog.comboBox("distTypeCombo").selectItem("RGB");
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -588,7 +609,7 @@ public class AssertJSwingTest {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
-        keyboard.undoRedo("Text Layer Change");
+        keyboard.undoRedo("Edit Text Layer");
 
         checkConsistency();
 
@@ -695,22 +716,26 @@ public class AssertJSwingTest {
         }
         log(0, "testing the colors");
 
-        testColorPalette("Foreground...", "Foreground Color Variations");
-        testColorPalette("Background...", "Background Color Variations");
+        testColorPaletteMenu("Foreground...", "Foreground Color Variations");
+        testColorPaletteMenu("Background...", "Background Color Variations");
 
-        testColorPalette("HSB Mix Foreground with Background...", "HSB Mix with Background");
-        testColorPalette("RGB Mix Foreground with Background...", "RGB Mix with Background");
-        testColorPalette("HSB Mix Background with Foreground...", "HSB Mix with Foreground");
-        testColorPalette("RGB Mix Background with Foreground...", "RGB Mix with Foreground");
+        testColorPaletteMenu("HSB Mix Foreground with Background...", "HSB Mix with Background");
+        testColorPaletteMenu("RGB Mix Foreground with Background...", "RGB Mix with Background");
+        testColorPaletteMenu("HSB Mix Background with Foreground...", "HSB Mix with Foreground");
+        testColorPaletteMenu("RGB Mix Background with Foreground...", "RGB Mix with Foreground");
 
-        testColorPalette("Color Palette...", "Color Palette");
+        testColorPaletteMenu("Color Palette...", "Color Palette");
 
         checkConsistency();
         colorsTested = true;
     }
 
-    private void testColorPalette(String menuName, String dialogTitle) {
+    private void testColorPaletteMenu(String menuName, String dialogTitle) {
         runMenuCommand(menuName);
+        testColorPaletteDialog(dialogTitle);
+    }
+
+    private void testColorPaletteDialog(String dialogTitle) {
         DialogFixture dialog = findDialogByTitle(dialogTitle);
         if (dialogTitle.contains("Foreground")) {
             dialog.resizeTo(new Dimension(500, 500));
@@ -755,12 +780,16 @@ public class AssertJSwingTest {
         testFade();
 
         // select for crop
-        pw.toggleButton("Selection Tool Button").click();
+        clickAndResetSelectTool();
+        assert EDT.call(() ->
+                (Tools.SELECTION.getSelectionType() == RECTANGLE));
+
         mouse.moveToCanvas(200, 200);
         mouse.dragToCanvas(400, 400);
         EDT.assertThereIsSelection();
 
-        testMenuCropWithExistingSelection();
+        testCropSelection(() -> runMenuCommand("Crop Selection"),
+                false, 200.0, 200.0);
 
         EDT.assertThereIsSelection();
         keyboard.deselect();
@@ -882,17 +911,7 @@ public class AssertJSwingTest {
     }
 
     private void testEnlargeCanvas() {
-        runMenuCommand("Enlarge Canvas...");
-        DialogFixture dialog = findDialogByTitle("Enlarge Canvas");
-
-        dialog.slider("north").slideTo(100);
-        dialog.slider("west").slideTo(100);
-        dialog.slider("east").slideTo(100);
-        dialog.slider("south").slideTo(100);
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
+        app.enlargeCanvas(100, 100, 100, 100);
         keyboard.undoRedoUndo("Enlarge Canvas");
     }
 
@@ -1631,169 +1650,170 @@ public class AssertJSwingTest {
 
     private void testFiltersColor() {
         testColorBalance();
-        testFilterWithDialog("Hue/Saturation...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Colorize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Levels...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Brightness/Contrast...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Solarize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Sepia...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Hue/Saturation", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Colorize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Levels", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Brightness/Contrast", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Solarize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Sepia", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testInvert();
-        testFilterWithDialog("Channel Invert...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Channel Mixer...", Randomize.YES,
+        testFilterWithDialog("Channel Invert", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Channel Mixer", Randomize.YES,
                 Reseed.NO, ShowOriginal.YES, "Swap Red-Green", "Swap Red-Blue", "Swap Green-Blue",
                 "R -> G -> B -> R", "R -> B -> G -> R",
                 "Average BW", "Luminosity BW", "Sepia",
                 "Normalize", "Randomize and Normalize");
-        testFilterWithDialog("Extract Channel...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Extract Channel", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Luminosity");
         testNoDialogFilter("Value = max(R,G,B)");
         testNoDialogFilter("Desaturate");
         testNoDialogFilter("Hue");
         testNoDialogFilter("Hue (with colors)");
         testNoDialogFilter("Saturation");
-        testFilterWithDialog("Quantize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Posterize...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Color Threshold...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Tritone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Gradient Map...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Dither...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Quantize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Posterize", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Threshold", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Tritone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Gradient Map", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Dither", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Foreground Color");
         testNoDialogFilter("Background Color");
         testNoDialogFilter("Transparent");
-        testFilterWithDialog("Color Wheel...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Four Color Gradient...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Color Wheel", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Four Color Gradient", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
     private void testFiltersBlurSharpen() {
-        testFilterWithDialog("Box Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Focus...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Gaussian Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Lens Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Motion Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Smart Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Spin and Zoom Blur...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Unsharp Mask...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Box Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Focus", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Gaussian Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Lens Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Motion Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Smart Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Spin and Zoom Blur", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Unsharp Mask", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersDistort() {
-        testFilterWithDialog("Swirl, Pinch, Bulge...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Circle to Square...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Perspective...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Lens Over Image...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Magnify...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Turbulent Distortion...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Underwater...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Water Ripple...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Waves...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Angular Waves...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Radial Waves...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glass Tiles...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Polar Glass Tiles...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Frosted Glass...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Little Planet...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Polar Coordinates...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Wrap Around Arc...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Swirl, Pinch, Bulge", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Circle to Square", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Perspective", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Lens Over Image", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Magnify", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Turbulent Distortion", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Underwater", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Water Ripple", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Angular Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Radial Waves", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Polar Glass Tiles", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Frosted Glass", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Little Planet", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Polar Coordinates", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Wrap Around Arc", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersDislocate() {
-        testFilterWithDialog("Drunk Vision...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Kaleidoscope...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Offset...", Randomize.NO, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Slice...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Mirror...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Video Feedback...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Drunk Vision", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Kaleidoscope", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Offset", Randomize.NO, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Slice", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Mirror", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Video Feedback", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersLight() {
-        testFilterWithDialog("Flashlight...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glint...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Glow...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Rays...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Sparkle...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Flashlight", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Glint", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Glow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Rays", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Sparkle", Randomize.YES, Reseed.YES, ShowOriginal.YES);
     }
 
     private void testFiltersNoise() {
         testNoDialogFilter("Reduce Single Pixel Noise");
         testNoDialogFilter("3x3 Median Filter");
-        testFilterWithDialog("Add Noise...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Pixelate...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Add Noise", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Pixelate", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersRender() {
-        testFilterWithDialog("Clouds...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Value Noise...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Caustics...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Plasma...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Wood...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Cells...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Brushed Metal...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Voronoi Diagram...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Clouds", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Value Noise", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Caustics", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Plasma", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Wood", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Cells", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Marble", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Brushed Metal", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Voronoi Diagram", Randomize.YES, Reseed.YES, ShowOriginal.NO);
 
-        testFilterWithDialog("Fractal Tree...", Randomize.YES, Reseed.YES, ShowOriginal.NO);
-        testFilterWithDialog("Julia Set...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Mandelbrot Set...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Chaos Game", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Fractal Tree", Randomize.YES, Reseed.YES, ShowOriginal.NO);
+        testFilterWithDialog("Julia Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Mandelbrot Set", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
-        testFilterWithDialog("Checker Pattern...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Starburst...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Checker Pattern", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Starburst", Randomize.YES, Reseed.NO, ShowOriginal.NO);
 
-        testFilterWithDialog("Mystic Rose...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Lissajous Curve...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Spirograph...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Flower of Life...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
-        testFilterWithDialog("Grid...", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Mystic Rose", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Lissajous Curve", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Spirograph", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Flower of Life", Randomize.YES, Reseed.NO, ShowOriginal.NO);
+        testFilterWithDialog("Grid", Randomize.YES, Reseed.NO, ShowOriginal.NO);
     }
 
     private void testFiltersArtistic() {
-        testFilterWithDialog("Crystallize...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Pointillize...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Stamp...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Oil Painting...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Random Spheres...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Smear...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Emboss...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Orton Effect...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Photo Collage...", Randomize.YES, Reseed.YES, ShowOriginal.YES);
-        testFilterWithDialog("Weave...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Crystallize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Pointillize", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Stamp", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Oil Painting", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Random Spheres", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Smear", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Emboss", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Orton Effect", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Photo Collage", Randomize.YES, Reseed.YES, ShowOriginal.YES);
+        testFilterWithDialog("Weave", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
-        testFilterWithDialog("Striped Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Concentric Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Color Halftone...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Striped Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Concentric Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Color Halftone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersEdgeDetection() {
-        testFilterWithDialog("Convolution Edge Detection...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Convolution Edge Detection", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Laplacian");
-        testFilterWithDialog("Difference of Gaussians...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Canny...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Difference of Gaussians", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Canny", Randomize.YES, Reseed.NO, ShowOriginal.YES);
     }
 
     private void testFiltersOther() {
-        testFilterWithDialog("Drop Shadow...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("Morphology...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Drop Shadow", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Morphology", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testRandomFilter();
-        testFilterWithDialog("Transform Layer...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testFilterWithDialog("2D Transitions...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Transform Layer", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("2D Transitions", Randomize.YES, Reseed.NO, ShowOriginal.YES);
 
-        testFilterWithDialog("Custom 3x3 Convolution...", Randomize.NO,
+        testFilterWithDialog("Custom 3x3 Convolution", Randomize.NO,
                 Reseed.NO, ShowOriginal.NO, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
                 "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
                 "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
                 "Do Nothing", "Randomize");
-        testFilterWithDialog("Custom 5x5 Convolution...", Randomize.NO,
+        testFilterWithDialog("Custom 5x5 Convolution", Randomize.NO,
                 Reseed.NO, ShowOriginal.NO, "Diamond Blur", "Motion Blur",
                 "Find Horizontal Edges", "Find Vertical Edges",
                 "Find Diagonal Edges", "Find Diagonal Edges 2", "Sharpen",
                 "Do Nothing", "Randomize");
 
-        testFilterWithDialog("Channel to Transparency...", Randomize.YES, Reseed.NO, ShowOriginal.YES);
+        testFilterWithDialog("Channel to Transparency", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testNoDialogFilter("Invert Transparency");
     }
 
     private void testColorBalance() {
         runWithSelectionAndTranslation(
-                () -> testFilterWithDialog("Color Balance...",
+                () -> testFilterWithDialog("Color Balance",
                         Randomize.YES, Reseed.NO, ShowOriginal.YES));
     }
 
@@ -1865,37 +1885,11 @@ public class AssertJSwingTest {
         if (skipThis()) {
             return;
         }
-        String nameWithoutDots = name.substring(0, name.length() - 3);
-        log(1, "testing the filter " + nameWithoutDots);
+        log(1, "testing the filter " + name);
 
-        runMenuCommand(name);
-        DialogFixture dialog = app.findFilterDialog();
+        app.runFilterWithDialog(name, randomize, reseed, checkShowOriginal, extraButtonsToClick);
 
-        for (String buttonText : extraButtonsToClick) {
-            findButtonByText(dialog, buttonText)
-                    .requireEnabled()
-                    .click();
-        }
-
-        if (randomize == Randomize.YES) {
-            dialog.button("randomize").click();
-            dialog.button("resetAll").click();
-            dialog.button("randomize").click();
-        }
-
-        if (checkShowOriginal.isYes()) {
-            dialog.checkBox("show original").click();
-            dialog.checkBox("show original").click();
-        }
-
-        if (reseed == Reseed.YES) {
-            dialog.button("reseed").click();
-        }
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        afterFilterRunActions(nameWithoutDots);
+        afterFilterRunActions(name);
     }
 
     private void afterFilterRunActions(String filterName) {
@@ -2482,54 +2476,16 @@ public class AssertJSwingTest {
         mouse.moveToCanvas(e2X, e2Y);
         mouse.dragToCanvas(e2X + e2Width, e2Y + e2Height);
 
-        EDT.assertThereIsSelection();
-        Selection selection = EDT.getActiveSelection();
-        Rectangle2D selectionBounds = selection.getShapeBounds2D();
-        double selWidth = selectionBounds.getWidth();
-        double selHeight = selectionBounds.getHeight();
+        // test crop selection by clicking on the button
+        testCropSelection(() ->
+                        findButtonByText(pw, "Crop Selection").requireEnabled().click(),
+                true, 300.0, 200.0);
 
-        // the values can be off by one due to rounding errors
-        assertThat(selWidth).isCloseTo(300.0, within(2.0));
-        assertThat(selHeight).isCloseTo(200.0, within(2.0));
-
-        Canvas canvas = EDT.active(Composition::getCanvas);
-        int origCanvasWidth = canvas.getImWidth();
-        int origCanvasHeight = canvas.getImHeight();
-
-        // crop using the "Crop" button in the selection tool
-        EDT.assertThereIsSelection();
-
-        findButtonByText(pw, "Crop Selection")
-                .requireEnabled()
-                .click();
-
-        // TODO test the other options as well
-        findJOptionPane()
-                .buttonWithText("Only Crop")
-                .click();
-
-        assertThat(EDT.active(Composition::getCanvas))
-                .hasImWidth((int) selWidth)
-                .hasImHeight((int) selHeight);
-        EDT.assertThereIsNoSelection();
-
-        keyboard.undo("Crop");
-        EDT.assertThereIsSelection();
-
-        keyboard.redo("Crop");
-        EDT.assertThereIsNoSelection();
-
-        keyboard.undo("Crop");
-        assertThat(EDT.getActiveSelection())
-                .isNotNull()
-                .isAlive()
-                .isMarching();
-        assertThat(EDT.active(Composition::getCanvas))
-                .hasImWidth(origCanvasWidth)
-                .hasImHeight(origCanvasHeight);
-
-        // crop from the menu
-        testMenuCropWithExistingSelection();
+        if(!quick) {
+            // test crop selection by using the menu
+            testCropSelection(() -> runMenuCommand("Crop Selection"),
+                    true, 300.0, 200.0);
+        }
 
         testSelectionModifyMenu();
         EDT.assertThereIsSelection();
@@ -2541,56 +2497,121 @@ public class AssertJSwingTest {
         EDT.assertThereIsNoSelection();
     }
 
-    // tests the crop command in the selection menu,
-    // it assumes an existing selection
-    private void testMenuCropWithExistingSelection() {
-        Canvas canvas = EDT.active(Composition::getCanvas);
-        int origCanvasWidth = canvas.getImWidth();
-        int origCanvasHeight = canvas.getImHeight();
+    private void testCropSelection(Runnable triggerTask,
+                                   boolean assumeNonRectangular,
+                                   double expectedSelWidth,
+                                   double expectedSelHeight) {
+        EDT.assertThereIsSelection();
 
         Selection selection = EDT.getActiveSelection();
         boolean rectangular = selection.getShape() instanceof Rectangle2D;
+        assert rectangular == !assumeNonRectangular;
+
         Rectangle2D selectionBounds = selection.getShapeBounds2D();
         double selWidth = selectionBounds.getWidth();
         double selHeight = selectionBounds.getHeight();
 
-        runMenuCommand("Crop Selection");
+        // the values can be off by one due to rounding errors
+        assertThat(selWidth).isCloseTo(expectedSelWidth, within(2.0));
+        assertThat(selHeight).isCloseTo(expectedSelHeight, within(2.0));
 
-        if (!rectangular) {
-            // TODO test the other options as well
+        Canvas canvas = EDT.active(Composition::getCanvas);
+        int origCanvasWidth = canvas.getImWidth();
+        int origCanvasHeight = canvas.getImHeight();
 
-            findJOptionPane()
-                    .buttonWithText("Only Crop")
-                    .click();
+        triggerTask.run();
+
+        if (rectangular) {
+            undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
+            return;
         }
+
+        // not rectangular: test choosing "Only Crop"
+        findJOptionPane()
+                .buttonWithText("Only Crop")
+                .click();
+        undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
+
+        if (quick) {
+            return;
+        }
+
+        // not rectangular: test choosing "Only Hide"
+        triggerTask.run();
+        findJOptionPane()
+                .buttonWithText("Only Hide")
+                .click();
 
         EDT.assertThereIsNoSelection();
         assertThat(EDT.active(Composition::getCanvas))
-                .hasImWidth((int) (selWidth + 0.5))
-                .hasImHeight((int) (selHeight + 0.5));
+                .hasImWidth(origCanvasWidth)
+                .hasImHeight(origCanvasHeight);
+        assertThat(EDT.active(Composition::getActiveLayer))
+                .hasMask();
+
+        keyboard.undo("Add Hiding Mask");
+        keyboard.redo("Add Hiding Mask");
+        keyboard.undo("Add Hiding Mask");
+
+        // not rectangular: test choosing "Crop and Hide"
+        triggerTask.run();
+        findJOptionPane()
+                .buttonWithText("Crop and Hide")
+                .click();
+        checkAfterSelectionCrop(selWidth, selHeight);
+        assertThat(EDT.active(Composition::getActiveLayer))
+                .hasMask();
+
+        keyboard.undo("Crop and Hide");
+        keyboard.redo("Crop and Hide");
+        keyboard.undo("Crop and Hide");
+
+        // not rectangular: test choosing "Cancel"
+        triggerTask.run();
+        findJOptionPane()
+                .buttonWithText("Cancel")
+                .click();
+
+        EDT.assertThereIsSelection();
+        assertThat(EDT.active(Composition::getCanvas))
+                .hasImWidth(origCanvasWidth)
+                .hasImHeight(origCanvasHeight);
+    }
+
+    private void undoRedoUndoSimpleSelectionCrop(
+            int origCanvasWidth, int origCanvasHeight,
+            double selWidth, double selHeight) {
+        checkAfterSelectionCrop(selWidth, selHeight);
 
         keyboard.undo("Crop");
-        EDT.assertThereIsSelection();
+        checkAfterSelectionCropUndone(origCanvasWidth, origCanvasHeight);
 
         keyboard.redo("Crop");
-        EDT.assertThereIsNoSelection();
+        checkAfterSelectionCrop(selWidth, selHeight);
 
         keyboard.undo("Crop");
-        EDT.assertThereIsSelection();
+        checkAfterSelectionCropUndone(origCanvasWidth, origCanvasHeight);
+    }
 
+    private void checkAfterSelectionCrop(double selWidth, double selHeight) {
+        assertThat(EDT.active(Composition::getCanvas))
+                .hasImWidth((int) (selWidth + 0.5))
+                .hasImHeight((int) (selHeight + 0.5));
+        EDT.assertThereIsNoSelection();
+    }
+
+    private void checkAfterSelectionCropUndone(int origCanvasWidth, int origCanvasHeight) {
+        assertThat(EDT.getActiveSelection())
+                .isNotNull()
+                .isAlive()
+                .isMarching();
         assertThat(EDT.active(Composition::getCanvas))
                 .hasImWidth(origCanvasWidth)
                 .hasImHeight(origCanvasHeight);
     }
 
     private void testSelectionModifyMenu() {
-        runMenuCommand("Modify Selection...");
-        DialogFixture dialog = findDialogByTitle("Modify Selection");
-
-        findButtonByText(dialog, "Change!").click();
-        findButtonByText(dialog, "Change!").click();
-        findButtonByText(dialog, "Close").click();
-        dialog.requireNotVisible();
+        app.runModifySelection(12, EXPAND, 2);
 
         keyboard.undoRedoUndo("Modify Selection");
     }
@@ -2664,7 +2685,7 @@ public class AssertJSwingTest {
                 .requireEnabled()
                 .click();
         EDT.assertNumLayersIs(1);
-        maskMode.set(this); 
+        maskMode.set(this);
 
         checkConsistency();
     }
@@ -2682,7 +2703,7 @@ public class AssertJSwingTest {
 
             mouse.dragToCanvas(200, 300);
 
-            if(mode.movesTheLayer()) {
+            if (mode.movesTheLayer()) {
                 // The translations will have these values only if we are at 100% zoom!
                 assert view.getZoomLevel() == ZoomLevel.Z100 : "zoom is " + view.getZoomLevel();
                 assert dr.getTX() == -200 : "tx = " + dr.getTX();
@@ -2815,10 +2836,7 @@ public class AssertJSwingTest {
         popupMenu = navigator.showPopupMenu();
         clickPopupMenu(popupMenu, "View Box Color...");
 
-        DialogFixture colorSelector = findDialogByTitle("Navigator");
-        mouse.moveTo(colorSelector, 100, 150);
-        mouse.dragTo(colorSelector, 100, 300);
-        findButtonByText(colorSelector, "OK").click();
+        testColorSelectorDialog("Navigator");
 
         navigator.close();
         navigator.requireNotVisible();
@@ -2854,13 +2872,67 @@ public class AssertJSwingTest {
         pw.releaseKey(VK_CONTROL);
     }
 
+    private void testColorSelector() {
+        log(1, "testing the color selector");
+
+        pw.button(FgBgColorSelector.RESET_DEF_COLORS_BUTTON_NAME).click();
+        pw.button(FgBgColorSelector.SWAP_COLORS_BUTTON_NAME).click();
+        pw.button(FgBgColorSelector.RANDOMIZE_COLORS_BUTTON_NAME).click();
+
+        JButtonFixture fgButton = pw.button(FgBgColorSelector.FG_BUTTON_NAME);
+        fgButton.click();
+        testColorSelectorDialog("Foreground Color");
+
+        JButtonFixture bgButton = pw.button(FgBgColorSelector.BG_BUTTON_NAME);
+        bgButton.click();
+        testColorSelectorDialog("Background Color");
+
+        if (!quick) {
+            testColorSelectorPopup(fgButton, true);
+            testColorSelectorPopup(bgButton, false);
+        }
+    }
+
+    private void testColorSelectorDialog(String title) {
+        DialogFixture colorSelector = findDialogByTitle(title);
+        mouse.moveTo(colorSelector, 100, 150);
+        mouse.dragTo(colorSelector, Rnd.intInRange(110, 200), Rnd.intInRange(160, 300));
+        findButtonByText(colorSelector, "OK").click();
+    }
+
+    private void testColorSelectorPopup(JButtonFixture button, boolean isFg) {
+        testColorPaletteDialogWithPopup(button,
+                isFg ? "Foreground Color Variations"
+                        : "Background Color Variations");
+
+        testColorPaletteDialogWithPopup(button,
+                isFg ? "HSB Mix with Background"
+                        : "HSB Mix with Foreground");
+
+        testColorPaletteDialogWithPopup(button,
+                isFg ? "RGB Mix with Background"
+                        : "RGB Mix with Foreground");
+
+        testColorPaletteDialogWithPopup(button,
+                isFg ? "Foreground Color History"
+                        : "Background Color History");
+
+        clickPopupMenu(button.showPopupMenu(), "Copy Color");
+        clickPopupMenu(button.showPopupMenu(), "Paste Color");
+    }
+
+    private void testColorPaletteDialogWithPopup(JButtonFixture button, String dialogName) {
+        clickPopupMenu(button.showPopupMenu(), dialogName + "...");
+        testColorPaletteDialog(dialogName);
+    }
+
     private static void cleanOutputs() {
         try {
             String cleanerScriptPath = cleanerScript.getCanonicalPath();
             System.out.println("AssertJSwingTest::cleanOutputs: running " + cleanerScript);
             Process process = Runtime.getRuntime().exec(cleanerScriptPath);
             int exitValue = process.waitFor();
-            if(exitValue != 0) {
+            if (exitValue != 0) {
                 throw new IllegalStateException("Exit value for " + cleanerScriptPath + " was " + exitValue);
             }
 
@@ -3060,10 +3132,6 @@ public class AssertJSwingTest {
                 + ImageArea.getMode() + ")");
     }
 
-    private static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
-        AppRunner.clickPopupMenu(popupMenu, text);
-    }
-
     private DialogFixture findDialogByTitle(String title) {
         return app.findDialogByTitle(title);
     }
@@ -3096,10 +3164,10 @@ public class AssertJSwingTest {
         Utils.sleep(1, SECONDS);
         mouse.recalcCanvasBounds();
 
-        if(EDT.active(Composition::isDirty)) {
+        if (EDT.active(Composition::isDirty)) {
             String compName = EDT.active(Composition::getName);
             throw new AssertionError(format("New comp '%s', loaded from %s is dirty",
-                    compName, fileName));            
+                    compName, fileName));
         }
 
         maskMode.set(this);

@@ -47,7 +47,7 @@ public final class ConsistencyChecks {
 
         selectionActionsEnabledCheck(comp);
 
-        assert selectionShapeIsNotEmpty(comp) : "empty selection in " + comp.getName();
+        assert selectionShapeIsNotEmpty(comp) : "empty selection shape in " + comp.getName();
         assert selectionIsInsideCanvas(comp) : "selection outside the canvas in " + comp.getName();
         assert fadeWouldWorkOn(comp);
 

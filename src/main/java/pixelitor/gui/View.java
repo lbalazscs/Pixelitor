@@ -119,7 +119,7 @@ public class View extends JComponent
     }
 
     void replaceJustReloadedComp(Composition newComp) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
         assert newComp != comp;
 
         // do this before actually replacing so that the old comp is
@@ -127,7 +127,12 @@ public class View extends JComponent
         History.addEdit(new CompositionReplacedEdit(
                 "Reload", true, this, comp, newComp, null));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
-        SelectionActions.setEnabled(false, newComp);
+
+        // the view was active when the reload started, but since the
+        // reload was asynchronous, this could have changed
+        if(isActive()) {
+            SelectionActions.setEnabled(false, newComp);
+        }
 
         String msg = format(
                 "<html>The image <b>%s</b> was reloaded from the file <b>%s</b>.",
@@ -184,6 +189,10 @@ public class View extends JComponent
 
     public boolean isDirty() {
         return comp.isDirty();
+    }
+
+    public boolean isActive() {
+        return OpenComps.getActiveView() == this;
     }
 
     @Override
@@ -379,7 +388,7 @@ public class View extends JComponent
 
         comp.drawGuides(g2);
 
-        if (OpenComps.isActive(this)) {
+        if (isActive()) {
             currentTool.paintOverImage(g2, canvas, this,
                     componentTransform, imageTransform);
         }
@@ -590,7 +599,7 @@ public class View extends JComponent
             moveScrollbarsAfterZoom(oldZoom, newZoom, mousePos);
         }
 
-        if (OpenComps.isActive(this)) {
+        if (isActive()) {
             ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
@@ -682,7 +691,7 @@ public class View extends JComponent
 
         // one can zoom an inactive image with the mouse wheel,
         // but the tools are interacting only with the active image
-        if (OpenComps.isActive(this)) {
+        if (isActive()) {
             Tools.coCoordsChanged(this);
         }
         comp.coCoordsChanged();
@@ -796,7 +805,7 @@ public class View extends JComponent
             layerButton.setUserInteraction(true);
         }
 
-        if (OpenComps.isActive(this)) {
+        if (isActive()) {
             Layers.numLayersChanged(comp, comp.getNumLayers());
         }
 

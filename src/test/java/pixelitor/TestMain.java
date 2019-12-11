@@ -21,7 +21,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 
 /**
  * A way to run the app from the test directory,
- * having the test code and libraries are available
+ * so that the test code and libraries are available
  */
 public class TestMain {
     private TestMain() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,11 +25,13 @@ public class RadiusRatioSpacing implements SpacingStrategy {
     private final double spacingRatio; // the spacing relative to the radius
 
     public RadiusRatioSpacing(double spacingRatio) {
+        assert spacingRatio > 0;
         this.spacingRatio = spacingRatio;
     }
 
     @Override
     public double getSpacing(double radius) {
-        return radius * spacingRatio;
+        assert radius > 0;
+        return Math.max(radius * spacingRatio, MIN_SPACING);
     }
 }

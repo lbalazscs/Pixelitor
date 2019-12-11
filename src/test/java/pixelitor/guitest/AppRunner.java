@@ -35,8 +35,10 @@ import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
+import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.IOThread;
+import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -89,6 +91,10 @@ public class AppRunner {
                 .using(robot);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
+
+        if(fileNames.length == 0) {
+            return;
+        }
 
         // wait even after the frame is shown to
         // make sure that the image is also loaded
@@ -188,6 +194,15 @@ public class AppRunner {
                 dialogRunning = false;
             }
         }
+
+        // even if the dialog is not visible, the
+        // async saving of the last file might be still running
+        boolean stillWriting = EDT.call(IOThread::isBusyWriting);
+        while(stillWriting) {
+            System.out.println("waiting 1s for the IO thread...");
+            Utils.sleep(1, SECONDS);
+            stillWriting = EDT.call(IOThread::isBusyWriting);
+        }
     }
 
     void closeAll() {
@@ -249,6 +264,34 @@ public class AppRunner {
         dialog.requireNotVisible();
 
         Utils.sleep(5, SECONDS);
+    }
+
+    public void enlargeCanvas(int north, int west, int east, int south) {
+        runMenuCommand("Enlarge Canvas...");
+        DialogFixture dialog = findDialogByTitle("Enlarge Canvas");
+
+        dialog.slider("north").slideTo(north);
+        dialog.slider("west").slideTo(west);
+        dialog.slider("east").slideTo(east);
+        dialog.slider("south").slideTo(south);
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+    }
+
+    public void runModifySelection(int amount, SelectionModifyType type, int numClicks) {
+        runMenuCommand("Modify Selection...");
+        DialogFixture dialog = findDialogByTitle("Modify Selection");
+
+        dialog.slider("amount").slideTo(amount);
+        dialog.comboBox("type").selectItem(type.toString());
+
+        for (int i = 0; i < numClicks; i++) {
+            findButtonByText(dialog, "Change!").click();
+        }
+
+        findButtonByText(dialog, "Close").click();
+        dialog.requireNotVisible();
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
@@ -430,4 +473,37 @@ public class AppRunner {
             throw new RuntimeException(e);
         }
     }
+
+    public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
+        runMenuCommand(name + "...");
+        DialogFixture dialog = findFilterDialog();
+
+        for (String buttonText : extraButtonsToClick) {
+            findButtonByText(dialog, buttonText)
+                    .requireEnabled()
+                    .click();
+        }
+
+        if (randomize == Randomize.YES) {
+            dialog.button("randomize").click();
+            dialog.button("resetAll").click();
+            dialog.button("randomize").click();
+        }
+
+        if (checkShowOriginal.isYes()) {
+            dialog.checkBox("show original").click();
+            dialog.checkBox("show original").click();
+        }
+
+        if (reseed == Reseed.YES) {
+            dialog.button("reseed").click();
+        }
+
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+    }
+
+    public enum Randomize {YES, NO}
+
+    public enum Reseed {YES, NO}
 }

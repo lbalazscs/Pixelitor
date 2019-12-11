@@ -80,8 +80,7 @@ public class SplashImageCreator {
     public static void saveManySplashImages() {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        boolean okPressed = SingleDirChooser.selectOutputDir(
-                true, OutputFormat.PNG);
+        boolean okPressed = SingleDirChooser.selectOutputDir(OutputFormat.PNG);
         if (!okPressed) {
             return;
         }

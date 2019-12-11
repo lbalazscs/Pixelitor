@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2019 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,11 +29,26 @@ import java.awt.Dimension;
 public class DefaultButton extends JButton {
     private static final Icon WEST_ARROW_ICON = Icons.getWestArrowIcon();
     private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
-    private final Resettable resettable;
+    private Resettable resettable;
 
+    /**
+     * Create a default button with no text
+     */
     public DefaultButton(Resettable resettable) {
-        this.resettable = resettable;
         setPreferredSize(PREFERRED_SIZE);
+        init(resettable);
+    }
+
+    /**
+     * Create a default button with the given text
+     */
+    public DefaultButton(String text, Resettable resettable) {
+        super(text);
+        init(resettable);
+    }
+
+    private void init(Resettable resettable) {
+        this.resettable = resettable;
         addActionListener(e -> resettable.reset(true));
         setToolTipText(resettable.getResetToolTip());
         updateIcon();

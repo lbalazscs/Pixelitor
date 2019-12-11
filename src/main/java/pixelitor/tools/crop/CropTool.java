@@ -74,8 +74,8 @@ public class CropTool extends DragTool {
 
     private final JLabel widthLabel = new JLabel("Width:");
     private final JLabel heightLabel = new JLabel("Height:");
-    private JSpinner wSizeSpinner;
-    private JSpinner hSizeSpinner;
+    private JSpinner widthSpinner;
+    private JSpinner heightSpinner;
     private JComboBox<CompositionGuideType> guidesCB;
 
     private JCheckBox allowGrowingCB;
@@ -168,28 +168,35 @@ public class CropTool extends DragTool {
         ChangeListener whChangeListener = e -> {
             if (state == TRANSFORM && !cropBox.isAdjusting()) {
                 cropBox.setImSize(
-                        (int) wSizeSpinner.getValue(),
-                        (int) hSizeSpinner.getValue(),
+                        (int) widthSpinner.getValue(),
+                        (int) heightSpinner.getValue(),
                     OpenComps.getActiveView()
                 );
             }
         };
 
         // add crop width spinner
-        wSizeSpinner = new JSpinner(new SpinnerNumberModel(
-                0, 0, Canvas.MAX_WIDTH, 1));
-        wSizeSpinner.addChangeListener(whChangeListener);
-        wSizeSpinner.setToolTipText("Width of the cropped image (px)");
+        widthSpinner = createSpinner(whChangeListener, Canvas.MAX_WIDTH,
+                "Width of the cropped image (px)");
         settingsPanel.add(widthLabel);
-        settingsPanel.add(wSizeSpinner);
+        settingsPanel.add(widthSpinner);
 
         // add crop height spinner
-        hSizeSpinner = new JSpinner(new SpinnerNumberModel(
-                0, 0, Canvas.MAX_HEIGHT, 1));
-        hSizeSpinner.addChangeListener(whChangeListener);
-        hSizeSpinner.setToolTipText("Height of the cropped image (px)");
+        heightSpinner = createSpinner(whChangeListener, Canvas.MAX_HEIGHT,
+                "Height of the cropped image (px)");
         settingsPanel.add(heightLabel);
-        settingsPanel.add(hSizeSpinner);
+        settingsPanel.add(heightSpinner);
+    }
+
+    private static JSpinner createSpinner(ChangeListener whChangeListener, int max, String toolTip) {
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(
+                0, 0, max, 1));
+        spinner.addChangeListener(whChangeListener);
+        spinner.setToolTipText(toolTip);
+        // In fact setting it to 3 columns seems enough
+        // for the range 1-9999, but leave it as 4 for safety
+        ((JSpinner.DefaultEditor)spinner.getEditor()).getTextField().setColumns(4);
+        return spinner;
     }
 
     private void addCropControlCheckboxes() {
@@ -377,10 +384,10 @@ public class CropTool extends DragTool {
 
     private void enableCropActions(boolean b) {
         widthLabel.setEnabled(b);
-        hSizeSpinner.setEnabled(b);
+        heightSpinner.setEnabled(b);
 
         heightLabel.setEnabled(b);
-        wSizeSpinner.setEnabled(b);
+        widthSpinner.setEnabled(b);
 
         cropButton.setEnabled(b);
         cancelButton.setEnabled(b);
@@ -394,8 +401,8 @@ public class CropTool extends DragTool {
         int width = (int) cropRect.getWidth();
         int height = (int) cropRect.getHeight();
 
-        wSizeSpinner.setValue(width);
-        hSizeSpinner.setValue(height);
+        widthSpinner.setValue(width);
+        heightSpinner.setValue(height);
     }
 
     /**
@@ -425,8 +432,8 @@ public class CropTool extends DragTool {
 
         enableCropActions(false);
 
-        hSizeSpinner.setValue(0);
-        wSizeSpinner.setValue(0);
+        heightSpinner.setValue(0);
+        widthSpinner.setValue(0);
 
         OpenComps.repaintActive();
         OpenComps.setCursorForAll(Cursors.DEFAULT);
