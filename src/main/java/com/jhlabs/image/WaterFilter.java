@@ -27,7 +27,6 @@ import java.awt.image.BufferedImage;
  * A filter which produces a water ripple distortion.
  */
 public class WaterFilter extends TransformFilter {
-
     private float wavelength = 16;
     private float amplitude = 10;
     private float phase = 0;
@@ -150,8 +149,8 @@ public class WaterFilter extends TransformFilter {
      * @see #getCentre
      */
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -207,18 +206,19 @@ public class WaterFilter extends TransformFilter {
         } else {
             float distance = (float) Math.sqrt(distance2);
             float amount = amplitude * (float) FastMath.sin(distance / wavelength * ImageMath.TWO_PI - phase);
-            amount *= (radius-distance)/radius;
-			if ( distance != 0 ) {
+            amount *= (radius - distance) / radius;
+            if (distance != 0) {
                 amount *= wavelength / distance;
             }
-			out[0] = x + dx*amount;
-			out[1] = y + dy*amount;
-		}
-	}
+            out[0] = x + dx * amount;
+            out[1] = y + dy * amount;
+        }
+    }
 
-	public String toString() {
-		return "Distort/Water Ripples...";
-	}
+    @Override
+    public String toString() {
+        return "Distort/Water Ripples...";
+    }
 
     public Shape[] getAffectedAreaShapes() {
         return new Shape[]{

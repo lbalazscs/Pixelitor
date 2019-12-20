@@ -43,5 +43,4 @@ public class CrossFadeComposite extends RGBComposite {
             }
         }
     }
-
 }

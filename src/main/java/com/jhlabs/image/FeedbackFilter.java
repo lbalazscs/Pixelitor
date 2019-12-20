@@ -18,9 +18,13 @@ package com.jhlabs.image;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
 /**
  * A filter which priduces a video feedback effect by repeated transformations.
@@ -233,8 +237,8 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
      * @see #getCentre
      */
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -273,8 +277,8 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         if (dst == null) {
             dst = createCompatibleDestImage(src, null);
         }
-        float cx = (float) src.getWidth() * centreX;
-        float cy = (float) src.getHeight() * centreY;
+        float cx = src.getWidth() * centreX;
+        float cy = src.getHeight() * centreY;
 //        float imageRadius = (float)Math.sqrt( cx*cx + cy*cy );
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
@@ -294,27 +298,29 @@ public class FeedbackFilter extends AbstractBufferedImageOp {
         pt = createProgressTracker(iterations);
 
         for (int i = 0; i < iterations; i++) {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ImageMath.lerp((float) i / (iterations - 1), startAlpha, endAlpha)));
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, ImageMath
+                    .lerp((float) i / (iterations - 1), startAlpha, endAlpha)));
 
             g.translate(cx + translateX, cy + translateY);
             g.scale(scale, scale);  // The .0001 works round a bug on Windows where drawImage throws an ArrayIndexOutofBoundException
-            if ( rotation != 0 ) {
+            if (rotation != 0) {
                 g.rotate(rotate);
             }
-            g.translate( -cx, -cy );
+            g.translate(-cx, -cy);
 
-            g.drawImage( src, null, null );
+            g.drawImage(src, null, null);
             pt.unitDone();
         }
         finishProgressTracker();
 
-		g.dispose();
+        g.dispose();
         return dst;
     }
 
-	public String toString() {
-		return "Effects/Feedback...";
-	}
+    @Override
+    public String toString() {
+        return "Effects/Feedback...";
+    }
 }

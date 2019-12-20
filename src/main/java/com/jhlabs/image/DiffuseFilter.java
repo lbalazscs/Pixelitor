@@ -77,7 +77,8 @@ public class DiffuseFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
+    @Override
     public String toString() {
         return "Distort/Diffuse...";
-	}
+    }
 }

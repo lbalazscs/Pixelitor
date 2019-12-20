@@ -30,7 +30,6 @@ import java.util.concurrent.Future;
  * @author Jerry Huxtable
  */
 public class GaussianFilter extends ConvolveFilter {
-
     /**
      * The blur radius.
      */
@@ -225,6 +224,7 @@ public class GaussianFilter extends ConvolveFilter {
         return new Kernel(rows, 1, matrix);
     }
 
+    @Override
     public String toString() {
         return "Blur/Gaussian Blur...";
     }

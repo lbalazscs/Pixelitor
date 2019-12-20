@@ -19,7 +19,6 @@ package com.jhlabs.image;
 import java.awt.image.BufferedImage;
 
 public abstract class TransferFilter extends PointFilter {
-
     protected int[] rTable, gTable, bTable;
     protected boolean initialized = false;
 
@@ -41,9 +40,10 @@ public abstract class TransferFilter extends PointFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        if (!initialized)
+        if (!initialized) {
             initialize();
-        return super.filter( src, dst );
+        }
+        return super.filter(src, dst);
     }
 
     protected void initialize() {
@@ -53,24 +53,25 @@ public abstract class TransferFilter extends PointFilter {
 
     protected int[] makeTable() {
         int[] table = new int[256];
-        for (int i = 0; i < 256; i++)
-            table[i] = PixelUtils.clamp( (int)( 255 * transferFunction( i / 255.0f ) ) );
+        for (int i = 0; i < 256; i++) {
+            table[i] = PixelUtils.clamp((int) (255 * transferFunction(i / 255.0f)));
+        }
         return table;
     }
 
-    protected float transferFunction( float v ) {
+    protected float transferFunction(float v) {
         return 0;
     }
 
     public int[] getLUT() {
-        if (!initialized)
+        if (!initialized) {
             initialize();
+        }
         int[] lut = new int[256];
-        for ( int i = 0; i < 256; i++ ) {
-            lut[i] = filterRGB( 0, 0, (i << 24) | (i << 16) | (i << 8) | i );
+        for (int i = 0; i < 256; i++) {
+            lut[i] = filterRGB(0, 0, (i << 24) | (i << 16) | (i << 8) | i);
         }
         return lut;
     }
-    
 }
 

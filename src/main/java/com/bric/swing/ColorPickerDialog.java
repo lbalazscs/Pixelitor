@@ -33,70 +33,72 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
-/** This wraps a <code>ColorPicker</code> in a simple dialog with "OK" and "Cancel" options.
+/**
+ * This wraps a <code>ColorPicker</code> in a simple dialog with "OK" and "Cancel" options.
  * <P>(This object is used by the static calls in <code>ColorPicker</code> to show a dialog.)
  * <br><IMG SRC="https://javagraphics.java.net/resources/colorpicker.png" alt="Screenshot of ColorPickerDialog">
- * 
+ *
  * @see ColorPicker
  * @see ColorPickerPanel
- *
  */
 class ColorPickerDialog extends JDialog {
-    
-	private static final long serialVersionUID = 2L;
-	
-	ColorPicker cp;
-	int alpha;
-	Color returnValue = null;
-	ActionListener okListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			returnValue = cp.getColor();
-		}
-	};
-	DialogFooter footer;
+    private static final long serialVersionUID = 2L;
+
+    private ColorPicker cp;
+    private Color returnValue = null;
+    private final ActionListener okListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            returnValue = cp.getColor();
+        }
+    };
 
     public ColorPickerDialog(Frame owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
-		super(owner);
+        super(owner);
         initialize(owner, color, includeOpacity, adjustmentListener);
     }
 
     public ColorPickerDialog(Dialog owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
-		super(owner);
+        super(owner);
         initialize(owner, color, includeOpacity, adjustmentListener);
     }
 
     private void initialize(Component owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
-		cp = new ColorPicker(true,includeOpacity);
-		setModal(true);
-		setResizable(false);
-		getContentPane().setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.gridx = 0; c.gridy = 0;
-		c.weightx = 1; c.weighty = 1; c.fill = GridBagConstraints.BOTH;
-		c.gridwidth = GridBagConstraints.REMAINDER;
-		c.insets = new Insets(10,10,10,10);
-		getContentPane().add(cp,c);
-		c.gridy++;
-		footer = DialogFooter.createDialogFooter(new JComponent[] {}, 
-				DialogFooter.OK_CANCEL_OPTION, DialogFooter.OK_OPTION, EscapeKeyBehavior.TRIGGERS_CANCEL);	
-		c.gridy++; c.weighty = 0;
-		getContentPane().add(footer, c);
-		cp.setRGB(color.getRed(), color.getGreen(), color.getBlue());
-		cp.setOpacity( color.getAlpha() );
-		alpha = color.getAlpha();
-		pack();
+        cp = new ColorPicker(true, includeOpacity);
+        setModal(true);
+        setResizable(false);
+        getContentPane().setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.insets = new Insets(10, 10, 10, 10);
+        getContentPane().add(cp, c);
+        c.gridy++;
+        DialogFooter footer = DialogFooter.createDialogFooter(new JComponent[]{},
+                DialogFooter.OK_CANCEL_OPTION, DialogFooter.OK_OPTION, EscapeKeyBehavior.TRIGGERS_CANCEL);
+        c.gridy++;
+        c.weighty = 0;
+        getContentPane().add(footer, c);
+        cp.setRGB(color.getRed(), color.getGreen(), color.getBlue());
+        cp.setOpacity(color.getAlpha());
+        pack();
         setLocationRelativeTo(owner);
-		
-		footer.getButton(DialogFooter.OK_OPTION).addActionListener(okListener);
+
+        footer.getButton(DialogFooter.OK_OPTION).addActionListener(okListener);
 
         cp.setupAdjListener(adjustmentListener);
-	}
-	
-	/** @return the color committed when the user clicked 'OK'.  Note this returns <code>null</code>
-	 * if the user canceled this dialog, or exited via the close decoration.
-	 */
-	public Color getColor() {
-		return returnValue;
-	}
+    }
+
+    /**
+     * @return the color committed when the user clicked 'OK'.  Note this returns <code>null</code>
+     * if the user canceled this dialog, or exited via the close decoration.
+     */
+    public Color getColor() {
+        return returnValue;
+    }
 }
 

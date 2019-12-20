@@ -20,7 +20,6 @@ package com.jhlabs.image;
  * A colormap which interpolates linearly between two colors.
  */
 public class LinearColormap implements Colormap {
-
     private int color1;
     private int color2;
 
@@ -87,6 +86,5 @@ public class LinearColormap implements Colormap {
     @Override
     public int getColor(float v) {
         return ImageMath.mixColors(ImageMath.clamp(v, 0, 1.0f), color1, color2);
-	}
-
+    }
 }

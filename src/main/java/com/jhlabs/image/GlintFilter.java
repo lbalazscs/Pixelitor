@@ -22,11 +22,12 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * A filter which renders "glints" on bright parts of the image.
  */
 public class GlintFilter extends AbstractBufferedImageOp {
-
     private float threshold = 1.0f;
     private int length = 5;
     private float blur = 0.0f;
@@ -211,7 +212,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
             }
         }
 
-        BufferedImage mask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage mask = new BufferedImage(width, height, TYPE_INT_ARGB);
 
         int threshold3 = (int) (threshold * 3 * 255);
         for (int y = 0; y < height; y++) {
@@ -324,6 +325,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         }
     }
 
+    @Override
     public String toString() {
         return "Effects/Glint...";
     }

@@ -28,7 +28,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * A filter which simulates underwater caustics. This can be animated to get a bottom-of-the-swimming-pool effect.
  */
 public class CausticsFilter extends WholeImageFilter {
-
     private float scale = 32;
     //    private float angle = 0.0f;
     private int brightness = 10;
@@ -407,8 +406,8 @@ public class CausticsFilter extends WholeImageFilter {
         return f;
     }
 
+    @Override
     public String toString() {
         return "Texture/Caustics...";
     }
-
 }

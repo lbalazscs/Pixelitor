@@ -22,7 +22,6 @@ import java.awt.Rectangle;
  * A class to emboss an image.
  */
 public class EmbossFilter extends WholeImageFilter {
-
     private static final float pixelScale = 255.9f;
 
     private float azimuth = 135.0f * ImageMath.PI / 180.0f, elevation = 30.0f * ImageMath.PI / 180.0f;
@@ -50,7 +49,7 @@ public class EmbossFilter extends WholeImageFilter {
     }
 
     public void setBumpHeight(float bumpHeight) {
-        this.width45 = 3 * bumpHeight;
+        width45 = 3 * bumpHeight;
     }
 
     public float getBumpHeight() {
@@ -139,8 +138,8 @@ public class EmbossFilter extends WholeImageFilter {
         return outPixels;
     }
 
+    @Override
     public String toString() {
         return "Stylize/Emboss...";
     }
-
 }

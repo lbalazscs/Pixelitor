@@ -17,6 +17,6 @@ limitations under the License.
 package com.jhlabs.math;
 
 public interface Function2D {
-    public float evaluate(float x, float y);
+    float evaluate(float x, float y);
 }
 

@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class BurnComposite extends RGBComposite {
-
     public BurnComposite(float alpha) {
         super(alpha);
     }
@@ -51,18 +50,21 @@ public final class BurnComposite extends RGBComposite {
                 int dia = dst[i + 3];
                 int dor, dog, dob;
 
-                if (dir != 255)
-                    dor = clamp(255 - ((255 - sr << 8) / (dir + 1)));
-                else
+                if (dir != 255) {
+                    dor = clamp(255 - (((255 - sr) << 8) / (dir + 1)));
+                } else {
                     dor = sr;
-                if (dig != 255)
-                    dog = clamp(255 - ((255 - sg << 8) / (dig + 1)));
-                else
+                }
+                if (dig != 255) {
+                    dog = clamp(255 - (((255 - sg) << 8) / (dig + 1)));
+                } else {
                     dog = sg;
-                if (dib != 255)
+                }
+                if (dib != 255) {
                     dob = clamp(255 - ((255 - sb << 8) / (dib + 1)));
-                else
+                } else {
                     dob = sb;
+                }
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
@@ -74,5 +76,4 @@ public final class BurnComposite extends RGBComposite {
             }
         }
     }
-
 }

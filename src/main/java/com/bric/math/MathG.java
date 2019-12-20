@@ -34,7 +34,6 @@ package com.bric.math;
  * of java.lang.Math and com.bric.math.MathG.
  */
 public abstract class MathG {
-
     /**
      * Finds the closest integer that is less than or equal to the argument as a double.
      * <BR>Warning: do not use an argument greater than 1e10, or less than 1e-10.
@@ -42,7 +41,7 @@ public abstract class MathG {
      * @param d the value to calculate the floor of.
      * @return the closest integer that is less than the argument as a double.
      */
-    public static final double floorDouble(double d) {
+    public static double floorDouble(double d) {
         int id = (int) d;
         return d == id || d > 0 ? id : id - 1;
     }
@@ -54,7 +53,7 @@ public abstract class MathG {
      * @param d the value to calculate the floor of.
      * @return the closest integer that is less than the argument as an int.
      */
-    public static final int floorInt(double d) {
+    public static int floorInt(double d) {
         int id = (int) d;
         return d == id || d > 0 ? id : id - 1;
     }
@@ -66,12 +65,12 @@ public abstract class MathG {
      * @param d the value to round.
      * @return the closest integer that is less than the argument.
      */
-    public static final int roundInt(double d) {
+    public static int roundInt(double d) {
         int i;
         if (d >= 0) {
-            i = (int) (d + .5);
+            i = (int) (d + 0.5);
         } else {
-            i = (int) (d - .5);
+            i = (int) (d - 0.5);
         }
         return i;
     }
@@ -83,12 +82,12 @@ public abstract class MathG {
      * @param d the value to round.
      * @return the closest integer that is less than the argument as a double.
      */
-    public static final double roundDouble(double d) {
+    public static double roundDouble(double d) {
         int i;
         if (d >= 0) {
-            i = (int) (d + .5);
+            i = (int) (d + 0.5);
         } else {
-            i = (int) (d - .5);
+            i = (int) (d - 0.5);
         }
         return i;
     }
@@ -100,9 +99,9 @@ public abstract class MathG {
      * @param d the value to calculate the ceil of.
      * @return the closest integer that is greater than the argument as an int.
      */
-    public static final int ceilInt(double d) {
+    public static int ceilInt(double d) {
         int id = (int) d;
-        return d == id || d < 0 ? id : -((int) (-d)) + 1;
+        return d == id || d < 0 ? id : -((int) -d) + 1;
     }
 
     /**
@@ -112,9 +111,9 @@ public abstract class MathG {
      * @param d the value to calculate the ceil of.
      * @return the closest integer that is greater than the argument as a double.
      */
-    public static final double ceilDouble(double d) {
+    public static double ceilDouble(double d) {
         int id = (int) d;
-        return d == id || d < 0 ? id : -((int) (-d)) + 1;
+        return d == id || d < 0 ? id : -((int) -d) + 1;
     }
 
     // Laszlo: cut out the rest to avoid importing additional classes

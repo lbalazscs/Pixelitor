@@ -19,7 +19,6 @@ package com.jhlabs.image;
 import java.awt.image.BufferedImage;
 
 public class OffsetFilter extends TransformFilter {
-
     private int width, height;
     private int xOffset, yOffset;
     private boolean wrap;
@@ -107,8 +106,8 @@ public class OffsetFilter extends TransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        this.width = src.getWidth();
-        this.height = src.getHeight();
+        width = src.getWidth();
+        height = src.getHeight();
 
         if (useRelative) {
             xOffset = (int) (width * relativeX);
@@ -128,6 +127,7 @@ public class OffsetFilter extends TransformFilter {
         return super.filter(src, dst);
     }
 
+    @Override
     public String toString() {
         return "Distort/Offset...";
     }

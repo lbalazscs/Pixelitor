@@ -21,15 +21,16 @@ import net.jafama.FastMath;
 
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * A filter which use FFTs to simulate lens blur on an image.
  */
 public class LensBlurFilter extends AbstractBufferedImageOp {
-
     private float radius = 10;
     private float bloom = 2;
     private float bloomThreshold = 192;
-    private final float angle = 0;
+    private static final float angle = 0;
     private int sides = 5;
 
     public LensBlurFilter(String filterName) {
@@ -134,7 +135,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         tileHeight = iradius < 32 ? Math.min(128, height + 2 * iradius) : Math.min(256, height + 2 * iradius);
 
         if (dst == null) {
-            dst = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            dst = new BufferedImage(width, height, TYPE_INT_ARGB);
         }
 
         while (rows < tileHeight) {
@@ -369,7 +370,7 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
                     th = height - ty;
                 }
 
-                dst.setRGB(tx, ty, tw, th, rgb, iradius * w + iradius, w );
+                dst.setRGB(tx, ty, tw, th, rgb, iradius * w + iradius, w);
                 // setRGB(dst, tx, ty, tw, th, rgb);
             }
             pt.unitDone();
@@ -379,7 +380,8 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
-	public String toString() {
-		return "Blur/Lens Blur...";
-	}
+    @Override
+    public String toString() {
+        return "Blur/Lens Blur...";
+    }
 }

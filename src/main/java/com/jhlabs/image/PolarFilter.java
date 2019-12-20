@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
  * A filter which distorts and image by performing coordinate conversions between rectangular and polar coordinates.
  */
 public class PolarFilter extends TransformFilter {
-
     private float zoom;
     private float angle;
 
@@ -61,8 +60,8 @@ public class PolarFilter extends TransformFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        this.width = src.getWidth();
-        this.height = src.getHeight();
+        width = src.getWidth();
+        height = src.getHeight();
 
         centreX = width * relativeCentreX;
         centreY = height * relativeCentreY;
@@ -198,7 +197,7 @@ public class PolarFilter extends TransformFilter {
                 r = radius * y / height;
                 r /= zoom;
 
-                float nx = -r * (float) FastMath.sin(theta2) ;
+                float nx = -r * (float) FastMath.sin(theta2);
                 float ny = r * (float) FastMath.cos(theta2);
 
                 if (theta >= 1.5f * ImageMath.PI) {
@@ -259,9 +258,10 @@ public class PolarFilter extends TransformFilter {
         return relativeCentreY;
     }
 
+    @Override
     public String toString() {
-		return "Distort/Polar Coordinates...";
-	}
+        return "Distort/Polar Coordinates...";
+    }
 
     public void setAngle(double angle) {
         this.angle = (float) angle;

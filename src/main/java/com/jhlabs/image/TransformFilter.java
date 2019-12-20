@@ -88,7 +88,6 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
      * The input image rectangle.
      */
 //    protected Rectangle originalSpace;
-
     protected TransformFilter(String filterName) {
         super(filterName);
     }
@@ -166,7 +165,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
 //            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(transformedSpace.width, transformedSpace.height), dstCM.isAlphaPremultiplied(), null);
-            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(0, 0), dstCM.isAlphaPremultiplied(), null);
+            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(0, 0), dstCM
+                    .isAlphaPremultiplied(), null);
         }
 //		WritableRaster dstRaster = dst.getRaster();
 
@@ -405,7 +405,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
                     case WRAP_AROUND:
                         return inPixels[(ImageMath.mod(srcY, srcHeight) * srcWidth) + ImageMath.mod(srcX, srcWidth)];
                     case REPEAT_EDGE_PIXELS:
-                        return inPixels[(ImageMath.clamp(srcY, 0, srcHeight - 1) * srcWidth) + ImageMath.clamp(srcX, 0, srcWidth - 1)];
+                        return inPixels[(ImageMath.clamp(srcY, 0, srcHeight - 1) * srcWidth) + ImageMath
+                                .clamp(srcX, 0, srcWidth - 1)];
                     case REFLECT:
                         int reflectedX = ImageMath.reflectTriangle(srcX, srcWidth);
                         int reflectedY = ImageMath.reflectTriangle(srcY, srcHeight);
@@ -448,5 +449,4 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
             }
         }
     }
-
 }

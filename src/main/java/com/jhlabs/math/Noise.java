@@ -24,7 +24,6 @@ import java.util.Random;
  * Perlin Noise functions
  */
 public class Noise implements Function1D, Function2D, Function3D {
-
     private static final Random randomGenerator = new Random();
 
     public static void reseed() {
@@ -76,8 +75,9 @@ public class Noise implements Function1D, Function2D, Function3D {
     public static float turbulence2(float x, float y, float octaves) {
         float t = 0.0f;
 
-        for (float f = 1.0f; f <= octaves; f *= 2)
+        for (float f = 1.0f; f <= octaves; f *= 2) {
             t += Math.abs(noise2(f * x, f * y)) / f;
+        }
         return t;
     }
 
@@ -104,11 +104,11 @@ public class Noise implements Function1D, Function2D, Function3D {
     public static float turbulence3(float x, float y, float z, float octaves) {
         float t = 0.0f;
 
-        for (float f = 1.0f; f <= octaves; f *= 2)
+        for (float f = 1.0f; f <= octaves; f *= 2) {
             t += Math.abs(noise3(f * x, f * y, f * z)) / f;
+        }
         return t;
     }
-
 
 
     /**
@@ -143,7 +143,7 @@ public class Noise implements Function1D, Function2D, Function3D {
      * A noise function with a "period" of 2 PI and values between -1 and 1
      */
     public static float sinLikeNoise1(float x) {
-        return 2 * Noise.noise1(x / ImageMath.PI);
+        return 2 * noise1(x / ImageMath.PI);
     }
 
     /**
@@ -201,7 +201,7 @@ public class Noise implements Function1D, Function2D, Function3D {
         b = lerp(sx, u, v);
 
         float rv = 1.5f * lerp(sy, a, b);
-        if (rv == Float.NaN) {
+        if (Float.isNaN(rv)) {
             // it seems that this is very rarely, but happening when rendering marble
             System.out.printf("Noise::noise2: failed for x = %.5f, y = %.5f%n", x, y);
             rv = 0.0f;
@@ -209,7 +209,6 @@ public class Noise implements Function1D, Function2D, Function3D {
 
         return rv;
     }
-
 
 
     /**
@@ -222,7 +221,8 @@ public class Noise implements Function1D, Function2D, Function3D {
      */
     public static float noise3(float x, float y, float z) {
         int bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
-        float rx0, rx1, ry0, ry1, rz0, rz1, q[], sy, sz, a, b, c, d, t, u, v;
+        float rx0, rx1, ry0, ry1, rz0, rz1, sy, sz, a, b, c, d, t, u, v;
+        float[] q;
         int i, j;
 
 //        if (start) {
@@ -320,12 +320,14 @@ public class Noise implements Function1D, Function2D, Function3D {
 
             g1[i] = (float) ((random() % (B + B)) - B) / B;
 
-            for (j = 0; j < 2; j++)
+            for (j = 0; j < 2; j++) {
                 g2[i][j] = (float) ((random() % (B + B)) - B) / B;
+            }
             normalize2(g2[i]);
 
-            for (j = 0; j < 3; j++)
+            for (j = 0; j < 3; j++) {
                 g3[i][j] = (float) ((random() % (B + B)) - B) / B;
+            }
             normalize3(g3[i]);
         }
 
@@ -338,10 +340,12 @@ public class Noise implements Function1D, Function2D, Function3D {
         for (i = 0; i < B + 2; i++) {
             p[B + i] = p[i];
             g1[B + i] = g1[i];
-            for (j = 0; j < 2; j++)
+            for (j = 0; j < 2; j++) {
                 g2[B + i][j] = g2[i][j];
-            for (j = 0; j < 3; j++)
+            }
+            for (j = 0; j < 3; j++) {
                 g3[B + i][j] = g3[i][j];
+            }
         }
     }
 
@@ -351,8 +355,9 @@ public class Noise implements Function1D, Function2D, Function3D {
      * normalising the function.
      */
     public static float[] findRange(Function1D f, float[] minmax) {
-        if (minmax == null)
+        if (minmax == null) {
             minmax = new float[2];
+        }
         float min = 0, max = 0;
         // Some random numbers here...
         for (float x = -100; x < 100; x += 1.27139) {
@@ -371,8 +376,9 @@ public class Noise implements Function1D, Function2D, Function3D {
      * normalising the function.
      */
     public static float[] findRange(Function2D f, float[] minmax) {
-        if (minmax == null)
+        if (minmax == null) {
             minmax = new float[2];
+        }
         float min = 0, max = 0;
         // Some random numbers here...
         for (float y = -100; y < 100; y += 10.35173) {
@@ -380,11 +386,10 @@ public class Noise implements Function1D, Function2D, Function3D {
                 float n = f.evaluate(x, y);
                 min = Math.min(min, n);
                 max = Math.max(max, n);
-			}
-		}
-		minmax[0] = min;
-		minmax[1] = max;
-		return minmax;
-	}
-
+            }
+        }
+        minmax[0] = min;
+        minmax[1] = max;
+        return minmax;
+    }
 }

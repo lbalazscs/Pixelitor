@@ -26,6 +26,8 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.GeneralPath;
 
+import static java.lang.Math.PI;
+
 /**
  * This applies the {@link CharcoalEffect} to another <code>Stroke</code>.
  * <p>
@@ -37,9 +39,10 @@ import java.awt.geom.GeneralPath;
  * complex.
  */
 public class CharcoalStroke implements FilteredStroke {
-    Stroke stroke;
-    float crackSize, angle;
-    int randomSeed;
+    private final Stroke stroke;
+    private final float crackSize;
+    private final float angle;
+    private final int randomSeed;
 
     /**
      * Create a new <code>CharcoalStroke</code> built on top of
@@ -91,7 +94,7 @@ public class CharcoalStroke implements FilteredStroke {
      * @param crackSize a value from 0-1 indicating how deep the crack should be.
      */
     public CharcoalStroke(float width, float crackSize) {
-        this(new BasicStroke(width), crackSize, (float) (Math.PI / 4), 0);
+        this(new BasicStroke(width), crackSize, (float) (PI / 4), 0);
     }
 
     /**
@@ -115,17 +118,20 @@ public class CharcoalStroke implements FilteredStroke {
      *                  of another <code>CharcoalStroke</code>, because they are very
      *                  complex.
      */
+    @Override
     public FilteredStroke deriveStroke(Stroke newStroke) {
         return new CharcoalStroke(newStroke, crackSize, angle, randomSeed);
     }
 
+    @Override
     public Shape createStrokedShape(Shape p) {
         Shape shape = stroke.createStrokedShape(p);
         if (crackSize == 0) {
             return shape;
         }
 
-        GeneralPath newShape = new GeneralPath(shape.getPathIterator(null).getWindingRule());
+        GeneralPath newShape = new GeneralPath(
+                shape.getPathIterator(null).getWindingRule());
         GeneralPathWriter writer = new GeneralPathWriter(newShape);
 
         float maxDepth = Float.MAX_VALUE;
@@ -144,6 +150,7 @@ public class CharcoalStroke implements FilteredStroke {
      * Returns the underlying stroke this <code>CharcoalStroke</code> is layered
      * on top of.
      */
+    @Override
     public Stroke getStroke() {
         return stroke;
     }

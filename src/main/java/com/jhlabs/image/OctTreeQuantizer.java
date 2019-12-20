@@ -28,7 +28,6 @@ import java.util.List;
  * (i.e. not completely at random) when I get the time.
  */
 public class OctTreeQuantizer implements Quantizer {
-
     /**
      * The greatest depth the tree is allowed to reach
      */
@@ -59,11 +58,13 @@ public class OctTreeQuantizer implements Quantizer {
             if (count == 0) {
                 System.out.println(index + ": count=" + count);
             } else {
-                System.out.println(index + ": count=" + count + " red=" + (totalRed / count) + " green=" + (totalGreen / count) + " blue=" + (totalBlue / count));
+                System.out
+                        .println(index + ": count=" + count + " red=" + (totalRed / count) + " green=" + (totalGreen / count) + " blue=" + (totalBlue / count));
             }
             for (int i = 0; i < 8; i++) {
-                if (leaf[i] != null)
+                if (leaf[i] != null) {
                     leaf[i].list(s, level + 2);
+                }
             }
         }
     }
@@ -98,6 +99,7 @@ public class OctTreeQuantizer implements Quantizer {
 
     /**
      * Add pixels to the quantizer.
+     *
      * @param pixels the array of ARGB pixels
      * @param offset the offset into the array
      * @param count  the count of pixels
@@ -112,7 +114,7 @@ public class OctTreeQuantizer implements Quantizer {
             if (colors > reduceColors) {
                 reduceTree(reduceColors);
             }
-            if(i % workUnit == 0) {
+            if (i % workUnit == 0) {
                 pt.unitDone();
             }
         }
@@ -306,11 +308,10 @@ public class OctTreeQuantizer implements Quantizer {
                 if (node.leaf[i] != null) {
                     node.index = index;
                     index = buildColorTable(node.leaf[i], table, index);
-				}
-			}
-		}
-		return index;
-	}
-
+                }
+            }
+        }
+        return index;
+    }
 }
 

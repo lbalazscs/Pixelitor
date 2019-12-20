@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class ScreenComposite extends RGBComposite {
-
     public ScreenComposite(float alpha) {
         super(alpha);
     }
@@ -68,5 +67,4 @@ public final class ScreenComposite extends RGBComposite {
             }
         }
     }
-
 }

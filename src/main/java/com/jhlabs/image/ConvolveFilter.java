@@ -30,21 +30,20 @@ import java.awt.image.Kernel;
  * @author Jerry Huxtable
  */
 public class ConvolveFilter extends AbstractBufferedImageOp {
-
     /**
      * Treat pixels off the edge as zero.
      */
-    public static int ZERO_EDGES = 0;
+    public static final int ZERO_EDGES = 0;
 
     /**
      * Clamp pixels off the edge to the nearest edge.
      */
-    public static int CLAMP_EDGES = 1;
+    public static final int CLAMP_EDGES = 1;
 
     /**
      * Wrap pixels off the edge to the opposite edge.
      */
-    public static int WRAP_EDGES = 2;
+    public static final int WRAP_EDGES = 2;
 
     /**
      * The convolution kernel.
@@ -150,7 +149,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @see #getUseAlpha
      */
     public void setUseAlpha(boolean useAlpha) {
-        this.alpha = useAlpha;
+        alpha = useAlpha;
     }
 
     /**
@@ -213,7 +212,8 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         if (dstCM == null) {
             dstCM = src.getColorModel();
         }
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM.isAlphaPremultiplied(), null);
+        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight()), dstCM
+                .isAlphaPremultiplied(), null);
     }
 
     @Override
@@ -449,18 +449,19 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
                         r += f * ((rgb >> 16) & 0xff);
                         g += f * ((rgb >> 8) & 0xff);
                         b += f * (rgb & 0xff);
-					}
-				}
-				int ia = alpha ? PixelUtils.clamp((int)(a+0.5)) : 0xff;
-				int ir = PixelUtils.clamp((int)(r+0.5));
-				int ig = PixelUtils.clamp((int)(g+0.5));
-				int ib = PixelUtils.clamp((int)(b+0.5));
-				outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
-			}
-		}
-	}
+                    }
+                }
+                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
+                int ir = PixelUtils.clamp((int) (r + 0.5));
+                int ig = PixelUtils.clamp((int) (g + 0.5));
+                int ib = PixelUtils.clamp((int) (b + 0.5));
+                outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+            }
+        }
+    }
 
-	public String toString() {
-		return "Blur/Convolve...";
-	}
+    @Override
+    public String toString() {
+        return "Blur/Convolve...";
+    }
 }

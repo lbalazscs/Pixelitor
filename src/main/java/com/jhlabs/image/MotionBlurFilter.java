@@ -98,8 +98,8 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
      */
     @Override
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -362,6 +362,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
         }
     }
 
+    @Override
     public String toString() {
         return "Blur/Motion Blur...";
     }

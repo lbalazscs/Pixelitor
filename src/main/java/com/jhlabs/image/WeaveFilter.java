@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 public class WeaveFilter extends PointFilter {
-
     private float xWidth = 16;
     private float yWidth = 16;
     private float xGap = 6;
@@ -108,8 +107,8 @@ public class WeaveFilter extends PointFilter {
 
     private void setCrossings(int[][] matrix) {
         this.matrix = matrix;
-        this.cols = matrix.length;
-        this.rows = matrix.length;
+        cols = matrix.length;
+        rows = matrix.length;
     }
 
     public int[][] getCrossings() {
@@ -215,10 +214,10 @@ public class WeaveFilter extends PointFilter {
         return v;
     }
 
+    @Override
     public String toString() {
         return "Texture/Weave...";
     }
-
 }
 
 

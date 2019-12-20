@@ -21,10 +21,12 @@ package com.bric.image.transition;
 
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
-/** This is a series of random bars that increase in frequency, slowly revealing
+/**
+ * This is a series of random bars that increase in frequency, slowly revealing
  * the new frame. Here are playback samples:
  * <p><table summary="Sample Animations of BarsTransition2D" cellspacing="50" border="0"><tr>
  * <td align="center">
@@ -44,119 +46,120 @@ import java.util.Vector;
  * <p>Bars Vertical
  * </td>
  * </tr></table>
- *
  */
 public class BarsTransition2D extends Transition2D {
-	
-	/** This public static method is used by the 
-	 * {@link com.bric.image.transition.Transition2DDemoHelper}
-	 * class to create sample animations of this transition.
-	 * @return the transitions that should be used to demonstrate this
-	 * transition.
-	 */
-	public static Transition[] getDemoTransitions() {
-		return new Transition[] {
-				new BarsTransition2D(HORIZONTAL, true),
-				new BarsTransition2D(HORIZONTAL, false),
-				new BarsTransition2D(VERTICAL, true),
-				new BarsTransition2D(VERTICAL, false)
-		};
-	}
-	
-	/** Keep a truly random seed; constantly creating a new
-	 * Random object with the current time as its seed created
-	 * several non-random frames generated in the same millisecond
-	 * 
-	 */
-	static Random random = new Random(System.currentTimeMillis());
-	
-	int type;
-	boolean isRandom;
-	
-	/** Creates a randomized horizontal BarsTransition2D
-	 * 
-	 */
-	public BarsTransition2D() {
-		this(HORIZONTAL,true);
-	}
-	
-	/** Creates a BarsTransition2D.
-	 * 
-	 * @param type must be HORIZONTAL or VERTICAL
-	 * @param random whether each frame is 100% random, or whether the
-	 * bars are cumulative as the transition progresses.
-	 */
-	public BarsTransition2D(int type,boolean random) {
-		if(!(type==HORIZONTAL || type==VERTICAL)) {
-			throw new IllegalArgumentException("Type must be HORIZONTAL or VERTICAL.");
-		}
-		this.type = type;
-		this.isRandom = random;
-	}
+    /**
+     * This public static method is used by the
+     * {@link com.bric.image.transition.Transition2DDemoHelper}
+     * class to create sample animations of this transition.
+     *
+     * @return the transitions that should be used to demonstrate this
+     * transition.
+     */
+    public static Transition[] getDemoTransitions() {
+        return new Transition[]{
+                new BarsTransition2D(HORIZONTAL, true),
+                new BarsTransition2D(HORIZONTAL, false),
+                new BarsTransition2D(VERTICAL, true),
+                new BarsTransition2D(VERTICAL, false)
+        };
+    }
 
-	@Override
-	public Transition2DInstruction[] getInstructions(float progress,
-			Dimension size) {
-		boolean[] k;
-		if(type==HORIZONTAL) {
-			k = new boolean[size.height];
-		} else {
-			k = new boolean[size.width];
-		}
-		Random r;
-		if(isRandom) {
-			r = random;
-		} else {
-			r = new Random(0);
-		}
-		for(int a = 0; a<k.length; a++) {
-			k[a] = r.nextFloat()>progress;
-		}
-		Vector<Transition2DInstruction> v = new Vector<Transition2DInstruction>();
-		v.add(new ImageInstruction(false));
-		if(type==HORIZONTAL) {
-			int a = 0;
-			while(a<k.length) {
-				int run = 0;
-				while(a+run<k.length && k[a+run]) {
-					run++;
-				}
-				if(run!=0) {
-					Rectangle2D r2 = new Rectangle2D.Float(0,a,size.width,run);
-					v.add(new ImageInstruction(true, null, r2));
-					a+=run;
-				}
-				a++;
-			}
-		} else {
-			int a = 0;
-			while(a<k.length) {
-				int run = 0;
-				while(a+run<k.length && k[a+run]) {
-					run++;
-				}
-				if(run!=0) {
-					Rectangle2D r2 = new Rectangle2D.Float(a,0,run,size.height);
-					v.add(new ImageInstruction(true, null, r2));
-					a+=run;
-				}
-				a++;
-			}
-		}
-		return v.toArray(new Transition2DInstruction[v.size()]);
-	}
-	
-	@Override
-	public String toString() {
-		if(type==HORIZONTAL) {
-			if(isRandom) {
-				return "Bars Horizontal Random";
-			}
-			return "Bars Horizontal";
-		}
-		if(isRandom) {
-			return "Bars Vertical Random";
-		}
-		return "Bars Vertical";
-	}
+    /**
+     * Keep a truly random seed; constantly creating a new
+     * Random object with the current time as its seed created
+     * several non-random frames generated in the same millisecond
+     */
+    private static final Random random = new Random(System.currentTimeMillis());
+
+    private final int type;
+    private final boolean isRandom;
+
+    /**
+     * Creates a randomized horizontal BarsTransition2D
+     */
+    public BarsTransition2D() {
+        this(HORIZONTAL, true);
+    }
+
+    /**
+     * Creates a BarsTransition2D.
+     *
+     * @param type   must be HORIZONTAL or VERTICAL
+     * @param random whether each frame is 100% random, or whether the
+     *               bars are cumulative as the transition progresses.
+     */
+    public BarsTransition2D(int type, boolean random) {
+        if (!(type == HORIZONTAL || type == VERTICAL)) {
+            throw new IllegalArgumentException("Type must be HORIZONTAL or VERTICAL.");
+        }
+        this.type = type;
+        this.isRandom = random;
+    }
+
+    @Override
+    public Transition2DInstruction[] getInstructions(float progress,
+                                                     Dimension size) {
+        boolean[] k;
+        if (type == HORIZONTAL) {
+            k = new boolean[size.height];
+        } else {
+            k = new boolean[size.width];
+        }
+        Random r;
+        if (isRandom) {
+            r = random;
+        } else {
+            r = new Random(0);
+        }
+        for (int a = 0; a < k.length; a++) {
+            k[a] = r.nextFloat() > progress;
+        }
+        List<Transition2DInstruction> v = new ArrayList<>();
+        v.add(new ImageInstruction(false));
+        if (type == HORIZONTAL) {
+            int a = 0;
+            while (a < k.length) {
+                int run = 0;
+                while (a + run < k.length && k[a + run]) {
+                    run++;
+                }
+                if (run != 0) {
+                    Rectangle2D r2 = new Rectangle2D.Float(0, a, size.width, run);
+                    v.add(new ImageInstruction(true, null, r2));
+                    a += run;
+                }
+                a++;
+            }
+        } else {
+            int a = 0;
+            while (a < k.length) {
+                int run = 0;
+                while (a + run < k.length && k[a + run]) {
+                    run++;
+                }
+                if (run != 0) {
+                    Rectangle2D r2 = new Rectangle2D.Float(a, 0, run, size.height);
+                    v.add(new ImageInstruction(true, null, r2));
+                    a += run;
+                }
+                a++;
+            }
+        }
+        return v.toArray(new Transition2DInstruction[v.size()]);
+    }
+
+    @Override
+    public String toString() {
+        if (type == HORIZONTAL) {
+            if (isRandom) {
+                return "Bars Horizontal Random";
+            }
+            return "Bars Horizontal";
+        }
+        if (isRandom) {
+            return "Bars Vertical Random";
+        }
+        return "Bars Vertical";
+    }
 }

@@ -149,7 +149,7 @@ public class StampFilter extends PointFilter {
                 return src;
             }
             dst = new BoxBlurFilter(radius, radius, 3, filterName).filter(src, null);
-        } else if(blurMethod == GAUSSIAN_BLUR) {
+        } else if (blurMethod == GAUSSIAN_BLUR) {
             dst = new GaussianFilter(radius, filterName).filter(src, null);
         } else {
             throw new IllegalStateException("blurMethod = " + blurMethod);
@@ -169,11 +169,12 @@ public class StampFilter extends PointFilter {
         int l = r + g + b;
         float f = ImageMath.smoothStep(lowerThreshold3, upperThreshold3, l);
         return ImageMath.mixColors(f, black, white);
-	}
+    }
 
-	public String toString() {
-		return "Stylize/Stamp...";
-	}
+    @Override
+    public String toString() {
+        return "Stylize/Stamp...";
+    }
 
     public void setBlurMethod(int blurMethod) {
         this.blurMethod = blurMethod;

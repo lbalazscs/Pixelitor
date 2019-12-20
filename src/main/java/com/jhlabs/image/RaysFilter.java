@@ -20,11 +20,12 @@ import pixelitor.utils.ProgressTracker;
 
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * A filter which produces the effect of light rays shining out of an image.
  */
 public class RaysFilter extends MotionBlurOp {
-
     //    private float opacity = 1.0f;
     private float threshold = 0.0f;
     private float strength = 0.5f;
@@ -143,7 +144,7 @@ public class RaysFilter extends MotionBlurOp {
         int[] srcPixels = new int[width];
 
         pt = createProgressTracker(3);
-        BufferedImage rays = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage rays = new BufferedImage(width, height, TYPE_INT_ARGB);
 
         int threshold3 = (int) (threshold * 3 * 255);
         for (int y = 0; y < height; y++) {
@@ -204,7 +205,8 @@ public class RaysFilter extends MotionBlurOp {
         return rays;
     }
 
-	public String toString() {
-		return "Stylize/Rays...";
-	}
+    @Override
+    public String toString() {
+        return "Stylize/Rays...";
+    }
 }

@@ -25,7 +25,6 @@ import java.awt.image.ColorModel;
  * to do their stuff.
  */
 public abstract class WholeImageFilter extends AbstractBufferedImageOp {
-
     /**
      * The output image bounds.
      */
@@ -56,7 +55,9 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
 
         if (dst == null) {
             ColorModel dstCM = src.getColorModel();
-            dst = new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(transformedSpace.width, transformedSpace.height), dstCM.isAlphaPremultiplied(), null);
+            dst = new BufferedImage(dstCM, dstCM
+                    .createCompatibleWritableRaster(transformedSpace.width, transformedSpace.height), dstCM
+                    .isAlphaPremultiplied(), null);
         }
 //		WritableRaster dstRaster = dst.getRaster();
 
@@ -84,6 +85,6 @@ public abstract class WholeImageFilter extends AbstractBufferedImageOp {
      * @param transformedSpace the output bounds
      * @return the output pixels
      */
-    protected abstract int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace );
+    protected abstract int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace);
 }
 

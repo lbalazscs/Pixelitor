@@ -20,18 +20,17 @@
  */
 package org.jdesktop.swingx;
 
-import java.awt.Component;
-import java.awt.HeadlessException;
-import java.util.prefs.Preferences;
-
-import javax.swing.JDialog;
-
 import org.jdesktop.swingx.plaf.LookAndFeelAddons;
 import org.jdesktop.swingx.plaf.TipOfTheDayAddon;
 import org.jdesktop.swingx.plaf.TipOfTheDayUI;
 import org.jdesktop.swingx.tips.DefaultTipOfTheDayModel;
 import org.jdesktop.swingx.tips.TipOfTheDayModel;
 import org.jdesktop.swingx.tips.TipOfTheDayModel.Tip;
+
+import javax.swing.*;
+import java.awt.Component;
+import java.awt.HeadlessException;
+import java.util.prefs.Preferences;
 
 /**
  * Provides the "Tip of The Day" pane and dialog.<br>
@@ -324,10 +323,12 @@ public void updateUI() {
       "Preferences can not be null"); }
 
     ShowOnStartupChoice store = new ShowOnStartupChoice() {
-      public boolean isShowingOnStartup() {
+      @Override
+	public boolean isShowingOnStartup() {
         return showOnStartupPref.getBoolean(PREFERENCE_KEY, true);
       }
-      public void setShowingOnStartup(boolean showOnStartup) {
+      @Override
+	public void setShowingOnStartup(boolean showOnStartup) {
         if (showOnStartup && !showOnStartupPref.getBoolean(PREFERENCE_KEY, true)) {
           // if the choice was previously not enable and now we re-enable it, we
           // must remove the key

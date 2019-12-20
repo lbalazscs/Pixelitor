@@ -29,11 +29,10 @@ import java.awt.Stroke;
  * manipulate the properties of your <code>Stroke</code>.
  */
 public interface FilteredStroke extends Stroke {
-
     /**
      * @return the underlying stroke being filtered.
      */
-    public Stroke getStroke();
+    Stroke getStroke();
 
     /**
      * Similar to <code>Font.deriveFont()</code>, this makes
@@ -43,5 +42,5 @@ public interface FilteredStroke extends Stroke {
      * @param s the new underlying stroke to use.
      * @return a new stroke that is built on top of <code>s</code>
      */
-    public FilteredStroke deriveStroke(Stroke s);
+    FilteredStroke deriveStroke(Stroke s);
 }

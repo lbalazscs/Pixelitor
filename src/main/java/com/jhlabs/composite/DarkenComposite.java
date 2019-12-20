@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class DarkenComposite extends RGBComposite {
-
     public DarkenComposite(float alpha) {
         super(alpha);
     }
@@ -65,5 +64,4 @@ public final class DarkenComposite extends RGBComposite {
             }
         }
     }
-
 }

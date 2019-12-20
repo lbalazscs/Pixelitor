@@ -25,7 +25,6 @@ import java.awt.image.BufferedImage;
  * A Filter which produces the effect of looking into a kaleidoscope.
  */
 public class KaleidoscopeFilter extends TransformFilter {
-
     private float angle = 0;
     private float angle2 = 0;
     private float centreX = 0.5f;
@@ -156,8 +155,8 @@ public class KaleidoscopeFilter extends TransformFilter {
      * @see #getCentre
      */
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -208,18 +207,19 @@ public class KaleidoscopeFilter extends TransformFilter {
         if (radius != 0) {
             double c = FastMath.cos(theta);
             double radiusc = radius / c;
-            r = radiusc * ImageMath.triangle( (float)(r/radiusc) );
-		}
-		theta += angle;
+            r = radiusc * ImageMath.triangle((float) (r / radiusc));
+        }
+        theta += angle;
 
         double zoomedR = r / zoom;
-        out[0] = (float)(icentreX + zoomedR*FastMath.cos(theta));
-        out[1] = (float)(icentreY + zoomedR*FastMath.sin(theta));
+        out[0] = (float) (icentreX + zoomedR * FastMath.cos(theta));
+        out[1] = (float) (icentreY + zoomedR * FastMath.sin(theta));
     }
 
-	public String toString() {
-		return "Distort/Kaleidoscope...";
-	}
+    @Override
+    public String toString() {
+        return "Distort/Kaleidoscope...";
+    }
 
     public void setZoom(float zoom) {
         this.zoom = zoom;

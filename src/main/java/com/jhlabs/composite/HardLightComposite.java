@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class HardLightComposite extends RGBComposite {
-
     public HardLightComposite(float alpha) {
         super(alpha);
     }
@@ -51,18 +50,21 @@ public final class HardLightComposite extends RGBComposite {
                 int dia = dst[i + 3];
                 int dor, dog, dob;
 
-                if (sr > 127)
+                if (sr > 127) {
                     dor = 255 - 2 * multiply255(255 - sr, 255 - dir);
-                else
+                } else {
                     dor = 2 * multiply255(sr, dir);
-                if (sg > 127)
+                }
+                if (sg > 127) {
                     dog = 255 - 2 * multiply255(255 - sg, 255 - dig);
-                else
+                } else {
                     dog = 2 * multiply255(sg, dig);
-                if (sb > 127)
+                }
+                if (sb > 127) {
                     dob = 255 - 2 * multiply255(255 - sb, 255 - dib);
-                else
+                } else {
                     dob = 2 * multiply255(sb, dib);
+                }
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
@@ -74,5 +76,4 @@ public final class HardLightComposite extends RGBComposite {
             }
         }
     }
-
 }

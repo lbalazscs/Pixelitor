@@ -465,7 +465,7 @@ public class CannyEdgeDetector {
                  * variable (3) and reused in the mirror case (4).
                  *
                  */
-                if (xGrad * yGrad <= (float) 0 /*(1)*/
+                if (xGrad * yGrad <= 0 /*(1)*/
                     ? Math.abs(xGrad) >= Math.abs(yGrad) /*(2)*/
                     ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) /*(3)*/
                     && tmp > Math.abs(yGrad * swMag - (xGrad + yGrad) * wMag) /*(4)*/

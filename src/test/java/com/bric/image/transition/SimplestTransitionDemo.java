@@ -25,62 +25,59 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 
-/** This class was put together at the request of Thierry to help
+import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
+
+/**
+ * This class was put together at the request of Thierry to help
  * experiment with new Transition classes.
  * <P>To test your transition, just redefine the "transition" field
  * in this object.
- *
  */
 public class SimplestTransitionDemo extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    /** The first image to use in this transition. */
-    public static  BufferedImage bi1 = AbstractTransition.createImage("A", true);
+    /**
+     * The first image to use in this transition.
+     */
+    private static BufferedImage bi1 = AbstractTransition.createImage("A", true);
 
-    /** The second image to use in this transition.
+    /**
+     * The second image to use in this transition.
      * It's assumed this is the same dimension as bi1.
      **/
 //    public static final BufferedImage bi2 = AbstractTransition.createImage("B", false);
-	public static  BufferedImage bi2 = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);
+    private static BufferedImage bi2 = new BufferedImage(400, 400, BufferedImage.TYPE_INT_ARGB);
 
     static {
         bi1 = ImageUtils.toSysCompatibleImage(bi1);
         bi2 = ImageUtils.toSysCompatibleImage(bi2);
     }
 
-    /** How long the transition should last. */
-    public static final float DURATION = 2000;
-
-    /** Create a frame with a simple transition demo.
-     * @param args the application's arguments. (This is unused.)
+    /**
+     * How long the transition should last.
      */
+    private static final float DURATION = 2000;
+
     public static void main(String[] args) {
+        SwingUtilities.invokeLater(SimplestTransitionDemo::buildGUI);
+    }
+
+    private static void buildGUI() {
         JFrame frame = new JFrame("SimplestDemo");
-        SimplestTransitionDemo d = new SimplestTransitionDemo();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(d);
+        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        frame.add(new SimplestTransitionDemo());
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    //	Transition transition = new GooTransition2D();
-//	Transition transition = new BlindsTransition2D();
-//    Transition transition = new BoxTransition2D();
-    Transition transition = new BlendTransition2D();
-
-    ActionListener repainter = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            repaint();
-        }
-    };
+    private Transition transition = new BlendTransition2D();
 
     public SimplestTransitionDemo() {
-        setPreferredSize(new Dimension(bi1.getWidth(),bi1.getHeight()));
-        Timer timer = new Timer(50,repainter);
+        setPreferredSize(new Dimension(bi1.getWidth(), bi1.getHeight()));
+        Timer timer = new Timer(50, e -> repaint());
         timer.start();
     }
 
@@ -88,13 +85,13 @@ public class SimplestTransitionDemo extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         long t = System.currentTimeMillis();
-        float progress = ( t%((long)(DURATION*2)) );
-        if(progress>DURATION) {
-            progress = (progress-DURATION)/DURATION;
-            transition.paint( (Graphics2D)g, bi2, bi1, progress);
+        float progress = (t % ((long) (DURATION * 2)));
+        if (progress > DURATION) {
+            progress = (progress - DURATION) / DURATION;
+            transition.paint((Graphics2D) g, bi2, bi1, progress);
         } else {
-            progress = progress/DURATION;
-            transition.paint( (Graphics2D)g, bi1, bi2, progress);
+            progress = progress / DURATION;
+            transition.paint((Graphics2D) g, bi1, bi2, progress);
         }
     }
 }

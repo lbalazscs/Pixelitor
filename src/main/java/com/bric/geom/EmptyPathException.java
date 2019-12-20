@@ -19,28 +19,27 @@
  */
 package com.bric.geom;
 
-/** This indicates that a path had no shape data.
+/**
+ * This indicates that a path had no shape data.
  * <P>This means it had no lines, quadratic or cubic
  * segments in it (although it may have had a MOVE_TO
  * and a CLOSE segment).
- *
  */
 public class EmptyPathException extends RuntimeException {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public EmptyPathException() {
-	}
+    public EmptyPathException() {
+    }
 
-	public EmptyPathException(String message) {
-		super(message);
-	}
+    public EmptyPathException(String message) {
+        super(message);
+    }
 
-	public EmptyPathException(Throwable cause) {
-		super(cause);
-	}
+    public EmptyPathException(Throwable cause) {
+        super(cause);
+    }
 
-	public EmptyPathException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
+    public EmptyPathException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

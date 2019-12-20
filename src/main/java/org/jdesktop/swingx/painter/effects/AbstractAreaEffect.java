@@ -324,7 +324,9 @@ public class AbstractAreaEffect implements AreaEffect {
     public void setBrushSteps(int brushSteps) {
         int oldBrushSteps = this.brushSteps;
         this.brushSteps = brushSteps;
-        propertyChangeSupport.firePropertyChange("brushSteps", new Integer(oldBrushSteps), new Integer(brushSteps));
+        propertyChangeSupport.firePropertyChange("brushSteps",
+                Integer.valueOf(oldBrushSteps),
+                Integer.valueOf(brushSteps));
     }
 
     /**
@@ -349,7 +351,9 @@ public class AbstractAreaEffect implements AreaEffect {
     public void setEffectWidth(int effectWidth) {
         int oldEffectWidth = this.effectWidth;
         this.effectWidth = effectWidth;
-        propertyChangeSupport.firePropertyChange("effectWidth", new Integer(oldEffectWidth), new Integer(effectWidth));
+        propertyChangeSupport.firePropertyChange("effectWidth",
+                Integer.valueOf(oldEffectWidth),
+                Integer.valueOf(effectWidth));
     }
 
     /**

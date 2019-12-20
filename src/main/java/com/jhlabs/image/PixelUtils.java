@@ -24,7 +24,6 @@ import java.util.Random;
  * These are becoming obsolete as we move to Java2D. Use MiscComposite instead.
  */
 public class PixelUtils {
-
     public static final int REPLACE = 0;
     public static final int NORMAL = 1;
     public static final int MIN = 2;
@@ -135,17 +134,17 @@ public class PixelUtils {
         int b2 = rgb2 & 0xff;
 
         r1 += r2;
-        if(r1 > 255) {
+        if (r1 > 255) {
             r1 = 255;
         }
 
         g1 += g2;
-        if(g1 > 255) {
+        if (g1 > 255) {
             g1 = 255;
         }
 
         b1 += b2;
-        if(b1 > 255) {
+        if (b1 > 255) {
             b1 = 255;
         }
 
@@ -279,5 +278,4 @@ public class PixelUtils {
         }
         return (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
     }
-
 }

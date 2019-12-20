@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class GlowFilter extends AbstractBufferedImageOp {
-
     private float amount = 0.5f;
 
     /**
@@ -79,7 +78,7 @@ public class GlowFilter extends AbstractBufferedImageOp {
         int[] inPixels = ImageUtils.getPixelsAsArray(src);
 
 
-        if(radius > 0) {
+        if (radius > 0) {
             BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, filterName);
             srcCopy = boxBlur.filter(srcCopy, srcCopy);
         }
@@ -116,7 +115,8 @@ public class GlowFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
+    @Override
     public String toString() {
-		return "Blur/Glow...";
-	}
+        return "Blur/Glow...";
+    }
 }

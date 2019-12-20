@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class SubtractComposite extends RGBComposite {
-
     public SubtractComposite(float alpha) {
         super(alpha);
     }
@@ -52,14 +51,17 @@ public final class SubtractComposite extends RGBComposite {
                 int dor, dog, dob;
 
                 dor = dir - sr;
-                if (dor < 0)
+                if (dor < 0) {
                     dor = 0;
+                }
                 dog = dig - sg;
-                if (dog < 0)
+                if (dog < 0) {
                     dog = 0;
+                }
                 dob = dib - sb;
-                if (dob < 0)
+                if (dob < 0) {
                     dob = 0;
+                }
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;
@@ -71,5 +73,4 @@ public final class SubtractComposite extends RGBComposite {
             }
         }
     }
-
 }

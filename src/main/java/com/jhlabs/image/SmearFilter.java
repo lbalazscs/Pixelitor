@@ -25,7 +25,6 @@ import java.util.Random;
 import java.util.concurrent.Future;
 
 public class SmearFilter extends WholeImageFilter {
-
     public static final int CROSSES = 0;
     public static final int LINES = 1;
     public static final int CIRCLES = 2;
@@ -146,7 +145,8 @@ public class SmearFilter extends WholeImageFilter {
         for (int i = 0; i < numShapes; i++) {
             int x = (randomGenerator.nextInt() & 0x7fffffff) % width;
             int y = (randomGenerator.nextInt() & 0x7fffffff) % height;
-            int length = randomGenerator.nextInt() % distance + 1;
+//            int length = randomGenerator.nextInt() % distance + 1;
+            int length = randomGenerator.nextInt(distance) + 1;
             int rgb = inPixels[y * width + x];
             for (int x1 = x - length; x1 < x + length + 1; x1++) {
                 if (x1 >= 0 && x1 < width) {
@@ -356,6 +356,7 @@ public class SmearFilter extends WholeImageFilter {
         }
     }
 
+    @Override
     public String toString() {
         return "Effects/Smear...";
     }

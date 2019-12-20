@@ -22,7 +22,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class HueComposite extends RGBComposite {
-
     public HueComposite(float alpha) {
         super(alpha);
     }
@@ -75,5 +74,4 @@ public final class HueComposite extends RGBComposite {
             }
         }
     }
-
 }

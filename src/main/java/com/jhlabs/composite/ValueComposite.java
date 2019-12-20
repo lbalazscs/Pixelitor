@@ -22,7 +22,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class ValueComposite extends RGBComposite {
-
     public ValueComposite(float alpha) {
         super(alpha);
     }
@@ -75,5 +74,4 @@ public final class ValueComposite extends RGBComposite {
             }
         }
     }
-
 }

@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
  * @author Jerry Huxtable
  */
 public class UnsharpFilter extends GaussianFilter {
-
     private float amount = 0.5f;
     private int threshold = 1;
 
@@ -98,7 +97,7 @@ public class UnsharpFilter extends GaussianFilter {
 
         // src.getRGB(0, 0, width, height, outPixels, 0, width);
         // TODO system.arraycopy would be even faster
-        getRGB(src, 0, 0,  width, height, outPixels);
+        getRGB(src, 0, 0, width, height, outPixels);
 
         float a = 4 * amount;
 
@@ -137,7 +136,8 @@ public class UnsharpFilter extends GaussianFilter {
         return dst;
     }
 
+    @Override
     public String toString() {
-		return "Blur/Unsharp Mask...";
-	}
+        return "Blur/Unsharp Mask...";
+    }
 }

@@ -20,7 +20,6 @@ package com.jhlabs.image;
  * A class containing static math methods useful for image processing.
  */
 public class ImageMath {
-
     /**
      * The value of pi as a float.
      */
@@ -187,8 +186,8 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
-     * @param a the lower clamp threshold
-     * @param b the upper clamp threshold
+     * @param a     the lower clamp threshold
+     * @param b     the upper clamp threshold
      * @param input the input parameter
      * @return the clamped value
      */
@@ -199,8 +198,8 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
-     * @param a the lower clamp threshold
-     * @param b the upper clamp threshold
+     * @param a     the lower clamp threshold
+     * @param b     the upper clamp threshold
      * @param input the input parameter
      * @return the clamped value
      */
@@ -251,8 +250,8 @@ public class ImageMath {
      */
     public static int mod(int a, int b) {
         assert (b > 0);
-        if(a >= 0) {
-            return a%b;
+        if (a >= 0) {
+            return a % b;
         }
 
         int n = a / b;
@@ -539,9 +538,10 @@ public class ImageMath {
 
     /**
      * Compute a Catmull-Rom spline.
-     * @param x the input parameter
+     *
+     * @param x        the input parameter
      * @param numKnots the number of knots in the spline
-     * @param knots the array of knots
+     * @param knots    the array of knots
      * @return the spline value
      */
     public static float splineClamped(float x, int numKnots, float[] knots) {
@@ -595,8 +595,9 @@ public class ImageMath {
         }
 
         for (span = 0; span < numSpans; span++) {
-            if (xknots[span + 1] > x)
+            if (xknots[span + 1] > x) {
                 break;
+            }
         }
         if (span > numKnots - 3) {
             span = numKnots - 3;
@@ -691,8 +692,9 @@ public class ImageMath {
         }
 
         for (span = 0; span < numSpans; span++) {
-            if (xknots[span + 1] > x)
+            if (xknots[span + 1] > x) {
                 break;
+            }
         }
         if (span > numKnots - 3) {
             span = numKnots - 3;
@@ -874,7 +876,5 @@ public class ImageMath {
             }
         }
     }
-
-
 }
 

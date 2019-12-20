@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class NegationComposite extends RGBComposite {
-
     public NegationComposite(float alpha) {
         super(alpha);
     }
@@ -65,5 +64,4 @@ public final class NegationComposite extends RGBComposite {
             }
         }
     }
-
 }

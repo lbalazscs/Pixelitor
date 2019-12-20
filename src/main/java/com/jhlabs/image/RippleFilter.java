@@ -27,7 +27,6 @@ import java.awt.Rectangle;
  * pixels going off the edges are wrapped or not.
  */
 public class RippleFilter extends TransformFilter {
-
     private float xAmplitude, yAmplitude;
     private float xWavelength, yWavelength;
     private int waveType;
@@ -159,8 +158,8 @@ public class RippleFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float nx = (float) y / xWavelength;
-        float ny = (float) x / yWavelength;
+        float nx = y / xWavelength;
+        float ny = x / yWavelength;
         float fx, fy;
         switch (waveType) {
             case WaveType.SINE:
@@ -178,16 +177,17 @@ public class RippleFilter extends TransformFilter {
                 break;
             case WaveType.NOISE:
                 fx = Noise.sinLikeNoise1(nx - phaseY);
-			    fy = Noise.sinLikeNoise1(ny - phaseX);
-			break;
-		}
-		out[0] = x + xAmplitude * fx;
-		out[1] = y + yAmplitude * fy;
-	}
+                fy = Noise.sinLikeNoise1(ny - phaseX);
+                break;
+        }
+        out[0] = x + xAmplitude * fx;
+        out[1] = y + yAmplitude * fy;
+    }
 
-	public String toString() {
-		return "Distort/Ripple...";
-	}
+    @Override
+    public String toString() {
+        return "Distort/Ripple...";
+    }
 
     public void setPhaseX(float phaseX) {
         this.phaseX = (float) (phaseX * Math.PI * 2);

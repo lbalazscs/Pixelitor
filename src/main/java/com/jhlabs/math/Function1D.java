@@ -17,6 +17,6 @@ limitations under the License.
 package com.jhlabs.math;
 
 public interface Function1D {
-    public float evaluate(float v);
+    float evaluate(float v);
 }
 

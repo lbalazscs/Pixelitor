@@ -27,7 +27,6 @@ import java.awt.image.BufferedImage;
  * A filter which simulates a lens placed over an image.
  */
 public class SphereFilter extends TransformFilter {
-
     private float a = 0;
     private float b = 0;
     private float a2 = 0;
@@ -74,8 +73,8 @@ public class SphereFilter extends TransformFilter {
      * @see #getRadius
      */
     public void setRadius(float r) {
-        this.a = r;
-        this.b = r;
+        a = r;
+        b = r;
     }
 
     /**
@@ -135,8 +134,8 @@ public class SphereFilter extends TransformFilter {
      * @see #getCentre
      */
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -199,16 +198,17 @@ public class SphereFilter extends TransformFilter {
             angle1 = ImageMath.HALF_PI - yAngle;
             angle2 = (float) FastMath.asin(FastMath.sin(angle1) * rRefraction);
             angle2 = ImageMath.HALF_PI - yAngle - angle2;
-			out[1] = y - (float)FastMath.tan(angle2)*z;
-		}
-	}
+            out[1] = y - (float) FastMath.tan(angle2) * z;
+        }
+    }
 
-	public String toString() {
-		return "Distort/Sphere...";
-	}
+    @Override
+    public String toString() {
+        return "Distort/Sphere...";
+    }
 
     public Shape[] getAffectedAreaShapes() {
-        return new Shape[] {
+        return new Shape[]{
                 new Ellipse2D.Float(icentreX - a, icentreY - b, 2 * a, 2 * b)
         };
     }

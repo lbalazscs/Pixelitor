@@ -19,25 +19,25 @@ package com.jhlabs.image;
 public class Curve {
     public float[] x;
     public float[] y;
-    
+
     public Curve() {
-        x = new float[] { 0, 1 };
-        y = new float[] { 0, 1 };
+        x = new float[]{0, 1};
+        y = new float[]{0, 1};
     }
-    
-    public Curve( Curve curve ) {
+
+    public Curve(Curve curve) {
         x = curve.x.clone();
         y = curve.y.clone();
     }
 
-    public int addKnot( float kx, float ky ) {
+    public int addKnot(float kx, float ky) {
         int pos = -1;
         int numKnots = x.length;
-        float[] nx = new float[numKnots+1];
-        float[] ny = new float[numKnots+1];
+        float[] nx = new float[numKnots + 1];
+        float[] ny = new float[numKnots + 1];
         int j = 0;
-        for ( int i = 0; i < numKnots; i++ ) {
-            if ( pos == -1 && x[i] > kx ) {
+        for (int i = 0; i < numKnots; i++) {
+            if (pos == -1 && x[i] > kx) {
                 pos = j;
                 nx[j] = kx;
                 ny[j] = ky;
@@ -47,7 +47,7 @@ public class Curve {
             ny[j] = y[i];
             j++;
         }
-        if ( pos == -1 ) {
+        if (pos == -1) {
             pos = j;
             nx[j] = kx;
             ny[j] = ky;
@@ -57,11 +57,11 @@ public class Curve {
         return pos;
     }
 
-    public int findKnotPos( float kx) {
+    public int findKnotPos(float kx) {
 
         int numKnots = x.length;
-        for ( int i = 0; i < numKnots; i++ ) {
-            if (x[i] > kx ) {
+        for (int i = 0; i < numKnots; i++) {
+            if (x[i] > kx) {
                 return i;
             }
         }
@@ -69,16 +69,18 @@ public class Curve {
         return numKnots;
     }
 
-    public void removeKnot( int n ) {
+    public void removeKnot(int n) {
         int numKnots = x.length;
-        if ( numKnots <= 2 )
+        if (numKnots <= 2) {
             return;
-        float[] nx = new float[numKnots-1];
-        float[] ny = new float[numKnots-1];
+        }
+        float[] nx = new float[numKnots - 1];
+        float[] ny = new float[numKnots - 1];
         int j = 0;
-        for ( int i = 0; i < numKnots-1; i++ ) {
-            if ( i == n )
+        for (int i = 0; i < numKnots - 1; i++) {
+            if (i == n) {
                 j++;
+            }
             nx[i] = x[j];
             ny[i] = y[j];
             j++;
@@ -89,7 +91,7 @@ public class Curve {
 
     private void sortKnots() {
         int numKnots = x.length;
-        for (int i = 1; i < numKnots-1; i++) {
+        for (int i = 1; i < numKnots - 1; i++) {
             for (int j = 1; j < i; j++) {
                 if (x[i] < x[j]) {
                     float t = x[i];
@@ -105,21 +107,21 @@ public class Curve {
 
     public int[] makeTable() {
         int numKnots = x.length;
-        float[] nx = new float[numKnots+2];
-        float[] ny = new float[numKnots+2];
-        System.arraycopy( x, 0, nx, 1, numKnots);
-        System.arraycopy( y, 0, ny, 1, numKnots);
+        float[] nx = new float[numKnots + 2];
+        float[] ny = new float[numKnots + 2];
+        System.arraycopy(x, 0, nx, 1, numKnots);
+        System.arraycopy(y, 0, ny, 1, numKnots);
         nx[0] = nx[1];
         ny[0] = ny[1];
-        nx[numKnots+1] = nx[numKnots];
-        ny[numKnots+1] = ny[numKnots];
+        nx[numKnots + 1] = nx[numKnots];
+        ny[numKnots + 1] = ny[numKnots];
 
         int[] table = new int[256];
 
         // if first knot is > 0 fill the table with y position
         if (nx[0] > 0) {
-            int nxStart = (int)(nx[0] * 255);
-            int nyStart = (int)(ny[0] * 255);
+            int nxStart = (int) (nx[0] * 255);
+            int nyStart = (int) (ny[0] * 255);
             for (int i = 0; i <= nxStart; i++) {
                 table[i] = nyStart;
             }
@@ -127,19 +129,19 @@ public class Curve {
 
         // if last knot is < 1 fill the table with y position
         if (nx[numKnots] < 1) {
-            int nxStart = (int)(nx[numKnots] * 255);
-            int nyStart = (int)(ny[numKnots] * 255);
+            int nxStart = (int) (nx[numKnots] * 255);
+            int nyStart = (int) (ny[numKnots] * 255);
             for (int i = nxStart; i <= 255; i++) {
                 table[i] = nyStart;
             }
         }
 
         for (int i = 0; i < 2048; i++) {
-            float f = i/2048.0f;
-            int x = (int)(255 * ImageMath.splineClamped( f, nx.length, nx ) + 0.5f);
-            int y = (int)(255 * ImageMath.spline( f, nx.length, ny ) + 0.5f);
-            x = ImageMath.clamp( x, 0, 255 );
-            y = ImageMath.clamp( y, 0, 255 );
+            float f = i / 2048.0f;
+            int x = (int) (255 * ImageMath.splineClamped(f, nx.length, nx) + 0.5f);
+            int y = (int) (255 * ImageMath.spline(f, nx.length, ny) + 0.5f);
+            x = ImageMath.clamp(x, 0, 255);
+            y = ImageMath.clamp(y, 0, 255);
             table[x] = y;
         }
         return table;

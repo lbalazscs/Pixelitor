@@ -18,9 +18,13 @@ package com.jhlabs.image;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.KEY_INTERPOLATION;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
 /**
  * A filter which produces motion blur the faster, but lower-quality way.
@@ -180,8 +184,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
      */
     @Override
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -212,8 +216,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
             dst = createCompatibleDestImage(src, null);
         }
         BufferedImage tsrc = src;
-        float cx = (float) src.getWidth() * centreX;
-        float cy = (float) src.getHeight() * centreY;
+        float cx = src.getWidth() * centreX;
+        float cy = src.getHeight() * centreY;
         float imageRadius = (float) Math.sqrt(cx * cx + cy * cy);
         float translateX = (float) (distance * Math.cos(angle));
         float translateY = (float) (distance * -Math.sin(angle));
@@ -241,8 +245,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
         for (int i = 0; i < steps; i++) {
             Graphics2D g = tmp.createGraphics();
             g.drawImage(tsrc, null, null);
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             g.setComposite(alphaComposite);
 
             g.translate(cx + translateX, cy + translateY);
@@ -272,7 +276,8 @@ public class MotionBlurOp extends AbstractBufferedImageOp implements MotionBlur 
         return dst;
     }
 
-	public String toString() {
-		return "Blur/Faster Motion Blur...";
-	}
+    @Override
+    public String toString() {
+        return "Blur/Faster Motion Blur...";
+    }
 }

@@ -283,7 +283,7 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
      * @see #getRadius
      */
     public void setRadius(float radius) {
-        this.hRadius = this.vRadius = radius;
+        hRadius = vRadius = radius;
     }
 
     /**
@@ -317,6 +317,7 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
         return iterations;
     }
 
+    @Override
     public String toString() {
         return "Blur/Box Blur...";
     }

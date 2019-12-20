@@ -22,7 +22,6 @@ import pixelitor.filters.jhlabsproxies.JHCrystallize;
  * A filter which applies a crystallizing effect to an image, by producing Voronoi cells filled with colours from the image.
  */
 public class CrystallizeFilter extends CellularFilter {
-
     private float edgeThickness = 0.4f;
     private boolean fadeEdges = false;
     private int edgeColor = 0xff000000;
@@ -90,8 +89,8 @@ public class CrystallizeFilter extends CellularFilter {
         return v;
     }
 
+    @Override
     public String toString() {
         return "Stylize/Crystallize...";
     }
-
 }

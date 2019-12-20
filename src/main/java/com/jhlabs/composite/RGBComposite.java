@@ -23,7 +23,6 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 
 public abstract class RGBComposite implements Composite {
-
     protected float extraAlpha;
 
     protected RGBComposite() {
@@ -31,9 +30,10 @@ public abstract class RGBComposite implements Composite {
     }
 
     protected RGBComposite(float alpha) {
-        if (alpha < 0.0f || alpha > 1.0f)
+        if (alpha < 0.0f || alpha > 1.0f) {
             throw new IllegalArgumentException("RGBComposite: alpha must be between 0 and 1");
-        this.extraAlpha = alpha;
+        }
+        extraAlpha = alpha;
     }
 
     public float getAlpha() {
@@ -51,17 +51,15 @@ public abstract class RGBComposite implements Composite {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof RGBComposite))
+        if (!(o instanceof RGBComposite)) {
             return false;
+        }
         RGBComposite c = (RGBComposite) o;
 
-        if (extraAlpha != c.extraAlpha)
-            return false;
-        return true;
+        return extraAlpha == c.extraAlpha;
     }
 
     public abstract static class RGBCompositeContext implements CompositeContext {
-
         private final float alpha;
         private final ColorModel srcColorModel;
         private final ColorModel dstColorModel;
@@ -113,6 +111,5 @@ public abstract class RGBComposite implements Composite {
                 dstOut.setPixels(x, y, w, 1, dstPix);
             }
         }
-
     }
 }

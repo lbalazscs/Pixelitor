@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
  * This filter applies a marbling effect to an image, displacing pixels by random amounts.
  */
 public class MarbleFilter extends TransformFilter {
-
     private float[] sinTable, cosTable;
     private float scale = 4;
     private float amount = 4;
@@ -128,14 +127,15 @@ public class MarbleFilter extends TransformFilter {
     }
 
     @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst ) {
-		initialize();
-		return super.filter( src, dst );
-	}
+    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
+        initialize();
+        return super.filter(src, dst);
+    }
 
-	public String toString() {
-		return "Distort/Marble...";
-	}
+    @Override
+    public String toString() {
+        return "Distort/Marble...";
+    }
 
     public void setTime(float time) {
         this.time = time;

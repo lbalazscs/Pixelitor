@@ -154,9 +154,9 @@ public class OilFilter extends WholeImageFilter {
         }
     }
 
+    @Override
     public String toString() {
-		return "Stylize/Oil...";
-	}
-
+        return "Stylize/Oil...";
+    }
 }
 

@@ -29,6 +29,7 @@ public class InvertAlphaFilter extends PointFilter {
         return rgb ^ 0xff000000;
     }
 
+    @Override
     public String toString() {
         return "Alpha/Invert";
     }

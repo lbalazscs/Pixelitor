@@ -314,7 +314,8 @@ public final class BlendComposite implements Composite {
     /**
      * {@inheritDoc}
      */
-    public CompositeContext createContext(ColorModel srcColorModel,
+    @Override
+	public CompositeContext createContext(ColorModel srcColorModel,
                                           ColorModel dstColorModel,
                                           RenderingHints hints) {
         if (isRgbColorModel(srcColorModel) && isRgbColorModel(dstColorModel)) {
@@ -335,7 +336,8 @@ public final class BlendComposite implements Composite {
             this.blender = Blender.getBlenderFor(composite);
         }
 
-        public void dispose() {
+        @Override
+		public void dispose() {
         }
     }
 
@@ -344,7 +346,8 @@ public final class BlendComposite implements Composite {
             super(composite);
         }
 
-        public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+        @Override
+		public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
 
@@ -392,7 +395,8 @@ public final class BlendComposite implements Composite {
             super(composite);
         }
 
-        public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+        @Override
+		public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
             int width = Math.min(src.getWidth(), dstIn.getWidth());
             int height = Math.min(src.getHeight(), dstIn.getHeight());
 

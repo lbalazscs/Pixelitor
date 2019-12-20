@@ -25,7 +25,6 @@ import java.awt.image.BufferedImage;
  * A filter which wraps an image around a circular arc.
  */
 public class CircleFilter extends TransformFilter {
-
     private float radius = 10;
     private float height = 20;
     private float angle = 0;
@@ -177,8 +176,8 @@ public class CircleFilter extends TransformFilter {
      * @see #getCentre
      */
     public void setCentre(Point2D centre) {
-        this.centreX = (float) centre.getX();
-        this.centreY = (float) centre.getY();
+        centreX = (float) centre.getX();
+        centreY = (float) centre.getY();
     }
 
     /**
@@ -208,14 +207,14 @@ public class CircleFilter extends TransformFilter {
         float theta = (float) FastMath.atan2(-dy, -dx) + angle;
         float r = (float) Math.sqrt(dx * dx + dy * dy);
 
-        theta = ImageMath.mod( theta, 2*(float)Math.PI );
+        theta = ImageMath.mod(theta, 2 * (float) Math.PI);
 
-		out[0] = iWidth * theta/(spreadAngle+0.00001f);
-		out[1] = iHeight * (1-(r-radius)/(height+0.00001f));
+        out[0] = iWidth * theta / (spreadAngle + 0.00001f);
+        out[1] = iHeight * (1 - (r - radius) / (height + 0.00001f));
     }
 
-	public String toString() {
-		return "Distort/Circle...";
-	}
-
+    @Override
+    public String toString() {
+        return "Distort/Circle...";
+    }
 }

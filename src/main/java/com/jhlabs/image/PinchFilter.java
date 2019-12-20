@@ -28,7 +28,6 @@ import java.awt.image.BufferedImage;
  * A filter which performs the popular whirl-and-pinch distortion effect.
  */
 public class PinchFilter extends TransformFilter implements SwirlMethod {
-
     private float angle = 0;
     private float centreX = 0.5f;
     private float centreY = 0.5f;
@@ -75,7 +74,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      */
     @Override
     public void setCenterX(float centerX) {
-        this.centreX = centerX;
+        centreX = centerX;
     }
 
     /**
@@ -96,7 +95,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      */
     @Override
     public void setCenterY(float centerY) {
-        this.centreY = centerY;
+        centreY = centerY;
     }
 
     /**
@@ -116,8 +115,8 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      * @see #getCentre
      */
     public void setCenter(Point2D center) {
-        this.centreX = (float) center.getX();
-        this.centreY = (float) center.getY();
+        centreX = (float) center.getX();
+        centreY = (float) center.getY();
     }
 
     /**
@@ -162,7 +161,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
      */
     @Override
     public void setPinchBulgeAmount(float amount) {
-        this.pinchBulgeAmount = -amount;
+        pinchBulgeAmount = -amount;
     }
 
     /**
@@ -242,6 +241,7 @@ public class PinchFilter extends TransformFilter implements SwirlMethod {
         this.rotateResultAngle = rotateResultAngle;
     }
 
+    @Override
     public String toString() {
         return "Distort/Pinch...";
     }

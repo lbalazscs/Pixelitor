@@ -28,7 +28,6 @@ import java.awt.Rectangle;
  * I hope to extend it to produce an IndexColorModel by request.
  */
 public class QuantizeFilter extends WholeImageFilter {
-
     /**
      * Floyd-Steinberg dithering matrix.
      */
@@ -37,7 +36,7 @@ public class QuantizeFilter extends WholeImageFilter {
             0, 0, 7,
             3, 5, 1,
     };
-    private final int sum = 3 + 5 + 7 + 1;
+    private static final int sum = 3 + 5 + 7 + 1;
 
     private boolean dither;
     private int numColors = 256;
@@ -110,7 +109,7 @@ public class QuantizeFilter extends WholeImageFilter {
         // computation-intensive task (addPixels)
         int units = (int) (height / 2.5);
         int workUnits;
-        if(dither) {
+        if (dither) {
             workUnits = units + height;
         } else {
             workUnits = units + 1;
@@ -178,7 +177,8 @@ public class QuantizeFilter extends WholeImageFilter {
                                         r1 += er * w / sum;
                                         g1 += eg * w / sum;
                                         b1 += eb * w / sum;
-                                        inPixels[k] = (PixelUtils.clamp(r1) << 16) | (PixelUtils.clamp(g1) << 8) | PixelUtils.clamp(b1);
+                                        inPixels[k] = (PixelUtils.clamp(r1) << 16) | (PixelUtils
+                                                .clamp(g1) << 8) | PixelUtils.clamp(b1);
                                     }
                                 }
                             }
@@ -200,10 +200,10 @@ public class QuantizeFilter extends WholeImageFilter {
         quantize(inPixels, outPixels, width, height, numColors, dither, serpentine);
 
         return outPixels;
-	}
+    }
 
-	public String toString() {
-		return "Colors/Quantize...";
-	}
-
+    @Override
+    public String toString() {
+        return "Colors/Quantize...";
+    }
 }

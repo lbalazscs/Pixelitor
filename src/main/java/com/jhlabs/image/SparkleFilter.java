@@ -28,7 +28,6 @@ import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.powQuick;
 
 public class SparkleFilter extends PointFilter {
-
     private int rays = 50;
     private int radius = 25;
     private int amount = 50;
@@ -146,7 +145,7 @@ public class SparkleFilter extends PointFilter {
             float length = lerp(f, rayLengths[i % rays], rayLengths[(i + 1) % rays]);
             float g = length * length / (distance + 0.0001f);
 
-            if(amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
+            if (amount != 50) { // if amount = 50 then power = 1, but safer to compare ints
                 g = (float) powQuick(g, power);
             }
 
@@ -191,9 +190,10 @@ public class SparkleFilter extends PointFilter {
         this.random = random;
     }
 
+    @Override
     public String toString() {
-		return "Stylize/Sparkle...";
-	}
+        return "Stylize/Sparkle...";
+    }
 
 
     // the radius does not define the affected area!!

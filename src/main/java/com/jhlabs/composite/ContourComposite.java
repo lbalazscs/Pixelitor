@@ -28,7 +28,6 @@ import java.awt.image.WritableRaster;
  * This can only be used on TYPE_INT_RGBA images.
  */
 public final class ContourComposite implements Composite {
-
     private final int offset;
 
     public ContourComposite(int offset) {
@@ -40,20 +39,18 @@ public final class ContourComposite implements Composite {
         return new ContourCompositeContext(offset, srcColorModel, dstColorModel);
     }
 
+    @Override
     public int hashCode() {
         return 0;
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ContourComposite))
-            return false;
-        return true;
+        return o instanceof ContourComposite;
     }
-
 }
 
 class ContourCompositeContext implements CompositeContext {
-
     private final int offset;
 
     public ContourCompositeContext(int offset, ColorModel srcColorModel, ColorModel dstColorModel) {
@@ -122,5 +119,4 @@ class ContourCompositeContext implements CompositeContext {
             y++;
         }
     }
-
 }

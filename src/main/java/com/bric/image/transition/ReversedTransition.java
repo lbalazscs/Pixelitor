@@ -22,19 +22,20 @@ package com.bric.image.transition;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-/** A Transition that plays another transition in reverse.
+/**
+ * A Transition that plays another transition in reverse.
  */
 public class ReversedTransition implements Transition {
-	Transition transition;
-	
-	public ReversedTransition(Transition t) {
-		transition = t;
-	}
+    private final Transition transition;
 
-	@Override
-	public void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB,
-			float progress) {
-		transition.paint(g, frameB, frameA, 1-progress);
-	}
-	
+    public ReversedTransition(Transition t) {
+        transition = t;
+    }
+
+    @Override
+    public void paint(Graphics2D g, BufferedImage frameA, BufferedImage frameB,
+                      float progress) {
+        transition.paint(g, frameB, frameA, 1 - progress);
+    }
+
 }

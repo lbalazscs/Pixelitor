@@ -20,7 +20,6 @@ package com.jhlabs.image;
  * A Filter to draw grids and check patterns.
  */
 public class CheckFilter extends PointFilter {
-
     private int xScale = 8;
     private int yScale = 8;
     private int foreground = 0xffffffff;
@@ -46,9 +45,9 @@ public class CheckFilter extends PointFilter {
 
     private void setAaRes(int aaRes) {
         this.aaRes = aaRes;
-        this.aaRes2 = aaRes * aaRes;
-        this.aaShift = 0.5f - 1.0f / (2 * aaRes);
-        this.invAaRes = 1.0f / aaRes;
+        aaRes2 = aaRes * aaRes;
+        aaShift = 0.5f - 1.0f / (2 * aaRes);
+        invAaRes = 1.0f / aaRes;
     }
 
     public CheckFilter(String filterName) {
@@ -276,6 +275,7 @@ public class CheckFilter extends PointFilter {
         return ((inx % 2) == (iny % 2)) ? 0.0f : 1.0f;
     }
 
+    @Override
     public String toString() {
         return "Texture/Checkerboard...";
     }

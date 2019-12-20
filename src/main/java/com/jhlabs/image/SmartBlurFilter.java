@@ -183,7 +183,7 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      * @see #getRadius
      */
     public void setRadius(int radius) {
-        this.hRadius = this.vRadius = radius;
+        hRadius = vRadius = radius;
     }
 
     /**
@@ -212,9 +212,9 @@ public class SmartBlurFilter extends AbstractBufferedImageOp {
      * @return the threshold value
      * @see #setThreshold
      */
-	public int getThreshold() {
-		return threshold;
-	}
+    public int getThreshold() {
+        return threshold;
+    }
 
     @Override
     public String toString() {

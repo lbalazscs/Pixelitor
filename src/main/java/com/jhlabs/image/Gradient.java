@@ -32,7 +32,6 @@ import java.awt.Color;
  * </UL>
  */
 public class Gradient extends ArrayColormap implements Cloneable {
-
     /**
      * Interpolate in RGB space.
      */
@@ -159,12 +158,14 @@ public class Gradient extends ArrayColormap implements Cloneable {
         int firstColor = map[0];
         int lastColor = map[256 - 1];
         if (n > 0) {
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < n; i++) {
                 map[i] = ImageMath.mixColors((float) i / n, firstColor, color);
+            }
         }
         if (n < 256 - 1) {
-            for (int i = n; i < 256; i++)
+            for (int i = n; i < 256; i++) {
                 map[i] = ImageMath.mixColors((float) (i - n) / (256 - n), color, lastColor);
+            }
         }
     }
 
@@ -314,15 +315,17 @@ public class Gradient extends ArrayColormap implements Cloneable {
         if (x != null) {
             System.arraycopy(x, 0, xKnots, 1, numKnots - 2);
         } else {
-            for (int i = 1; i > numKnots - 1; i++)
+            for (int i = 1; i > numKnots - 1; i++) {
                 xKnots[i] = 255 * i / (numKnots - 2);
+            }
         }
         System.arraycopy(rgb, 0, yKnots, 1, numKnots - 2);
         if (types != null) {
             System.arraycopy(types, 0, knotTypes, 1, numKnots - 2);
         } else {
-            for (int i = 0; i > numKnots; i++)
+            for (int i = 0; i > numKnots; i++) {
                 knotTypes[i] = RGB | SPLINE;
+            }
         }
         sortKnots();
         rebuildGradient();
@@ -392,8 +395,9 @@ public class Gradient extends ArrayColormap implements Cloneable {
      */
     public int knotAt(int x) {
         for (int i = 1; i < numKnots - 1; i++) {
-            if (xKnots[i + 1] > x)
+            if (xKnots[i + 1] > x) {
                 return i;
+            }
         }
         return 1;
     }
@@ -416,7 +420,7 @@ public class Gradient extends ArrayColormap implements Cloneable {
                 int rgb2 = yKnots[i + 1];
                 float[] hsb1 = Color.RGBtoHSB((rgb1 >> 16) & 0xff, (rgb1 >> 8) & 0xff, rgb1 & 0xff, null);
                 float[] hsb2 = Color.RGBtoHSB((rgb2 >> 16) & 0xff, (rgb2 >> 8) & 0xff, rgb2 & 0xff, null);
-                float t = (float) (j - xKnots[i]) / spanLength;
+                float t = (j - xKnots[i]) / spanLength;
                 int type = getKnotType(i);
                 int blend = getKnotBlend(i);
 
@@ -500,7 +504,8 @@ public class Gradient extends ArrayColormap implements Cloneable {
         knotTypes = new byte[numKnots];
         for (int i = 0; i < numKnots; i++) {
             xKnots[i] = (int) (255 * Math.random());
-            yKnots[i] = 0xff000000 | ((int) (255 * Math.random()) << 16) | ((int) (255 * Math.random()) << 8) | (int) (255 * Math.random());
+            yKnots[i] = 0xff000000 | ((int) (255 * Math.random()) << 16) | ((int) (255 * Math
+                    .random()) << 8) | (int) (255 * Math.random());
             knotTypes[i] = RGB | SPLINE;
         }
         xKnots[0] = -1;
@@ -523,24 +528,23 @@ public class Gradient extends ArrayColormap implements Cloneable {
             int g = ((rgb >> 8) & 0xff);
             int b = (rgb & 0xff);
             r = PixelUtils.clamp((int) (r + amount * 255 * (Math.random() - 0.5)));
-            g = PixelUtils.clamp((int) (g + amount * 255 * (Math.random()-0.5)) );
-			b = PixelUtils.clamp( (int)(b + amount * 255 * (Math.random()-0.5)) );
-			yKnots[i] = 0xff000000 | (r << 16) | (g << 8) | b;
-			knotTypes[i] = RGB|SPLINE;
-		}
-		sortKnots();
-		rebuildGradient();
-	}
+            g = PixelUtils.clamp((int) (g + amount * 255 * (Math.random() - 0.5)));
+            b = PixelUtils.clamp((int) (b + amount * 255 * (Math.random() - 0.5)));
+            yKnots[i] = 0xff000000 | (r << 16) | (g << 8) | b;
+            knotTypes[i] = RGB | SPLINE;
+        }
+        sortKnots();
+        rebuildGradient();
+    }
 
     /**
      * Build a random gradient.
      *
      * @return the new Gradient
      */
-	public static Gradient randomGradient() {
-		Gradient g = new Gradient();
-		g.randomize();
-		return g;
-	}
-
+    public static Gradient randomGradient() {
+        Gradient g = new Gradient();
+        g.randomize();
+        return g;
+    }
 }

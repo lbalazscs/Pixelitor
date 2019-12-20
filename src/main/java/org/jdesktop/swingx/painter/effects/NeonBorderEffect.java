@@ -103,16 +103,16 @@ public class NeonBorderEffect extends AbstractAreaEffect {
         for (int i = 0; i < steps; i++) {
 
             // make the brush width smaller each time until there is nothing left
-            float brushWidth = (float) (steps + 1 - i);
+            float brushWidth = steps + 1 - i;
             float half = steps / 2;
 
             if (borderPosition == BorderPosition.Centered) {
                 gfx.setPaint(interpolateColor((float) (steps - i) / steps, getEdgeColor(), getCenterColor()));
             } else {
                 if (i < half) {
-                    gfx.setPaint(interpolateColor((float) (half - i) / half, getEdgeColor(), getCenterColor()));
+                    gfx.setPaint(interpolateColor((half - i) / half, getEdgeColor(), getCenterColor()));
                 } else {
-                    gfx.setPaint(interpolateColor((float) (i - half) / half, getEdgeColor(), getCenterColor()));
+                    gfx.setPaint(interpolateColor((i - half) / half, getEdgeColor(), getCenterColor()));
                 }
             }
 

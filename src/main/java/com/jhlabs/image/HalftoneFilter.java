@@ -22,7 +22,6 @@ import java.awt.image.BufferedImage;
  * A filter which uses a another image as a mask to produce a halftoning effect.
  */
 public class HalftoneFilter extends AbstractBufferedImageOp {
-
     private float softness = 0.1f;
     private boolean invert;
     private boolean monochrome;
@@ -161,6 +160,7 @@ public class HalftoneFilter extends AbstractBufferedImageOp {
         return dst;
     }
 
+    @Override
     public String toString() {
         return "Stylize/Halftone...";
     }

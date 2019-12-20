@@ -21,7 +21,6 @@ import java.awt.RenderingHints;
 import java.awt.image.ColorModel;
 
 public final class SoftLightComposite extends RGBComposite {
-
     public SoftLightComposite(float alpha) {
         super(alpha);
     }
@@ -69,5 +68,4 @@ public final class SoftLightComposite extends RGBComposite {
             }
         }
     }
-
 }

@@ -17,7 +17,6 @@ limitations under the License.
 package com.jhlabs.image;
 
 public class CurvesFilter extends TransferFilter {
-
     private Curve[] curves;
 
     public CurvesFilter(String filterName) {
@@ -32,9 +31,9 @@ public class CurvesFilter extends TransferFilter {
     @Override
     protected void initialize() {
         initialized = true;
-        if ( curves.length == 1 )
+        if (curves.length == 1) {
             rTable = gTable = bTable = curves[0].makeTable();
-        else {
+        } else {
             rTable = new int[256];
             gTable = new int[256];
             bTable = new int[256];
@@ -52,8 +51,8 @@ public class CurvesFilter extends TransferFilter {
         }
     }
 
-    public void setCurve( Curve curve ) {
-        curves = new Curve[] { curve };
+    public void setCurve(Curve curve) {
+        curves = new Curve[]{curve};
         initialized = false;
     }
 
@@ -69,9 +68,9 @@ public class CurvesFilter extends TransferFilter {
         return curves;
     }
 
+    @Override
     public String toString() {
         return "Colors/Curves...";
     }
-
 }
 

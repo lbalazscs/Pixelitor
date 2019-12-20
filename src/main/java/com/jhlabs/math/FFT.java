@@ -17,11 +17,10 @@ limitations under the License.
 package com.jhlabs.math;
 
 public class FFT {
-
     // Weighting factors
-    protected float[] w1;
-    protected float[] w2;
-    protected float[] w3;
+    protected final float[] w1;
+    protected final float[] w2;
+    protected final float[] w3;
 
     public FFT(int logN) {
         // Prepare the weighting factors
@@ -148,5 +147,4 @@ public class FFT {
         }
         return m == n ? log2n : -1;
     }
-
 }

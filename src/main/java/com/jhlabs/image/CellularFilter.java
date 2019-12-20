@@ -37,7 +37,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
     public float gain = 0.5f;
     public float bias = 0.5f;
     public float distancePower = 2;
-    public final boolean useColor = false;
+    public static final boolean useColor = false;
     protected Colormap colormap = new Gradient();
     protected final float[] coefficients = {1, 0, 0, 0};
     protected float angleCoefficient;
@@ -436,7 +436,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
         };
 
         static final ThreadLocal<CachedFloatRandom> randomTL =
-            ThreadLocal.withInitial(CachedFloatRandom::new);
+                ThreadLocal.withInitial(CachedFloatRandom::new);
 
         abstract float checkCube(float x, float y, int cubeX, int cubeY, Point[] results, float randomness);
 

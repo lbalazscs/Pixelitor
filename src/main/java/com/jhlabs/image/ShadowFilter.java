@@ -26,11 +26,12 @@ import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * A filter which draws a drop shadow based on the alpha channel of the image.
  */
 public class ShadowFilter extends AbstractBufferedImageOp {
-
     private float radius = 5;
     private float angle = (float) Math.PI * 6 / 4;
     private float distance = 5;
@@ -229,7 +230,9 @@ public class ShadowFilter extends AbstractBufferedImageOp {
         if (dst == null) {
             if (addMargins) {
                 ColorModel cm = src.getColorModel();
-                dst = new BufferedImage(cm, cm.createCompatibleWritableRaster(src.getWidth() + (int) (Math.abs(xOffset) + radius), src.getHeight() + (int) (Math.abs(yOffset) + radius)), cm.isAlphaPremultiplied(), null);
+                dst = new BufferedImage(cm, cm
+                        .createCompatibleWritableRaster(src.getWidth() + (int) (Math.abs(xOffset) + radius), src
+                                .getHeight() + (int) (Math.abs(yOffset) + radius)), cm.isAlphaPremultiplied(), null);
             } else {
                 dst = createCompatibleDestImage(src, null);
             }
@@ -246,7 +249,7 @@ public class ShadowFilter extends AbstractBufferedImageOp {
                 {0, 0, 0, shadowB},
                 {0, 0, 0, opacity}
         };
-        BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage shadow = new BufferedImage(width, height, TYPE_INT_ARGB);
         new BandCombineOp(extractAlpha, null).filter(src.getRaster(), shadow.getRaster());
 //        shadow = new GaussianFilter(radius, filterName).filter(shadow, null);
         shadow = new BoxBlurFilter(radius, radius, 3, filterName).filter(shadow, null);
@@ -259,17 +262,19 @@ public class ShadowFilter extends AbstractBufferedImageOp {
             float leftShadow = Math.max(0, radius - xOffset);
             g.translate(leftShadow, topShadow);
         }
-        g.drawRenderedImage(shadow, AffineTransform.getTranslateInstance(xOffset, yOffset ) );
-		if ( !shadowOnly ) {
-			g.setComposite( AlphaComposite.SrcOver );
-			g.drawRenderedImage( src, null );
-		}
-		g.dispose();
+        g.drawRenderedImage(shadow, AffineTransform.getTranslateInstance(
+                xOffset, yOffset));
+        if (!shadowOnly) {
+            g.setComposite(AlphaComposite.SrcOver);
+            g.drawRenderedImage(src, null);
+        }
+        g.dispose();
 
         return dst;
-	}
+    }
 
-	public String toString() {
-		return "Stylize/Drop Shadow...";
-	}
+    @Override
+    public String toString() {
+        return "Stylize/Drop Shadow...";
+    }
 }

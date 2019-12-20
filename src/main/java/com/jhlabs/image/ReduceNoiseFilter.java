@@ -23,7 +23,6 @@ import java.awt.Rectangle;
  * replacing it by the next minimum or maximum of the neighbours.
  */
 public class ReduceNoiseFilter extends WholeImageFilter {
-
     public ReduceNoiseFilter(String filterName) {
         super(filterName);
     }
@@ -107,9 +106,9 @@ public class ReduceNoiseFilter extends WholeImageFilter {
         return outPixels;
     }
 
+    @Override
     public String toString() {
         return "Blur/Smooth";
     }
-
 }
 

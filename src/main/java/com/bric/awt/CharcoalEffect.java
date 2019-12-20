@@ -22,12 +22,15 @@ package com.bric.awt;
 import com.bric.geom.GeneralPathWriter;
 import com.bric.geom.MeasuredShape;
 import com.bric.geom.PathWriter;
-import net.jafama.FastMath;
 
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Random;
+
+import static java.lang.Math.PI;
+import static net.jafama.FastMath.cos;
+import static net.jafama.FastMath.sin;
 
 /**
  * This applies a charcoal effect to a shape.
@@ -39,11 +42,11 @@ import java.util.Random;
  * code snippets commented out that change how this renders.)
  */
 public class CharcoalEffect {
-    public final PathWriter writer;
-    public final int seed;
-    public final float size;
-    public final float angle;
-    public final float maxDepth;
+    private final PathWriter writer;
+    private final int seed;
+    private final float size;
+    private final float angle;
+    private final float maxDepth;
 
     /**
      * Creates a new <code>CharcoalEffect</code>.
@@ -131,24 +134,29 @@ public class CharcoalEffect {
         Point2D center = new Point2D.Float();
         Point2D rightSide = new Point2D.Float();
 
-        MeasuredShape[] m = MeasuredShape.getSubpaths(s, .05f);
+        MeasuredShape[] m = MeasuredShape.getSubpaths(s, 0.05f);
+
+        // Don't add a crack if this point is completely inside the guiding shape.
+        // And don't trust shape.contains(x,y,width,height).  Although that is in
+        // theory what we want, it doesn't always return correct results!
+        // This test isn't quite the same, but gets us what we need.  And accurately:
         subpathIterator:
-        for (int a = 0; a < m.length; a++) {
-            float orig = m[a].getOriginalDistance();
-            float total = m[a].getClosedDistance();
+        for (MeasuredShape measuredShape : m) {
+            float orig = measuredShape.getOriginalDistance();
+            float total = measuredShape.getClosedDistance();
             float distance = 0;
             float pendingGap = 0;
 
-            writer.moveTo(m[a].getMoveToX(), m[a].getMoveToY());
+            writer.moveTo(measuredShape.getMoveToX(), measuredShape.getMoveToY());
 
             while (distance < orig) {
-                pendingGap += (.05f + .95f * random.nextFloat()) * 20 * (.05f + .95f * (1 - .9f * size));
+                pendingGap += (0.05f + 0.95f * random.nextFloat()) * 20 * (0.05f + 0.95f * (1 - 0.9f * size));
 
                 if (distance + pendingGap >= orig) {
                     //we're overflowing:
                     float remaining = orig - distance;
                     if (remaining > 2) {
-                        m[a].writeShape(distance / total, remaining / total, writer, false);
+                        measuredShape.writeShape(distance / total, remaining / total, writer, false);
                     } else {
                         writer.closePath();
                     }
@@ -156,27 +164,26 @@ public class CharcoalEffect {
                 } else if (distance + pendingGap < orig) {
                     //see if we can add a crack here:
 
-                    m[a].getPoint(distance + pendingGap, center);
+                    measuredShape.getPoint(distance + pendingGap, center);
 
-                    /** Don't add a crack if this point is completely inside the guiding shape.
-                     * And don't trust shape.contains(x,y,width,height).  Although that is in
-                     * theory what we want, it doesn't always return correct results!
-                     * This test isn't quite the same, but gets us what we need.  And accurately:
-                     */
-                    boolean addCrack = !(s.contains(center.getX() - .5, center.getY() - .5) &&
-                            s.contains(center.getX() + .5, center.getY() - .5) &&
-                            s.contains(center.getX() - .5, center.getY() + .5) &&
-                            s.contains(center.getX() + .5, center.getY() + .5));
+                    // Don't add a crack if this point is completely inside the guiding shape.
+                    // And don't trust shape.contains(x,y,width,height).  Although that is in
+                    // theory what we want, it doesn't always return correct results!
+                    // This test isn't quite the same, but gets us what we need.  And accurately:
+                    boolean addCrack = !(s.contains(center.getX() - 0.5, center.getY() - 0.5) &&
+                            s.contains(center.getX() + 0.5, center.getY() - 0.5) &&
+                            s.contains(center.getX() - 0.5, center.getY() + 0.5) &&
+                            s.contains(center.getX() + 0.5, center.getY() + 0.5));
 
                     if (addCrack) {
                         for (int mult = -1; mult <= 1; mult += 2) { //try both the clockwise and the counterclockwise side
-                            float width = .05f;
+                            float width = 0.05f;
                             //yes, you can also try this:
                             //float angle = m[a].getTangentSlope(distance+pendingGap);
                             //or
                             //float angle = m[a].getTangentSlope(distance+pendingGap)-(float)Math.PI/4;
-                            while (s.contains(center.getX() + width * FastMath.cos(angle + mult * Math.PI / 2),
-                                    center.getY() + width * FastMath.sin(angle + mult * Math.PI / 2)) && width < maxDepth) {
+                            while (s.contains(center.getX() + width * cos(angle + mult * PI / 2),
+                                    center.getY() + width * sin(angle + mult * PI / 2)) && width < maxDepth) {
                                 width++;
                             }
                             //or to make something spikey, try:
@@ -191,29 +198,30 @@ public class CharcoalEffect {
 
                                 //now define a constant to multiply the depth of the crack by
                                 //when width is 5, multiply by 1.  when width is 15, multiply by .5
-                                float k = -.05f * width + 1.25f;
+                                float k = -0.05f * width + 1.25f;
                                 if (k > 1) {
                                     k = 1; //cap at these values
                                 }
-                                if (k < .4f) {
-                                    k = .4f;
+                                if (k < 0.4f) {
+                                    k = 0.4f;
                                 }
-                                depth = width * k * (.5f + .5f * size) * (.25f + .75f * random.nextFloat());
+                                depth = width * k * (0.5f + 0.5f * size) * (0.25f + 0.75f * random.nextFloat());
 
                                 crackWidth = depth * depth / 150;
-                                if (crackWidth < 1f) {
-                                    crackWidth = 1f;
+                                if (crackWidth < 1.0f) {
+                                    crackWidth = 1.0f;
                                 }
                                 if (crackWidth > 2) {
                                     crackWidth = 2;
                                 }
 
                                 if (distance + pendingGap - crackWidth / 2 > 0 && distance + pendingGap + crackWidth / 2 < orig) {
-                                    m[a].getPoint(distance + pendingGap + crackWidth / 2, rightSide);
-                                    m[a].writeShape(distance / total, (pendingGap - crackWidth / 2) / total, writer, false);
+                                    measuredShape.getPoint(distance + pendingGap + crackWidth / 2, rightSide);
+                                    measuredShape
+                                            .writeShape(distance / total, (pendingGap - crackWidth / 2) / total, writer, false);
                                     writer.lineTo(
-                                            (float) (center.getX() + depth * FastMath.cos(angle + mult * Math.PI / 2)),
-                                            (float) (center.getY() + depth * FastMath.sin(angle + mult * Math.PI / 2))
+                                            (float) (center.getX() + depth * cos(angle + mult * PI / 2)),
+                                            (float) (center.getY() + depth * sin(angle + mult * PI / 2))
                                     );
                                     writer.lineTo((float) rightSide.getX(), (float) rightSide.getY());
 

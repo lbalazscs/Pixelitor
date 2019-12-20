@@ -22,6 +22,8 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Future;
 
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+
 /**
  * An abstract superclass for point filters. The interface is the same as the old RGBImageFilter.
  */
@@ -40,7 +42,7 @@ public abstract class PointFilter extends AbstractBufferedImageOp {
             dst = createCompatibleDestImage(src, null);
         }
 
-        if (src.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+        if (src.getType() == TYPE_BYTE_GRAY) {
             return grayFilter(src, dst);
         }
 
