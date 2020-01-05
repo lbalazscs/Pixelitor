@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public class OnePixelBrushSettings extends BrushSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        JPanel p = new JPanel(new FlowLayout());
+        var p = new JPanel(new FlowLayout());
         p.add(new JLabel("Anti-aliasing"));
         if (aa == null) {
             aa = new JCheckBox("", DEFAULT_AA);

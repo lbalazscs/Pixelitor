@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.utils.test;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
 
 import java.awt.EventQueue;
@@ -57,7 +57,7 @@ public class PixelitorEvent {
 
         if (comp == null) {
             assert layer == null;
-            Composition activeComp = OpenComps.getActiveCompOrNull();
+            Composition activeComp = OpenImages.getActiveComp();
             if (activeComp != null) {
                 this.comp = activeComp;
                 this.layer = activeComp.getActiveLayer();
@@ -86,7 +86,7 @@ public class PixelitorEvent {
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle2D rect = comp.getSelection().getShapeBounds2D();
-            selectionInfo = format("sel. bounds = '%s'", rect.toString());
+            selectionInfo = format("sel. bounds = '%s'", rect);
         }
         String maskInfo = "no mask";
         if (layer.hasMask()) {

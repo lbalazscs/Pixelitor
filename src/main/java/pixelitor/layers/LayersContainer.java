@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.CompActivationListener;
@@ -31,6 +31,10 @@ import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
 
@@ -46,24 +50,24 @@ public class LayersContainer extends JPanel implements CompActivationListener {
     private LayersContainer() {
         setLayout(new BorderLayout());
 
-        add(LayerBlendingModePanel.INSTANCE, BorderLayout.NORTH);
+        add(LayerBlendingModePanel.INSTANCE, NORTH);
 
         scrollPane = new JScrollPane();
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, CENTER);
 
         JPanel southPanel = initSouthPanel();
-        add(southPanel, BorderLayout.SOUTH);
+        add(southPanel, SOUTH);
 
         setBorder(createTitledBorder("Layers"));
 
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
 
         new DropTarget(this, new DropListener(NEW_LAYERS));
     }
 
     private static JPanel initSouthPanel() {
         JPanel southPanel = new JPanel();
-        southPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        southPanel.setLayout(new FlowLayout(LEFT, 2, 0));
 
         southPanel.add(new SouthButton(AddNewLayerAction.INSTANCE, "addLayer"));
         southPanel.add(new SouthButton(DeleteActiveLayerAction.INSTANCE, "deleteLayer"));

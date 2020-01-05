@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
-import pixelitor.filters.comp.Flip;
-import pixelitor.filters.comp.Rotate;
+import pixelitor.compactions.Flip;
+import pixelitor.compactions.Rotate;
 import pixelitor.history.ContentLayerMoveEdit;
 
 import java.awt.Dimension;
@@ -43,7 +43,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
+    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
         return null;
     }
 
@@ -70,7 +70,7 @@ public class SmartObject extends ContentLayer {
 
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
-        g.drawImage(content.getCompositeImage(), getTX(), getTY(), null);
+        g.drawImage(content.getCompositeImage(), getTx(), getTy(), null);
     }
 
     @Override
@@ -87,7 +87,6 @@ public class SmartObject extends ContentLayer {
     public void crop(Rectangle2D cropRect, boolean deleteCroppedPixels, boolean allowGrowing) {
         if (!deleteCroppedPixels) {
             super.crop(cropRect, deleteCroppedPixels, allowGrowing);
-            return;
         }
     }
 

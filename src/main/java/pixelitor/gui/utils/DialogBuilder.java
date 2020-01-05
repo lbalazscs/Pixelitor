@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import java.awt.Window;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -69,7 +70,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder title(String s) {
-        this.title = s;
+        title = s;
         return this;
     }
 
@@ -98,7 +99,7 @@ public class DialogBuilder {
      * Sets an alternative text for the "OK" button
      */
     public DialogBuilder okText(String s) {
-        this.okText = s;
+        okText = s;
         return this;
     }
 
@@ -106,7 +107,7 @@ public class DialogBuilder {
      * Sets an alternative text for the "Cancel" button
      */
     public DialogBuilder cancelText(String s) {
-        this.cancelText = s;
+        cancelText = s;
         return this;
     }
 
@@ -115,7 +116,7 @@ public class DialogBuilder {
      */
     public DialogBuilder content(JComponent form) {
         assert form != null;
-        this.content = form;
+        content = form;
         return this;
     }
 
@@ -124,7 +125,7 @@ public class DialogBuilder {
      * sets up validation based on it.
      */
     public DialogBuilder validatedContent(ValidatedPanel validatedPanel) {
-        this.content = validatedPanel;
+        content = validatedPanel;
         return validator(d -> {
             ValidationResult validationResult = validatedPanel.checkValidity();
             if (validationResult.isOK()) {
@@ -137,7 +138,7 @@ public class DialogBuilder {
     }
 
     public DialogBuilder notModal() {
-        this.modal = false;
+        modal = false;
         return this;
     }
 
@@ -147,12 +148,12 @@ public class DialogBuilder {
     }
 
     public DialogBuilder validateWhenCanceled() {
-        this.validateWhenCanceled = true;
+        validateWhenCanceled = true;
         return this;
     }
 
     public DialogBuilder withScrollbars() {
-        this.addScrollBars = true;
+        addScrollBars = true;
         return this;
     }
 
@@ -167,17 +168,17 @@ public class DialogBuilder {
     }
 
     public DialogBuilder noGlobalKeyChange() {
-        this.notifyGlobalEvents = false;
+        notifyGlobalEvents = false;
         return this;
     }
 
     public DialogBuilder okAction(Runnable r) {
-        this.okAction = r;
+        okAction = r;
         return this;
     }
 
     public DialogBuilder cancelAction(Runnable r) {
-        this.cancelAction = r;
+        cancelAction = r;
         return this;
     }
 
@@ -189,7 +190,7 @@ public class DialogBuilder {
      * and should be used as the owner of the error dialog.
      */
     public DialogBuilder validator(Predicate<JDialog> p) {
-        this.validator = p;
+        validator = p;
         return this;
     }
 
@@ -245,7 +246,7 @@ public class DialogBuilder {
             } else if (dialogOwner != null) {
                 d = new BuiltDialog(dialogOwner, notifyGlobalEvents);
             } else {
-                PixelitorWindow pw = PixelitorWindow.getInstance();
+                var pw = PixelitorWindow.getInstance();
                 d = new BuiltDialog(pw, notifyGlobalEvents);
             }
         }
@@ -258,9 +259,9 @@ public class DialogBuilder {
             JScrollPane scrollPane = new JScrollPane(content,
                     VERTICAL_SCROLLBAR_AS_NEEDED,
                     HORIZONTAL_SCROLLBAR_NEVER);
-            d.add(scrollPane, BorderLayout.CENTER);
+            d.add(scrollPane, CENTER);
         } else {
-            d.add(content, BorderLayout.CENTER);
+            d.add(content, CENTER);
         }
     }
 

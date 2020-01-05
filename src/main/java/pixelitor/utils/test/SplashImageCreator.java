@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -86,7 +86,7 @@ public class SplashImageCreator {
         }
         int numImages = 64;
         String msg = format("Save %d Splash Images: ", numImages);
-        ProgressHandler progressHandler = Messages.startProgress(msg, numImages);
+        var progressHandler = Messages.startProgress(msg, numImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
         for (int i = 0; i < numImages; i++) {
@@ -106,11 +106,11 @@ public class SplashImageCreator {
     private static Composition makeOneSplashImage(ProgressHandler ph, int seqNo) {
         ph.updateProgress(seqNo);
 
-        Composition comp = createSplashComp();
+        var comp = createSplashComp();
         comp.getView().paintImmediately();
 
         OutputFormat format = OutputFormat.getLastUsed();
-        String fileName = format("splash%04d.%s", seqNo, format.toString());
+        String fileName = format("splash%04d.%s", seqNo, format);
         File f = new File(Dirs.getLastSave(), fileName);
         comp.setFile(f);
 
@@ -124,7 +124,7 @@ public class SplashImageCreator {
 //        FgBgColors.setBGColor(new Color(6, 83, 81));
         FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());
 
-        Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+        var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         for (int i = 0; i < 3; i++) {
@@ -147,7 +147,7 @@ public class SplashImageCreator {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
         ValueNoise.reseed();
-        Composition comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+        var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         layer.setName("Color Wheel", true);

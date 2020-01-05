@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,9 +45,9 @@ public class VariationsPalette extends Palette {
 
     @Override
     public void addButtons(PalettePanel panel) {
-        HueSatPaletteConfig hsp = (HueSatPaletteConfig) config;
-        float hueShift = hsp.getHueShift();
-        float saturation = hsp.getSaturation();
+        var hsConfig = (HueSatPaletteConfig) config;
+        float hueShift = hsConfig.getHueShift();
+        float saturation = hsConfig.getSaturation();
 
         for (int y = 0; y < numRows; y++) {
             float hue = calcHue(y, hueShift);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,11 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.FlowLayout.LEFT;
+import static java.lang.String.format;
+
 class AddGridGuidesPanel extends JPanel {
     private final GroupedRangeParam guidesParam = new GroupedRangeParam(
             "Guides", 0, 3, 50, false);
@@ -33,13 +38,13 @@ class AddGridGuidesPanel extends JPanel {
     public AddGridGuidesPanel(Guides.Builder builder) {
         this.builder = builder;
         setLayout(new BorderLayout());
-        add(guidesParam.createGUI(), BorderLayout.CENTER);
+        add(guidesParam.createGUI(), CENTER);
 
-        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        var southPanel = new JPanel(new FlowLayout(LEFT));
         BooleanParam clearExisting = builder.getClearExisting();
         southPanel.add(new JLabel(clearExisting.getName() + ": "));
         southPanel.add(clearExisting.createGUI());
-        add(southPanel, BorderLayout.SOUTH);
+        add(southPanel, SOUTH);
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
         guidesParam.setAdjustmentListener(updatePreview);
@@ -55,7 +60,7 @@ class AddGridGuidesPanel extends JPanel {
         int horDivisions = getNumHorDivisions();
         int verDivisions = getNumVerDivisions();
         guides.addRelativeGrid(horDivisions, verDivisions);
-        guides.setName(String.format("horDivisions = %d, verDivisions = %d%n", horDivisions, verDivisions));
+        guides.setName(format("horDivisions = %d, verDivisions = %d%n", horDivisions, verDivisions));
     }
 
     private int getNumHorDivisions() {

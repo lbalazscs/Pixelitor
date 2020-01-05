@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.ColorUtils;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.utils.Rnd;
 
 import java.awt.Color;
 
@@ -37,7 +38,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColor;
-        this.defaultInnerColor = innerColor;
+        defaultInnerColor = innerColor;
         innerColorSwatch = new ColorSwatch(this.innerColor, BUTTON_SIZE);
 
         GUIUtils.addColorDialogListener(innerColorSwatch, this::innerColorSwatchClicked);
@@ -45,7 +46,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
         ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
                 this::getInnerColor, c -> setInnerColor(c, true));
 
-        gbh.addLabelWithControlNoStretch("Inner Color:", innerColorSwatch);
+        gbh.addLabelAndControlNoStretch("Inner Color:", innerColorSwatch);
     }
 
     private void innerColorSwatchClicked() {
@@ -55,8 +56,8 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
     }
 
     public void setInnerColor(Color selectedColor, boolean trigger) {
-        this.innerColor = selectedColor;
-        innerColorSwatch.setForeground(this.innerColor);
+        innerColor = selectedColor;
+        innerColorSwatch.setForeground(innerColor);
         innerColorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 
         if (trigger && adjustmentListener != null) {
@@ -79,5 +80,14 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
     public void reset(boolean trigger) {
         super.reset(false);
         setInnerColor(defaultInnerColor, trigger);
+    }
+
+    @Override
+    public boolean randomize() {
+        boolean enable = super.randomize();
+        if (enable) {
+            setInnerColor(Rnd.createRandomColor(), false);
+        }
+        return enable;
     }
 }

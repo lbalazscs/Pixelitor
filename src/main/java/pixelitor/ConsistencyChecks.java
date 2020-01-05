@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,18 +17,15 @@
 
 package pixelitor;
 
-import pixelitor.gui.OpenComps;
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
-import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 
 import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
@@ -58,7 +55,7 @@ public final class ConsistencyChecks {
     }
 
     public static boolean fadeWouldWorkOn(Composition comp) {
-        Drawable dr = comp.getActiveDrawableOrNull();
+        Drawable dr = comp.getActiveDrawable();
         if (dr == null) {
             // nothing to check
             return true;
@@ -74,17 +71,16 @@ public final class ConsistencyChecks {
         }
         Optional<FadeableEdit> edit = History.getPreviousEditForFade(dr);
         if (edit.isPresent()) {
-            BufferedImage currentImg = dr.getSelectedSubImage(false);
-
-            FadeableEdit fadeableEdit = edit.get();
-            BufferedImage previousImg = fadeableEdit.getBackupImage();
+            var currentImg = dr.getSelectedSubImage(false);
+            var fadeableEdit = edit.get();
+            var previousImg = fadeableEdit.getBackupImage();
             if (previousImg == null) {
                 // soft reference expired: fade wouldn't work, but not a bug
                 return true;
             }
 
             if (isSizeDifferent(currentImg, previousImg)) {
-                Composition comp = dr.getComp();
+                var comp = dr.getComp();
                 Events.postProgramError("fadeWouldWorkOn problem", comp, null);
 
                 Utils.debugImage(currentImg, "current");
@@ -131,38 +127,37 @@ public final class ConsistencyChecks {
     }
 
     public static boolean selectionShapeIsNotEmpty(Composition comp) {
-        Selection selection = comp.getSelection();
+        var selection = comp.getSelection();
         if (selection == null) {
             return true;
         }
-        Rectangle2D shapeBounds = selection.getShapeBounds2D();
-        if (shapeBounds.isEmpty()) {
+        var selShapeBounds = selection.getShapeBounds2D();
+        if (selShapeBounds.isEmpty()) {
             return false;
         }
         return true;
     }
 
     public static boolean selectionIsInsideCanvas(Composition comp) {
-        Selection selection = comp.getSelection();
+        var selection = comp.getSelection();
         if (selection == null) {
             return true;
         }
         Rectangle canvasSize = comp.getCanvasImBounds();
         // increase the size because of rounding errors
-        canvasSize = new Rectangle(-1, -1,
-                canvasSize.width + 2, canvasSize.height + 2);
-        Rectangle2D shapeBounds = selection.getShapeBounds2D();
+        canvasSize.grow(1, 1);
+        var selShapeBounds = selection.getShapeBounds2D();
 
         // In principle the selection must be fully inside the canvas,
         // but this is hard to check since
-        // canvasSize.contains(shapeBounds)
+        // canvasSize.contains(selShapeBounds)
         // doesn't work (the bounds are not necessarily the smallest)
         // so check that it is not fully outside
-        boolean ok = !canvasSize.createIntersection(shapeBounds).isEmpty();
+        boolean ok = !canvasSize.createIntersection(selShapeBounds).isEmpty();
         if (!ok) {
             System.out.println("\nConsistencyChecks::selectionIsInsideCanvas: no intersection: "
-                + "canvasSize = " + canvasSize
-                    + ", shapeBounds = " + shapeBounds);
+                    + "canvasSize = " + canvasSize
+                    + ", shapeBounds = " + selShapeBounds);
         }
         return ok;
     }
@@ -174,20 +169,20 @@ public final class ConsistencyChecks {
     }
 
     public static boolean imageCoversCanvas(Drawable dr) {
-        Canvas canvas = dr.getComp().getCanvas();
+        var canvas = dr.getComp().getCanvas();
         if (canvas == null) {
             // can happen during the loading of pxc files
             return true;
         }
 
-        BufferedImage image = dr.getImage();
+        var image = dr.getImage();
 
-        int txAbs = -dr.getTX();
+        int txAbs = -dr.getTx();
         if (image.getWidth() < txAbs + canvas.getImWidth()) {
             return throwImageDoesNotCoverCanvasException(dr);
         }
 
-        int tyAbs = -dr.getTY();
+        int tyAbs = -dr.getTy();
         if (image.getHeight() < tyAbs + canvas.getImHeight()) {
             return throwImageDoesNotCoverCanvasException(dr);
         }
@@ -196,29 +191,29 @@ public final class ConsistencyChecks {
     }
 
     private static boolean throwImageDoesNotCoverCanvasException(Drawable dr) {
-        Canvas canvas = dr.getComp().getCanvas();
-        BufferedImage img = dr.getImage();
+        var canvas = dr.getComp().getCanvas();
+        var img = dr.getImage();
 
         String msg = format("canvas width = %d, canvas height = %d, " +
                         "image width = %d, image height = %d, " +
                         "tx = %d, ty = %d, class = %s",
                 canvas.getImWidth(), canvas.getImHeight(),
                 img.getWidth(), img.getHeight(),
-                dr.getTX(), dr.getTY(), dr.getClass().getSimpleName());
+                dr.getTx(), dr.getTy(), dr.getClass().getSimpleName());
 
         throw new IllegalStateException(msg);
     }
 
     @SuppressWarnings("SameReturnValue")
     public static boolean layerDeleteActionEnabled() {
-        DeleteActiveLayerAction action = DeleteActiveLayerAction.INSTANCE;
+        var action = DeleteActiveLayerAction.INSTANCE;
         if (action == null) {
             // can be null at startup because this check is
             // called while constructing the DeleteActiveLayerAction
             return true;
         }
 
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp == null) {
             return true;
         }

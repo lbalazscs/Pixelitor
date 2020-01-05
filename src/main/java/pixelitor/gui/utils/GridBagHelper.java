@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ import static java.awt.GridBagConstraints.HORIZONTAL;
 import static java.awt.GridBagConstraints.NONE;
 import static java.awt.GridBagConstraints.REMAINDER;
 import static java.awt.GridBagConstraints.WEST;
+import static javax.swing.SwingConstants.RIGHT;
 
 /**
  * Helper object for GridBagLayout
@@ -54,7 +55,7 @@ public class GridBagHelper {
     }
 
     public void addLabel(String labelText, int gridX, int gridY) {
-        JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
+        JLabel label = new JLabel(labelText, RIGHT);
         addLabel(label, gridX, gridY);
     }
 
@@ -73,19 +74,19 @@ public class GridBagHelper {
         container.add(c, nextControlConstraint);
     }
 
-    public void addLabelWithTwoControls(String labelText, Component c1, Component c2) {
-        addLabelWithControl(labelText, c1);
+    public void addLabelAndTwoControls(String labelText, Component c1, Component c2) {
+        addLabelAndControl(labelText, c1);
         addNextControl(c2);
     }
 
-    public void addLabelWithControlNoStretch(String labelText, Component c) {
+    public void addLabelAndControlNoStretch(String labelText, Component c) {
         addLabel(labelText, 0, autoIncrementedGridY);
         addControlNoStretch(c);
         autoIncrementedGridY++;
     }
 
     public void addTwoLabels(String text1, String text2) {
-        addLabelWithControl(text1, new JLabel(text2));
+        addLabelAndControl(text1, new JLabel(text2));
     }
 
     public void addTwoComponents(Component c1, Component c2) {
@@ -93,13 +94,13 @@ public class GridBagHelper {
         autoIncrementedGridY++;
     }
 
-    public void addLabelWithControl(String labelText, Component c) {
-        addLabelWithControl(labelText, c, autoIncrementedGridY);
+    public void addLabelAndControl(String labelText, Component c) {
+        addLabelAndControl(labelText, c, autoIncrementedGridY);
         autoIncrementedGridY++;
     }
 
-    public void addLabelWithControl(String labelText, Component c, int gridY) {
-        JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
+    public void addLabelAndControl(String labelText, Component c, int gridY) {
+        JLabel label = new JLabel(labelText, RIGHT);
         addTwoComponents(label, c, gridY);
     }
 
@@ -135,7 +136,7 @@ public class GridBagHelper {
         container.add(c, nextControlConstraint);
     }
 
-    public void addLabelWithLastControl(String name, Component c) {
+    public void addLabelAndLastControl(String name, Component c) {
         addLabel(name, 0, autoIncrementedGridY);
         addLastControl(c);
         autoIncrementedGridY++;
@@ -164,7 +165,7 @@ public class GridBagHelper {
     public void addParam(FilterParam param) {
         int cols = param.getNumGridBagCols();
         if (cols == 2) {
-            addLabelWithControl(param.getName(), param.createGUI());
+            addLabelAndControl(param.getName(), param.createGUI());
         } else if (cols == 1) {
             addOnlyControl(param.createGUI());
         }

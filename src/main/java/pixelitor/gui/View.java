@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import pixelitor.CanvasMargins;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
@@ -46,7 +47,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
-import pixelitor.utils.debug.ViewNode;
+import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
@@ -95,8 +96,8 @@ public class View extends JComponent
     private double canvasStartX;
     private double canvasStartY;
 
-    private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTX);
-    private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTX);
+    private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTransform);
+    private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
 
     private Navigator navigator;
 
@@ -107,7 +108,7 @@ public class View extends JComponent
         assert comp != null;
 
         this.comp = comp;
-        this.canvas = comp.getCanvas();
+        canvas = comp.getCanvas();
         comp.setView(this);
 
         ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
@@ -118,13 +119,13 @@ public class View extends JComponent
         addListeners();
     }
 
-    void replaceJustReloadedComp(Composition newComp) {
+    public void replaceJustReloadedComp(Composition newComp) {
         assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
         assert newComp != comp;
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
-        History.addEdit(new CompositionReplacedEdit(
+        History.add(new CompositionReplacedEdit(
                 "Reload", true, this, comp, newComp, null));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
 
@@ -162,7 +163,7 @@ public class View extends JComponent
         Layers.activeLayerChanged(newComp.getActiveLayer(), false);
 
         newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
-        updateNavigator(true);
+        repaintNavigator(true);
 
         Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
 
@@ -192,7 +193,7 @@ public class View extends JComponent
     }
 
     public boolean isActive() {
-        return OpenComps.getActiveView() == this;
+        return OpenImages.getActiveView() == this;
     }
 
     @Override
@@ -251,7 +252,7 @@ public class View extends JComponent
     }
 
     public void setViewContainer(ViewContainer window) {
-        this.viewContainer = window;
+        viewContainer = window;
         setImageWindowSize();
     }
 
@@ -290,7 +291,7 @@ public class View extends JComponent
 
     // used only for the frames ui
     public String createTitleWithZoom() {
-        return comp.getName() + " - " + zoomLevel.toString();
+        return comp.getName() + " - " + zoomLevel;
     }
 
     public ZoomLevel getZoomLevel() {
@@ -343,7 +344,7 @@ public class View extends JComponent
                 canvasCoWidth, canvasCoHeight);
 
         // make a copy of the transform object
-        AffineTransform componentTransform = g2.getTransform();
+        var componentTransform = g2.getTransform();
 
         // TODO casting to int seems necessary, otherwise the
         //   checkerboard and the image might be painted on slightly different
@@ -439,14 +440,14 @@ public class View extends JComponent
     }
 
     public static void setShowPixelGrid(boolean newValue) {
-        if (View.showPixelGrid == newValue) {
+        if (showPixelGrid == newValue) {
             return;
         }
-        View.showPixelGrid = newValue;
+        showPixelGrid = newValue;
         if (newValue) {
-            OpenComps.pixelGridEnabled();
+            OpenImages.pixelGridEnabled();
         } else {
-            OpenComps.repaintVisible();
+            OpenImages.repaintVisible();
         }
     }
 
@@ -474,7 +475,7 @@ public class View extends JComponent
     /**
      * Repaints only a region of the image
      */
-    public void updateRegion(PPoint start, PPoint end, double thickness) {
+    public void repaintRegion(PPoint start, PPoint end, double thickness) {
         double startX = start.getCoX();
         double startY = start.getCoY();
         double endX = end.getCoX();
@@ -511,7 +512,7 @@ public class View extends JComponent
     /**
      * Repaints only a region of the image
      */
-    public void updateRegion(PRectangle area) {
+    public void repaintRegion(PRectangle area) {
         repaint(area.getCo());
     }
 
@@ -637,7 +638,7 @@ public class View extends JComponent
 
     private void setZoomLevel(ZoomLevel zoomLevel) {
         this.zoomLevel = zoomLevel;
-        this.scaling = zoomLevel.getViewScale();
+        scaling = zoomLevel.getViewScale();
         canvas.recalcCoSize(this);
         updateTitle();
     }
@@ -748,8 +749,8 @@ public class View extends JComponent
         return new Rectangle.Double(
                 componentXToImageSpace(co.getX()),
                 componentYToImageSpace(co.getY()),
-                (co.getWidth() / scaling),
-                (co.getHeight() / scaling)
+                co.getWidth() / scaling,
+                co.getHeight() / scaling
         );
     }
 
@@ -766,8 +767,8 @@ public class View extends JComponent
         return imToCo.get();
     }
 
-    private AffineTransform createImToCoTX() {
-        AffineTransform at = new AffineTransform();
+    private AffineTransform createImToCoTransform() {
+        var at = new AffineTransform();
         at.translate(canvasStartX, canvasStartY);
         at.scale(scaling, scaling);
         return at;
@@ -777,8 +778,8 @@ public class View extends JComponent
         return coToIm.get();
     }
 
-    private AffineTransform createCoToImTX() {
-        AffineTransform at = new AffineTransform();
+    private AffineTransform createCoToImTransform() {
+        var at = new AffineTransform();
         double s = 1.0 / scaling;
         at.scale(s, s);
         at.translate(-canvasStartX, -canvasStartY);
@@ -838,15 +839,16 @@ public class View extends JComponent
         this.navigator = navigator;
     }
 
-    public void updateNavigator(boolean icSizeChanged) {
+    public void repaintNavigator(boolean viewSizeChanged) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
         if (navigator != null) {
-            if (icSizeChanged) {
+            if (viewSizeChanged) {
                 // defer until all
                 // pending events have been processed
                 SwingUtilities.invokeLater(() -> {
                     if (navigator != null) { // check again for safety
+                        // will also repaint
                         navigator.recalculateSize(this, false,
                                 true, false);
                     }
@@ -882,7 +884,7 @@ public class View extends JComponent
 
     @Override
     public String toString() {
-        ViewNode node = new ViewNode("CompositionView", this);
+        var node = DebugNodes.createViewNode("view", this);
         return node.toDetailedString();
     }
 }

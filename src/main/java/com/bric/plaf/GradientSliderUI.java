@@ -252,7 +252,7 @@ public class GradientSliderUI extends MultiThumbSliderUI {
     }
 
     @Override
-    protected void calculateGeometry() {
+    protected synchronized void calculateGeometry() {
         super.calculateGeometry();
         calculateImage();
     }
@@ -327,9 +327,8 @@ public class GradientSliderUI extends MultiThumbSliderUI {
 
         TexturePaint tp = new TexturePaint(img, new Rectangle(trackRect.x, 0, img.getWidth(), 1));
         g.setPaint(tp);
-        AffineTransform oldTransform = null;
 
-        oldTransform = g.getTransform();
+        AffineTransform oldTransform = g.getTransform();
         AffineTransform transform = new AffineTransform();
         if (slider.getOrientation() == MultiThumbSlider.VERTICAL) {
             if (slider.isInverted()) {

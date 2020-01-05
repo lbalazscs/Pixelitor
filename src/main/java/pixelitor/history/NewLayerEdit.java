@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,7 +42,7 @@ public class NewLayerEdit extends PixelitorEdit {
         this.activeLayerBefore = activeLayerBefore;
         this.viewModeBefore = viewModeBefore;
         this.newLayer = newLayer;
-        this.newLayerIndex = comp.getLayerIndex(newLayer);
+        newLayerIndex = comp.getLayerIndex(newLayer);
     }
 
     @Override

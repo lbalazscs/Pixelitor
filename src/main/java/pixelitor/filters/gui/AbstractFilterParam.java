@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import java.awt.Rectangle;
 import java.util.Objects;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -35,7 +36,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     // an extra action button to the right of the normal GUI,
     // typically some randomization, which will be enabled
     // only for certain values of this param
-    protected FilterAction action;
+    protected FilterButtonModel action;
 
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
         this.name = Objects.requireNonNull(name);
@@ -44,13 +45,13 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        this.adjustmentListener = listener;
+        adjustmentListener = listener;
         if (action != null) {
             action.setAdjustmentListener(listener);
         }
     }
 
-    public FilterParam withAction(FilterAction action) {
+    public FilterParam withAction(FilterButtonModel action) {
         this.action = action;
         return this;
     }
@@ -58,6 +59,11 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void considerImageSize(Rectangle bounds) {
+        // by default do nothing, most controls are unaffected
     }
 
     @Override
@@ -69,7 +75,7 @@ public abstract class AbstractFilterParam implements FilterParam {
             case FINAL_ANIMATION_SETTING:
                 if (canBeAnimated()) {
                     // ignore - the whole point of the final animation setting mode
-                    // is to disable/enable the filter params that cannot be animated
+                    // is to disable/enable the filter params that can't be animated
                     return;
                 }
                 enabledByAnimationSetting = b;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -41,8 +41,8 @@ public class JHCheckerFilter extends ParametrizedFilter {
 
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 1, 10, 100, true);
     private final AngleParam angle = new AngleParam("Angle", 0);
-    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, NO_OPACITY);
-    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, NO_OPACITY);
+    private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, NO_TRANSPARENCY);
+    private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, NO_TRANSPARENCY);
     private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 48);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.tools.util.PPoint;
  * Specifies the way the dabs of a {@link DabsBrush}
  * are placed in response to mouse events.
  *
- * Unlike brush settings, these objects cannot be shared
+ * Unlike brush settings, these objects can't be shared
  * between symmetry brushes, because they call back a specific brush.
  */
 public interface DabsStrategy {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.utils.DialogBuilder;
 
 import javax.swing.*;
-import java.awt.Rectangle;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -36,7 +35,7 @@ public class EffectsParam extends AbstractFilterParam {
 
     public EffectsParam(String name) {
         super(name, IGNORE_RANDOMIZE); // randomize() is not implemented!
-        this.separateDialog = true;
+        separateDialog = true;
     }
 
     @Override
@@ -45,11 +44,11 @@ public class EffectsParam extends AbstractFilterParam {
         ensureEffectsPanelIsCreated();
 
         if (separateDialog) {
-            DefaultButton button = new DefaultButton(effectsPanel);
-            effectsPanel.setDefaultButton(button);
+            var defaultButton = new DefaultButton(effectsPanel);
+            effectsPanel.setDefaultButton(defaultButton);
 
-            ConfigureParamGUI configureParamGUI = new ConfigureParamGUI(owner ->
-                    buildDialog(owner, true), button);
+            var configureParamGUI = new ConfigureParamGUI(owner ->
+                    buildDialog(owner, true), defaultButton);
 
             paramGUI = configureParamGUI;
             setParamGUIEnabledState();
@@ -63,14 +62,14 @@ public class EffectsParam extends AbstractFilterParam {
     public JDialog buildDialog(JDialog owner, boolean modal) {
         ensureEffectsPanelIsCreated();
 
-        DialogBuilder db = new DialogBuilder();
+        var builder = new DialogBuilder();
         if (owner != null) {
-            db = db.owner(owner);
+            builder = builder.owner(owner);
         }
         if (!modal) {
-            db = db.notModal();
+            builder = builder.notModal();
         }
-        return db
+        return builder
                 .title("Effects")
                 .content(effectsPanel)
                 .withScrollbars()
@@ -102,21 +101,19 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        // TODO
+        if (effectsPanel == null) { // happens in unit tests
+            effectsPanel = new EffectsPanel(adjustmentListener, null);
+        }
+        effectsPanel.randomize();
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-        // ignore
-    }
-
-    @Override
-    public ParamState copyState() {
+    public AreaEffects copyState() {
         return getEffects();
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         setEffects((AreaEffects) state);
     }
 

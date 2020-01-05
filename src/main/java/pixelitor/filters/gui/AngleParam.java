@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import java.awt.Rectangle;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -164,27 +163,23 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
     public boolean canBeAnimated() {
         return true;
     }
 
     @Override
-    public ParamState copyState() {
+    public APState copyState() {
         // save the degrees so that the interpolation
         // does not confuse the user
         return new APState(getValueInDegrees());
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         setValueInDegrees(((APState) state).angle, false);
     }
 
-    private static class APState implements ParamState {
+    private static class APState implements ParamState<APState> {
         private final double angle;
 
         public APState(double angle) {
@@ -192,9 +187,8 @@ public class AngleParam extends AbstractFilterParam {
         }
 
         @Override
-        public ParamState interpolate(ParamState endState, double progress) {
-            APState apEndState = (APState) endState;
-            double interpolatedAngle = ImageMath.lerp(progress, angle, apEndState.angle);
+        public APState interpolate(APState endState, double progress) {
+            double interpolatedAngle = ImageMath.lerp(progress, angle, endState.angle);
             return new APState(interpolatedAngle);
         }
     }

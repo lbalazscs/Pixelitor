@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,10 +85,10 @@ public class RGBColorMixPalette extends Palette {
 
     private int getMixed(int x) {
         float mixFactor = calcMixFactor(x);
-        int mixed = mixColors(mixFactor, this.rgb, otherRGB);
+        int mixed = mixColors(mixFactor, rgb, otherRGB);
 
-        RGBPaletteConfig c = (RGBPaletteConfig) config;
-        float cyanRed = c.getCyanRed();
+        var rgbConfig = (RGBPaletteConfig) config;
+        float cyanRed = rgbConfig.getCyanRed();
 
         if (cyanRed > 0.5f) {
             mixed = mixColors(cyanRed - 0.5f, mixed, 0xFF_FF_00_00);
@@ -96,14 +96,14 @@ public class RGBColorMixPalette extends Palette {
             mixed = mixColors(0.5f - cyanRed, mixed, 0xFF_00_FF_FF);
         }
 
-        float magentaGreen = c.getMagentaGreen();
+        float magentaGreen = rgbConfig.getMagentaGreen();
         if (magentaGreen > 0.5f) {
             mixed = mixColors(magentaGreen - 0.5f, mixed, 0xFF_00_FF_00);
         } else {
             mixed = mixColors(0.5f - magentaGreen, mixed, 0xFF_FF_00_FF);
         }
 
-        float yellowBlue = c.getYellowBlue();
+        float yellowBlue = rgbConfig.getYellowBlue();
         if (yellowBlue > 0.5f) {
             mixed = mixColors(yellowBlue - 0.5f, mixed, 0xFF_00_00_FF);
         } else {
@@ -114,7 +114,7 @@ public class RGBColorMixPalette extends Palette {
     }
 
     private float calcMixFactor(int x) {
-        return (x * (numCols + 1) / (float) numCols) / (float) numCols;
+        return (x * (numCols + 1) / (float) numCols) / numCols;
     }
 
     @Override

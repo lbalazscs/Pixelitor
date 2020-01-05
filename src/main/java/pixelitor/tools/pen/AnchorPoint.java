@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,10 +80,10 @@ public class AnchorPoint extends DraggablePoint {
     public AnchorPoint(AnchorPoint other, SubPath subPath,
                        boolean copyControlPositions) {
         this(other.x, other.y, other.view, subPath);
-        this.type = other.type;
+        type = other.type;
         if (copyControlPositions) {
-            this.ctrlIn.copyPositionFrom(other.ctrlIn);
-            this.ctrlOut.copyPositionFrom(other.ctrlOut);
+            ctrlIn.copyPositionFrom(other.ctrlIn);
+            ctrlOut.copyPositionFrom(other.ctrlOut);
         }
     }
 
@@ -92,18 +92,10 @@ public class AnchorPoint extends DraggablePoint {
         boolean ctrlInActive = ctrlIn.isActive();
 
         if (paintIn && !ctrlIn.isRetracted()) {
-            Line2D.Double lineIn = new Line2D.Double(x, y, ctrlIn.x, ctrlIn.y);
-            Shapes.drawVisible(g, lineIn);
-            if (!ctrlInActive) {
-                ctrlIn.paintHandle(g);
-            }
+            paintControlHandle(ctrlIn, ctrlInActive, g);
         }
         if (paintOut && !ctrlOut.isRetracted()) {
-            Line2D.Double lineOut = new Line2D.Double(x, y, ctrlOut.x, ctrlOut.y);
-            Shapes.drawVisible(g, lineOut);
-            if (!ctrlOutActive) {
-                ctrlOut.paintHandle(g);
-            }
+            paintControlHandle(ctrlOut, ctrlOutActive, g);
         }
 
         paintHandle(g);
@@ -114,6 +106,16 @@ public class AnchorPoint extends DraggablePoint {
             ctrlOut.paintHandle(g);
         } else if (ctrlInActive) {
             ctrlIn.paintHandle(g);
+        }
+    }
+
+    private void paintControlHandle(ControlPoint controlPoint,
+                                    boolean ctrlActive,
+                                    Graphics2D g) {
+        var line = new Line2D.Double(x, y, controlPoint.x, controlPoint.y);
+        Shapes.drawVisible(g, line);
+        if (!ctrlActive) {
+            controlPoint.paintHandle(g);
         }
     }
 
@@ -205,10 +207,10 @@ public class AnchorPoint extends DraggablePoint {
     // tries to determine a type based on the current
     // positions of control points
     private AnchorPointType calcHeuristicType() {
-        double dOutX = ctrlOut.x - this.x;
-        double dOutY = ctrlOut.y - this.y;
-        double dInX = ctrlIn.x - this.x;
-        double dInY = ctrlIn.y - this.y;
+        double dOutX = ctrlOut.x - x;
+        double dOutY = ctrlOut.y - y;
+        double dInX = ctrlIn.x - x;
+        double dInY = ctrlIn.y - y;
 
         double symThreshold = 2.0;
         if (Math.abs(dOutX + dInX) < symThreshold
@@ -226,25 +228,25 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void showPopup(int x, int y) {
-        JPopupMenu p = new JPopupMenu();
-        AnchorPointType.addTypePopupItems(this, p);
+        var popup = new JPopupMenu();
+        AnchorPointType.addTypePopupItems(this, popup);
 
-        p.addSeparator();
+        popup.addSeparator();
 
-        p.add(new AbstractAction("Retract Handles") {
+        popup.add(new AbstractAction("Retract Handles") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AnchorPoint.this.retractHandles();
+                retractHandles();
             }
         });
 
-        p.addSeparator();
+        popup.addSeparator();
 
         if (Build.isDevelopment()) {
-            p.add(new AbstractAction("Dump") {
+            popup.add(new AbstractAction("Dump") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    AnchorPoint.this.dump();
+                    dump();
                 }
             });
         }
@@ -253,16 +255,16 @@ public class AnchorPoint extends DraggablePoint {
         boolean isLastPoint = singleSubPath && subPath.getNumAnchors() == 1;
 
         if (!isLastPoint) {
-            p.add(new AbstractAction("Delete Point") {
+            popup.add(new AbstractAction("Delete Point") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    AnchorPoint.this.delete();
+                    delete();
                 }
             });
         }
 
         if (!singleSubPath) {
-            p.add(new AbstractAction("Delete Subpath") {
+            popup.add(new AbstractAction("Delete Subpath") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     subPath.delete();
@@ -270,7 +272,7 @@ public class AnchorPoint extends DraggablePoint {
             });
         }
 
-        p.add(new AbstractAction("Delete Path") {
+        popup.add(new AbstractAction("Delete Path") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 subPath.deletePath();
@@ -278,7 +280,7 @@ public class AnchorPoint extends DraggablePoint {
         });
 
         try {
-            p.show(view, x, y);
+            popup.show(view, x, y);
         } catch (IllegalComponentStateException e) {
             // ignore: happens in RandomGUITest, but works OK otherwise
             // ("component must be showing on the screen to determine its location")
@@ -288,13 +290,13 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void retractHandles() {
-        AnchorPoint backup = new AnchorPoint(this, subPath, true);
+        var backup = new AnchorPoint(this, subPath, true);
         ctrlIn.retract();
         ctrlOut.retract();
         setType(SYMMETRIC);
         view.repaint();
 
-        History.addEdit(new AnchorPointChangeEdit("Retract Handles",
+        History.add(new AnchorPointChangeEdit("Retract Handles",
                 subPath.getComp(), backup, this));
     }
 
@@ -306,10 +308,10 @@ public class AnchorPoint extends DraggablePoint {
     }
 
     public void delete() {
-        SubPath backup = this.subPath.deepCopy(subPath.getPath(), view.getComp());
-        this.subPath.deletePoint(this);
-        History.addEdit(new SubPathEdit("Delete Anchor Point",
-                backup, subPath));
+        SubPath backup = subPath.deepCopy(subPath.getPath(), view.getComp());
+        subPath.deletePoint(this);
+        History.add(new SubPathEdit(
+                "Delete Anchor Point", backup, subPath));
         view.repaint();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,8 +19,8 @@ package pixelitor.menus;
 
 import com.bric.util.JVM;
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.NewImage;
+import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
@@ -29,14 +29,14 @@ import pixelitor.automate.BatchResize;
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.FullPalette;
 import pixelitor.colors.palette.PalettePanel;
+import pixelitor.compactions.EnlargeCanvas;
+import pixelitor.compactions.Flip;
+import pixelitor.compactions.ResizePanel;
+import pixelitor.compactions.Rotate;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.TweenWizard;
-import pixelitor.filters.comp.EnlargeCanvas;
-import pixelitor.filters.comp.Flip;
-import pixelitor.filters.comp.Rotate;
 import pixelitor.filters.convolve.Convolve;
 import pixelitor.filters.curves.ToneCurvesFilter;
-import pixelitor.filters.gui.ResizePanel;
 import pixelitor.filters.jhlabsproxies.*;
 import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
@@ -46,10 +46,10 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.Navigator;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.PreferencesPanel;
 import pixelitor.gui.View;
+import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;
@@ -90,7 +90,6 @@ import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.menus.view.ZoomMenu;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.brushes.CopyBrush;
-import pixelitor.utils.AppPreferences;
 import pixelitor.utils.FilterCreator;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
@@ -106,30 +105,32 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Composition.ImageChangeActions.FULL;
+import static pixelitor.OpenImages.duplicateActive;
+import static pixelitor.OpenImages.getActiveComp;
+import static pixelitor.OpenImages.getActiveCompositeImage;
+import static pixelitor.OpenImages.getActiveLayer;
+import static pixelitor.OpenImages.getActiveView;
+import static pixelitor.OpenImages.onActiveDrawable;
+import static pixelitor.OpenImages.onActiveImageLayer;
+import static pixelitor.OpenImages.onActiveTextLayer;
+import static pixelitor.OpenImages.reloadActiveFromFileAsync;
+import static pixelitor.OpenImages.repaintActive;
 import static pixelitor.colors.FillType.BACKGROUND;
 import static pixelitor.colors.FillType.FOREGROUND;
 import static pixelitor.colors.FillType.TRANSPARENT;
-import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
-import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
+import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
-import static pixelitor.gui.OpenComps.duplicateActive;
-import static pixelitor.gui.OpenComps.getActiveCompOrNull;
-import static pixelitor.gui.OpenComps.getActiveCompositeImage;
-import static pixelitor.gui.OpenComps.getActiveLayerOrNull;
-import static pixelitor.gui.OpenComps.getActiveView;
-import static pixelitor.gui.OpenComps.onActiveDrawable;
-import static pixelitor.gui.OpenComps.onActiveImageLayer;
-import static pixelitor.gui.OpenComps.onActiveTextLayer;
-import static pixelitor.gui.OpenComps.reloadActiveFromFileAsync;
-import static pixelitor.gui.OpenComps.repaintActive;
 import static pixelitor.layers.LayerMaskAddType.FROM_LAYER;
 import static pixelitor.layers.LayerMaskAddType.FROM_TRANSPARENCY;
 import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
@@ -254,10 +255,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // close
-        fileMenu.addActionWithKey(OpenComps.CLOSE_ACTIVE_ACTION, CTRL_W);
+        fileMenu.addActionWithKey(OpenImages.CLOSE_ACTIVE_ACTION, CTRL_W);
 
         // close all
-        fileMenu.addActionWithKey(OpenComps.CLOSE_ALL_ACTION, CTRL_ALT_W);
+        fileMenu.addActionWithKey(OpenImages.CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
 
@@ -381,21 +382,21 @@ public class MenuBar extends JMenuBar {
         layersMenu.addActionWithKey(new MenuAction("Merge Down") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().mergeActiveLayerDown(true);
+                getActiveComp().mergeActiveLayerDown(true);
             }
         }, CTRL_E);
 
         layersMenu.addAction(new MenuAction("Flatten Image") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().flattenImage(true, true);
+                getActiveComp().flattenImage(true, true);
             }
         });
 
         layersMenu.addActionWithKey(new MenuAction("New Layer from Composite") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().addNewLayerFromComposite();
+                getActiveComp().addNewLayerFromComposite();
             }
         }, CTRL_SHIFT_ALT_E);
 
@@ -420,14 +421,14 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_TOP) {
             @Override
             public void onClick() {
-                getActiveCompOrNull().moveActiveLayerToTop();
+                getActiveComp().moveActiveLayerToTop();
             }
         }, CTRL_SHIFT_ALT_R);
 
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_BOTTOM) {
             @Override
             public void onClick() {
-                getActiveCompOrNull().moveActiveLayerToBottom();
+                getActiveComp().moveActiveLayerToBottom();
             }
         }, CTRL_SHIFT_ALT_L);
 
@@ -436,7 +437,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction(LayerMoveAction.RAISE_LAYER_SELECTION) {
             @Override
             public void onClick() {
-                Composition comp = getActiveCompOrNull();
+                var comp = getActiveComp();
                 comp.moveLayerSelectionUp();
             }
         }, CTRL_SHIFT_R);
@@ -444,7 +445,7 @@ public class MenuBar extends JMenuBar {
         sub.addActionWithKey(new MenuAction(LayerMoveAction.LOWER_LAYER_SELECTION) {
             @Override
             public void onClick() {
-                getActiveCompOrNull().moveLayerSelectionDown();
+                getActiveComp().moveLayerSelectionDown();
             }
         }, CTRL_SHIFT_L);
 
@@ -457,35 +458,35 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Add White (Reveal All)") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(REVEAL_ALL);
+                getActiveLayer().addMask(REVEAL_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add Black (Hide All)") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(HIDE_ALL);
+                getActiveLayer().addMask(HIDE_ALL);
             }
         });
 
         sub.addAction(new MenuAction("Add from Selection") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(REVEAL_SELECTION);
+                getActiveLayer().addMask(REVEAL_SELECTION);
             }
         });
 
         sub.addAction(new MenuAction("Add from Transparency") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(FROM_TRANSPARENCY);
+                getActiveLayer().addMask(FROM_TRANSPARENCY);
             }
         });
 
         sub.addAction(new MenuAction("Add from Layer") {
             @Override
             public void onClick() {
-                getActiveLayerOrNull().addMask(FROM_LAYER);
+                getActiveLayer().addMask(FROM_LAYER);
             }
         });
 
@@ -501,7 +502,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                OpenComps.onActiveLayer(layer ->
+                OpenImages.onActiveLayer(layer ->
                         layer.deleteMask(true));
             }
         });
@@ -509,7 +510,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Apply", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                Layer layer = getActiveLayerOrNull();
+                Layer layer = getActiveLayer();
 
                 if (!(layer instanceof ImageLayer)) {
                     Messages.showNotImageLayerError();
@@ -561,7 +562,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Selection from Text", IS_TEXT_LAYER) {
             @Override
             public void onClick() {
-                getActiveCompOrNull().createSelectionFromTextLayer();
+                getActiveComp().createSelectionFromTextLayer();
             }
         });
 
@@ -640,7 +641,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.addAction(new MenuAction("Layer to Canvas Size") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().activeLayerToCanvasSize();
+                getActiveComp().activeLayerToCanvasSize();
             }
         });
 
@@ -776,9 +777,8 @@ public class MenuBar extends JMenuBar {
         filterMenu.add(createFindEdgesSubmenu());
         filterMenu.add(createOtherSubmenu());
 
-        // TODO does it still make sense to add the old text filter?
-        filterMenu.buildFilter(TextFilter.createFilterAction())
-                .add();
+        // the text as filter is still useful for batch operations
+        filterMenu.buildFilter(TextFilter.createFilterAction()).add();
 
         return filterMenu;
     }
@@ -1046,7 +1046,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAlwaysEnabledAction(new MenuAction("Set Default Workspace") {
             @Override
             public void onClick() {
-                AppPreferences.WorkSpace.resetDefaults(pw);
+                WorkSpace.resetDefaults(pw);
             }
         });
 
@@ -1084,7 +1084,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.addAction(new MenuAction("Clear Guides") {
             @Override
             public void onClick() {
-                Composition comp = getActiveCompOrNull();
+                var comp = getActiveComp();
                 comp.clearGuides();
             }
         });
@@ -1210,7 +1210,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Debug Layer Mask") {
             @Override
             public void onClick() {
-                ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
+                ImageLayer imageLayer = (ImageLayer) getActiveLayer();
                 debugImage(imageLayer.getImage(), "layer image");
 
                 if (imageLayer.hasMask()) {
@@ -1227,7 +1227,7 @@ public class MenuBar extends JMenuBar {
         developMenu.addAction(new MenuAction("Mask update transparency from BW") {
             @Override
             public void onClick() {
-                ImageLayer imageLayer = (ImageLayer) getActiveLayerOrNull();
+                ImageLayer imageLayer = (ImageLayer) getActiveLayer();
                 if (imageLayer.hasMask()) {
                     imageLayer.getMask().updateFromBWImage();
                     imageLayer.getComp().imageChanged();
@@ -1312,7 +1312,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("imageChanged(FULL) on the active image") {
             @Override
             public void onClick() {
-                getActiveCompOrNull().imageChanged(FULL, true);
+                getActiveComp().imageChanged(FULL, true);
             }
         });
 
@@ -1326,7 +1326,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("reset the translation of current layer") {
             @Override
             public void onClick() {
-                Composition comp = getActiveCompOrNull();
+                var comp = getActiveComp();
                 Layer layer = comp.getActiveLayer();
                 if (layer instanceof ContentLayer) {
                     ContentLayer contentLayer = (ContentLayer) layer;
@@ -1342,7 +1342,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Update Histograms") {
             @Override
             public void onClick() {
-                Composition comp = getActiveCompOrNull();
+                var comp = getActiveComp();
                 HistogramsPanel.INSTANCE.updateFrom(comp);
             }
         });
@@ -1452,8 +1452,8 @@ public class MenuBar extends JMenuBar {
                 explainLabel.setBorder(createEmptyBorder(5, 5, 5, 5));
 
                 JPanel form = new JPanel(new BorderLayout());
-                form.add(explainLabel, BorderLayout.NORTH);
-                form.add(new JScrollPane(tree), BorderLayout.CENTER);
+                form.add(explainLabel, NORTH);
+                form.add(new JScrollPane(tree), CENTER);
 
                 String text = node.toDetailedString();
 

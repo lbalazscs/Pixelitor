@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -97,7 +97,7 @@ public class LayerMask extends ImageLayer {
         // Therefore this method needs to be called only when
         // the visible image reference changes.
         WritableRaster raster = getVisibleImage().getRaster();
-        this.transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL,
+        transparencyImage = new BufferedImage(TRANSPARENCY_COLOR_MODEL,
                 raster, false, null);
     }
 
@@ -133,7 +133,7 @@ public class LayerMask extends ImageLayer {
     public void updateIconImage() {
         LayerUI ui = getUI();
         if (ui != null) { // can be null while deserializing
-            ui.updateLayerIconImage(this);
+            ui.updateLayerIconImageAsync(this);
         }
     }
 
@@ -145,7 +145,7 @@ public class LayerMask extends ImageLayer {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
 
         LayerMask d = new LayerMask(comp, maskImageCopy, owner,
-                getTX(), getTY());
+                getTx(), getTy());
 
         return d;
     }
@@ -158,7 +158,7 @@ public class LayerMask extends ImageLayer {
         this.linked = linked;
         notifyLayerChangeListeners();
         if (addToHistory) {
-            History.addEdit(new LinkLayerMaskEdit(comp, this));
+            History.add(new LinkLayerMaskEdit(comp, this));
         }
     }
 
@@ -174,7 +174,7 @@ public class LayerMask extends ImageLayer {
         if (Tools.isShapesDrawing()) {
             paintDraggedShapesIntoActiveLayer(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
-            g.drawImage(visibleImage, getTX(), getTY(), null);
+            g.drawImage(visibleImage, getTx(), getTy(), null);
         }
     }
 
@@ -182,7 +182,7 @@ public class LayerMask extends ImageLayer {
     protected void paintDraggedShapesIntoActiveLayer(Graphics2D g,
                                                      BufferedImage visibleImage,
                                                      boolean firstVisibleLayer) {
-        g.drawImage(visibleImage, getTX(), getTY(), null);
+        g.drawImage(visibleImage, getTx(), getTy(), null);
         Tools.SHAPES.paintOverActiveLayer(g, comp);
     }
 

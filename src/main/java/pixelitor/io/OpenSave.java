@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.io;
 
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -39,7 +39,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
-import static pixelitor.gui.OpenComps.addJustLoadedComp;
+import static pixelitor.OpenImages.addJustLoadedComp;
 import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
@@ -145,7 +145,7 @@ public class OpenSave {
     }
 
     public static void save(boolean saveAs) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         save(comp, saveAs);
     }
 
@@ -154,7 +154,7 @@ public class OpenSave {
      * false if the user cancels the saving or if it could not be saved
      */
     public static boolean save(Composition comp, boolean saveAs) {
-        boolean needsFileChooser = saveAs || (comp.getFile() == null);
+        boolean needsFileChooser = saveAs || comp.getFile() == null;
         if (needsFileChooser) {
             return FileChoosers.saveWithChooser(comp);
         } else {
@@ -208,10 +208,10 @@ public class OpenSave {
 
     private static void showAnotherProcessErrorMsg(File file) {
         String msg = format(
-                "Cannot save to\n%s\nbecause this file is being used by another program.",
+                "Can't save to\n%s\nbecause this file is being used by another program.",
                 file.getAbsolutePath());
 
-        EventQueue.invokeLater(() -> Messages.showError("Cannot save", msg));
+        EventQueue.invokeLater(() -> Messages.showError("Can't save", msg));
     }
 
     public static void openAllImagesInDir(File dir) {
@@ -247,7 +247,7 @@ public class OpenSave {
             return;
         }
 
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
 
         CompletableFuture
                 .supplyAsync(() -> exportLayersToPNG(comp), IOThread.getExecutor())
@@ -299,7 +299,7 @@ public class OpenSave {
     }
 
     public static void saveCurrentImageInAllFormats() {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
 
         boolean canceled = !SingleDirChooser.selectOutputDir();
         if (canceled) {
@@ -309,7 +309,7 @@ public class OpenSave {
         if (saveDir != null) {
             OutputFormat[] outputFormats = OutputFormat.values();
             for (OutputFormat outputFormat : outputFormats) {
-                File f = new File(saveDir, "all_formats." + outputFormat.toString());
+                File f = new File(saveDir, "all_formats." + outputFormat);
                 SaveSettings saveSettings = new SaveSettings(outputFormat, f);
                 comp.saveAsync(saveSettings, false).join();
             }
@@ -321,7 +321,7 @@ public class OpenSave {
             FileChoosers.initSaveChooser();
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             FileChoosers.showSaveChooserAndSaveComp(comp, settings);
         } finally {
             FileChoosers.setDefaultSaveExtensions();

@@ -76,7 +76,7 @@ public class ShapeStroke implements Stroke {
                 case SEG_CLOSE:
                     points[0] = moveX;
                     points[1] = moveY;
-                    // Fall into....
+                // fall through
 
                 case SEG_LINETO:
                     thisX = points[0];

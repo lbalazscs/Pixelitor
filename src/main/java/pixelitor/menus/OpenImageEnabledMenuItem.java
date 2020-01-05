@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,7 +16,7 @@
  */
 package pixelitor.menus;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 
@@ -29,7 +29,7 @@ public class OpenImageEnabledMenuItem extends JMenuItem implements CompActivatio
     public OpenImageEnabledMenuItem(Action a) {
         super(a);
         setEnabled(false);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
     }
 
     @Override

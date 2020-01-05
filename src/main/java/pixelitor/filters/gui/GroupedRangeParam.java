@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
         checkBoxModel = new JToggleButton.ToggleButtonModel();
 
-        this.linkedByDefault = linked;
+        linkedByDefault = linked;
         setLinked(linkedByDefault);
 
         linkParams();
@@ -86,7 +86,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        GroupedRangeParamGUI gui = new GroupedRangeParamGUI(this);
+        var gui = new GroupedRangeParamGUI(this);
         paramGUI = gui;
         setParamGUIEnabledState();
         return gui;
@@ -216,11 +216,11 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     public float getValueAsPercentage(int index) {
-        return rangeParams[index].getValueAsPercentage();
+        return rangeParams[index].getPercentageValF();
     }
 
     public double getValueAsDPercentage(int index) {
-        return rangeParams[index].getValueAsDPercentage();
+        return rangeParams[index].getPercentageValD();
     }
 
     public int getNumParams() {
@@ -228,7 +228,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     public GroupedRangeParam notLinkable() {
-        this.linkable = false;
+        linkable = false;
         return this;
     }
 
@@ -260,7 +260,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         GRState grState = (GRState) state;
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {

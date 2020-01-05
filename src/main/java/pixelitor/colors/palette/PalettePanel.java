@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,8 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
@@ -52,8 +54,8 @@ public class PalettePanel extends JPanel {
         this.palette = palette;
         this.clickHandler = clickHandler;
 
-        this.numCols = palette.getNumCols();
-        this.numRows = palette.getNumRows();
+        numCols = palette.getNumCols();
+        numRows = palette.getNumRows();
 
         setLayout(null);
 
@@ -93,7 +95,7 @@ public class PalettePanel extends JPanel {
             // remove only the unnecessary
             int count = getComponentCount();
             for (int i = count - 1; i >= 0; i--) {
-                ColorSwatchButton swatch = (ColorSwatchButton) getComponent(i);
+                var swatch = (ColorSwatchButton) getComponent(i);
                 if (swatch.getXPos() >= newNumCols || swatch.getYPos() >= newNumRows) {
                     remove(i);
                 }
@@ -107,9 +109,9 @@ public class PalettePanel extends JPanel {
 
     private ColorSwatchButton getButton(int x, int y) {
         if (x < buttons.size()) {
-            List<ColorSwatchButton> verticalList = buttons.get(x);
-            if (y < verticalList.size()) {
-                return verticalList.get(y);
+            List<ColorSwatchButton> verticalSwatches = buttons.get(x);
+            if (y < verticalSwatches.size()) {
+                return verticalSwatches.get(y);
             }
         }
         return null;
@@ -156,32 +158,32 @@ public class PalettePanel extends JPanel {
 
     public static void showFGVariationsDialog(PixelitorWindow pw) {
         Color refColor = getFGColor();
-        VariationsPalette palette = new VariationsPalette(refColor,
+        var palette = new VariationsPalette(refColor,
                 "Foreground Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showBGVariationsDialog(PixelitorWindow pw) {
         Color refColor = getBGColor();
-        VariationsPalette palette = new VariationsPalette(refColor,
+        var palette = new VariationsPalette(refColor,
                 "Background Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showFilterVariationsDialog(Window window, Color refColor,
                                                   ColorSwatchClickHandler clickHandler) {
-        VariationsPalette palette = new VariationsPalette(refColor,
+        var palette = new VariationsPalette(refColor,
                 "Filter Color Variations");
         showDialog(window, palette, clickHandler);
     }
 
     public static void showHSBMixDialog(PixelitorWindow pw, boolean fg) {
-        HSBColorMixPalette palette = new HSBColorMixPalette(fg);
+        var palette = new HSBColorMixPalette(fg);
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showRGBMixDialog(PixelitorWindow pw, boolean fg) {
-        RGBColorMixPalette palette = new RGBColorMixPalette(fg);
+        var palette = new RGBColorMixPalette(fg);
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
@@ -189,13 +191,13 @@ public class PalettePanel extends JPanel {
                                   ColorSwatchClickHandler clickHandler) {
         assert window != null;
 
-        PalettePanel palettePanel = new PalettePanel(palette, clickHandler);
+        var palettePanel = new PalettePanel(palette, clickHandler);
 
         JPanel form = new JPanel(new BorderLayout());
 
         form.add(palette.getConfig()
-                .createConfigPanel(palettePanel), BorderLayout.NORTH);
-        form.add(palettePanel, BorderLayout.CENTER);
+                .createConfigPanel(palettePanel), NORTH);
+        form.add(palettePanel, CENTER);
 
         new DialogBuilder()
                 .title(palette.getDialogTitle())

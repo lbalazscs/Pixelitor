@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ public class Canvas implements Serializable {
     public static final int MAX_HEIGHT = 9_999;
 
     // implementation note: some non-transient field names are inconsistent
-    // with their getters, but they cannot be renamed without breaking
+    // with their getters, but they can't be renamed without breaking
     // serialization compatibility with old pxc files
 
     // size in image space
@@ -51,15 +51,15 @@ public class Canvas implements Serializable {
     private static final long serialVersionUID = -1459254568616232274L;
 
     public Canvas(int imWidth, int imHeight) {
-        this.width = imWidth;
-        this.height = imHeight;
+        width = imWidth;
+        height = imHeight;
     }
 
     public Canvas(Canvas orig) {
-        this.width = orig.width;
-        this.height = orig.height;
-        this.zoomedWidth = orig.zoomedWidth;
-        this.zoomedHeight = orig.zoomedHeight;
+        width = orig.width;
+        height = orig.height;
+        zoomedWidth = orig.zoomedWidth;
+        zoomedHeight = orig.zoomedHeight;
     }
 
     /**
@@ -72,7 +72,7 @@ public class Canvas implements Serializable {
         // also update the component space values
         recalcCoSize(view);
 
-        Canvas.activeCanvasImSizeChanged(this);
+        activeCanvasImSizeChanged(this);
     }
 
     /**
@@ -152,12 +152,12 @@ public class Canvas implements Serializable {
             // creating an unnecessary Area, because this is useful
             // info in many ways (crop selection, AA selection clipping)
             return ((Rectangle2D) shape).createIntersection(canvasBounds);
-        }        
+        }
 
-        Area compBounds = new Area(canvasBounds);
-        Area result = new Area(shape);
-        result.intersect(compBounds);
-        return result;
+        Area canvasArea = new Area(canvasBounds);
+        Area shapeArea = new Area(shape);
+        shapeArea.intersect(canvasArea);
+        return shapeArea;
     }
 
     public static void activeCanvasImSizeChanged(Canvas canvas) {

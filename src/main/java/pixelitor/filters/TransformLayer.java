@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,16 +17,17 @@
 
 package pixelitor.filters;
 
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -34,7 +35,7 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 import static pixelitor.colors.ColorUtils.TRANSPARENT_COLOR;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Arbitrary Rotate
@@ -42,7 +43,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
 public class TransformLayer extends ParametrizedFilter {
     private final ImagePositionParam centerParam = new ImagePositionParam("Pivot Point");
     private final AngleParam angleParam = new AngleParam("Rotate Angle", 0);
-    private final ColorParam bgColorParam = new ColorParam("Background Color", TRANSPARENT_COLOR, USER_ONLY_OPACITY);
+    private final ColorParam bgColorParam = new ColorParam("Background Color", TRANSPARENT_COLOR, USER_ONLY_TRANSPARENCY);
     private final GroupedRangeParam scaleParam = new GroupedRangeParam("Scale (%)", 1, 100, 501);
     private final GroupedRangeParam shearParam = new GroupedRangeParam("Shear", -500, 0, 500, false);
 
@@ -61,45 +62,68 @@ public class TransformLayer extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        // fill with the background color
-        Graphics2D g = dest.createGraphics();
-        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
-        g.setColor(bgColorParam.getColor());
-        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+        Graphics2D g = createDestGraphics(dest);
+        fillWithBgColor(dest, g);
 
-        double theta = angleParam.getValueInRadians();
-
-        Drawable dr = OpenComps.getActiveDrawableOrThrow();
-
-        float relativeX = centerParam.getRelativeX();
-        float relativeY = centerParam.getRelativeY();
-
-        double centerShiftX = (-dr.getTX() + src.getWidth()) * relativeX;
-        double centerShiftY = (-dr.getTY() + src.getHeight()) * relativeY;
-
-        AffineTransform transform = AffineTransform.getRotateInstance(theta, centerShiftX, centerShiftY);
-
-        int scaleX = scaleParam.getValue(0);
-        int scaleY = scaleParam.getValue(1);
-        if (scaleX != 100 || scaleY != 100) {
-            transform.translate(centerShiftX, centerShiftY);
-            transform.scale(scaleX / 100.0, scaleY / 100.0);
-            transform.translate(-centerShiftX, -centerShiftY);
-        }
-
-        int shearX = shearParam.getValue(0);
-        int shearY = shearParam.getValue(1);
-        if (shearX != 0 || shearY != 0) {
-            transform.translate(centerShiftX, centerShiftY);
-            transform.shear(shearX / 100.0, shearY / 100.0);
-            transform.translate(-centerShiftX, -centerShiftY);
-        }
-
+        AffineTransform transform = calcTransform(src);
         g.drawImage(src, transform, null);
 
         g.dispose();
-
         return dest;
+    }
+
+    private static Graphics2D createDestGraphics(BufferedImage dest) {
+        Graphics2D g = dest.createGraphics();
+        g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BICUBIC);
+        return g;
+    }
+
+    private void fillWithBgColor(BufferedImage dest, Graphics2D g) {
+        g.setColor(bgColorParam.getColor());
+        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+    }
+
+    private AffineTransform calcTransform(BufferedImage src) {
+        Point2D centerShift = calcCenterShift(src);
+        var transform = calcRotateTransform(centerShift);
+        applyScale(transform, centerShift);
+        applyShear(transform, centerShift);
+        return transform;
+    }
+
+    private Point2D calcCenterShift(BufferedImage src) {
+        Drawable dr = OpenImages.getActiveDrawableOrThrow();
+        float relativeX = centerParam.getRelativeX();
+        float relativeY = centerParam.getRelativeY();
+        double centerShiftX = (-dr.getTx() + src.getWidth()) * relativeX;
+        double centerShiftY = (-dr.getTy() + src.getHeight()) * relativeY;
+        return new Point2D.Double(centerShiftX, centerShiftY);
+    }
+
+    private AffineTransform calcRotateTransform(Point2D centerShift) {
+        double theta = angleParam.getValueInRadians();
+        return AffineTransform.getRotateInstance(
+                theta, centerShift.getX(), centerShift.getY());
+    }
+
+    private void applyScale(AffineTransform transform, Point2D centerShift) {
+        int scaleX = scaleParam.getValue(0);
+        int scaleY = scaleParam.getValue(1);
+        if (scaleX != 100 || scaleY != 100) {
+            transform.translate(centerShift.getX(), centerShift.getY());
+            transform.scale(scaleX / 100.0, scaleY / 100.0);
+            transform.translate(-centerShift.getX(), -centerShift.getY());
+        }
+    }
+
+    private void applyShear(AffineTransform transform, Point2D centerShift) {
+        int shearX = shearParam.getValue(0);
+        int shearY = shearParam.getValue(1);
+        if (shearX != 0 || shearY != 0) {
+            transform.translate(centerShift.getX(), centerShift.getY());
+            transform.shear(shearX / 100.0, shearY / 100.0);
+            transform.translate(-centerShift.getX(), -centerShift.getY());
+        }
     }
 }

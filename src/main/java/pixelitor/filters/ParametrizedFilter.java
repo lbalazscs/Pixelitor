@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     protected void showAffectedArea() {
-        this.hasAffectedAreaShapeParam = true;
+        hasAffectedAreaShapeParam = true;
         showAffectedAreaParam = new BooleanParam("Show Affected Area", false);
     }
 
@@ -107,7 +107,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Some filters cannot be animated well, they can return true
+     * Some filters can't be animated well, they can return true
      * here in order to be excluded from the list of animation filters
      */
     public boolean excludedFromAnimation() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.awt.Color.WHITE;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Customization panel for the text filter and for text layers
@@ -123,7 +124,7 @@ public class TextSettingsPanel extends FilterGUI
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(textPanel);
+        var gbh = new GridBagHelper(textPanel);
 
         gbh.addLabel("Text:", 0, 0);
         createTextTF(settings);
@@ -131,9 +132,8 @@ public class TextSettingsPanel extends FilterGUI
 
         gbh.addLabel("Color:", 0, 1);
         Color defaultColor = settings == null ? WHITE : settings.getColor();
-        color = new ColorParam("Color", defaultColor, USER_ONLY_OPACITY);
-        ColorParamGUI colorParamGUI = new ColorParamGUI(color, false);
-        gbh.addControl(colorParamGUI);
+        color = new ColorParam("Color", defaultColor, USER_ONLY_TRANSPARENCY);
+        gbh.addControl(new ColorParamGUI(color, false));
         color.setAdjustmentListener(this);
 
         gbh.addLabel("Rotation:", 2, 1);
@@ -206,7 +206,7 @@ public class TextSettingsPanel extends FilterGUI
         fontPanel.setBorder(createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(fontPanel);
+        var gbh = new GridBagHelper(fontPanel);
 
         int maxFontSize = 1000;
         int defaultFontSize;
@@ -227,14 +227,13 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLabel("Font Size:", 0, 0);
 
         RangeParam fontSizeParam = new RangeParam("", 1, defaultFontSize, maxFontSize);
-        fontSizeSlider = SliderSpinner.simpleFrom(fontSizeParam);
+        fontSizeSlider = SliderSpinner.from(fontSizeParam);
         fontSizeSlider.setName("fontSize");
         fontSizeParam.setAdjustmentListener(this);
         gbh.addLastControl(fontSizeSlider);
 
         gbh.addLabel("Font Type:", 0, 1);
-        GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        String[] availableFonts = localGE.getAvailableFontFamilyNames();
+        String[] availableFonts = getAvailableFonts();
         fontFamilyChooserCB = new JComboBox<>(availableFonts);
         if (settings != null) {
             // it is important to use Font.getName(), and not Font.getFontName(),
@@ -269,11 +268,16 @@ public class TextSettingsPanel extends FilterGUI
         return fontPanel;
     }
 
+    private static String[] getAvailableFonts() {
+        return GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getAvailableFontFamilyNames();
+    }
+
     @SuppressWarnings("unchecked")
     private void setAttributeMapFromFontSettings(Font font) {
         if (font.hasLayoutAttributes()) {
-            Map<TextAttribute, ?> attributes = font.getAttributes();
-            this.map = (Map<TextAttribute, Object>) attributes;
+            map = (Map<TextAttribute, Object>) font.getAttributes();
         }
     }
 
@@ -318,7 +322,7 @@ public class TextSettingsPanel extends FilterGUI
         // and other fields which would override the current ones.
         // TODO there has to be a simpler way, for example overwriting
         // however, it is not trivial, there is no single "style" TextAttribute
-        Map<TextAttribute, Object> oldMap = map;
+        var oldMap = map;
         map = new HashMap<>();
 
         if (advancedSettingsDialog != null) {
@@ -358,7 +362,7 @@ public class TextSettingsPanel extends FilterGUI
         watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
         watermarkCB.addActionListener(this);
 
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        var p = new JPanel(new FlowLayout(LEFT));
         p.add(watermarkCB);
         return p;
     }
@@ -397,7 +401,7 @@ public class TextSettingsPanel extends FilterGUI
 
         Font selectedFont = getSelectedFont();
 
-        TextSettings settings = new TextSettings(
+        var settings = new TextSettings(
                 text, selectedFont, color.getColor(), areaEffects,
                 (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
                 (VerticalAlignment) vAlignmentCB.getSelectedItem(),
@@ -405,7 +409,7 @@ public class TextSettingsPanel extends FilterGUI
 
         if (textFilter != null) { // filter mode
             textFilter.setSettings(settings);
-            super.runFilterPreview();
+            runFilterPreview();
         } else {
             assert textLayer != null;
             textLayer.setSettings(settings);

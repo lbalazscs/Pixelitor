@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,13 @@ import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.SelectionBuilder;
-import pixelitor.selection.SelectionInteraction;
 import pixelitor.selection.SelectionType;
+import pixelitor.selection.ShapeCombination;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -38,9 +38,9 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 
-import static pixelitor.selection.SelectionInteraction.ADD;
-import static pixelitor.selection.SelectionInteraction.INTERSECT;
-import static pixelitor.selection.SelectionInteraction.SUBTRACT;
+import static pixelitor.selection.ShapeCombination.ADD;
+import static pixelitor.selection.ShapeCombination.INTERSECT;
+import static pixelitor.selection.ShapeCombination.SUBTRACT;
 
 /**
  * The selection tool
@@ -60,11 +60,8 @@ public class SelectionTool extends DragTool {
             "<b>Shift-drag</b> adds to an existing selection, " +
             "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
 
-    private JComboBox<SelectionType> typeCB;
-    private JComboBox<SelectionInteraction> interactionCB;
-
     private boolean altMeansSubtract = false;
-    private SelectionInteraction originalSelectionInteraction;
+    private ShapeCombination originalShapeCombination;
 
     private SelectionBuilder selectionBuilder;
     private boolean polygonal = false;
@@ -72,8 +69,8 @@ public class SelectionTool extends DragTool {
 
     private final EnumComboBoxModel<SelectionType> typeModel
             = new EnumComboBoxModel<>(SelectionType.class);
-    private final EnumComboBoxModel<SelectionInteraction> interactionModel
-            = new EnumComboBoxModel<>(SelectionInteraction.class);
+    private final EnumComboBoxModel<ShapeCombination> interactionModel
+            = new EnumComboBoxModel<>(ShapeCombination.class);
 
     SelectionTool() {
         super("Selection", 'M', "selection_tool_icon.png",
@@ -85,13 +82,13 @@ public class SelectionTool extends DragTool {
     @Override
     @SuppressWarnings("unchecked")
     public void initSettingsPanel() {
-        typeCB = new JComboBox<>(typeModel);
+        var typeCB = new JComboBox<SelectionType>(typeModel);
         typeCB.addActionListener(e -> selectionTypeChanged());
         settingsPanel.addComboBox("Type:", typeCB, "typeCB");
 
         settingsPanel.addSeparator();
 
-        interactionCB = new JComboBox<>(interactionModel);
+        var interactionCB = new JComboBox<ShapeCombination>(interactionModel);
         settingsPanel.addComboBox("New Selection:",
                 interactionCB, "interactionCB");
 
@@ -158,7 +155,7 @@ public class SelectionTool extends DragTool {
             return;
         }
 
-        Composition comp = e.getComp();
+        var comp = e.getComp();
         Selection builtSelection = comp.getBuiltSelection();
         if (builtSelection == null && !polygonal) {
             // can happen, if we called stopBuildingSelection()
@@ -167,30 +164,9 @@ public class SelectionTool extends DragTool {
         }
 
         if (polygonal) {
-            if (selectionBuilder == null) {
-                setupInteractionWithKeyModifiers(e);
-                selectionBuilder = new SelectionBuilder(getSelectionType(),
-                        getCurrentInteraction(), comp);
-                selectionBuilder.updateBuiltSelection(e, comp);
-                restoreInteraction();
-            } else {
-                selectionBuilder.updateBuiltSelection(e, comp);
-                if (e.isRight()) {
-                    selectionBuilder.combineShapes(comp);
-                    stopBuildingSelection();
-                }
-            }
+            polygonalDragFinished(e);
         } else {
-            restoreInteraction();
-
-            boolean startFromCenter = !altMeansSubtract && e.isAltDown();
-            userDrag.setStartFromCenter(startFromCenter);
-
-            selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
-            selectionBuilder.combineShapes(comp);
-            stopBuildingSelection();
-
-            assert !comp.hasBuiltSelection();
+            notPolygonalDragFinished(e);
         }
 
         altMeansSubtract = false;
@@ -201,20 +177,50 @@ public class SelectionTool extends DragTool {
                 "selection is outside";
     }
 
+    private void polygonalDragFinished(PMouseEvent e) {
+        var comp = e.getComp();
+        if (selectionBuilder == null) {
+            setupInteractionWithKeyModifiers(e);
+            selectionBuilder = new SelectionBuilder(getSelectionType(),
+                    getCurrentInteraction(), comp);
+            selectionBuilder.updateBuiltSelection(e, comp);
+            restoreInteraction();
+        } else {
+            selectionBuilder.updateBuiltSelection(e, comp);
+            if (e.isRight()) {
+                selectionBuilder.combineShapes(comp);
+                stopBuildingSelection();
+            }
+        }
+    }
+
+    private void notPolygonalDragFinished(PMouseEvent e) {
+        var comp = e.getComp();
+        restoreInteraction();
+
+        boolean startFromCenter = !altMeansSubtract && e.isAltDown();
+        userDrag.setStartFromCenter(startFromCenter);
+
+        selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
+        selectionBuilder.combineShapes(comp);
+        stopBuildingSelection();
+
+        assert !comp.hasBuiltSelection();
+    }
+
     @Override
     public void mouseClicked(PMouseEvent e) {
-        Composition comp = e.getComp();
+        var comp = e.getComp();
         if (polygonal) {
             if (selectionBuilder != null && e.getClickCount() > 1) {
                 // finish polygonal for double-click
                 selectionBuilder.updateBuiltSelection(e, comp);
                 selectionBuilder.combineShapes(comp);
                 stopBuildingSelection();
-                return;
             } else {
                 // ignore otherwise: will be handled in mouse released
-                return;
             }
+            return;
         }
 
         super.mouseClicked(e);
@@ -243,14 +249,14 @@ public class SelectionTool extends DragTool {
     @Override
     public void escPressed() {
         // pressing Esc should work the same as clicking outside the selection
-        OpenComps.onActiveComp(this::cancelSelection);
+        OpenImages.onActiveComp(this::cancelSelection);
     }
 
     @Override
     public void altPressed() {
         if (!altDown && !altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(true);
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
         }
         altDown = true;
@@ -260,7 +266,7 @@ public class SelectionTool extends DragTool {
     public void altReleased() {
         if (!altMeansSubtract && userDrag != null && userDrag.isDragging()) {
             userDrag.setStartFromCenter(false);
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             selectionBuilder.updateBuiltSelection(userDrag.toImDrag(), comp);
         }
         altDown = false;
@@ -268,10 +274,10 @@ public class SelectionTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        View view = OpenComps.getActiveView();
+        View view = OpenImages.getActiveView();
         if (view != null) {
-            Composition comp = view.getComp();
-            Selection selection = comp.getSelection();
+            var comp = view.getComp();
+            var selection = comp.getSelection();
             if (selection != null) {
                 selection.nudge(key.getTransform());
                 return true;
@@ -295,7 +301,7 @@ public class SelectionTool extends DragTool {
         altMeansSubtract = altDown;
 
         if (shiftDown || altDown) {
-            originalSelectionInteraction = getCurrentInteraction();
+            originalShapeCombination = getCurrentInteraction();
             if (shiftDown) {
                 if (altDown) {
                     setCurrentInteraction(INTERSECT);
@@ -309,9 +315,9 @@ public class SelectionTool extends DragTool {
     }
 
     private void restoreInteraction() {
-        if (originalSelectionInteraction != null) {
-            setCurrentInteraction(originalSelectionInteraction);
-            originalSelectionInteraction = null;
+        if (originalShapeCombination != null) {
+            setCurrentInteraction(originalShapeCombination);
+            originalShapeCombination = null;
         }
     }
 
@@ -327,7 +333,7 @@ public class SelectionTool extends DragTool {
 
     private void stopBuildingSelection() {
         if (selectionBuilder != null) {
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             selectionBuilder.cancelIfNotFinished(comp);
             selectionBuilder = null;
         }
@@ -348,28 +354,28 @@ public class SelectionTool extends DragTool {
     }
 
     @VisibleForTesting
-    public SelectionInteraction getCurrentInteraction() {
+    public ShapeCombination getCurrentInteraction() {
         return interactionModel.getSelectedItem();
     }
 
-    private void setCurrentInteraction(SelectionInteraction interaction) {
+    private void setCurrentInteraction(ShapeCombination interaction) {
         interactionModel.setSelectedItem(interaction);
     }
 
     @Override
     public String getStateInfo() {
         SelectionType type = getSelectionType();
-        SelectionInteraction interaction = getCurrentInteraction();
+        ShapeCombination interaction = getCurrentInteraction();
 
         return type + ", " + interaction;
     }
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addString("Type", getSelectionType().toString());
-        node.addString("Interaction", getCurrentInteraction().toString());
+        node.addString("type", getSelectionType().toString());
+        node.addString("interaction", getCurrentInteraction().toString());
 
         return node;
     }

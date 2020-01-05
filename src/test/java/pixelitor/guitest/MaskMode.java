@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.guitest;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.layers.MaskViewMode;
 
 import static pixelitor.layers.MaskViewMode.EDIT_MASK;
@@ -162,7 +162,7 @@ enum MaskMode {
     }
 
     protected static void assertMaskViewModeIs(MaskViewMode expected) {
-        MaskViewMode actual = OpenComps.getActiveView().getMaskViewMode();
+        MaskViewMode actual = OpenImages.getActiveView().getMaskViewMode();
         if (actual != expected) {
             throw new AssertionError("expected mask view mode " + expected
                     + ", found " + actual);

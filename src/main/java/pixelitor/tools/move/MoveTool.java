@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.move;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.ClipStrategy;
@@ -128,7 +128,7 @@ public class MoveTool extends DragTool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp != null) {
 
             move(comp, currentMode, key.getMoveX(), key.getMoveY());

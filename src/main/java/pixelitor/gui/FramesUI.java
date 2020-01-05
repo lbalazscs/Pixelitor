@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 
@@ -49,16 +50,16 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int locX = CASCADE_HORIZONTAL_SHIFT * cascadeIndex;
         int locY = CASCADE_VERTICAL_SHIFT * cascadeIndex;
 
-        int maxWidth = this.getWidth() - CASCADE_HORIZONTAL_SHIFT;
+        int maxWidth = getWidth() - CASCADE_HORIZONTAL_SHIFT;
         locX %= maxWidth;
 
-        int maxHeight = this.getHeight() - CASCADE_VERTICAL_SHIFT;
+        int maxHeight = getHeight() - CASCADE_VERTICAL_SHIFT;
         locY %= maxHeight;
 
         ImageFrame frame = new ImageFrame(view, locX, locY);
         view.setViewContainer(frame);
 
-        this.add(frame);
+        add(frame);
         activateFrame(frame);
 
         cascadeIndex++;
@@ -70,11 +71,11 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         } catch (PropertyVetoException e) {
             Messages.showException(e);
         }
-        this.getDesktopManager().activateFrame(frame);
+        getDesktopManager().activateFrame(frame);
     }
 
     public void cascadeWindows() {
-        List<View> views = OpenComps.getViews();
+        List<View> views = OpenImages.getViews();
         if (views.isEmpty()) {
             Dialogs.showInfoDialog("No open windows",
                     "There are no open internal windows to cascade.");
@@ -97,8 +98,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
             locY += CASCADE_VERTICAL_SHIFT;
 
             // wrap
-            int maxWidth = this.getWidth() - CASCADE_HORIZONTAL_SHIFT;
-            int maxHeight = this.getHeight() - CASCADE_VERTICAL_SHIFT;
+            int maxWidth = getWidth() - CASCADE_HORIZONTAL_SHIFT;
+            int maxHeight = getHeight() - CASCADE_VERTICAL_SHIFT;
 
             if (locX > maxWidth) {
                 locX = 0;
@@ -110,7 +111,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void tileWindows() {
-        List<View> views = OpenComps.getViews();
+        List<View> views = OpenImages.getViews();
         int numWindows = views.size();
         if (numWindows == 0) {
             Dialogs.showInfoDialog("No open windows",
@@ -122,8 +123,8 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int numCols = numWindows / numRows;
         int extra = numWindows % numRows;
 
-        int frameWidth = this.getWidth() / numCols;
-        int frameHeight = this.getHeight() / numRows;
+        int frameWidth = getWidth() / numCols;
+        int frameHeight = getHeight() / numRows;
         int currRow = 0;
         int currCol = 0;
 
@@ -144,7 +145,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
                 currCol++;
                 if (currCol == numCols - extra) {
                     numRows++;
-                    frameHeight = this.getHeight() / numRows;
+                    frameHeight = getHeight() / numRows;
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -66,7 +66,7 @@ public class UserDrag {
     public void setStart(PPoint e) {
         assert e.getView() != null;
 
-        this.view = e.getView();
+        view = e.getView();
 
         coStartX = e.getCoX();
         coStartY = e.getCoY();
@@ -75,7 +75,7 @@ public class UserDrag {
     }
 
     public void setEnd(PPoint e) {
-        if (this.view != e.getView()) {
+        if (view != e.getView()) {
             // in some exceptional situations it can happen that the
             // view changes without a mousePressed event, so simulate one
             setStart(e);
@@ -178,7 +178,7 @@ public class UserDrag {
     }
 
     public void mouseReleased() {
-        this.dragging = false;
+        dragging = false;
     }
 
     public Rectangle toCoRect() {
@@ -289,10 +289,10 @@ public class UserDrag {
             float startInfoY;
             if (imHeight >= 0) {
                 // display the start info info above the start
-                startInfoY = (float) (this.coStartY - mouseDist);
+                startInfoY = (float) (coStartY - mouseDist);
             } else {
                 // display the start info info bellow the start
-                startInfoY = (float) (this.coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
+                startInfoY = (float) (coStartY + mouseDist + DragDisplay.TWO_LINER_BG_HEIGHT);
             }
 
             dd.drawTwoLines(xInfo, yInfo, startInfoX, startInfoY);
@@ -332,8 +332,8 @@ public class UserDrag {
             xDistIsSmall = true;
             // display it so that it has no sudden jumps
             x = coEndX - displayBgWidth / 2.0
-                + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                * coDx / (double) displayBgWidth);
+                    + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                    * coDx / displayBgWidth);
         }
         double y;
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
@@ -351,8 +351,8 @@ public class UserDrag {
         } else {
             // display it so that it has no sudden jumps
             y = coEndY + DragDisplay.TWO_LINER_BG_HEIGHT / 2.0
-                + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
-                * coDy / (double) DragDisplay.TWO_LINER_BG_HEIGHT);
+                    + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
+                    * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
         }
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 

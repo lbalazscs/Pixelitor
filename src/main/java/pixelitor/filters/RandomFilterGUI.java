@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.filters;
 
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.gui.OpenComps;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -27,6 +27,9 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.ChangeReason.PREVIEWING;
 
@@ -48,17 +51,17 @@ public class RandomFilterGUI extends FilterGUI {
         filterSource = new RandomFilterSource();
 
         setLayout(new BorderLayout());
-        northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        northPanel = new JPanel(new FlowLayout(LEFT));
 
         backButton = createButton("Back", e -> showFilter(filterSource.getPrevious()));
         forwardButton = createButton("Forward", e -> showFilter(filterSource.getNext()));
-        createButton("Next Random Filter", e -> showFilter(filterSource.getRandom()));
+        createButton("Next Random Filter", e -> showFilter(filterSource.choose()));
 
-        add(northPanel, BorderLayout.NORTH);
+        add(northPanel, NORTH);
         realSettingsPanel = new JPanel();
-        add(realSettingsPanel, BorderLayout.CENTER);
+        add(realSettingsPanel, CENTER);
 
-        showFilter(filterSource.getRandom());
+        showFilter(filterSource.choose());
         updateEnabled();
     }
 
@@ -89,7 +92,7 @@ public class RandomFilterGUI extends FilterGUI {
             if (filterSource.getLastFilter() != null) { // there was a filter before
                 // need to clear the preview of the previous filters
                 // so that the image position selectors show the original image
-                Drawable dr = OpenComps.getActiveDrawableOrThrow();
+                Drawable dr = OpenImages.getActiveDrawableOrThrow();
                 dr.stopPreviewing(); // stop the last one
                 dr.startPreviewing(); // start the new one
             }

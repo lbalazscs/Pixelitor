@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class TweenWizard extends Wizard {
     protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage,
                                                   Component dialogParent) {
         if(currentPage == OUTPUT_SETTINGS) {
-            ValidatedPanel settings = (ValidatedPanel) currentPage.getPanel(this, dr);
+            ValidatedPanel settings = (ValidatedPanel) currentPage.createPanel(this, dr);
             ValidationResult validity = settings.checkValidity();
             if (!validity.isOK()) {
                 validity.showErrorDialog(dialogParent);

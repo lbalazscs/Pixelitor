@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class RandomFilterSourceTest {
 
     @Test(timeout = 1000) // make sure there is no infinite loop
     public void testAfterOne() {
-        Filter one = source.getRandom();
+        Filter one = source.choose();
 
         assertThat(source)
                 .doesNotHavePrevious()
@@ -71,8 +71,8 @@ public class RandomFilterSourceTest {
 
     @Test(timeout = 1000) // make sure there is no infinite loop
     public void testAfterTwo() {
-        Filter one = source.getRandom();
-        Filter two = source.getRandom();
+        Filter one = source.choose();
+        Filter two = source.choose();
 
         assertThat(source)
                 .hasPrevious()
@@ -84,7 +84,7 @@ public class RandomFilterSourceTest {
                 .hasPrevious()
                 .doesNotHaveNext();
 
-        source.getRandom(); // three
+        source.choose(); // three
         assertThat(source)
                 .hasPrevious()
                 .doesNotHaveNext()
@@ -95,8 +95,8 @@ public class RandomFilterSourceTest {
 
     @Test(timeout = 1000) // make sure there is no infinite loop
     public void testMultipleBackForward() {
-        Filter one = source.getRandom();
-        Filter two = source.getRandom();
+        Filter one = source.choose();
+        Filter two = source.choose();
 
         for (int i = 0; i < 3; i++) {
             assertThat(source)
@@ -111,22 +111,22 @@ public class RandomFilterSourceTest {
 
     @Test(timeout = 1000) // make sure there is no infinite loop
     public void testGenerateWhenBackInHistory() {
-        Filter one = source.getRandom();
-        Filter two = source.getRandom();
-        Filter three = source.getRandom();
-        source.getRandom(); // four
+        Filter one = source.choose();
+        Filter two = source.choose();
+        Filter three = source.choose();
+        source.choose(); // four
 
         assertThat(source)
                 .previousFilterIs(three)
                 .previousFilterIs(two);
 
         // after going back a while start generating new filters
-        Filter five = source.getRandom();
+        Filter five = source.choose();
         assertThat(source)
                 .hasPrevious()
                 .doesNotHaveNext();
 
-        source.getRandom(); // six
+        source.choose(); // six
         assertThat(source)
                 .hasPrevious()
                 .doesNotHaveNext();

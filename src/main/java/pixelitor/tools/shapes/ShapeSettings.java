@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,7 @@ public class ShapeSettings {
 
     public JComboBox<TwoPointPaintType> createFillPaintCombo() {
         @SuppressWarnings("unchecked")
-        JComboBox<TwoPointPaintType> cb = new JComboBox<>(fillPaintModel);
+        var cb = new JComboBox<TwoPointPaintType>(fillPaintModel);
 
         cb.setMaximumRowCount(fillPaintModel.getSize());
         cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_FILL));
@@ -87,7 +87,7 @@ public class ShapeSettings {
 
     public JComboBox<TwoPointPaintType> createStrokePaintCombo() {
         @SuppressWarnings("unchecked")
-        JComboBox<TwoPointPaintType> cb = new JComboBox<>(strokePaintModel);
+        var cb = new JComboBox<TwoPointPaintType>(strokePaintModel);
 
         cb.setMaximumRowCount(strokePaintModel.getSize());
         cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_STROKE));
@@ -96,7 +96,7 @@ public class ShapeSettings {
 
     public JComboBox<ShapeType> createShapeTypeCombo() {
         @SuppressWarnings("unchecked")
-        JComboBox<ShapeType> shapeTypeCB = new JComboBox<>(typeModel);
+        var shapeTypeCB = new JComboBox<ShapeType>(typeModel);
 
         // make sure all values are visible without a scrollbar
         shapeTypeCB.setMaximumRowCount(typeModel.getSize());
@@ -133,7 +133,7 @@ public class ShapeSettings {
     }
 
     public StrokeSettings getStrokeSettings() {
-        return (StrokeSettings) strokeParam.copyState();
+        return strokeParam.copyState();
     }
 
     public void invalidateStroke() {
@@ -152,7 +152,7 @@ public class ShapeSettings {
         // as this is used as part of undo/redo, don't regenerate the shape
         regenerate = false;
         try {
-            // the shape target cannot change for a styled shape edit
+            // the shape target can't change for a styled shape edit
             typeModel.setSelectedItem(styledShape.getShapeType());
             fillPaintModel.setSelectedItem(styledShape.getFillPaintType());
             strokePaintModel.setSelectedItem(styledShape.getStrokePaintType());
@@ -164,9 +164,9 @@ public class ShapeSettings {
     }
 
     public void addToDebugNode(DebugNode node) {
-        node.addString("Type", getSelectedType().toString());
-        node.addString("Fill", getSelectedFillPaint().toString());
-        node.addString("Stroke", getSelectedStrokePaint().toString());
+        node.addString("type", getSelectedType().toString());
+        node.addString("fill", getSelectedFillPaint().toString());
+        node.addString("stroke", getSelectedStrokePaint().toString());
         strokeParam.addDebugNodeInfo(node);
     }
 }

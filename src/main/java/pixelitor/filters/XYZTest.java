@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.color.ColorSpace;
@@ -60,13 +59,13 @@ public class XYZTest extends ParametrizedFilter {
         double[] rgb = {0.0f, 0.0f, 0.0f};
         double[] xyz = {0.0f, 0.0f, 0.0f};
 
-        float xVal = x.getValueAsPercentage();
-        float yVal = y.getValueAsPercentage();
-        float zVal = z.getValueAsPercentage();
+        float xVal = x.getPercentageValF();
+        float yVal = y.getPercentageValF();
+        float zVal = z.getPercentageValF();
         boolean linearize = linRGB.isChecked();
 
         int numPixels = pixels.length;
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, 100);
+        var pt = new StatusBarProgressTracker(NAME, 100);
         int workUnit = numPixels / 100;
         int workDone = 0;
 
@@ -134,7 +133,7 @@ public class XYZTest extends ParametrizedFilter {
                 b = 0;
             }
 
-            pixels[i] = (a << 24) | (r << 16) | (g << 8) | b;
+            pixels[i] = a << 24 | r << 16 | g << 8 | b;
 
             workDone++;
             if (workDone > workUnit) {

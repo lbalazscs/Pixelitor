@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,10 +115,7 @@ public class TrackedIO {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ArrayIndexOutOfBoundsException e) {
-            boolean isGif = FileUtils.findExtension(file.getName())
-                .map(String::toLowerCase)
-                .filter(s -> s.equals("gif"))
-                .isPresent();
+            boolean isGif = FileUtils.hasGIFExtension(file.getName());
             if (isGif) {
                 // perhaps this is issue #40, try another decoder
                 // also see https://stackoverflow.com/questions/22259714/arrayindexoutofboundsexception-4096-while-reading-gif-file

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -70,7 +70,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         // A single TFValidationLayerUI for all the textfields.
         LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
 
-        GridBagHelper gbh = new GridBagHelper(this);
+        var gbh = new GridBagHelper(this);
 
         addOutputTypeSelector(gbh);
         addAnimationLengthSelector(tfLayerUI, gbh);
@@ -81,20 +81,18 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
     @SuppressWarnings("unchecked")
     private void addOutputTypeSelector(GridBagHelper gbh) {
-        //noinspection unchecked
-        EnumComboBoxModel<TweenOutputType> model =
-                new EnumComboBoxModel(TweenOutputType.class);
+        var model = new EnumComboBoxModel<>(TweenOutputType.class);
 
-        outputTypeCB = new JComboBox<>(model);
+        outputTypeCB = new JComboBox<TweenOutputType>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
-        gbh.addLabelWithControl("Output Type:", outputTypeCB);
+        gbh.addLabelAndControl("Output Type:", outputTypeCB);
     }
 
     private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI,
                                             GridBagHelper gbh) {
-        gbh.addLabelWithControl("Number of Seconds:",
+        gbh.addLabelAndControl("Number of Seconds:",
                 new JLayer<>(numSecondsTF, tfLayerUI));
 
         KeyListener keyListener = new KeyAdapter() {
@@ -105,25 +103,25 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         };
         numSecondsTF.addKeyListener(keyListener);
 
-        gbh.addLabelWithControl("Frames per Second:",
+        gbh.addLabelAndControl("Frames per Second:",
                 new JLayer<>(fpsTF, tfLayerUI));
         fpsTF.addKeyListener(keyListener);
 
         updateCalculations();
-        gbh.addLabelWithControl("Number of Frames:", numFramesLabel);
+        gbh.addLabelAndControl("Number of Frames:", numFramesLabel);
     }
 
     @SuppressWarnings("unchecked")
     private void addInterpolationSelector(GridBagHelper gbh) {
         EnumComboBoxModel<Interpolation> ipCBM
                 = new EnumComboBoxModel<>(Interpolation.class);
-        ipCB = new JComboBox<>(ipCBM);
+        ipCB = new JComboBox<Interpolation>(ipCBM);
 
-        gbh.addLabelWithControl("Interpolation:", ipCB);
+        gbh.addLabelAndControl("Interpolation:", ipCB);
     }
 
     private void addPingPongSelector(GridBagHelper gbh) {
-        gbh.addLabelWithControl("Ping Pong:", pingPongCB);
+        gbh.addLabelAndControl("Ping Pong:", pingPongCB);
 
         pingPongCB.addActionListener(e -> updateCalculations());
     }

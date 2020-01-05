@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.filters.animation;
 
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.gui.CompositeState;
 import pixelitor.gui.utils.Dialogs;
 
 import java.awt.Component;
@@ -28,8 +28,8 @@ import static java.nio.file.Files.isWritable;
 
 public class TweenAnimation {
     private ParametrizedFilter filter;
-    private ParamSetState initialState;
-    private ParamSetState finalState;
+    private CompositeState initialState;
+    private CompositeState finalState;
     private int numFrames;
     private int millisBetweenFrames;
     private Interpolation interpolation;
@@ -46,11 +46,11 @@ public class TweenAnimation {
     }
 
     public void copyFinalStateFromCurrent() {
-        this.finalState = filter.getParamSet().copyState();
+        finalState = filter.getParamSet().copyState();
     }
 
     public void copyInitialStateFromCurrent() {
-        this.initialState = filter.getParamSet().copyState();
+        initialState = filter.getParamSet().copyState();
     }
 
     public Interpolation getInterpolation() {
@@ -86,7 +86,7 @@ public class TweenAnimation {
                 output, millisBetweenFrames);
     }
 
-    public ParamSetState tween(double time) {
+    public CompositeState tween(double time) {
         double progress = interpolation.time2progress(time);
         return initialState.interpolate(finalState, progress);
     }
@@ -127,8 +127,9 @@ public class TweenAnimation {
 
     private boolean showFolderNotEmptyDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
-                "<html>The folder " + output.getAbsolutePath() + " is not empty. " +
-                        "<br>Some files might get replaced. Are sure you want to continue?");
+                String.format("<html>The folder <b>%s</b> is not empty. " +
+                                "<br>Some files might be overwritten. Are sure you want to continue?",
+                        output.getAbsolutePath()));
     }
 
     private boolean showFileExistsDialog(Component dialogParent) {

@@ -61,13 +61,13 @@ public abstract class RGBComposite implements Composite {
 
     public abstract static class RGBCompositeContext implements CompositeContext {
         private final float alpha;
-        private final ColorModel srcColorModel;
-        private final ColorModel dstColorModel;
+//        private final ColorModel srcColorModel;
+//        private final ColorModel dstColorModel;
 
         protected RGBCompositeContext(float alpha, ColorModel srcColorModel, ColorModel dstColorModel) {
             this.alpha = alpha;
-            this.srcColorModel = srcColorModel;
-            this.dstColorModel = dstColorModel;
+//            this.srcColorModel = srcColorModel;
+//            this.dstColorModel = dstColorModel;
         }
 
         @Override

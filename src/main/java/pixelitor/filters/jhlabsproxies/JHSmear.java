@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,9 +81,9 @@ public class JHSmear extends ParametrizedFilter {
         }
 
         filter.setDistance(distanceValue);
-        filter.setDensity(density.getValueAsPercentage());
+        filter.setDensity(density.getPercentageValF());
         filter.setAngle((float) angle.getValueInRadians());
-        filter.setMix(mix.getValueAsPercentage());
+        filter.setMix(mix.getPercentageValF());
         filter.setShape(shape.getValue());
         filter.setRandomGenerator(rand);
 

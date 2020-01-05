@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -111,7 +111,7 @@ public class GradientHandlesTest {
     public void test_imCoordsChanged_translate() {
         int dx = 10;
         int dy = 20;
-        AffineTransform at = AffineTransform.getTranslateInstance(dx, dy);
+        var at = AffineTransform.getTranslateInstance(dx, dy);
         handles.imCoordsChanged(at);
 
         assertThat(start)
@@ -127,7 +127,7 @@ public class GradientHandlesTest {
 
     @Test
     public void test_imCoordsChanged_scale() {
-        AffineTransform at = AffineTransform.getScaleInstance(0.5, 0.5);
+        var at = AffineTransform.getScaleInstance(0.5, 0.5);
         handles.imCoordsChanged(at);
 
         assertThat(start)

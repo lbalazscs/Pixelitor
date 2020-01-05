@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -14,25 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+package pixelitor.compactions;
 
-package pixelitor.utils.debug;
+import pixelitor.Composition;
 
-import pixelitor.tools.pen.Path;
-import pixelitor.tools.pen.Paths;
+import java.util.concurrent.CompletableFuture;
 
-public class PathsNode extends DebugNode {
-    public PathsNode(Paths paths) {
-        this("Paths", paths);
-    }
-
-    public PathsNode(String name, Paths paths) {
-        super(name, paths);
-
-        Path activePath = paths.getActivePath();
-        if (activePath != null) {
-            add(new PathNode(activePath));
-        } else {
-            addBoolean("has active path", false);
-        }
-    }
+/**
+ * An action that acts on all layers of a {@link Composition}
+ */
+public interface CompAction {
+    CompletableFuture<Composition> process(Composition comp);
 }

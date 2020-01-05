@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
@@ -49,7 +48,7 @@ public class Orton extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         float radius = blurRadius.getValueAsFloat();
-        float opacity = amount.getValueAsPercentage();
+        float opacity = amount.getPercentageValF();
 
         int width = src.getWidth();
         int height = src.getHeight();
@@ -58,7 +57,7 @@ public class Orton extends ParametrizedFilter {
         int blurWorkUnits = 3 * (width + height);
         int totalWorkUnits = 2 * blurWorkUnits;
 
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, totalWorkUnits);
+        var pt = new StatusBarProgressTracker(NAME, totalWorkUnits);
 
         dest = ImageUtils.copyImage(src);
         ImageUtils.screenWithItself(dest, opacity);
@@ -72,7 +71,7 @@ public class Orton extends ParametrizedFilter {
                 return src;
             }
 
-            BoxBlurFilter boxBlur = new BoxBlurFilter(radius, radius, 3, NAME);
+            var boxBlur = new BoxBlurFilter(radius, radius, 3, NAME);
             boxBlur.setProgressTracker(pt);
             blurredMultiplied = boxBlur.filter(blurredMultiplied, blurredMultiplied);
         }

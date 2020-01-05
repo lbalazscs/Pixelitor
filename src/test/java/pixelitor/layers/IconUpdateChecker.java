@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,7 +49,7 @@ public class IconUpdateChecker {
 
     private void checkLayer(int num) {
         if (layer instanceof ImageLayer) {
-            TestLayerUI ui = (TestLayerUI) layer.getUI();
+            var ui = (TestLayerUI) layer.getUI();
             assertThat(ui.getNumIconImageUpdates((ImageLayer) layer)).isEqualTo(layerIconUpdatesAtStart + num);
         }
     }
@@ -59,7 +59,7 @@ public class IconUpdateChecker {
             return;
         }
 //        verify(ui, times(maskIconUpdatesAtStart + num)).updateLayerIconImage(mask);
-        TestLayerUI ui = (TestLayerUI) mask.getUI();
+        var ui = (TestLayerUI) mask.getUI();
         assertThat(ui.getNumIconImageUpdates(mask)).isEqualTo(maskIconUpdatesAtStart + num);
     }
 }

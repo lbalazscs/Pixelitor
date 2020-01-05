@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 
@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
@@ -49,7 +50,7 @@ public class ZoomControl extends JPanel implements CompActivationListener {
     private final ZoomLevel[] zoomLevels = ZoomLevel.values();
 
     private ZoomControl() {
-        super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        super(new FlowLayout(LEFT, 0, 0));
 
         zoomSlider = new JSlider(0, zoomLevels.length - 1);
 
@@ -63,7 +64,7 @@ public class ZoomControl extends JPanel implements CompActivationListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-            OpenComps.onActiveView(
+                OpenImages.onActiveView(
                         this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  Zoom: ");
@@ -79,7 +80,7 @@ public class ZoomControl extends JPanel implements CompActivationListener {
                 ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
     }
 
     private void zoomAccordingToTheSlider(View view) {
@@ -134,7 +135,7 @@ public class ZoomControl extends JPanel implements CompActivationListener {
     }
 
     private void setNewZoomText(ZoomLevel zoomLevel) {
-        zoomDisplay.setText(" " + zoomLevel.toString());
+        zoomDisplay.setText(" " + zoomLevel);
     }
 
     @Override

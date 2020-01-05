@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.view;
 
 import pixelitor.gui.StatusBar;
-import pixelitor.utils.AppPreferences;
+import pixelitor.gui.WorkSpace;
 
 /**
  * The action that either shows or hides the status bar,
@@ -38,11 +38,11 @@ public class ShowHideStatusBarAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return AppPreferences.WorkSpace.getStatusBarVisibility();
+        return WorkSpace.getStatusBarVisibility();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        AppPreferences.WorkSpace.setStatusBarVisibility(value, true);
+        WorkSpace.setStatusBarVisibility(value, true);
     }
 }

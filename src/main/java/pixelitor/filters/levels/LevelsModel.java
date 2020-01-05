@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,13 +51,13 @@ public class LevelsModel {
 
     public LevelsModel(Levels filter) {
         this.filter = filter;
-        this.rgbModel = new OneChannelLevelsModel(RGB, this);
-        this.rModel = new OneChannelLevelsModel(R, this);
-        this.gModel = new OneChannelLevelsModel(G, this);
-        this.bModel = new OneChannelLevelsModel(B, this);
-        this.rgModel = new OneChannelLevelsModel(RG, this);
-        this.rbModel = new OneChannelLevelsModel(RB, this);
-        this.gbModel = new OneChannelLevelsModel(GB, this);
+        rgbModel = new OneChannelLevelsModel(RGB, this);
+        rModel = new OneChannelLevelsModel(R, this);
+        gModel = new OneChannelLevelsModel(G, this);
+        bModel = new OneChannelLevelsModel(B, this);
+        rgModel = new OneChannelLevelsModel(RG, this);
+        rbModel = new OneChannelLevelsModel(RB, this);
+        gbModel = new OneChannelLevelsModel(GB, this);
 
         subModels = new OneChannelLevelsModel[]{
                 rgbModel, rModel, gModel, bModel, rgModel, rbModel, gbModel
@@ -65,7 +65,7 @@ public class LevelsModel {
     }
 
     public void setExecutor(PreviewExecutor previewExecutor) {
-        this.executor = previewExecutor;
+        executor = previewExecutor;
     }
 
     public void adjustmentChanged() {

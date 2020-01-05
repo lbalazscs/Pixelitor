@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public void setLayerName(String newName) {
-        this.name = newName;
+        name = newName;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public void setOpenEye(boolean newVisibility) {
-        this.showVisibility = newVisibility;
+        showVisibility = newVisibility;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImage(ImageLayer imageLayer) {
+    public void updateLayerIconImageAsync(ImageLayer imageLayer) {
         iconImageUpdateCounter.merge(imageLayer, 1, Integer::sum);
     }
 

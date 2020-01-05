@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
 
     public ToneCurvesPanel() {
         //size: grid(255px) + curvePadding(2*10px) + scales(20px)
-        Dimension size = new Dimension(295, 295);
-        this.setPreferredSize(size);
+        var size = new Dimension(295, 295);
+        setPreferredSize(size);
         addMouseMotionListener(this);
         addMouseListener(this);
 
@@ -87,7 +87,7 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     private Point.Float getNormalizedMousePos(MouseEvent e) {
-        Point.Float mousePos = new Point.Float(e.getX(), e.getY());
+        var mousePos = new Point.Float(e.getX(), e.getY());
         toneCurves.normalizePoint(mousePos);
         return mousePos;
     }
@@ -135,11 +135,11 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
         Point.Float mousePos = getNormalizedMousePos(e);
         ToneCurve activeCurve = toneCurves.getActiveCurve();
         if (activeCurve.isOverKnot(mousePos)) {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         } else if (ToneCurve.isOverChart(mousePos)) {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+            setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         } else {
-            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 

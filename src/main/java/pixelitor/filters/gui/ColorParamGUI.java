@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.FlowLayout;
 
+import static java.awt.FlowLayout.LEFT;
+
 /**
  * The GUI for a {@link ColorParam}
  */
@@ -39,7 +41,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
     public ColorParamGUI(ColorParam model, boolean addDefaultButton) {
         this.model = model;
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setLayout(new FlowLayout(LEFT));
 
 //        button = new JButton();
 //        button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
@@ -66,7 +68,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 //        Color color = JColorChooser.showDialog(this, "Select Color", model.getColor());
 
         ColorUtils.selectColorWithDialog(this, model.getName(),
-                model.getColor(), model.allowOpacity(), this::updateColor);
+                model.getColor(), model.allowTransparency(), this::updateColor);
     }
 
     private void updateColor(Color color) {

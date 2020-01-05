@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
@@ -48,19 +48,19 @@ public class AddLayerMaskAction extends AbstractAction
                 "<html>Adds a layer mask to the active layer. " +
                         "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
         Layers.addLayerChangeListener(this);
         Layers.addLayerMaskChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = OpenComps.getActiveCompOrNull();
-        Layer layer = comp.getActiveLayer();
+        var comp = OpenImages.getActiveComp();
+        var layer = comp.getActiveLayer();
         assert !layer.hasMask();
         boolean ctrlPressed = false;
-        if(e != null) { // could be null in tests
-            ctrlPressed = ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
+        if (e != null) { // could be null in tests
+            ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
         }
 
         if (comp.hasSelection()) {

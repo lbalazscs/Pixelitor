@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
@@ -40,13 +39,13 @@ public class AddNewLayerAction extends AbstractAction implements CompActivationL
                 "<html>Adds a new transparent image layer." +
                         "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = OpenComps.getActiveCompOrNull();
-        boolean addBellowActive = ((e.getModifiers() & CTRL_MASK) == CTRL_MASK);
+        var comp = OpenImages.getActiveComp();
+        boolean addBellowActive = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;
         comp.addNewEmptyLayer(comp.generateNewLayerName(), addBellowActive);
     }
 

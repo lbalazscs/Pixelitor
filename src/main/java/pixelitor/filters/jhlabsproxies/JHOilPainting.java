@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,12 +72,12 @@ public class JHOilPainting extends ParametrizedFilter {
 
         // important to re-create because the progress tracker
         // is different for big and small images
-        OilFilter filter = new OilFilter(NAME);
+        var filter = new OilFilter(NAME);
 
         filter.setLevels(coarseness.getValue() + 1);
 
-        ResizingFilterHelper r = new ResizingFilterHelper(src);
-        if (r.shouldResize()) {
+        var helper = new ResizingFilterHelper(src);
+        if (helper.shouldResize()) {
             ScaleUpQuality scaleUpQuality;
             if (detailQuality.getValue() == BETTER) {
                 scaleUpQuality = ScaleUpQuality.BILINEAR11;
@@ -87,25 +87,25 @@ public class JHOilPainting extends ParametrizedFilter {
                 throw new IllegalStateException("value = " + detailQuality.getValue());
             }
 
-            double resizeFactor = r.getResizeFactor();
+            double resizeFactor = helper.getResizeFactor();
             // these will determine the real running time of the filter
             int downScaledBrushX = (int) (brushX / resizeFactor);
             int downScaledBrushY = (int) (brushY / resizeFactor);
 
-            int resizeUnits = r.getResizeWorkUnits(scaleUpQuality);
+            int resizeUnits = helper.getResizeWorkUnits(scaleUpQuality);
             long filterWorkAmount = (long) downScaledBrushX * downScaledBrushY;
             int filterUnits = (int) (filterWorkAmount / 4);
             int workUnits = resizeUnits + filterUnits;
 
-            ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
-            ProgressTracker filterTracker = r.createFilterTracker(pt, filterUnits);
+            var pt = new StatusBarProgressTracker(NAME, workUnits);
+            ProgressTracker filterTracker = helper.createFilterTracker(pt, filterUnits);
 
             filter.setProgressTracker(filterTracker);
 
             filter.setRangeX(downScaledBrushX);
             filter.setRangeY(downScaledBrushY);
 
-            dest = r.invoke(scaleUpQuality, filter, pt, 0);
+            dest = helper.invoke(scaleUpQuality, filter, pt, 0);
             pt.finished();
         } else {
             // normal case, no resizing

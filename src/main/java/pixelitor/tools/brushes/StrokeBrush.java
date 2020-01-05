@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public abstract class StrokeBrush extends AbstractBrush {
     public void startAt(PPoint p) {
         super.startAt(p);
         drawStartShape(p);
-        updateComp(p);
+        repaintComp(p);
 //        rememberPrevious(p);
     }
 
@@ -61,7 +61,7 @@ public abstract class StrokeBrush extends AbstractBrush {
         assert previous != null;
 
         drawLine(previous, p);
-        updateComp(p);
+        repaintComp(p);
         rememberPrevious(p);
     }
 
@@ -91,9 +91,9 @@ public abstract class StrokeBrush extends AbstractBrush {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addString("Stroke Type", strokeType.toString());
+        node.addString("stroke type", strokeType.toString());
 
         return node;
     }

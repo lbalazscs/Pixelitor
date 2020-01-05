@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,11 +52,11 @@ public class SliceFilter extends RotatedEffectFilter {
     }
 
     public void setShiftHorizontal(double t) {
-        this.shiftHorizontal = t * size;
+        shiftHorizontal = t * size;
     }
 
     public void setShiftVertical(double t) {
-        this.shiftVertical = t * size;
+        shiftVertical = t * size;
     }
 
     public void setOffset(int offset) {

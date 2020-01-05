@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.gui.View;
@@ -48,13 +48,13 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected void applyTx(ContentLayer contentLayer) {
+    protected void transform(ContentLayer contentLayer) {
         contentLayer.rotate(angle);
     }
 
     @Override
-    protected AffineTransform createCanvasImTX(Canvas canvas) {
-        return angle.createCanvasImTX(canvas);
+    protected AffineTransform createCanvasImTransform(Canvas canvas) {
+        return angle.createCanvasImTransform(canvas);
     }
 
     @Override
@@ -73,18 +73,18 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTX(Canvas canvas) {
+            public AffineTransform createCanvasImTransform(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         canvas.getImHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTX(BufferedImage image) {
+            public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         image.getHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
@@ -105,18 +105,18 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTX(Canvas canvas) {
+            public AffineTransform createCanvasImTransform(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         canvas.getImWidth(), canvas.getImHeight());
                 at.quadrantRotate(2);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTX(BufferedImage image) {
+            public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         image.getWidth(), image.getHeight());
                 at.quadrantRotate(2);
                 return at;
@@ -138,18 +138,18 @@ public class Rotate extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTX(Canvas canvas) {
+            public AffineTransform createCanvasImTransform(Canvas canvas) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         0, canvas.getImWidth());
                 at.quadrantRotate(3);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTX(BufferedImage image) {
+            public AffineTransform createImageTransform(BufferedImage image) {
                 // rotate, then translate to compensate
-                AffineTransform at = AffineTransform.getTranslateInstance(
+                var at = AffineTransform.getTranslateInstance(
                         0, image.getWidth());
                 at.quadrantRotate(3);
                 return at;
@@ -179,13 +179,13 @@ public class Rotate extends SimpleCompAction {
 
         public abstract void changeCanvas(Canvas canvas, View view);
 
-        public abstract AffineTransform createCanvasImTX(Canvas canvas);
+        public abstract AffineTransform createCanvasImTransform(Canvas canvas);
 
         /**
          * Returns the transformation of the image,
          * ignoring the canvas and the translation
          */
-        public abstract AffineTransform createImageTX(BufferedImage image);
+        public abstract AffineTransform createImageTransform(BufferedImage image);
 
         public int getAngleDegree() {
             return angleDegree;

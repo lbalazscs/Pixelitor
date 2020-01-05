@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,8 +33,8 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
 import static pixelitor.history.History.undo;
-import static pixelitor.selection.SelectionInteraction.REPLACE;
 import static pixelitor.selection.SelectionType.RECTANGLE;
+import static pixelitor.selection.ShapeCombination.REPLACE;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
@@ -351,10 +351,10 @@ public class PenToolTest {
                 .numAnchorsIs(3);
 
         // undo everything
-        History.undo("Close Subpath");
-        History.undo("Add Anchor Point");
-        History.undo("Add Anchor Point");
-        History.undo("Subpath Start");
+        undo("Close Subpath");
+        undo("Add Anchor Point");
+        undo("Add Anchor Point");
+        undo("Subpath Start");
 
         assertThat(Tools.PEN)
                 .hasNoPath()
@@ -362,10 +362,10 @@ public class PenToolTest {
                 .pathActionAreNotEnabled();
 
         // redo everything
-        History.redo("Subpath Start");
-        History.redo("Add Anchor Point");
-        History.redo("Add Anchor Point");
-        History.redo("Close Subpath");
+        redo("Subpath Start");
+        redo("Add Anchor Point");
+        redo("Add Anchor Point");
+        redo("Close Subpath");
 
         assertThat(Tools.PEN)
                 .hasPath()

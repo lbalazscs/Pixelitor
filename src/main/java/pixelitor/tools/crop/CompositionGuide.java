@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,7 +85,7 @@ public class CompositionGuide {
     }
 
     private void drawShapes(Shape[] shapes) {
-        this.glRenderer.draw(g2, Arrays.asList(shapes));
+        glRenderer.draw(g2, Arrays.asList(shapes));
     }
 
     private void drawSections(Rectangle2D rect, double phi) {
@@ -162,8 +162,8 @@ public class CompositionGuide {
 
     private void drawGrid(Rectangle2D rect) {
         int gridSize = 50;
-        int gridCountH = 1 + 2 * ((int) (rect.getHeight() / 2 / gridSize));
-        int gridCountV = 1 + 2 * ((int) (rect.getWidth() / 2 / gridSize));
+        int gridCountH = 1 + 2 * (int) (rect.getHeight() / 2 / gridSize);
+        int gridCountV = 1 + 2 * (int) (rect.getWidth() / 2 / gridSize);
         double gridOffsetH = (rect.getHeight() - (gridCountH + 1) * gridSize) / 2;
         double gridOffsetV = (rect.getWidth() - (gridCountV + 1) * gridSize) / 2;
         Line2D[] lines = new Line2D.Double[gridCountH + gridCountV];

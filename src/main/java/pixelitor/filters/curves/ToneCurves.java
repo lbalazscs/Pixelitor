@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.EnumMap;
-import java.util.Map;
 
 /**
  * Represents set of [RGB,R,G,B] curves
@@ -65,23 +64,23 @@ public class ToneCurves {
     }
 
     public void setActiveCurve(ToneCurveType curveType) {
-        curve.get(this.activeCurveType).setActive(false);
+        curve.get(activeCurveType).setActive(false);
         curve.get(curveType).setActive(true);
-        this.activeCurveType = curveType;
+        activeCurveType = curveType;
     }
 
-    public void setSize(int width, int height){
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
-        this.curveWidth = width - 2 * CURVE_PADDING - AXIS_PADDING;
-        this.curveHeight = height - 2 * CURVE_PADDING - AXIS_PADDING;
-        for (Map.Entry<ToneCurveType, ToneCurve> entry : curve.entrySet()) {
-            entry.getValue().setSize(this.curveWidth, this.curveHeight);
+        curveWidth = width - 2 * CURVE_PADDING - AXIS_PADDING;
+        curveHeight = height - 2 * CURVE_PADDING - AXIS_PADDING;
+        for (var entry : curve.entrySet()) {
+            entry.getValue().setSize(curveWidth, curveHeight);
         }
     }
 
     public void reset() {
-        for (Map.Entry<ToneCurveType, ToneCurve> entry : curve.entrySet()) {
+        for (var entry : curve.entrySet()) {
             entry.getValue().reset();
         }
     }
@@ -90,14 +89,14 @@ public class ToneCurves {
         p.x -= CURVE_PADDING + AXIS_PADDING;
         p.y -= CURVE_PADDING;
 
-        p.y = this.curveHeight - p.y;
-        p.x /= this.curveWidth;
-        p.y /= this.curveHeight;
+        p.y = curveHeight - p.y;
+        p.x /= curveWidth;
+        p.y /= curveHeight;
     }
 
     public void setG2D(Graphics2D gr) {
         this.gr = gr;
-        for (Map.Entry<ToneCurveType, ToneCurve> entry : curve.entrySet()) {
+        for (var entry : curve.entrySet()) {
             entry.getValue().setG2D(gr);
         }
     }
@@ -110,8 +109,8 @@ public class ToneCurves {
         gr.fillRect(0, 0, width, height);
 
         // apply CURVE_PADDING, and prepare for y-axis up drawing
-        AffineTransform transform = gr.getTransform();
-        AffineTransform curveTransform = new AffineTransform();
+        var transform = gr.getTransform();
+        var curveTransform = new AffineTransform();
         curveTransform.translate(CURVE_PADDING + AXIS_PADDING, CURVE_PADDING);
         curveTransform.translate(0, curveHeight);
         curveTransform.scale(1.0, -1.0);
@@ -126,9 +125,9 @@ public class ToneCurves {
     }
 
     private void drawGrid() {
-        Path2D.Float lightPath2D = new Path2D.Float();
-        Path2D.Float darkPath2D = new Path2D.Float();
-        Path2D.Float path2D;
+        Path2D lightPath2D = new Path2D.Float();
+        Path2D darkPath2D = new Path2D.Float();
+        Path2D path2D;
 
         float gridWidth = (float) curveWidth / GRID_DENSITY;
         float gridHeight = (float) curveHeight / GRID_DENSITY;
@@ -154,15 +153,15 @@ public class ToneCurves {
 
     private void drawScales() {
         // draw horizontal
-        Rectangle.Float rectH = new Rectangle.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
-        GradientPaint gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, Color.WHITE);
+        var rectH = new Rectangle.Float(0, -AXIS_PADDING, curveWidth, AXIS_SIZE);
+        var gradientH = new GradientPaint(0, 0, Color.BLACK, curveWidth, 0, Color.WHITE);
         gr.setPaint(gradientH);
         gr.fill(rectH);
         gr.setColor(Color.LIGHT_GRAY);
         gr.draw(rectH);
 
         // draw vertical
-        Rectangle.Float rectV = new Rectangle.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
+        var rectV = new Rectangle.Float(-AXIS_PADDING, 0, AXIS_SIZE, curveHeight);
         gradientH = new GradientPaint(0, 0, Color.BLACK, 0, curveHeight, Color.WHITE);
         gr.setPaint(gradientH);
         gr.fill(rectV);
@@ -178,7 +177,7 @@ public class ToneCurves {
 
     private void drawCurves() {
         // on back draw inactive curves
-        for (Map.Entry<ToneCurveType, ToneCurve> entry : curve.entrySet()) {
+        for (var entry : curve.entrySet()) {
             if (entry.getKey() != activeCurveType) {
                 entry.getValue().draw();
             }

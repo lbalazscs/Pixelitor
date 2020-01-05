@@ -18,7 +18,6 @@ package com.jhlabs.composite;
 
 import java.awt.Color;
 import java.awt.CompositeContext;
-import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
@@ -26,12 +25,12 @@ import java.awt.image.WritableRaster;
 public class MiscCompositeContext implements CompositeContext {
     private final int rule;
     private final float alpha;
-    private final ColorModel srcColorModel;
-    private final ColorModel dstColorModel;
-    private final ColorSpace srcColorSpace;
-    private final ColorSpace dstColorSpace;
-    private boolean srcNeedsConverting;
-    private boolean dstNeedsConverting;
+//    private final ColorModel srcColorModel;
+//    private final ColorModel dstColorModel;
+//    private final ColorSpace srcColorSpace;
+//    private final ColorSpace dstColorSpace;
+//    private boolean srcNeedsConverting;
+//    private boolean dstNeedsConverting;
 
     public MiscCompositeContext(int rule,
                                 float alpha,
@@ -39,10 +38,10 @@ public class MiscCompositeContext implements CompositeContext {
                                 ColorModel dstColorModel) {
         this.rule = rule;
         this.alpha = alpha;
-        this.srcColorModel = srcColorModel;
-        this.dstColorModel = dstColorModel;
-        srcColorSpace = srcColorModel.getColorSpace();
-        dstColorSpace = dstColorModel.getColorSpace();
+//        this.srcColorModel = srcColorModel;
+//        this.dstColorModel = dstColorModel;
+//        srcColorSpace = srcColorModel.getColorSpace();
+//        dstColorSpace = dstColorModel.getColorSpace();
 //		ColorModel srgbCM = ColorModel.getRGBdefault();
 //		srcNeedsConverting = !srcColorModel.equals(srgbCM);
 //		dstNeedsConverting = !dstColorModel.equals(srgbCM);
@@ -104,7 +103,7 @@ public class MiscCompositeContext implements CompositeContext {
                 int dib = dstPix[i + 2];
                 int sa = srcPix[i + 3];
                 int dia = dstPix[i + 3];
-                int dor, dog, dob, doa;
+                int dor, dog, dob;
 
                 switch (rule) {
                     case MiscComposite.ADD:
@@ -251,17 +250,17 @@ public class MiscCompositeContext implements CompositeContext {
 
                     case MiscComposite.BURN:
                         if (dir != 255) {
-                            dor = clamp(255 - ((255 - sr << 8) / (dir + 1)));
+                            dor = clamp(255 - (((255 - sr) << 8) / (dir + 1)));
                         } else {
                             dor = sr;
                         }
                         if (dig != 255) {
-                            dog = clamp(255 - ((255 - sg << 8) / (dig + 1)));
+                            dog = clamp(255 - (((255 - sg) << 8) / (dig + 1)));
                         } else {
                             dog = sg;
                         }
                         if (dib != 255) {
-                            dob = clamp(255 - ((255 - sb << 8) / (dib + 1)));
+                            dob = clamp(255 - (((255 - sb) << 8) / (dib + 1)));
                         } else {
                             dob = sb;
                         }
@@ -269,17 +268,17 @@ public class MiscCompositeContext implements CompositeContext {
 
                     case MiscComposite.COLOR_BURN:
                         if (sr != 0) {
-                            dor = Math.max(255 - ((255 - dir << 8) / sr), 0);
+                            dor = Math.max(255 - (((255 - dir) << 8) / sr), 0);
                         } else {
                             dor = sr;
                         }
                         if (sg != 0) {
-                            dog = Math.max(255 - ((255 - dig << 8) / sg), 0);
+                            dog = Math.max(255 - (((255 - dig) << 8) / sg), 0);
                         } else {
                             dog = sg;
                         }
                         if (sb != 0) {
-                            dob = Math.max(255 - ((255 - dib << 8) / sb), 0);
+                            dob = Math.max(255 - (((255 - dib) << 8) / sb), 0);
                         } else {
                             dob = sb;
                         }

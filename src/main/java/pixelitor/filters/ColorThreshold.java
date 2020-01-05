@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class ColorThreshold extends ParametrizedFilter {
     public ColorThreshold() {
         super(ShowOriginal.YES);
 
-        GroupedRangeParam threshold = new GroupedRangeParam("Threshold",
+        var threshold = new GroupedRangeParam("Threshold",
                 new RangeParam[]{
                         redThreshold,
                         greenThreshold,
@@ -68,7 +68,7 @@ public class ColorThreshold extends ParametrizedFilter {
             g = g >= greenTh ? 0xFF : 0;
             b = b >= blueTh ? 0xFF : 0;
 
-            destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
+            destData[i] = a << 24 | r << 16 | g << 8 | b;
         }
 
         return dest;

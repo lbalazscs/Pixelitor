@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.EventQueue;
-import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,14 +48,14 @@ public class BooleanParam extends AbstractFilterParam {
 
     public BooleanParam(String name, boolean defaultV, RandomizePolicy randomizePolicy, boolean addDefaultButton) {
         super(name, randomizePolicy);
-        this.defaultValue = defaultV;
+        defaultValue = defaultV;
         currentValue = defaultV;
         this.addDefaultButton = addDefaultButton;
     }
 
     @Override
     public JComponent createGUI() {
-        BooleanParamGUI gui = new BooleanParamGUI(this, addDefaultButton, action);
+        var gui = new BooleanParamGUI(this, addDefaultButton, action);
         paramGUI = gui;
         setParamGUIEnabledState();
 
@@ -147,21 +146,17 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
     public boolean canBeAnimated() {
         return false;
     }
 
     @Override
-    public ParamState copyState() {
+    public ParamState<?> copyState() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         throw new UnsupportedOperationException();
     }
 
@@ -174,8 +169,7 @@ public class BooleanParam extends AbstractFilterParam {
     public void addActionListener(ActionListener actionListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
-            BooleanParamGUI selector = (BooleanParamGUI) paramGUI;
-            selector.addActionListener(actionListener);
+            ((BooleanParamGUI) paramGUI).addActionListener(actionListener);
             return;
         }
 

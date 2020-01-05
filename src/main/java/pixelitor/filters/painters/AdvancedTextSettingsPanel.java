@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,10 +78,10 @@ public class AdvancedTextSettingsPanel extends JPanel {
     }
 
     private JCheckBox addCheckBox(String labelText, String name, boolean selected) {
-        JCheckBox cb = new JCheckBox("", selected);
+        var cb = new JCheckBox("", selected);
         cb.setName(name);
         cb.addActionListener(actionListener);
-        gbh.addLabelWithControl(labelText, cb);
+        gbh.addLabelAndControl(labelText, cb);
         return cb;
     }
 
@@ -97,9 +97,9 @@ public class AdvancedTextSettingsPanel extends JPanel {
         trackingParam = new RangeParam("", -20, 0, 70);
         trackingParam.setValue(tracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
-        JComponent trackingGUI = trackingParam.createGUI();
+        var trackingGUI = trackingParam.createGUI();
         trackingGUI.setName("trackingGUI");
-        gbh.addLabelWithControl("Tracking (Letter-spacing):", trackingGUI);
+        gbh.addLabelAndControl("Tracking (Letter-spacing):", trackingGUI);
     }
 
     public void updateFontAttributesMap(Map<TextAttribute, Object> map) {
@@ -127,7 +127,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
         }
         map.put(UNDERLINE, underlineSetting);
 
-        Float tracking = trackingParam.getValueAsPercentage();
+        Float tracking = trackingParam.getPercentageValF();
         map.put(TRACKING, tracking);
     }
 }

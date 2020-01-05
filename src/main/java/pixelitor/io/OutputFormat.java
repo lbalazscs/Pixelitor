@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,8 +47,8 @@ public enum OutputFormat {
     private final boolean supportsAlpha;
 
     OutputFormat(boolean layered, boolean hasAlpha) {
-        this.supportsMultipleLayers = layered;
-        this.supportsAlpha = hasAlpha;
+        supportsMultipleLayers = layered;
+        supportsAlpha = hasAlpha;
     }
 
     public Runnable getSaveTask(Composition comp, SaveSettings settings) {
@@ -110,6 +110,6 @@ public enum OutputFormat {
     }
 
     public static void setLastUsed(OutputFormat format) {
-        OutputFormat.lastUsed = format;
+        lastUsed = format;
     }
 }

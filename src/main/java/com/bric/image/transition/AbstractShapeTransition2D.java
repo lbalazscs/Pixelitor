@@ -75,30 +75,30 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
         Rectangle2D r = ShapeBounds.getBounds(base);
         transform.translate(size.width / 2.0f - r.getCenterX(), size.height / 2.0f - r.getCenterY());
         base.transform(transform);
-        r = ShapeBounds.getBounds(base, r);
+//        r = ShapeBounds.getBounds(base, r);
         float min = 0;
         float max = 1;
         Rectangle2D boundsRect = new Rectangle2D.Float(0, 0, size.width, size.height);
-        while (!isOK(base, r, boundsRect, max)) {
+        while (!isOK(base, boundsRect, max)) {
             min = max;
             max *= 1.2f;
         }
-        float f = calculateMultiplier(base, r, boundsRect, min, max);
-        isOK(base, r, boundsRect, f);
+        float f = calculateMultiplier(base, boundsRect, min, max);
+        isOK(base, boundsRect, f);
         return f;
     }
 
     /**
      * Perform a binary search for the best-fitting multiplier to use
      */
-    private static float calculateMultiplier(Area shape, Rectangle2D shapeBounds, Rectangle2D bounds, float min, float max) {
+    private static float calculateMultiplier(Area shape, Rectangle2D bounds, float min, float max) {
         while (true) {
             if (max - min < 0.5) {
                 return max;
             }
 
             float middle = (min + max) / 2.0f;
-            if (isOK(shape, shapeBounds, bounds, middle)) {
+            if (isOK(shape, bounds, middle)) {
                 max = middle;
             } else {
                 min = middle;
@@ -109,7 +109,7 @@ public abstract class AbstractShapeTransition2D extends Transition2D {
     /**
      * Determine if a particular scaling ratio works
      */
-    private static boolean isOK(Area shape, Rectangle2D shapeBounds, Rectangle2D bounds, float ratio) {
+    private static boolean isOK(Area shape, Rectangle2D bounds, float ratio) {
         Area area = new Area(shape);
         area.transform(AffineTransform.getScaleInstance(ratio, ratio));
         Rectangle2D r = ShapeBounds.getBounds(area);

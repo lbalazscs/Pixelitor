@@ -368,22 +368,22 @@ public final class BlendComposite implements Composite {
                     int pixel = srcPixels[x];
                     srcPixel[0] = (pixel >> 16) & 0xFF;
                     srcPixel[1] = (pixel >> 8) & 0xFF;
-                    srcPixel[2] = (pixel) & 0xFF;
+                    srcPixel[2] = pixel & 0xFF;
                     srcPixel[3] = (pixel >> 24) & 0xFF;
 
                     pixel = dstPixels[x];
                     dstPixel[0] = (pixel >> 16) & 0xFF;
                     dstPixel[1] = (pixel >> 8) & 0xFF;
-                    dstPixel[2] = (pixel) & 0xFF;
+                    dstPixel[2] = pixel & 0xFF;
                     dstPixel[3] = (pixel >> 24) & 0xFF;
 
                     blender.blend(srcPixel, dstPixel, result);
 
                     // mixes the result with the opacity
-                    dstPixels[x] = ((int) (dstPixel[3] + (result[3] - dstPixel[3]) * alpha) & 0xFF) << 24 |
-                            ((int) (dstPixel[0] + (result[0] - dstPixel[0]) * alpha) & 0xFF) << 16 |
-                            ((int) (dstPixel[1] + (result[1] - dstPixel[1]) * alpha) & 0xFF) << 8 |
-                            (int) (dstPixel[2] + (result[2] - dstPixel[2]) * alpha) & 0xFF;
+                    dstPixels[x] = (((int) (dstPixel[3] + (result[3] - dstPixel[3]) * alpha) & 0xFF) << 24) |
+                            (((int) (dstPixel[0] + (result[0] - dstPixel[0]) * alpha) & 0xFF) << 16) |
+                            (((int) (dstPixel[1] + (result[1] - dstPixel[1]) * alpha) & 0xFF) << 8) |
+                            ((int) (dstPixel[2] + (result[2] - dstPixel[2]) * alpha) & 0xFF);
                 }
                 dstOut.setDataElements(0, y, width, 1, dstPixels);
             }
@@ -415,13 +415,13 @@ public final class BlendComposite implements Composite {
                     // pixels are stored as INT_ABGR
                     // our arrays are [R, G, B, A]
                     int pixel = srcPixels[x];
-                    srcPixel[0] = (pixel) & 0xFF;
+                    srcPixel[0] = pixel & 0xFF;
                     srcPixel[1] = (pixel >> 8) & 0xFF;
                     srcPixel[2] = (pixel >> 16) & 0xFF;
                     srcPixel[3] = (pixel >> 24) & 0xFF;
 
                     pixel = dstPixels[x];
-                    dstPixel[0] = (pixel) & 0xFF;
+                    dstPixel[0] = pixel & 0xFF;
                     dstPixel[1] = (pixel >> 8) & 0xFF;
                     dstPixel[2] = (pixel >> 16) & 0xFF;
                     dstPixel[3] = (pixel >> 24) & 0xFF;
@@ -549,9 +549,9 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = dst[0] + src[0] - (dst[0] * src[0] >> 7);
-                            result[1] = dst[1] + src[1] - (dst[1] * src[1] >> 7);
-                            result[2] = dst[2] + src[2] - (dst[2] * src[2] >> 7);
+                            result[0] = (dst[0] + src[0]) - ((dst[0] * src[0]) >> 7);
+                            result[1] = (dst[1] + src[1]) - ((dst[1] * src[1]) >> 7);
+                            result[2] = (dst[2] + src[2]) - ((dst[2] * src[2]) >> 7);
                             result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
                         }
                     };
@@ -595,12 +595,12 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = src[0] < 128 ? dst[0] * src[0] >> 7 :
-                                    255 - ((255 - src[0]) * (255 - dst[0]) >> 7);
-                            result[1] = src[1] < 128 ? dst[1] * src[1] >> 7 :
-                                    255 - ((255 - src[1]) * (255 - dst[1]) >> 7);
-                            result[2] = src[2] < 128 ? dst[2] * src[2] >> 7 :
-                                    255 - ((255 - src[2]) * (255 - dst[2]) >> 7);
+                            result[0] = (src[0] < 128) ? ((dst[0] * src[0]) >> 7) :
+                                    (255 - (((255 - src[0]) * (255 - dst[0])) >> 7));
+                            result[1] = (src[1] < 128) ? ((dst[1] * src[1]) >> 7) :
+                                    (255 - (((255 - src[1]) * (255 - dst[1])) >> 7));
+                            result[2] = (src[2] < 128) ? ((dst[2] * src[2]) >> 7) :
+                                    (255 - (((255 - src[2]) * (255 - dst[2])) >> 7));
                             result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
                         }
                     };
@@ -703,12 +703,12 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = dst[0] < 128 ? dst[0] * src[0] >> 7 :
-                                    255 - ((255 - dst[0]) * (255 - src[0]) >> 7);
-                            result[1] = dst[1] < 128 ? dst[1] * src[1] >> 7 :
-                                    255 - ((255 - dst[1]) * (255 - src[1]) >> 7);
-                            result[2] = dst[2] < 128 ? dst[2] * src[2] >> 7 :
-                                    255 - ((255 - dst[2]) * (255 - src[2]) >> 7);
+                            result[0] = (dst[0] < 128) ? ((dst[0] * src[0]) >> 7) :
+                                    (255 - (((255 - dst[0]) * (255 - src[0])) >> 7));
+                            result[1] = (dst[1] < 128) ? ((dst[1] * src[1]) >> 7) :
+                                    (255 - (((255 - dst[1]) * (255 - src[1])) >> 7));
+                            result[2] = (dst[2] < 128) ? ((dst[2] * src[2]) >> 7) :
+                                    (255 - (((255 - dst[2]) * (255 - src[2])) >> 7));
                             result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
                         }
                     };
@@ -752,9 +752,9 @@ public final class BlendComposite implements Composite {
                     return new Blender() {
                         @Override
                         public void blend(int[] src, int[] dst, int[] result) {
-                            result[0] = 255 - ((255 - src[0]) * (255 - dst[0]) >> 8);
-                            result[1] = 255 - ((255 - src[1]) * (255 - dst[1]) >> 8);
-                            result[2] = 255 - ((255 - src[2]) * (255 - dst[2]) >> 8);
+                            result[0] = 255 - (((255 - src[0]) * (255 - dst[0])) >> 8);
+                            result[1] = 255 - (((255 - src[1]) * (255 - dst[1])) >> 8);
+                            result[2] = 255 - (((255 - src[2]) * (255 - dst[2])) >> 8);
                             result[3] = Math.min(255, src[3] + dst[3] - (src[3] * dst[3]) / 255);
                         }
                     };

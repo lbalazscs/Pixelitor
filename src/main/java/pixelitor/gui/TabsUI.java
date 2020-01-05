@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.OpenImages;
 import pixelitor.utils.Keys;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.test.RandomGUITest;
@@ -52,7 +53,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         setTabPlacement(tabPlacement);
         addChangeListener(e -> tabsChanged());
 
-        InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(Keys.CTRL_TAB, "navigateNext");
         inputMap.put(Keys.CTRL_SHIFT_TAB, "navigatePrevious");
     }
@@ -96,14 +97,14 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     private static void warnAndCloseTab(ImageTab tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
-            OpenComps.warnAndClose(tab.getView());
+            OpenImages.warnAndClose(tab.getView());
         }
     }
 
     public void closeTab(ImageTab tab) {
         remove(indexOfComponent(tab));
         View view = tab.getView();
-        OpenComps.imageClosed(view);
+        OpenImages.imageClosed(view);
     }
 
     public void selectTab(ImageTab tab) {
@@ -234,7 +235,7 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
             setBorderPainted(false);
             addMouseListener(buttonMouseListener);
             setRolloverEnabled(true);
-            addActionListener(e -> TabsUI.warnAndCloseTab(tab));
+            addActionListener(e -> warnAndCloseTab(tab));
         }
 
         @Override

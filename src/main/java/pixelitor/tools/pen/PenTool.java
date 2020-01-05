@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ package pixelitor.tools.pen;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
@@ -143,7 +143,7 @@ public class PenTool extends Tool {
             return;
         }
 
-        assert OpenComps.activePathIs(path);
+        assert OpenImages.activePathIs(path);
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -161,7 +161,7 @@ public class PenTool extends Tool {
         }
         changeMode(BUILD, path);
         enableActionsBasedOnFinishedPath(hasPath());
-        OpenComps.repaintActive();
+        OpenImages.repaintActive();
 
         assert checkPathConsistency();
     }
@@ -195,7 +195,7 @@ public class PenTool extends Tool {
 
         changeMode(mode, path);
         enableActionsBasedOnFinishedPath(true);
-        OpenComps.repaintActive();
+        OpenImages.repaintActive();
 
         assert checkPathConsistency();
     }
@@ -231,21 +231,21 @@ public class PenTool extends Tool {
         Path oldPath = path;
 
         Shape shape = path.toImageSpaceShape();
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit == null) {
             if (!RandomGUITest.isRunning()) {
                 Dialogs.showInfoDialog("No Selection",
-                    "No selection was created because the path is outside the canvas.");
+                        "No selection was created because the path is outside the canvas.");
             }
             return;
         }
 
         PenToolMode oldMode = mode;
         removePath();
-        History.addEdit(new ConvertPathToSelectionEdit(
-            comp, oldPath, selectionEdit, oldMode));
+        History.add(new ConvertPathToSelectionEdit(
+                comp, oldPath, selectionEdit, oldMode));
         assert checkPathConsistency();
 
         Tools.SELECTION.activate();
@@ -285,7 +285,7 @@ public class PenTool extends Tool {
 
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
-        View view = OpenComps.getActiveView();
+        View view = OpenImages.getActiveView();
         if (view == null) {
             return false;
         }
@@ -324,7 +324,7 @@ public class PenTool extends Tool {
         super.compActivated(oldCV, newCV);
         path = newCV.getComp().getActivePath();
 
-        assert OpenComps.getActiveView() == newCV;
+        assert OpenImages.getActiveView() == newCV;
         assert checkPathConsistency();
     }
 
@@ -336,7 +336,7 @@ public class PenTool extends Tool {
 
     @Override
     public void resetInitialState() {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         setPathFromComp(comp);
 
         assert checkPathConsistency();
@@ -346,7 +346,7 @@ public class PenTool extends Tool {
     protected void toolStarted() {
         super.toolStarted();
 
-        View view = OpenComps.getActiveView();
+        View view = OpenImages.getActiveView();
         if (view != null) {
             setPathFromComp(view.getComp());
 
@@ -364,9 +364,9 @@ public class PenTool extends Tool {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
-        assert OpenComps.activePathIs(path);
+        assert OpenImages.activePathIs(path);
 
-        Composition activeComp = OpenComps.getActiveCompOrNull();
+        Composition activeComp = OpenImages.getActiveComp();
         if (activeComp == null) {
             return true;
         }
@@ -422,7 +422,7 @@ public class PenTool extends Tool {
     }
 
     public void removePath() {
-        OpenComps.setActivePath(null);
+        OpenImages.setActivePath(null);
         setNullPath();
         enableActionsBasedOnFinishedPath(false);
     }
@@ -479,7 +479,7 @@ public class PenTool extends Tool {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         node.add(mode.createDebugNode());
 

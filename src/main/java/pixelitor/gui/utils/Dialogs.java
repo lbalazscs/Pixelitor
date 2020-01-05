@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -206,7 +206,7 @@ public class Dialogs {
     public static void showExceptionDialog(Throwable e, Thread thread) {
         if (!EventQueue.isDispatchThread()) {
             System.err.printf("ERROR: Dialogs.showExceptionDialog called in %s%n",
-                    Thread.currentThread().toString());
+                    Thread.currentThread());
 
             // call this method on the EDT
             Throwable finalE = e;
@@ -307,7 +307,7 @@ public class Dialogs {
             "<li>working with smaller images" +
             "<li>putting more RAM into your computer";
         String title = "Out of memory error.";
-        Dialogs.showErrorDialog(title, msg);
+        showErrorDialog(title, msg);
     }
 
     public static int showCloseWarningDialog(String compName) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,11 @@
 
 package pixelitor.utils;
 
-import pixelitor.filters.gui.FilterAction;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.FilterButtonModel;
 
 import java.util.Random;
+
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Support for "reseed" buttons in filters. The idea is
@@ -53,14 +54,11 @@ public class ReseedSupport {
         seed = System.nanoTime();
     }
 
-    public static FilterAction createAction() {
-        return new ReseedNoiseFilterAction(
-                e -> reseed());
+    public static FilterButtonModel createAction() {
+        return reseedByCalling(ReseedSupport::reseed);
     }
 
-    public static FilterAction createAction(String name, String toolTipText) {
-        return new ReseedNoiseFilterAction(
-                name, toolTipText,
-                e -> reseed());
+    public static FilterButtonModel createAction(String name, String toolTipText) {
+        return reseedByCalling(ReseedSupport::reseed, name, toolTipText);
     }
 }

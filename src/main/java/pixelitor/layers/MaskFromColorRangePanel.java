@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.ColorPickerThumbnailPanel;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -44,6 +44,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 import static java.awt.AlphaComposite.DstIn;
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.WEST;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.layers.LayerMask.RUBYLITH_COLOR_MODEL;
@@ -108,9 +114,9 @@ public class MaskFromColorRangePanel extends JPanel {
         createInvertCheckBox();
         createColorSpaceComboBox();
 
-        add(createNorthPanel(), BorderLayout.NORTH);
-        add(createImagesPanel(srcImage), BorderLayout.CENTER);
-        add(createSouthPanel(), BorderLayout.SOUTH);
+        add(createNorthPanel(), NORTH);
+        add(createImagesPanel(srcImage), CENTER);
+        add(createSouthPanel(), SOUTH);
     }
 
     private void maskBaseChanged(Composition comp) {
@@ -154,9 +160,9 @@ public class MaskFromColorRangePanel extends JPanel {
         rightPanel.add(new JLabel("Preview Mode:"));
         rightPanel.add(previewModeCB);
 
-        northPanel.add(leftPanel, BorderLayout.WEST);
-        northPanel.add(rightPanel, BorderLayout.EAST);
-        
+        northPanel.add(leftPanel, WEST);
+        northPanel.add(rightPanel, EAST);
+
         return northPanel;
     }
 
@@ -168,11 +174,11 @@ public class MaskFromColorRangePanel extends JPanel {
 
         JPanel left = new JPanel(new BorderLayout());
         left.setBorder(createTitledBorder(HELP_TEXT));
-        left.add(colorPickerPanel, BorderLayout.CENTER);
+        left.add(colorPickerPanel, CENTER);
 
         JPanel right = new JPanel(new BorderLayout());
         right.setBorder(createTitledBorder("Preview"));
-        right.add(previewPanel, BorderLayout.CENTER);
+        right.add(previewPanel, CENTER);
 
         JPanel imagesPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         imagesPanel.add(left);
@@ -217,9 +223,9 @@ public class MaskFromColorRangePanel extends JPanel {
         JPanel southPanel = new JPanel(new BorderLayout());
 
         JPanel southCenterPanel = new JPanel(new GridBagLayout());
-        JPanel southEastPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        southPanel.add(southCenterPanel, BorderLayout.CENTER);
-        southPanel.add(southEastPanel, BorderLayout.EAST);
+        JPanel southEastPanel = new JPanel(new FlowLayout(LEFT, 5, 5));
+        southPanel.add(southCenterPanel, CENTER);
+        southPanel.add(southEastPanel, EAST);
 
         SliderSpinner toleranceSlider = new SliderSpinner(tolerance, NONE, false);
         toleranceSlider.setName("toleranceSlider");
@@ -227,10 +233,10 @@ public class MaskFromColorRangePanel extends JPanel {
         SliderSpinner softnessSlider = new SliderSpinner(softness, NONE, false);
         softnessSlider.setName("softnessSlider");
 
-        GridBagHelper gbh = new GridBagHelper(southCenterPanel);
-        gbh.addLabelWithControlNoStretch(tolerance.getName(), toleranceSlider);
-        gbh.addLabelWithControlNoStretch(softness.getName(), softnessSlider);
-        gbh.addLabelWithControl("Invert:", invertCheckBox);
+        var gbh = new GridBagHelper(southCenterPanel);
+        gbh.addLabelAndControlNoStretch(tolerance.getName(), toleranceSlider);
+        gbh.addLabelAndControlNoStretch(softness.getName(), softnessSlider);
+        gbh.addLabelAndControl("Invert:", invertCheckBox);
 
 //        southCenterPanel.add(toleranceSlider);
 //        southCenterPanel.add(softnessSlider);
@@ -265,7 +271,7 @@ public class MaskFromColorRangePanel extends JPanel {
         int distType = ((Value) distTypeCombo.getSelectedItem()).getValue();
         filter.setDistType(distType);
         filter.setColor(c);
-        filter.setTolerance(tolerance.getValue(), softness.getValueAsPercentage());
+        filter.setTolerance(tolerance.getValue(), softness.getPercentageValF());
         filter.setInvert(invertCheckBox.isSelected());
         return filter;
     }
@@ -346,7 +352,7 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     public static void showInDialog() {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         Layer layer = comp.getActiveLayer();
 
         MaskFromColorRangePanel panel = new MaskFromColorRangePanel(comp, layer);

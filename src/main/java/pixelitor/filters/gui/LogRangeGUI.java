@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.SliderSpinner.TextPosition;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -39,15 +40,15 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
         this.model = model;
 
         setLayout(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(this);
+        var gbh = new GridBagHelper(this);
 
-        slider = new SliderSpinner(model, SliderSpinner.TextPosition.NONE, true);
+        slider = new SliderSpinner(model, TextPosition.NONE, true);
         slider.addChangeListener(e -> sliderChanged());
 
-        gbh.addLabelWithControl("Log:", slider);
+        gbh.addLabelAndControl("Log:", slider);
         valueLabel = new JLabel();
         updateValueLabel();
-        gbh.addLabelWithControl("Value:", valueLabel);
+        gbh.addLabelAndControl("Value:", valueLabel);
 
         setBorder(BorderFactory.createTitledBorder("Zoom"));
     }

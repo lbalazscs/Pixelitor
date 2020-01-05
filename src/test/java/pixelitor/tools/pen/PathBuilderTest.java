@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -60,7 +59,7 @@ public class PathBuilderTest {
     @Before
     public void setup() {
         // a real comp that can store paths
-        Composition comp = TestHelper.createEmptyComposition();
+        var comp = TestHelper.createEmptyComposition();
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
         pb = BUILD;
@@ -111,8 +110,7 @@ public class PathBuilderTest {
     public void testUndoAfterMousePressed() {
         press(100, 100, DRAGGING_THE_CONTROL_OF_LAST);
         Path path = PenTool.path;
-        SubPath sp = path.getActiveSubpath();
-        assertThat(sp).numAnchorsIs(1);
+        assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
         undo("Subpath Start", null);
         assertThat(Tools.PEN).hasNoPath();
@@ -143,8 +141,7 @@ public class PathBuilderTest {
         click(100, 100);
 
         Path path = PenTool.path;
-        SubPath sp = path.getActiveSubpath();
-        assertThat(sp).numAnchorsIs(1);
+        assertThat(path.getActiveSubpath()).numAnchorsIs(1);
 
         undo("Subpath Start", null);
         assertThat(Tools.PEN).hasNoPath();

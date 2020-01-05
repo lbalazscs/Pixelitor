@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,11 +25,12 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Cells filter based on the JHLabs CellularFilter
@@ -75,7 +76,7 @@ public class JHCells extends ParametrizedFilter {
                 scale.withAdjustedRange(0.5),
                 stretch,
                 angle
-        ).withAction(new ReseedNoiseFilterAction(e -> {
+        ).withAction(reseedByCalling(() -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
         }));
@@ -87,7 +88,7 @@ public class JHCells extends ParametrizedFilter {
             filter = new CellularFilter(NAME);
         }
 
-        float tune = refineType.getValueAsPercentage();
+        float tune = refineType.getPercentageValF();
         float f1, f2, f3;
 
         switch (type.getValue()) {
@@ -110,19 +111,19 @@ public class JHCells extends ParametrizedFilter {
                 throw new IllegalStateException("type.getValue() = " + type.getValue());
         }
 
-        float bw = darkLightBalance.getValueAsPercentage();
+        float bw = darkLightBalance.getPercentageValF();
         f1 += bw;
         f2 += bw;
         f3 += bw;
 
         filter.setScale(scale.getValueAsFloat());
-        filter.setStretch(stretch.getValueAsPercentage());
-        filter.setAngle((float) (angle.getValueInRadians() + (Math.PI / 2)));
+        filter.setStretch(stretch.getPercentageValF());
+        filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
         filter.setF1(f1);
         filter.setF2(f2);
         filter.setF3(f3);
         filter.setGridType(gridType.getValue());
-        filter.setRandomness(gridRandomness.getValueAsPercentage());
+        filter.setRandomness(gridRandomness.getPercentageValF());
         filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);

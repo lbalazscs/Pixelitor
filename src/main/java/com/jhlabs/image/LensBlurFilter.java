@@ -125,14 +125,14 @@ public class LensBlurFilter extends AbstractBufferedImageOp {
         int rows = 1, cols = 1;
         int log2rows = 0, log2cols = 0;
         int iradius = (int) Math.ceil(radius);
-        int tileWidth = 128;
-        int tileHeight = tileWidth;
+//        int tileWidth = 128;
+//        int tileHeight = tileWidth;
 
 //        int adjustedWidth = (int)(width + iradius*2);
 //        int adjustedHeight = (int)(height + iradius*2);
 
-        tileWidth = iradius < 32 ? Math.min(128, width + 2 * iradius) : Math.min(256, width + 2 * iradius);
-        tileHeight = iradius < 32 ? Math.min(128, height + 2 * iradius) : Math.min(256, height + 2 * iradius);
+        int tileWidth = iradius < 32 ? Math.min(128, width + 2 * iradius) : Math.min(256, width + 2 * iradius);
+        int tileHeight = iradius < 32 ? Math.min(128, height + 2 * iradius) : Math.min(256, height + 2 * iradius);
 
         if (dst == null) {
             dst = new BufferedImage(width, height, TYPE_INT_ARGB);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,19 +48,19 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     OpenSaveDirsPanel(boolean allowSameDirs, OutputFormat outputFormat) {
         this.allowSameDirs = allowSameDirs;
         setLayout(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(this);
+        var gbh = new GridBagHelper(this);
 
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
         outputFormatSelector = new OutputFormatSelector(outputFormat);
-        gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
+        gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
     private static void addDirChooser(String label,
                                       BrowseFilesSupport chooser,
                                       GridBagHelper gbh) {
-        gbh.addLabelWithTwoControls(label,
+        gbh.addLabelAndTwoControls(label,
                 chooser.getNameTF(),
                 chooser.getBrowseButton());
     }
@@ -77,16 +77,16 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         File inputDir = inputChooser.getSelectedFile();
         File outputDir = outputChooser.getSelectedFile();
 
-        ValidationResult v = ValidationResult.ok();
-        v = addDirExistenceCheck(v, inputDir, "input");
-        v = addDirExistenceCheck(v, outputDir, "output");
+        var retVal = ValidationResult.ok();
+        retVal = addDirExistenceCheck(retVal, inputDir, "input");
+        retVal = addDirExistenceCheck(retVal, outputDir, "output");
 
         if (!allowSameDirs && inputDir.equals(outputDir)) {
             ValidationResult err = ValidationResult.error(
                     "The input and output folders must be different.");
-            return v.and(err);
+            return retVal.and(err);
         }
-        return v;
+        return retVal;
     }
 
     private static ValidationResult addDirExistenceCheck(ValidationResult v,

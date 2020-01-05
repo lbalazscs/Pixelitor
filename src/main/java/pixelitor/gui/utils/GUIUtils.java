@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,6 +51,8 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static java.awt.FlowLayout.CENTER;
+import static java.awt.FlowLayout.RIGHT;
 import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import static pixelitor.utils.Cursors.BUSY;
@@ -127,7 +129,7 @@ public final class GUIUtils {
     }
 
     public static JPanel arrangeParamsVertically(Iterable<FilterParam> params) {
-        JPanel p = new JPanel();
+        var p = new JPanel();
         arrangeParamsVertically(p, params);
         return p;
     }
@@ -137,7 +139,7 @@ public final class GUIUtils {
 
         int row = 0;
 
-        GridBagHelper gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(p);
         for (FilterParam param : params) {
             JComponent control = param.createGUI();
 
@@ -235,11 +237,11 @@ public final class GUIUtils {
     public static void addOKCancelButtons(JPanel panel,
                                           JButton okButton, JButton cancelButton) {
         if (JVM.isMac) {
-            panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+            panel.setLayout(new FlowLayout(RIGHT, 5, 5));
             panel.add(cancelButton);
             panel.add(okButton);
         } else {
-            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+            panel.setLayout(new FlowLayout(CENTER, 5, 5));
             panel.add(okButton);
             panel.add(cancelButton);
         }
@@ -310,36 +312,41 @@ public final class GUIUtils {
         });
     }
 
-    public static Action createShowInFileManagerAction(File file) {
-        String menuName;
-        if (JVM.isWindows) {
-            menuName = "Show in Explorer...";
-        } else if (JVM.isMac) {
-            menuName = "Show in Finder...";
-        } else {
-            menuName = "Show Folder...";
-        }
-        return new AbstractAction(menuName) {
+    public static Action createShowInFolderAction(File file) {
+        return new AbstractAction("Show in Folder...") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // TODO in Java 9 it can be done in a platform-independent way
-                    // see https://stackoverflow.com/questions/7357969/how-to-use-java-code-to-open-windows-file-explorer-and-highlight-the-specified-f
-                    if (JVM.isWindows) {
-                        Runtime.getRuntime().exec("explorer.exe /select," + file.getCanonicalPath());
-                    } else if (JVM.isMac) {
-                        Runtime.getRuntime().exec("open -R " + file.getCanonicalPath());
-                    } else {
-                        // for now (java 8 compatibility) this only
-                        // opens the folder, but without selecting the file
-                        File dir = file.getParentFile();
-                        Desktop.getDesktop().open(dir);
-                    }
+                    openFileInFolder(file);
                 } catch (IOException ex) {
                     Messages.showException(ex);
                 }
             }
         };
+    }
+
+    private static void openFileInFolder(File file) throws IOException {
+        // this line should work in a platform-independent way, but
+        // https://bugs.openjdk.java.net/browse/JDK-8233994
+        // Desktop.getDesktop().browseFileDirectory(file);
+        String path = file.getCanonicalPath();
+        if (JVM.isWindows) {
+            Runtime.getRuntime().exec("explorer.exe /select," + path);
+        } else if (JVM.isMac) {
+            Runtime.getRuntime().exec("open -R " + path);
+        } else {
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.BROWSE_FILE_DIR)) {
+                    desktop.browseFileDirectory(file);
+                } else if (desktop.isSupported(Desktop.Action.OPEN)) {
+                    // just open the parent directory
+                    File dir = file.getParentFile();
+                    desktop.open(dir);
+                }
+                // else give up
+            }
+        }
     }
 
     public static AbstractAction createPrintFileAction(Composition comp, File file) {

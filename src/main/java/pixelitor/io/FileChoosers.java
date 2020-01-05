@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,8 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.File;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
 import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
@@ -89,12 +91,12 @@ public class FileChoosers {
 
             setDefaultOpenExtensions();
 
-            JPanel p = new JPanel();
+            var p = new JPanel();
             p.setLayout(new BorderLayout());
             ProgressPanel progressPanel = new ProgressPanel();
             ImagePreviewPanel preview = new ImagePreviewPanel(progressPanel);
-            p.add(preview, BorderLayout.CENTER);
-            p.add(progressPanel, BorderLayout.SOUTH);
+            p.add(preview, CENTER);
+            p.add(progressPanel, SOUTH);
 
             openChooser.setAccessory(p);
             openChooser.addPropertyChangeListener(preview);

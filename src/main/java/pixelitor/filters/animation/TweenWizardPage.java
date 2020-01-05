@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
-            JPanel p = new JPanel(new FlowLayout());
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
+            var p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
             p.add(filtersCB);
@@ -76,7 +76,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
             ParametrizedFilter filter = getAnimation(wizard).getFilter();
             dr.startPreviewing();
 
@@ -112,7 +112,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
             // the following 3 lines are necessary because otherwise the image position
             // selectors will show the result of the initial filter and not the original image
             dr.stopPreviewing(); // stop the initial one
@@ -152,7 +152,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
             if (outputSettingsPanel == null) {
                 outputSettingsPanel = new TweenOutputSettingsPanel();
             }

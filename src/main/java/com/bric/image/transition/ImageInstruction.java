@@ -133,9 +133,8 @@ public class ImageInstruction extends Transition2DInstruction {
 
         BufferedImage img = isFirstFrame ? frameA : frameB;
 
-        Composite oldComposite = null;
 //		if(opacity!=1) {
-        oldComposite = g.getComposite();
+        Composite oldComposite = g.getComposite();
 //			g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
 //			g.setComposite(new CrossFadeToTransparentComposite(opacity));
 //			g.setComposite(new AddComposite(opacity));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,9 +36,9 @@ public class EffectWithWidthPanel extends EffectPanel {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
-        widthSlider = SliderSpinner.simpleFrom(widthRange);
+        widthSlider = SliderSpinner.from(widthRange);
 
-        gbh.addLabelWithControl("Width:", widthSlider);
+        gbh.addLabelAndControl("Width:", widthSlider);
 
         widthRange.addChangeListener(e -> updateDefaultButtonIcon());
     }
@@ -69,6 +69,15 @@ public class EffectWithWidthPanel extends EffectPanel {
     public void reset(boolean trigger) {
         super.reset(false);
         widthRange.reset(trigger);
+    }
+
+    @Override
+    public boolean randomize() {
+        boolean enable = super.randomize();
+        if (enable) {
+            widthRange.randomize();
+        }
+        return enable;
     }
 
     @Override

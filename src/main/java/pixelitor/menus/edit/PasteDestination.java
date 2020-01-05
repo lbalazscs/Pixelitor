@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,7 @@
 package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
@@ -40,8 +39,8 @@ public enum PasteDestination {
         }
 
         @Override
-        void addImage(BufferedImage pastedImage) {
-            Composition comp = OpenComps.getActiveCompOrNull();
+        void paste(BufferedImage pastedImage) {
+            var comp = OpenImages.getActiveComp();
             comp.addExternalImageAsNewLayer(pastedImage,
                     "Pasted Layer", "New Pasted Layer");
         }
@@ -54,13 +53,11 @@ public enum PasteDestination {
         }
 
         @Override
-        void addImage(BufferedImage pastedImage) {
+        void paste(BufferedImage pastedImage) {
             String title = "Pasted Image " + pastedCount;
 
-            Composition comp = Composition.fromImage(pastedImage,
-                    null, title);
+            OpenImages.addAsNewComp(pastedImage, null, title);
 
-            OpenComps.addAsNewImage(comp);
             pastedCount++;
         }
     }, MASK {
@@ -70,8 +67,8 @@ public enum PasteDestination {
         }
 
         @Override
-        void addImage(BufferedImage pastedImage) {
-            Composition comp = OpenComps.getActiveCompOrNull();
+        void paste(BufferedImage pastedImage) {
+            var comp = OpenImages.getActiveComp();
             Canvas canvas = comp.getCanvas();
             int width = canvas.getImWidth();
             int height = canvas.getImHeight();
@@ -105,5 +102,5 @@ public enum PasteDestination {
         }
     };
 
-    abstract void addImage(BufferedImage pastedImage);
+    abstract void paste(BufferedImage pastedImage);
 }

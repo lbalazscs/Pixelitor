@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,13 +46,13 @@ public interface FilterParam extends FilterSetting, Resettable {
      * "memento" object.
      * Implemented only for parameters that can be animated.
      */
-    ParamState copyState();
+    ParamState<?> copyState();
 
     /**
      * Sets the internal state according to the given {@link ParamState}
      * Implemented only for parameters that can be animated.
      */
-    void setState(ParamState state);
+    void setState(ParamState<?> state);
 
     /**
      * True if the value can be interpolated in some useful way.

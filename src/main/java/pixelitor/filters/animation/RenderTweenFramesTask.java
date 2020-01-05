@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,9 @@
 
 package pixelitor.filters.animation;
 
-import pixelitor.Composition;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ParamSetState;
+import pixelitor.filters.gui.CompositeState;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -41,7 +40,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final Drawable dr;
 
     public RenderTweenFramesTask(TweenAnimation tweenAnimation, Drawable dr) {
-        this.animation = tweenAnimation;
+        animation = tweenAnimation;
         this.dr = dr;
     }
 
@@ -150,7 +149,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         long runCountBefore = Filter.runCount;
 
-        ParamSetState intermediateState = animation.tween(time);
+        CompositeState intermediateState = animation.tween(time);
         filter.getParamSet().setState(intermediateState);
 
         // all sorts of problems can happen
@@ -161,7 +160,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         long runCountAfter = Filter.runCount;
         assert runCountAfter == runCountBefore + 1;
 
-        Composition comp = dr.getComp();
+        var comp = dr.getComp();
         comp.repaint();
 
         return comp.getCompositeImage();

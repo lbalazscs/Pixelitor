@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Canvas;
+import pixelitor.OpenImages;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 
@@ -67,10 +68,10 @@ public enum AutoZoom {
     public abstract double calcImageToDesktopRatio(double hor, double ver);
 
     private Action asAction() {
-        AbstractAction action = new AbstractAction(guiName) {
+        var action = new AbstractAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenComps.fitActiveTo(AutoZoom.this);
+                OpenImages.fitActiveTo(AutoZoom.this);
             }
         };
         action.putValue(Action.SHORT_DESCRIPTION, toolTip);

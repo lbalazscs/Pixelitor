@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -130,7 +130,7 @@ public class ImDrag {
 
     public ImDrag getCenterDrag() {
         Point2D center = getCenterPoint();
-        ImDrag rv = new ImDrag(center.getX(), center.getY(), this.getEndX(), this.getEndY());
+        ImDrag rv = new ImDrag(center.getX(), center.getY(), getEndX(), getEndY());
         return rv;
     }
 
@@ -299,8 +299,8 @@ public class ImDrag {
     }
 
     public void debug(Graphics2D g, Color c) {
-        Line2D.Double line = new Line2D.Double(startX, startY, endX, endY);
-        Shape circle = Shapes.createCenteredCircle(startX, startY, 10);
+        var line = new Line2D.Double(startX, startY, endX, endY);
+        Shape circle = Shapes.createCircle(startX, startY, 10);
         Shapes.debug(g, c, line);
         Shapes.debug(g, c, circle);
     }

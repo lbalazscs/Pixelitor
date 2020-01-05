@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,7 @@ import com.jhlabs.image.DiffuseFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedActions;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -45,7 +45,7 @@ public class JHFrostedGlass extends ParametrizedFilter {
         setParams(amount.withAdjustedRange(0.1),
                 interpolation,
                 edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS)
-        ).withAction(ReseedNoiseFilterAction.noOpReseed());
+        ).withAction(ReseedActions.noOpReseed());
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,10 @@ import pixelitor.utils.ImageUtils;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
-import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MBMethod.BETTER;
-import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MBMethod.FASTER;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MotionBlurQuality.BETTER;
+import static pixelitor.filters.jhlabsproxies.JHMotionBlur.MotionBlurQuality.FASTER;
 
 /**
  * "Motion Blur" and "Spin and Zoom Blur" filters based on the JHLabs
@@ -53,23 +53,23 @@ public class JHMotionBlur extends ParametrizedFilter {
 
     private final Mode mode;
 
-    enum MBMethod {
+    enum MotionBlurQuality {
         FASTER {
             @Override
-            public MotionBlur getImplementation(String filterName) {
+            public MotionBlur createFilter(String filterName) {
                 return new MotionBlurOp(filterName);
             }
         }, BETTER {
             @Override
-            public MotionBlur getImplementation(String filterName) {
-                MotionBlurFilter filter = new MotionBlurFilter(filterName);
+            public MotionBlur createFilter(String filterName) {
+                var filter = new MotionBlurFilter(filterName);
                 filter.setPremultiplyAlpha(false);
                 filter.setWrapEdges(false);
                 return filter;
             }
         };
 
-        public abstract MotionBlur getImplementation(String filterName);
+        public abstract MotionBlur createFilter(String filterName);
     }
 
     private static final Value[] methodChoices = {
@@ -96,7 +96,7 @@ public class JHMotionBlur extends ParametrizedFilter {
             return new FilterAction(toString(), () -> new JHMotionBlur(this));
         }
 
-        // the ParamSet cannot be created here, because the referenced fields belong to the filter...
+        // the ParamSet can't be created here, because the referenced fields belong to the filter...
     }
 
     public JHMotionBlur(Mode mode) {
@@ -128,7 +128,7 @@ public class JHMotionBlur extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int distanceValue = distance.getValue();
-        float zoomValue = zoom.getValueAsPercentage();
+        float zoomValue = zoom.getPercentageValF();
         float rotationValue = rotation.getValueInRadians();
         if(mode == MOTION_BLUR) {
             if (distanceValue == 0) {
@@ -141,10 +141,10 @@ public class JHMotionBlur extends ParametrizedFilter {
         }
 
         int intValue = method.getValue();
-        MBMethod chosenMethod = MBMethod.values()[intValue];
+        MotionBlurQuality chosenMethod = MotionBlurQuality.values()[intValue];
 
         String filterName = mode.toString();
-        MotionBlur filter = chosenMethod.getImplementation(filterName);
+        MotionBlur filter = chosenMethod.createFilter(filterName);
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public class ExtractChannelFilter extends Filter {
     public static FilterAction getValueChannelFA() {
         RGBPixelOp rgbOp = (a, r, g, b) -> {
             // value = max(R, G, B)
-            int maxRGB = (r > g) ? r : g;
+            int maxRGB = Math.max(r, g);
             if (b > maxRGB) {
                 maxRGB = b;
             }
@@ -56,7 +56,7 @@ public class ExtractChannelFilter extends Filter {
             g = value;
             b = value;
 
-            return (a << 24) | (r << 16) | (g << 8) | b;
+            return a << 24 | r << 16 | g << 8 | b;
         };
         String name = "Value = max(R,G,B)";
         return rgbOp.toFilterAction(name);
@@ -65,11 +65,11 @@ public class ExtractChannelFilter extends Filter {
     public static FilterAction getDesaturateChannelFA() {
         RGBPixelOp rgbOp = (a, r, g, b) -> {
             // achieves desaturation by setting the brightness to [max(R, G, B) + min (R, G, B)] / 2
-            int maxRGB = (r > g) ? r : g;
+            int maxRGB = Math.max(r, g);
             if (b > maxRGB) {
                 maxRGB = b;
             }
-            int minRGB = (r < g) ? r : g;
+            int minRGB = Math.min(r, g);
             if (b < minRGB) {
                 minRGB = b;
             }
@@ -80,39 +80,38 @@ public class ExtractChannelFilter extends Filter {
             g = brightness;
             b = brightness;
 
-            return (a << 24) | (r << 16) | (g << 8) | b;
+            return a << 24 | r << 16 | g << 8 | b;
         };
         return rgbOp.toFilterAction("Desaturate");
     }
 
     public static FilterAction getSaturationChannelFA() {
         RGBPixelOp rgbOp = (a, r, g, b) -> {
-            int rgbMax = (r > g) ? r : g;
+            int rgbMax = Math.max(r, g);
             if (b > rgbMax) {
                 rgbMax = b;
             }
-            int rgbMin = (r < g) ? r : g;
+            int rgbMin = Math.min(r, g);
             if (b < rgbMin) {
                 rgbMin = b;
             }
 
             int saturation = 0;
             if (rgbMax != 0) {
-                saturation = (int) (((float) (rgbMax - rgbMin)) / ((float) rgbMax) * 255);
+                saturation = (int) ((rgbMax - rgbMin) / (float) rgbMax * 255);
             }
 
             r = saturation;
             g = saturation;
             b = saturation;
 
-
-            return (a << 24) | (r << 16) | (g << 8) | b;
+            return a << 24 | r << 16 | g << 8 | b;
         };
         return rgbOp.toFilterAction("Saturation");
     }
 
     public static FilterAction getHueChannelFA() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
+        var rgbOp = new RGBPixelOp() {
             private float[] tmpHSBArray = {0.0f, 0.0f, 0.0f};
 
             @Override
@@ -126,14 +125,14 @@ public class ExtractChannelFilter extends Filter {
                 g = hue;
                 b = hue;
 
-                return (a << 24) | (r << 16) | (g << 8) | b;
+                return a << 24 | r << 16 | g << 8 | b;
             }
         };
         return rgbOp.toFilterAction("Hue");
     }
 
     public static FilterAction getHueInColorsChannelFA() {
-        RGBPixelOp rgbOp = new RGBPixelOp() {
+        var rgbOp = new RGBPixelOp() {
             private static final float DEFAULT_SATURATION = 0.9f;
             private static final float DEFAULT_BRIGHTNESS = 0.75f;
 
@@ -148,7 +147,7 @@ public class ExtractChannelFilter extends Filter {
                 int newRGB = Color.HSBtoRGB(tmpHSBArray[0],
                         DEFAULT_SATURATION, DEFAULT_BRIGHTNESS); // alpha is 255
                 newRGB &= 0x00FFFFFF;  // set alpha to 0
-                return (a << 24) | newRGB; // add the real alpha
+                return a << 24 | newRGB; // add the real alpha
             }
         };
         return rgbOp.toFilterAction("Hue (with colors)");

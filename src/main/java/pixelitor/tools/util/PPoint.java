@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,8 @@ import pixelitor.gui.View;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+
+import static java.lang.String.format;
 
 /**
  * The "Pixelitor Point" represents an immutable point on an image both in
@@ -110,8 +112,8 @@ public abstract class PPoint {
     }
 
     public void drawLineTo(PPoint end, Graphics2D g) {
-        Line2D.Double line = new Line2D.Double(getImX(), getImY(), end.getImX(), end.getImY());
-        g.draw(line);
+        g.draw(new Line2D.Double(
+                getImX(), getImY(), end.getImX(), end.getImY()));
     }
 
     /**
@@ -168,7 +170,7 @@ public abstract class PPoint {
 
     @Override
     public String toString() {
-        return String.format("[imX = %.1f, imY = %.1f]", getImX(), getImY());
+        return format("[imX = %.1f, imY = %.1f]", getImX(), getImY());
     }
 
     /**
@@ -228,8 +230,8 @@ public abstract class PPoint {
             super(view);
             this.imX = imX;
             this.imY = imY;
-            this.coX = (int) view.imageXToComponentSpace(imX);
-            this.coY = (int) view.imageYToComponentSpace(imY);
+            coX = (int) view.imageXToComponentSpace(imX);
+            coY = (int) view.imageYToComponentSpace(imY);
         }
     }
 
@@ -250,7 +252,7 @@ public abstract class PPoint {
         @Override
         public double getCoX() {
             if (!xConverted) {
-                this.coX = view.imageXToComponentSpace(imX);
+                coX = view.imageXToComponentSpace(imX);
                 xConverted = true;
             }
             return coX;
@@ -259,7 +261,7 @@ public abstract class PPoint {
         @Override
         public double getCoY() {
             if (!yConverted) {
-                this.coY = view.imageYToComponentSpace(imY);
+                coY = view.imageYToComponentSpace(imY);
                 yConverted = true;
             }
             return coY;

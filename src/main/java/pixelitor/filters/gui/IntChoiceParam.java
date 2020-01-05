@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import static java.lang.String.format;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * A filter parameter for selecting a choice from a list of values
@@ -54,7 +55,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
         choicesList.addAll(Arrays.asList(choices));
 
-        this.defaultChoice = choices[0];
+        defaultChoice = choices[0];
         currentChoice = defaultChoice;
     }
 
@@ -158,7 +159,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
             Value other = (Value) o;
 
-            if (this.value != other.value) {
+            if (value != other.value) {
                 return false;
             }
             return !(name != null ? !name.equals(other.name) : other.name != null);
@@ -193,7 +194,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     }
 
     public static IntChoiceParam forEdgeAction(boolean reflectFirst) {
-        IntChoiceParam choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
+        var choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
         if(reflectFirst) {
             return choice.withDefaultChoice(EDGE_REFLECT);
         }
@@ -227,9 +228,9 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     };
 
     public static IntChoiceParam forWaveType() {
-        ReseedNoiseFilterAction reseedNoise = new ReseedNoiseFilterAction("Reseed Noise",
+        var reseedNoise = reseedNoise("Reseed Noise",
                 "Reinitialize the randomness of the noise.");
-        IntChoiceParam icp = new IntChoiceParam("Wave Type", waveTypeChoices);
+        var icp = new IntChoiceParam("Wave Type", waveTypeChoices);
         icp.withAction(reseedNoise);
 
         // The "Reseed Noise" button should be enabled only if the wave type is "Noise"
@@ -241,7 +242,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     public static IntChoiceParam forGridType(String name, RangeParam randomnessParam) {
         randomnessParam.setEnabled(false, APP_LOGIC);
-        IntChoiceParam param = new IntChoiceParam(name, gridTypeChoices);
+        var param = new IntChoiceParam(name, gridTypeChoices);
         param.addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -278,12 +279,12 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     @Override
     public String getResetToolTip() {
-        return super.getResetToolTip() + " to " + defaultChoice.toString();
+        return super.getResetToolTip() + " to " + defaultChoice;
     }
 
     @Override
     public String toString() {
         return format("%s[name = '%s', selected = '%s']",
-                getClass().getSimpleName(), getName(), currentChoice.toString());
+                getClass().getSimpleName(), getName(), currentChoice);
     }
 }

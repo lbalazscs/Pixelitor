@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,8 +65,8 @@ public abstract class ComplexFractalImpl extends PointFilter {
         double zoomedRangeCX = cxRange / zoom;
         double zoomedRangeCY = cyRange / zoom;
 
-        xMultiplier = zoomedRangeCX / (double) src.getWidth();
-        yMultiplier = zoomedRangeCY / (double) src.getHeight();
+        xMultiplier = zoomedRangeCX / src.getWidth();
+        yMultiplier = zoomedRangeCY / src.getHeight();
 
         // the zoom center in the "C-space"
         double zoomCenterCX = cxMin + zoomCenterX * cxRange;

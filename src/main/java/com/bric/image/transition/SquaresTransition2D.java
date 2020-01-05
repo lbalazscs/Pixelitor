@@ -24,7 +24,6 @@ import com.bric.geom.RectangularTransform;
 import java.awt.Dimension;
 import java.awt.geom.Rectangle2D;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Random;
 
 /**
@@ -62,23 +61,6 @@ public class SquaresTransition2D extends Transition2D {
                 new SquaresTransition2D(20, 20),
         };
     }
-
-    private final Comparator<ImageInstruction> comparator = (i1, i2) -> {
-        if (i1.isFirstFrame && !i2.isFirstFrame) {
-            return 1;
-        }
-        if (i2.isFirstFrame && !i1.isFirstFrame) {
-            return -1;
-        }
-
-        double d1 = i1.transform.getDeterminant();
-        double d2 = i2.transform.getDeterminant();
-        return Double.compare(d1, d2);
-//			if(d1<d2) {
-//				return -1;
-//			}
-//			return 1;
-    };
 
     private final float[][] accels;
     private final float[][] delays;
@@ -190,8 +172,21 @@ public class SquaresTransition2D extends Transition2D {
                 instr[1 + ctr++] = new ImageInstruction(true, transform.createAffineTransform(), clip);
             }
         }
-        Arrays.sort(instr, comparator);
+        Arrays.sort(instr, this::compareInstructions);
         return instr;
+    }
+
+    private int compareInstructions(ImageInstruction i1, ImageInstruction i2) {
+        if (i1.isFirstFrame && !i2.isFirstFrame) {
+            return 1;
+        }
+        if (i2.isFirstFrame && !i1.isFirstFrame) {
+            return -1;
+        }
+
+        double d1 = i1.transform.getDeterminant();
+        double d2 = i2.transform.getDeterminant();
+        return Double.compare(d1, d2);
     }
 
     @Override

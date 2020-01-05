@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,21 +19,22 @@ package pixelitor.guitest;
 
 import com.bric.util.JVM;
 import org.assertj.swing.core.Robot;
+import org.assertj.swing.driver.WindowDriver;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
+import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.OpenComps;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Utils;
 
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 
-import static java.awt.Event.TAB;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
@@ -85,7 +86,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             // press Ctrl-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+                    .releaseKey(VK_Z).releaseKey(VK_CONTROL);
         } else {
             EDT.undo();
         }
@@ -116,7 +117,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             // press Ctrl-Shift-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
-                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+                    .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
         } else {
             EDT.redo();
         }
@@ -150,7 +151,7 @@ public class Keyboard {
         } else {
             // runMenuCommand("Deselect");
             GuiActionRunner.execute(() ->
-                OpenComps.getActiveCompOrNull().deselect(true));
+                    OpenImages.getActiveComp().deselect(true));
         }
     }
 
@@ -204,7 +205,8 @@ public class Keyboard {
         }
     }
 
-    static void pressCtrlPlus(AbstractWindowFixture window, int times) {
+    static <S, C extends Window, D extends WindowDriver>
+    void pressCtrlPlus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
             if (osLevelKeyEvents) {
                 window.pressKey(VK_CONTROL);
@@ -217,7 +219,8 @@ public class Keyboard {
         }
     }
 
-    static void pressCtrlMinus(AbstractWindowFixture window, int times) {
+    static <S, C extends Window, D extends WindowDriver>
+    void pressCtrlMinus(AbstractWindowFixture<S, C, D> window, int times) {
         for (int i = 0; i < times; i++) {
             if (osLevelKeyEvents) {
                 window.pressKey(VK_CONTROL);
@@ -278,11 +281,11 @@ public class Keyboard {
     }
 
     public void pressTab() {
-        press(TAB);
+        press('\t');
     }
 
     public void pressCtrlTab() {
-        ctrlPress(TAB);
+        ctrlPress('\t');
     }
 
     private void postKeyEventToEventQueue(int modifiers, int keyCode) {

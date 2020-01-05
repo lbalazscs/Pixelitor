@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,12 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
@@ -38,6 +38,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
 
+import static javax.swing.BoxLayout.Y_AXIS;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
@@ -72,10 +73,10 @@ public class EnlargeCanvas implements CompAction {
 
         newComp.forEachLayer(this::processLayer);
 
-        AffineTransform canvasTx = null;
+        AffineTransform canvasTransform = null;
         if (north > 0 || west > 0) {
-            canvasTx = AffineTransform.getTranslateInstance(west, north);
-            newComp.imCoordsChanged(canvasTx, false);
+            canvasTransform = AffineTransform.getTranslateInstance(west, north);
+            newComp.imCoordsChanged(canvasTransform, false);
         }
 
         int newCanvasWidth = newCanvas.getImWidth() + east + west;
@@ -86,8 +87,8 @@ public class EnlargeCanvas implements CompAction {
         // enlarged, because they are based on the canvas-sized subimage
         comp.updateAllIconImages();
 
-        History.addEdit(new CompositionReplacedEdit(
-                "Enlarge Canvas", false, view, comp, newComp, canvasTx));
+        History.add(new CompositionReplacedEdit("Enlarge Canvas",
+                false, view, comp, newComp, canvasTransform));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -119,12 +120,12 @@ public class EnlargeCanvas implements CompAction {
     }
 
     private static void showInDialog() {
-        EnlargeCanvasPanel p = new EnlargeCanvasPanel();
+        var p = new EnlargeCanvasPanel();
         new DialogBuilder()
                 .title("Enlarge Canvas")
                 .content(p)
                 .okAction(() -> {
-                    Composition comp = OpenComps.getActiveCompOrNull();
+                    var comp = OpenImages.getActiveComp();
                     new EnlargeCanvas(p.getNorth(), p.getEast(), p.getSouth(), p.getWest())
                             .process(comp);
                 })
@@ -138,7 +139,7 @@ public class EnlargeCanvas implements CompAction {
         final RangeParam westRange = new RangeParam("West", 0, 0, 500);
 
         private EnlargeCanvasPanel() {
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setLayout(new BoxLayout(this, Y_AXIS));
 
             addSliderSpinner(northRange, "north");
             addSliderSpinner(eastRange, "east");
@@ -147,7 +148,7 @@ public class EnlargeCanvas implements CompAction {
         }
 
         private void addSliderSpinner(RangeParam range, String sliderName) {
-            SliderSpinner s = new SliderSpinner(range, BORDER, false);
+            var s = new SliderSpinner(range, BORDER, false);
             s.setName(sliderName);
             add(s);
         }

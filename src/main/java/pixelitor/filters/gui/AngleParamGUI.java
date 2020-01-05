@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,8 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.WEST;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
@@ -40,10 +42,10 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
         // the selector UI depends on the specific class
         angleUI = angleParam.getAngleSelectorUI();
-        add(angleUI, BorderLayout.WEST);
+        add(angleUI, WEST);
 
         sliderSpinner = createSliderSpinner(angleParam, angleUI);
-        add(sliderSpinner, BorderLayout.CENTER);
+        add(sliderSpinner, CENTER);
 
         setBorder(createTitledBorder(angleParam.getName()));
 
@@ -51,8 +53,8 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     }
 
     private void setupPreferredSize() {
-        Dimension origPS = getPreferredSize();
-        Dimension sliderPS = sliderSpinner.getPreferredSize();
+        var origPS = getPreferredSize();
+        var sliderPS = sliderSpinner.getPreferredSize();
         setPreferredSize(new Dimension(
                 sliderPS.width,
                 origPS.height));
@@ -60,16 +62,16 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
 
     private SliderSpinner createSliderSpinner(AngleParam angleParam,
                                               AbstractAngleUI angleUI) {
-        RangeParam sliderModel = angleParam.createRangeParam();
+        var sliderModel = angleParam.createRangeParam();
         sliderModel.addChangeListener(e ->
                 sliderModelChanged(angleParam, sliderModel));
 
-        SliderSpinner s = new SliderSpinner(sliderModel, NONE, true);
-        setupSliderTicks(s, angleParam.getMaxAngleInDegrees());
+        var retVal = new SliderSpinner(sliderModel, NONE, true);
+        setupSliderTicks(retVal, angleParam.getMaxAngleInDegrees());
 
         angleParam.addChangeListener(e ->
                 angleParamChanged(angleParam, angleUI, sliderModel));
-        return s;
+        return retVal;
     }
 
     private void sliderModelChanged(AngleParam angleParam, RangeParam sliderModel) {

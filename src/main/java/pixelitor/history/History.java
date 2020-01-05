@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,8 @@
 package pixelitor.history;
 
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.MenuAction.AllowedLayerType;
@@ -54,19 +53,14 @@ public class History {
     private static boolean ignoreEdits = false;
 
     static {
-        if (Build.isUnitTesting()) {
-            // make sure we have enough undo for the tests
-            setUndoLevels(15);
-        } else {
-            setUndoLevels(AppPreferences.loadUndoLevels());
-        }
+        setUndoLevels(AppPreferences.loadUndoLevels());
     }
 
     public static final Action UNDO_ACTION = new MenuAction("Undo",
             Icons.getUndoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
-            History.undo();
+            undo();
         }
     };
 
@@ -74,7 +68,7 @@ public class History {
             Icons.getRedoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
-            History.redo();
+            redo();
         }
     };
 
@@ -85,7 +79,7 @@ public class History {
         undoableEditSupport.postEdit(edit);
     }
 
-    public static void addEdit(PixelitorEdit edit) {
+    public static void add(PixelitorEdit edit) {
 //        Utils.debugCall(edit.getDebugName());
 
         assert edit != null;
@@ -93,9 +87,11 @@ public class History {
             return;
         }
 
-        Composition comp = edit.getComp();
+        var comp = edit.getComp();
 
-        makeDirty(edit, comp);
+        if (edit.makesDirty()) {
+            comp.setDirty(true);
+        }
 
         if (edit.canUndo()) {
             undoManager.addEdit(edit);
@@ -114,18 +110,6 @@ public class History {
         }
     }
 
-    // every edit makes the comp dirty except a reload
-    // TODO there are other exceptions, like selection edits
-    private static void makeDirty(PixelitorEdit edit, Composition comp) {
-        boolean makesDirty = true;
-        if (edit instanceof CompositionReplacedEdit) {
-            makesDirty = !((CompositionReplacedEdit) edit).isReload();
-        }
-        if (makesDirty) {
-            comp.setDirty(true);
-        }
-    }
-
     public static PartialImageEdit createPartialImageEdit(Rectangle rect,
                                                           BufferedImage origImage,
                                                           Drawable dr,
@@ -137,8 +121,8 @@ public class History {
         if (!relativeToImage) {
             // if the coordinates are relative to the canvas,
             // translate them to be relative to the image
-            int dx = -dr.getTX();
-            int dy = -dr.getTY();
+            int dx = -dr.getTx();
+            int dy = -dr.getTy();
             rect.translate(dx, dy);
         }
 
@@ -152,7 +136,7 @@ public class History {
             return null;
         }
 
-        Composition comp = dr.getComp();
+        var comp = dr.getComp();
 
         // we could also intersect with the selection bounds,
         // but typically the extra savings would be minimal
@@ -187,7 +171,7 @@ public class History {
                 throw new RuntimeException("No undo available", e);
             } else {
                 Messages.showInfo("No undo available",
-                    "No undo available, probably because the undo image was discarded in order to save memory");
+                        "No undo available, probably because the undo image was discarded in order to save memory");
             }
         }
     }
@@ -284,11 +268,11 @@ public class History {
     }
 
     public static boolean canFade() {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp == null) {
             return false;
         }
-        Drawable dr = comp.getActiveDrawableOrNull();
+        Drawable dr = comp.getActiveDrawable();
         if (dr == null) {
             return false;
         }
@@ -377,19 +361,19 @@ public class History {
     }
 
     public static DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("History", undoManager);
+        var node = new DebugNode("history", undoManager);
 
-        node.addInt("Num edits", undoManager.getSize());
+        node.addInt("num edits", undoManager.getSize());
         if (undoManager.hasEdits()) {
             node.add(undoManager.getDebugNode());
         }
 
-        node.addInt("Num undone edits", numUndoneEdits);
-        node.addBoolean("Ignore edits", ignoreEdits);
-        node.addBoolean("Can undo", History.canUndo());
-        node.addBoolean("Can redo", History.canRedo());
-        node.addBoolean("Can fade", History.canFade());
-        node.addBoolean("Can repeat", History.canRepeatOperation());
+        node.addInt("num undone edits", numUndoneEdits);
+        node.addBoolean("ignore edits", ignoreEdits);
+        node.addBoolean("can undo", canUndo());
+        node.addBoolean("can redo", canRedo());
+        node.addBoolean("can fade", canFade());
+        node.addBoolean("can repeat", canRepeatOperation());
 
         return node;
     }

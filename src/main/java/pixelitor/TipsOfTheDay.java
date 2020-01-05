@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.utils.Messages;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -48,7 +47,7 @@ public class TipsOfTheDay {
                 nextTip = tipPrefs.getInt(NEXT_TIP_NR_KEY, 0);
             }
 
-            TipOfTheDayModel tipOfTheDayModel = loadModel();
+            var tipOfTheDayModel = loadModel();
             int tipCount = tipOfTheDayModel.getTipCount();
             if (nextTip < 0) {
                 nextTip = 0;
@@ -57,8 +56,8 @@ public class TipsOfTheDay {
                 nextTip = tipCount - 1;
             }
 
-            Dimension size = new Dimension(480, 230);
-            JXTipOfTheDay tipOfTheDay = new JXTipOfTheDay(tipOfTheDayModel) {
+            var size = new Dimension(480, 230);
+            var tipOfTheDay = new JXTipOfTheDay(tipOfTheDayModel) {
                 @Override
                 public Dimension getPreferredSize() {
                     return size;
@@ -79,10 +78,10 @@ public class TipsOfTheDay {
     }
 
     private static TipOfTheDayModel loadModel() throws IOException {
-        Properties properties = new Properties();
-        InputStream propertiesInputStream = TipsOfTheDay.class.getResourceAsStream("/tips.properties");
+        var properties = new Properties();
+        var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream("/tips.properties");
         properties.load(propertiesInputStream);
-        TipOfTheDayModel model = TipLoader.load(properties);
+        var model = TipLoader.load(properties);
         propertiesInputStream.close();
         return model;
     }

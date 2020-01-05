@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
+import static javax.swing.SwingConstants.VERTICAL;
+
 /**
  * The upper horizontal panel with the settings of the active tool.
  */
@@ -37,7 +39,7 @@ public class ToolSettingsPanel extends JPanel {
     }
 
     public void addSeparator() {
-        JSeparator separator = new JSeparator(JSeparator.VERTICAL);
+        JSeparator separator = new JSeparator(VERTICAL);
         separator.setPreferredSize(new Dimension(
                 separator.getPreferredSize().width,
                 26));
@@ -110,7 +112,7 @@ public class ToolSettingsPanel extends JPanel {
         typeModel.setSelectedItem(defaultSelection);
 
         @SuppressWarnings("unchecked")
-        JComboBox<CopyBrushType> typeCB = new JComboBox<>(typeModel);
+        var typeCB = new JComboBox<CopyBrushType>(typeModel);
 
         addComboBox("Brush:", typeCB, "typeCB");
         typeCB.addActionListener(e -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import java.awt.Shape;
  */
 public class SelectionBuilder {
     private final SelectionType selectionType;
-    private final SelectionInteraction interaction;
+    private final ShapeCombination interaction;
 //    private final Composition comp;
 
     private Shape replacedShape;
@@ -43,7 +43,7 @@ public class SelectionBuilder {
     /**
      * Called in mousePressed (or mouseReleased for polygonal selection)
      */
-    public SelectionBuilder(SelectionType selectionType, SelectionInteraction interaction, Composition comp) {
+    public SelectionBuilder(SelectionType selectionType, ShapeCombination interaction, Composition comp) {
         this.interaction = interaction;
         this.selectionType = selectionType;
         Selection existingSelection = comp.getSelection();
@@ -56,7 +56,7 @@ public class SelectionBuilder {
 
         comp.setBuiltSelection(new Selection(null, comp.getView()));
 
-        if (interaction == SelectionInteraction.REPLACE) {
+        if (interaction == ShapeCombination.REPLACE) {
             replacedShape = existingSelection.getShape();
             // At this point the mouse was pressed, and it is clear that the
             // old selection should go away, but we don't know yet whether the
@@ -130,7 +130,7 @@ public class SelectionBuilder {
                 comp.promoteSelection();
 
                 PixelitorEdit edit = new SelectionShapeChangeEdit(interaction.getNameForUndo(), comp, oldShape);
-                History.addEdit(edit);
+                History.add(edit);
             }
         } else {
             // we can get here if either (1) a new selection
@@ -149,7 +149,7 @@ public class SelectionBuilder {
                 } else {
                     edit = new NewSelectionEdit(comp, newShape);
                 }
-                History.addEdit(edit);
+                History.add(edit);
             }
         }
 
@@ -165,7 +165,7 @@ public class SelectionBuilder {
             }
 
             // if we had a frozen selection, unfreeze
-            Selection selection = comp.getSelection();
+            var selection = comp.getSelection();
             if (selection != null && selection.isFrozen()) {
                 selection.setFrozen(false);
             }

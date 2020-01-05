@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public class Canny extends ParametrizedFilter {
 
         long estimatedMemoryMB = estimateNeededMemoryMB(src);
         System.gc(); // needed for the memory estimation
-        MemoryInfo memoryInfo = new MemoryInfo();
+        var memoryInfo = new MemoryInfo();
         long availableMemoryMB = memoryInfo.getAvailableMemoryMB();
 
         if (estimatedMemoryMB > availableMemoryMB) {
@@ -83,10 +83,10 @@ public class Canny extends ParametrizedFilter {
         }
 
         // do not cache this object because it holds a lot of memory!
-        CannyEdgeDetector detector = new CannyEdgeDetector();
+        var detector = new CannyEdgeDetector();
 
-        detector.setLowThreshold(lowThreshold.getValueAsPercentage());
-        detector.setHighThreshold(highThreshold.getValueAsPercentage());
+        detector.setLowThreshold(lowThreshold.getPercentageValF());
+        detector.setHighThreshold(highThreshold.getPercentageValF());
         detector.setContrastNormalized(contrastNormalized.isChecked());
         detector.setGaussianKernelRadius(gaussianKernelRadius.getValueAsFloat());
         detector.setGaussianKernelWidth(gaussianKernelWidth.getValue());
@@ -96,7 +96,7 @@ public class Canny extends ParametrizedFilter {
         detector.process();
         dest = detector.getEdgesImage();
 
-        if(invert.isChecked()) {
+        if (invert.isChecked()) {
             Invert.quickInvert(dest);
         }
 

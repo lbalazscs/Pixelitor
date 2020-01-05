@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 public abstract class Wizard {
     private OKCancelDialog dialog = null;
-    private WizardPage wizardPage;
+    private WizardPage currentPage;
     private final String dialogTitle;
     private final String finishButtonText;
     private final int initialDialogWidth;
@@ -44,7 +44,7 @@ public abstract class Wizard {
                      int initialDialogWidth,
                      int initialDialogHeight,
                      Drawable dr) {
-        this.wizardPage = initialPage;
+        currentPage = initialPage;
         this.dialogTitle = dialogTitle;
         this.finishButtonText = finishButtonText;
         this.initialDialogWidth = initialDialogWidth;
@@ -67,14 +67,14 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(
-                wizardPage.getPanel(this, dr),
+                currentPage.createPanel(this, dr),
                 dialogParent,
                 title,
                 "Next", "Cancel") {
 
             @Override
             protected void cancelAction() {
-                wizardPage.onWizardCanceled(dr);
+                currentPage.onWizardCanceled(dr);
                 super.cancelAction();
             }
 
@@ -83,7 +83,7 @@ public abstract class Wizard {
                 nextPressed(dialog);
             }
         };
-        dialog.setHeaderMessage(wizardPage.getHeaderText(this));
+        dialog.setHeaderMessage(currentPage.getHeaderText(this));
 
         // it is packed already, but not correctly, because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
@@ -93,28 +93,28 @@ public abstract class Wizard {
     }
 
     private void nextPressed(OKCancelDialog dialog) {
-        if (!mayMoveForwardIfNextPressed(wizardPage, dialog)) {
+        if (!mayMoveForwardIfNextPressed(currentPage, dialog)) {
             return;
         }
 
         // move forward
-        wizardPage.onMovingToTheNext(this, dr);
+        currentPage.onMovingToTheNext(this, dr);
 
-        if (!mayProceedAfterMovingForward(wizardPage, dialog)) {
+        if (!mayProceedAfterMovingForward(currentPage, dialog)) {
             return;
         }
 
-        WizardPage nextPage = wizardPage.getNext();
+        WizardPage nextPage = currentPage.getNext();
         if (nextPage == null) { // dialog finished
             dialog.close();
             finalAction();
         } else {
-            JComponent panel = nextPage.getPanel(this, dr);
+            JComponent panel = nextPage.createPanel(this, dr);
             this.dialog.changeForm(panel);
             this.dialog.setHeaderMessage(nextPage.getHeaderText(this));
-            wizardPage = nextPage;
+            currentPage = nextPage;
 
-            if (wizardPage.getNext() == null) { // this is the last page
+            if (currentPage.getNext() == null) { // this is the last page
                 dialog.setOKButtonText(finishButtonText);
             }
         }

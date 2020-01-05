@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
@@ -36,7 +36,7 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, C
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
         setEnabled(false);
     }
 
@@ -61,7 +61,7 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, C
 
     @Override
     public void compActivated(View oldView, View newView) {
-        Composition comp = newView.getComp();
+        var comp = newView.getComp();
         onNewComp(comp);
     }
 

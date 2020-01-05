@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
@@ -34,7 +33,8 @@ import java.util.concurrent.Future;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Clouds filter based on multiple Perlin noise iterations, inspired by the Paint.net clouds
@@ -51,8 +51,8 @@ public class Clouds extends ParametrizedFilter {
     private final RangeParam scaleParam = new RangeParam("Zoom", 3, 100, 300);
     private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 0, 50, 100);
 
-    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
-    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
+    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
 
     public Clouds() {
         super(ShowOriginal.NO);
@@ -62,16 +62,16 @@ public class Clouds extends ParametrizedFilter {
                 roughnessParam,
                 color1,
                 color2
-        ).withAction(new ReseedNoiseFilterAction(e -> reseed()));
+        ).withAction(reseedByCalling(Clouds::reseed));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, src.getHeight());
+        var pt = new StatusBarProgressTracker(NAME, src.getHeight());
 
         renderClouds(dest,
                 scaleParam.getValueAsFloat(),
-                roughnessParam.getValueAsPercentage(),
+                roughnessParam.getPercentageValF(),
                 color1.getColor(),
                 color2.getColor(),
                 pt);
@@ -95,7 +95,7 @@ public class Clouds extends ParametrizedFilter {
             Runnable lineTask = () -> calculateLine(scale, roughness, width, finalY, destData, color1, color2);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
     }
 
     private static void calculateLine(float startingScale, float roughness,
@@ -106,7 +106,7 @@ public class Clouds extends ParametrizedFilter {
             float noiseValue = 0.0f;
             float contribution = 1.0f;
 
-            for (int i = 0; (i < 8) && (contribution > 0.03f) && (scale > 0); i++) {
+            for (int i = 0; i < 8 && contribution > 0.03f && scale > 0; i++) {
                 float scaledX = x / scale;
                 float scaledY = y / scale;
                 float n = perlinNoise2D(scaledX, scaledY);

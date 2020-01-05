@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,12 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
-import pixelitor.utils.debug.BufferedImageNode;
+import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -51,7 +50,7 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
 
             if (source == CopySource.LAYER_OR_MASK) {
                 Layer layer = comp.getActiveLayer();
@@ -79,7 +78,7 @@ public class CopyAction extends AbstractAction {
                 clipboard.setContents(imageTransferable, null);
             } catch (RasterFormatException rfe) {
                 rfe.printStackTrace();
-                BufferedImageNode node = new BufferedImageNode(activeImage);
+                var node = DebugNodes.createBufferedImageNode("active image", activeImage);
                 String s = node.toDetailedString();
                 System.out.println(format(
                         "CopyAction: RasterFormatException in actionPerformed: %s", s));

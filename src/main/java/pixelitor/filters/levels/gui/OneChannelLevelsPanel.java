@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,10 +34,10 @@ public class OneChannelLevelsPanel extends CardPanelWithCombo.Card {
         Box box = Box.createVerticalBox();
         add(box);
 
-        SliderSpinner inputDarkSlider = new SliderSpinner(model.getInputDark(), GRAY, model.getDarkColor());
-        SliderSpinner inputLightSlider = new SliderSpinner(model.getInputLight(), model.getLightColor(), GRAY);
-        SliderSpinner outputDarkSlider = new SliderSpinner(model.getOutputDark(), GRAY, model.getLightColor());
-        SliderSpinner outputLightSlider = new SliderSpinner(model.getOutputLight(), model.getDarkColor(), GRAY);
+        var inputDarkSlider = new SliderSpinner(model.getInputDark(), GRAY, model.getDarkColor());
+        var inputLightSlider = new SliderSpinner(model.getInputLight(), model.getLightColor(), GRAY);
+        var outputDarkSlider = new SliderSpinner(model.getOutputDark(), GRAY, model.getLightColor());
+        var outputLightSlider = new SliderSpinner(model.getOutputLight(), model.getDarkColor(), GRAY);
 
         box.add(inputDarkSlider);
         box.add(inputLightSlider);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,6 +31,10 @@ import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+
 /**
  * The GUI for the levels filter
  */
@@ -57,7 +61,7 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
         JButton resetAllButton = new JButton("Reset all", Icons.getWestArrowIcon());
         resetAllButton.addActionListener(e -> model.resetToDefaultSettings());
         northPanel.add(resetAllButton);
-        add(northPanel, BorderLayout.NORTH);
+        add(northPanel, NORTH);
 
         cardPanel = new JPanel();
         cardPanel.setLayout(new CardLayout());
@@ -68,12 +72,12 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
             addNewCard(p);
         }
 
-        add(cardPanel, BorderLayout.CENTER);
+        add(cardPanel, CENTER);
 
         showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
-        add(showOriginalCB, BorderLayout.SOUTH);
+        add(showOriginalCB, SOUTH);
     }
 
     private void addNewCard(OneChannelLevelsPanel chPanel) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,11 @@ import com.jhlabs.image.HalftoneFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
-import java.awt.MultipleGradientPaint;
+import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.image.BufferedImage;
 
 /**
@@ -37,14 +38,13 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     protected final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     protected final BooleanParam invert = new BooleanParam("Invert Pattern", false);
     protected final RangeParam stripesDistance = new RangeParam("Stripes Distance (px)", 1, 20, 101);
-    protected final IntChoiceParam repetitionType = new IntChoiceParam("Stripes Type",
-            new IntChoiceParam.Value[]{
-                    new IntChoiceParam.Value("Symmetric", REPETITION_REFLECT),
-                    new IntChoiceParam.Value("One-sided", REPETITION_REPEAT),
-            });
+    protected final IntChoiceParam repetitionType = new IntChoiceParam("Stripes Type", new Value[]{
+            new Value("Symmetric", REPETITION_REFLECT),
+            new Value("One-sided", REPETITION_REPEAT),
+    });
     protected final RangeParam shiftStripes = new RangeParam("Shift Stripes (%)", 0, 0, 100);
     protected final RangeParam softness = new RangeParam("Softness", 0, 10, 100);
-    protected MultipleGradientPaint.CycleMethod cycleMethod;
+    protected CycleMethod cycleMethod;
     protected float distanceCorrection;
 
     protected JHMaskedHalftone() {
@@ -57,10 +57,10 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
 
         BufferedImage stripes = createMaskImage(src);
 
-        HalftoneFilter filter = new HalftoneFilter(getName());
+        var filter = new HalftoneFilter(getName());
         filter.setMask(stripes);
         filter.setMonochrome(monochrome.isChecked());
-        filter.setSoftness(softness.getValueAsPercentage());
+        filter.setSoftness(softness.getPercentageValF());
         filter.setInvert(invert.isChecked());
 
         return filter.filter(src, dest);
@@ -69,10 +69,10 @@ public abstract class JHMaskedHalftone extends ParametrizedFilter {
     private void setupHelperVariables() {
         int repetition = repetitionType.getValue();
         if (repetition == REPETITION_REFLECT) {
-            cycleMethod = MultipleGradientPaint.CycleMethod.REFLECT;
+            cycleMethod = CycleMethod.REFLECT;
             distanceCorrection = 2.0f;
         } else if (repetition == REPETITION_REPEAT) {
-            cycleMethod = MultipleGradientPaint.CycleMethod.REPEAT;
+            cycleMethod = CycleMethod.REPEAT;
             distanceCorrection = 1.0f;
         } else {
             throw new IllegalStateException("repetition = " + repetition);

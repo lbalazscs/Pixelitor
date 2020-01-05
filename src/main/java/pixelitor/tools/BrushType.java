@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.tools.brushes.*;
-import pixelitor.tools.shapes.ShapeType;
 
 import javax.swing.*;
 import java.util.IdentityHashMap;
@@ -50,7 +49,7 @@ public enum BrushType {
     }, CALLIGRAPHY("Calligraphy", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            CalligraphyBrushSettings settings = (CalligraphyBrushSettings) findSettings(
+            var settings = (CalligraphyBrushSettings) findSettings(
                     tool, CalligraphyBrushSettings::new);
             return new CalligraphyBrush(radius, settings);
         }
@@ -67,15 +66,15 @@ public enum BrushType {
     }, SHAPE("Shapes", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            ShapeDabsBrushSettings settings = (ShapeDabsBrushSettings) findSettings(
+            var settings = (ShapeDabsBrushSettings) findSettings(
                     tool, this::createShapeDabsBrushSettings);
             return new ShapeDabsBrush(radius, settings);
         }
 
         private ShapeDabsBrushSettings createShapeDabsBrushSettings() {
-            ShapeType shapeType = ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
+            var shapeType = ShapeDabsBrushSettingsPanel.DEFAULT_SHAPE;
             double spacingRatio = ShapeDabsBrushSettingsPanel.DEFAULT_SPACING_RATIO;
-            RadiusRatioSpacing spacing = new RadiusRatioSpacing(spacingRatio);
+            var spacing = new RadiusRatioSpacing(spacingRatio);
             return new ShapeDabsBrushSettings(
                     ANGLE_AWARE_NO_JITTER,
                     spacing,
@@ -96,35 +95,35 @@ public enum BrushType {
     }, SPRAY("Spray Shapes", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            SprayBrushSettings settings = (SprayBrushSettings) findSettings(
+            var settings = (SprayBrushSettings) findSettings(
                     tool, SprayBrushSettings::new);
             return new SprayBrush(radius, settings);
         }
     }, CONNECT("Connect", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            ConnectBrushSettings settings = (ConnectBrushSettings) findSettings(
+            var settings = (ConnectBrushSettings) findSettings(
                     tool, ConnectBrushSettings::new);
             return new ConnectBrush(settings, radius);
         }
     }, OUTLINE_CIRCLE("Circles", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
+            var settings = (OutlineBrushSettings) findSettings(
                     tool, OutlineBrushSettings::new);
             return new OutlineCircleBrush(radius, settings);
         }
     }, OUTLINE_SQUARE("Squares", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            OutlineBrushSettings settings = (OutlineBrushSettings) findSettings(
+            var settings = (OutlineBrushSettings) findSettings(
                     tool, OutlineBrushSettings::new);
             return new OutlineSquareBrush(radius, settings);
         }
     }, ONE_PIXEL("One Pixel", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {
-            OnePixelBrushSettings settings = (OnePixelBrushSettings) findSettings(
+            var settings = (OnePixelBrushSettings) findSettings(
                     tool, OnePixelBrushSettings::new);
             return new OnePixelBrush(settings);
         }
@@ -166,7 +165,7 @@ public enum BrushType {
         assert hasSettings; // otherwise the button is not enabled
         assert settingsByTool != null; // already initialized
 
-        BrushSettings settingsForTool = settingsByTool.get(tool);
+        var settingsForTool = settingsByTool.get(tool);
 
         assert settingsForTool != null; // already initialized
 

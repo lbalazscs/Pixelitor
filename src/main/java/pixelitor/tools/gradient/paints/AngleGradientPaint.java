@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
 import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
@@ -123,7 +122,7 @@ public class AngleGradientPaint implements Paint {
         // Warning: gray subclass has exact copy of the algorithm
         @Override
         public Raster getRaster(int startX, int startY, int width, int height) {
-            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            var raster = cm.createCompatibleWritableRaster(width, height);
             int[] rasterData = new int[width * height * 4];
 
             for (int j = 0; j < height; j++) {
@@ -226,7 +225,7 @@ public class AngleGradientPaint implements Paint {
 
         @Override
         public Raster getRaster(int startX, int startY, int width, int height) {
-            WritableRaster raster = cm.createCompatibleWritableRaster(width, height);
+            var raster = cm.createCompatibleWritableRaster(width, height);
             int[] rasterData = new int[width * height];
 
             for (int j = 0; j < height; j++) {

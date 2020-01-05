@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,12 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.filters.comp.Resize;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
@@ -40,6 +39,7 @@ import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
 
 /**
@@ -78,10 +78,10 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
         String[] items = {"pixels", "percent"};
         ComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>(items);
-        JPanel p = new JPanel();
+        var p = new JPanel();
         p.setLayout(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(p);
 
         widthTF = new JTextField(NR_OF_COLUMNS);
         widthTF.setName("widthTF");
@@ -90,7 +90,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         pixelPercentChooser1 = new JComboBox<>(comboBoxModel);
         JLayer<JTextField> widthLayer = new JLayer<>(widthTF,
                 new TFValidationLayerUI(widthValidator));
-        gbh.addLabelWithTwoControls("Width:", widthLayer, pixelPercentChooser1);
+        gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
         heightTF = new JTextField(NR_OF_COLUMNS);
         heightTF.setName("heightTF");
@@ -99,7 +99,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         JComboBox<String> pixelPercentChooser2 = new JComboBox<>(comboBoxModel);
         JLayer<JTextField> heightLayer = new JLayer<>(heightTF,
                 new TFValidationLayerUI(heightValidator));
-        gbh.addLabelWithTwoControls("Height:", heightLayer, pixelPercentChooser2);
+        gbh.addLabelAndTwoControls("Height:", heightLayer, pixelPercentChooser2);
 
         titledBorder = BorderFactory.createTitledBorder("");
         updateInfo();
@@ -111,7 +111,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         constrainProportionsCB = new JCheckBox("Keep Proportions");
         constrainProportionsCB.setSelected(true);
         p2.add(constrainProportionsCB);
-        p2.setLayout(new FlowLayout(FlowLayout.LEFT));
+        p2.setLayout(new FlowLayout(LEFT));
         verticalBox.add(p2);
         add(verticalBox);
 
@@ -339,7 +339,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     public static void resizeActiveImage() {
-        Composition comp = OpenComps.getActiveComp()
+        var comp = OpenImages.getActiveCompOpt()
                 .orElseThrow(() -> new IllegalStateException("no active image"));
         showInDialog(comp);
     }

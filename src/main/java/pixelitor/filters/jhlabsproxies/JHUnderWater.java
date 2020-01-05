@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,11 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Underwater filter based on JHLabs SwimFilter
@@ -46,7 +47,7 @@ public class JHUnderWater extends ParametrizedFilter {
     public JHUnderWater() {
         super(ShowOriginal.YES);
 
-        ReseedNoiseFilterAction reseed = new ReseedNoiseFilterAction();
+        var reseed = reseedNoise();
         setParams(
                 amount.withAdjustedRange(0.1),
                 scale.withAdjustedRange(0.3),
@@ -74,7 +75,7 @@ public class JHUnderWater extends ParametrizedFilter {
         filter.setAmount(amount.getValueAsFloat());
         filter.setScale(scale.getValueAsFloat());
         filter.setStretch((float) Math.pow(10.0, stretch.getValueAsDouble() / 100.0));
-        filter.setTime(time.getValueAsPercentage());
+        filter.setTime(time.getPercentageValF());
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2.0));
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

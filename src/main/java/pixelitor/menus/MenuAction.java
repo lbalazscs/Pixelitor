@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
@@ -115,7 +115,7 @@ public abstract class MenuAction extends NamedAction {
             if (layerType == AllowedLayerType.ANY) {
                 onClick();
             } else {
-                Layer activeLayer = OpenComps.getActiveLayerOrNull();
+                Layer activeLayer = OpenImages.getActiveLayer();
                 if (layerType.isAllowed(activeLayer)) {
                     onClick();
                 } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
@@ -34,6 +33,7 @@ import static java.awt.Color.ORANGE;
 import static java.awt.Color.RED;
 import static java.awt.Color.YELLOW;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Plasma filter based on the JHLabs PlasmaFilter
@@ -68,7 +68,7 @@ public class JHPlasma extends ParametrizedFilter {
                 turbulence,
                 type,
                 gradient
-        ).withAction(new ReseedNoiseFilterAction(e -> {
+        ).withAction(reseedByCalling(() -> {
             if (filter != null) {
                 filter.randomize();
             }
@@ -83,7 +83,7 @@ public class JHPlasma extends ParametrizedFilter {
         }
 
         filter.setLessColors(type.getValue() != MORE_COLORS);
-        filter.setTurbulence(turbulence.getValueAsPercentage());
+        filter.setTurbulence(turbulence.getPercentageValF());
         filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
         filter.setColormap(gradient.getValue());
 

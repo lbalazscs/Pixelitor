@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ public class LogZoomParam extends RangeParam {
 
     @Override
     public JComponent createGUI() {
-        LogRangeGUI gui = new LogRangeGUI(this);
+        var gui = new LogRangeGUI(this);
         paramGUI = gui;
         setParamGUIEnabledState();
         return gui;
@@ -45,12 +45,7 @@ public class LogZoomParam extends RangeParam {
         return Math.pow(10.0, getValueAsDouble()/100.0);
     }
 
-    public double getZoomPercentage() {
+    public double getZoomRatio() {
         return getZoomValue() / 100.0;
-    }
-
-    @Override
-    public void randomize() {
-        super.randomize();
     }
 }

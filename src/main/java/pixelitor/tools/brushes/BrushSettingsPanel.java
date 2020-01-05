@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+
 public class BrushSettingsPanel extends JPanel {
 
     private final GridBagHelper gbh;
@@ -36,24 +38,24 @@ public class BrushSettingsPanel extends JPanel {
     }
 
     public void addLabelWithControl(String text, JComponent c) {
-        gbh.addLabelWithControl(text, c);
+        gbh.addLabelAndControl(text, c);
     }
 
     public void addLabelWithControlNoStretch(String text, JComponent c) {
-        gbh.addLabelWithControlNoStretch(text, c);
+        gbh.addLabelAndControlNoStretch(text, c);
     }
 
     public void addSlider(RangeParam param) {
-        SliderSpinner slider = SliderSpinner.simpleWithDefaultButton(param);
-        gbh.addLabelWithControl(param.getName() + ":", slider);
+        var slider = new SliderSpinner(param, NONE, true);
+        gbh.addLabelAndControl(param.getName() + ":", slider);
     }
 
     public void addParam(FilterParam param) {
-        gbh.addLabelWithControlNoStretch(param.getName() + ":", param.createGUI());
+        gbh.addLabelAndControlNoStretch(param.getName() + ":", param.createGUI());
     }
 
     public void addOnlyButton(String text, ActionListener action) {
-        JButton button = new JButton(text);
+        var button = new JButton(text);
         gbh.addOnlyControl(button);
         button.addActionListener(action);
     }

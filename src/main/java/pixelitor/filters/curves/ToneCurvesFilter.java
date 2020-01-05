@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,18 +47,18 @@ public class ToneCurvesFilter extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        if(filter == null) {
+        if (filter == null) {
             filter = new CurvesFilter(NAME);
         }
-        if (this.curves == null) {
+        if (curves == null) {
             return src;
         }
 
         filter.setCurves(
-                this.curves.getCurve(ToneCurveType.RGB).curve,
-                this.curves.getCurve(ToneCurveType.RED).curve,
-                this.curves.getCurve(ToneCurveType.GREEN).curve,
-                this.curves.getCurve(ToneCurveType.BLUE).curve
+                curves.getCurve(ToneCurveType.RGB).curve,
+                curves.getCurve(ToneCurveType.RED).curve,
+                curves.getCurve(ToneCurveType.GREEN).curve,
+                curves.getCurve(ToneCurveType.BLUE).curve
         );
 
         dest = filter.filter(src, dest);

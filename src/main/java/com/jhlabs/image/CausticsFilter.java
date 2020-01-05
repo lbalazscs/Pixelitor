@@ -247,7 +247,7 @@ public class CausticsFilter extends WholeImageFilter {
             Runnable lineTask = () -> calculateLine(outWidth, outHeight, pixels, finalV, rs, d, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
 
         finishProgressTracker();
 
@@ -330,47 +330,47 @@ public class CausticsFilter extends WholeImageFilter {
         }
     }
 
-    private static int add(int rgb, float brightness) {
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
-        r += brightness;
-        g += brightness;
-        b += brightness;
-        if (r > 255) {
-            r = 255;
-        }
-        if (g > 255) {
-            g = 255;
-        }
-        if (b > 255) {
-            b = 255;
-        }
-        return 0xff000000 | (r << 16) | (g << 8) | b;
-    }
+//    private static int add(int rgb, float brightness) {
+//        int r = (rgb >> 16) & 0xff;
+//        int g = (rgb >> 8) & 0xff;
+//        int b = rgb & 0xff;
+//        r += brightness;
+//        g += brightness;
+//        b += brightness;
+//        if (r > 255) {
+//            r = 255;
+//        }
+//        if (g > 255) {
+//            g = 255;
+//        }
+//        if (b > 255) {
+//            b = 255;
+//        }
+//        return 0xff000000 | (r << 16) | (g << 8) | b;
+//    }
 
-    private static int add(int rgb, float brightness, int c) {
-        int r = (rgb >> 16) & 0xff;
-        int g = (rgb >> 8) & 0xff;
-        int b = rgb & 0xff;
-        if (c == 2) {
-            r += brightness;
-        } else if (c == 1) {
-            g += brightness;
-        } else {
-            b += brightness;
-        }
-        if (r > 255) {
-            r = 255;
-        }
-        if (g > 255) {
-            g = 255;
-        }
-        if (b > 255) {
-            b = 255;
-        }
-        return 0xff000000 | (r << 16) | (g << 8) | b;
-    }
+//    private static int add(int rgb, float brightness, int c) {
+//        int r = (rgb >> 16) & 0xff;
+//        int g = (rgb >> 8) & 0xff;
+//        int b = rgb & 0xff;
+//        if (c == 2) {
+//            r += brightness;
+//        } else if (c == 1) {
+//            g += brightness;
+//        } else {
+//            b += brightness;
+//        }
+//        if (r > 255) {
+//            r = 255;
+//        }
+//        if (g > 255) {
+//            g = 255;
+//        }
+//        if (b > 255) {
+//            b = 255;
+//        }
+//        return 0xff000000 | (r << 16) | (g << 8) | b;
+//    }
 
     private static float turbulence2(float x, float y, float time, float octaves) {
         float value = 0.0f;

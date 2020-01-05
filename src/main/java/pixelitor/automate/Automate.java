@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.automate;
 
 import pixelitor.Composition;
-import pixelitor.filters.comp.CompAction;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
+import pixelitor.compactions.CompAction;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -68,9 +68,9 @@ public class Automate {
             return;
         }
 
-        ProgressMonitor progressMonitor = GUIUtils.createPercentageProgressMonitor(
+        var progressMonitor = GUIUtils.createPercentageProgressMonitor(
                 dialogTitle);
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+        var worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
                 overwriteAll = false;
@@ -82,7 +82,7 @@ public class Automate {
 
                     File file = inputFiles[i];
                     progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
-                    
+
                     String msg = "Processing " + (i + 1) + " of " + nrOfFiles;
                     progressMonitor.setNote(msg);
                     System.out.println(msg);
@@ -104,7 +104,7 @@ public class Automate {
     private static void processFile(File file, CompAction action, File saveDir) {
         OpenSave.openFileAsync(file)
                 .thenComposeAsync(
-                        comp -> Automate.process(comp, action),
+                        comp -> process(comp, action),
                         EventQueue::invokeLater)
                 .thenComposeAsync(
                         comp -> saveAndClose(comp, saveDir),
@@ -114,11 +114,9 @@ public class Automate {
     }
 
     private static CompletableFuture<Composition> process(Composition comp,
-                                       CompAction action) {
+                                                          CompAction action) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
-
-        View view = comp.getView();
-        assert view != null : "no view for " + comp.getName();
+        assert comp.getView() != null : "no view for " + comp.getName();
 
         return action.process(comp);
     }
@@ -127,14 +125,14 @@ public class Automate {
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
 
-        OutputFormat outputFormat = OutputFormat.getLastUsed();
+        var outputFormat = OutputFormat.getLastUsed();
         File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
         CompletableFuture<Void> retVal = null;
 
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
-        SaveSettings saveSettings = new SaveSettings(outputFormat, outputFile);
+        var saveSettings = new SaveSettings(outputFormat, outputFile);
         if (outputFile.exists() && !overwriteAll) {
             String answer = showOverwriteWarningDialog(outputFile);
 
@@ -150,7 +148,7 @@ public class Automate {
                     // do nothing
                     break;
                 case OVERWRITE_CANCEL:
-                    OpenComps.warnAndClose(view);
+                    OpenImages.warnAndClose(view);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
             }
@@ -158,7 +156,7 @@ public class Automate {
             view.paintImmediately();
             retVal = comp.saveAsync(saveSettings, false);
         }
-        OpenComps.warnAndClose(view);
+        OpenImages.warnAndClose(view);
         stopProcessing = false;
         if (retVal != null) {
             return retVal;
@@ -174,16 +172,18 @@ public class Automate {
     }
 
     private static String showOverwriteWarningDialog(File outputFile) {
-        JOptionPane pane = new JOptionPane(
+        var optionPane = new JOptionPane(
                 format("File %s already exists. Overwrite?", outputFile),
                 WARNING_MESSAGE);
 
-        pane.setOptions(new String[]{OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
-        pane.setInitialValue(OVERWRITE_NO);
+        optionPane.setOptions(new String[]{
+                OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
+        optionPane.setInitialValue(OVERWRITE_NO);
 
-        JDialog dialog = pane.createDialog(PixelitorWindow.getInstance(), "Warning");
+        JDialog dialog = optionPane.createDialog(
+                PixelitorWindow.getInstance(), "Warning");
         dialog.setVisible(true);
-        String value = (String) pane.getValue();
+        String value = (String) optionPane.getValue();
         String answer;
 
         if (value == null) { // cancelled

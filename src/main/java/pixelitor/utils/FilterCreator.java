@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.Objects;
 
+import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 
@@ -56,7 +57,7 @@ public class FilterCreator extends JPanel {
     private FilterCreator() {
         setLayout(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(this);
+        var gbh = new GridBagHelper(this);
 
         gbh.addLabel("Name:", 0, 0);
         nameTF = new JTextField(20);
@@ -167,7 +168,7 @@ public class FilterCreator extends JPanel {
         private final JTextField defaultTextField;
 
         private ParamPanel() {
-            setLayout(new FlowLayout(FlowLayout.LEFT));
+            setLayout(new FlowLayout(LEFT));
             add(new JLabel("Name:"));
             nameTextField = new JTextField(20);
             add(nameTextField);
@@ -245,7 +246,7 @@ public class FilterCreator extends JPanel {
 
     private static String addGetAdjustPanel(FilterDescription desc) {
         String retVal = "";
-        if (desc.isGui() && (!desc.isParametrizedGui())) {
+        if (desc.isGui() && !desc.isParametrizedGui()) {
             retVal += "\n    @Override\n";
             retVal += "    public AdjustPanel createAdjustPanel() {\n";
             retVal += "        return new " + desc.getClassName() + "Adjustments(this);\n";
@@ -535,10 +536,10 @@ public class FilterCreator extends JPanel {
             this.name = name;
             this.min = min;
             this.max = max;
-            this.defaultValue = def;
+            defaultValue = def;
 
             String tmp = name.replaceAll(" ", "");
-            this.variableName = tmp.substring(0, 1).toLowerCase() + tmp.substring(1);
+            variableName = tmp.substring(0, 1).toLowerCase() + tmp.substring(1);
         }
 
         private String getName() {

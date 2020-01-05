@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
@@ -61,7 +60,7 @@ public class DrunkVision extends ParametrizedFilter {
         }
 
         int numShiftedImages = numEyes.getValue() - 1;
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numShiftedImages);
+        var pt = new StatusBarProgressTracker(NAME, numShiftedImages);
 
         dest = ImageUtils.copyImage(src);
 
@@ -69,11 +68,11 @@ public class DrunkVision extends ParametrizedFilter {
 
         Random rand = ReseedSupport.reInitialize();
 
-        int maxDistance = (int) (drunkenness.getValueAsPercentage() * 0.2 * (src.getWidth() + src.getHeight()));
+        int maxDistance = (int) (drunkenness.getPercentageValD() * 0.2 * (src.getWidth() + src.getHeight()));
 
         Point2D[] transformPoints = generateTransforms(numShiftedImages, maxDistance, rand);
         for (int i = 0; i < numShiftedImages; i++) {
-            AffineTransform transform = AffineTransform.getTranslateInstance(
+            var transform = AffineTransform.getTranslateInstance(
                     transformPoints[i].getX(),
                     transformPoints[i].getY());
             g.setComposite(AlphaComposite.getInstance(SRC_OVER, 1.0f / (i + 2)));

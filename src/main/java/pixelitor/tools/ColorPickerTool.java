@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -85,8 +85,8 @@ public class ColorPickerTool extends Tool {
             img = dr.getImage();
             isGray = img.getType() == TYPE_BYTE_GRAY;
 
-            x -= dr.getTX();
-            y -= dr.getTY();
+            x -= dr.getTx();
+            y -= dr.getTy();
         } else {
             img = view.getComp().getCompositeImage();
         }
@@ -129,7 +129,7 @@ public class ColorPickerTool extends Tool {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         node.addBoolean(SAMPLE_LABEL_TEXT, sampleLayerOnly.isSelected());
 

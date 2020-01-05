@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
@@ -85,7 +84,7 @@ public class AbstractBrushToolTest {
 
     @Before
     public void setUp() {
-        Composition comp = TestHelper.create2LayerComposition(false);
+        var comp = TestHelper.create2LayerComposition(false);
         view = comp.getView();
 
         dr = comp.getActiveDrawableOrThrow();

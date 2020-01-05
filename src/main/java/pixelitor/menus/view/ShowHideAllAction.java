@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class ShowHideAllAction extends ShowHideAction {
 
     @Override
     public void setVisibility(boolean show) {
-        PixelitorWindow pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.getInstance();
         boolean histogramsAreShown = HistogramsPanel.INSTANCE.isShown();
         boolean layersAreShown = LayersContainer.areLayersShown();
         boolean statusBarIsShown = StatusBar.INSTANCE.isShown();

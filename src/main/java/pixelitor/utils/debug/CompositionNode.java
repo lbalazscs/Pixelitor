@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,27 +32,27 @@ import java.io.File;
  */
 public class CompositionNode extends DebugNode {
     public CompositionNode(Composition comp) {
-        super("Composition", comp);
+        super("composition", comp);
 
         comp.forEachLayer(this::addLayerNode);
 
         BufferedImage compositeImage = comp.getCompositeImage();
-        BufferedImageNode imageNode = new BufferedImageNode(
-            "composite image", compositeImage);
+        DebugNode imageNode = DebugNodes.createBufferedImageNode(
+                "composite image", compositeImage);
         add(imageNode);
 
         Paths paths = comp.getPaths();
         if (paths == null) {
             addBoolean("has paths", false);
         } else {
-            add(new PathsNode(paths));
+            add(DebugNodes.createPathsNode(paths));
         }
 
         Guides guides = comp.getGuides();
         if (guides == null) {
             addBoolean("has guides", false);
         } else {
-            add(new GuidesNode(guides));
+            add(DebugNodes.createGuidesNode("guides", guides));
         }
 
         addInt("num layers", comp.getNumLayers());
@@ -69,13 +69,13 @@ public class CompositionNode extends DebugNode {
         addBoolean("dirty", comp.isDirty());
 
         if (comp.hasBuiltSelection()) {
-            add(comp.getBuiltSelection().createDebugNode("Built Selection"));
+            add(comp.getBuiltSelection().createDebugNode("built selection"));
         } else {
             addBoolean("has built selection", false);
         }
 
         if (comp.hasSelection()) {
-            add(comp.getSelection().createDebugNode("Selection"));
+            add(comp.getSelection().createDebugNode("selection"));
         } else {
             addBoolean("has selection", false);
         }
@@ -88,29 +88,32 @@ public class CompositionNode extends DebugNode {
 
     private void addLayerNode(Layer layer) {
         if (layer instanceof ImageLayer) {
-            addImageLayerNode(layer);
+            addImageLayerNode((ImageLayer) layer);
         } else if (layer instanceof TextLayer) {
-            addTextLayerNode(layer);
+            addTextLayerNode((TextLayer) layer);
         } else {
-            addQuotedString("Layer of class",
+            addQuotedString("layer class",
                     layer.getClass().getName());
         }
     }
 
-    private void addImageLayerNode(Layer layer) {
-        ImageLayer imageLayer = (ImageLayer) layer;
-        ImageLayerNode node;
-        if (imageLayer.isActive()) {
-            node = new ImageLayerNode("ACTIVE Layer - " + layer.getName(), imageLayer);
-        } else {
-            node = new ImageLayerNode("Layer - " + layer.getName(), imageLayer);
+    private void addImageLayerNode(ImageLayer layer) {
+        String name = "layer - " + layer.getName();
+
+        if (layer.isActive()) {
+            name = "active " + name;
         }
-        add(node);
+
+        add(new ImageLayerNode(name, layer));
     }
 
-    private void addTextLayerNode(Layer layer) {
-        TextLayer textLayer = (TextLayer) layer;
-        TextLayerNode node = new TextLayerNode("Text Layer - " + layer.getName(), textLayer);
-        add(node);
+    private void addTextLayerNode(TextLayer layer) {
+        String name = "text layer - " + layer.getName();
+
+        if (layer.isActive()) {
+            name = "active " + name;
+        }
+
+        add(new TextLayerNode(name, layer));
     }
 }

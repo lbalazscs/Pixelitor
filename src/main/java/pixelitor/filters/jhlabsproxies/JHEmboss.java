@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class JHEmboss extends ParametrizedFilter {
         }
 
         filter.setAzimuth((float) lightDirection.getValueInIntuitiveRadians());
-        filter.setBumpHeight(depth.getValueAsPercentage());
+        filter.setBumpHeight(depth.getPercentageValF());
         filter.setElevation((float) lightElevation.getValueInIntuitiveRadians());
         filter.setEmboss(texture.isChecked());
 

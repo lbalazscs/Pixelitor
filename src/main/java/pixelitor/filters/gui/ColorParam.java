@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -36,21 +35,21 @@ public class ColorParam extends AbstractFilterParam {
     private final Color defaultColor;
     private Color color;
 
-    private final OpacitySetting opacitySetting;
+    private final TransparencyPolicy transparencyPolicy;
 
-    public ColorParam(String name, Color defaultColor, OpacitySetting opacitySetting) {
+    public ColorParam(String name, Color defaultColor, TransparencyPolicy transparencyPolicy) {
         super(name, ALLOW_RANDOMIZE);
 
         this.defaultColor = defaultColor;
-        this.color = defaultColor;
-        this.opacitySetting = opacitySetting;
+        color = defaultColor;
+        this.transparencyPolicy = transparencyPolicy;
 
         ColorHistory.FILTER.add(defaultColor);
     }
 
     @Override
     public JComponent createGUI() {
-        ColorParamGUI gui = new ColorParamGUI(this, true);
+        var gui = new ColorParamGUI(this, true);
         paramGUI = gui;
         setParamGUIEnabledState();
 
@@ -74,8 +73,8 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void randomize() {
-        Color c = Rnd.createRandomColor(opacitySetting.allowOpacityAtRandomize);
-        setColor(c, false);
+        setColor(Rnd.createRandomColor(
+                transparencyPolicy.allowTransparencyWhenRandomized), false);
     }
 
     public Color getColor() {
@@ -87,7 +86,7 @@ public class ColorParam extends AbstractFilterParam {
         if (Objects.equals(color, newColor)) {
             return;
         }
-        this.color = newColor;
+        color = newColor;
 
         ColorHistory.FILTER.add(newColor);
 
@@ -102,12 +101,8 @@ public class ColorParam extends AbstractFilterParam {
         }
     }
 
-    public boolean allowOpacity() {
-        return opacitySetting.allowOpacity;
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
+    public boolean allowTransparency() {
+        return transparencyPolicy.allowTransparency;
     }
 
     @Override
@@ -121,8 +116,8 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState state) {
-        this.color = ((CState)state).color;
+    public void setState(ParamState<?> state) {
+        color = ((CState) state).color;
     }
 
     private static class CState implements ParamState<CState> {
@@ -142,20 +137,33 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', color = '%s']",
-                getClass().getSimpleName(), getName(), color.toString());
+                getClass().getSimpleName(), getName(), color);
     }
 
-    public enum OpacitySetting {
-        NO_OPACITY(false, false),
-        USER_ONLY_OPACITY(true, false),
-        FREE_OPACITY(true, true);
+    public enum TransparencyPolicy {
+        /**
+         * Transparent colors can't be selected
+         */
+        NO_TRANSPARENCY(false, false),
 
-        private final boolean allowOpacity;
-        private final boolean allowOpacityAtRandomize;
+        /**
+         * The user can select an alpha value, but randomizing will
+         * always use opaque colors
+         */
+        USER_ONLY_TRANSPARENCY(true, false),
 
-        OpacitySetting(boolean allowOpacity, boolean allowOpacityAtRandomize) {
-            this.allowOpacity = allowOpacity;
-            this.allowOpacityAtRandomize = allowOpacityAtRandomize;
+        /**
+         * The user can select an alpha value, and randomizing will
+         * with randomize the alpha
+         */
+        FREE_TRANSPARENCY(true, true);
+
+        private final boolean allowTransparency;
+        private final boolean allowTransparencyWhenRandomized;
+
+        TransparencyPolicy(boolean allowTransparency, boolean allowTransparencyWhenRandomized) {
+            this.allowTransparency = allowTransparency;
+            this.allowTransparencyWhenRandomized = allowTransparencyWhenRandomized;
         }
     }
 }

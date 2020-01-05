@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ public enum WithSelection {
     YES {
         @Override
         public void setupFor(Composition comp) {
-            TestHelper.setRectangleSelection(comp, selectionShape);
-            assertThat(comp).selectionBoundsIs(selectionShape);
+            TestHelper.setRectangleSelection(comp, SELECTION_SHAPE);
+            assertThat(comp).selectionBoundsIs(SELECTION_SHAPE);
         }
     }, NO {
         @Override
@@ -41,16 +41,11 @@ public enum WithSelection {
         }
     };
 
-    private static final Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+    public static final Rectangle SELECTION_SHAPE = new Rectangle(4, 4, 8, 4);
 
     public abstract void setupFor(Composition comp);
 
     public boolean isYes() {
         return this == YES;
     }
-
-    public static Rectangle getSelectionShape() {
-        return selectionShape;
-    }
-
 }

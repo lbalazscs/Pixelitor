@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.utils.test;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
@@ -91,8 +91,8 @@ public class Events {
     }
 
     public static void postMaskViewActivate(MaskViewMode mode, View view, Layer layer, String reason) {
-        post(new PixelitorEvent("[MASK VIEW " + mode.toString()
-            + " (" + reason + ")]", view.getComp(), layer));
+        post(new PixelitorEvent("[MASK VIEW " + mode
+                + " (" + reason + ")]", view.getComp(), layer));
     }
 
     /**
@@ -110,7 +110,7 @@ public class Events {
      * Dumps the last events for the active Composition.
      */
     public static void dumpForActiveComp() {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         events.stream()
                 .filter(e -> e.isComp(comp))
                 .forEach(System.out::println);

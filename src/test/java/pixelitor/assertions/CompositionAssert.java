@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.layers.Layer;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -254,8 +253,8 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         isNotNull();
 
         ContentLayer layer = (ContentLayer) actual.getActiveLayer();
-        assertEquals("tx", tx, layer.getTX());
-        assertEquals("ty", ty, layer.getTY());
+        assertEquals("tx", tx, layer.getTx());
+        assertEquals("ty", ty, layer.getTy());
 
         return this;
     }
@@ -263,14 +262,13 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert activeLayerAndMaskImageSizeIs(int w, int h) {
         isNotNull();
 
-        ImageLayer layer = (ImageLayer) actual.getActiveLayer();
-        BufferedImage image = layer.getImage();
+        var layer = (ImageLayer) actual.getActiveLayer();
+        var image = layer.getImage();
         assertEquals("width", w, image.getWidth());
         assertEquals("height", h, image.getHeight());
 
         if (layer.hasMask()) {
-            BufferedImage maskImage = layer.getMask()
-                    .getImage();
+            var maskImage = layer.getMask().getImage();
             assertEquals("mask width", w, maskImage.getWidth());
             assertEquals("mask height", h, maskImage.getHeight());
         }
@@ -281,9 +279,9 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert selectionBoundsIs(Rectangle2D rect) {
         isNotNull();
 
-        Rectangle2D bounds = actual.getSelection()
-            .getShapeBounds2D();
-        assertEquals("selection bounds", rect, bounds);
+        var selection = actual.getSelection();
+        var selShapeBounds = selection.getShapeBounds2D();
+        assertEquals("selection bounds", rect, selShapeBounds);
 
         return this;
     }

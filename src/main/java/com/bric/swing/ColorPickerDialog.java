@@ -29,8 +29,6 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
 /**
@@ -46,12 +44,6 @@ class ColorPickerDialog extends JDialog {
 
     private ColorPicker cp;
     private Color returnValue = null;
-    private final ActionListener okListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            returnValue = cp.getColor();
-        }
-    };
 
     public ColorPickerDialog(Frame owner, Color color, boolean includeOpacity, Consumer<Color> adjustmentListener) {
         super(owner);
@@ -88,9 +80,13 @@ class ColorPickerDialog extends JDialog {
         pack();
         setLocationRelativeTo(owner);
 
-        footer.getButton(DialogFooter.OK_OPTION).addActionListener(okListener);
+        footer.getButton(DialogFooter.OK_OPTION).addActionListener(e -> setReturnValue());
 
         cp.setupAdjListener(adjustmentListener);
+    }
+
+    private void setReturnValue() {
+        returnValue = cp.getColor();
     }
 
     /**

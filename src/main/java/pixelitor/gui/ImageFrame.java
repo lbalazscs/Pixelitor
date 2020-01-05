@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Canvas;
+import pixelitor.OpenImages;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -49,11 +50,11 @@ public class ImageFrame extends JInternalFrame
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         scrollPane = new JScrollPane(this.view);
-        this.add(scrollPane);
+        add(scrollPane);
 
         setLocation(locX, locY);
         setToNaturalSize();
-        this.setVisible(true);
+        setVisible(true);
     }
 
     @Override
@@ -61,18 +62,18 @@ public class ImageFrame extends JInternalFrame
         // We can get here as the result of a user click or as part
         // of a programmatic activation, but it shouldn't matter as all
         // activation takes place in the following method
-        OpenComps.viewActivated(view);
+        OpenImages.viewActivated(view);
     }
 
     @Override
     public void internalFrameClosed(InternalFrameEvent e) {
-        OpenComps.imageClosed(view);
+        OpenImages.imageClosed(view);
     }
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
         if (!RandomGUITest.isRunning()) {
-            OpenComps.warnAndClose(view);
+            OpenImages.warnAndClose(view);
         }
     }
 
@@ -82,12 +83,12 @@ public class ImageFrame extends JInternalFrame
 
     @Override
     public void internalFrameDeiconified(InternalFrameEvent e) {
-        view.updateNavigator(true);
+        view.repaintNavigator(true);
     }
 
     @Override
     public void internalFrameIconified(InternalFrameEvent e) {
-        view.updateNavigator(true);
+        view.repaintNavigator(true);
     }
 
     @Override
@@ -142,8 +143,8 @@ public class ImageFrame extends JInternalFrame
     public void ensurePositiveLocation() {
         Rectangle bounds = getBounds();
         if (bounds.x < 0 || bounds.y < 0) {
-            int newX = bounds.x < 0 ? 0 : bounds.x;
-            int newY = bounds.y < 0 ? 0 : bounds.y;
+            int newX = Math.max(bounds.x, 0);
+            int newY = Math.max(bounds.y, 0);
             setBounds(newX, newY, bounds.width, bounds.height);
         }
     }

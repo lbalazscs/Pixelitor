@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,12 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Renders wood texture based on the JHLabs WoodFilter
@@ -63,7 +64,7 @@ public class JHWood extends ParametrizedFilter {
                 turbulence,
                 fibres,
                 gain
-        ).withAction(new ReseedNoiseFilterAction());
+        ).withAction(reseedNoise());
 
         stretch.setupEnableOtherIfNotZero(angle);
     }
@@ -77,10 +78,10 @@ public class JHWood extends ParametrizedFilter {
         filter.setAngle((float) (angle.getValueInRadians() + Math.PI / 2));
         filter.setScale(scale.getValueAsFloat());
         filter.setStretch(stretch.getValueAsFloat() + 1.0f);
-        filter.setRings(rings.getValueAsPercentage());
-        filter.setTurbulence(turbulence.getValueAsPercentage());
-        filter.setFibres(fibres.getValueAsPercentage());
-        filter.setGain(gain.getValueAsPercentage());
+        filter.setRings(rings.getPercentageValF());
+        filter.setTurbulence(turbulence.getPercentageValF());
+        filter.setFibres(fibres.getPercentageValF());
+        filter.setGain(gain.getPercentageValF());
         filter.setColormap(gradient.getValue());
 
         dest = filter.filter(src, dest);

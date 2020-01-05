@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class CompositionIOTest {
 
     @Test
     public void testNewImage() {
-        Composition comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
+        var comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
         comp.checkInvariant();
         assertThat(comp)
                 .numLayersIs(1)
@@ -55,10 +55,10 @@ public class CompositionIOTest {
     }
 
     private static void testSingleLayerRead(File f) {
-        CompletableFuture<Composition> cf = OpenSave.loadCompAsync(f);
-        checkLoadFuture(cf);
+        var future = OpenSave.loadCompAsync(f);
+        checkLoadFuture(future);
 
-        Composition comp = cf.join();
+        var comp = future.join();
         assertThat(comp)
                 .numLayersIs(1)
                 .hasCanvasImWidth(10)
@@ -75,17 +75,17 @@ public class CompositionIOTest {
     }
 
     private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        CompletableFuture<Composition> cf = OpenSave.loadCompAsync(f);
-        checkLoadFuture(cf);
+        var future = OpenSave.loadCompAsync(f);
+        checkLoadFuture(future);
 
-        Composition comp = cf.join();
+        var comp = future.join();
         assertThat(comp)
                 .numLayersIs(2)
                 .hasCanvasImWidth(10)
                 .hasCanvasImHeight(10)
                 .invariantIsOK();
 
-        Layer secondLayer = comp.getLayer(1);
+        var secondLayer = comp.getLayer(1);
         secondLayerChecker.accept(secondLayer);
 
         return comp;
@@ -154,7 +154,7 @@ public class CompositionIOTest {
             String fileName = fileNames[i];
             try {
                 File f = new File(fileName);
-                Composition comp = testMultiLayerRead(f, extraChecks.get(i));
+                var comp = testMultiLayerRead(f, extraChecks.get(i));
 
                 // write to tmp file
                 File tmp = File.createTempFile("pix_tmp", ".pxc");
@@ -181,7 +181,7 @@ public class CompositionIOTest {
 
         // read and test
         File f = new File("src/test/resources/gimp_ora_test_input.ora");
-        Composition comp = testMultiLayerRead(f, extraCheck);
+        var comp = testMultiLayerRead(f, extraCheck);
 
         File tmp = File.createTempFile("pix_tmp", ".ora");
         OpenRaster.write(comp, tmp, true);

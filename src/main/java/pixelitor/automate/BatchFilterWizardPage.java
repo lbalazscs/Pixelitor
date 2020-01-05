@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.automate;
 
 import org.jdesktop.swingx.VerticalLayout;
-import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -43,8 +42,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public WizardPage getNext() {
-            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
-            Filter filter = selectedItem.getFilter();
+            var filter = ((FilterAction) filtersCB.getSelectedItem()).getFilter();
             if (filter instanceof FilterWithGUI) {
                 return FILTER_GUI;
             } else {
@@ -53,8 +51,8 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
-            JPanel p = new JPanel(new FlowLayout());
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
+            var p = new JPanel(new FlowLayout());
             p.add(new JLabel("Select Filter:"));
             if (filtersCB == null) {
                 filtersCB = new JComboBox<>(FilterUtils.getAllFiltersSorted());
@@ -62,15 +60,15 @@ public enum BatchFilterWizardPage implements WizardPage {
             }
             p.add(filtersCB);
 
-            JPanel main = new JPanel(new VerticalLayout());
-            main.add(p);
+            var mainPanel = new JPanel(new VerticalLayout());
+            mainPanel.add(p);
             if (openSaveDirsPanel == null) {
                 openSaveDirsPanel = new OpenSaveDirsPanel(
                         false, OutputFormat.getLastUsed());
             }
-            main.add(openSaveDirsPanel);
+            mainPanel.add(openSaveDirsPanel);
 
-            return main;
+            return mainPanel;
         }
 
         @Override
@@ -80,8 +78,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void onMovingToTheNext(Wizard wizard, Drawable dr) {
-            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
-            Filter filter = selectedItem.getFilter();
+            var filter = ((FilterAction) filtersCB.getSelectedItem()).getFilter();
 
             ((BatchFilterWizard) wizard).setFilter(filter);
 
@@ -99,9 +96,9 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public JComponent getPanel(Wizard wizard, Drawable dr) {
+        public JComponent createPanel(Wizard wizard, Drawable dr) {
             // we get here only if the chosen filter is a filter with GUI
-            FilterWithGUI filter = (FilterWithGUI) ((BatchFilterWizard) wizard).getFilter();
+            var filter = (FilterWithGUI) ((BatchFilterWizard) wizard).getFilter();
 
             dr.startPreviewing();
 

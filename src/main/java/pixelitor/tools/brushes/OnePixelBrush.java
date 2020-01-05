@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public class OnePixelBrush extends AbstractBrush {
     @Override
     public void startAt(PPoint p) {
         super.startAt(p);
-        updateComp(p);
+        repaintComp(p);
         rememberPrevious(p);
 
         // make sure a pixel is changed without dragging
@@ -51,15 +51,15 @@ public class OnePixelBrush extends AbstractBrush {
         }
 
         previous.drawLineTo(p, targetG);
-        updateComp(p);
+        repaintComp(p);
         rememberPrevious(p);
     }
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addBoolean("Anti-aliasing", settings.hasAA());
+        node.addBoolean("anti-aliasing", settings.hasAA());
 
         return node;
     }

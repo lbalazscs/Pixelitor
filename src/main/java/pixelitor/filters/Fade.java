@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.filters;
 
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
@@ -49,13 +49,13 @@ public class Fade extends ParametrizedFilter {
         // the fade menu item must be active only if History.canFade()
         assert History.canFade();
 
-        BufferedImage previous = OpenComps.getActiveComp()
-                .flatMap(Composition::getActiveDrawable)
+        BufferedImage previous = OpenImages.getActiveCompOpt()
+                .flatMap(Composition::getActiveDrawableOpt)
                 .flatMap(History::getPreviousEditForFade)
                 .orElseThrow(() -> new IllegalStateException("no FadeableEdit"))
                 .getBackupImage();
 
-        if(previous == null) {
+        if (previous == null) {
             // soft reference expired
             return src;
         }
@@ -75,7 +75,7 @@ public class Fade extends ParametrizedFilter {
             return after;
         }
 
-        float fadeFactor = opacity.getValueAsPercentage();
+        float fadeFactor = opacity.getPercentageValF();
         // A simple AlphaComposite would not handle semitransparent pixels correctly
         int[] srcData = ImageUtils.getPixelsAsArray(after);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -100,7 +100,7 @@ public class Fade extends ParametrizedFilter {
             g = (int) (prevG + fadeFactor * (g - prevG));
             b = (int) (prevB + fadeFactor * (b - prevB));
 
-            destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
+            destData[i] = a << 24 | r << 16 | g << 8 | b;
         }
         return dest;
     }

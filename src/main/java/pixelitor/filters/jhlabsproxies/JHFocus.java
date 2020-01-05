@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -136,11 +136,11 @@ public class JHFocus extends ParametrizedFilter {
         }
 
         public void setRadius(double radiusX, double radiusY, double softness) {
-            this.innerRadiusX = radiusX - radiusX * softness;
-            this.innerRadiusY = radiusY - radiusY * softness;
+            innerRadiusX = radiusX - radiusX * softness;
+            innerRadiusY = radiusY - radiusY * softness;
 
-            this.outerRadiusX = radiusX + radiusX * softness;
-            this.outerRadiusY = radiusY + radiusY * softness;
+            outerRadiusX = radiusX + radiusX * softness;
+            outerRadiusY = radiusY + radiusY * softness;
         }
 
         @Override

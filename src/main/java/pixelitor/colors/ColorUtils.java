@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
@@ -194,17 +193,17 @@ public class ColorUtils {
 
     public static float calcSaturation(int r, int g, int b) {
         float sat;
-        int cMax = (r > g) ? r : g;
+        int cMax = Math.max(r, g);
         if (b > cMax) {
             cMax = b;
         }
-        int cMin = (r < g) ? r : g;
+        int cMin = Math.min(r, g);
         if (b < cMin) {
             cMin = b;
         }
 
         if (cMax != 0) {
-            sat = ((float) (cMax - cMin)) / ((float) cMax);
+            sat = (cMax - cMin) / (float) cMax;
         } else {
             sat = 0;
         }
@@ -212,7 +211,7 @@ public class ColorUtils {
     }
 
     public static int toPackedInt(int a, int r, int g, int b) {
-        return (a << 24) | (r << 16) | (g << 8) | b;
+        return a << 24 | r << 16 | g << 8 | b;
     }
 
     public static String debugPackedInt(int argb) {
@@ -225,19 +224,19 @@ public class ColorUtils {
     }
 
     public static void selectColorWithDialog(JComponent component, String title,
-                                             Color selectedColor, boolean allowOpacity,
+                                             Color selectedColor, boolean allowTransparency,
                                              Consumer<Color> colorChangeListener) {
         Window owner = SwingUtilities.getWindowAncestor(component);
-        selectColorWithDialog(owner, title, selectedColor, allowOpacity, colorChangeListener);
+        selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
     }
 
     public static void selectColorWithDialog(Window owner, String title,
-                                             Color selectedColor, boolean allowOpacity,
+                                             Color selectedColor, boolean allowTransparency,
                                              Consumer<Color> colorChangeListener) {
         Color prevColor = selectedColor;
         GlobalEvents.dialogOpened(title);
         Color color = ColorPicker.showDialog(owner, title, selectedColor,
-                allowOpacity, colorChangeListener);
+                allowTransparency, colorChangeListener);
         GlobalEvents.dialogClosed(title);
 
         if (color == null) {  // Cancel was pressed, reset the old color
@@ -254,7 +253,7 @@ public class ColorUtils {
 
         int gray = (r + r + g + g + g + b) / 6;
 
-        return new Color(0xFF_00_00_00 | (gray << 16) | (gray << 8) | gray);
+        return new Color(0xFF_00_00_00 | gray << 16 | gray << 8 | gray);
     }
 
     public static float[] toHSB(Color c) {
@@ -268,7 +267,7 @@ public class ColorUtils {
     }
 
     public static Color getColorFromClipboard() {
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         String text;
         try {
             text = (String) clipboard.getData(DataFlavor.stringFlavor);
@@ -306,7 +305,7 @@ public class ColorUtils {
     public static void setupFilterColorsPopupMenu(JComponent parent, ColorSwatch swatch,
                                                   Supplier<Color> colorSupplier,
                                                   Consumer<Color> colorSetter) {
-        JPopupMenu popup = new JPopupMenu();
+        var popup = new JPopupMenu();
 
         ColorSwatchClickHandler clickHandler = (newColor, e) -> colorSetter.accept(newColor);
 
@@ -361,7 +360,7 @@ public class ColorUtils {
         popup.add(new MenuAction("Copy Color") {
             @Override
             public void onClick() {
-                ColorUtils.copyColorToClipboard(colorSupplier.get());
+                copyColorToClipboard(colorSupplier.get());
             }
         });
     }
@@ -370,7 +369,7 @@ public class ColorUtils {
         popup.add(new MenuAction("Paste Color") {
             @Override
             public void onClick() {
-                Color color = ColorUtils.getColorFromClipboard();
+                Color color = getColorFromClipboard();
                 if (color == null) {
                     Dialogs.showNotAColorOnClipboardDialog(window);
                 } else {

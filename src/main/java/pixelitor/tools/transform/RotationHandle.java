@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ public class RotationHandle extends DraggablePoint {
     public RotationHandle(String name, TransformBox box, Point2D pos, View view) {
         super(name, pos.getX(), pos.getY(), view, Color.WHITE, Color.RED);
         this.box = box;
-        this.cursor = Cursors.DEFAULT;
+        cursor = Cursors.DEFAULT;
     }
 
     @Override
@@ -106,10 +106,10 @@ public class RotationHandle extends DraggablePoint {
             double sin = box.getSin();
             double cos = box.getCos();
 
-            float drawX = (float) (this.x
+            float drawX = (float) (x
                     - displayBgWidth / 2.0f
                     + displayBgWidth * 0.7 * sin);
-            float drawY = (float) (this.y
+            float drawY = (float) (y
                     - MOUSE_DISPLAY_CENTER_DISTANCE * cos
                     + DragDisplay.ONE_LINER_BG_HEIGHT / 2.0f);
             dd.drawOneLine(angleInfo, drawX, drawY);

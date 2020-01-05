@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.LogZoomParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -45,14 +46,14 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     protected final LogZoomParam zoomParam = new LogZoomParam("Log(Zoom)", 200, 200, 1000);
     protected final ImagePositionParam zoomCenter;
     protected final RangeParam iterationsParam;
-    private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Contrasting", COLORS_CONTRASTING),
-            new IntChoiceParam.Value("Continuous", COLORS_CONTINUOUS),
-            new IntChoiceParam.Value("Blues", COLORS_BLUES),
+    private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Value[]{
+            new Value("Contrasting", COLORS_CONTRASTING),
+            new Value("Continuous", COLORS_CONTINUOUS),
+            new Value("Blues", COLORS_BLUES),
     });
-    private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("None (Faster)", AA_NONE),
-            new IntChoiceParam.Value("2x2 (Better, Slower)", AA_2x2),
+    private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new Value[]{
+            new Value("None (Faster)", AA_NONE),
+            new Value("2x2 (Better, Slower)", AA_2x2),
     }, IGNORE_RANDOMIZE);
 
     protected ComplexFractal(int defaultIterations, float zoomX) {
@@ -114,7 +115,7 @@ public abstract class ComplexFractal extends ParametrizedFilter {
             for (int it = 0; it <= maxIterations; it++) {
                 float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
-                        ((float) it / maxIterations),
+                        (float) it / maxIterations,
                         0.9f,
                         it > 0 ? bri : 0);
             }
@@ -123,8 +124,8 @@ public abstract class ComplexFractal extends ParametrizedFilter {
             for (int it = 0; it <= maxIterations; it++) {
                 float bri = (float) (1 + Math.log(maxIterations - it + 1) / normalizer) / 2;
                 colors[it] = Color.HSBtoRGB(
-                        0.5f + ((float) it / (maxIterations * 10)),
-                        ((float) it / maxIterations),
+                        0.5f + (float) it / (maxIterations * 10),
+                        (float) it / maxIterations,
                         it > 0 ? bri : 0);
             }
         } else {

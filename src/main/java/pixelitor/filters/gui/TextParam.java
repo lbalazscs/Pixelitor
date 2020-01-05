@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.Rectangle;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -93,21 +92,17 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
     public boolean canBeAnimated() {
         return false;
     }
 
     @Override
-    public ParamState copyState() {
+    public ParamState<?> copyState() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         throw new UnsupportedOperationException();
     }
 

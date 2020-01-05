@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.gui.ChannelMixerGUI;
-import pixelitor.filters.gui.FilterAction;
+import pixelitor.filters.gui.FilterButtonModel;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
@@ -29,11 +29,8 @@ import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BandCombineOp;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
 import java.util.function.BooleanSupplier;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
@@ -59,7 +56,7 @@ public class ChannelMixer extends ParametrizedFilter {
     private final RangeParam blueFromGreen = createParam("Blue", "Green", 0);
     private final RangeParam blueFromBlue = createParam("Blue", "Blue", 100);
 
-    private final ActionListener normalizeAction = e -> {
+    private final Runnable normalizeAction = () -> {
         normalizeChannel(redFromRed, redFromGreen, redFromBlue);
         normalizeChannel(greenFromRed, greenFromGreen, greenFromBlue);
         normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
@@ -286,7 +283,7 @@ public class ChannelMixer extends ParametrizedFilter {
     public ChannelMixer() {
         super(ShowOriginal.YES);
 
-        FilterAction normalize = new FilterAction("Normalize", normalizeAction,
+        var normalize = new FilterButtonModel("Normalize", normalizeAction,
                 "Makes sure that the sum of the channel contributions is 100%");
         FilterParam[] params = {
                 redFromRed,
@@ -315,10 +312,10 @@ public class ChannelMixer extends ParametrizedFilter {
                 .withAction(normalize);
 
         // add this extra action, but after the standard "Randomize Settings"
-        FilterAction randomizeAndNormalize = new FilterAction("Randomize and Normalize",
-                e -> {
+        var randomizeAndNormalize = new FilterButtonModel("Randomize and Normalize",
+                () -> {
                     paramSet.randomize();
-                    normalizeAction.actionPerformed(null);
+                    normalizeAction.run();
                 }, "Randomizes settings and normalizes the brightness");
         // insert it right after "Randomize Settings"
         paramSet.insertAction(randomizeAndNormalize, 2);
@@ -384,21 +381,21 @@ public class ChannelMixer extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float rfr = redFromRed.getValueAsPercentage();
-        float rfg = redFromGreen.getValueAsPercentage();
-        float rfb = redFromBlue.getValueAsPercentage();
+        float rfr = redFromRed.getPercentageValF();
+        float rfg = redFromGreen.getPercentageValF();
+        float rfb = redFromBlue.getPercentageValF();
 
-        float gfr = greenFromRed.getValueAsPercentage();
-        float gfg = greenFromGreen.getValueAsPercentage();
-        float gfb = greenFromBlue.getValueAsPercentage();
+        float gfr = greenFromRed.getPercentageValF();
+        float gfg = greenFromGreen.getPercentageValF();
+        float gfb = greenFromBlue.getPercentageValF();
 
-        float bfr = blueFromRed.getValueAsPercentage();
-        float bfg = blueFromGreen.getValueAsPercentage();
-        float bfb = blueFromBlue.getValueAsPercentage();
+        float bfr = blueFromRed.getPercentageValF();
+        float bfg = blueFromGreen.getPercentageValF();
+        float bfb = blueFromBlue.getPercentageValF();
 
-        if ((rfr == 1.0f) && (rfg == 0.0f) && (rfb == 0.0f)) {
-            if ((gfr == 0.0f) && (gfg == 1.0f) && (gfb == 0.0f)) {
-                if ((bfr == 0.0f) && (bfg == 0.0f) && (bfb == 1.0f)) {
+        if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f) {
+            if (gfr == 0.0f && gfg == 1.0f && gfb == 0.0f) {
+                if (bfr == 0.0f && bfg == 0.0f && bfb == 1.0f) {
                     return src;
                 }
             }
@@ -418,7 +415,7 @@ public class ChannelMixer extends ParametrizedFilter {
                 int a = rgb & 0xFF000000;
                 int r = (rgb >>> 16) & 0xFF;
                 int g = (rgb >>> 8) & 0xFF;
-                int b = (rgb) & 0xFF;
+                int b = rgb & 0xFF;
 
                 int newRed = (int) (rfr * r + rfg * g + rfb * b);
                 int newGreen = (int) (gfr * r + gfg * g + gfb * b);
@@ -428,16 +425,16 @@ public class ChannelMixer extends ParametrizedFilter {
                 newGreen = PixelUtils.clamp(newGreen);
                 newBlue = PixelUtils.clamp(newBlue);
 
-                destData[i] = a | (newRed << 16) | (newGreen << 8) | newBlue;
+                destData[i] = a | newRed << 16 | newGreen << 8 | newBlue;
             }
         } else { // not packed int
-            BandCombineOp bandCombineOp = new BandCombineOp(new float[][]{
+            var bandCombineOp = new BandCombineOp(new float[][]{
                     {rfr, rfg, rfb},
                     {gfr, gfg, gfb},
                     {bfr, bfg, bfb}
             }, null);
-            Raster srcRaster = src.getRaster();
-            WritableRaster destRaster = dest.getRaster();
+            var srcRaster = src.getRaster();
+            var destRaster = dest.getRaster();
             bandCombineOp.filter(srcRaster, destRaster);
         }
 

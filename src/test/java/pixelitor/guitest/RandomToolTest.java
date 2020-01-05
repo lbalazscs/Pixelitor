@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,14 +19,11 @@ package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
-import org.assertj.swing.fixture.DialogFixture;
-import org.assertj.swing.fixture.JButtonFixture;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
+import pixelitor.OpenImages;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.history.History;
@@ -52,7 +49,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -167,7 +163,7 @@ public class RandomToolTest {
                 assert stopped;
                 System.out.println("\n" + RandomToolTest.class.getSimpleName() + " stopped.");
 
-                DoubleSummaryStatistics stats = testTimes.stream()
+                var stats = testTimes.stream()
                         .mapToDouble(s -> s)
                         .summaryStatistics();
                 System.out.printf("time stats: count = %d, min = %.2fs, max = %.2fs, avg = %.2fs%n",
@@ -231,10 +227,9 @@ public class RandomToolTest {
     }
 
     private void testWithTimeout(Tool tool) {
-        CompletableFuture<Void> cf = CompletableFuture.runAsync(
-                () -> testWithCleanup(tool));
+        var future = CompletableFuture.runAsync(() -> testWithCleanup(tool));
         try {
-            cf.get(10, MINUTES);
+            future.get(10, MINUTES);
         } catch (InterruptedException e) {
             stopped = true;
             System.err.println(AppRunner.getCurrentTimeHMS() + ": task unexpectedly interrupted, exiting");
@@ -392,7 +387,7 @@ public class RandomToolTest {
         Tool tool = EDT.call(Tools::getCurrent);
         log("cleaning up after " + tool.getName());
 
-        Composition comp = EDT.getComp();
+        var comp = EDT.getComp();
         if (tool == MOVE || tool == CROP) {
             if (comp.getNumLayers() > 1) {
                 flattenImage();
@@ -431,7 +426,7 @@ public class RandomToolTest {
 
     // might be necessary because of the croppings
     private void setStandardSize() {
-        Canvas canvas = EDT.active(Composition::getCanvas);
+        var canvas = EDT.active(Composition::getCanvas);
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
 
@@ -620,12 +615,12 @@ public class RandomToolTest {
         log("layers to canvas size");
         Utils.sleep(200, MILLISECONDS);
 
-        int numImageLayers = EDT.call(() -> OpenComps.fromActiveComp(
+        int numImageLayers = EDT.call(() -> OpenImages.fromActiveComp(
                 Composition::getNumImageLayers));
         if (numImageLayers == 1) {
             app.runMenuCommand("Layer to Canvas Size");
         } else if (numImageLayers > 1) {
-            EDT.run(() -> OpenComps.onActiveComp(
+            EDT.run(() -> OpenImages.onActiveComp(
                     Composition::allImageLayersToCanvasSize));
         }
     }
@@ -670,7 +665,7 @@ public class RandomToolTest {
 
     private void changeLazyMouseSetting() {
         app.findButton("lazyMouseDialogButton").click();
-        DialogFixture dialog = app.findDialogByTitle("Lazy Mouse Settings");
+        var dialog = app.findDialogByTitle("Lazy Mouse Settings");
 
         log("changing the lazy mouse setting");
         Utils.sleep(200, MILLISECONDS);
@@ -681,18 +676,18 @@ public class RandomToolTest {
     }
 
     private void changeBrushSetting() {
-        JButtonFixture button = app.findButtonByText("Settings...");
-        if (!button.isEnabled()) {
+        var settingsButton = app.findButtonByText("Settings...");
+        if (!settingsButton.isEnabled()) {
             return;
         }
 
         log("changing the brush setting");
-        button.click();
-        DialogFixture dialog = app.findDialogByTitleStartingWith("Settings for the");
+        settingsButton.click();
+        var settingsDialog = app.findDialogByTitleStartingWith("Settings for the");
 
         // TODO
 
-        dialog.button("ok").click();
+        settingsDialog.button("ok").click();
     }
 
     private void clickPenToolButton() {
@@ -700,7 +695,7 @@ public class RandomToolTest {
         if (path == null) {
             return;
         }
-        Canvas canvas = EDT.getCanvas();
+        var canvas = EDT.getCanvas();
         if (!canvas.getImBounds().contains(path.getImBounds())) {
             // if the path is outside, then it can potentially take a very long time
             return;
@@ -743,7 +738,7 @@ public class RandomToolTest {
 
     private void clickRandomToolButton(String[] texts) {
         String text = Rnd.chooseFrom(texts);
-        JButtonFixture button = app.findButtonByText(text);
+        var button = app.findButtonByText(text);
         if (button.isEnabled()) {
             log("Clicking " + Ansi.cyan(text));
             Utils.sleep(200, MILLISECONDS);
@@ -908,7 +903,7 @@ class StoppedException extends TestControlException {
 }
 
 class MeasuredTask implements Runnable {
-    private Runnable task;
+    private final Runnable task;
     private final String name;
 
     public MeasuredTask(Runnable task, String name) {

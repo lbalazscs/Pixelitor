@@ -29,7 +29,7 @@ import java.util.concurrent.Future;
  */
 public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionBlur {
     private float angle = 0.0f;
-    private final float falloff = 1.0f;
+//    private final float falloff = 1.0f;
     private float distance = 1.0f;
     private float zoom = 0.0f;
     private float rotation = 0.0f;
@@ -288,7 +288,7 @@ public class MotionBlurFilter extends AbstractBufferedImageOp implements MotionB
             Runnable lineTask = () -> calcLine(width, height, inPixels, outPixels, cx, cy, translateX, translateY, repetitions, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
         if (premultiplyAlpha) {
             ImageMath.unpremultiply(outPixels, 0, inPixels.length);
         }

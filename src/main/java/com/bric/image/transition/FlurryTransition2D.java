@@ -29,7 +29,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -66,26 +65,6 @@ public class FlurryTransition2D extends Transition2D {
     }
 
     private int type = OUT;
-
-    private final Comparator<ImageInstruction> comparator = (i1, i2) -> {
-        if (i1.isFirstFrame && !i2.isFirstFrame) {
-            return 1;
-        }
-        if (i2.isFirstFrame && !i1.isFirstFrame) {
-            return -1;
-        }
-
-        Rectangle2D r1 = ShapeBounds.getBounds(i1.clipping);
-        Rectangle2D r2 = ShapeBounds.getBounds(i2.clipping);
-        double area1 = r1.getWidth() * r1.getHeight();
-        double area2 = r2.getWidth() * r2.getHeight();
-
-        return Double.compare(area1, area2);
-//			if(area1<area2) {
-//				return -1;
-//			}
-//			return 1;
-    };
 
     /**
      * Creates a new flurry transition that moves out.
@@ -135,8 +114,10 @@ public class FlurryTransition2D extends Transition2D {
             random.setSeed(a);
             Shape clipping = r;
             Point2D center = new Point2D.Double(r.getCenterX() - 200.0f / 2.0f, r.getCenterY() - 200.0f / 2.0f);
-            float k = (float) (Math.sqrt(center.getX() * center.getX() + center.getY() * center.getY()) / Math
-                    .sqrt(200.0f * 200.0f / 4 + 200.0f * 200.0f / 4));
+            double cX = center.getX();
+            double cY = center.getY();
+            float k = (float) (Math.sqrt(cX * cX + cY * cY) /
+                    Math.sqrt(200.0f * 200.0f / 4 + 200.0f * 200.0f / 4));
             k = (1 - progress) * k + progress;
             float scaleProgress = (float) Math.pow(2 * progress * k, 0.02 + 4 * random.nextFloat());
             AffineTransform transform = new AffineTransform();
@@ -185,13 +166,29 @@ public class FlurryTransition2D extends Transition2D {
 
             instr[a + 1] = new ImageInstruction(true, transform, clipping);
         }
-        Arrays.sort(instr, comparator);
+        Arrays.sort(instr, FlurryTransition2D::compareInstructions);
         if (type == IN) {
             for (ImageInstruction imageInstruction : instr) {
                 imageInstruction.isFirstFrame = !imageInstruction.isFirstFrame;
             }
         }
         return instr;
+    }
+
+    private static int compareInstructions(ImageInstruction i1, ImageInstruction i2) {
+        if (i1.isFirstFrame && !i2.isFirstFrame) {
+            return 1;
+        }
+        if (i2.isFirstFrame && !i1.isFirstFrame) {
+            return -1;
+        }
+
+        Rectangle2D r1 = ShapeBounds.getBounds(i1.clipping);
+        Rectangle2D r2 = ShapeBounds.getBounds(i2.clipping);
+        double area1 = r1.getWidth() * r1.getHeight();
+        double area2 = r2.getWidth() * r2.getHeight();
+
+        return Double.compare(area1, area2);
     }
 
     @Override

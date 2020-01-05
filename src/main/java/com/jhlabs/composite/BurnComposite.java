@@ -61,7 +61,7 @@ public final class BurnComposite extends RGBComposite {
                     dog = sg;
                 }
                 if (dib != 255) {
-                    dob = clamp(255 - ((255 - sb << 8) / (dib + 1)));
+                    dob = clamp(255 - (((255 - sb) << 8) / (dib + 1)));
                 } else {
                     dob = sb;
                 }

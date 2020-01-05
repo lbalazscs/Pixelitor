@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,11 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
@@ -51,7 +51,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        OpenComps.onActiveComp(this::process);
+        OpenImages.onActiveComp(this::process);
     }
 
     @Override
@@ -60,8 +60,8 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         Composition newComp = comp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
 
-        AffineTransform canvasTx = createCanvasImTX(newCanvas);
-        newComp.imCoordsChanged(canvasTx, false);
+        var canvasAT = createCanvasImTransform(newCanvas);
+        newComp.imCoordsChanged(canvasAT, false);
 
         newComp.forEachLayer(this::processLayer);
 
@@ -69,8 +69,8 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
             changeCanvas(newCanvas, view);
         }
 
-        History.addEdit(new CompositionReplacedEdit(
-                getEditName(), false, view, comp, newComp, canvasTx));
+        History.add(new CompositionReplacedEdit(
+                getEditName(), false, view, comp, newComp, canvasAT));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -93,11 +93,11 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     private void processLayer(Layer layer) {
         if (layer instanceof ContentLayer) {
             ContentLayer contentLayer = (ContentLayer) layer;
-            applyTx(contentLayer);
+            transform(contentLayer);
         }
         if (layer.hasMask()) {
             LayerMask mask = layer.getMask();
-            applyTx(mask);
+            transform(mask);
         }
     }
 
@@ -108,13 +108,13 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     /**
      * Applies the transformation to the given content layer.
      */
-    protected abstract void applyTx(ContentLayer contentLayer);
+    protected abstract void transform(ContentLayer contentLayer);
 
     /**
      * Returns the change made by this action as a transform in
      * image-space coordinates relative to the canvas
      */
-    protected abstract AffineTransform createCanvasImTX(Canvas canvas);
+    protected abstract AffineTransform createCanvasImTransform(Canvas canvas);
 
     protected abstract Guides createGuidesCopy(Guides guides, View view);
 }

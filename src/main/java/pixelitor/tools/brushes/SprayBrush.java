@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -162,7 +162,7 @@ public class SprayBrush extends AbstractBrush {
                 maxX - minX + 2 * maxShapeRadius + 2,
             maxY - minY + 2 * maxShapeRadius + 2, view);
 
-        comp.updateRegion(area);
+        comp.repaintRegion(area);
     }
 
     private void updateTheMaxRadius(double dx, double dy) {
@@ -190,7 +190,7 @@ public class SprayBrush extends AbstractBrush {
     public void continueTo(PPoint p) {
         // this method does no painting, but the
         // brush outline still has to be repainted
-        updateComp(p);
+        repaintComp(p);
 
         rememberPrevious(p);
 
@@ -202,8 +202,8 @@ public class SprayBrush extends AbstractBrush {
     }
 
     @Override
-    public void finish() {
-        super.finish();
+    public void finishBrushStroke() {
+        super.finishBrushStroke();
         assert timer != null;
 
         if (timer != null) {

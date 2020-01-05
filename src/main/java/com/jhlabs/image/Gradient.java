@@ -459,7 +459,7 @@ public class Gradient extends ArrayColormap implements Cloneable {
                                     hsb1[0] += 1.0f;
                                 }
                             }
-                            float h = ImageMath.lerp(t, hsb1[0], hsb2[0]) % (ImageMath.TWO_PI);
+                            float h = ImageMath.lerp(t, hsb1[0], hsb2[0]) % ImageMath.TWO_PI;
                             float s = ImageMath.lerp(t, hsb1[1], hsb2[1]);
                             float b = ImageMath.lerp(t, hsb1[2], hsb2[2]);
                             map[j] = 0xff000000 | Color.HSBtoRGB(h, s, b);//FIXME-alpha
@@ -489,10 +489,10 @@ public class Gradient extends ArrayColormap implements Cloneable {
         }
     }
 
-    private void rebuild() {
-        sortKnots();
-        rebuildGradient();
-    }
+//    private void rebuild() {
+//        sortKnots();
+//        rebuildGradient();
+//    }
 
     /**
      * Randomize the gradient.

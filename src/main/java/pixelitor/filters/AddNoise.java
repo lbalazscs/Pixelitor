@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -84,14 +83,14 @@ public class AddNoise extends ParametrizedFilter {
         boolean fullSaturation = saturationParam.getValue() == 100;
         boolean fullOpacity = opacityParam.getValue() == 100;
 
-        float opacityPercentage = opacityParam.getValueAsPercentage();
-        float saturationPercentage = saturationParam.getValueAsPercentage();
-        float coveragePercentage = coverageParam.getValueAsPercentage();
+        float opacityPercentage = opacityParam.getPercentageValF();
+        float saturationPercentage = saturationParam.getPercentageValF();
+        float coveragePercentage = coverageParam.getPercentageValF();
 
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = length / workUnit;
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numWorkUnits);
+        var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
 
         for (int i = 0; i < length; i++) {
             // count at the beginning of the loop because of early returns
@@ -174,7 +173,7 @@ public class AddNoise extends ParametrizedFilter {
 
         boolean fullOpacity = opacityParam.getValue() == 100;
         boolean fullCoverage = coverageParam.getValue() == 100;
-        float coveragePercentage = coverageParam.getValueAsPercentage();
+        float coveragePercentage = coverageParam.getPercentageValF();
 
         if (fullOpacity && fullCoverage) {
             return dest;
@@ -184,9 +183,9 @@ public class AddNoise extends ParametrizedFilter {
         int workUnit = 100_000;
         int counter = 0;
         int numWorkUnits = length / workUnit;
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numWorkUnits);
+        var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
 
-        double destWeight = opacityParam.getValueAsPercentage();
+        double destWeight = opacityParam.getPercentageValF();
         double srcWeight = 1.0 - destWeight;
         for (int i = 0; i < length; i++) {
             // count at the beginning of the loop because of early returns

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import javax.swing.*;
 
 /**
  * The model of something that appears in a filter GUI.
- * If that something is a button, then the {@link FilterAction}
+ * If that something is a button, then the {@link FilterButtonModel}
  * sub-interface is used, otherwise the {@link FilterParam}
  */
 public interface FilterSetting {

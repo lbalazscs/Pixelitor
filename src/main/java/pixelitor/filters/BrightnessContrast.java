@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,7 @@ public class BrightnessContrast extends ParametrizedFilter {
             lookupValue = (float) Math.pow(lookupValue, pow) / normalize;
 
             // modify for contrast
-            lookupValue = (contrastFactor * (lookupValue - 128) + 128);
+            lookupValue = contrastFactor * (lookupValue - 128) + 128;
 
             lookup[i] = PixelUtils.clamp((int) lookupValue);
         }
@@ -93,7 +93,7 @@ public class BrightnessContrast extends ParametrizedFilter {
                 g = lookup[g];
                 b = lookup[b];
 
-                destData[i] = a | (r << 16) | (g << 8) | b;
+                destData[i] = a | r << 16 | g << 8 | b;
             }
         }
 

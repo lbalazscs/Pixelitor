@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,15 @@
 package pixelitor.filters.gui;
 
 import javax.swing.*;
-import java.awt.event.ActionListener;
 
 import static java.lang.String.format;
 
 /**
- * Creates a button that runs an action when pushed
+ * A model for a button on a filter GUI, which runs a task
+ * when pushed, before triggering the filter
  */
-public class FilterAction implements FilterSetting {
-    private final ActionListener actionListener;
+public class FilterButtonModel implements FilterSetting {
+    private final Runnable beforeTriggeringTask;
     private final Icon icon;
     private final String toolTipText;
     private final String lookupName; // for AssertJSwing tests
@@ -40,14 +40,14 @@ public class FilterAction implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterAction(String text, ActionListener actionListener, String toolTipText) {
-        this(text, actionListener, null, toolTipText, null);
+    public FilterButtonModel(String text, Runnable beforeTriggeringTask, String toolTipText) {
+        this(text, beforeTriggeringTask, null, toolTipText, null);
     }
 
-    public FilterAction(String text, ActionListener actionListener, Icon icon,
-                        String toolTipText, String lookupName) {
+    public FilterButtonModel(String text, Runnable beforeTriggeringTask, Icon icon,
+                             String toolTipText, String lookupName) {
         this.text = text;
-        this.actionListener = actionListener;
+        this.beforeTriggeringTask = beforeTriggeringTask;
         this.icon = icon;
         this.toolTipText = toolTipText;
         this.lookupName = lookupName;
@@ -55,7 +55,7 @@ public class FilterAction implements FilterSetting {
 
     @Override
     public JComponent createGUI() {
-        button = new OrderedExecutionButton(text, actionListener, adjustmentListener, icon);
+        button = new OrderedExecutionButton(text, beforeTriggeringTask, adjustmentListener, icon);
         if(toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
@@ -99,7 +99,7 @@ public class FilterAction implements FilterSetting {
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        this.adjustmentListener = listener;
+        adjustmentListener = listener;
     }
 
     @Override
@@ -118,8 +118,9 @@ public class FilterAction implements FilterSetting {
      * (typically to trigger a filter preview)
      */
     private static class OrderedExecutionButton extends JButton {
-        private OrderedExecutionButton(String name, ActionListener actionListener,
-                                       ParamAdjustmentListener adjustmentListener, Icon icon) {
+        private OrderedExecutionButton(String name, Runnable beforeTriggeringTask,
+                                       ParamAdjustmentListener adjustmentListener,
+                                       Icon icon) {
             super(name);
 
             if (icon != null) {
@@ -127,7 +128,7 @@ public class FilterAction implements FilterSetting {
             }
 
             addActionListener(e -> {
-                actionListener.actionPerformed(e);
+                beforeTriggeringTask.run();
                 adjustmentListener.paramAdjusted();
             });
         }

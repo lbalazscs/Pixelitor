@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,10 @@ import com.jhlabs.image.PointFilter;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.Shapes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -63,7 +63,7 @@ public class VoronoiFilter extends PointFilter {
 
     public void setAaRes(int aaRes) {
         this.aaRes = aaRes;
-        this.aaRes2 = aaRes * aaRes;
+        aaRes2 = aaRes * aaRes;
     }
 
     @Override
@@ -93,7 +93,6 @@ public class VoronoiFilter extends PointFilter {
         if(radius < 1) {
             radius = 1;
         }
-        double diameter = 2 * radius;
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setColor(Color.BLACK);
@@ -101,8 +100,7 @@ public class VoronoiFilter extends PointFilter {
             g.setXORMode(Color.WHITE);
         }
         for (int i = 0; i < numPoints; i++) {
-            g.fill(new Ellipse2D.Double(xCoords[i] - radius, yCoords[i] - radius,
-                    diameter, diameter));
+            g.fill(Shapes.createCircle(xCoords[i], yCoords[i], radius));
         }
         g.dispose();
     }
@@ -187,7 +185,7 @@ public class VoronoiFilter extends PointFilter {
         g /= aaRes2;
         b /= aaRes2;
 
-        return (0xFF_00_00_00 | (r << 16) | (g << 8) | b);
+        return 0xFF_00_00_00 | r << 16 | g << 8 | b;
     }
 
     public void antiAlias(BufferedImage imgSoFar) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,7 @@ public class PRectangle {
      * Creates a {@link PRectangle} from image-space input
      */
     public static PRectangle fromIm(double x, double y, double w, double h, View view) {
-        Rectangle2D.Double rect = new Rectangle2D.Double(x, y, w, h);
+        Rectangle2D rect = new Rectangle2D.Double(x, y, w, h);
         return fromIm(rect, view);
     }
 

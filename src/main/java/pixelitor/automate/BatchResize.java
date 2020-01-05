@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.automate;
 
-import pixelitor.filters.comp.CompAction;
-import pixelitor.filters.comp.Resize;
+import pixelitor.compactions.Resize;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.IntTextField;
 import pixelitor.gui.utils.ValidatedPanel;
@@ -26,6 +25,8 @@ import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.OutputFormat;
 
 import javax.swing.*;
+
+import static javax.swing.BoxLayout.Y_AXIS;
 
 /**
  * The batch resize functionality
@@ -35,11 +36,11 @@ public class BatchResize {
     }
 
     public static void start() {
-        BatchResizePanel p = new BatchResizePanel();
+        var batchResizePanel = new BatchResizePanel();
         new DialogBuilder()
-                .validatedContent(p)
+                .validatedContent(batchResizePanel)
                 .title("Batch Resize")
-                .okAction(() -> dialogAccepted(p))
+                .okAction(() -> dialogAccepted(batchResizePanel))
                 .show();
     }
 
@@ -49,7 +50,7 @@ public class BatchResize {
         int maxWidth = p.getNewWidth();
         int maxHeight = p.getNewHeight();
 
-        CompAction resizeAction = new Resize(maxWidth, maxHeight, true);
+        var resizeAction = new Resize(maxWidth, maxHeight, true);
         Automate.processEachFile(resizeAction, "Batch Resize...");
     }
 
@@ -62,7 +63,7 @@ public class BatchResize {
         private final IntTextField heightTF;
 
         private BatchResizePanel() {
-            JPanel sizePanel = new JPanel();
+            var sizePanel = new JPanel();
 
             sizePanel.add(new JLabel("Max Width:"));
             widthTF = new IntTextField(300, 5);
@@ -74,7 +75,7 @@ public class BatchResize {
             heightTF.setName("heightTF");
             sizePanel.add(heightTF);
 
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setLayout(new BoxLayout(this, Y_AXIS));
             add(sizePanel);
             openSaveDirsPanel = new OpenSaveDirsPanel(
                     false, OutputFormat.getLastUsed());

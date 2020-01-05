@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,14 +40,14 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     private DeselectEdit oldDeselectEdit;
     private DeselectEdit newDeselectEdit;
 
-    private final AffineTransform canvasTx;
-    private AffineTransform inverseCanvasTx;
+    private final AffineTransform canvasTransform;
+    private AffineTransform inverseCanvasTransform;
     private final boolean reload;
 
     public CompositionReplacedEdit(String name, boolean reload, View view,
                                    Composition oldComp,
                                    Composition newComp,
-                                   AffineTransform canvasTx) {
+                                   AffineTransform canvasTransform) {
         super(name, newComp);
         this.reload = reload;
 
@@ -68,7 +68,7 @@ public class CompositionReplacedEdit extends PixelitorEdit {
         backupCompRef = new SoftReference<>(oldComp);
         oldMaskViewMode = view.getMaskViewMode();
         this.view = view;
-        this.canvasTx = canvasTx;
+        this.canvasTransform = canvasTransform;
 
         assert !oldComp.hasSelection();
     }
@@ -104,18 +104,18 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         assert !newComp.hasSelection();
 
-        if (canvasTx != null) { // there was a transform
-            if (inverseCanvasTx == null) { // first undo
+        if (canvasTransform != null) { // there was a transform
+            if (inverseCanvasTransform == null) { // first undo
                 try {
-                    inverseCanvasTx = canvasTx.createInverse();
+                    inverseCanvasTransform = canvasTransform.createInverse();
                 } catch (NoninvertibleTransformException e) {
-                    inverseCanvasTx = null;
+                    inverseCanvasTransform = null;
                 }
             }
-            if (inverseCanvasTx != null) { // successful inversion
+            if (inverseCanvasTransform != null) { // successful inversion
                 // the path of the composition was restored together with
                 // the old comp, but the tool widgets need updating
-                Tools.imCoordsChanged(comp, inverseCanvasTx);
+                Tools.imCoordsChanged(comp, inverseCanvasTransform);
             }
         }
     }
@@ -147,9 +147,15 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         assert !oldComp.hasSelection();
 
-        if (canvasTx != null) { // there was a transform
-            Tools.imCoordsChanged(comp, canvasTx);
+        if (canvasTransform != null) { // there was a transform
+            Tools.imCoordsChanged(comp, canvasTransform);
         }
+    }
+
+    @Override
+    public boolean makesDirty() {
+        // reloading should not result in a dirty comp
+        return !reload;
     }
 
     @Override
@@ -158,9 +164,5 @@ public class CompositionReplacedEdit extends PixelitorEdit {
 
         backupCompRef = null;
         view = null;
-    }
-
-    public boolean isReload() {
-        return reload;
     }
 }

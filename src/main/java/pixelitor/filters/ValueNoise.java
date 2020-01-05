@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,8 @@ package pixelitor.filters;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
@@ -33,7 +31,8 @@ import java.util.concurrent.Future;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Renders value noise
@@ -53,8 +52,8 @@ public class ValueNoise extends ParametrizedFilter {
     private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
 
-    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_OPACITY);
-    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_OPACITY);
+    private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
 
     public ValueNoise() {
         super(ShowOriginal.NO);
@@ -64,7 +63,7 @@ public class ValueNoise extends ParametrizedFilter {
                 details,
                 color1,
                 color2
-        ).withAction(new ReseedNoiseFilterAction(e -> reseed()));
+        ).withAction(reseedByCalling(ValueNoise::reseed));
     }
 
     @Override
@@ -88,7 +87,7 @@ public class ValueNoise extends ParametrizedFilter {
         float persistence = 0.6f;
         float amplitude = 1.0f;
 
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, height);
+        var pt = new StatusBarProgressTracker(NAME, height);
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
@@ -97,7 +96,7 @@ public class ValueNoise extends ParametrizedFilter {
                     width, frequency, persistence, amplitude, finalY);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
 
         pt.finished();
 

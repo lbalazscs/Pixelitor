@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -175,7 +175,7 @@ public abstract class Layer implements Serializable {
         }
 
         if (addToHistory) {
-            History.addEdit(
+            History.add(
                     new LayerVisibilityChangeEdit(comp, this, newVisibility));
         }
     }
@@ -236,7 +236,7 @@ public abstract class Layer implements Serializable {
         }
 
         if (addToHistory) {
-            History.addEdit(new LayerOpacityEdit(this, opacity));
+            History.add(new LayerOpacityEdit(this, opacity));
         }
 
         opacity = newOpacity;
@@ -252,7 +252,7 @@ public abstract class Layer implements Serializable {
     public void setBlendingMode(BlendingMode mode, boolean updateGUI,
                                 boolean addToHistory, boolean updateImage) {
         if (addToHistory) {
-            History.addEdit(new LayerBlendingEdit(this, blendingMode));
+            History.add(new LayerBlendingEdit(this, blendingMode));
         }
 
         blendingMode = mode;
@@ -277,7 +277,7 @@ public abstract class Layer implements Serializable {
         ui.get().setLayerName(newName);
 
         if (addToHistory) {
-            History.addEdit(new LayerRenameEdit(this, previousName, name));
+            History.add(new LayerRenameEdit(this, previousName, name));
         }
     }
 
@@ -316,7 +316,7 @@ public abstract class Layer implements Serializable {
      */
     public PixelitorEdit addHidingMask(Selection sel, boolean createEdit) {
         if (mask == null) {
-            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.getBWImage(this, canvas, sel);
+            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, canvas, sel);
             return addImageAsMask(bwMask, false, "Add Layer Mask",
                     false, false, createEdit);
         } else {
@@ -351,14 +351,14 @@ public abstract class Layer implements Serializable {
                     format("The layer \"%s\" already has a layer mask.", getName()));
             return;
         }
-        Selection selection = comp.getSelection();
+        var selection = comp.getSelection();
         if (addType.missingSelection(selection)) {
             Messages.showInfo("No selection",
                     format("The composition \"%s\" has no selection.", comp.getName()));
             return;
         }
 
-        BufferedImage bwMask = addType.getBWImage(this, canvas, selection);
+        BufferedImage bwMask = addType.createBWImage(this, canvas, selection);
 
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();
@@ -378,8 +378,8 @@ public abstract class Layer implements Serializable {
         int maskTy = 0;
         if (inheritTranslation && this instanceof ContentLayer) {
             ContentLayer contentLayer = (ContentLayer) this;
-            maskTx = contentLayer.getTX();
-            maskTy = contentLayer.getTY();
+            maskTx = contentLayer.getTx();
+            maskTy = contentLayer.getTy();
         }
 
         // Get the layer button reference before creating the mask.
@@ -409,15 +409,15 @@ public abstract class Layer implements Serializable {
         if (deselect) {
             Shape backupShape = comp.getSelectionShape();
             comp.deselect(false);
-            if (backupShape != null) { // TODO on Mac Random GUI test we can get null here
+            if (backupShape != null) {
                 DeselectEdit deselectEdit = new DeselectEdit(
-                        comp, backupShape, "nested deselect");
+                        comp, backupShape);
                 edit = new MultiEdit(editName, comp, edit, deselectEdit);
             }
         }
 
         if (addEdit) {
-            History.addEdit(edit);
+            History.add(edit);
             MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
             return null;
         } else {
@@ -458,7 +458,7 @@ public abstract class Layer implements Serializable {
         setMaskEditing(false);
 
         if (addToHistory) {
-            History.addEdit(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
+            History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
 
         Layers.maskDeletedFrom(this);
@@ -511,11 +511,11 @@ public abstract class Layer implements Serializable {
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
         mig.drawImage(mask.getTransparencyImage(),
-                mask.getTX(), mask.getTY(), null);
+                mask.getTx(), mask.getTy(), null);
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
-//            g.drawImage(maskedImage, getTX(), getTY(), null);
+//            g.drawImage(maskedImage, getTx(), getTy(), null);
         setupDrawingComposite(g, firstVisibleLayer);
         g.drawImage(maskedImage, 0, 0, null);
     }
@@ -682,7 +682,7 @@ public abstract class Layer implements Serializable {
         notifyLayerChangeListeners();
 
         if (addToHistory) {
-            History.addEdit(new EnableLayerMaskEdit(comp, this));
+            History.add(new EnableLayerMaskEdit(comp, this));
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,9 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Drawable;
-import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.debug.DataBufferNode;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.debug.DebugUtils;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -122,7 +121,7 @@ public class PartialImageEdit extends FadeableEdit {
         String className = raster.getClass().getSimpleName();
         DataBuffer dataBuffer = raster.getDataBuffer();
         int dataType = dataBuffer.getDataType();
-        String typeAsString = DataBufferNode.getDataBufferTypeDescription(dataType);
+        String typeAsString = DebugUtils.dateBufferTypeAsString(dataType);
         int numBanks = dataBuffer.getNumBanks();
         int numBands = raster.getNumBands();
         int numDataElements = raster.getNumDataElements();
@@ -164,11 +163,11 @@ public class PartialImageEdit extends FadeableEdit {
         BufferedImage previousImage = ImageUtils.copyImage(fullImage);
         previousImage.setData(backupRaster);
 
-        Selection selection = dr.getComp().getSelection();
+        var selection = dr.getComp().getSelection();
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             previousImage = ImageUtils.getSelectionSizedPartFrom(
-                    previousImage, selection, dr.getTX(), dr.getTY());
+                    previousImage, selection, dr.getTx(), dr.getTy());
         }
 
         return previousImage;
@@ -176,7 +175,7 @@ public class PartialImageEdit extends FadeableEdit {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         int width = -1;
         int height = -1;
@@ -186,8 +185,8 @@ public class PartialImageEdit extends FadeableEdit {
             height = backupRaster.getHeight();
         }
 
-        node.addInt("Backup Image Width", width);
-        node.addInt("Backup Image Height", height);
+        node.addInt("backup image width", width);
+        node.addInt("backup image height", height);
 
         return node;
     }

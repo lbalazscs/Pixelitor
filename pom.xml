@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 Laszlo Balazs-Csiki and Contributors
+  ~ Copyright 2020 Laszlo Balazs-Csiki and Contributors
   ~
   ~ This file is part of Pixelitor. Pixelitor is free software: you
   ~ can redistribute it and/or modify it under the terms of the GNU
@@ -15,7 +15,7 @@
   ~ along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<!-- Tested with Maven version 3.2.5 -->
+<!-- Tested with Maven version 3.6.3 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -42,17 +42,8 @@
                     <target>11</target>
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
-<!--                        <arg>-Xlint:deprecation</arg>-->
-<!--                        <arg>-XDcompilePolicy=simple</arg>-->
-<!--                        <arg>-Xplugin:ErrorProne</arg>-->
+                        <arg>-Xlint:deprecation</arg>
                     </compilerArgs>
-<!--                    <annotationProcessorPaths>-->
-<!--                        <path>-->
-<!--                            <groupId>com.google.errorprone</groupId>-->
-<!--                            <artifactId>error_prone_core</artifactId>-->
-<!--                            <version>2.3.4</version>-->
-<!--                        </path>-->
-<!--                    </annotationProcessorPaths>-->
                 </configuration>
             </plugin>
 
@@ -137,7 +128,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.28.2</version>
+            <version>3.2.4</version>
             <scope>test</scope>
         </dependency>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,10 +20,10 @@ package pixelitor.tools.shapes;
 import com.jhlabs.awt.WobbleStroke;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
@@ -49,6 +49,7 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
+import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
@@ -97,8 +98,8 @@ public class StyledShape implements Cloneable {
         setStrokePaintType(settings.getSelectedStrokePaint());
         setStroke(settings.getStroke());
         setEffects(settings.getEffects());
-        this.strokeSettings = settings.getStrokeSettings();
-        this.insideBox = false;
+        strokeSettings = settings.getStrokeSettings();
+        insideBox = false;
 
         fgColor = getFGColor();
         bgColor = getBGColor();
@@ -132,7 +133,7 @@ public class StyledShape implements Cloneable {
                 g.fill(shape);
                 fillPaintType.finish(g);
             } else if (!hasStroke()) {
-                // Special case: an open shape cannot be filled,
+                // Special case: an open shape can't be filled,
                 // it can be only stroked, even if stroke is disabled.
                 // So use the default stroke and the fill paint.
                 g.setStroke(STROKE_FOR_OPEN_SHAPES);
@@ -204,11 +205,11 @@ public class StyledShape implements Cloneable {
         }
         ImDrag imDrag = userDrag.toImDrag();
 
-        this.origImDrag = imDrag;
+        origImDrag = imDrag;
         unTransformedShape = shapeType.createShape(imDrag);
 
         // since there is no transform box yet
-        this.transformedImDrag = imDrag;
+        transformedImDrag = imDrag;
         shape = unTransformedShape;
     }
 
@@ -323,7 +324,7 @@ public class StyledShape implements Cloneable {
         }
 
         PartialImageEdit imageEdit = null;
-        Drawable dr = comp.getActiveDrawableOrNull();
+        Drawable dr = comp.getActiveDrawable();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
             int thickness = calcThickness(settings);
@@ -332,14 +333,14 @@ public class StyledShape implements Cloneable {
             if (!shapeBounds.isEmpty()) {
                 BufferedImage originalImage = dr.getImage();
                 imageEdit = History.createPartialImageEdit(
-                    shapeBounds, originalImage, dr, false, "Shape");
+                        shapeBounds, originalImage, dr, false, "Shape");
             }
         }
 
         // must be added even if there is no image edit
         // to manage the shapes tool state changes
-        History.addEdit(new FinalizeShapeEdit(comp,
-            imageEdit, transformBox, this));
+        History.add(new FinalizeShapeEdit(comp,
+                imageEdit, transformBox, this));
 
         if (imageEdit != null) {
             paintOnDrawable(dr);
@@ -352,14 +353,14 @@ public class StyledShape implements Cloneable {
     }
 
     private void paintOnDrawable(Drawable dr) {
-        int tx = -dr.getTX();
-        int ty = -dr.getTY();
+        int tx = -dr.getTx();
+        int ty = -dr.getTy();
 
         BufferedImage bi = dr.getImage();
         Graphics2D g2 = bi.createGraphics();
         g2.translate(tx, ty);
 
-        Composition comp = dr.getComp();
+        var comp = dr.getComp();
         comp.applySelectionClipping(g2);
 
         paint(g2);
@@ -437,8 +438,8 @@ public class StyledShape implements Cloneable {
                 throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
-        Composition comp = OpenComps.getActiveCompOrNull();
-        History.addEdit(new StyledShapeEdit(editName, comp, backup));
+        var comp = OpenImages.getActiveComp();
+        History.add(new StyledShapeEdit(editName, comp, backup));
         comp.imageChanged();
     }
 
@@ -496,13 +497,13 @@ public class StyledShape implements Cloneable {
     }
 
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("StyledShape", this);
-        node.addString("ShapeType", shapeType.toString());
+        var node = new DebugNode("styled shape", this);
+        node.addString("type", shapeType.toString());
         return node;
     }
 
     @Override
     public String toString() {
-        return String.format("StyledShape, width = %.2f", strokeSettings.getWidth());
+        return format("StyledShape, width = %.2f", strokeSettings.getWidth());
     }
 }

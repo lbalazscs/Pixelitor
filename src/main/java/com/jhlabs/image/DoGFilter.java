@@ -113,7 +113,7 @@ public class DoGFilter extends AbstractBufferedImageOp {
         }
         workUnits += (singleBlurUnit / 2); // subtract
         if (doNormalize()) {
-            workUnits += singleBlurUnit * 0.16; // normalize
+            workUnits = (int) (workUnits + singleBlurUnit * 0.16); // normalize
         }
         pt = createProgressTracker(workUnits);
 

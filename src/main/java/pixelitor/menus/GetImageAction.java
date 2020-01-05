@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
@@ -51,7 +51,7 @@ public abstract class GetImageAction extends AbstractAction {
         assert name != null;
 
         this.name = name;
-        this.menuName = hasDialog ? name + "..." : name;
+        menuName = hasDialog ? name + "..." : name;
         setActionName(menuName);
 
         this.allowMasks = allowMasks;
@@ -65,7 +65,7 @@ public abstract class GetImageAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            OpenComps.onActiveLayer(this::startOnLayer);
+            OpenImages.onActiveLayer(this::startOnLayer);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -103,6 +103,6 @@ public abstract class GetImageAction extends AbstractAction {
     }
 
     public void setActionName(String newName) {
-        putValue(AbstractAction.NAME, newName);
+        putValue(Action.NAME, newName);
     }
 }

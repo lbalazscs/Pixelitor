@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,8 +24,8 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.AlphaComposite;
@@ -33,8 +33,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.RadialGradientPaint;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -96,14 +94,14 @@ public class RandomSpheres extends ParametrizedFilter {
         int width = dest.getWidth();
         int height = dest.getHeight();
         float r = radius.getValueAsFloat();
-        int numCircles = (int) (width * height * density.getValueAsPercentage() / (r * r));
+        int numCircles = (int) (width * height * density.getPercentageValD() / (r * r));
 
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numCircles);
+        var pt = new StatusBarProgressTracker(NAME, numCircles);
 
         Random rand = ReseedSupport.reInitialize();
 
         Graphics2D g = dest.createGraphics();
-        g.setComposite(AlphaComposite.SrcOver.derive(opacity.getValueAsPercentage()));
+        g.setComposite(AlphaComposite.SrcOver.derive(opacity.getPercentageValF()));
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         int colorSrc = colorSource.getValue();
@@ -111,7 +109,6 @@ public class RandomSpheres extends ParametrizedFilter {
         double angle = highlightAngleSelector.getValueInRadians();
         angle += Math.PI;
 
-        float diameter = 2 * r;
         double elevation = highlightElevationSelector.getValueInRadians();
         int centerShiftX = (int) (r * Math.cos(angle) * Math.cos(elevation));
         int centerShiftY = (int) (r * Math.sin(angle) * Math.cos(elevation));
@@ -157,12 +154,8 @@ public class RandomSpheres extends ParametrizedFilter {
                 g.setColor(c);
             }
 
-            float drawX = x - r;
-            float drawY = y - r;
-
             // render the spheres
-            Shape circle = new Ellipse2D.Float(drawX, drawY, diameter, diameter);
-            g.fill(circle);
+            g.fill(Shapes.createCircle(x, y, r));
 
             pt.unitDone();
         }

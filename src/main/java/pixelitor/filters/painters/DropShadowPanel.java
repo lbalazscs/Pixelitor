@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,16 +42,16 @@ public class DropShadowPanel extends EffectPanel {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
-        SliderSpinner distanceSlider = SliderSpinner.simpleFrom(distanceParam);
-        gbh.addLabelWithControl("Distance:", distanceSlider);
+        var distanceSlider = SliderSpinner.from(distanceParam);
+        gbh.addLabelAndControl("Distance:", distanceSlider);
 
         angleParam = new AngleParam("Angle", defaultAngle);
-        AngleUI angleSelector = new AngleUI(angleParam);
-        gbh.addLabelWithControl("Angle:", angleSelector);
+        var angleUI = new AngleUI(angleParam);
+        gbh.addLabelAndControl("Angle:", angleUI);
 
         spreadParam = new RangeParam("Spread:", 1, defaultSpread, 100);
-        SliderSpinner spreadSlider = SliderSpinner.simpleFrom(spreadParam);
-        gbh.addLabelWithControl("Spread:", spreadSlider);
+        var spreadSlider = SliderSpinner.from(spreadParam);
+        gbh.addLabelAndControl("Spread:", spreadSlider);
 
         ChangeListener changeListener = e -> updateDefaultButtonIcon();
         distanceParam.addChangeListener(changeListener);
@@ -73,7 +73,6 @@ public class DropShadowPanel extends EffectPanel {
 
         return Utils.offsetFromPolar(distance, angle);
     }
-
 
     @Override
     public int getBrushWidth() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,11 +74,11 @@ public class RandomFilterSource {
         return filter;
     }
 
-    public Filter getRandom() {
+    public Filter choose() {
         Filter randomFilter = FilterUtils.getRandomFilter(filter ->
-            filter != lastFilter
-                && !(filter instanceof Fade)
-                && !(filter instanceof RandomFilter));
+                filter != lastFilter
+                        && !(filter instanceof Fade)
+                        && !(filter instanceof RandomFilter));
 
         if (lastFilter != null) { // not the first call
             previousIndex++;

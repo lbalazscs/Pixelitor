@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,9 @@ import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.io.File;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.WEST;
 import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
 
 /**
@@ -47,20 +50,20 @@ public class SingleDirChooser extends ValidatedPanel {
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
 
-        boolean addOutputChooser = (outputFormat != null);
+        boolean addOutputChooser = outputFormat != null;
         if (addOutputChooser) {
             setLayout(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(this);
-            gbh.addLabelWithTwoControls(label, dirTF, browseButton);
+            var gbh = new GridBagHelper(this);
+            gbh.addLabelAndTwoControls(label, dirTF, browseButton);
 
             outputFormatSelector = new OutputFormatSelector(outputFormat);
 
-            gbh.addLabelWithControlNoStretch("Output Format:", outputFormatSelector);
+            gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
         } else {
             setLayout(new BorderLayout());
-            add(new JLabel(label), BorderLayout.WEST);
-            add(dirTF, BorderLayout.CENTER);
-            add(browseButton, BorderLayout.EAST);
+            add(new JLabel(label), WEST);
+            add(dirTF, CENTER);
+            add(browseButton, EAST);
         }
     }
 
@@ -83,13 +86,13 @@ public class SingleDirChooser extends ValidatedPanel {
             if (exists) {
                 return ValidationResult.error(
                         "The selected path "
-                        + selectedDir.getAbsolutePath()
-                        + " is not a folder.");
+                                + selectedDir.getAbsolutePath()
+                                + " is not a folder.");
             } else {
                 return ValidationResult.error(
                         "The selected folder "
-                        + selectedDir.getAbsolutePath()
-                        + " does not exist.");
+                                + selectedDir.getAbsolutePath()
+                                + " does not exist.");
             }
         }
     }
@@ -103,7 +106,7 @@ public class SingleDirChooser extends ValidatedPanel {
      * Returns true if a selection was made, false if the operation was cancelled.
      */
     public static boolean selectOutputDir(OutputFormat defaultFormat) {
-        SingleDirChooser chooserPanel = new SingleDirChooser("Output Folder:",
+        var chooserPanel = new SingleDirChooser("Output Folder:",
                 Dirs.getLastSave().getAbsolutePath(),
                 "Select Output Folder", defaultFormat);
 
@@ -119,8 +122,7 @@ public class SingleDirChooser extends ValidatedPanel {
                 .show();
 
         if (defaultFormat != null) {
-            OutputFormat selectedFormat = chooserPanel.getSelectedFormat();
-            OutputFormat.setLastUsed(selectedFormat);
+            OutputFormat.setLastUsed(chooserPanel.getSelectedFormat());
         }
 
         return selectionWasMade[0];

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
@@ -104,23 +103,23 @@ public class TranslatedTextPainter extends TextPainter {
      */
     @Override
     protected void doPaint(Graphics2D g, Object component, int canvasWidth, int canvasHeight) {
-        AffineTransform origTX = g.getTransform();
+        var origTransform = g.getTransform();
         String text = getText();
 
-        FontMetrics metrics = setupGraphicsTX(g, canvasWidth, canvasHeight, text);
+        FontMetrics metrics = setupGraphics(g, canvasWidth, canvasHeight, text);
 
         Paint paint = getFillPaint();
         if (paint != null) {
             g.setPaint(paint);
         }
 
-        g.drawString(text, (float) 0, (float) metrics.getAscent());
+        g.drawString(text, 0, (float) metrics.getAscent());
 
         // paint the effects on an explicitly transformed shape
         // instead of simply painting them on the transformed graphics
         // so that the direction of the drop shadow effect does not rotate
-        AffineTransform tx = g.getTransform();
-        g.setTransform(origTX);
+        var tx = g.getTransform();
+        g.setTransform(origTransform);
 
         AreaEffect[] effects = getAreaEffects();
         if (effects.length != 0) {
@@ -135,7 +134,7 @@ public class TranslatedTextPainter extends TextPainter {
 
     // sets up the given Graphics2D so that it is usable
     // from both doPaint and getTextShape
-    private FontMetrics setupGraphicsTX(Graphics2D g, int canvasWidth, int canvasHeight, String text) {
+    private FontMetrics setupGraphics(Graphics2D g, int canvasWidth, int canvasHeight, String text) {
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
         g.setFont(font);
@@ -164,19 +163,19 @@ public class TranslatedTextPainter extends TextPainter {
         // create this image just to get a Graphics2D somehow...
         BufferedImage tmp = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = tmp.createGraphics();
-        AffineTransform imgOrigTX = g2.getTransform();
+        var imgOrigTransform = g2.getTransform();
 
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
-        setupGraphicsTX(g2, canvasWidth, canvasHeight, getText());
-        AffineTransform tx = g2.getTransform();
-        g2.setTransform(imgOrigTX); // provideShape must be called with untransformed Graphics
+        setupGraphics(g2, canvasWidth, canvasHeight, getText());
+        var at = g2.getTransform();
+        g2.setTransform(imgOrigTransform); // provideShape must be called with untransformed Graphics
         Shape shape = provideShape(g2, null, canvasWidth, canvasHeight);
 
         g2.dispose();
         tmp.flush();
 
-        return tx.createTransformedShape(shape);
+        return at.createTransformedShape(shape);
     }
 
     @Override
@@ -198,11 +197,11 @@ public class TranslatedTextPainter extends TextPainter {
         this.rotation = rotation;
     }
 
-    public int getTX() {
+    public int getTx() {
         return translationX;
     }
 
-    public int getTY() {
+    public int getTy() {
         return translationY;
     }
 }

@@ -185,7 +185,7 @@ public class SmearFilter extends WholeImageFilter {
             };
             futures.add(ThreadPool.submit(r));
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
     }
 
     private void renderOneLine(int width, int height, int[] inPixels, int[] outPixels, float sin, float cos) {
@@ -278,7 +278,7 @@ public class SmearFilter extends WholeImageFilter {
             Runnable r = () -> renderOneShape(width, height, inPixels, outPixels, radius, radius2);
             futures[i] = ThreadPool.submit(r);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
     }
 
     private void renderOneShape(int width, int height, int[] inPixels, int[] outPixels, int radius, int radius2) {

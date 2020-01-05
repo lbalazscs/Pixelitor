@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,8 +72,7 @@ public class BrowseFilesSupport {
 
         chooser.setDialogTitle(fileChooserTitle);
         chooser.showOpenDialog(PixelitorWindow.getInstance());
-        File selectedFile = chooser.getSelectedFile();
-        fillFileNameTextField(selectedFile);
+        fillFileNameTextField(chooser.getSelectedFile());
     }
 
     private JFileChooser createChooserForDirectorySelection() {
@@ -93,7 +92,7 @@ public class BrowseFilesSupport {
             selectorCurrentDir = f.getParentFile();
         }
 
-        JFileChooser chooser = new JFileChooser(selectorCurrentDir);
+        var chooser = new JFileChooser(selectorCurrentDir);
         chooser.setApproveButtonText("Select File");
         if (fileFilter != null) {
             // First remove the All Files option...
@@ -108,20 +107,18 @@ public class BrowseFilesSupport {
 
     private void fillFileNameTextField(File selectedFile) {
         if (selectedFile != null) {
-            String fileName = selectedFile.toString();
+            String filePath = selectedFile.toString();
 
             if (mode == FILE) {
-                boolean theUserEnteredNoExtension = !FileUtils
-                    .findExtension(selectedFile.getName())
-                        .isPresent();
-                if (theUserEnteredNoExtension) {
+                boolean noExtGivenByUser = !FileUtils.hasExtension(selectedFile.getName());
+                if (noExtGivenByUser) {
                     if (fileFilter != null) {
-                        fileName = fileName + '.' + fileFilter.getExtensions()[0];
+                        filePath = filePath + '.' + fileFilter.getExtensions()[0];
                     }
                 }
             }
 
-            nameTF.setText(fileName);
+            nameTF.setText(filePath);
         }
     }
 

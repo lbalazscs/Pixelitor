@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.levels.RGBLookup;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
 import static java.awt.Color.BLUE;
@@ -74,14 +73,14 @@ public class ColorBalance extends ParametrizedFilter {
         float mg = magentaGreen.getValueAsFloat();
         float yb = yellowBlue.getValueAsFloat();
 
-        if ((cr == 0) && (mg == 0) && (yb == 0)) {
+        if (cr == 0 && mg == 0 && yb == 0) {
             return src;
         }
 
-        RGBLookup rgbLookup = new LookupHelper(cr, mg, yb, affect.getValue())
+        var rgbLookup = new LookupHelper(cr, mg, yb, affect.getValue())
                 .getLookup();
 
-        BufferedImageOp filterOp = new FastLookupOp(
+        var filterOp = new FastLookupOp(
                 (ShortLookupTable) rgbLookup.getLookupOp());
 
         filterOp.filter(src, dest);
@@ -120,15 +119,15 @@ public class ColorBalance extends ParametrizedFilter {
 
         private void setupMappingsForTotallyAffected() {
             for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + cyanRed - (magentaGreen / 2) - (yellowBlue / 2));
+                short r = (short) (i + cyanRed - magentaGreen / 2 - yellowBlue / 2);
                 r = PixelUtils.clamp(r);
                 redMapping[i] = r;
 
-                short g = (short) (i + magentaGreen - (cyanRed / 2) - (yellowBlue / 2));
+                short g = (short) (i + magentaGreen - cyanRed / 2 - yellowBlue / 2);
                 g = PixelUtils.clamp(g);
                 greenMapping[i] = g;
 
-                short b = (short) (i + yellowBlue - (magentaGreen / 2) - (cyanRed / 2));
+                short b = (short) (i + yellowBlue - magentaGreen / 2 - cyanRed / 2);
                 b = PixelUtils.clamp(b);
                 blueMapping[i] = b;
             }
@@ -137,15 +136,15 @@ public class ColorBalance extends ParametrizedFilter {
         private void setupMappingsForPartiallyAffected() {
             float[] affectFactor = calculateAffectFactor(affect);
             for (short i = 0; i < LUT_TABLE_SIZE; i++) {
-                short r = (short) (i + affectFactor[i] * (cyanRed - (magentaGreen / 2) - (yellowBlue / 2)));
+                short r = (short) (i + affectFactor[i] * (cyanRed - magentaGreen / 2 - yellowBlue / 2));
                 r = PixelUtils.clamp(r);
                 redMapping[i] = r;
 
-                short g = (short) (i + affectFactor[i] * (magentaGreen - (cyanRed / 2) - (yellowBlue / 2)));
+                short g = (short) (i + affectFactor[i] * (magentaGreen - cyanRed / 2 - yellowBlue / 2));
                 g = PixelUtils.clamp(g);
                 greenMapping[i] = g;
 
-                short b = (short) (i + affectFactor[i] * (yellowBlue - (magentaGreen / 2) - (cyanRed / 2)));
+                short b = (short) (i + affectFactor[i] * (yellowBlue - magentaGreen / 2 - cyanRed / 2));
                 b = PixelUtils.clamp(b);
                 blueMapping[i] = b;
             }

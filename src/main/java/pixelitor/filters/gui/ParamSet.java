@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  */
 public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
-    private final List<FilterAction> actionList = new ArrayList<>(3);
+    private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable beforeResetAction;
 
@@ -51,18 +51,18 @@ public class ParamSet {
         paramList.addAll(params);
     }
 
-    public ParamSet withActions(FilterAction... actions) {
+    public ParamSet withActions(FilterButtonModel... actions) {
         actionList.addAll(Arrays.asList(actions));
         return this;
     }
 
-    public ParamSet withAction(FilterAction action) {
+    public ParamSet withAction(FilterButtonModel action) {
         actionList.add(action);
         return this;
     }
 
-    public ParamSet addCommonActions(FilterAction... actions) {
-        for (FilterAction action : actions) {
+    public ParamSet addCommonActions(FilterButtonModel... actions) {
+        for (FilterButtonModel action : actions) {
             if (action != null) {
                 actionList.add(action);
             }
@@ -91,8 +91,8 @@ public class ParamSet {
     }
 
     private void addRandomizeAction() {
-        FilterAction randomizeAction = new FilterAction("Randomize Settings",
-                e -> randomize(),
+        var randomizeAction = new FilterButtonModel("Randomize Settings",
+                this::randomize,
                 Icons.getDiceIcon(),
                 "Randomize the settings for this filter.",
                 "randomize");
@@ -100,8 +100,8 @@ public class ParamSet {
     }
 
     private void addResetAllAction() {
-        FilterAction resetAllAction = new FilterAction("Reset All",
-                e -> reset(),
+        var resetAllAction = new FilterButtonModel("Reset All",
+                this::reset,
                 Icons.getWestArrowIcon(),
                 "Reset all settings to their default values.",
                 "resetAll");
@@ -112,7 +112,7 @@ public class ParamSet {
         paramList.add(index, param);
     }
 
-    public void insertAction(FilterAction action, int index) {
+    public void insertAction(FilterButtonModel action, int index) {
         actionList.add(index, action);
     }
 
@@ -150,7 +150,7 @@ public class ParamSet {
         for (FilterParam param : paramList) {
             param.setAdjustmentListener(listener);
         }
-        for (FilterAction action : actionList) {
+        for (FilterButtonModel action : actionList) {
             action.setAdjustmentListener(listener);
         }
     }
@@ -161,17 +161,17 @@ public class ParamSet {
         }
     }
 
-    public ParamSetState copyState() {
-        return new ParamSetState(this);
+    public CompositeState copyState() {
+        return new CompositeState(this);
     }
 
-    public void setState(ParamSetState newState) {
-        Iterator<ParamState> newStateIterator = newState.iterator();
+    public void setState(CompositeState newStateSet) {
+        Iterator<ParamState<?>> newStates = newStateSet.iterator();
         paramList.stream()
                 .filter(FilterParam::canBeAnimated)
                 .forEach(param -> {
-                    ParamState newParamState = newStateIterator.next();
-                    param.setState(newParamState);
+                    ParamState<?> newState = newStates.next();
+                    param.setState(newState);
                 });
     }
 
@@ -187,7 +187,7 @@ public class ParamSet {
         for (FilterParam param : paramList) {
             param.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
-        for (FilterAction action : actionList) {
+        for (FilterButtonModel action : actionList) {
             action.setEnabled(!b, FINAL_ANIMATION_SETTING);
         }
     }
@@ -196,7 +196,7 @@ public class ParamSet {
         return Utils.anyMatch(paramList, p -> p instanceof GradientParam);
     }
 
-    public List<FilterAction> getActions() {
+    public List<FilterButtonModel> getActions() {
         return actionList;
     }
 
@@ -208,7 +208,7 @@ public class ParamSet {
     public String toString() {
         String s = "ParamSet[";
         for (FilterParam param : paramList) {
-            s += ("\n    " + param.toString());
+            s += ("\n    " + param);
         }
         s += "\n]";
         return s;

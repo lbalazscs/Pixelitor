@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -87,22 +87,22 @@ public class SmudgeBrush extends CopyBrush {
         g.dispose();
 
         firstUsageInStroke = false;
-        super.debugImage();
+        debugImage();
     }
 
     @Override
     public void putDab(PPoint p, double theta) {
-        AffineTransform transform = AffineTransform.getTranslateInstance(
+        var transform = AffineTransform.getTranslateInstance(
                 p.getImX() - radius,
                 p.getImY() - radius
         );
 
         // TODO SrcOver allows to smudge into transparent areas, but transparency
-        // cannot be smudged into non-transparent areas
+        // can't be smudged into non-transparent areas
         // DstOver allows only smudging into transparent
         targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
 
-// SrcAtop: cannot smudge into transparent areas
+// SrcAtop: can't smudge into transparent areas
 //        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
 
 //        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
@@ -111,7 +111,7 @@ public class SmudgeBrush extends CopyBrush {
 
         last = p;
 
-        updateComp(p);
+        repaintComp(p);
     }
 
     public void setFingerPainting(boolean fingerPainting) {
@@ -120,16 +120,16 @@ public class SmudgeBrush extends CopyBrush {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         if(last != null) {
-            node.addDouble("lastImX", last.getImX());
-            node.addDouble("lastImY", last.getImY());
+            node.addDouble("last x", last.getImX());
+            node.addDouble("last y", last.getImY());
         } else {
             node.addString("last", "null");
         }
         node.addFloat("strength", strength);
-        node.addBoolean("firstUsageInStroke", firstUsageInStroke);
+        node.addBoolean("first usage in stroke", firstUsageInStroke);
 
         return node;
     }

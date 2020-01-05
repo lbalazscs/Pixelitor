@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.history.PixelitorEdit;
 import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.PathNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -64,9 +64,9 @@ public class AddAnchorPointEdit extends PixelitorEdit {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.add(new PathNode(subPath.getPath()));
+        node.add(DebugNodes.createPathNode(subPath.getPath()));
 
         return node;
     }

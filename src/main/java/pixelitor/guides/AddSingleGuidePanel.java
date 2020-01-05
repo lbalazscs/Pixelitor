@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.guides;
 
-import pixelitor.Canvas;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
@@ -27,6 +26,8 @@ import pixelitor.gui.utils.GUIUtils;
 import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * The GUI for adding a single (horizontal or vertical) guide
@@ -41,10 +42,10 @@ public class AddSingleGuidePanel extends JPanel {
         this.builder = builder;
         this.horizontal = horizontal;
 
-        Canvas canvas = builder.getCanvas();
+        var canvas = builder.getCanvas();
         int maxSize = horizontal ? canvas.getImWidth() : canvas.getImHeight();
         percents = new RangeParam("Position %", 0, 50, 100);
-        RangeParam pixels = new RangeParam("Position Pixels", 0, maxSize / 2, maxSize);
+        var pixels = new RangeParam("Position Pixels", 0, maxSize / 2, maxSize);
         percents.linkWith(pixels, maxSize / 100.0);
 
         BooleanParam clearExisting = builder.getClearExisting();
@@ -63,13 +64,13 @@ public class AddSingleGuidePanel extends JPanel {
     }
 
     private void setup(Guides guides) {
-        float percentage = percents.getValueAsPercentage();
+        float percentage = percents.getPercentageValF();
         if (horizontal) {
             guides.addHorRelative(percentage);
-            guides.setName(String.format("horizontal at %.2f", percentage));
+            guides.setName(format("horizontal at %.2f", percentage));
         } else {
             guides.addVerRelative(percentage);
-            guides.setName(String.format("vertical at %.2f", percentage));
+            guides.setName(format("vertical at %.2f", percentage));
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.OpenImages;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 
@@ -27,6 +27,10 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
+
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
+
 
 /**
  * A GUI for parametrized filters
@@ -70,9 +74,9 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         JPanel filterActionsPanel = createFilterActionsPanel(
                 params.getActions(), addShowOriginal, 3);
 
-        this.setLayout(new BorderLayout());
-        this.add(filterParamsPanel, BorderLayout.CENTER);
-        this.add(filterActionsPanel, BorderLayout.SOUTH);
+        setLayout(new BorderLayout());
+        add(filterParamsPanel, CENTER);
+        add(filterActionsPanel, SOUTH);
     }
 
     /**
@@ -82,7 +86,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         return GUIUtils.arrangeParamsVertically(paramList);
     }
 
-    protected JPanel createFilterActionsPanel(List<FilterAction> actionList,
+    protected JPanel createFilterActionsPanel(List<FilterButtonModel> actionList,
                                               ShowOriginal addShowOriginal,
                                               int maxControlsInRow) {
         int numControls = actionList.size();
@@ -92,7 +96,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         }
         JPanel faPanel;
 
-        if(numControls <= maxControlsInRow) {
+        if (numControls <= maxControlsInRow) {
             faPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         } else {
             int cols = (numControls + 1) / 2;
@@ -101,7 +105,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
         if (addShowOriginal.isYes()) {
             faPanel.add(showOriginalCB);
         }
-        for (FilterAction action : actionList) {
+        for (FilterButtonModel action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
             faPanel.add(button);
@@ -117,7 +121,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             // mode should be automatically stopped
             showOriginalCB.deselectWithoutTriggering();
         }
-        super.runFilterPreview();
+        runFilterPreview();
     }
 
     private boolean hasShowOriginal() {
@@ -135,7 +139,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             super(text);
             addActionListener(e -> {
                 if (trigger) {
-                    OpenComps.getActiveDrawableOrThrow()
+                    OpenImages.getActiveDrawableOrThrow()
                             .setShowOriginal(isSelected());
                 }
             });

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
@@ -51,8 +50,8 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Photo Collage
@@ -65,8 +64,8 @@ public class PhotoCollage extends ParametrizedFilter {
     private final RangeParam numImagesParam = new RangeParam("Number of Images", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutside = new BooleanParam("Allow Outside", true);
-    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_OPACITY);
-    private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_OPACITY);
+    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_TRANSPARENCY);
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 0.7);
     private final RangeParam shadowDistance = new RangeParam("Shadow Distance", 0, 5, 20);
@@ -96,7 +95,7 @@ public class PhotoCollage extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         int numImages = numImagesParam.getValue();
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numImages);
+        var pt = new StatusBarProgressTracker(NAME, numImages);
 
         Random rand = ReseedSupport.reInitialize();
 
@@ -110,9 +109,9 @@ public class PhotoCollage extends ParametrizedFilter {
         g.setColor(bgColor.getColor());
         g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
 
-        Rectangle photoRect = new Rectangle(0, 0, xSize, ySize);
+        var photoRect = new Rectangle(0, 0, xSize, ySize);
         int margin = marginSize.getValue();
-        Rectangle photoWOMarginRect = new Rectangle(photoRect);
+        var photoWOMarginRect = new Rectangle(photoRect);
         photoWOMarginRect.grow(-margin, -margin);
 
         // the shadow image must be larger than the image size
@@ -130,10 +129,10 @@ public class PhotoCollage extends ParametrizedFilter {
 
         // multiply makes sense only if the shadow color is not black
         Composite shadowComposite = AlphaComposite.getInstance(SRC_OVER,
-                shadowOpacityParam.getValueAsPercentage());
+                shadowOpacityParam.getPercentageValF());
 
-        Paint imagePaint = new TexturePaint(src,
-                new Rectangle2D.Float(0, 0, src.getWidth(), src.getHeight()));
+        Paint imagePaint = new TexturePaint(src, new Rectangle2D.Float(
+                0, 0, src.getWidth(), src.getHeight()));
 
         for (int i = 0; i < numImages; i++) {
             // Calculate the transform of the image
@@ -157,17 +156,17 @@ public class PhotoCollage extends ParametrizedFilter {
                 tx = maxTranslateX * rand.nextDouble();
                 ty = maxTranslateY * rand.nextDouble();
             }
-            AffineTransform imageTransform = AffineTransform.getTranslateInstance(tx, ty);
+            var imageTransform = AffineTransform.getTranslateInstance(tx, ty);
 
             // step 1: rotate
             // the rotation amount is a number between -PI and PI if maxRandomRot is 1.0;
             double theta = Math.PI * 2 * rand.nextFloat() - Math.PI;
-            theta *= randomRotation.getValueAsPercentage();
+            theta *= randomRotation.getPercentageValF();
             imageTransform.rotate(theta, xSize / 2.0, ySize / 2.0);
 
             // Calculate the transform of the shadow
             // step 3: final shadow offset
-            AffineTransform shadowTransform = AffineTransform.getTranslateInstance(shadowOffsetX, shadowOffsetY);
+            var shadowTransform = AffineTransform.getTranslateInstance(shadowOffsetX, shadowOffsetY);
             // step 2: rotate and random translate
             shadowTransform.concatenate(imageTransform);
             // step 1: take shadowBorder into account
@@ -200,7 +199,7 @@ public class PhotoCollage extends ParametrizedFilter {
         return dest;
     }
 
-    private BufferedImage createShadowImage(int xSize, int ySize, int shadowSoftness, int softShadowRoom) {
+    private static BufferedImage createShadowImage(int xSize, int ySize, int shadowSoftness, int softShadowRoom) {
         int shadowImgWidth = xSize + 2 * softShadowRoom;
         int shadowImgHeight = ySize + 2 * softShadowRoom;
         BufferedImage shadowImage = ImageUtils.createSysCompatibleImage(

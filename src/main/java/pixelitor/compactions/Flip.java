@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.gui.View;
@@ -47,13 +47,13 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected void applyTx(ContentLayer contentLayer) {
+    protected void transform(ContentLayer contentLayer) {
         contentLayer.flip(direction);
     }
 
     @Override
-    protected AffineTransform createCanvasImTX(Canvas canvas) {
-        return direction.createCanvasImTX(canvas);
+    protected AffineTransform createCanvasImTransform(Canvas canvas) {
+        return direction.createCanvasImTransform(canvas);
     }
 
     @Override
@@ -72,16 +72,16 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTX(Canvas canvas) {
-                AffineTransform at = new AffineTransform();
+            public AffineTransform createCanvasImTransform(Canvas canvas) {
+                var at = new AffineTransform();
                 at.translate(canvas.getImWidth(), 0);
                 at.scale(-1, 1);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTX(ImageLayer layer) {
-                AffineTransform at = new AffineTransform();
+            public AffineTransform createImageTransform(ImageLayer layer) {
+                var at = new AffineTransform();
                 at.translate(layer.getImage().getWidth(), 0);
                 at.scale(-1, 1);
                 return at;
@@ -93,16 +93,16 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTX(Canvas canvas) {
-                AffineTransform at = new AffineTransform();
+            public AffineTransform createCanvasImTransform(Canvas canvas) {
+                var at = new AffineTransform();
                 at.translate(0, canvas.getImHeight());
                 at.scale(1, -1);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTX(ImageLayer layer) {
-                AffineTransform at = new AffineTransform();
+            public AffineTransform createImageTransform(ImageLayer layer) {
+                var at = new AffineTransform();
                 at.translate(0, layer.getImage().getHeight());
                 at.scale(1, -1);
                 return at;
@@ -115,11 +115,11 @@ public class Flip extends SimpleCompAction {
          * Returns the transformation in canvas space.
          * Needed for transforming the selection.
          */
-        public abstract AffineTransform createCanvasImTX(Canvas canvas);
+        public abstract AffineTransform createCanvasImTransform(Canvas canvas);
 
         /**
          * Returns the transformation for the image.
          */
-        public abstract AffineTransform createImageTX(ImageLayer layer);
+        public abstract AffineTransform createImageTransform(ImageLayer layer);
     }
 }

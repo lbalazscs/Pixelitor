@@ -408,9 +408,9 @@ public class AnimatedGifEncoder {
 
         // packed fields
         out.write(0 | // 1:3 reserved
-            disp | // 4:6 disposal
-            0 | // 7 user input - 0 = none
-            transp); // 8 transparency flag
+                disp | // 4:6 disposal
+                0 | // 7 user input - 0 = none
+                transp); // 8 transparency flag
 
         writeShort(delay); // delay x 1/100 sec
         out.write(transIndex); // transparent color index
@@ -433,10 +433,10 @@ public class AnimatedGifEncoder {
         } else {
             // specify normal LCT
             out.write(0x80 | // 1 local color table 1=yes
-                0 | // 2 interlace - 0=no
-                0 | // 3 sorted - 0=no
-                0 | // 4-5 reserved
-                palSize); // 6-8 size of color table
+                    0 | // 2 interlace - 0=no
+                    0 | // 3 sorted - 0=no
+                    0 | // 4-5 reserved
+                    palSize); // 6-8 size of color table
         }
     }
 
@@ -449,9 +449,9 @@ public class AnimatedGifEncoder {
         writeShort(height);
         // packed fields
         out.write((0x80 | // 1 : global color table flag = 1 (gct used)
-            0x70 | // 2-4 : color resolution = 7
-            0x00 | // 5 : gct sort flag = 0
-            palSize)); // 6-8 : gct size
+                0x70 | // 2-4 : color resolution = 7
+                0x00 | // 5 : gct sort flag = 0
+                palSize)); // 6-8 : gct size
 
         out.write(0); // background color index
         out.write(0); // pixel aspect ratio - assume 1:1
@@ -673,9 +673,9 @@ class NeuQuant {
         int k = 0;
         for (int i = 0; i < netsize; i++) {
             int j = index[i];
-            map[k++] = (byte) (network[j][0]);
-            map[k++] = (byte) (network[j][1]);
-            map[k++] = (byte) (network[j][2]);
+            map[k++] = (byte) network[j][0];
+            map[k++] = (byte) network[j][1];
+            map[k++] = (byte) network[j][2];
         }
         return map;
     }
@@ -914,7 +914,7 @@ class NeuQuant {
      */
     private void unbiasnet() {
 
-        int i, j;
+        int i;
 
         for (i = 0; i < netsize; i++) {
             network[i][0] >>= netbiasshift;
@@ -1021,7 +1021,7 @@ class NeuQuant {
                 bestd = dist;
                 bestpos = i;
             }
-            biasdist = dist - ((bias[i]) >> (intbiasshift - netbiasshift));
+            biasdist = dist - (bias[i] >> (intbiasshift - netbiasshift));
             if (biasdist < bestbiasd) {
                 bestbiasd = biasdist;
                 bestbiaspos = i;
@@ -1135,7 +1135,7 @@ class LZWEncoder {
     private int cur_bits = 0;
 
     private final int[] masks = {0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F, 0x00FF, 0x01FF,
-        0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
+            0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
 
     // Number of characters so far in this 'packet'
     private int a_count;

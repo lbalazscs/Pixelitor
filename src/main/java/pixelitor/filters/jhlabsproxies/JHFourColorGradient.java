@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,7 +31,7 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.ORANGE;
 import static java.awt.Color.RED;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Four Color Gradient filter based on the JHLabs FourColorFilter
@@ -39,10 +39,10 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 public class JHFourColorGradient extends ParametrizedFilter {
     public static final String NAME = "Four Color Gradient";
 
-    private final ColorParam northWestParam = new ColorParam("Northwest", GREEN, NO_OPACITY);
-    private final ColorParam northEastParam = new ColorParam("Northeast", ORANGE, NO_OPACITY);
-    private final ColorParam southWestParam = new ColorParam("Southwest", BLUE, NO_OPACITY);
-    private final ColorParam southEastParam = new ColorParam("Southeast", RED, NO_OPACITY);
+    private final ColorParam northWestParam = new ColorParam("Northwest", GREEN, NO_TRANSPARENCY);
+    private final ColorParam northEastParam = new ColorParam("Northeast", ORANGE, NO_TRANSPARENCY);
+    private final ColorParam southWestParam = new ColorParam("Southwest", BLUE, NO_TRANSPARENCY);
+    private final ColorParam southEastParam = new ColorParam("Southeast", RED, NO_TRANSPARENCY);
 
     private FourColorFilter filter;
 

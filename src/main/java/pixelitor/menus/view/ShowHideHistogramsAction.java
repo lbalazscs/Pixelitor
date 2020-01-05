@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 package pixelitor.menus.view;
 
 import pixelitor.gui.HistogramsPanel;
-import pixelitor.utils.AppPreferences;
+import pixelitor.gui.WorkSpace;
 
 /**
  * The action that either shows or hides the histogram,
@@ -37,11 +37,11 @@ public class ShowHideHistogramsAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return AppPreferences.WorkSpace.getHistogramsVisibility();
+        return WorkSpace.getHistogramsVisibility();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        AppPreferences.WorkSpace.setHistogramsVisibility(value, true);
+        WorkSpace.setHistogramsVisibility(value, true);
     }
 }

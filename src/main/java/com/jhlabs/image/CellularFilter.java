@@ -349,8 +349,8 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
                 float px = 0.5f;
                 float py = 0.5f;
                 if (randomness != 0) {
-                    px += randomness * (random.nextFloat() - 0.5);
-                    py += randomness * (random.nextFloat() - 0.5);
+                    px = (float) (px + randomness * (random.nextFloat() - 0.5));
+                    py = (float) (py + randomness * (random.nextFloat() - 0.5));
                 }
                 insertionSort(x, y, cubeX, cubeY, results, px, py, weight);
                 return results[2].distance;
@@ -615,7 +615,7 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
             };
             futures[y] = ThreadPool.submit(calculateLineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
 
         finishProgressTracker();
 

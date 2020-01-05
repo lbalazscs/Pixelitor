@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.FlowLayout;
 
+import static java.awt.FlowLayout.LEFT;
+
 /**
  * The GUI for a {@link TextParam}
  */
@@ -31,7 +33,7 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     public TextParamGUI(TextParam param, String defaultValue, ParamAdjustmentListener adjustmentListener) {
         tf = new JTextField(defaultValue);
 
-        setLayout(new FlowLayout(FlowLayout.LEFT));
+        setLayout(new FlowLayout(LEFT));
         add(new JLabel(getName() + ": "));
 
         if (adjustmentListener != null) {

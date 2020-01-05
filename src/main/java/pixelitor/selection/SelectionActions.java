@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.selection;
 
 import pixelitor.Composition;
-import pixelitor.filters.comp.Crop;
+import pixelitor.OpenImages;
+import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
@@ -39,8 +39,8 @@ import java.awt.GridBagLayout;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.gui.OpenComps.getActiveCompOrNull;
-import static pixelitor.gui.OpenComps.getActiveSelection;
+import static pixelitor.OpenImages.getActiveComp;
+import static pixelitor.OpenImages.getActiveSelection;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
@@ -60,14 +60,14 @@ public final class SelectionActions {
     private static final Action deselect = new MenuAction("Deselect") {
         @Override
         public void onClick() {
-            getActiveCompOrNull().deselect(true);
+            getActiveComp().deselect(true);
         }
     };
 
     private static final Action invert = new MenuAction("Invert Selection") {
         @Override
         public void onClick() {
-            getActiveCompOrNull().invertSelection();
+            getActiveComp().invertSelection();
         }
     };
 
@@ -76,7 +76,7 @@ public final class SelectionActions {
     private static final Action convertToPath = new AbstractAction("Convert to Path") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = getActiveComp();
             selectionToPath(comp, true);
         }
     };
@@ -84,7 +84,7 @@ public final class SelectionActions {
     private static final Action copySel = new MenuAction("Copy Selection") {
         @Override
         public void onClick() {
-            copiedSelShape = getActiveCompOrNull().getSelectionShape();
+            copiedSelShape = getActiveComp().getSelectionShape();
             pasteSel.setEnabled(true);
         }
     };
@@ -92,13 +92,13 @@ public final class SelectionActions {
     private static final Action pasteSel = new MenuAction("Paste Selection") {
         @Override
         public void onClick() {
-            getActiveCompOrNull().changeSelectionFromShape(copiedSelShape);
+            getActiveComp().changeSelectionFromShape(copiedSelShape);
         }
     };
 
     static {
         pasteSel.setEnabled(false);
-        OpenComps.addActivationListener(new CompActivationListener() {
+        OpenImages.addActivationListener(new CompActivationListener() {
             @Override
             public void compActivated(View oldView, View newView) {
                 pasteSel.setEnabled(copiedSelShape != null);
@@ -122,7 +122,7 @@ public final class SelectionActions {
         Tools.PEN.activate();
 
         if (addToHistory) {
-            History.addEdit(new ConvertSelectionToPathEdit(comp, shape, oldActivePath));
+            History.add(new ConvertSelectionToPathEdit(comp, shape, oldActivePath));
         }
     }
 
@@ -130,17 +130,17 @@ public final class SelectionActions {
         @Override
         public void onClick() {
             JPanel panel = new JPanel(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(panel);
+            var gbh = new GridBagHelper(panel);
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
             EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
             JComponent amountGUI = amount.createGUI();
             amountGUI.setName("amount");
-            gbh.addLabelWithControl("Amount", amountGUI);
+            gbh.addLabelAndControl("Amount", amountGUI);
 
             JComponent typeGUI = type.createGUI();
             typeGUI.setName("type");
-            gbh.addLabelWithControl("Type", typeGUI);
+            gbh.addLabelAndControl("Type", typeGUI);
 
             new DialogBuilder()
                     .content(panel)
@@ -160,7 +160,7 @@ public final class SelectionActions {
 
     private static void modifySelection(EnumParam<SelectionModifyType> type,
                                         RangeParam amount) {
-        Selection selection = getActiveSelection();
+        var selection = getActiveSelection();
         SelectionModifyType selectionModifyType = type.getSelected();
         if (selection != null) {
             selection.modify(selectionModifyType, amount.getValue());
@@ -182,9 +182,9 @@ public final class SelectionActions {
      * the active composition has a selection
      */
     public static void setEnabled(boolean b, Composition comp) {
-        assert comp == null || getActiveCompOrNull() == comp
+        assert comp == null || getActiveComp() == comp
                 : "comp = " + (comp == null ? "null" : comp.getName())
-                + ", active comp = " + (getActiveCompOrNull() == null ? "null" : getActiveCompOrNull().getName());
+                + ", active comp = " + (getActiveComp() == null ? "null" : getActiveComp().getName());
 
         crop.setEnabled(b);
         deselect.setEnabled(b);

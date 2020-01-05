@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
@@ -41,6 +40,7 @@ import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.pow;
 import static net.jafama.FastMath.sin;
 import static net.jafama.FastMath.sqrt;
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Marble filter
@@ -80,7 +80,7 @@ public class Marble extends ParametrizedFilter {
     public Marble() {
         super(ShowOriginal.NO);
 
-        GroupedRangeParam details = new GroupedRangeParam("Details",
+        var details = new GroupedRangeParam("Details",
                 new RangeParam[]{detailsLevel, detailsStrength}, false);
 
         setParams(
@@ -93,7 +93,7 @@ public class Marble extends ParametrizedFilter {
                 details.notLinkable(),
                 smoothDetails,
                 gradient
-        ).withAction(new ReseedNoiseFilterAction());
+        ).withAction(reseedNoise());
     }
 
     @Override
@@ -148,11 +148,11 @@ public class Marble extends ParametrizedFilter {
         }
 
         public void setDetailsStrength(float f) {
-            this.detailsStrength = f;
+            detailsStrength = f;
         }
 
         public void setStrength(float f) {
-            this.strength = f;
+            strength = f;
         }
 
         public void setDetails(float f) {
@@ -172,7 +172,7 @@ public class Marble extends ParametrizedFilter {
         }
 
         public void setAngle(float angle) {
-            this.rotAngle = angle;
+            rotAngle = angle;
             float cos = (float) cos(angle);
             float sin = (float) sin(angle);
             m00 = cos;
@@ -222,7 +222,7 @@ public class Marble extends ParametrizedFilter {
                         f2 += detailsStrength * turbulence2(ny * -0.2f, nx * -0.2f, octaves);
                     }
 
-                    c = ((float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType))) / 4.0f;
+                    c = (float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType)) / 4.0f;
                     break;
                 case TYPE_RINGS:
                     float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
@@ -218,21 +217,17 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
     public boolean canBeAnimated() {
         return true;
     }
 
     @Override
-    public ParamState copyState() {
+    public GState copyState() {
         return new GState(gradientSlider.getThumbPositions(), gradientSlider.getColors());
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         GState gr = (GState) state;
 
         trigger = false;
@@ -240,7 +235,7 @@ public class GradientParam extends AbstractFilterParam {
         trigger = true;
     }
 
-    private static class GState implements ParamState {
+    private static class GState implements ParamState<GState> {
         final float[] thumbPositions;
         final Color[] colors;
 
@@ -250,13 +245,12 @@ public class GradientParam extends AbstractFilterParam {
         }
 
         @Override
-        public ParamState interpolate(ParamState endState, double progress) {
+        public GState interpolate(GState endState, double progress) {
             // This will not work if the number of thumbs changes
-            GState grEndState = (GState) endState;
 
-            float[] interpolatedPositions = getInterpolatedPositions((float) progress, grEndState);
+            float[] interpolatedPositions = getInterpolatedPositions((float) progress, endState);
 
-            Color[] interpolatedColors = getInterpolatedColors((float) progress, grEndState);
+            Color[] interpolatedColors = getInterpolatedColors((float) progress, endState);
 
             return new GState(interpolatedPositions, interpolatedColors);
         }

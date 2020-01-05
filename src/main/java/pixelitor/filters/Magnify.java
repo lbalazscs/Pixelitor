@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,13 +72,13 @@ public class Magnify extends ParametrizedFilter {
         filter.setOuterRadiusX(outerRadiusX);
         filter.setOuterRadiusY(outerRadiusY);
 
-        float ratio = outerInnerRadiusRatio.getValueAsPercentage() + 1.0f;
+        float ratio = outerInnerRadiusRatio.getPercentageValF() + 1.0f;
         int innerRadiusX = (int) (outerRadiusX / ratio);
         int innerRadiusY = (int) (outerRadiusY / ratio);
         filter.setInnerRadiusX(innerRadiusX);
         filter.setInnerRadiusY(innerRadiusY);
 
-        filter.setMagnification(magnification.getValueAsPercentage());
+        filter.setMagnification(magnification.getPercentageValF());
 
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

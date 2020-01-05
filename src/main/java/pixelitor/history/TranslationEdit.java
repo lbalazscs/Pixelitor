@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ import javax.swing.undo.CannotUndoException;
  */
 public class TranslationEdit extends PixelitorEdit {
     private ContentLayer layer;
-    private int backupTX = 0;
-    private int backupTY = 0;
+    private int backupTx = 0;
+    private int backupTy = 0;
 
     private TranslationEdit maskEdit;
 
@@ -42,24 +42,24 @@ public class TranslationEdit extends PixelitorEdit {
      * the current translation is considered the old value
      */
     public TranslationEdit(Composition comp, ContentLayer layer, boolean considerMask) {
-        this(comp, layer, layer.getTX(), layer.getTY(), considerMask);
+        this(comp, layer, layer.getTx(), layer.getTy(), considerMask);
     }
 
     /**
      * This constructor can be called after the change
      * if the mask can be ignored
      */
-    public TranslationEdit(Composition comp, ContentLayer layer, int oldTX, int oldTY, boolean considerMask) {
+    public TranslationEdit(Composition comp, ContentLayer layer, int oldTx, int oldTy, boolean considerMask) {
         // needs no name, because this is never used alone
         super("", comp);
 
         this.layer = layer;
-        this.backupTX = oldTX;
-        this.backupTY = oldTY;
+        backupTx = oldTx;
+        backupTy = oldTy;
 
         if (considerMask && layer.hasMask()) {
             LayerMask mask = layer.getMask();
-            maskEdit = new TranslationEdit(comp, mask, mask.getTX(), mask.getTY(), false);
+            maskEdit = new TranslationEdit(comp, mask, mask.getTx(), mask.getTy(), false);
         }
 
         // currently always embedded
@@ -87,12 +87,12 @@ public class TranslationEdit extends PixelitorEdit {
     }
 
     private void swapTranslation() {
-        int tmpTX = layer.getTX();
-        int tmpTY = layer.getTY();
+        int tmpTx = layer.getTx();
+        int tmpTy = layer.getTy();
 
-        layer.setTranslation(backupTX, backupTY);
-        backupTX = tmpTX;
-        backupTY = tmpTY;
+        layer.setTranslation(backupTx, backupTy);
+        backupTx = tmpTx;
+        backupTy = tmpTy;
 
         if (!embedded) {
             layer.getComp().imageChanged();
@@ -111,10 +111,10 @@ public class TranslationEdit extends PixelitorEdit {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addInt("Backup TX", backupTX);
-        node.addInt("Backup TY", backupTY);
+        node.addInt("backup tx", backupTx);
+        node.addInt("backup ty", backupTy);
 
         return node;
     }

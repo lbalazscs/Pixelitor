@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.filters.convolve;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
@@ -25,13 +24,14 @@ import pixelitor.utils.NotANumberException;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import static javax.swing.BorderFactory.createTitledBorder;
+import static javax.swing.BoxLayout.X_AXIS;
+import static javax.swing.SwingConstants.LEFT;
 
 /**
  * An adjustment panel for customizable convolutions
@@ -48,7 +48,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     public CustomConvolveGUI(Convolve filter, Drawable dr) {
         super(filter, dr);
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, X_AXIS));
 
         size = filter.getSize();
 
@@ -70,7 +70,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         addConvolveMethodSelector(filter, box);
 
         box.setMaximumSize(box.getPreferredSize());
-        box.setAlignmentY(Component.TOP_ALIGNMENT);
+        box.setAlignmentY(TOP_ALIGNMENT);
 
         add(box);
     }
@@ -82,15 +82,15 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
             textFields[i] = new JTextField();
         }
         textFieldsP.setLayout(new GridLayout(size, size));
-        for (JTextField textField : textFields) {
+        for (var textField : textFields) {
             setupTextField(textField);
         }
         textFieldsP.setBorder(createTitledBorder("Kernel"));
-        textFieldsP.setAlignmentX(Component.LEFT_ALIGNMENT);
+        textFieldsP.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(textFieldsP);
 
         // this must come after adding the textFieldsP to the box
-        Dimension minimumSize = textFieldsP.getMinimumSize();
+        var minimumSize = textFieldsP.getMinimumSize();
         textFieldsP.setPreferredSize(new Dimension(
                 size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
     }
@@ -98,7 +98,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
     private void addNormalizeButton(Box leftVerticalBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
         normalizeButton.addActionListener(this);
-        normalizeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(normalizeButton);
     }
 
@@ -109,16 +109,15 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
     }
 
     private void addConvolveMethodSelector(Convolve filter, Box leftVerticalBox) {
-        JLabel cmLabel = new JLabel("Convolution method:", JLabel.LEFT);
-        cmLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel cmLabel = new JLabel("Convolution method:", LEFT);
+        cmLabel.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(cmLabel);
-        EnumComboBoxModel<ConvolveMethod> convolveMethodModel
-                = filter.getConvolveMethodModel();
+        var convolveMethodModel = filter.getConvolveMethodModel();
 
         @SuppressWarnings("unchecked")
-        JComboBox<ConvolveMethod> convolveMethodCB = new JComboBox<>(convolveMethodModel);
+        var convolveMethodCB = new JComboBox<ConvolveMethod>(convolveMethodModel);
 
-        convolveMethodCB.setAlignmentX(Component.LEFT_ALIGNMENT);
+        convolveMethodCB.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(convolveMethodCB);
         convolveMethodCB.addActionListener(this);
     }
@@ -152,7 +151,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         presetsBox.add(doNothingButton);
 
         presetsBox.setMaximumSize(presetsBox.getPreferredSize());
-        presetsBox.setAlignmentY(Component.TOP_ALIGNMENT);
+        presetsBox.setAlignmentY(TOP_ALIGNMENT);
 
         add(presetsBox);
     }
@@ -317,9 +316,9 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
                 setValues(values);
             }
         }
-        Convolve kernelFilter = (Convolve) filter;
-        kernelFilter.setKernelMatrix(values);
-        super.runFilterPreview();
+
+        ((Convolve) filter).setKernelMatrix(values);
+        runFilterPreview();
     }
 
     private void setValues(float[] values) {

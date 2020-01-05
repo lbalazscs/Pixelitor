@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,8 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Graphics2D;
 
 /**
- * Delegates the work to other brushes according to the symmetry and brush type settings
+ * Delegates the work to other brushes according to
+ * the symmetry and brush type settings
  */
 public class SymmetryBrush implements Brush {
     private static final int MAX_BRUSHES = 4;
@@ -44,7 +45,7 @@ public class SymmetryBrush implements Brush {
         this.tool = tool;
         this.brushType = brushType;
         this.symmetry = symmetry;
-        this.affectedArea = new AffectedArea();
+        affectedArea = new AffectedArea();
         numBrushes = symmetry.getNumBrushes();
         assert numBrushes <= MAX_BRUSHES;
         brushTypeChanged(brushType, radius);
@@ -117,7 +118,7 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void finish() {
+    public void finishBrushStroke() {
         symmetry.finish(this);
     }
 
@@ -197,19 +198,19 @@ public class SymmetryBrush implements Brush {
     }
 
     public void finish(int brushNo) {
-        brushes[brushNo].finish();
+        brushes[brushNo].finishBrushStroke();
     }
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("Symmetry Brush", this);
+        var node = new DebugNode("symmetry brush", this);
 
         for (int i = 0; i < numBrushes; i++) {
             node.add(brushes[i].getDebugNode());
         }
 
-        node.addString("Brush Type", brushType.toString());
-        node.addString("Symmetry", symmetry.toString());
+        node.addString("type", brushType.toString());
+        node.addString("symmetry", symmetry.toString());
 
         node.add(affectedArea.getDebugNode());
 

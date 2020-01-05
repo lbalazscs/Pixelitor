@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,13 +68,13 @@ public class JHSwirlPinchBulge extends ParametrizedFilter {
             filter = new PinchFilter();
         }
 
-        filter.setPinchBulgeAmount(pinchBulgeAmount.getValueAsPercentage());
+        filter.setPinchBulgeAmount(pinchBulgeAmount.getPercentageValF());
         filter.setSwirlAmount(swirlAmount.getValueInRadians());
         filter.setRadius(radius.getValueAsFloat());
         filter.setCenterX(center.getRelativeX());
         filter.setCenterY(center.getRelativeY());
 
-        filter.setZoom(zoom.getValueAsPercentage());
+        filter.setZoom(zoom.getPercentageValF());
         filter.setRotateResultAngle((float) rotateResult.getValueInIntuitiveRadians());
 
         filter.setEdgeAction(edgeAction.getValue());

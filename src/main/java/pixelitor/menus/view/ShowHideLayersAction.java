@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,8 +16,8 @@
  */
 package pixelitor.menus.view;
 
+import pixelitor.gui.WorkSpace;
 import pixelitor.layers.LayersContainer;
-import pixelitor.utils.AppPreferences;
 
 /**
  * The action that either shows or hides the layers,
@@ -37,11 +37,11 @@ public class ShowHideLayersAction extends ShowHideAction {
 
     @Override
     public boolean getStartupVisibility() {
-        return AppPreferences.WorkSpace.getLayersVisibility();
+        return WorkSpace.getLayersVisibility();
     }
 
     @Override
     public void setVisibility(boolean value) {
-        AppPreferences.WorkSpace.setLayersVisibility(value, true);
+        WorkSpace.setLayersVisibility(value, true);
     }
 }

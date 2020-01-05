@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,9 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.util.List;
+
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
 
 /**
  * An adjustment panel, where the components (typically representing
@@ -84,13 +87,13 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
             }
         }
 
-        if(numParams <= MAX_GRID_PARAMS) {
+        if (numParams <= MAX_GRID_PARAMS) {
             return gridPanel;
         }
 
-        JPanel p = new JPanel(new BorderLayout());
-        p.add(gridPanel, BorderLayout.CENTER);
-        p.add(extraParamsPanel, BorderLayout.SOUTH);
+        var p = new JPanel(new BorderLayout());
+        p.add(gridPanel, CENTER);
+        p.add(extraParamsPanel, SOUTH);
         return p;
     }
 }

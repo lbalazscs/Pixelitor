@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor;
 
 import pixelitor.colors.FillType;
 import pixelitor.filters.Fill;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TextFieldValidator;
@@ -36,6 +35,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.colors.FillType.TRANSPARENT;
 import static pixelitor.utils.MemoryInfo.ONE_MEGABYTE;
@@ -52,8 +52,8 @@ public final class NewImage {
     }
 
     public static Composition addNewImage(FillType bg, int width, int height, String title) {
-        Composition comp = createNewComposition(bg, width, height, title);
-        OpenComps.addAsNewImage(comp);
+        var comp = createNewComposition(bg, width, height, title);
+        OpenImages.addAsNewComp(comp);
         return comp;
     }
 
@@ -72,7 +72,7 @@ public final class NewImage {
     }
 
     private static void showInDialog() {
-        NewImagePanel panel = new NewImagePanel();
+        var panel = new NewImagePanel();
         new DialogBuilder()
                 .title("New Image")
                 .validatedContent(panel)
@@ -105,7 +105,7 @@ public final class NewImage {
 
         private NewImagePanel() {
             setLayout(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(this);
+            var gbh = new GridBagHelper(this);
 
             //noinspection SuspiciousNameCombination
             setBorder(createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
@@ -116,14 +116,14 @@ public final class NewImage {
                     lastSize.height, gbh);
 
             backgroundSelector = new JComboBox<>(FillType.values());
-            gbh.addLabelWithLastControl("Fill:", backgroundSelector);
+            gbh.addLabelAndLastControl("Fill:", backgroundSelector);
         }
 
         private static JTextField addTextField(String name, String labelText,
                                                int value, GridBagHelper gbh) {
-            JTextField tf = new JTextField(String.valueOf(value));
+            var tf = new JTextField(String.valueOf(value));
             tf.setName(name);
-            gbh.addLabelWithTwoControls(labelText,
+            gbh.addLabelAndTwoControls(labelText,
                     TextFieldValidator.createPositiveIntLayer(labelText, tf, false),
                     new JLabel("pixels"));
             return tf;
@@ -131,7 +131,7 @@ public final class NewImage {
 
         @Override
         public ValidationResult checkValidity() {
-            ValidationResult retVal = ValidationResult.ok();
+            var retVal = ValidationResult.ok();
             int width = 0;
             try {
                 width = getSelectedWidth();
@@ -155,7 +155,7 @@ public final class NewImage {
                 long numPixels = ((long) width) * height;
                 if (numPixels > Integer.MAX_VALUE) {
                     // theoretical limit, as the pixels ultimately will be stored in an array
-                    return retVal.addError(String.format(
+                    return retVal.addError(format(
                             "Pixelitor doesn't support images with more than %d pixels." +
                                     "<br>%dx%d would be %d pixels.",
                             Integer.MAX_VALUE, width, height, numPixels));
@@ -164,7 +164,7 @@ public final class NewImage {
                     long allocatedMemory = rt.totalMemory() - rt.freeMemory();
                     long availableMemory = rt.maxMemory() - allocatedMemory;
                     if (numPixels * 4 > availableMemory) {
-                        return retVal.addError(String.format(
+                        return retVal.addError(format(
                                 "The image would not fit into memory." +
                                         "<br>An image of %dx%d pixels needs at least %d megabytes." +
                                         "<br>Available memory is at most %d megabytes.",

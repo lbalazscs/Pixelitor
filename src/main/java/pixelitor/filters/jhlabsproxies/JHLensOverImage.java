@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class JHLensOverImage extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float refraction = refractionIndex.getValueAsPercentage();
+        float refraction = refractionIndex.getPercentageValF();
         int hRadius = radius.getValue(0);
         int vRadius = radius.getValue(1);
 
@@ -83,7 +83,7 @@ public class JHLensOverImage extends ParametrizedFilter {
 
         dest = filter.filter(src, dest);
 
-        super.setAffectedAreaShapes(filter.getAffectedAreaShapes());
+        setAffectedAreaShapes(filter.getAffectedAreaShapes());
 
         return dest;
     }

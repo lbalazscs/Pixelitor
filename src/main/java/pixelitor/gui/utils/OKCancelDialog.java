@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,6 +26,8 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 
 import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
@@ -51,7 +53,7 @@ public abstract class OKCancelDialog extends JDialog {
                       String okText, String cancelText, boolean addScrollBars) {
         assert EventQueue.isDispatchThread() : "not EDT thread";
 
-        this.formPanel = form;
+        formPanel = form;
 
         setLayout(new BorderLayout());
         addForm(form, addScrollBars);
@@ -65,7 +67,7 @@ public abstract class OKCancelDialog extends JDialog {
 
         GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
 
-        add(southPanel, BorderLayout.SOUTH);
+        add(southPanel, SOUTH);
 
         getRootPane().setDefaultButton(okButton);
         okButton.addActionListener(e -> {
@@ -117,7 +119,7 @@ public abstract class OKCancelDialog extends JDialog {
         }
         msgLabel = new JLabel(msg);
         msgLabel.setBorder(createEmptyBorder(0, 5, 0, 5));
-        add(msgLabel, BorderLayout.NORTH);
+        add(msgLabel, NORTH);
         revalidate();
     }
 

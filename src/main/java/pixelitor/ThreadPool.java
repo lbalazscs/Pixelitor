@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,10 +60,10 @@ public class ThreadPool {
      * computation, and updates the given
      * {@link ProgressTracker} in the meantime.
      */
-    public static void waitToFinish(Iterable<Future<?>> futures, ProgressTracker pt) {
+    public static void waitFor(Iterable<Future<?>> futures, ProgressTracker pt) {
         assert pt != null;
 
-        for (Future<?> future : futures) {
+        for (var future : futures) {
             try {
                 future.get();
 
@@ -78,10 +78,10 @@ public class ThreadPool {
     }
 
     // same as the above, but with array argument
-    public static void waitToFinish(Future<?>[] futures, ProgressTracker pt) {
+    public static void waitFor(Future<?>[] futures, ProgressTracker pt) {
         assert pt != null;
 
-        for (Future<?> future : futures) {
+        for (var future : futures) {
             try {
                 future.get();
                 pt.unitDone();
@@ -94,17 +94,17 @@ public class ThreadPool {
     }
 
     /**
-     * Similar to waitToFinish, but works with futures
+     * Similar to waitFor, but works with futures
      * that return an int array representing a line, and
      * updates the given destination image with the new pixels.
      */
-    public static void waitToFinish2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
+    public static void waitFor2(Future<int[]>[] futures, BufferedImage dst, int width, ProgressTracker pt) {
         assert pt != null;
 
         try {
             for (int i = 0; i < futures.length; i++) {
-                Future<int[]> line = futures[i];
-                int[] linePixels = line.get();
+                var lineFuture = futures[i];
+                int[] linePixels = lineFuture.get();
                 AbstractBufferedImageOp.setRGB(dst, 0, i, width, 1, linePixels);
 
                 pt.unitDone();

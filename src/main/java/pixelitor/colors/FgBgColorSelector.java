@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -103,12 +103,12 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private JPopupMenu createPopupMenu(boolean fg) {
-        JPopupMenu menu = new JPopupMenu();
+        JPopupMenu popup = new JPopupMenu();
 
         String variationsTitle = fg
                 ? "Foreground Color Variations..."
                 : "Background Color Variations...";
-        menu.add(new MenuAction(variationsTitle) {
+        popup.add(new MenuAction(variationsTitle) {
             @Override
             public void onClick() {
                 if (fg) {
@@ -122,7 +122,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String mixTitle = fg
                 ? "HSB Mix with Background..."
                 : "HSB Mix with Foreground...";
-        menu.add(new MenuAction(mixTitle) {
+        popup.add(new MenuAction(mixTitle) {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, fg);
@@ -132,7 +132,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String rgbMixTitle = fg
                 ? "RGB Mix with Background..."
                 : "RGB Mix with Foreground...";
-        menu.add(new MenuAction(rgbMixTitle) {
+        popup.add(new MenuAction(rgbMixTitle) {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, fg);
@@ -142,7 +142,7 @@ public class FgBgColorSelector extends JLayeredPane {
         String historyTitle = fg
                 ? "Foreground Color History..."
                 : "Background Color History...";
-        menu.add(new MenuAction(historyTitle) {
+        popup.add(new MenuAction(historyTitle) {
             @Override
             public void onClick() {
                 if (fg) {
@@ -155,11 +155,11 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        menu.addSeparator();
+        popup.addSeparator();
 
-        ColorUtils.setupCopyColorPopupMenu(menu, () -> fg ? getFgColor() : getBgColor());
+        ColorUtils.setupCopyColorPopupMenu(popup, () -> fg ? getFgColor() : getBgColor());
 
-        ColorUtils.setupPasteColorPopupMenu(menu, pw, color -> {
+        ColorUtils.setupPasteColorPopupMenu(popup, pw, color -> {
             if (fg) {
                 setFgColor(color, true);
             } else {
@@ -167,7 +167,7 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        return menu;
+        return popup;
     }
 
     private void initResetDefaultsButton() {
@@ -201,7 +201,7 @@ public class FgBgColorSelector extends JLayeredPane {
         swapButton.addActionListener(swapColorsAction);
     }
 
-    public void swapColors() {
+    private void swapColors() {
         if (layerMaskEditing) {
             Color tmpFgColor = maskFgColor;
             setFgColor(maskBgColor, false);
@@ -214,25 +214,24 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initRandomizeButton() {
-        JButton randomizeButton = initButton("Randomize Colors (R)",
-                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME);
-        randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
         randomizeColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Color rndColor1 = Rnd.createRandomColor();
-                setFgColor(rndColor1, false);
-                Color rndColor2 = Rnd.createRandomColor();
-                setBgColor(rndColor2, true);
+                setFgColor(Rnd.createRandomColor(), false);
+                setBgColor(Rnd.createRandomColor(), true);
             }
         };
+
+        JButton randomizeButton = initButton("Randomize Colors (R)",
+                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME);
+        randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
         randomizeButton.addActionListener(randomizeColorsAction);
     }
 
     private void setupSize() {
         int preferredWidth = (int) (BIG_BUTTON_SIZE * 1.5);
         int preferredHeight = preferredWidth + SMALL_BUTTON_VERTICAL_SPACE;
-        Dimension dim = new Dimension(preferredWidth, preferredHeight);
+        var dim = new Dimension(preferredWidth, preferredHeight);
         setPreferredSize(dim);
         setMinimumSize(dim);
         setMaximumSize(dim);
@@ -321,7 +320,7 @@ public class FgBgColorSelector extends JLayeredPane {
         boolean oldValue = this.layerMaskEditing;
         this.layerMaskEditing = layerMaskEditing;
 
-        if(oldValue != layerMaskEditing) {
+        if (oldValue != layerMaskEditing) {
             // force the redrawing of colors
             if (layerMaskEditing) {
                 setFgColor(maskFgColor, false);

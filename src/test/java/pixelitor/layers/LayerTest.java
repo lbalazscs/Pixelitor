@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -84,7 +84,7 @@ public class LayerTest {
 
         comp.addLayerInInitMode(layer);
 
-        ImageLayer layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
+        var layer2 = TestHelper.createImageLayer("LayerTest layer 2", comp);
         comp.addLayerInInitMode(layer2);
 
         withMask.setupFor(layer);
@@ -163,7 +163,7 @@ public class LayerTest {
 
         assertThat(layer).opacityIs(newValue);
         History.assertNumEditsIs(1);
-        LayerOpacityEdit lastEdit = (LayerOpacityEdit) History.getLastEdit();
+        var lastEdit = (LayerOpacityEdit) History.getLastEdit();
         assertSame(layer, lastEdit.getLayer());
 
         History.undo("Layer Opacity Change");
@@ -233,12 +233,12 @@ public class LayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         Dimension origSize = canvas.getImSize();
 
-        layer.resize(origSize);
-        layer.resize(new Dimension(30, 25));
-        layer.resize(new Dimension(25, 30));
-        layer.resize(new Dimension(10, 1));
-        layer.resize(new Dimension(1, 10));
-        layer.resize(origSize);
+        layer.resize(origSize).join();
+        layer.resize(new Dimension(30, 25)).join();
+        layer.resize(new Dimension(25, 30)).join();
+        layer.resize(new Dimension(10, 1)).join();
+        layer.resize(new Dimension(1, 10)).join();
+        layer.resize(origSize).join();
 
         iconUpdates.check(0, 0);
     }
@@ -297,7 +297,7 @@ public class LayerTest {
                     .hasMask()
                     .maskIsEnabled();
 
-            EnableDisableMaskAction enableAction = new EnableDisableMaskAction(layer);
+            var enableAction = new EnableDisableMaskAction(layer);
             assertThat(enableAction).nameIs("Disable");
 
             // test disabling the layer mask
@@ -341,7 +341,7 @@ public class LayerTest {
             assertThat(layer)
                     .hasMask()
                     .maskIsLinked();
-            LinkUnlinkMaskAction linkAction = new LinkUnlinkMaskAction(layer);
+            var linkAction = new LinkUnlinkMaskAction(layer);
             assertThat(linkAction).nameIs("Unlink");
 
             // test unlinking the layer mask

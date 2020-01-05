@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.filters.impl;
 
 import net.jafama.FastMath;
 import pixelitor.filters.CircleToSquare;
+import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -40,11 +40,11 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     }
 
     public void setRadiusX(float radius) {
-        this.radiusX = radius;
+        radiusX = radius;
     }
 
     public void setRadiusY(float radius) {
-        this.radiusY = radius;
+        radiusY = radius;
     }
 
     public void setAmount(float amount) {
@@ -58,9 +58,9 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     }
 
     public Shape[] getAffectedAreaShapes() {
-        Shape rect = new Rectangle2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2* radiusY);
-        Shape ellipse = new Ellipse2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2* radiusY);
-        return new Shape[] {rect, ellipse};
+        Shape rect = new Rectangle2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
+        Shape ellipse = Shapes.createEllipse(cx, cy, radiusX, radiusY);
+        return new Shape[]{rect, ellipse};
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         float xDist = Math.abs(dx);
 
         float yDist = Math.abs(dy);
-        if ((xDist > radiusX) || (yDist > radiusY)) { // out of the affected area
+        if (xDist > radiusX || yDist > radiusY) { // out of the affected area
             out[0] = x;
             out[1] = y;
             return;

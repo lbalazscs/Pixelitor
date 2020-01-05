@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -89,7 +89,7 @@ public class Invert extends Filter {
                 g = PixelUtils.clamp(g);
                 b = PixelUtils.clamp(b);
 
-                destData[i] = (a << 24) | (r << 16) | (g << 8) | b;
+                destData[i] = a << 24 | r << 16 | g << 8 | b;
             }
         }
     }

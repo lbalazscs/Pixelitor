@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.geom.QuadCurve2D;
 
+import static java.awt.BorderLayout.CENTER;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -87,11 +88,11 @@ public class StrokeSettingsPanel extends JPanel {
     private static JPanel createCapJoinPanel(
             EnumParam<BasicStrokeCap> capParam,
             EnumParam<BasicStrokeJoin> joinParam) {
-        JPanel p = new JPanel();
+        var p = new JPanel();
         p.setBorder(createTitledBorder("Line Endpoints"));
         p.setLayout(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(p);
 
         JComponent capSelector = capParam.createGUI();
 
@@ -107,8 +108,8 @@ public class StrokeSettingsPanel extends JPanel {
         JComponent joinSelector = joinParam.createGUI();
         joinParam.setToolTip("The way lines connect at the corners");
 
-        gbh.addLabelWithControl("Endpoint Cap:", capSelector);
-        gbh.addLabelWithControl("Corner Join:", joinSelector);
+        gbh.addLabelAndControl("Endpoint Cap:", capSelector);
+        gbh.addLabelAndControl("Corner Join:", joinSelector);
 
         return p;
     }
@@ -116,7 +117,7 @@ public class StrokeSettingsPanel extends JPanel {
     private static JPanel createStrokeTypePanel(EnumParam<StrokeType> strokeTypeParam,
                                                 EnumParam<ShapeType> shapeTypeParam,
                                                 BooleanParam dashedParam) {
-        JPanel p = new JPanel();
+        var p = new JPanel();
         p.setBorder(createTitledBorder("Stroke Type"));
 
         p.setLayout(new GridBagLayout());
@@ -131,18 +132,18 @@ public class StrokeSettingsPanel extends JPanel {
                         && strokeType != ZIGZAG
                         && strokeType != SHAPE);
 
-        GridBagHelper gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(p);
         JComponent strokeTypeGUI = strokeTypeParam.createGUI();
         strokeTypeGUI.setName("strokeType");
-        gbh.addLabelWithControl("Line Type:", strokeTypeGUI);
+        gbh.addLabelAndControl("Line Type:", strokeTypeGUI);
 
         JComponent shapeTypeGUI = shapeTypeParam.createGUI();
         shapeTypeGUI.setName("shapeType");
-        gbh.addLabelWithControl("Shape:", shapeTypeGUI);
+        gbh.addLabelAndControl("Shape:", shapeTypeGUI);
 
         JComponent dashedGUI = dashedParam.createGUI();
         dashedGUI.setName("dashed");
-        gbh.addLabelWithControl("Dashed:", dashedGUI);
+        gbh.addLabelAndControl("Dashed:", dashedGUI);
 
         return p;
     }
@@ -182,8 +183,8 @@ public class StrokeSettingsPanel extends JPanel {
         };
         sp.setPreviewer(preview);
 
-        JPanel p = new JPanel(new BorderLayout());
-        p.add(preview, BorderLayout.CENTER);
+        var p = new JPanel(new BorderLayout());
+        p.add(preview, CENTER);
         p.setBorder(createTitledBorder("Stroke Preview"));
 
         return p;

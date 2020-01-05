@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -59,7 +59,7 @@ public class JHStripedHalftone extends JHMaskedHalftone {
         float x2 = (float) (x1 + dx);
         double dy = dist * Math.sin(angleVal);
         float y2 = (float) (y1 + dy);
-        float shiftPercent = shiftStripes.getValueAsPercentage() * distanceCorrection;
+        float shiftPercent = shiftStripes.getPercentageValF() * distanceCorrection;
         double shiftX = shiftPercent * dx;
         double shiftY = shiftPercent * dy;
         x1 += shiftX;
@@ -67,7 +67,7 @@ public class JHStripedHalftone extends JHMaskedHalftone {
         x2 += shiftX;
         y2 += shiftY;
 
-        LinearGradientPaint paint = new LinearGradientPaint(x1, y1, x2, y2,
+        var paint = new LinearGradientPaint(x1, y1, x2, y2,
                 fractions, colors, cycleMethod);
 
         g.setPaint(paint);

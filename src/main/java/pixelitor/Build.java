@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public enum Build {
 
     // these references are here only in order to make sure that
     // their dynamically loaded classes are included into the final jar
-    // after a  "minimizeJar" Maven Build. This cannot be achieved with
+    // after a  "minimizeJar" Maven Build. This can't be achieved with
     // include filters in pom.xml because the maven-shade-plugin limitation
     // "specifying an include filter for classes in an artifact implicitly
     // excludes all non-specified classes in that artifact"
@@ -65,7 +65,7 @@ public enum Build {
     }
 
     private static String calcFixTitle() {
-        String s = "Pixelitor " + Build.VERSION_NUMBER;
+        String s = "Pixelitor " + VERSION_NUMBER;
         if (CURRENT != FINAL) {
             s += " DEVELOPMENT " + System.getProperty("java.version");
         }

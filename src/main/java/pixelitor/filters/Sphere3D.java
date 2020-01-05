@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,13 +53,13 @@ public class Sphere3D extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if(filter == null) {
+        if (filter == null) {
             filter = new Sphere3DFilter();
         }
 
-        filter.setAlpha(alpha.getValueAsPercentage());
-        filter.setBeta(beta.getValueAsPercentage());
-        filter.setGamma(gamma.getValueAsPercentage());
+        filter.setAlpha(alpha.getPercentageValF());
+        filter.setBeta(beta.getPercentageValF());
+        filter.setGamma(gamma.getPercentageValF());
 
         filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
         filter.setInterpolation(interpolation.getValue());

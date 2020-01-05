@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.Cursors;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
@@ -35,6 +34,7 @@ import java.util.List;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
+import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Cursors.MOVE;
 
 /**
@@ -159,7 +159,7 @@ public class PathTransformer implements PenToolMode {
                     break;
                 }
             }
-            view.setCursor(contained ? Cursors.MOVE : Cursors.DEFAULT);
+            view.setCursor(contained ? MOVE : DEFAULT);
         }
 
         return false;
@@ -208,7 +208,7 @@ public class PathTransformer implements PenToolMode {
 
     @Override
     public DebugNode createDebugNode() {
-        DebugNode node = PenToolMode.super.createDebugNode();
+        var node = PenToolMode.super.createDebugNode();
         for (TransformBox box : boxes) {
             node.add(box.getDebugNode());
         }

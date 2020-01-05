@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -43,8 +42,8 @@ public class GuidesRendererTest {
 
     @Test
     public void testDrawNone() {
-        Graphics2D g2 = mock(Graphics2D.class);
-        List<Shape> lines = new ArrayList<>();
+        var g2 = mock(Graphics2D.class);
+        var lines = new ArrayList<Shape>();
 
         guidesRenderer.draw(g2, lines);
 
@@ -53,8 +52,8 @@ public class GuidesRendererTest {
 
     @Test
     public void testDrawInSingleStrokeMode() {
-        Graphics2D g2 = mock(Graphics2D.class);
-        List<Shape> lines = new ArrayList<>();
+        var g2 = mock(Graphics2D.class);
+        var lines = new ArrayList<Shape>();
         lines.add(new Line2D.Double(1, 2, 3, 4));
         guideStyle.setStrokeType(GuideStrokeType.SOLID);
 
@@ -67,8 +66,8 @@ public class GuidesRendererTest {
 
     @Test
     public void testDrawInDoubleStrokeMode() {
-        Graphics2D g2 = mock(Graphics2D.class);
-        List<Shape> lines = new ArrayList<>();
+        var g2 = mock(Graphics2D.class);
+        var lines = new ArrayList<Shape>();
         lines.add(new Line2D.Double(1, 2, 3, 4));
         guideStyle.setStrokeType(GuideStrokeType.DASHED_DOUBLE);
 

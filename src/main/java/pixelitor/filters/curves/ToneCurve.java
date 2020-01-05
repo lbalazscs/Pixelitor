@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public class ToneCurve {
         int lastIndex = curve.x.length - 1;
         int index = curve.findKnotPos(p.x);
 
-        // cannot add knot at first/last position
+        // Can't add knot at first/last position
         if (index <=0 || index > lastIndex) {
             return -1;
         }
@@ -145,7 +145,7 @@ public class ToneCurve {
             return;
         }
 
-        // check prev/next index - knots cannot change they index
+        // check prev/next index - knots can't change they index
         if (index > 0 && p.x < curve.x[index-1]) {
             p.x = curve.x[index-1];
         } else if (index < lastIndex && p.x > curve.x[index+1]) {
@@ -203,7 +203,7 @@ public class ToneCurve {
     }
 
     public boolean isOverKnot(int index) {
-        Point.Float p = new Point.Float(curve.x[index], curve.y[index]);
+        var p = new Point.Float(curve.x[index], curve.y[index]);
         for (int i = 0; i < curve.x.length; i++) {
             if (i != index && isOver(p, new Point.Float(curve.x[i], curve.y[i]))) {
                 return true;
@@ -244,17 +244,17 @@ public class ToneCurve {
 
     private void drawCurve() {
         initCurvePlotData();
-        Path2D.Float path2D = new Path2D.Float();
-        path2D.moveTo(0, ((float) curvePlotData[0] / 255) * height);
+        Path2D path = new Path2D.Float();
+        path.moveTo(0, ((float) curvePlotData[0] / 255) * height);
         for (int i = 0; i < curvePlotData.length; i++) {
             float x = ((float) i / 255) * width;
             float y = ((float) curvePlotData[i] / 255) * height;
-            path2D.lineTo(x, y);
+            path.lineTo(x, y);
         }
 
-        gr.setColor(active ? this.curveType.getColor() : this.curveType.getInactiveColor());
+        gr.setColor(active ? curveType.getColor() : curveType.getInactiveColor());
         gr.setStroke(curveStroke);
-        gr.draw(path2D);
+        gr.draw(path);
     }
 
     private void drawKnots() {

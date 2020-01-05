@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,12 +19,12 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
+import pixelitor.OpenImages;
 import pixelitor.gui.BlendingModePanel;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 
-import static pixelitor.gui.OpenComps.onActiveLayer;
+import static pixelitor.OpenImages.onActiveLayer;
 
 /**
  * The GUI selector for the opacity and blending mode of the layers
@@ -39,7 +39,7 @@ public class LayerBlendingModePanel extends BlendingModePanel
     private LayerBlendingModePanel() {
         super(false);
 
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
         Layers.addLayerChangeListener(this);
 
         opacityDDSlider.addActionListener(e -> {

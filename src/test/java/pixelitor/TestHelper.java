@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
 import pixelitor.filters.painters.TextSettings;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
@@ -50,7 +49,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Random;
 
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_MOVED;
@@ -72,12 +70,13 @@ public class TestHelper {
     public static final int TEST_WIDTH = 20;
     public static final int TEST_HEIGHT = 10;
     private static Composition currentComp;
+    private static Selection currentSel;
 
     private TestHelper() {
     }
 
     public static void setupMockFgBgSelector() {
-        FgBgColorSelector fgBgColorSelector = mock(FgBgColorSelector.class);
+        var fgBgColorSelector = mock(FgBgColorSelector.class);
         when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
         when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
         FgBgColors.setUI(fgBgColorSelector);
@@ -91,8 +90,9 @@ public class TestHelper {
     }
 
     public static TextLayer createTextLayer(Composition comp, String name) {
-        TextLayer textLayer = new TextLayer(comp, name);
-        textLayer.setSettings(TextSettings.createRandomSettings(new Random()));
+        var textLayer = new TextLayer(comp, name);
+        var settings = TextSettings.createRandomSettings();
+        textLayer.setSettings(settings);
         return textLayer;
     }
 
@@ -101,7 +101,7 @@ public class TestHelper {
     }
 
     public static Composition createEmptyComposition(int width, int height) {
-        Composition comp = Composition.createEmpty(width, height);
+        var comp = Composition.createEmpty(width, height);
         comp.setName("Test");
         setupMockViewFor(comp);
 
@@ -109,9 +109,9 @@ public class TestHelper {
     }
 
     public static Composition createMockComposition() {
-        Composition comp = mock(Composition.class);
+        var comp = mock(Composition.class);
+        var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
-        Canvas canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasImBounds()).thenReturn(
                 new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
@@ -124,19 +124,29 @@ public class TestHelper {
 
         when(comp.getView()).thenReturn(view);
 
-        when(comp.getSelection()).thenReturn(null);
+        currentSel = null;
+        // when setSelectionRef() is called on the mock, then store the received
+        // Selection argument in the currentSel field
+        doAnswer(invocation -> {
+            currentSel = (Selection) invocation.getArguments()[0];
+            return null;
+        }).when(comp).setSelectionRef(any(Selection.class));
+
+        // when getSelection() is called on the mock, then return the currentSel field
+        when(comp.getSelection()).thenAnswer((Answer<Selection>) invocation -> currentSel);
+        when(comp.hasSelection()).thenAnswer((Answer<Boolean>) invocation -> currentSel != null);
 
         return comp;
     }
 
     public static Composition create2LayerComposition(boolean addMasks) {
-        Composition c = createEmptyComposition();
+        var comp = createEmptyComposition();
 
-        ImageLayer layer1 = createImageLayer("layer 1", c);
-        ImageLayer layer2 = createImageLayer("layer 2", c);
+        var layer1 = createImageLayer("layer 1", comp);
+        var layer2 = createImageLayer("layer 2", comp);
 
-        c.addLayerInInitMode(layer1);
-        c.addLayerInInitMode(layer2);
+        comp.addLayerInInitMode(layer1);
+        comp.addLayerInInitMode(layer2);
 
         if (addMasks) {
             layer1.addMask(REVEAL_ALL);
@@ -145,13 +155,13 @@ public class TestHelper {
 
         NORMAL.activate(layer2, "test");
 
-        assert layer2 == c.getActiveLayer();
-        assert layer1 == c.getLayer(0);
-        assert layer2 == c.getLayer(1);
+        assert layer2 == comp.getActiveLayer();
+        assert layer1 == comp.getLayer(0);
+        assert layer2 == comp.getLayer(1);
 
-        c.setDirty(false);
+        comp.setDirty(false);
 
-        return c;
+        return comp;
     }
 
     public static BufferedImage createImage() {
@@ -162,7 +172,7 @@ public class TestHelper {
         return createImage().createGraphics();
     }
 
-    public static Layer createLayerOfClass(Class layerClass, Composition comp) {
+    public static Layer createLayerOfClass(Class<?> layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
             layer = ImageLayer.createEmpty(comp, "layer 1");
@@ -239,7 +249,7 @@ public class TestHelper {
 
         // set it to active only after the comp is set
         // because the active view should return non-null in view.getComp()
-        OpenComps.setActiveView(view, false);
+        OpenImages.setActiveView(view, false);
 
         return view;
     }
@@ -300,16 +310,17 @@ public class TestHelper {
     }
 
     public static void setRectangleSelection(Composition comp, Rectangle rect) {
-        comp.createSelectionFromShape(rect);
+        assert !comp.hasSelection();
+        comp.setSelectionRef(new Selection(rect, comp.getView()));
     }
 
     public static void setStandardTestTranslationToAllLayers(Composition comp,
                                                              WithTranslation translation) {
         comp.forEachContentLayer(contentLayer -> {
             // should be used on layers without translation
-            int tx = contentLayer.getTX();
+            int tx = contentLayer.getTx();
             assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
-            int ty = contentLayer.getTY();
+            int ty = contentLayer.getTy();
             assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
 
             setStandardTestTranslation(comp, contentLayer, translation);

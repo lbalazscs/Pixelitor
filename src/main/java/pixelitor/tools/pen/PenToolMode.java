@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,14 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Build;
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.PathNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -63,13 +62,13 @@ public interface PenToolMode {
         if (prevMode == TRANSFORM) {
             // in rare cases the transform boxes can
             // leave their cursor even after a mode change
-            OpenComps.setCursorForAll(Tools.PEN.getStartingCursor());
+            OpenImages.setCursorForAll(Tools.PEN.getStartingCursor());
         }
     }
 
     default void modeEnded() {
         if (PenTool.hasPath()) {
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
@@ -91,7 +90,7 @@ public interface PenToolMode {
                 comp.repaint();
             }
         } else { // no path in the pen tool
-            assert OpenComps.activePathIs(null);
+            assert OpenImages.activePathIs(null);
         }
         DraggablePoint.lastActive = null;
     }
@@ -102,12 +101,12 @@ public interface PenToolMode {
     boolean arrowKeyPressed(ArrowKey key);
 
     default DebugNode createDebugNode() {
-        DebugNode node = new DebugNode("PenToolMode " + toString(), this);
+        var node = new DebugNode("pen tool mode " + this, this);
 
         if (PenTool.hasPath()) {
-            node.add(new PathNode(path));
+            node.add(DebugNodes.createPathNode(path));
         } else {
-            node.addBoolean("Has Path", false);
+            node.addBoolean("has path", false);
         }
 
         return node;

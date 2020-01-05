@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class HueSatPaletteConfig implements PaletteConfig {
 
     @Override
     public JPanel createConfigPanel(PalettePanel palettePanel) {
-        JPanel p = new JPanel(new GridBagLayout());
+        var p = new JPanel(new GridBagLayout());
 
         satSlider = createSlider(saturation, "Saturation of the colors");
         satSlider.addChangeListener(e -> onNewSat(palettePanel));
@@ -62,10 +62,10 @@ public class HueSatPaletteConfig implements PaletteConfig {
         hueSlider.addChangeListener(e -> onNewHue(palettePanel));
 
         Insets insets = new Insets(2, 4, 2, 4);
-        GridBagConstraints labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
+        var labelCtr = new GridBagConstraints(0, 0, 1, 1, 0, 0,
                 GridBagConstraints.CENTER,
                 GridBagConstraints.NONE, insets, 0, 0);
-        GridBagConstraints sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
+        var sliderCtr = new GridBagConstraints(1, 0, 1, 1, 1.0, 0,
                 GridBagConstraints.EAST,
                 GridBagConstraints.HORIZONTAL, insets, 0, 0);
         p.add(new JLabel("Sat:"), labelCtr);

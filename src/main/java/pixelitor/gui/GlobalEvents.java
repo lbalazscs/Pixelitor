@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -108,7 +108,7 @@ public class GlobalEvents {
             assert Character.isUpperCase(key);
 
             // see issue #31 for why key codes and not key characters are used here
-            hotKeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_MASK), action);
+            hotKeyMap.put(KeyStroke.getKeyStroke(key, InputEvent.SHIFT_DOWN_MASK), action);
             hotKeyMap.put(KeyStroke.getKeyStroke(key, 0), action);
         }
     }

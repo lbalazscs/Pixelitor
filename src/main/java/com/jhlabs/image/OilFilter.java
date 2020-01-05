@@ -78,7 +78,7 @@ public class OilFilter extends WholeImageFilter {
             futures[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
         finishProgressTracker();
 
         return outPixels;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,11 +88,11 @@ public class Selection {
     // copy constructor
     public Selection(Selection orig, boolean shareView) {
         if (shareView) {
-            this.view = orig.view;
+            view = orig.view;
         }
 
         // the shapes can be shared
-        this.shape = orig.shape;
+        shape = orig.shape;
 
         // the Timer is not copied! - setView starts it
     }
@@ -187,7 +187,7 @@ public class Selection {
     }
 
     public void setShape(Shape currentShape) {
-        this.shape = currentShape;
+        shape = currentShape;
     }
 
     /**
@@ -244,12 +244,12 @@ public class Selection {
         Shape backupShape = shape;
         shape = type.modify(oldArea, outlineArea);
 
-        Composition comp = view.getComp();
+        var comp = view.getComp();
         boolean notEmpty = clipToCanvasSize(comp);
         if (notEmpty) {
             SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit(
                     "Modify Selection", comp, backupShape);
-            History.addEdit(edit);
+            History.add(edit);
         } else {
             comp.deselect(true);
         }
@@ -263,8 +263,8 @@ public class Selection {
 
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
-        History.addEdit(new SelectionShapeChangeEdit(
-            "Nudge Selection", view.getComp(), backupShape));
+        History.add(new SelectionShapeChangeEdit(
+                "Nudge Selection", view.getComp(), backupShape));
     }
 
     public boolean isHidden() {
@@ -274,12 +274,12 @@ public class Selection {
     public void setHidden(boolean hide, boolean fromMenu) {
         assert !dead : "dead selection";
 
-        boolean change = this.hidden != hide;
+        boolean change = hidden != hide;
         if (!change) {
             return;
         }
 
-        this.hidden = hide;
+        hidden = hide;
 
         if(hide) {
             stopMarching();
@@ -302,7 +302,7 @@ public class Selection {
     }
 
     public void setFrozen(boolean b) {
-        this.frozen = b;
+        frozen = b;
         if (b) {
             stopMarching();
         } else if (!hidden) {
@@ -326,16 +326,16 @@ public class Selection {
     }
 
     public void moveWhileDragging(double relImX, double relImY) {
-        AffineTransform at = AffineTransform.getTranslateInstance(relImX, relImY);
+        var at = AffineTransform.getTranslateInstance(relImX, relImY);
         shape = at.createTransformedShape(moveStartShape);
     }
 
     public PixelitorEdit endMovement() {
-        Composition comp = view.getComp();
+        var comp = view.getComp();
 
         shape = comp.clipShapeToCanvasSize(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas
-            DeselectEdit deselectEdit = new DeselectEdit(comp, moveStartShape, "moved outside the canvas");
+            DeselectEdit deselectEdit = new DeselectEdit(comp, moveStartShape);
             comp.deselect(false);
             return deselectEdit;
         }
@@ -347,16 +347,16 @@ public class Selection {
     }
 
     public DebugNode createDebugNode(String name) {
-        DebugNode node = new DebugNode(name, this);
+        var node = new DebugNode(name, this);
 
         node.addBoolean("hidden", hidden);
         node.addBoolean("dead", dead);
         node.addBoolean("frozen", frozen);
         node.addBoolean("marching", isMarching());
 
-        node.addString("Shape Class", shape.getClass().getName());
-        node.addString("Bounds", getShapeBounds(0).toString());
-        node.addString("Bounds 2D", getShapeBounds2D().toString());
+        node.addString("shape class", shape.getClass().getName());
+        node.addString("bounds", getShapeBounds(0).toString());
+        node.addString("bounds 2D", getShapeBounds2D().toString());
 
         return node;
     }

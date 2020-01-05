@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
@@ -39,7 +38,7 @@ import java.util.Random;
 import static java.awt.Color.WHITE;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -63,14 +62,14 @@ public class Starburst extends ParametrizedFilter {
             new IntChoiceParam.Value("Tool Background", BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
-    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, NO_OPACITY);
+    private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, NO_TRANSPARENCY);
     private final BooleanParam randomColors = new BooleanParam("Random Ray Colors", false, IGNORE_RANDOMIZE);
     private final AngleParam rotate = new AngleParam("Rotate", 0);
 
     public Starburst() {
         super(ShowOriginal.NO);
 
-        FilterAction reseedColorsAction = ReseedSupport.createAction(
+        var reseedColorsAction = ReseedSupport.createAction(
                 "Reseed", "Changes the random colors");
 
         setParams(
@@ -131,7 +130,7 @@ public class Starburst extends ParametrizedFilter {
         double radius = width + height; // should be enough even if the center is outside the image
 
         for (int i = 0; i < numberOfRays; i++) {
-            GeneralPath triangle = new GeneralPath();
+            var triangle = new GeneralPath();
             triangle.moveTo(cx, cy);
 
             double p1x = cx + radius * Math.cos(angle);

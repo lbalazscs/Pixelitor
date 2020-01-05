@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,9 +64,10 @@ public enum CopySource {
                 return canvasSizedImage;
             }
 
-            // If we get here, it means that there is an image and also a selection
-            // Now create an image with the selected pixels only
+            return createImageWithSelectedPixels(comp, canvasSizedImage);
+        }
 
+        private BufferedImage createImageWithSelectedPixels(Composition comp, BufferedImage canvasSizedImage) {
             Shape selectionShape = comp.getSelection().getShape();
             Rectangle bounds = selectionShape.getBounds();
 
@@ -84,7 +85,7 @@ public enum CopySource {
 
             BufferedImage finalImage = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
             Graphics2D g2 = finalImage.createGraphics();
-            AffineTransform at = AffineTransform.getTranslateInstance(-bounds.x, -bounds.y);
+            var at = AffineTransform.getTranslateInstance(-bounds.x, -bounds.y);
             g2.setClip(at.createTransformedShape(selectionShape));
             g2.drawImage(boundsSizeImg, 0, 0, null);
             g2.dispose();

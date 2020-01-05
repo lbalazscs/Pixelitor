@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -62,7 +63,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
         opacityRange = new RangeParam("Width:", 1, 100, 100);
-        SliderSpinner opacitySlider = SliderSpinner.simpleFrom(opacityRange);
+        var opacitySlider = SliderSpinner.from(opacityRange);
 
         enabledCB = new JCheckBox();
         enabledCB.setName("enabledCB");
@@ -80,9 +81,9 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         setLayout(new GridBagLayout());
 
         gbh = new GridBagHelper(this);
-        gbh.addLabelWithControl("Enabled:", enabledCB);
-        gbh.addLabelWithControlNoStretch("Color:", colorSwatch);
-        gbh.addLabelWithControl("Opacity:", opacitySlider);
+        gbh.addLabelAndControl("Enabled:", enabledCB);
+        gbh.addLabelAndControlNoStretch("Color:", colorSwatch);
+        gbh.addLabelAndControl("Opacity:", opacitySlider);
     }
 
     public void setTabEnabled(boolean defaultEnabled) {
@@ -120,7 +121,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     }
 
     public float getOpacity() {
-        return opacityRange.getValueAsPercentage();
+        return opacityRange.getPercentageValF();
     }
 
     public abstract int getBrushWidth();
@@ -155,7 +156,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     public boolean isSetToDefault() {
         boolean enabled = enabledCB.isSelected();
 
-        return (enabled == defaultEnabled)
+        return enabled == defaultEnabled
                 && Objects.equals(color, defaultColor);
     }
 
@@ -163,6 +164,17 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     public void reset(boolean trigger) {
         setTabEnabled(defaultEnabled);
         setColor(defaultColor, trigger);
+    }
+
+    public boolean randomize() {
+        // each effect is enabled with 25% probability
+        boolean enable = Rnd.nextFloat() < 0.25f;
+        setTabEnabled(enable);
+        if (enable) {
+            setColor(Rnd.createRandomColor(), false);
+            opacityRange.randomize();
+        }
+        return enable;
     }
 
     public void setDefaultButton(DefaultButton defaultButton) {

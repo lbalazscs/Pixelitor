@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,9 @@ import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.CompletableFuture;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
@@ -64,8 +67,8 @@ public class OptimizedJpegSavePanel extends JPanel {
         JPanel comparePanel = createComparePanel(image);
 
         setLayout(new BorderLayout(3, 3));
-        add(comparePanel, BorderLayout.CENTER);
-        add(controlsPanel, BorderLayout.SOUTH);
+        add(comparePanel, CENTER);
+        add(controlsPanel, SOUTH);
 
         updatePreview();
     }
@@ -113,7 +116,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JPanel createControlsPanel() {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        var p = new JPanel(new FlowLayout(LEFT));
 
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);
@@ -162,8 +165,8 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private JpegSettings getSelectedSettings() {
-        return new JpegSettings(qualityParam.getValueAsPercentage(),
-            progressiveCB.isSelected());
+        return new JpegSettings(qualityParam.getPercentageValF(),
+                progressiveCB.isSelected());
     }
 
     public static void showInDialog(BufferedImage image, JFrame frame) {

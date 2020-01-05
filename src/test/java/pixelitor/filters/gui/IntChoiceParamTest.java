@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class IntChoiceParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        IntChoiceParam param = new IntChoiceParam("Test", new Value[]{
+        var param = new IntChoiceParam("Test", new Value[]{
                 new Value("Name 1", 1),
                 new Value("Name 2", 2),
                 new Value("Name 3", 3),
@@ -46,7 +46,7 @@ public class IntChoiceParamTest {
     public void test_setSelectedItem() {
         Value v1 = new Value("Item 1", 1);
         Value v2 = new Value("Item 2", 2);
-        IntChoiceParam param = new IntChoiceParam("Test", new Value[]{
+        var param = new IntChoiceParam("Test", new Value[]{
                 v1,
                 v2,
         });
@@ -56,8 +56,8 @@ public class IntChoiceParamTest {
                 .valueIs(1)
                 .selectedAsStringIs("Item 1");
 
-        ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
-        param.setAdjustmentListener(al);
+        var adjListener = mock(ParamAdjustmentListener.class);
+        param.setAdjustmentListener(adjListener);
 
         param.setSelectedItem(v1, true);
         assertThat(param)
@@ -65,7 +65,7 @@ public class IntChoiceParamTest {
                 .valueIs(1)
                 .selectedAsStringIs("Item 1");
         // expect no triggering because the value didn't change
-        verify(al, never()).paramAdjusted();
+        verify(adjListener, never()).paramAdjusted();
 
         param.setSelectedItem(v2, true);
         assertThat(param)
@@ -73,7 +73,7 @@ public class IntChoiceParamTest {
                 .valueIs(2)
                 .selectedAsStringIs("Item 2");
         // expect one triggering
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
 
         param.setSelectedItem(v1, false);
         assertThat(param)
@@ -81,6 +81,6 @@ public class IntChoiceParamTest {
                 .valueIs(1)
                 .selectedAsStringIs("Item 1");
         // expect no new triggering, because triggering was set to false
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
     }
 }

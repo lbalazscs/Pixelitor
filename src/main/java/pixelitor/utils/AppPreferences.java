@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,22 +21,16 @@ import com.bric.util.JVM;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
-import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.StatusBar;
+import pixelitor.gui.WorkSpace;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.layers.LayerButtonLayout;
-import pixelitor.layers.LayersContainer;
 import pixelitor.menus.file.RecentFile;
 import pixelitor.menus.file.RecentFilesMenu;
-import pixelitor.menus.view.ShowHideHistogramsAction;
-import pixelitor.menus.view.ShowHideLayersAction;
-import pixelitor.menus.view.ShowHideStatusBarAction;
-import pixelitor.menus.view.ShowHideToolsAction;
 import pixelitor.tools.BrushTool;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -56,6 +50,7 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
+import static pixelitor.menus.file.RecentFilesMenu.MAX_RECENT_FILES;
 
 /**
  * Static methods for saving and loading application preferences
@@ -76,7 +71,7 @@ public final class AppPreferences {
 
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
-    private static final Preferences mainNode
+    public static final Preferences mainNode
             = Preferences.userNodeForPackage(Pixelitor.class);
     private static final Preferences recentFilesNode
             = Preferences.userNodeForPackage(RecentFilesMenu.class);
@@ -88,10 +83,6 @@ public final class AppPreferences {
 
     private static final String LAST_OPEN_DIR_KEY = "last_open_dir";
     private static final String LAST_SAVE_DIR_KEY = "last_save_dir";
-    private static final String HISTOGRAMS_SHOWN_KEY = "histograms_shown";
-    private static final String LAYERS_SHOWN_KEY = "layers_shown";
-    private static final String TOOLS_SHOWN_KEY = "tools_shown";
-    private static final String STATUS_BAR_SHOWN_KEY = "status_bar_shown";
 
     private static final String UNDO_LEVELS_KEY = "undo_levels";
 
@@ -201,9 +192,8 @@ public final class AppPreferences {
     }
 
     public static BoundedUniqueList<RecentFile> loadRecentFiles() {
-        BoundedUniqueList<RecentFile> retVal
-                = new BoundedUniqueList<>(RecentFilesMenu.MAX_RECENT_FILES);
-        for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
+        var retVal = new BoundedUniqueList<RecentFile>(MAX_RECENT_FILES);
+        for (int i = 0; i < MAX_RECENT_FILES; i++) {
             String key = RECENT_FILE_PREFS_KEY + i;
             String fileName = recentFilesNode.get(key, null);
             if (fileName == null) {
@@ -212,8 +202,7 @@ public final class AppPreferences {
             File file = new File(fileName);
 
             if (file.exists()) {
-                RecentFile recentFile = new RecentFile(file);
-                retVal.addIfNotThere(recentFile);
+                retVal.addIfNotThere(new RecentFile(file));
             }
         }
         return retVal;
@@ -228,7 +217,7 @@ public final class AppPreferences {
     }
 
     public static void removeRecentFiles() {
-        for (int i = 0; i < RecentFilesMenu.MAX_RECENT_FILES; i++) {
+        for (int i = 0; i < MAX_RECENT_FILES; i++) {
             recentFilesNode.remove(RECENT_FILE_PREFS_KEY + i);
         }
     }
@@ -334,11 +323,11 @@ public final class AppPreferences {
     }
 
     public static void savePrefsAndExit() {
-        savePreferencesBeforeExit();
+        savePreferences();
         System.exit(0);
     }
 
-    private static void savePreferencesBeforeExit() {
+    private static void savePreferences() {
         saveDesktopMode();
         saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileInfosForSaving());
         saveFramePosition(PixelitorWindow.getInstance());
@@ -454,105 +443,4 @@ public final class AppPreferences {
         toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getName());
     }
 
-    /**
-     * Static utility methods for managing the visibility of
-     * various UI areas
-     */
-    public static class WorkSpace {
-        private WorkSpace() {
-        }
-
-        private static final boolean DEFAULT_HISTOGRAMS_VISIBILITY = false;
-        private static final boolean DEFAULT_TOOLS_VISIBILITY = true;
-        private static final boolean DEFAULT_LAYERS_VISIBILITY = true;
-        private static final boolean DEFAULT_STATUS_BAR_VISIBILITY = true;
-
-        static boolean loaded = false;
-        private static boolean histogramsVisibility;
-        private static boolean toolsVisibility;
-        private static boolean layersVisibility;
-        private static boolean statusBarVisibility;
-
-        private static void load() {
-            if (loaded) {
-                return;
-            }
-            histogramsVisibility = mainNode.getBoolean(HISTOGRAMS_SHOWN_KEY, DEFAULT_HISTOGRAMS_VISIBILITY);
-            toolsVisibility = mainNode.getBoolean(TOOLS_SHOWN_KEY, DEFAULT_TOOLS_VISIBILITY);
-            layersVisibility = mainNode.getBoolean(LAYERS_SHOWN_KEY, DEFAULT_LAYERS_VISIBILITY);
-            statusBarVisibility = mainNode.getBoolean(STATUS_BAR_SHOWN_KEY, DEFAULT_STATUS_BAR_VISIBILITY);
-            loaded = true;
-        }
-
-        public static void resetDefaults(PixelitorWindow pw) {
-            if(HistogramsPanel.INSTANCE.isShown() != DEFAULT_HISTOGRAMS_VISIBILITY) {
-                setHistogramsVisibility(DEFAULT_HISTOGRAMS_VISIBILITY, false);
-                ShowHideHistogramsAction.INSTANCE.updateText(DEFAULT_HISTOGRAMS_VISIBILITY);
-            }
-
-            if(pw.areToolsShown() != DEFAULT_TOOLS_VISIBILITY) {
-                setToolsVisibility(DEFAULT_TOOLS_VISIBILITY, false);
-                ShowHideToolsAction.INSTANCE.updateText(DEFAULT_TOOLS_VISIBILITY);
-            }
-
-            if(LayersContainer.areLayersShown() != DEFAULT_LAYERS_VISIBILITY) {
-                setLayersVisibility(DEFAULT_LAYERS_VISIBILITY, false);
-                ShowHideLayersAction.INSTANCE.updateText(DEFAULT_LAYERS_VISIBILITY);
-            }
-
-            if(StatusBar.INSTANCE.isShown() != DEFAULT_STATUS_BAR_VISIBILITY) {
-                setStatusBarVisibility(DEFAULT_STATUS_BAR_VISIBILITY, false);
-                ShowHideStatusBarAction.INSTANCE.updateText(DEFAULT_STATUS_BAR_VISIBILITY);
-            }
-
-            pw.getContentPane().revalidate();
-        }
-
-        public static boolean getHistogramsVisibility() {
-            load();
-            return histogramsVisibility;
-        }
-
-        public static boolean getLayersVisibility() {
-            load();
-            return layersVisibility;
-        }
-
-        public static boolean getStatusBarVisibility() {
-            load();
-            return statusBarVisibility;
-        }
-
-        public static boolean getToolsVisibility() {
-            load();
-            return toolsVisibility;
-        }
-
-        private static void saveVisibility() {
-            mainNode.putBoolean(HISTOGRAMS_SHOWN_KEY, histogramsVisibility);
-            mainNode.putBoolean(LAYERS_SHOWN_KEY, layersVisibility);
-            mainNode.putBoolean(TOOLS_SHOWN_KEY, toolsVisibility);
-            mainNode.putBoolean(STATUS_BAR_SHOWN_KEY, statusBarVisibility);
-        }
-
-        public static void setLayersVisibility(boolean v, boolean revalidate) {
-            layersVisibility = v;
-            PixelitorWindow.getInstance().setLayersVisibility(v, revalidate);
-        }
-
-        public static void setHistogramsVisibility(boolean v, boolean revalidate) {
-            histogramsVisibility = v;
-            PixelitorWindow.getInstance().setHistogramsVisibility(v, revalidate);
-        }
-
-        public static void setToolsVisibility(boolean v, boolean revalidate) {
-            toolsVisibility = v;
-            PixelitorWindow.getInstance().setToolsVisibility(v, revalidate);
-        }
-
-        public static void setStatusBarVisibility(boolean v, boolean revalidate) {
-            statusBarVisibility = v;
-            PixelitorWindow.getInstance().setStatusBarVisibility(v, revalidate);
-        }
-    }
 }

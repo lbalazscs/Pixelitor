@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public enum TweenOutputType {
                 return format("<html>%s is a folder." +
                                 "<br>For the \"%s\" output type, " +
                                 "select a (new or existing) %s file in an existing folder.",
-                        output.getAbsolutePath(), type.toString(), fileType);
+                        output.getAbsolutePath(), type, fileType);
             }
         } else { // if it does not exist, we still expect the parent directory to exist
             File parentDir = output.getParentFile();
@@ -102,7 +102,7 @@ public enum TweenOutputType {
                                 "<br>For the \"%s\" output type, " +
                                 "select a (new or existing) %s file in an existing folder.",
                         parentDir.getName(), output.getAbsolutePath(),
-                        type.toString(), fileType);
+                        type, fileType);
             }
         }
         return null;
@@ -113,7 +113,7 @@ public enum TweenOutputType {
         if (!output.isDirectory()) {
             return format("<html>%s is not a folder." +
                             "<br>For the \"%s\" output type, select an existing folder.",
-                    output.getAbsolutePath(), type.toString());
+                    output.getAbsolutePath(), type);
         }
         if (!output.exists()) {
             return output.getAbsolutePath() + " does not exist.";

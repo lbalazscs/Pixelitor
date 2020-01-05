@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
-import java.util.Random;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -41,13 +40,13 @@ public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String text;
-    private final Font font;
-    private final AreaEffects areaEffects;
-    private final Color color;
-    private final VerticalAlignment verticalAlignment;
-    private final HorizontalAlignment horizontalAlignment;
-    private final boolean watermark;
-    private final double rotation;
+    private Font font;
+    private AreaEffects areaEffects;
+    private Color color;
+    private VerticalAlignment verticalAlignment;
+    private HorizontalAlignment horizontalAlignment;
+    private boolean watermark;
+    private double rotation;
 
     public TextSettings(String text, Font font, Color color,
                         AreaEffects areaEffects,
@@ -76,6 +75,9 @@ public class TextSettings implements Serializable {
         horizontalAlignment = other.horizontalAlignment;
         watermark = other.watermark;
         rotation = other.rotation;
+    }
+
+    private TextSettings() {
     }
 
     public AreaEffects getAreaEffects() {
@@ -115,8 +117,14 @@ public class TextSettings implements Serializable {
     }
 
     public void randomize() {
-        // TODO randomize the other fields as well
-        text = Long.toHexString(Rnd.nextLong());
+        text = Rnd.createRandomString(10);
+        font = Rnd.createRandomFont();
+        areaEffects = Rnd.createRandomEffects();
+        color = Rnd.createRandomColor();
+        horizontalAlignment = Rnd.chooseFrom(HorizontalAlignment.values());
+        verticalAlignment = Rnd.chooseFrom(VerticalAlignment.values());
+        watermark = Rnd.nextBoolean();
+        rotation = Rnd.nextDouble() * Math.PI * 2;
     }
 
     public void configurePainter(TranslatedTextPainter painter) {
@@ -148,13 +156,9 @@ public class TextSettings implements Serializable {
         return dest;
     }
 
-    public static TextSettings createRandomSettings(Random rand) {
-        return new TextSettings(Rnd.createRandomString(10),
-                new Font(Font.SANS_SERIF, Font.BOLD, 100),
-            Rnd.createRandomColor(),
-                AreaEffects.createRandom(rand),
-                HorizontalAlignment.CENTER,
-                VerticalAlignment.CENTER,
-                rand.nextBoolean(), rand.nextDouble() * Math.PI * 2);
+    public static TextSettings createRandomSettings() {
+        TextSettings settings = new TextSettings();
+        settings.randomize();
+        return settings;
     }
 }

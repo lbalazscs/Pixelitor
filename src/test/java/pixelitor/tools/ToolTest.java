@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,10 +26,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
-import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.TestHelper;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.pen.PenTool;
@@ -104,7 +103,7 @@ public class ToolTest {
     @Before
     public void setUp()  {
         PenTool.path = null;
-        Composition comp = TestHelper.create2LayerComposition(true);
+        var comp = TestHelper.create2LayerComposition(true);
         view = comp.getView();
         tool.toolStarted();
     }
@@ -112,7 +111,7 @@ public class ToolTest {
     @After
     public void tearDown() {
         tool.toolEnded();
-        OpenComps.setActiveView(null, false);
+        OpenImages.setActiveView(null, false);
     }
 
     @Test
@@ -147,20 +146,17 @@ public class ToolTest {
     }
 
     private void press(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, view
-        );
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, view);
         tool.handlerChain.handleMousePressed(e);
     }
 
     private void drag(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, view
-        );
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, view);
         tool.handlerChain.handleMouseDragged(e);
     }
 
     private void release(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, view
-        );
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, view);
         tool.handlerChain.handleMouseReleased(e);
     }
 }

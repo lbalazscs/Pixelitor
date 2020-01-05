@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,6 @@ package pixelitor.tools.shapes;
 
 import org.jdesktop.swingx.geom.Star2D;
 import pixelitor.filters.gui.EnumParam;
-import pixelitor.tools.shapes.custom.BatShape;
-import pixelitor.tools.shapes.custom.CatShape;
-import pixelitor.tools.shapes.custom.HeartShape;
-import pixelitor.tools.shapes.custom.KiwiShape;
-import pixelitor.tools.shapes.custom.RabbitShape;
 import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
@@ -82,7 +77,7 @@ public enum ShapeType {
         }
 
         private Shape createDiamond(double x, double y, double width, double height) {
-            Path2D.Double path = new Path2D.Double();
+            Path2D path = new Path2D.Double();
 
             double cx = x + width / 2.0;
             double cy = y + height / 2.0;
@@ -131,12 +126,12 @@ public enum ShapeType {
         @Override
         public Shape createShape(ImDrag imDrag) {
             setCoordinates(imDrag);
-            return new HeartShape(x, y, width, height);
+            return Shapes.createHeartShape(x, y, width, height);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return new HeartShape(x, y, diameter, diameter);
+            return Shapes.createHeartShape(x, y, diameter, diameter);
         }
     }, STAR("Star", true, false) {
         @Override
@@ -228,7 +223,7 @@ public enum ShapeType {
                 distance *= 2;
             }
 
-            AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
+            var transform = AffineTransform.getTranslateInstance(x, y);
             transform.scale(distance, distance); // originally it had a length of 1.0
             if (rotate) {
                 double angleInRadians = imDrag.getDrawAngle();
@@ -258,45 +253,45 @@ public enum ShapeType {
         @Override
         public Shape createShape(ImDrag imDrag) {
             setCoordinates(imDrag);
-            return new CatShape(x, y, width, height);
+            return Shapes.createCatShape(x, y, width, height);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return new CatShape(x, y, diameter, diameter);
+            return Shapes.createCatShape(x, y, diameter, diameter);
         }
     }, KIWI("Kiwi", true, false) {
         @Override
         public Shape createShape(ImDrag imDrag) {
             setCoordinates(imDrag);
-            return new KiwiShape(x, y, width, height);
+            return Shapes.createKiwiShape(x, y, width, height);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return new KiwiShape(x, y, diameter, diameter);
+            return Shapes.createKiwiShape(x, y, diameter, diameter);
         }
     }, BAT("Bat", true, false) {
         @Override
         public Shape createShape(ImDrag imDrag) {
             setCoordinates(imDrag);
-            return new BatShape(x, y, width, height);
+            return Shapes.createBatShape(x, y, width, height);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return new BatShape(x, y, diameter, diameter);
+            return Shapes.createBatShape(x, y, diameter, diameter);
         }
     }, RABBIT("Rabbit", true, false) {
         @Override
         public Shape createShape(ImDrag imDrag) {
             setCoordinates(imDrag);
-            return new RabbitShape(x, y, width, height);
+            return Shapes.createRabbitShape(x, y, width, height);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return new RabbitShape(x, y, diameter, diameter);
+            return Shapes.createRabbitShape(x, y, diameter, diameter);
         }
 //    }, RND_ANIMAL_FACE("Random Animal Face", true, false) {
 //        final int[] codePoints = {
@@ -386,7 +381,7 @@ public enum ShapeType {
 
     private final String guiName;
 
-    // if a shape is not closed, then it cannot be filled directly
+    // if a shape is not closed, then it can't be filled directly
     private final boolean closed;
 
     // directional shapes are the arrow and line, where the

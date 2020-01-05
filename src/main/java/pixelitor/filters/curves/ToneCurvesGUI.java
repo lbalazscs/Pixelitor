@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,9 @@ import pixelitor.utils.Icons;
 import javax.swing.*;
 import java.awt.FlowLayout;
 
+import static java.awt.FlowLayout.LEFT;
+import static javax.swing.BoxLayout.PAGE_AXIS;
+
 /**
  * The GUI for the tone curve filter
  *
@@ -35,20 +38,20 @@ public class ToneCurvesGUI extends FilterGUI {
         super(filter, dr);
 
         // listen for any change in curves to run filter preview
-        ToneCurvesPanel curvesPanel = new ToneCurvesPanel();
+        var curvesPanel = new ToneCurvesPanel();
         curvesPanel.addActionListener(e -> {
             ((ToneCurvesFilter) filter).setCurves(curvesPanel.toneCurves);
             runFilterPreview();
         });
 
-        JPanel chartPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel chartPanel = new JPanel(new FlowLayout(LEFT));
         chartPanel.add(curvesPanel);
 
-        JComboBox<ToneCurveType> curveTypeSelect = new JComboBox<>(ToneCurveType.values());
-        curveTypeSelect.setMaximumRowCount(curveTypeSelect.getItemCount());
-        curveTypeSelect.setSelectedItem(ToneCurveType.RGB);
-        curveTypeSelect.addActionListener(e -> curvesPanel.setActiveCurve(
-                (ToneCurveType) curveTypeSelect.getSelectedItem()));
+        var curveTypeCB = new JComboBox<ToneCurveType>(ToneCurveType.values());
+        curveTypeCB.setMaximumRowCount(curveTypeCB.getItemCount());
+        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
+        curveTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
+                (ToneCurveType) curveTypeCB.getSelectedItem()));
 
         JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
         resetChannel.addActionListener(e -> curvesPanel.resetActiveCurve());
@@ -56,12 +59,12 @@ public class ToneCurvesGUI extends FilterGUI {
         JButton resetAllBtn = new JButton("Reset All", Icons.getWestArrowIcon());
         resetAllBtn.addActionListener(e -> curvesPanel.reset());
 
-        JPanel channelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
         channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(curveTypeSelect);
+        channelPanel.add(curveTypeCB);
         channelPanel.add(resetChannel);
 
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
         JCheckBox showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
@@ -69,7 +72,7 @@ public class ToneCurvesGUI extends FilterGUI {
         buttonsPanel.add(resetAllBtn);
 
         JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+        mainPanel.setLayout(new BoxLayout(mainPanel, PAGE_AXIS));
         mainPanel.add(channelPanel);
         mainPanel.add(chartPanel);
         mainPanel.add(buttonsPanel);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,22 +20,25 @@ package pixelitor.gui;
 import com.bric.util.JVM;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
+import pixelitor.menus.help.AboutDialog;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.gui.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Taskbar;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -43,6 +46,16 @@ import java.awt.event.WindowEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.WEST;
+import static java.awt.Desktop.Action.APP_ABOUT;
+import static java.awt.Desktop.Action.APP_PREFERENCES;
+import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
+import static java.awt.Taskbar.Feature.ICON_IMAGE;
 
 /**
  * The main application window.
@@ -69,7 +82,7 @@ public class PixelitorWindow extends JFrame {
         Tools.setDefaultTool();
         addStatusBar();
 
-        setupFrameIcons();
+        setupIcons();
 
         GlobalEvents.init();
         GlobalEvents.addBrushSizeActions();
@@ -88,22 +101,39 @@ public class PixelitorWindow extends JFrame {
     private void setupWindowClosing() {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         addWindowListener(
-            new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent we) {
-                    Pixelitor.exitApp(PixelitorWindow.this);
+                new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent we) {
+                        Pixelitor.exitApp(PixelitorWindow.this);
+                    }
                 }
-            }
         );
     }
 
     private void addMenus() {
         MenuBar menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
+
+        if (JVM.isMac) {
+            setupMacHandlers();
+        }
+    }
+
+    private void setupMacHandlers() {
+        Desktop desktop = Desktop.getDesktop();
+        if (desktop.isSupported(APP_ABOUT)) {
+            desktop.setAboutHandler(e -> AboutDialog.showDialog(this));
+        }
+        if (desktop.isSupported(APP_PREFERENCES)) {
+            desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());
+        }
+        if (desktop.isSupported(APP_QUIT_HANDLER)) {
+            desktop.setQuitHandler((e, r) -> Pixelitor.exitApp(this));
+        }
     }
 
     public void addImagesArea() {
-        add(ImageArea.getUI(), BorderLayout.CENTER);
+        add(ImageArea.getUI(), CENTER);
     }
 
     public void removeImagesArea(JComponent c) {
@@ -112,44 +142,54 @@ public class PixelitorWindow extends JFrame {
 
     private void addLayersAndHistograms() {
         eastPanel = Box.createVerticalBox();
-        OpenComps.addActivationListener(HistogramsPanel.INSTANCE);
+        OpenImages.addActivationListener(HistogramsPanel.INSTANCE);
 
-        if (AppPreferences.WorkSpace.getHistogramsVisibility()) {
+        if (WorkSpace.getHistogramsVisibility()) {
             eastPanel.add(HistogramsPanel.INSTANCE);
         }
-        if (AppPreferences.WorkSpace.getLayersVisibility()) {
+        if (WorkSpace.getLayersVisibility()) {
             eastPanel.add(LayersContainer.INSTANCE);
         }
 
-        add(eastPanel, BorderLayout.EAST);
+        add(eastPanel, EAST);
     }
 
     private void addToolsPanel(Dimension screenSize) {
         toolsPanel = new ToolsPanel(this, screenSize);
 
-        if (AppPreferences.WorkSpace.getToolsVisibility()) {
-            add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
-            add(toolsPanel, BorderLayout.WEST);
+        if (WorkSpace.getToolsVisibility()) {
+            add(ToolSettingsPanelContainer.INSTANCE, NORTH);
+            add(toolsPanel, WEST);
         }
     }
 
     private void addStatusBar() {
-        if (AppPreferences.WorkSpace.getStatusBarVisibility()) {
-            add(StatusBar.INSTANCE, BorderLayout.SOUTH);
+        if (WorkSpace.getStatusBarVisibility()) {
+            add(StatusBar.INSTANCE, SOUTH);
         }
     }
 
-    private void setupFrameIcons() {
+    private void setupIcons() {
         URL imgURL32 = getClass().getResource("/images/pixelitor_icon32.png");
         URL imgURL48 = getClass().getResource("/images/pixelitor_icon48.png");
         URL imgURL256 = getClass().getResource("/images/pixelitor_icon256.png");
 
         if (imgURL32 != null && imgURL48 != null && imgURL256 != null) {
             List<Image> icons = new ArrayList<>(2);
-            icons.add(new ImageIcon(imgURL32).getImage());
-            icons.add(new ImageIcon(imgURL48).getImage());
-            icons.add(new ImageIcon(imgURL256).getImage());
+            Image img32 = new ImageIcon(imgURL32).getImage();
+            Image img48 = new ImageIcon(imgURL48).getImage();
+            Image img256 = new ImageIcon(imgURL256).getImage();
+            icons.add(img32);
+            icons.add(img48);
+            icons.add(img256);
             setIconImages(icons);
+
+            if (Taskbar.isTaskbarSupported()) {
+                Taskbar taskBar = Taskbar.getTaskbar();
+                if (taskBar.isSupported(ICON_IMAGE)) {
+                    taskBar.setIconImage(img256);
+                }
+            }
         } else {
             String msg = "icon imgURL is null";
             Dialogs.showErrorDialog(this, "Error", msg);
@@ -169,7 +209,7 @@ public class PixelitorWindow extends JFrame {
 
     public void setStatusBarVisibility(boolean visible, boolean revalidate) {
         if (visible) {
-            add(StatusBar.INSTANCE, BorderLayout.SOUTH);
+            add(StatusBar.INSTANCE, SOUTH);
         } else {
             remove(StatusBar.INSTANCE);
         }
@@ -183,7 +223,7 @@ public class PixelitorWindow extends JFrame {
         if (visible) {
             assert HistogramsPanel.INSTANCE.getParent() == null;
             eastPanel.add(HistogramsPanel.INSTANCE);
-            OpenComps.onActiveComp(HistogramsPanel.INSTANCE::updateFrom);
+            OpenImages.onActiveComp(HistogramsPanel.INSTANCE::updateFrom);
         } else {
             assert HistogramsPanel.INSTANCE.getParent() == eastPanel;
             eastPanel.remove(HistogramsPanel.INSTANCE);
@@ -212,8 +252,8 @@ public class PixelitorWindow extends JFrame {
         if (visible) {
             assert toolsPanel.getParent() == null;
             assert ToolSettingsPanelContainer.INSTANCE.getParent() == null;
-            add(toolsPanel, BorderLayout.WEST);
-            add(ToolSettingsPanelContainer.INSTANCE, BorderLayout.NORTH);
+            add(toolsPanel, WEST);
+            add(ToolSettingsPanelContainer.INSTANCE, NORTH);
         } else {
             assert toolsPanel.getParent() == getContentPane();
             assert ToolSettingsPanelContainer.INSTANCE.getParent() == getContentPane();
@@ -292,11 +332,11 @@ public class PixelitorWindow extends JFrame {
     }
 
     private void setLastNormalBounds(Rectangle normalBounds) {
-        this.lastNormalBounds = normalBounds;
+        lastNormalBounds = normalBounds;
     }
 
     public void setSavedNormalBounds(Rectangle normalBounds) {
-        this.savedNormalBounds = normalBounds;
+        savedNormalBounds = normalBounds;
     }
 
     private void setupRememberingLastBounds() {

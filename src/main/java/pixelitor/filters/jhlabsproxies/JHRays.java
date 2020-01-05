@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,6 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Graphics2D;
@@ -73,32 +72,32 @@ public class JHRays extends ParametrizedFilter {
 
         filter.setCentreX(center.getRelativeX());
         filter.setCentreY(center.getRelativeY());
-        filter.setStrength(strength.getValueAsPercentage());
+        filter.setStrength(strength.getPercentageValF());
         filter.setRotation(rotation.getValueInRadians());
 //        filter.setOpacity(opacity.getValueAsPercentage());
-        filter.setThreshold(threshold.getValueAsPercentage());
+        filter.setThreshold(threshold.getPercentageValF());
 //        filter.setRaysOnly(raysOnly.isChecked());
 
         // this value should not be divided by resizeFactor because
         // this is a scale and not really a length
-        filter.setZoom(length.getValueAsPercentage());
+        filter.setZoom(length.getPercentageValF());
 
-        ResizingFilterHelper r = new ResizingFilterHelper(src);
-        boolean shouldResize = r.shouldResize();
+        var helper = new ResizingFilterHelper(src);
+        boolean shouldResize = helper.shouldResize();
 
         int filterUnits = 3;
         int workUnits = filterUnits + 3; // +3 for the rays only step at the end
         if (shouldResize) {
-            int resizeUnits = r.getResizeWorkUnits(BILINEAR_FAST);
+            int resizeUnits = helper.getResizeWorkUnits(BILINEAR_FAST);
             workUnits += resizeUnits;
         }
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
-//        ProgressTracker pt = new DebugProgressTracker(NAME, workUnits);
+        var pt = new StatusBarProgressTracker(NAME, workUnits);
+//        var pt = new DebugProgressTracker(NAME, workUnits);
         filter.setProgressTracker(pt);
 
         BufferedImage rays;
         if (shouldResize) {
-            rays = r.invoke(BILINEAR_FAST, filter, pt, 0);
+            rays = helper.invoke(BILINEAR_FAST, filter, pt, 0);
         } else {
             // normal case, no resizing
             rays = filter.filter(src, dest);
@@ -112,7 +111,7 @@ public class JHRays extends ParametrizedFilter {
                 dest = filter.createCompatibleDestImage(src, null);
             }
             Graphics2D g = dest.createGraphics();
-            g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getValueAsPercentage()));
+            g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getPercentageValF()));
             g.drawRenderedImage(rays, null);
             g.dispose();
 
@@ -125,7 +124,7 @@ public class JHRays extends ParametrizedFilter {
         // add the rays on top of the source
         dest = ImageUtils.copyImage(src);
         Graphics2D g = dest.createGraphics();
-        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getValueAsPercentage()));
+        g.setComposite(MiscComposite.getInstance(MiscComposite.ADD, opacity.getPercentageValF()));
         g.drawRenderedImage(rays, null);
         g.dispose();
 

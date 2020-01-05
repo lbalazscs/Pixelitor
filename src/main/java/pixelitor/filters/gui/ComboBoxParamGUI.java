@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,9 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
+import static java.awt.FlowLayout.LEFT;
+import static javax.swing.BoxLayout.X_AXIS;
+
 /**
  * Displays a JComboBox as the GUI for an
  * {@link IntChoiceParam} or an {@link EnumParam}
@@ -29,7 +32,7 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;
     private final DefaultButton defaultButton;
 
-    public ComboBoxParamGUI(ComboBoxModel<E> model, FilterAction action) {
+    public ComboBoxParamGUI(ComboBoxModel<E> model, FilterButtonModel action) {
         assert model instanceof Resettable;
 
         comboBox = new JComboBox<>(model);
@@ -37,7 +40,7 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
         comboBox.setMaximumRowCount(model.getSize());
 
         // workaround for nimbus bug
-        Dimension origPS = comboBox.getPreferredSize();
+        var origPS = comboBox.getPreferredSize();
         comboBox.setPreferredSize(new Dimension(
                 origPS.width + 3,
                 origPS.height));
@@ -45,16 +48,16 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
         defaultButton = new DefaultButton((Resettable) model);
 
         if (action != null) {
-            JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JPanel left = new JPanel(new FlowLayout(LEFT));
             left.add(comboBox);
             left.add(defaultButton);
 
-            setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+            setLayout(new BoxLayout(this, X_AXIS));
             add(left);
             add(Box.createGlue());
             add(action.createGUI());
         } else {
-            setLayout(new FlowLayout(FlowLayout.LEFT));
+            setLayout(new FlowLayout(LEFT));
             add(comboBox);
             add(defaultButton);
         }

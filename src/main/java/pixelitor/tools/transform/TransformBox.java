@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.tools.transform;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DDimension;
 import pixelitor.history.History;
@@ -44,6 +44,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Consumer;
 
+import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.tools.transform.Direction.*;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
@@ -299,7 +300,7 @@ public class TransformBox implements ToolWidget {
     public void paint(Graphics2D g) {
         // paint the lines
         Shapes.drawVisible(g, boxShape);
-        Line2D line = new Line2D.Double(Shapes.calcCenter(nw, ne), rot);
+        var line = new Line2D.Double(Shapes.calcCenter(nw, ne), rot);
         Shapes.drawVisible(g, line);
 
         // paint the handles
@@ -455,7 +456,7 @@ public class TransformBox implements ToolWidget {
     private void addMovementToHistory(Composition comp, String editName) {
         assert editName != null;
         Memento afterMovement = copyState();
-        History.addEdit(new TransformBoxChangedEdit(editName, comp,
+        History.add(new TransformBoxChangedEdit(editName, comp,
                 this, beforeMovement, afterMovement, false));
     }
 
@@ -479,7 +480,7 @@ public class TransformBox implements ToolWidget {
         double dx = x - wholeBoxDragStartX;
         double dy = y - wholeBoxDragStartY;
 
-        Composition comp = e.getComp();
+        var comp = e.getComp();
 
         moveWholeBoxBy(dx, dy, comp);
     }
@@ -541,7 +542,7 @@ public class TransformBox implements ToolWidget {
 
         double dx = key.getMoveX();
         double dy = key.getMoveY();
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         moveWholeBoxBy(dx, dy, comp);
 
         String editName = key.isShiftDown()
@@ -627,7 +628,7 @@ public class TransformBox implements ToolWidget {
     }
 
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("TransformBox", this);
+        var node = new DebugNode("transform box", this);
 
         node.add(nw.getDebugNode());
         node.add(ne.getDebugNode());
@@ -656,7 +657,7 @@ public class TransformBox implements ToolWidget {
 
     @Override
     public String toString() {
-        return String.format("Transform Box, corners = (%s, %s, %s, %s)",
+        return format("Transform Box, corners = (%s, %s, %s, %s)",
                 nw, ne, se, sw);
     }
 

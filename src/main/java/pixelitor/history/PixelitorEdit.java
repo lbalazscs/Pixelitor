@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.AbstractUndoableEdit;
@@ -31,6 +31,8 @@ import javax.swing.undo.CannotUndoException;
 public abstract class PixelitorEdit extends AbstractUndoableEdit {
     protected Composition comp;
     private final String name;
+    private final boolean wasDirty;
+    private boolean cleanedByUndo = false;
 
     // if true, this is part of another edit,
     // not added to the history by itself
@@ -42,6 +44,8 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
         this.comp = comp;
         this.name = name;
+
+        wasDirty = comp.isDirty();
     }
 
     @Override
@@ -52,6 +56,11 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
         if (!embedded) {
             History.notifyMenus(this);
+        }
+
+        if (!wasDirty && !embedded) {
+            comp.setDirty(false);
+            cleanedByUndo = true;
         }
     }
 
@@ -64,10 +73,23 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
         if (!embedded) {
             History.notifyMenus(this);
         }
+
+        if (cleanedByUndo && makesDirty()) {
+            comp.setDirty(true);
+        }
+    }
+
+    /**
+     * Whether this edit should mark the composition as dirty.
+     * This method should be called only after full initialization
+     * of this object, because for some subclasses it is state-dependent.
+     */
+    public boolean makesDirty() {
+        return true;
     }
 
     private void activateComp() {
-        OpenComps.setActiveView(comp.getView(), true);
+        OpenImages.setActiveView(comp.getView(), true);
     }
 
     public Composition getComp() {
@@ -117,10 +139,10 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
             nodeName = getClass().getSimpleName();
         }
 
-        DebugNode node = new DebugNode(nodeName, this);
+        var node = new DebugNode(nodeName, this);
         node.addClass();
-        node.addQuotedString("Comp", comp.getName());
-        node.addBoolean("Embedded", embedded);
+        node.addQuotedString("comp", comp.getName());
+        node.addBoolean("embedded", embedded);
         return node;
     }
 }

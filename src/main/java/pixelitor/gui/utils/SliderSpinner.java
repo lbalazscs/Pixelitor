@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.WEST;
 import static java.awt.Color.GRAY;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
@@ -82,42 +86,46 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (textPosition == TextPosition.BORDER) {
             if (leftColor != null && rightColor != null) {
                 Border gradientBorder = new GradientBorder(leftColor, rightColor);
-                this.setBorder(createTitledBorder(gradientBorder, model.getName()));
+                setBorder(createTitledBorder(gradientBorder, model.getName()));
             } else {
-                this.setBorder(createTitledBorder(model.getName()));
+                setBorder(createTitledBorder(model.getName()));
                 this.leftColor = GRAY;
                 this.rightColor = GRAY;
             }
         }
 
-        this.slider = createSlider(model);
+        slider = createSlider(model);
         if (textPosition == TextPosition.BORDER) {
             setupTicks();
         }
 
-        this.spinner = createSpinner(model);
+        spinner = createSpinner(model);
 
         if (textPosition == TextPosition.WEST) {
             label = new JLabel(model.getName() + ": ");
-            add(label, BorderLayout.WEST);
+            add(label, WEST);
         } else if (textPosition == TextPosition.NORTH) {
             label = new JLabel(model.getName() + ": ");
-            add(label, BorderLayout.NORTH);
+            add(label, NORTH);
         } else {
             label = null;
         }
 
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        add(this.slider, BorderLayout.CENTER);
-        p.add(this.spinner);
+        var p = new JPanel(new FlowLayout(LEFT));
+        add(slider, CENTER);
+        p.add(spinner);
 
         if (addDefaultButton) {
             createDefaultButton(model);
             p.add(defaultButton);
         }
-        add(p, BorderLayout.EAST);
+        add(p, EAST);
 
 //        showTicksAsFloat();
+    }
+
+    public static SliderSpinner from(RangeParam model) {
+        return new SliderSpinner(model, TextPosition.NONE, false);
     }
 
     private JSlider createSlider(RangeParam model) {
@@ -153,7 +161,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         JSpinner s = new JSpinner(spinnerModel);
 
         if(decimalPlaces > 0) {
-            JSpinner.NumberEditor editor = (JSpinner.NumberEditor) s.getEditor();
+            var editor = (JSpinner.NumberEditor) s.getEditor();
             DecimalFormat format = editor.getFormat();
             format.setMinimumFractionDigits(decimalPlaces);
 
@@ -170,14 +178,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (colorsUsed) {
             defaultButton.setBackground(GRAY);
         }
-    }
-
-    public static SliderSpinner simpleFrom(RangeParam model) {
-        return new SliderSpinner(model, TextPosition.NONE, false);
-    }
-
-    public static SliderSpinner simpleWithDefaultButton(RangeParam model) {
-        return new SliderSpinner(model, TextPosition.NONE, true);
     }
 
     public void setupTicks() {
@@ -265,7 +265,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         @SuppressWarnings("unchecked")
         Dictionary<Integer, JLabel> labelsDict = slider.getLabelTable();
 
-        Enumeration<Integer> keys = labelsDict.keys();
+        var keys = labelsDict.keys();
         while (keys.hasMoreElements()) {
             Integer i = keys.nextElement();
             labelsDict.get(i).setText(String.valueOf(i / 100.0f));

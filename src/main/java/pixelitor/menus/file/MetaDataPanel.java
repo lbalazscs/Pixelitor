@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import org.jdesktop.swingx.JXTreeTable;
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -45,6 +44,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.WEST;
+import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 
 public class MetaDataPanel extends JPanel implements DropTargetListener {
@@ -59,10 +63,10 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         treeTable.setHorizontalScrollEnabled(true);
 
         JScrollPane sp = new JScrollPane(treeTable);
-        add(sp, BorderLayout.CENTER);
+        add(sp, CENTER);
 
         JPanel northPanel = new JPanel(new BorderLayout());
-        JPanel northLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel northLeftPanel = new JPanel(new FlowLayout(LEFT));
         JButton expandButton = new JButton(new AbstractAction("Expand All") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -79,7 +83,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         collapseButton.setName("collapseButton");
         northLeftPanel.add(expandButton);
         northLeftPanel.add(collapseButton);
-        northPanel.add(northLeftPanel, BorderLayout.WEST);
+        northPanel.add(northLeftPanel, WEST);
         JButton helpButton = new JButton(new AbstractAction("Help") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -88,8 +92,8 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         });
         JPanel northRightPanel = new JPanel();
         northRightPanel.add(helpButton);
-        northPanel.add(northRightPanel, BorderLayout.EAST);
-        add(northPanel, BorderLayout.NORTH);
+        northPanel.add(northRightPanel, EAST);
+        add(northPanel, NORTH);
 
         setupColumnsWidths();
 
@@ -192,7 +196,7 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
     }
 
     public static void showInDialog(PixelitorWindow pw) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         File file = comp.getFile();
         if (file == null) {
             Dialogs.showInfoDialog(pw, "No file", format(

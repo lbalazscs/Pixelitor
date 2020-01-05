@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,14 +49,14 @@ public class ShapeDabsBrush extends DabsBrush {
         ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
         if (theta != 0) {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
-            AffineTransform t = AffineTransform.getRotateInstance(theta, x, y);
-            Shape transformedShape = t.createTransformedShape(shape);
+            var rotTx = AffineTransform.getRotateInstance(theta, x, y);
+            Shape transformedShape = rotTx.createTransformedShape(shape);
             targetG.fill(transformedShape);
         } else {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
             targetG.fill(shape);
         }
-        updateComp(p);
+        repaintComp(p);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,8 +82,8 @@ public class HSBColorMixPalette extends Palette {
 
     @Override
     public void onConfigChange() {
-        HueSatPaletteConfig hs = (HueSatPaletteConfig) config;
-        extraSat = hs.getSaturation() - averageSat;
+        float configSat = ((HueSatPaletteConfig) config).getSaturation();
+        extraSat = configSat - averageSat;
     }
 
     @Override
@@ -126,7 +126,7 @@ public class HSBColorMixPalette extends Palette {
     }
 
     private float calcMixFactor(int x) {
-        return (x * (numCols + 1) / (float) numCols) / (float) numCols;
+        return (x * (numCols + 1) / (float) numCols) / numCols;
     }
 
     private float calcSat(float mixFactor) {
@@ -141,9 +141,7 @@ public class HSBColorMixPalette extends Palette {
     }
 
     private float calcHue(float mixFactor) {
-        HueSatPaletteConfig hs = (HueSatPaletteConfig) config;
-        float hueShift = hs.getHueShift();
-
+        float hueShift = ((HueSatPaletteConfig) config).getHueShift();
         float h = hueShift + ColorUtils.lerpHue(mixFactor, hue, otherHue);
         if (h > 1.0f) {
             h = h - 1.0f;

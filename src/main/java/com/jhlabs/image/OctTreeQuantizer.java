@@ -69,7 +69,7 @@ public class OctTreeQuantizer implements Quantizer {
         }
     }
 
-    private int nodes = 0;
+//    private int nodes = 0;
     private final OctTreeNode root;
     private int reduceColors;
     private int maximumColors;
@@ -195,7 +195,7 @@ public class OctTreeQuantizer implements Quantizer {
                 child.parent = node;
                 node.leaf[index] = child;
                 node.isLeaf = false;
-                nodes++;
+//                nodes++;
                 colorList[level].add(child);
 
                 if (level == MAX_LEVEL) {
@@ -242,7 +242,7 @@ public class OctTreeQuantizer implements Quantizer {
                                 node.leaf[i] = null;
                                 node.children--;
                                 colors--;
-                                nodes--;
+//                                nodes--;
                                 colorList[level + 1].remove(child);
                             }
                         }

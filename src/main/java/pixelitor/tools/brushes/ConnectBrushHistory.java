@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class ConnectBrushHistory {
             double offSet = settings.getStyle().getOffset();
             double density = settings.getDensity();
 
-            Line2D.Double line = new Line2D.Double();
+            var line = new Line2D.Double();
 
             ThreadLocalRandom rnd = ThreadLocalRandom.current();
             for (int i = 0; i < indexOfNextAdd; i++) {
@@ -65,7 +65,7 @@ public class ConnectBrushHistory {
                     if (distSq < diamSq && distSq > 0 && density > rnd.nextFloat()) {
                         int alpha = (int) Math.min(255.0, 10000 / distSq);
 
-                        int rgbWithAlpha = (alpha << 24) | currentColorZeroAlpha;
+                        int rgbWithAlpha = alpha << 24 | currentColorZeroAlpha;
 
                         targetG.setColor(new Color(rgbWithAlpha, true));
                         double xOffset = dx * offSet;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,12 +28,10 @@ import java.util.Objects;
  */
 public class DeselectEdit extends PixelitorEdit {
     private final Shape backupShape;
-    private final String reason;
 
-    public DeselectEdit(Composition comp, Shape backupShape, String reason) {
+    public DeselectEdit(Composition comp, Shape backupShape) {
         super("Deselect", comp);
 
-        this.reason = reason;
         this.backupShape = Objects.requireNonNull(backupShape);
     }
 
@@ -54,7 +52,7 @@ public class DeselectEdit extends PixelitorEdit {
     }
 
     @Override
-    public String getDebugName() {
-        return super.getDebugName() + " (reason = \"" + reason + "\")";
+    public boolean makesDirty() {
+        return false;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.util.Objects;
 import pixelitor.selection.Selection;
 
+import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -117,12 +118,12 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         return this;
     }
 
-    public SelectionAssert hasShape(java.awt.Shape shape) {
+    public SelectionAssert hasShape(Shape shape) {
         isNotNull();
 
         String msg = "\nExpecting shape of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        java.awt.Shape actualShape = actual.getShape();
+        Shape actualShape = actual.getShape();
         if (!Objects.areEqual(actualShape, shape)) {
             failWithMessage(msg, actual, shape, actualShape);
         }

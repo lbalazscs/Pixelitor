@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,6 +38,7 @@ import java.awt.geom.Point2D;
 import java.util.Optional;
 
 import static java.lang.Double.isNaN;
+import static java.lang.String.format;
 
 /**
  * A point that can be dragged with the help of a handle.
@@ -142,7 +143,7 @@ public class DraggablePoint extends Point2D.Double {
      * and also recalculates the component-space coordinates
      */
     public final void imTransformOnlyThis(AffineTransform at, boolean useRefPoint) {
-        // can't simply use at.transform(refPoint, this) because that would
+        // Can't simply use at.transform(refPoint, this) because that would
         // call setLocation, which is in component space and also can be overridden
         Point2D transformed;
         if (useRefPoint) {
@@ -172,8 +173,8 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     private void setShapes() {
-        double shapeStartX = this.x - HANDLE_RADIUS;
-        double shapeStartY = this.y - HANDLE_RADIUS;
+        double shapeStartX = x - HANDLE_RADIUS;
+        double shapeStartY = y - HANDLE_RADIUS;
         double shadowStartX = shapeStartX + SHADOW_OFFSET;
         double shadowStartY = shapeStartY + SHADOW_OFFSET;
         shape = createShape(shapeStartX, shapeStartY, HANDLE_DIAMETER);
@@ -202,10 +203,10 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public boolean handleContains(double x, double y) {
-        return (x > (this.x - HANDLE_RADIUS))
-            && (x < (this.x + HANDLE_RADIUS))
-            && (y > (this.y - HANDLE_RADIUS))
-            && (y < (this.y + HANDLE_RADIUS));
+        return x > this.x - HANDLE_RADIUS
+                && x < this.x + HANDLE_RADIUS
+                && y > this.y - HANDLE_RADIUS
+                && y < this.y + HANDLE_RADIUS;
     }
 
     public void paintHandle(Graphics2D g) {
@@ -286,10 +287,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public void setActive(boolean activate) {
         if (activate) {
-            DraggablePoint.activePoint = this;
-            DraggablePoint.lastActive = this;
+            activePoint = this;
+            lastActive = this;
         } else {
-            DraggablePoint.activePoint = null;
+            activePoint = null;
         }
     }
 
@@ -298,8 +299,8 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public double distanceFrom(DraggablePoint other) {
-        double dx = other.x - this.x;
-        double dy = other.y - this.y;
+        double dx = other.x - x;
+        double dy = other.y - y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
@@ -316,7 +317,7 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public boolean samePositionAs(DraggablePoint that) {
-        return this.x == that.x && this.y == that.y;
+        return x == that.x && y == that.y;
     }
 
     public String getName() {
@@ -324,14 +325,14 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public boolean samePositionAs(DraggablePoint that, double epsilon) {
-        return Math.abs(this.x - that.x) < epsilon
-            && Math.abs(this.y - that.y) < epsilon;
+        return Math.abs(x - that.x) < epsilon
+                && Math.abs(y - that.y) < epsilon;
     }
 
     public void copyPositionFrom(DraggablePoint that) {
         setLocationOnlyForThis(that.x, that.y);
-        this.imX = that.imX;
-        this.imY = that.imY;
+        imX = that.imX;
+        imY = that.imY;
 
         assert !isNaN(imX);
         assert !isNaN(imY);
@@ -391,25 +392,24 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public String toColoredString() {
-        String sb = String.format("\u001B[32m%s\u001B[0m " +
-                "{x = \u001B[33m%.2f\u001B[0m, " +
-                "y = \u001B[33m%.2f\u001B[0m}" +
-                "{imX = \u001B[36m%.1f\u001B[0m, " +
-                "imY = \u001B[36m%.1f\u001B[0m}",
-            name, x, y, imX, imY);
+        String sb = format("\u001B[32m%s\u001B[0m " +
+                        "{x = \u001B[33m%.2f\u001B[0m, " +
+                        "y = \u001B[33m%.2f\u001B[0m}" +
+                        "{imX = \u001B[36m%.1f\u001B[0m, " +
+                        "imY = \u001B[36m%.1f\u001B[0m}",
+                name, x, y, imX, imY);
         return sb;
     }
 
     @Override
     public String toString() {
-        String sb = String
-            .format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
+        String sb = format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
                 name, x, y, imX, imY);
         return sb;
     }
 
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode(name, this);
+        var node = new DebugNode(name, this);
         node.addDouble("x", getX());
         node.addDouble("y", getY());
         return node;

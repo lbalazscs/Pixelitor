@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
@@ -92,11 +91,11 @@ public class PaintBucketTool extends Tool {
         int x = (int) e.getImX();
         int y = (int) e.getImY();
 
-        Composition comp = e.getComp();
+        var comp = e.getComp();
         Drawable dr = comp.getActiveDrawableOrThrow();
 
-        int tx = dr.getTX();
-        int ty = dr.getTY();
+        int tx = dr.getTx();
+        int ty = dr.getTy();
 
         x -= tx;
         y -= ty;
@@ -159,7 +158,7 @@ public class PaintBucketTool extends Tool {
             PartialImageEdit edit = History.createPartialImageEdit(replacedArea, backupForUndo, dr,
                     true, getName());
             if (edit != null) {
-                History.addEdit(edit);
+                History.add(edit);
             }
 
             if (thereIsSelection) {
@@ -334,11 +333,11 @@ public class PaintBucketTool extends Tool {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addInt("Tolerance", toleranceParam.getValue());
-        node.addQuotedString("Fill With", (String) fillCB.getSelectedItem());
-        node.addQuotedString("Action", (String) actionCB.getSelectedItem());
+        node.addInt("tolerance", toleranceParam.getValue());
+        node.addQuotedString("fill with", (String) fillCB.getSelectedItem());
+        node.addQuotedString("action", (String) actionCB.getSelectedItem());
 
         return node;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.Build;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
@@ -66,7 +66,7 @@ public class Tools {
     public static Tool currentTool;
 
     static {
-        OpenComps.addActivationListener(new CompActivationListener() {
+        OpenImages.addActivationListener(new CompActivationListener() {
             @Override
             public void compActivated(View oldView, View newView) {
                 currentTool.compActivated(oldView, newView);
@@ -115,7 +115,7 @@ public class Tools {
         // showing the message could be useful even if the tool didn't change
         Messages.showInStatusBar(newTool.getStatusBarMessage());
 
-        Tool previousTool = Tools.currentTool;
+        Tool previousTool = currentTool;
         if (previousTool == newTool) {
             return;
         }
@@ -123,7 +123,7 @@ public class Tools {
             previousTool.toolEnded();
             EventDispatcher.toolChanged(previousTool, newTool);
         }
-        Tools.currentTool = newTool;
+        currentTool = newTool;
         newTool.toolStarted();
         ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newTool);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,8 @@ package pixelitor.guides;
 
 import pixelitor.Canvas;
 import pixelitor.CanvasMargins;
-import pixelitor.Composition;
-import pixelitor.filters.comp.Flip;
-import pixelitor.filters.comp.Rotate;
+import pixelitor.compactions.Flip;
+import pixelitor.compactions.Rotate;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.gui.View;
@@ -37,11 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
-import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+import static java.lang.String.format;
+import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
+import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
 
 /**
  * Represents a set of guides.
@@ -133,9 +133,18 @@ public class Guides implements Serializable {
 
     public Guides copyForEnlargedCanvas(int north, int east, int south, int west, View view) {
         Guides copy = new Guides();
-        copy.setName(String.format("enlarged : north = %d, east = %d, south = %d, west = %d%n",
+        copy.setName(format("enlarged : north = %d, east = %d, south = %d, west = %d%n",
                 north, east, south, west));
         Canvas canvas = view.getCanvas();
+
+        copyVerticals(copy, east, west, canvas);
+        copyHorizontals(copy, north, south, canvas);
+
+        copy.regenerateLines(view);
+        return copy;
+    }
+
+    private void copyVerticals(Guides copy, int east, int west, Canvas canvas) {
         int oldWidth = canvas.getImWidth();
         if (west != 0 || east != 0) {
             int newWidth = oldWidth + east + west;
@@ -147,7 +156,9 @@ public class Guides implements Serializable {
         } else {
             copy.verticals.addAll(verticals);
         }
+    }
 
+    private void copyHorizontals(Guides copy, int north, int south, Canvas canvas) {
         int oldHeight = canvas.getImHeight();
         if (north != 0 || south != 0) {
             int newHeight = oldHeight + north + south;
@@ -159,9 +170,6 @@ public class Guides implements Serializable {
         } else {
             copy.horizontals.addAll(horizontals);
         }
-
-        copy.regenerateLines(view);
-        return copy;
     }
 
     public Guides copyForCrop(Rectangle cropRect, View view) {
@@ -224,14 +232,14 @@ public class Guides implements Serializable {
 
     public void addRelativeGrid(int numHorDivisions, int numVerDivisions) {
         // horizontal lines
-        double divisionHeight = 1.0 / (double) numHorDivisions;
+        double divisionHeight = 1.0 / numHorDivisions;
         for (int i = 1; i < numHorDivisions; i++) {
             double lineY = i * divisionHeight;
             horizontals.add(lineY);
         }
 
         // vertical lines
-        double divisionWidth = 1.0 / (double) numVerDivisions;
+        double divisionWidth = 1.0 / numVerDivisions;
         for (int i = 1; i < numVerDivisions; i++) {
             double lineX = i * divisionWidth;
             verticals.add(lineX);
@@ -352,16 +360,16 @@ public class Guides implements Serializable {
             setup.accept(guides);
 
             guides.regenerateLines(view);
-            Composition comp = view.getComp();
+            var comp = view.getComp();
             comp.setGuides(guides);
             comp.repaint();
             if (!preview) {
-                History.addEdit(new GuidesChangeEdit(comp, oldGuides, guides));
+                History.add(new GuidesChangeEdit(comp, oldGuides, guides));
             }
         }
 
         public void resetOldGuides() {
-            Composition comp = view.getComp();
+            var comp = view.getComp();
             comp.setGuides(oldGuides);
             view.repaint();
         }

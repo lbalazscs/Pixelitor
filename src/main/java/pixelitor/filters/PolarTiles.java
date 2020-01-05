@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,11 +22,12 @@ import pixelitor.filters.gui.DialogParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.PolarTilesFilter;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Polar Glass Tiles filter
@@ -52,7 +53,7 @@ public class PolarTiles extends ParametrizedFilter {
     public PolarTiles() {
         super(ShowOriginal.YES);
 
-        ReseedNoiseFilterAction reseedRandomness = new ReseedNoiseFilterAction("", "Reseed Randomness");
+        var reseedRandomness = reseedNoise("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseedRandomness);
         setParams(
                 center,
@@ -77,12 +78,12 @@ public class PolarTiles extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
         filter.setRotateResult((float) rotateImage.getValueInIntuitiveRadians());
-        filter.setZoom(zoom.getValueAsPercentage());
-        filter.setT(rotateEffect.getValueAsPercentage());
+        filter.setZoom(zoom.getPercentageValF());
+        filter.setT(rotateEffect.getPercentageValF());
         filter.setNumADivisions(numAngDivisions.getValue());
         filter.setNumRDivisions(numRadDivisions.getValue());
         filter.setCurvature(curvature.getValueAsDouble());
-        filter.setRandomness(randomness.getValueAsPercentage());
+        filter.setRandomness(randomness.getPercentageValF());
 
         dest = filter.filter(src, dest);
         return dest;

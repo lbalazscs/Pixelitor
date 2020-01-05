@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class ConnectBrushSettings extends BrushSettings {
         resetForEachStroke = new JCheckBox("", RESET_DEFAULT);
         p.addLabelWithControl("Reset History for Each Stroke: ", resetForEachStroke);
 
-        p.addOnlyButton("Reset History Now", e -> brush.deleteHistory());
+        p.addOnlyButton("Reset History Now", e -> ConnectBrush.deleteHistory());
 
         return p;
     }
@@ -65,7 +65,7 @@ public class ConnectBrushSettings extends BrushSettings {
     }
 
     public double getDensity() {
-        return densityModel.getValueAsPercentage();
+        return densityModel.getPercentageValF();
     }
 
     public float getLineWidth() {

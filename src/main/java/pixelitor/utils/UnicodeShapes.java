@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class UnicodeShapes {
             return glyphs.getOutline(0, lineMetrics.getAscent());
         });
 
-        AffineTransform at = AffineTransform.getTranslateInstance(x, y);
+        var at = AffineTransform.getTranslateInstance(x, y);
         Rectangle2D stringBounds = font.getStringBounds(s, frc);
         double sx = width / stringBounds.getWidth();
         double sy = height / stringBounds.getHeight();

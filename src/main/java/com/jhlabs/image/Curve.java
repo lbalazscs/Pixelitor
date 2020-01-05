@@ -89,21 +89,21 @@ public class Curve {
         y = ny;
     }
 
-    private void sortKnots() {
-        int numKnots = x.length;
-        for (int i = 1; i < numKnots - 1; i++) {
-            for (int j = 1; j < i; j++) {
-                if (x[i] < x[j]) {
-                    float t = x[i];
-                    x[i] = x[j];
-                    x[j] = t;
-                    t = y[i];
-                    y[i] = y[j];
-                    y[j] = t;
-                }
-            }
-        }
-    }
+//    private void sortKnots() {
+//        int numKnots = x.length;
+//        for (int i = 1; i < numKnots - 1; i++) {
+//            for (int j = 1; j < i; j++) {
+//                if (x[i] < x[j]) {
+//                    float t = x[i];
+//                    x[i] = x[j];
+//                    x[j] = t;
+//                    t = y[i];
+//                    y[i] = y[j];
+//                    y[j] = t;
+//                }
+//            }
+//        }
+//    }
 
     public int[] makeTable() {
         int numKnots = x.length;

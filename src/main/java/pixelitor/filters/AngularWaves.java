@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,11 +68,11 @@ public class AngularWaves extends ParametrizedFilter {
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 
-        filter.setPhase(phase.getValueAsPercentage());
+        filter.setPhase(phase.getPercentageValF());
         filter.setRadialWL(radialWL.getValueAsDouble());
 
-        filter.setZoom(zoom.getValueAsPercentage());
-        filter.setAmount(amount.getValueAsPercentage());
+        filter.setZoom(zoom.getPercentageValF());
+        filter.setAmount(amount.getPercentageValF());
         filter.setWaveType(waveType.getValue());
 
         dest = filter.filter(src, dest);

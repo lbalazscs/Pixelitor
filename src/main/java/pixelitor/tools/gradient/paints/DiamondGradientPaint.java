@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -145,7 +145,7 @@ public class DiamondGradientPaint implements Paint {
                     boolean needsAA = false;
                     if (cycleMethod == REPEAT) {
                         double threshold = 1.0 / dragDist;
-                        needsAA = interpolation > (1.0 - threshold)
+                        needsAA = interpolation > 1.0 - threshold
                                 || interpolation < threshold;
                     }
 
@@ -199,8 +199,8 @@ public class DiamondGradientPaint implements Paint {
             double dx = x - imDrag.getStartX();
             double dy = y - imDrag.getStartY();
 
-            double v1 = Math.abs((dx * this.dragRelDX) + (dy * this.dragRelDY));
-            double v2 = Math.abs((dx * this.dragRelDY) - (dy * this.dragRelDX));
+            double v1 = Math.abs((dx * dragRelDX) + (dy * dragRelDY));
+            double v2 = Math.abs((dx * dragRelDY) - (dy * dragRelDX));
 
             double interpolation = v1 + v2;
 

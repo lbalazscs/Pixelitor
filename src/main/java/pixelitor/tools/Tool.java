@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.tools;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Layer;
@@ -120,7 +120,7 @@ public abstract class Tool implements KeyListener {
         ended = false;
 
         GlobalEvents.setKeyListener(this);
-        OpenComps.setCursorForAll(cursor);
+        OpenImages.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
@@ -208,7 +208,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
-            OpenComps.setCursorForAll(
+            OpenImages.setCursorForAll(
                     Tools.COLOR_PICKER.getStartingCursor());
         }
         altDown = true;
@@ -217,7 +217,7 @@ public abstract class Tool implements KeyListener {
     @Override
     public void altReleased() {
         if(doColorPickerForwarding()) {
-            OpenComps.setCursorForAll(cursor);
+            OpenImages.setCursorForAll(cursor);
         }
         altDown = false;
     }
@@ -237,8 +237,8 @@ public abstract class Tool implements KeyListener {
     }
 
     public DebugNode getDebugNode() {
-        DebugNode toolNode = new DebugNode("Active Tool", this);
-        toolNode.addString("Name", getName());
+        DebugNode toolNode = new DebugNode("active tool", this);
+        toolNode.addString("name", getName());
         return toolNode;
     }
 

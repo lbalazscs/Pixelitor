@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,6 @@ import org.assertj.swing.fixture.JMenuItemFixture;
 import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.assertj.swing.fixture.JPopupMenuFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
-import pixelitor.Composition;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.IOThread;
@@ -50,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -98,7 +96,7 @@ public class AppRunner {
 
         // wait even after the frame is shown to
         // make sure that the image is also loaded
-        Composition comp = EDT.getComp();
+        var comp = EDT.getComp();
         while (comp == null) {
             Utils.sleep(1, SECONDS);
             comp = EDT.getComp();
@@ -174,11 +172,11 @@ public class AppRunner {
     }
 
     void saveWithOverwrite(File baseTestingDir, String fileName) {
-        JFileChooserFixture saveDialog = findSaveFileChooser();
+        var saveDialog = findSaveFileChooser();
         saveDialog.selectFile(new File(baseTestingDir, fileName));
         saveDialog.approve();
         // say OK to the overwrite question
-        JOptionPaneFixture optionPane = findJOptionPane();
+        var optionPane = findJOptionPane();
         optionPane.yesButton().click();
     }
 
@@ -212,9 +210,9 @@ public class AppRunner {
         boolean warnings = true;
         while (warnings) {
             try {
-                JOptionPaneFixture pane = findJOptionPane();
+                var optionPane = findJOptionPane();
                 // click "Don't Save"
-                pane.button(new GenericTypeMatcher<JButton>(JButton.class) {
+                optionPane.button(new GenericTypeMatcher<>(JButton.class) {
                     @Override
                     protected boolean isMatching(JButton button) {
                         return button.getText().equals("Don't Save");
@@ -230,7 +228,7 @@ public class AppRunner {
 
     void resize(int targetWidth) {
         runMenuCommand("Resize...");
-        DialogFixture dialog = findDialogByTitle("Resize");
+        var dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
                 .deleteText()
@@ -247,7 +245,7 @@ public class AppRunner {
 
     void resize(int targetWidth, int targetHeight) {
         runMenuCommand("Resize...");
-        DialogFixture dialog = findDialogByTitle("Resize");
+        var dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
                 .deleteText()
@@ -268,7 +266,7 @@ public class AppRunner {
 
     public void enlargeCanvas(int north, int west, int east, int south) {
         runMenuCommand("Enlarge Canvas...");
-        DialogFixture dialog = findDialogByTitle("Enlarge Canvas");
+        var dialog = findDialogByTitle("Enlarge Canvas");
 
         dialog.slider("north").slideTo(north);
         dialog.slider("west").slideTo(west);
@@ -281,7 +279,7 @@ public class AppRunner {
 
     public void runModifySelection(int amount, SelectionModifyType type, int numClicks) {
         runMenuCommand("Modify Selection...");
-        DialogFixture dialog = findDialogByTitle("Modify Selection");
+        var dialog = findDialogByTitle("Modify Selection");
 
         dialog.slider("amount").slideTo(amount);
         dialog.comboBox("type").selectItem(type.toString());
@@ -301,7 +299,7 @@ public class AppRunner {
     }
 
     void expectAndCloseErrorDialog() {
-        DialogFixture errorDialog = findDialogByTitle("Error");
+        var errorDialog = findDialogByTitle("Error");
         findButtonByText(errorDialog, "OK").click();
         errorDialog.requireNotVisible();
     }
@@ -315,7 +313,7 @@ public class AppRunner {
     }
 
     JMenuItemFixture findMenuItemByText(String guiName) {
-        return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+        return new JMenuItemFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JMenuItem.class) {
             @Override
             protected boolean isMatching(JMenuItem menuItem) {
                 return guiName.equals(menuItem.getText());
@@ -333,7 +331,7 @@ public class AppRunner {
     }
 
     DialogFixture findDialogByTitle(String title) {
-        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<JDialog>(JDialog.class) {
+        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JDialog.class) {
             @Override
             protected boolean isMatching(JDialog dialog) {
                 // the visible condition is necessary because otherwise it finds
@@ -349,7 +347,7 @@ public class AppRunner {
     }
 
     DialogFixture findDialogByTitleStartingWith(String start) {
-        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<JDialog>(JDialog.class) {
+        return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JDialog.class) {
             @Override
             protected boolean isMatching(JDialog dialog) {
                 // the visible condition is necessary because otherwise it finds
@@ -373,7 +371,7 @@ public class AppRunner {
     }
 
     static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
-        JButtonMatcher matcher = JButtonMatcher.withText(text).andShowing();
+        var matcher = JButtonMatcher.withText(text).andShowing();
         return container.button(matcher);
     }
 
@@ -386,8 +384,8 @@ public class AppRunner {
     }
 
     static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
-        JMenuItemFixture menuItemFixture = popupMenu.menuItem(
-                new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+        var menuItemFixture = popupMenu.menuItem(
+                new GenericTypeMatcher<>(JMenuItem.class) {
                     @Override
                     protected boolean isMatching(JMenuItem menuItem) {
                         if (!menuItem.isShowing()) {
@@ -410,8 +408,8 @@ public class AppRunner {
     }
 
     static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
-        JButtonFixture buttonFixture = container.button(
-                new GenericTypeMatcher<JButton>(JButton.class) {
+        return container.button(
+                new GenericTypeMatcher<>(JButton.class) {
                     @Override
                     protected boolean isMatching(JButton button) {
                         if (!button.isShowing()) {
@@ -430,13 +428,11 @@ public class AppRunner {
                         return "[Button Action Name Matcher, action name = " + actionName + "]";
                     }
                 });
-
-        return buttonFixture;
     }
 
     static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
-        JButtonFixture buttonFixture = container.button(
-                new GenericTypeMatcher<JButton>(JButton.class) {
+        var buttonFixture = container.button(
+                new GenericTypeMatcher<>(JButton.class) {
                     @Override
                     protected boolean isMatching(JButton button) {
                         if (!button.isShowing()) {
@@ -465,8 +461,8 @@ public class AppRunner {
 
         // waiting until an empty task finishes works
         // because the IO thread pool has a single thread
-        ExecutorService executor = (ExecutorService) IOThread.getExecutor();
-        Future<?> future = executor.submit(() -> {});
+        var executor = (ExecutorService) IOThread.getExecutor();
+        var future = executor.submit(() -> {});
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
@@ -476,7 +472,7 @@ public class AppRunner {
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
         runMenuCommand(name + "...");
-        DialogFixture dialog = findFilterDialog();
+        var dialog = findFilterDialog();
 
         for (String buttonText : extraButtonsToClick) {
             findButtonByText(dialog, buttonText)

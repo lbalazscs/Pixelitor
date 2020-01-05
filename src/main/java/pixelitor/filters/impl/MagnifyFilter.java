@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,9 +19,9 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Magnify;
 import pixelitor.utils.BlurredShape;
+import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -45,19 +45,19 @@ public class MagnifyFilter extends CenteredTransformFilter {
     }
 
     public void setInnerRadiusX(float radius) {
-        this.innerRadiusX = radius;
+        innerRadiusX = radius;
     }
 
     public void setInnerRadiusY(float radius) {
-        this.innerRadiusY = radius;
+        innerRadiusY = radius;
     }
 
     public void setOuterRadiusX(float radius) {
-        this.outerRadiusX = radius;
+        outerRadiusX = radius;
     }
 
     public void setOuterRadiusY(float radius) {
-        this.outerRadiusY = radius;
+        outerRadiusY = radius;
     }
 
     public void setMagnification(float magnification) {
@@ -96,9 +96,9 @@ public class MagnifyFilter extends CenteredTransformFilter {
     }
 
     public Shape[] getAffectedAreaShapes() {
-        Shape inner = new Ellipse2D.Double(cx - innerRadiusX, cy - innerRadiusY, 2 * innerRadiusX, 2 * innerRadiusY);
-        Shape outer = new Ellipse2D.Double(cx - outerRadiusX, cy - outerRadiusY, 2 * outerRadiusX, 2 * outerRadiusY);
-        return new Shape[] {inner, outer};
+        Shape inner = Shapes.createEllipse(cx, cy, innerRadiusX, innerRadiusY);
+        Shape outer = Shapes.createEllipse(cx, cy, outerRadiusX, outerRadiusY);
+        return new Shape[]{inner, outer};
     }
 
     // must be called after the shape arguments!

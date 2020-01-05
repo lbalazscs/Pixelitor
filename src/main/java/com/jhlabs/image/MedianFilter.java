@@ -26,28 +26,28 @@ public class MedianFilter extends WholeImageFilter {
         super(filterName);
     }
 
-    private static int median(int[] array) {
-        int max, maxIndex;
-
-        for (int i = 0; i < 4; i++) {
-            max = 0;
-            maxIndex = 0;
-            for (int j = 0; j < 9; j++) {
-                if (array[j] > max) {
-                    max = array[j];
-                    maxIndex = j;
-                }
-            }
-            array[maxIndex] = 0;
-        }
-        max = 0;
-        for (int i = 0; i < 9; i++) {
-            if (array[i] > max) {
-                max = array[i];
-            }
-        }
-        return max;
-    }
+//    private static int median(int[] array) {
+//        int max, maxIndex;
+//
+//        for (int i = 0; i < 4; i++) {
+//            max = 0;
+//            maxIndex = 0;
+//            for (int j = 0; j < 9; j++) {
+//                if (array[j] > max) {
+//                    max = array[j];
+//                    maxIndex = j;
+//                }
+//            }
+//            array[maxIndex] = 0;
+//        }
+//        max = 0;
+//        for (int i = 0; i < 9; i++) {
+//            if (array[i] > max) {
+//                max = array[i];
+//            }
+//        }
+//        return max;
+//    }
 
     private static int rgbMedian(int[] r, int[] g, int[] b) {
         int sum, index = 0, min = Integer.MAX_VALUE;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.gui;
 
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.ImageUtils;
 
@@ -29,9 +30,12 @@ import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
 /**
@@ -69,23 +73,23 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
 
         JComboBox<String> typeChooser = new JComboBox<>(
                 new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
-        JPanel northPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel northPanel = new JPanel(new FlowLayout(LEFT));
         northPanel.add(new JLabel("Type:"));
         northPanel.add(typeChooser);
-        add(northPanel, BorderLayout.NORTH);
+        add(northPanel, NORTH);
         typeChooser.addActionListener(e ->
                 typeChanged((String) typeChooser.getSelectedItem()));
 
         setBorder(createTitledBorder("Histograms"));
         JScrollPane scrollPane = new JScrollPane(painters);
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, CENTER);
     }
 
     private void typeChanged(String selected) {
         boolean isLogarithmicNow = selected.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            OpenComps.getActiveComp().ifPresent(
+            OpenImages.getActiveCompOpt().ifPresent(
                     this::updateFrom);
         }
     }

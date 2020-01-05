@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ import pixelitor.ThreadPool;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
-import pixelitor.utils.debug.BufferedImageNode;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -104,7 +103,7 @@ public class ImageUtils {
     }
 
     public static CheckerboardPainter createCheckerboardPainter() {
-        return new CheckerboardPainter(CHECKERBOARD_GRAY, Color.WHITE);
+        return new CheckerboardPainter(CHECKERBOARD_GRAY, WHITE);
     }
 
     public static BufferedImage toSysCompatibleImage(BufferedImage input) {
@@ -165,8 +164,8 @@ public class ImageUtils {
                                                                int targetWidth,
                                                                int targetHeight) {
         boolean progressiveBilinear = false;
-        if ((targetWidth < (img.getWidth() / 2))
-                || (targetHeight < (img.getHeight() / 2))) {
+        if (targetWidth < img.getWidth() / 2
+                || targetHeight < img.getHeight() / 2) {
             progressiveBilinear = true;
         }
 
@@ -237,21 +236,21 @@ public class ImageUtils {
         }
 
         do {
-            if (progressiveBilinear && (w > targetWidth)) {
+            if (progressiveBilinear && w > targetWidth) {
                 w /= 2;
                 if (w < targetWidth) {
                     w = targetWidth;
                 }
             }
 
-            if (progressiveBilinear && (h > targetHeight)) {
+            if (progressiveBilinear && h > targetHeight) {
                 h /= 2;
                 if (h < targetHeight) {
                     h = targetHeight;
                 }
             }
 
-            if ((scratchImage == null) || isTranslucent) {
+            if (scratchImage == null || isTranslucent) {
                 // Use a single scratch buffer for all iterations
                 // and then copy to the final, correctly-sized image
                 // before returning
@@ -264,7 +263,7 @@ public class ImageUtils {
             prevH = h;
 
             ret = scratchImage;
-        } while ((w != targetWidth) || (h != targetHeight));
+        } while (w != targetWidth || h != targetHeight);
 
         if (g2 != null) {
             g2.dispose();
@@ -272,7 +271,7 @@ public class ImageUtils {
 
         // If we used a scratch buffer that is larger than our target size,
         // create an image of the right size and copy the results into it
-        if ((targetWidth != ret.getWidth()) || (targetHeight != ret.getHeight())) {
+        if (targetWidth != ret.getWidth() || targetHeight != ret.getHeight()) {
             scratchImage = new BufferedImage(targetWidth, targetHeight, type);
             g2 = scratchImage.createGraphics();
             g2.drawImage(ret, 0, 0, null);
@@ -361,21 +360,6 @@ public class ImageUtils {
         g2.drawImage(img, 0, 0, targetWidth, targetHeight, null);
         g2.dispose();
         return ret;
-    }
-
-    // TODO duplicate functionality
-    public static BufferedImage resizeImage(double newSize, BufferedImage original) {
-        int originalWidth = original.getWidth();
-        int originalHeight = original.getHeight();
-        int maxOriginalSize = Math.max(originalWidth, originalHeight);
-        double ratio = ((double) maxOriginalSize) / newSize;
-        int imageWidth = (int) (originalWidth / ratio);
-        int imageHeight = (int) (originalHeight / ratio);
-        BufferedImage resizedImage = new BufferedImage(imageWidth, imageHeight, TYPE_INT_ARGB_PRE);
-        Graphics2D g2 = resizedImage.createGraphics();
-        g2.drawImage(original, 0, 0, imageWidth, imageHeight, null);
-        g2.dispose();
-        return resizedImage;
     }
 
     /**
@@ -651,11 +635,11 @@ public class ImageUtils {
         int thumbHeight;
         if (srcWidth > srcHeight) {
             thumbWidth = size;
-            float ratio = (float) srcWidth / (float) srcHeight;
+            float ratio = (float) srcWidth / srcHeight;
             thumbHeight = (int) (size / ratio);
         } else {
             thumbHeight = size;
-            float ratio = (float) srcHeight / (float) srcWidth;
+            float ratio = (float) srcHeight / srcWidth;
             thumbWidth = (int) (size / ratio);
         }
 
@@ -788,8 +772,7 @@ public class ImageUtils {
                 , height
                 , input.getType());
         Graphics2D g = output.createGraphics();
-        AffineTransform t = AffineTransform.getTranslateInstance(-x, -y);
-        g.transform(t);
+        g.transform(AffineTransform.getTranslateInstance(-x, -y));
         g.drawImage(input, null, 0, 0);
         g.dispose();
 
@@ -818,7 +801,7 @@ public class ImageUtils {
             }
         }
 
-        return (alpha << 24 | red << 16 | green << 8 | blue);
+        return alpha << 24 | red << 16 | green << 8 | blue;
     }
 
     public static void screenWithItself(BufferedImage src, float opacity) {
@@ -862,7 +845,7 @@ public class ImageUtils {
         int radius2 = radius * radius;
         Random random = new Random();
 
-        int[] pixels = ImageUtils.getPixelsAsArray(brushImage);
+        int[] pixels = getPixelsAsArray(brushImage);
         for (int x = 0; x < diameter; x++) {
             for (int y = 0; y < diameter; y++) {
                 int dx = x - radius;
@@ -908,7 +891,7 @@ public class ImageUtils {
 
     public static BufferedImage createSoftTransparencyImage(int size) {
         BufferedImage image = createSoftBWBrush(size);
-        int[] pixels = ImageUtils.getPixelsAsArray(image);
+        int[] pixels = getPixelsAsArray(image);
         for (int i = 0, pixelsLength = pixels.length; i < pixelsLength; i++) {
             int pixelValue = pixels[i] & 0xFF; // take the blue channel: they are all the same
             int alpha = 255 - pixelValue;
@@ -998,7 +981,7 @@ public class ImageUtils {
                                         BufferedImage bumpMapSource,
                                         String filterName) {
         return bumpMap(src, bumpMapSource,
-                (float) ImageUtils.DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
+                (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
@@ -1021,7 +1004,7 @@ public class ImageUtils {
 
         BufferedImage bumpMap = embossFilter.filter(bumpMapSource, null);
 
-        BufferedImage dest = ImageUtils.copyImage(src);
+        BufferedImage dest = copyImage(src);
 
         Graphics2D g = dest.createGraphics();
         g.setComposite(composite);
@@ -1102,12 +1085,6 @@ public class ImageUtils {
         }
 
         g.dispose();
-    }
-
-    public static void debugImageToText(BufferedImage img) {
-        BufferedImageNode imgNode = new BufferedImageNode("debug", img);
-        String s = imgNode.toDetailedString();
-        System.out.println("ImageUtils::debugImage: " + s);
     }
 
     public static void fillWithTransparentRectangle(Graphics2D g, int size) {

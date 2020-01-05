@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,8 +43,8 @@ public class BlurredEllipse implements BlurredShape {
     public BlurredEllipse(double centerX, double centerY,
                           double innerRadiusX, double innerRadiusY,
                           double outerRadiusX, double outerRadiusY) {
-        this.cx = centerX;
-        this.cy = centerY;
+        cx = centerX;
+        cy = centerY;
         this.innerRadiusY = innerRadiusY;
         this.outerRadiusX = outerRadiusX;
         this.outerRadiusY = outerRadiusY;

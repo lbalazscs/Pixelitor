@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -137,8 +137,8 @@ public class OpenRaster {
                 layer.getBlendingMode().toSVGName(),
                 layer.getOpacity(),
                 layerIndex,
-                layer.getTX(),
-                layer.getTY());
+                layer.getTx(),
+                layer.getTy());
         ZipEntry entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
         BufferedImage image = layer.getImage();
@@ -168,7 +168,7 @@ public class OpenRaster {
                     stackXML = extractString(zipFile.getInputStream(entry));
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
                     // no need for that
-                } else if (hasPNGExtension(name)) {
+                } else if (FileUtils.hasPNGExtension(name)) {
                     ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
                     InputStream stream = zipFile.getInputStream(entry);
                     BufferedImage image = TrackedIO.readFromStream(stream, spt);
@@ -193,7 +193,7 @@ public class OpenRaster {
         int compWidth = parseInt(doc.getAttribute("w").trim());
         int compHeight = parseInt(doc.getAttribute("h").trim());
 
-        Composition comp = Composition.createEmpty(compWidth, compHeight);
+        var comp = Composition.createEmpty(compWidth, compHeight);
         comp.setFile(file);
 
         NodeList layers = doc.getElementsByTagName("layer");
@@ -251,12 +251,6 @@ public class OpenRaster {
             }
         }
         return numImageFiles;
-    }
-
-    private static boolean hasPNGExtension(String name) {
-        return FileUtils.findExtension(name)
-                .filter(s -> s.equalsIgnoreCase("png"))
-                .isPresent();
     }
 
     private static Document loadXMLFromString(String xml)

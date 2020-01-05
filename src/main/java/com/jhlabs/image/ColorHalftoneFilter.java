@@ -169,7 +169,7 @@ public class ColorHalftoneFilter extends AbstractBufferedImageOp {
                         int nr = (argb >> shift) & 0xff;
                         float l = nr / 255.0f;
                         l = 1 - l * l;
-                        l *= halfGridSize * 1.414;
+                        l = (float) (l * (halfGridSize * 1.414));
                         float dx = x - ntx;
                         float dy = y - nty;
                         float dx2 = dx * dx;

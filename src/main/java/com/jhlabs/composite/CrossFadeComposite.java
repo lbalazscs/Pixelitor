@@ -34,7 +34,7 @@ public class CrossFadeComposite extends RGBComposite {
                 int sa = src[i + 3];
 
                 float a = alpha * sa / 255.0f;
-                float ac = 1 - a;
+//                float ac = 1 - a;
 
                 dst[i] = (int) (a * sr);
                 dst[i + 1] = (int) (a * sg);

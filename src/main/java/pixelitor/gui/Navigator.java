@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
+import pixelitor.OpenImages;
 import pixelitor.colors.ColorUtils;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
@@ -44,7 +45,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 
 /**
  * The navigator component that allows the user to pan a zoomed-in image.
@@ -88,7 +88,7 @@ public class Navigator extends JComponent
 
         addMouseListener(this);
         addMouseMotionListener(this);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
 
         addNavigatorResizedListener();
         addMouseWheelZoomingSupport();
@@ -101,7 +101,7 @@ public class Navigator extends JComponent
         popup = new JPopupMenu();
         ZoomLevel[] levels = {ZoomLevel.Z100, ZoomLevel.Z50, ZoomLevel.Z25, ZoomLevel.Z12};
         for (ZoomLevel level : levels) {
-            popup.add(new AbstractAction("Navigator Zoom: " + level.toString()) {
+            popup.add(new AbstractAction("Navigator Zoom: " + level) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     setNavigatorSizeFromZoom(level);
@@ -131,7 +131,7 @@ public class Navigator extends JComponent
         preferredHeight = (int) (scale * canvas.getImHeight());
 
         JDialog ancestor = GUIUtils.getDialogAncestor(this);
-        ancestor.setTitle("Navigator - " + zoom.toString());
+        ancestor.setTitle("Navigator - " + zoom);
 
         exactZoom = zoom; // set the the exact zoom only temporarily
 
@@ -152,8 +152,8 @@ public class Navigator extends JComponent
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                if (Navigator.this.view != null) { // it is null if all images are closed
-                    recalculateSize(Navigator.this.view, false, false, true);
+                if (view != null) { // it is null if all images are closed
+                    recalculateSize(view, false, false, true);
                 }
             }
         });
@@ -177,7 +177,7 @@ public class Navigator extends JComponent
     }
 
     public static void showInDialog(PixelitorWindow pw) {
-        View view = OpenComps.getActiveView();
+        View view = OpenImages.getActiveView();
         Navigator navigator = new Navigator(view);
 
         if (dialog != null && dialog.isVisible()) {
@@ -305,11 +305,11 @@ public class Navigator extends JComponent
 
         checkerBoardPainter.paint(g2, null, thumbWidth, thumbHeight);
 
-        AffineTransform origTX = g2.getTransform();
+        var origTransform = g2.getTransform();
 
         g2.scale(imgScalingRatio, imgScalingRatio);
         g2.drawImage(view.getComp().getCompositeImage(), 0, 0, null);
-        g2.setTransform(origTX);
+        g2.setTransform(origTransform);
 
         g2.setStroke(VIEW_BOX_STROKE);
         g2.setColor(viewBoxColor);
@@ -439,7 +439,7 @@ public class Navigator extends JComponent
     // called when the dialog is closed - then this
     // navigator instance is no longer needed
     private void dispose() {
-        OpenComps.removeActivationListener(this);
+        OpenImages.removeActivationListener(this);
     }
 
     @Override

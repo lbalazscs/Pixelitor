@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,9 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
+
 /**
  * The UI panel of history: the history list in a scroll pane
  * and the undo/redo buttons bellow it
@@ -33,11 +36,11 @@ public class HistoryPanel extends JPanel {
     private final JButton redoButton;
     private final PixelitorUndoManager pum;
 
-    public HistoryPanel(PixelitorUndoManager pum, JList historyList) {
+    public HistoryPanel(PixelitorUndoManager pum, JList<PixelitorEdit> historyList) {
         this.pum = pum;
         setLayout(new BorderLayout());
-        add(new JScrollPane(historyList), BorderLayout.CENTER);
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        add(new JScrollPane(historyList), CENTER);
+        JPanel buttonsPanel = new JPanel(new FlowLayout());
 
         Icon undoIcon = Icons.getUndoIcon();
         Icon redoIcon = Icons.getRedoIcon();
@@ -52,7 +55,7 @@ public class HistoryPanel extends JPanel {
 
         buttonsPanel.add(undoButton);
         buttonsPanel.add(redoButton);
-        add(buttonsPanel, BorderLayout.SOUTH);
+        add(buttonsPanel, SOUTH);
     }
 
     private static JButton createButton(Icon icon, String name, String tooltipResource, ActionListener actionListener) {

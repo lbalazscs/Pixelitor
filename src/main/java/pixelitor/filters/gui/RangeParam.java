@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.util.function.BooleanSupplier;
 
+import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
@@ -79,23 +80,23 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         assert def >= min : name + ": def (" + def + ") < min (" + min + ')';
         assert def <= max : name + ": def (" + def + ") > max (" + max + ')';
 
-        this.minValue = min;
-        this.maxValue = max;
-        this.defaultValue = def;
-        this.value = def;
+        minValue = min;
+        maxValue = max;
+        defaultValue = def;
+        value = def;
         this.addDefaultButton = addDefaultButton;
-        this.textPosition = position;
+        textPosition = position;
     }
 
     @Override
     public JComponent createGUI() {
-        SliderSpinner sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
+        var sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         setParamGUIEnabledState();
 
         if (action != null) {
-            JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            JComponent actionGUI = action.createGUI();
+            var p = new JPanel(new FlowLayout(LEFT));
+            var actionGUI = action.createGUI();
             p.add(sliderSpinner);
             p.add(actionGUI);
             return p;
@@ -123,7 +124,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      */
     public void ensureHigherValueThan(RangeParam other) {
         // if the value is not higher, then make it equal
-        linkWith(other, () -> other.getValue() > this.getValue());
+        linkWith(other, () -> other.getValue() > getValue());
     }
 
     public int getDecimalPlaces() {
@@ -131,7 +132,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void setDecimalPlaces(int dp) {
-        this.decimalPlaces = dp;
+        decimalPlaces = dp;
     }
 
     public RangeParam withDecimalPlaces(int dp) {
@@ -144,14 +145,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * {@link RangeParam} if the given condition evaluates to true.
      */
     public void linkWith(RangeParam other, BooleanSupplier condition) {
-        this.addChangeListener(e -> {
+        addChangeListener(e -> {
             if (condition.getAsBoolean()) {
-                other.setValueNoTrigger(this.getValueAsDouble());
+                other.setValueNoTrigger(getValueAsDouble());
             }
         });
         other.addChangeListener(e -> {
             if (condition.getAsBoolean()) {
-                this.setValueNoTrigger(other.getValueAsDouble());
+                setValueNoTrigger(other.getValueAsDouble());
             }
         });
     }
@@ -161,9 +162,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * {@link RangeParam} so that there is a constant multiplier between the values.
      */
     public void linkWith(RangeParam other, double multiplier) {
-        this.addChangeListener(e -> other.setValueNoTrigger(
-                this.getValueAsDouble() * multiplier));
-        other.addChangeListener(e -> this.setValueNoTrigger(
+        addChangeListener(e -> other.setValueNoTrigger(
+                getValueAsDouble() * multiplier));
+        other.addChangeListener(e -> setValueNoTrigger(
                 other.getValueAsDouble() / multiplier));
     }
 
@@ -186,11 +187,17 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         setValue(defaultValue, trigger);
     }
 
-    public float getValueAsPercentage() {
+    /**
+     * Returns the value of a percentage parameter as a float ratio
+     */
+    public float getPercentageValF() {
         return getValueAsFloat() / 100.0f;
     }
 
-    public double getValueAsDPercentage() {
+    /**
+     * Returns the value of a percentage parameter as a double ratio
+     */
+    public double getPercentageValD() {
         return getValueAsDouble() / 100.0;
     }
 
@@ -368,7 +375,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     @Override
     public void considerImageSize(Rectangle bounds) {
         if (adjustMaxAccordingToImage) {
-            double defaultToMaxRatio = ((double) defaultValue) / ((double) maxValue);
+            double defaultToMaxRatio = defaultValue / maxValue;
             maxValue = (int) (maxToImageSizeRatio * Math.max(bounds.width, bounds.height));
             if (maxValue <= minValue) { // can happen with very small (for example 1x1) images
                 maxValue = minValue + 1;
@@ -405,7 +412,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         value = ((RPState) state).getValue();
     }
 
@@ -444,7 +451,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
 
         public Builder withDecimalPlaces(int dp) {
-            this.decimalPlaces = dp;
+            decimalPlaces = dp;
             return this;
         }
 

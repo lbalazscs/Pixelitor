@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -139,8 +139,7 @@ public class FlowerOfLife extends ShapeFilter {
         }
 
         Shape toShape() {
-            double d = 2 * r;
-            return new Ellipse2D.Double(cx - r, cy - r, d, d);
+            return Shapes.createCircle(cx, cy, r);
         }
 
         @Override

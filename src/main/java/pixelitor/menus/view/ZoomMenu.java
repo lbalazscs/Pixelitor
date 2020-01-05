@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.menus.PMenu;
 import pixelitor.utils.Utils;
@@ -62,13 +62,13 @@ public class ZoomMenu extends PMenu {
     private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            OpenComps.onActiveView(View::increaseZoom);
+            OpenImages.onActiveView(View::increaseZoom);
         }
     };
     private static final Action ZOOM_OUT_ACTION = new AbstractAction("Zoom Out") {
         @Override
         public void actionPerformed(ActionEvent e) {
-            OpenComps.onActiveView(View::decreaseZoom);
+            OpenImages.onActiveView(View::decreaseZoom);
         }
     };
 
@@ -103,7 +103,7 @@ public class ZoomMenu extends PMenu {
 
     public static void setupZoomKeys(JComponent c) {
         // add other key bindings - see http://stackoverflow.com/questions/15605109/java-keybinding-plus-key
-        InputMap inputMap = c.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        InputMap inputMap = c.getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = c.getActionMap();
         inputMap.put(CTRL_SHIFT_EQUALS, ACTION_MAP_KEY_INCREASE);  // + key in English keyboards
         inputMap.put(CTRL_NUMPAD_PLUS, ACTION_MAP_KEY_INCREASE);  // + key on the numpad

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,8 @@ import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.WEST;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NORTH;
 
@@ -55,7 +57,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
         // add the image position selector
         imgPosSelector = new ImagePositionSelector(this, model, 100);
-        add(imgPosSelector, BorderLayout.WEST);
+        add(imgPosSelector, WEST);
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
@@ -63,7 +65,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         verticalBox.add(xSlider);
         ySlider = new SliderSpinner(ySliderModel, NORTH, true);
         verticalBox.add(ySlider);
-        add(verticalBox, BorderLayout.CENTER);
+        add(verticalBox, CENTER);
 
         setupPreferredSize();
 
@@ -85,7 +87,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void onXSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeX(xSliderModel.getValueAsPercentage(),
+            model.setRelativeX(xSliderModel.getPercentageValF(),
                     xSliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
@@ -93,7 +95,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void onYSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
-            model.setRelativeY(ySliderModel.getValueAsPercentage(),
+            model.setRelativeY(ySliderModel.getPercentageValF(),
                     ySliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }

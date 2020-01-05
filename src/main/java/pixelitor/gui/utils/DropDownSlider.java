@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static java.awt.FlowLayout.CENTER;
+import static java.awt.FlowLayout.LEFT;
+import static javax.swing.SwingConstants.HORIZONTAL;
+
 /**
  * A textfield with a drop down button
  * that shows a slider in a popup window
@@ -42,16 +46,16 @@ public class DropDownSlider extends JComponent {
     private final JSlider slider;
 
     public DropDownSlider(int minValue, int value, int maxValue, boolean limitRange) {
-        setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        setLayout(new FlowLayout(LEFT, 0, 0));
         textField = new IntTextField(value, minValue, maxValue, limitRange, 4);
         add(textField);
 
         initDropDownButton();
         textField.add(dropDownButton);
 
-        slider = new JSlider(JSlider.HORIZONTAL, minValue, maxValue, value);
+        slider = new JSlider(HORIZONTAL, minValue, maxValue, value);
         popupMenu = new JPopupMenu();
-        popupMenu.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 1));
+        popupMenu.setLayout(new FlowLayout(CENTER, 5, 1));
         popupMenu.add(slider);
 
         connectSlideAndTextField();

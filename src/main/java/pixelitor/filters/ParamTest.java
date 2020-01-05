@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
  * A test operation with all GUIParam objects
@@ -79,7 +79,7 @@ public class ParamTest extends ParametrizedFilter {
                         new Value("value 1", 1),
                         new Value("value 2", 2),
                 }),
-                new ColorParam("ColorParam:", WHITE, FREE_OPACITY),
+                new ColorParam("ColorParam:", WHITE, FREE_TRANSPARENCY),
                 new AngleParam("AngleParam", 0),
                 new ElevationAngleParam("ElevationAngleParam", 0),
                 new BlendingModeParam(BlendingMode.values()),

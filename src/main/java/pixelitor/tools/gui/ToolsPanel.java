@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,16 +26,17 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+
+import static javax.swing.BoxLayout.Y_AXIS;
 
 /**
  * The panel with the tool buttons and the color selector
  */
 public class ToolsPanel extends JPanel {
     public ToolsPanel(PixelitorWindow pw, Dimension screenSize) {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setLayout(new BoxLayout(this, Y_AXIS));
 
         addToolButtons(screenSize);
         add(Box.createVerticalGlue());
@@ -50,7 +51,7 @@ public class ToolsPanel extends JPanel {
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
             ToolButton toolButton = new ToolButton(tool, buttonSize);
-            toolButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+            toolButton.setAlignmentX(CENTER_ALIGNMENT);
             add(toolButton);
             group.add(toolButton);
             setupKeyboardShortcut(tool);
@@ -60,7 +61,7 @@ public class ToolsPanel extends JPanel {
     private void addColorSelector(PixelitorWindow pw) {
         FgBgColorSelector colorSelector = new FgBgColorSelector(pw);
         FgBgColors.setUI(colorSelector);
-        colorSelector.setAlignmentX(Component.CENTER_ALIGNMENT);
+        colorSelector.setAlignmentX(CENTER_ALIGNMENT);
         add(colorSelector);
     }
 

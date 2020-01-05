@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,21 @@
 
 package pixelitor.utils;
 
+import org.jdesktop.swingx.painter.effects.GlowPathEffect;
+import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
+import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
+import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
+import pixelitor.filters.painters.AreaEffects;
+
 import java.awt.Color;
+import java.awt.Font;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import static java.awt.font.TextAttribute.*;
+import static java.text.AttributedCharacterIterator.Attribute;
 
 /**
  * Static utility methods related to random numbers
@@ -42,6 +54,35 @@ public class Rnd {
 
     public static <T> T chooseFrom(List<T> items) {
         return items.get(rand.nextInt(items.size()));
+    }
+
+    public static boolean nextBoolean() {
+        return rand.nextBoolean();
+    }
+
+    public static int nextInt(int bound) {
+        return rand.nextInt(bound);
+    }
+
+    public static int intInRange(int min, int max) {
+        assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
+        return min + rand.nextInt(max - min + 1);
+    }
+
+    public static long nextLong() {
+        return rand.nextLong();
+    }
+
+    public static double nextGaussian() {
+        return rand.nextGaussian();
+    }
+
+    public static double nextDouble() {
+        return rand.nextDouble();
+    }
+
+    public static float nextFloat() {
+        return rand.nextFloat();
     }
 
     public static Color createRandomColor() {
@@ -75,33 +116,49 @@ public class Rnd {
         return sb.toString();
     }
 
-    public static boolean nextBoolean() {
-        return rand.nextBoolean();
+    public static AreaEffects createRandomEffects() {
+        var ae = new AreaEffects();
+        float f = rand.nextFloat();
+        if (f < 0.25f) {
+            ae.setNeonBorderEffect(new NeonBorderEffect());
+        } else if (f < 0.5f) {
+            ae.setDropShadowEffect(new ShadowPathEffect(1.0f));
+        } else if (f < 0.75f) {
+            ae.setInnerGlowEffect(new InnerGlowPathEffect(1.0f));
+        } else {
+            ae.setGlowEffect(new GlowPathEffect(1.0f));
+        }
+        return ae;
     }
 
-    public static int nextInt(int bound) {
-        return rand.nextInt(bound);
-    }
+    public static Font createRandomFont() {
+        Map<Attribute, Object> attributes = new HashMap<>();
 
-    public static int intInRange(int min, int max) {
-        assert max - min + 1 > 0 : "max = " + max + ", min = " + min;
-        return min + rand.nextInt(max - min + 1);
-    }
+        attributes.put(SIZE, intInRange(10, 100));
+        if (nextBoolean()) {
+            attributes.put(WEIGHT, WEIGHT_BOLD);
+        }
+        if (nextBoolean()) {
+            attributes.put(POSTURE, POSTURE_OBLIQUE);
+        }
+        if (nextBoolean()) {
+            attributes.put(KERNING, KERNING_ON);
+        }
+        if (nextBoolean()) {
+            attributes.put(TRACKING, TRACKING_LOOSE);
+        }
+        if (nextBoolean()) {
+            attributes.put(LIGATURES, LIGATURES_ON);
+        }
+        if (nextBoolean()) {
+            attributes.put(STRIKETHROUGH, STRIKETHROUGH_ON);
+        }
+        if (nextBoolean()) {
+            attributes.put(UNDERLINE, UNDERLINE_ON);
+        }
 
-    public static long nextLong() {
-        return rand.nextLong();
-    }
-
-    public static double nextGaussian() {
-        return rand.nextGaussian();
-    }
-
-    public static double nextDouble() {
-        return rand.nextDouble();
-    }
-
-    public static float nextFloat() {
-        return rand.nextFloat();
+        Font font = new Font(attributes);
+        return font;
     }
 
     public static boolean withProbability(double p, Runnable task) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,7 @@ public class RecentFilesMenuItem extends JMenuItem {
         } else {
             // the file was deleted since Pixelitor started
             Messages.showError("Problem",
-                    format("The file %s does not exist.", f.toString()));
+                    format("The file %s does not exist.", f));
         }
     }
 }

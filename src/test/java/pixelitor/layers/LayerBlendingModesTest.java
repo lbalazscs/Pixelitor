@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,8 @@
 
 package pixelitor.layers;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.junit.Before;
 import org.junit.Test;
 import pixelitor.Composition;
@@ -53,14 +54,14 @@ public class LayerBlendingModesTest {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
         TestHelper.setupMockViewFor(comp);
 
-        this.upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2");
+        upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2");
         comp.addLayerInInitMode(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
 
         assert lowerLayer.getComp().checkInvariant();
-        assert lowerLayer.getComp() == this.upperLayer.getComp();
-        assert this.upperLayer == comp.getActiveLayer();
+        assert lowerLayer.getComp() == upperLayer.getComp();
+        assert upperLayer == comp.getActiveLayer();
 
         invertAdjustment = new AdjustmentLayer(comp, "Invert", new Invert());
         alwaysUpperColorAdjustment = new AdjustmentLayer(comp, "One Color", new OneColorFilter(upperColor));
@@ -214,7 +215,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adding a no-op adjustment layer should change nothing
-        AdjustmentLayer noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
+        var noOpAdjustment = new AdjustmentLayer(comp, "No-op", new NoOpFilter());
         comp.addLayerInInitMode(noOpAdjustment);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
@@ -275,14 +276,14 @@ public class LayerBlendingModesTest {
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {
-        TextLayer layer = new TextLayer(comp);
+        var layer = new TextLayer(comp);
         layer.setSettings(new TextSettings(
                 "T", // a huge T should cover everything
                 new Font(Font.SANS_SERIF, Font.BOLD, 100),
                 color,
                 new AreaEffects(),
-                AbstractLayoutPainter.HorizontalAlignment.CENTER,
-                AbstractLayoutPainter.VerticalAlignment.CENTER,
+                HorizontalAlignment.CENTER,
+                VerticalAlignment.CENTER,
                 false,
                 0));
         return layer;

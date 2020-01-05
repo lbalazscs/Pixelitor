@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ public class Posterize extends ParametrizedFilter {
     public Posterize() {
         super(ShowOriginal.YES);
 
-        GroupedRangeParam levels = new GroupedRangeParam("Levels",
+        var levels = new GroupedRangeParam("Levels",
                 new RangeParam[]{
                         redLevels,
                         greenLevels,
@@ -54,7 +54,7 @@ public class Posterize extends ParametrizedFilter {
         int numRedLevels = redLevels.getValue();
         int numGreenLevels = greenLevels.getValue();
         int numBlueLevels = blueLevels.getValue();
-        RGBLookup rgbLookup = new RGBLookup();
+        var rgbLookup = new RGBLookup();
         rgbLookup.initFromPosterize(numRedLevels, numGreenLevels, numBlueLevels);
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) rgbLookup.getLookupOp());

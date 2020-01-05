@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,14 @@ import com.jhlabs.image.CausticsFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
@@ -37,7 +37,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
 
-    private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), USER_ONLY_OPACITY);
+    private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), USER_ONLY_TRANSPARENCY);
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
@@ -61,7 +61,7 @@ public class JHCaustics extends ParametrizedFilter {
                 focus,
                 dispersion,
                 samples
-        ).withAction(new ReseedNoiseFilterAction());
+        ).withAction(reseedNoise());
     }
 
     @Override
@@ -70,13 +70,13 @@ public class JHCaustics extends ParametrizedFilter {
             filter = new CausticsFilter(NAME);
         }
 
-        filter.setAmount(focus.getValueAsPercentage());
+        filter.setAmount(focus.getPercentageValF());
         filter.setBgColor(bgColor.getColor().getRGB());
         filter.setBrightness(brightness.getValue());
-        filter.setDispersion(dispersion.getValueAsPercentage());
+        filter.setDispersion(dispersion.getPercentageValF());
         filter.setSamples(samples.getValue());
         filter.setScale(zoom.getValueAsFloat());
-        filter.setTime(time.getValueAsPercentage());
+        filter.setTime(time.getPercentageValF());
         filter.setTurbulence(turbulence.getValueAsFloat() / 25.0f);
 
         dest = filter.filter(src, dest);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -80,39 +80,39 @@ public class ExtractChannel extends ParametrizedFilter {
                 rgbOp = (a, r, g, b) -> {
                     g = r;
                     b = r;
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
                 break;
             case REMOVE_RED_CHANNEL:
                 rgbOp = (a, r, g, b) -> {
                     int val = (g + b) / 2;
-                    return (a << 24) | (val << 16) | (val << 8) | val;
+                    return a << 24 | val << 16 | val << 8 | val;
                 };
                 break;
             case GREEN_CHANNEL:
                 rgbOp = (a, r, g, b) -> {
                     r = g;
                     b = g;
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
                 break;
             case REMOVE_GREEN_CHANNEL:
                 rgbOp = (a, r, g, b) -> {
                     int val = (r + b) / 2;
-                    return (a << 24) | (val << 16) | (val << 8) | val;
+                    return a << 24 | val << 16 | val << 8 | val;
                 };
                 break;
             case BLUE_CHANNEL:
                 rgbOp = (a, r, g, b) -> {
                     r = b;
                     g = b;
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
                 break;
             case REMOVE_BLUE_CHANNEL:
                 rgbOp = (a, r, g, b) -> {
                     int val = (r + g) / 2;
-                    return (a << 24) | (val << 16) | (val << 8) | val;
+                    return a << 24 | val << 16 | val << 8 | val;
                 };
                 break;
             default:

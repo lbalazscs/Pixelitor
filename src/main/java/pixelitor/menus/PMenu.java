@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,13 +39,13 @@ public class PMenu extends JMenu {
 
     // Simple add without a builder
     public void addAction(Action action) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
+        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(action);
         add(menuItem);
     }
 
     // Simple add without a builder
     public void addActionWithKey(Action action, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(action);
+        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(action);
         menuItem.setAccelerator(keyStroke);
         add(menuItem);
     }
@@ -54,7 +54,7 @@ public class PMenu extends JMenu {
     // Practically the same as the self-controlled add,
     // but the name better expresses the intent
     public void addAlwaysEnabledAction(Action action) {
-        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
+        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.createMenuItem(action);
         add(menuItem);
     }
 
@@ -64,7 +64,7 @@ public class PMenu extends JMenu {
 
     // Simple add without a builder
     public void addAlwaysEnabledAction(Action action, KeyStroke keyStroke) {
-        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.getMenuItem(action);
+        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.createMenuItem(action);
         menuItem.setAccelerator(keyStroke);
         add(menuItem);
     }
@@ -93,7 +93,7 @@ public class PMenu extends JMenu {
     }
 
     public void addFilter(FilterAction fa) {
-        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.getMenuItem(fa);
+        JMenuItem menuItem = EnabledIf.THERE_IS_OPEN_IMAGE.createMenuItem(fa);
         add(menuItem);
     }
 
@@ -124,7 +124,7 @@ public class PMenu extends JMenu {
             if (whenToEnable == null) {
                 whenToEnable = EnabledIf.THERE_IS_OPEN_IMAGE;
             }
-            JMenuItem menuItem = whenToEnable.getMenuItem(action);
+            JMenuItem menuItem = whenToEnable.createMenuItem(action);
             menu.add(menuItem);
             if (keyStroke != null) {
                 menuItem.setAccelerator(keyStroke);
@@ -143,7 +143,7 @@ public class PMenu extends JMenu {
 
         public MenuItemBuilder alwaysEnabled() {
             // used in cases when the action will be never disabled
-            this.whenToEnable = EnabledIf.ACTION_ENABLED;
+            whenToEnable = EnabledIf.ACTION_ENABLED;
             return this;
         }
     }

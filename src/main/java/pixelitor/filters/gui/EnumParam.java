@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
 
     public EnumParam(String name, Class<E> enumClass) {
         super(name, RandomizePolicy.ALLOW_RANDOMIZE);
-        this.enumConstants = enumClass.getEnumConstants();
+        enumConstants = enumClass.getEnumConstants();
         defaultValue = enumConstants[0];
         delegateModel = new EnumComboBoxModel<>(enumClass);
     }
@@ -108,6 +108,6 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
 
     @Override
     public String getResetToolTip() {
-        return super.getResetToolTip() + " to " + defaultValue.toString();
+        return super.getResetToolTip() + " to " + defaultValue;
     }
 }

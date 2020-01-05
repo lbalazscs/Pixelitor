@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,11 +56,11 @@ public class AdjustmentLayer extends Layer {
     public Layer duplicate(boolean compCopy) {
         // TODO the filter should be copied so that it can be adjusted independently
         String duplicateName = compCopy ? name : Utils.createCopyName(name);
-        AdjustmentLayer d = new AdjustmentLayer(comp, duplicateName, filter);
+        var copy = new AdjustmentLayer(comp, duplicateName, filter);
 
-        duplicateMask(d, compCopy);
+        duplicateMask(copy, compCopy);
 
-        return d;
+        return copy;
     }
 
     @Override

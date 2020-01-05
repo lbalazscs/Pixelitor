@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
@@ -77,14 +77,14 @@ public class Resize implements CompAction {
             double widthScale = canvasTargetWidth / (double) canvasCurrWidth;
             double scale = Math.min(heightScale, widthScale);
 
-            canvasTargetWidth = (int) (scale * (double) canvasCurrWidth);
-            canvasTargetHeight = (int) (scale * (double) canvasCurrHeight);
+            canvasTargetWidth = (int) (scale * canvasCurrWidth);
+            canvasTargetHeight = (int) (scale * canvasCurrHeight);
         }
         Dimension targetSize = new Dimension(canvasTargetWidth, canvasTargetHeight);
 
         // The resize runs outside the EDT so that the progress bar animation
         // can update and multiple resizing operations can run in parallel
-        ProgressHandler progressHandler = Messages.startProgress("Resizing", -1);
+        var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
                 .supplyAsync(() -> comp.createCopy(true, true),
                         ThreadPool.getExecutor())
@@ -100,8 +100,8 @@ public class Resize implements CompAction {
     }
 
     private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension targetSize, ProgressHandler progressHandler) {
-        assert EventQueue.isDispatchThread(): "called on " + Thread.currentThread().getName();
-        
+        assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
+
         int canvasTargetWidth = targetSize.width;
         int canvasTargetHeight = targetSize.height;
 
@@ -110,19 +110,19 @@ public class Resize implements CompAction {
         int canvasCurrHeight = newCanvas.getImHeight();
         double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
         double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-        AffineTransform canvasTx = AffineTransform.getScaleInstance(sx, sy);
-        newComp.imCoordsChanged(canvasTx, false);
+        var canvasTransform = AffineTransform.getScaleInstance(sx, sy);
+        newComp.imCoordsChanged(canvasTransform, false);
 
         View view = newComp.getView();
         newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, view);
 
-        History.addEdit(new CompositionReplacedEdit(
-                "Resize", false, view, comp, newComp, canvasTx));
+        History.add(new CompositionReplacedEdit("Resize",
+                false, view, comp, newComp, canvasTransform));
         view.replaceComp(newComp);
 
         // the view was active when the resize started, but since the
         // resize was asynchronous, this could have changed
-        if(view.isActive()) {
+        if (view.isActive()) {
             SelectionActions.setEnabled(newComp.hasSelection(), newComp);
         }
 

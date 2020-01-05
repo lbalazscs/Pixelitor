@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.VisibleForTesting;
 
@@ -89,7 +88,7 @@ public class LayersPanel extends JLayeredPane {
             // put it into the drag layer so that it is always visible
             // (removing and adding works on Java 7, but not on Java 8, setLayer is fine on both)
             setLayer(newDraggedButton, JLayeredPane.DRAG_LAYER);
-            this.draggedButton = newDraggedButton;
+            draggedButton = newDraggedButton;
         }
         swapIfNecessary(dragY);
     }
@@ -161,7 +160,7 @@ public class LayersPanel extends JLayeredPane {
         doLayout();
 
         // notify the raise/lower layer menu items
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         LayerMoveAction.INSTANCE_UP.enableDisable(comp);
         LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
     }

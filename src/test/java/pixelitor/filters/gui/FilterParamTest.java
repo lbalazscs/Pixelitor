@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.filters.gui.IntChoiceParam.Value;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -39,9 +40,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
@@ -74,15 +75,15 @@ public class FilterParamTest {
                 {new ImagePositionParam("Param Name")},
                 {new GradientParam("Param Name", BLACK, WHITE)},
                 {new TextParam("Param Name", "default text")},
-                {new ColorParam("Param Name", BLACK, FREE_OPACITY)},
-                {new ColorParam("Param Name", WHITE, USER_ONLY_OPACITY)},
-                {new ColorParam("Param Name", BLUE, NO_OPACITY)},
+                {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
+                {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
+                {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
                 {new BooleanParam("Param Name", true)},
                 {new AngleParam("Param Name", 0)},
                 {new ElevationAngleParam("Param Name", 0)},
-                {new IntChoiceParam("Param Name", new IntChoiceParam.Value[]{
-                        new IntChoiceParam.Value("Better", 0),
-                        new IntChoiceParam.Value("Faster", 1),
+                {new IntChoiceParam("Param Name", new Value[]{
+                        new Value("Better", 0),
+                        new Value("Faster", 1),
                 })
                 },
                 {new StrokeParam("Param Name")},
@@ -165,11 +166,11 @@ public class FilterParamTest {
     @Test
     public void test_copyState_setState() {
         try {
-            ParamState paramState = param.copyState();
+            ParamState<?> paramState = param.copyState();
             assertThat(paramState).isNotNull();
             param.setState(paramState);
         } catch (UnsupportedOperationException e) {
-            // It is OK to throw this exception
+            // It is OK to catch this exception
         }
         checkThatFilterWasNotCalled();
     }

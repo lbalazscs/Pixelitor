@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,14 +24,14 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
+import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
  * Pointillize filter based on the JHLabs PointillizeFilter
@@ -42,7 +42,7 @@ public class JHPointillize extends ParametrizedFilter {
     private final RangeParam gridSize = new RangeParam("Grid Size", 1, 15, 200);
     private final RangeParam dotSize = new RangeParam("Dot Relative Size (%)", 0, 45, 100);
     private final RangeParam fuzziness = new RangeParam("Fill Fuzziness (%)", 0, 0, 100);
-    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, FREE_OPACITY);
+    private final ColorParam edgeColor = new ColorParam("Fill Color", BLACK, FREE_TRANSPARENCY);
     private final BooleanParam fadeEdges = new BooleanParam("Fade Instead of Fill", true);
 
     private final RangeParam randomness = new RangeParam("Grid Randomness (%)", 0, 0, 100);
@@ -61,7 +61,7 @@ public class JHPointillize extends ParametrizedFilter {
                 edgeColor,
                 dotSize,
                 fuzziness
-        ).withAction(new ReseedNoiseFilterAction(e -> {
+        ).withAction(reseedByCalling(() -> {
             CachedFloatRandom.reseedCache();
             Noise.reseed();
         }));
@@ -79,9 +79,9 @@ public class JHPointillize extends ParametrizedFilter {
 
         // there is an angle property but it does not work as expected
         filter.setScale(gridSize.getValueAsFloat());
-        filter.setRandomness(randomness.getValueAsPercentage());
-        filter.setEdgeThickness(dotSize.getValueAsPercentage());
-        filter.setFuzziness(fuzziness.getValueAsPercentage());
+        filter.setRandomness(randomness.getPercentageValF());
+        filter.setEdgeThickness(dotSize.getPercentageValF());
+        filter.setFuzziness(fuzziness.getPercentageValF());
         filter.setGridType(gridType.getValue());
         filter.setFadeEdges(fadeEdges.isChecked());
         filter.setEdgeColor(edgeColor.getColor().getRGB());

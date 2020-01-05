@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Graphics2D;
 
@@ -29,7 +28,7 @@ import java.awt.Graphics2D;
  * A brush with the "lazy mouse" feature enabled is
  * a decorator for a delegate brush
  */
-public class LazyMouseBrush implements Brush {
+public class LazyMouseBrush extends BrushDecorator {
     private static final int MIN_DIST = 10;
     private static final int DEFAULT_DIST = 30;
     private static final int MAX_DIST = 200;
@@ -38,7 +37,6 @@ public class LazyMouseBrush implements Brush {
     private static final int DEFAULT_SPACING = 3;
     private static final int MAX_SPACING = 20;
 
-    private final Brush delegate;
     private double mouseX;
     private double mouseY;
     private double drawX;
@@ -52,7 +50,7 @@ public class LazyMouseBrush implements Brush {
     private static double minDist2 = DEFAULT_DIST * DEFAULT_DIST;
 
     public LazyMouseBrush(Brush delegate) {
-        this.delegate = delegate;
+        super(delegate);
 
         // copy the previous position of the delegate so that
         // if this object starts with shift-clicked lines, the
@@ -87,36 +85,6 @@ public class LazyMouseBrush implements Brush {
         delegate.setTarget(comp, g);
 
         view = comp.getView();
-    }
-
-    @Override
-    public void setRadius(double radius) {
-        delegate.setRadius(radius);
-    }
-
-    @Override
-    public void setPrevious(PPoint previous) {
-        delegate.setPrevious(previous);
-    }
-
-    @Override
-    public double getEffectiveRadius() {
-        return delegate.getEffectiveRadius();
-    }
-
-    @Override
-    public PPoint getPrevious() {
-        return delegate.getPrevious();
-    }
-
-    @Override
-    public boolean isDrawing() {
-        return delegate.isDrawing();
-    }
-
-    @Override
-    public void initDrawing(PPoint p) {
-        delegate.initDrawing(p);
     }
 
     @Override
@@ -179,26 +147,6 @@ public class LazyMouseBrush implements Brush {
         initDrawing(p);
 
         advanceTo(p);
-    }
-
-    @Override
-    public void finish() {
-        delegate.finish();
-    }
-
-    @Override
-    public DebugNode getDebugNode() {
-        return delegate.getDebugNode();
-    }
-
-    @Override
-    public void dispose() {
-        delegate.dispose();
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return delegate.getPreferredSpacing();
     }
 
     public static RangeParam createDistParam() {

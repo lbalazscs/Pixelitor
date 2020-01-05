@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,7 @@ import static java.lang.Integer.parseInt;
  * of numbers and nothing else.
  */
 public class IntTextField extends JTextField implements KeyListener {
-    private int defaultValue;
+    private final int defaultValue;
     private int minValue;
     private int maxValue;
     private boolean limitRange;
@@ -63,7 +63,7 @@ public class IntTextField extends JTextField implements KeyListener {
             c == KeyEvent.VK_ENTER ||
             c == KeyEvent.VK_DELETE)) {
 
-            if ((int) c != 26) { // 26 occurs while undoing a change, should not beep
+            if (c != 26) { // 26 occurs while undoing a change, should not beep
                 getToolkit().beep();
             }
 
@@ -105,9 +105,9 @@ public class IntTextField extends JTextField implements KeyListener {
     }
 
     public void setRange(int min, int max) {
-        this.minValue = min;
-        this.maxValue = max;
-        this.limitRange = true;
+        minValue = min;
+        maxValue = max;
+        limitRange = true;
     }
 
     @Override

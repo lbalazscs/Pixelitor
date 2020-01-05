@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,11 +73,6 @@ public class SubPath implements Serializable {
     private boolean closed = false;
     private boolean finished = false;
 
-    private static final ToDoubleFunction<DraggablePoint> TO_CO_X = p -> p.x;
-    private static final ToDoubleFunction<DraggablePoint> TO_CO_Y = p -> p.y;
-    private static final ToDoubleFunction<DraggablePoint> TO_IM_X = p -> p.imX;
-    private static final ToDoubleFunction<DraggablePoint> TO_IM_Y = p -> p.imY;
-
     public SubPath(Path path, Composition comp) {
         assert path != null;
         assert comp != null;
@@ -103,7 +98,7 @@ public class SubPath implements Serializable {
         anchorPoints.add(p);
 
         if (addToHistory) {
-            History.addEdit(new SubPathStartEdit(comp, path, this));
+            History.add(new SubPathStartEdit(comp, path, this));
         }
     }
 
@@ -151,7 +146,7 @@ public class SubPath implements Serializable {
         setMoving(null);
 
         AnchorPoint last = getLast();
-        History.addEdit(new AddAnchorPointEdit(
+        History.add(new AddAnchorPointEdit(
                 comp, this, last));
         return last;
     }
@@ -171,11 +166,11 @@ public class SubPath implements Serializable {
     public void addToComponentSpaceShape(GeneralPath path) {
         // TODO cache, but one must be careful to
         // re-create after any editing
-        addToShape(path, TO_CO_X, TO_CO_Y);
+        addToShape(path, p -> p.x, p1 -> p1.y);
     }
 
     public void addToImageSpaceShape(GeneralPath path) {
-        addToShape(path, TO_IM_X, TO_IM_Y);
+        addToShape(path, p -> p.imX, p1 -> p1.imY);
     }
 
     private void addToShape(GeneralPath gp,
@@ -395,7 +390,7 @@ public class SubPath implements Serializable {
         finish(comp, "closing", false);
 
         if (addToHistory) {
-            History.addEdit(new CloseSubPathEdit(comp, this));
+            History.add(new CloseSubPathEdit(comp, this));
         }
 
         // the controls of the first anchor should not be visible after
@@ -641,7 +636,7 @@ public class SubPath implements Serializable {
         Tools.PEN.enableActionsBasedOnFinishedPath(true);
 
         if (addToHistory) {
-            History.addEdit(new FinishSubPathEdit(comp, this));
+            History.add(new FinishSubPathEdit(comp, this));
         }
     }
 
@@ -727,7 +722,6 @@ public class SubPath implements Serializable {
         boolean badWidth = Double.isNaN(coBoundingBox.getWidth());
         boolean badHeight = Double.isNaN(coBoundingBox.getHeight());
         if (badX || badY || badWidth || badHeight) {
-            // TODO in some rare cases x, y, width, height are NaNs, why?
             if (RandomGUITest.isRunning()) {
                 throw new IllegalStateException("bad coordinates for " + toDetailedString());
             }

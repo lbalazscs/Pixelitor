@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -79,7 +79,7 @@ public class Threshold extends ParametrizedFilter {
                         b = 0;
                     }
 
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
             case CRIT_RED:
                 return (a, r, g, b) -> {
@@ -93,7 +93,7 @@ public class Threshold extends ParametrizedFilter {
                         b = 0;
                     }
 
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
             case CRIT_GREEN:
                 return (a, r, g, b) -> {
@@ -107,7 +107,7 @@ public class Threshold extends ParametrizedFilter {
                         b = 0;
                     }
 
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
             case CRIT_BLUE:
                 return (a, r, g, b) -> {
@@ -121,7 +121,7 @@ public class Threshold extends ParametrizedFilter {
                         b = 0;
                     }
 
-                    return (a << 24) | (r << 16) | (g << 8) | b;
+                    return a << 24 | r << 16 | g << 8 | b;
                 };
             case CRIT_SATURATION:
                 return new RGBPixelOp() {
@@ -140,7 +140,7 @@ public class Threshold extends ParametrizedFilter {
                             b = 0;
                         }
 
-                        return (a << 24) | (r << 16) | (g << 8) | b;
+                        return a << 24 | r << 16 | g << 8 | b;
                     }
                 };
 

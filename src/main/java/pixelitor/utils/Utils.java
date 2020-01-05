@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.debug.Ansi;
 
@@ -61,7 +61,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -70,6 +69,8 @@ import java.util.function.Supplier;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.lang.String.format;
+import static pixelitor.OpenImages.addAsNewComp;
+import static pixelitor.OpenImages.findCompositionByName;
 
 /**
  * Utility class with static methods
@@ -220,15 +221,30 @@ public final class Utils {
     }
 
     public static void debugImage(Image img, String name) {
-        if(!EventQueue.isDispatchThread()) {
+        // make sure the this is called on the EDT
+        if (!EventQueue.isDispatchThread()) {
             EventQueue.invokeLater(() -> debugImage(img, name));
             return;
         }
 
+        BufferedImage copy = copyToBufferedImage(img);
+
+        View previousView = OpenImages.getActiveView();
+
+        findCompositionByName(name).ifPresentOrElse(
+                comp -> replaceImageInDebugComp(comp, copy),
+                () -> addAsNewComp(copy, null, name));
+
+        if (previousView != null) {
+            OpenImages.setActiveView(previousView, true);
+        }
+    }
+
+    private static BufferedImage copyToBufferedImage(Image img) {
         BufferedImage copy;
         if (img instanceof BufferedImage) {
             BufferedImage bufferedImage = (BufferedImage) img;
-            if(bufferedImage.getColorModel() instanceof IndexColorModel) {
+            if (bufferedImage.getColorModel() instanceof IndexColorModel) {
                 copy = ImageUtils.convertToARGB(bufferedImage, false);
             } else {
                 copy = ImageUtils.copyImage(bufferedImage);
@@ -239,34 +255,23 @@ public final class Utils {
         } else {
             throw new UnsupportedOperationException("img class is " + img.getClass().getName());
         }
+        return copy;
+    }
 
-        View savedView = OpenComps.getActiveView();
-
-        Optional<Composition> debugCompOpt = OpenComps.findCompositionByName(name);
-        if (debugCompOpt.isPresent()) { // TODO after Java 9: ifPresentOrElse​
-            // if we already have a debug composition, simply replace the image
-            Composition comp = debugCompOpt.get();
-            Canvas canvas = comp.getCanvas();
-            comp.getActiveDrawableOrThrow().setImage(copy);
-            if (canvas.getImWidth() != copy.getWidth()
-                    || canvas.getImHeight() != copy.getHeight()) {
-                canvas.changeImSize(copy.getWidth(), copy.getHeight(), comp.getView());
-            }
-
-            comp.repaint();
-        } else {
-            Composition comp = Composition.fromImage(copy, null, name);
-            OpenComps.addAsNewImage(comp);
+    private static void replaceImageInDebugComp(Composition comp, BufferedImage copy) {
+        Canvas canvas = comp.getCanvas();
+        comp.getActiveDrawableOrThrow().setImage(copy);
+        if (canvas.getImWidth() != copy.getWidth()
+                || canvas.getImHeight() != copy.getHeight()) {
+            canvas.changeImSize(copy.getWidth(), copy.getHeight(), comp.getView());
         }
 
-        if (savedView != null) {
-            OpenComps.setActiveView(savedView, true);
-        }
+        comp.repaint();
     }
 
     public static void debugShape(Shape shape, String name) {
         // create a copy
-        Shape shapeCopy = new Path2D.Double(shape);
+        Path2D shapeCopy = new Path2D.Double(shape);
 
         Rectangle shapeBounds = shape.getBounds();
         int imgWidth = shapeBounds.x + shapeBounds.width + 50;
@@ -635,16 +640,16 @@ public final class Utils {
     public static double parseDouble(String s) throws NumberFormatException {
         // don't accept strings that end with an 'f' or 'd',
         // which are accepted by Double.parseDouble(s)
-        if (s.lastIndexOf('f') != -1) {
+        if (s.indexOf('f') != -1) {
             throw new NumberFormatException();
         }
-        if (s.lastIndexOf('F') != -1) {
+        if (s.indexOf('F') != -1) {
             throw new NumberFormatException();
         }
-        if (s.lastIndexOf('d') != -1) {
+        if (s.indexOf('d') != -1) {
             throw new NumberFormatException();
         }
-        if (s.lastIndexOf('D') != -1) {
+        if (s.indexOf('D') != -1) {
             throw new NumberFormatException();
         }
         return Double.parseDouble(s);

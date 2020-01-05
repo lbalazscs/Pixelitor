@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import static java.awt.Color.GRAY;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Brushed Metal filter based on the JHLabs BrushedMetalFilter
@@ -36,7 +36,7 @@ import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
 public class JHBrushedMetal extends ParametrizedFilter {
     public static final String NAME = "Brushed Metal";
 
-    private final ColorParam color = new ColorParam("Color", GRAY, NO_OPACITY);
+    private final ColorParam color = new ColorParam("Color", GRAY, NO_TRANSPARENCY);
     private final RangeParam radius = new RangeParam("Length", 0, 100, 500);
     private final RangeParam amount = new RangeParam("Amount (%)", 0, 50, 100);
     private final RangeParam shine = new RangeParam("Shine (%)", 0, 10, 100);
@@ -56,11 +56,11 @@ public class JHBrushedMetal extends ParametrizedFilter {
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         Random rand = ReseedSupport.reInitialize();
 
-        BrushedMetalFilter filter = new BrushedMetalFilter(color.getColor().getRGB(),
+        var filter = new BrushedMetalFilter(color.getColor().getRGB(),
                 radius.getValue(),
-                amount.getValueAsPercentage(),
+                amount.getPercentageValF(),
                 true,
-                shine.getValueAsPercentage(),
+                shine.getPercentageValF(),
                 NAME);
 
         filter.setRandom(rand);

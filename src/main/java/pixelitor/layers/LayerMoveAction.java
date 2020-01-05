@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
@@ -51,13 +51,13 @@ public class LayerMoveAction extends AbstractAction
         super(getName(up), getIcon(up));
         this.up = up;
         setEnabled(false);
-        OpenComps.addActivationListener(this);
+        OpenImages.addActivationListener(this);
         Layers.addLayerChangeListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if(up) {
             comp.moveActiveLayerUp();
         } else {
@@ -102,7 +102,7 @@ public class LayerMoveAction extends AbstractAction
 
     @Override
     public void activeLayerChanged(Layer newActiveLayer) {
-        Composition comp = newActiveLayer.getComp();
+        var comp = newActiveLayer.getComp();
         enableDisable(comp);
     }
 

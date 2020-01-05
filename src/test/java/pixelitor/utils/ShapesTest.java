@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,11 +19,9 @@ package pixelitor.utils;
 
 import org.junit.Before;
 import org.junit.Test;
-import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.testutils.ShapeChecker;
-import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 
@@ -40,7 +38,7 @@ public class ShapesTest {
 
     @Before
     public void setup() {
-        Composition comp = TestHelper.createEmptyComposition();
+        var comp = TestHelper.createEmptyComposition();
         view = TestHelper.setupMockViewFor(comp);
     }
 
@@ -88,22 +86,22 @@ public class ShapesTest {
                 .numAnchorsIs(4)
                 .isClosed();
 
-        AnchorPoint p1 = sp.getAnchor(0);
+        var p1 = sp.getAnchor(0);
         assertThat(p1).isAt(2, 2);
         assertThat(p1.ctrlOut).isRetracted();
         assertThat(p1.ctrlIn).isRetracted();
 
-        AnchorPoint p2 = sp.getAnchor(1);
+        var p2 = sp.getAnchor(1);
         assertThat(p2).isAt(12, 2);
         assertThat(p2.ctrlOut).isRetracted();
         assertThat(p2.ctrlIn).isRetracted();
 
-        AnchorPoint p3 = sp.getAnchor(2);
+        var p3 = sp.getAnchor(2);
         assertThat(p3).isAt(12, 12);
         assertThat(p3.ctrlOut).isRetracted();
         assertThat(p3.ctrlIn).isRetracted();
 
-        AnchorPoint p4 = sp.getAnchor(3);
+        var p4 = sp.getAnchor(3);
         assertThat(p4).isAt(2, 12);
         assertThat(p4.ctrlOut).isRetracted();
         assertThat(p4.ctrlIn).isRetracted();
@@ -123,24 +121,24 @@ public class ShapesTest {
                 .numAnchorsIs(4)
                 .isClosed();
 
-        AnchorPoint p1 = sp.getAnchor(0);
+        var p1 = sp.getAnchor(0);
         assertThat(p1)
                 .isAt(12, 7)
                 .anchorPointTypeIs(SYMMETRIC);
         assertThat(p1.ctrlOut).isAt(12, 9.76);
         assertThat(p1.ctrlIn).isAt(12, 4.24);
 
-        AnchorPoint p2 = sp.getAnchor(1);
+        var p2 = sp.getAnchor(1);
         assertThat(p2).isAt(7, 12);
         assertThat(p2.ctrlOut).isAt(4.24, 12.00);
         assertThat(p2.ctrlIn).isAt(9.76, 12);
 
-        AnchorPoint p3 = sp.getAnchor(2);
+        var p3 = sp.getAnchor(2);
         assertThat(p3).isAt(2, 7);
         assertThat(p3.ctrlOut).isAt(2, 4.24);
         assertThat(p3.ctrlIn).isAt(2, 9.76);
 
-        AnchorPoint p4 = sp.getAnchor(3);
+        var p4 = sp.getAnchor(3);
         assertThat(p4).isAt(7, 2);
         assertThat(p4.ctrlOut).isAt(9.76, 2);
         assertThat(p4.ctrlIn).isAt(4.24, 2);

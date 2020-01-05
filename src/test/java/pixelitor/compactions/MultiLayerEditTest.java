@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,7 +15,7 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,8 +25,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.TestHelper;
-import pixelitor.gui.OpenComps;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.testutils.NumLayers;
@@ -40,11 +40,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.comp.Flip.Direction.HORIZONTAL;
-import static pixelitor.filters.comp.Flip.Direction.VERTICAL;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.filters.comp.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
+import static pixelitor.compactions.Flip.Direction.VERTICAL;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
+import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
 
 @RunWith(Parameterized.class)
 public class MultiLayerEditTest {
@@ -123,7 +123,7 @@ public class MultiLayerEditTest {
         withMask.setupFor(comp);
 
         if (withSelection.isYes()) {
-            origSelection = WithSelection.getSelectionShape();
+            origSelection = WithSelection.SELECTION_SHAPE;
         }
         History.clear();
     }
@@ -154,7 +154,7 @@ public class MultiLayerEditTest {
         int east = 4;
         int south = 5;
         int west = 2;
-        new EnlargeCanvas(north, east, south, west).process(comp);
+        new EnlargeCanvas(north, east, south, west).process(comp).join();
 
         checkEnlargeCanvasAfterState(north, east, south, west);
 
@@ -172,7 +172,7 @@ public class MultiLayerEditTest {
         int newCanvasWidth = ORIG_CANVAS_WIDTH + west + east;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT + north + south;
 
-        Composition newComp = OpenComps.getActiveCompOrNull();
+        var newComp = OpenImages.getActiveComp();
 
         assertThat(newComp)
                 .invariantIsOK()
@@ -185,9 +185,11 @@ public class MultiLayerEditTest {
                         origImageHeight + south + Math.max(0, origTY + north));
 
         if (withSelection.isYes()) {
-            Rectangle newSelection = new Rectangle(origSelection.x + west,
-                    origSelection.y + north, origSelection.width, origSelection.height);
-            assertThat(newComp).selectionBoundsIs(newSelection);
+            assertThat(newComp).selectionBoundsIs(new Rectangle(
+                    origSelection.x + west,
+                    origSelection.y + north,
+                    origSelection.width,
+                    origSelection.height));
         }
     }
 
@@ -211,10 +213,10 @@ public class MultiLayerEditTest {
     }
 
     private void checkStateAfterResize() {
-        Composition newComp = OpenComps.getActiveCompOrNull();
+        var newComp = OpenImages.getActiveComp();
 
         if (withSelection.isYes()) {
-            Rectangle halfOfOrigSelection = new Rectangle(
+            var halfOfOrigSelection = new Rectangle(
                     origSelection.x / 2,
                     origSelection.y / 2,
                     origSelection.width / 2,
@@ -239,7 +241,7 @@ public class MultiLayerEditTest {
     @Test
     public void testRotate90() {
         checkOriginalState();
-        new Rotate(ANGLE_90).process(comp);
+        new Rotate(ANGLE_90).process(comp).join();
         checkStateAfterRotate(ANGLE_90);
 
         History.assertNumEditsIs(1);
@@ -254,7 +256,7 @@ public class MultiLayerEditTest {
     @Test
     public void testRotate180() {
         checkOriginalState();
-        new Rotate(ANGLE_180).process(comp);
+        new Rotate(ANGLE_180).process(comp).join();
         checkStateAfterRotate(ANGLE_180);
 
         History.assertNumEditsIs(1);
@@ -269,7 +271,7 @@ public class MultiLayerEditTest {
     @Test
     public void testRotate270() {
         checkOriginalState();
-        new Rotate(ANGLE_270).process(comp);
+        new Rotate(ANGLE_270).process(comp).join();
         checkStateAfterRotate(ANGLE_270);
 
         History.assertNumEditsIs(1);
@@ -283,7 +285,7 @@ public class MultiLayerEditTest {
 
     @SuppressWarnings("SuspiciousNameCombination")
     private void checkStateAfterRotate(Rotate.SpecialAngle angle) {
-        Composition newComp = OpenComps.getActiveCompOrNull();
+        var newComp = OpenImages.getActiveComp();
 
         if (angle == ANGLE_180) {
             assertThat(newComp)
@@ -360,7 +362,7 @@ public class MultiLayerEditTest {
     public void testFlipHorizontal() {
         checkOriginalState();
 
-        new Flip(HORIZONTAL).process(comp);
+        new Flip(HORIZONTAL).process(comp).join();
         checkStateAfterFlip(HORIZONTAL);
 
         History.assertNumEditsIs(1);
@@ -376,7 +378,7 @@ public class MultiLayerEditTest {
     public void testFlipVertical() {
         checkOriginalState();
 
-        new Flip(VERTICAL).process(comp);
+        new Flip(VERTICAL).process(comp).join();
         checkStateAfterFlip(VERTICAL);
 
         History.assertNumEditsIs(1);
@@ -389,7 +391,7 @@ public class MultiLayerEditTest {
     }
 
     private void checkStateAfterFlip(Flip.Direction direction) {
-        Composition newComp = OpenComps.getActiveCompOrNull();
+        var newComp = OpenImages.getActiveComp();
 
         assertThat(newComp)
                 .invariantIsOK()
@@ -419,10 +421,12 @@ public class MultiLayerEditTest {
             } else {
                 throw new IllegalStateException();
             }
-            Rectangle flippedSelection = new Rectangle(
-                    flippedX, flippedY, origSelection.width, origSelection.height
-            );
-            assertThat(newComp).selectionBoundsIs(flippedSelection);
+            assertThat(newComp).selectionBoundsIs(new Rectangle(
+                    flippedX,
+                    flippedY,
+                    origSelection.width,
+                    origSelection.height
+            ));
         }
 
         if (numLayers == NumLayers.MORE) {
@@ -435,10 +439,9 @@ public class MultiLayerEditTest {
     public void testCrop() {
         checkOriginalState();
 
-        Rectangle imCropRect = new Rectangle(3, 3, 6, 3);
-        Crop cropAction = new Crop(imCropRect,
-                false, false, true, false);
-        cropAction.process(comp);
+        var imCropRect = new Rectangle(3, 3, 6, 3);
+        new Crop(imCropRect, false, false, true, false)
+                .process(comp).join();
         checkAfterCropState();
 
         // test undo with one layer
@@ -460,12 +463,12 @@ public class MultiLayerEditTest {
         String afterCropState = "{canvasWidth=6, canvasHeight=3, tx=0, ty=0, imgWidth=6, imgHeight=3}";
 
         // the layer references have changed after the crop
-        Composition newComp = OpenComps.getActiveCompOrNull();
-        ImageLayer newLayer1 = (ImageLayer) newComp.getLayer(0);
+        var newComp = OpenImages.getActiveComp();
+        var newLayer1 = (ImageLayer) newComp.getLayer(0);
 
         assertThat(newLayer1.toDebugCanvasString()).isEqualTo(afterCropState);
         if (numLayers == NumLayers.MORE) {
-            ImageLayer newLayer2 = (ImageLayer) newComp.getLayer(1);
+            var newLayer2 = (ImageLayer) newComp.getLayer(1);
             assertThat(newLayer2.toDebugCanvasString()).isEqualTo(afterCropState);
         }
         // TODO check translation, selection etc

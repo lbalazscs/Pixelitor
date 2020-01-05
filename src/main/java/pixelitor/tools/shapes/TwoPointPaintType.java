@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,12 +45,12 @@ import static pixelitor.colors.FgBgColors.getFGColor;
 public enum TwoPointPaintType {
     NONE("None") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             throw new UnsupportedOperationException();
         }
     }, LINEAR_GRADIENT("Linear Gradient") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return new GradientPaint(
                     (float) imDrag.getStartXFromCenter(),
                     (float) imDrag.getStartYFromCenter(),
@@ -64,7 +64,7 @@ public enum TwoPointPaintType {
         private final AffineTransform gradientTransform = new AffineTransform();
 
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             Point2D center = imDrag.getCenterPoint();
             float distance = (float) imDrag.getDistance();
 
@@ -74,35 +74,35 @@ public enum TwoPointPaintType {
         }
     }, ANGLE_GRADIENT("Angle Gradient") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return new AngleGradientPaint(imDrag.getCenterDrag(),
                     getFGColor(), getBGColor(), NO_CYCLE);
         }
     }, SPIRAL_GRADIENT("Spiral Gradient") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return new SpiralGradientPaint(true, imDrag.getCenterDrag(),
                     getFGColor(), getBGColor(), NO_CYCLE);
         }
     }, DIAMOND_GRADIENT("Diamond Gradient") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return new DiamondGradientPaint(imDrag.getCenterDrag(),
                     getFGColor(), getBGColor(), NO_CYCLE);
         }
     }, FOREGROUND("Foreground") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return getFGColor();
         }
     }, BACKGROUND("Background") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return getBGColor();
         }
     }, TRANSPARENT("Transparent") {
         @Override
-        protected Paint getPaint(ImDrag imDrag) {
+        protected Paint createPaint(ImDrag imDrag) {
             return Color.WHITE; // does not matter
         }
 
@@ -123,13 +123,13 @@ public enum TwoPointPaintType {
         this.guiName = guiName;
     }
 
-    protected abstract Paint getPaint(ImDrag imDrag);
+    protected abstract Paint createPaint(ImDrag imDrag);
 
     /**
      * Called before the drawing/filling
      */
     public void prepare(Graphics2D g, ImDrag imDrag) {
-        g.setPaint(getPaint(imDrag));
+        g.setPaint(createPaint(imDrag));
     }
 
     /**

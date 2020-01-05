@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,8 @@
 package pixelitor.utils;
 
 import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.colors.ColorUtils;
-import pixelitor.gui.OpenComps;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.menus.view.ZoomLevel;
@@ -124,7 +124,7 @@ public class Tests3x3 {
     public static void addStandardImage(boolean withMask) {
         BufferedImage img = getRandomImage(false);
 //        BufferedImage img = getStandardImage(false);
-        Composition comp = Composition.fromImage(img, null, "3x3 Test");
+        var comp = Composition.fromImage(img, null, "3x3 Test");
 
         if(withMask) {
             BufferedImage maskImg = getStandardMaskImage();
@@ -132,7 +132,7 @@ public class Tests3x3 {
             LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
             layer.addConfiguredMask(mask, true);
         }
-        OpenComps.addAsNewImage(comp);
+        OpenImages.addAsNewComp(comp);
         comp.getView().setZoom(ZoomLevel.Z6400, null);
     }
 
@@ -162,7 +162,7 @@ public class Tests3x3 {
     }
 
     public static void dumpCompositeOfActive() {
-        BufferedImage img = OpenComps.getActiveCompositeImage();
+        BufferedImage img = OpenImages.getActiveCompositeImage();
         String actual = getExpectedFromActual(img);
         System.out.println(format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
     }

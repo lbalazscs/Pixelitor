@@ -65,8 +65,7 @@ public class CrystallizeFilter extends CellularFilter {
         nx += 1000;
         ny += 1000;    // Reduce artifacts around 0,0
 
-        //noinspection UnusedAssignment
-        float f = evaluate(nx, ny);
+        evaluate(nx, ny);
 
         Point[] results = resultsTL.get();
 
@@ -75,7 +74,7 @@ public class CrystallizeFilter extends CellularFilter {
         int srcx = ImageMath.clamp((int) ((results[0].x - 1000) * scale), 0, width - 1);
         int srcy = ImageMath.clamp((int) ((results[0].y - 1000) * scale), 0, height - 1);
         int v = inPixels[srcy * width + srcx];
-        f = (f2 - f1) / edgeThickness;
+        float f = (f2 - f1) / edgeThickness;
         f = ImageMath.smoothStep(0, edgeThickness, f);
         if (fadeEdges) {
             srcx = ImageMath.clamp((int) ((results[1].x - 1000) * scale), 0, width - 1);

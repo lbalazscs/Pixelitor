@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import java.awt.Rectangle;
 import java.util.function.Predicate;
 
 /**
@@ -36,7 +35,7 @@ public abstract class AbstractMultipleChoiceParam<E>
 
     @Override
     public JComponent createGUI() {
-        ComboBoxParamGUI<E> gui = new ComboBoxParamGUI<>(this, action);
+        var gui = new ComboBoxParamGUI<E>(this, action);
         paramGUI = gui;
         setParamGUIEnabledState();
         return gui;
@@ -48,21 +47,17 @@ public abstract class AbstractMultipleChoiceParam<E>
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-    }
-
-    @Override
     public boolean canBeAnimated() {
         return false;
     }
 
     @Override
-    public ParamState copyState() {
+    public ParamState<?> copyState() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         throw new UnsupportedOperationException();
     }
 

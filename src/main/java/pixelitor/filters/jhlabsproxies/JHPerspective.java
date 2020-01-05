@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,7 +61,7 @@ public class JHPerspective extends ParametrizedFilter {
         float southEastX = southEast.getRelativeX();
         float southEastY = southEast.getRelativeY();
 
-        PerspectiveFilter filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
+        var filter = new PerspectiveFilter(northWestX, northWestY, northEastX, northEastY,
                 southEastX, southEastY, southWestX, southWestY, NAME);
 
         filter.setEdgeAction(edgeAction.getValue());

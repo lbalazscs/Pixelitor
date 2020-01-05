@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -298,7 +298,7 @@ public class Path implements Serializable {
         comp.repaint();
 
         PathEdit edit = new PathEdit("Delete Subpath", comp, backup, this);
-        History.addEdit(edit);
+        History.add(edit);
 
         assert comp.getActivePath() == this;
     }
@@ -317,7 +317,7 @@ public class Path implements Serializable {
         Tools.PEN.removePath();
         comp.repaint();
 
-        History.addEdit(edit);
+        History.add(edit);
     }
 
     public int indexOf(SubPath subPath) {
@@ -334,7 +334,7 @@ public class Path implements Serializable {
     }
 
     public void setBuildState(BuildState newState, String reason) {
-        if (this.buildState == newState) {
+        if (buildState == newState) {
             return;
         }
 //        if (Build.isDevelopment()) {
@@ -352,7 +352,7 @@ public class Path implements Serializable {
             }
         }
 
-        this.buildState = newState;
+        buildState = newState;
     }
 
     public BuildState getPrevBuildState() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.tools.transform;
 
 import org.junit.Before;
 import org.junit.Test;
-import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -32,7 +31,6 @@ import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
@@ -42,14 +40,14 @@ public class TransformBoxTest {
 
     @Before
     public void setUp() {
-        Composition comp = TestHelper.createMockComposition();
+        var comp = TestHelper.createMockComposition();
         view = comp.getView();
     }
 
     @Test
     public void moveNWFromInitialState() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+        var box = new TransformBox(originalRect,
+                view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -85,15 +83,15 @@ public class TransformBoxTest {
         assertThat(se).isAt(400, 200);
 
         // check that the transform behaves like the handles
-        AffineTransform at = box.calcImTransform();
-        checkTransform(at,
+        checkTransform(
+                box.calcImTransform(),
                 new Rectangle(200, 100, 200, 100),
                 new Rectangle(240, 110, 160, 90));
     }
 
     @Test
     public void moveSEFromInitialState() {
-        TransformBox box = new TransformBox(originalRect, view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -129,16 +127,16 @@ public class TransformBoxTest {
         assertThat(nw).isAt(200, 100);
 
         // check that the transform behaves like the handles
-        AffineTransform at = box.calcImTransform();
-        checkTransform(at,
+        checkTransform(
+                box.calcImTransform(),
                 new Rectangle(200, 100, 200, 100),
                 new Rectangle(200, 100, 160, 90));
     }
 
     @Test
     public void pureTranslation() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+        var box = new TransformBox(originalRect,
+                view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -162,7 +160,7 @@ public class TransformBoxTest {
         se.mouseDragged(430, 220);
         se.mouseReleased(430, 220);
 
-        AffineTransform at = box.calcImTransform();
+        var at = box.calcImTransform();
         // should be a pure (30, 20) translation and nothing else
         assertEquals(AffineTransform.TYPE_TRANSLATION, at.getType());
         checkTransform(at, 100, 100, 130, 120);
@@ -170,8 +168,8 @@ public class TransformBoxTest {
 
     @Test
     public void pureScaling() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+        var box = new TransformBox(originalRect,
+                view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -194,7 +192,7 @@ public class TransformBoxTest {
         assertThat(se).isAt(600, 400).isAtIm(600, 400);
         assertThat(ne).isAt(600, 100).isAtIm(600, 100);
 
-        AffineTransform at = box.calcImTransform();
+        var at = box.calcImTransform();
         // check that a point at NE does not move...
         checkTransform(at, 200, 100, 200, 100);
         // ...and that a point at SE transforms like SE
@@ -203,8 +201,8 @@ public class TransformBoxTest {
 
     @Test
     public void pureRotation() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+        var box = new TransformBox(originalRect,
+                view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -258,13 +256,13 @@ public class TransformBoxTest {
 
     @Test
     public void testCursorAfterTurnedInsideOut() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+        var box = new TransformBox(originalRect,
+                view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
-        RotationHandle rot = box.getRot();
+//        RotationHandle rot = box.getRot();
 
         // drag NW downwards
         press(box, 200, 100);
@@ -330,9 +328,8 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void testImageSpaceRotation() {
-        TransformBox box = new TransformBox(originalRect,
-            view, at -> {});
+    public void testImageSpaceRotation() throws NoninvertibleTransformException {
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -349,7 +346,7 @@ public class TransformBoxTest {
         assertThat(box).angleDegreesIs(0);
 
         // rotate around NW 90 degrees
-        AffineTransform at = AffineTransform.getQuadrantRotateInstance(1, 200, 100);
+        var at = AffineTransform.getQuadrantRotateInstance(1, 200, 100);
         box.imCoordsChanged(at);
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
@@ -376,11 +373,7 @@ public class TransformBoxTest {
         assertThat(box).angleDegreesIs(270); // no change
 
         // rotate back
-        try {
-            at = at.createInverse();
-        } catch (NoninvertibleTransformException e) {
-            fail();
-        }
+        at = at.createInverse();
         box.imCoordsChanged(at);
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
@@ -425,14 +418,14 @@ public class TransformBoxTest {
     }
 
     private static void checkTransform(AffineTransform at, Rectangle start, Rectangle end) {
-        Point2D.Double topLeftStart = new Point2D.Double(start.x, start.y);
-        Point2D.Double topLeftExpected = new Point2D.Double(end.x, end.y);
+        Point2D topLeftStart = new Point2D.Double(start.x, start.y);
+        Point2D topLeftExpected = new Point2D.Double(end.x, end.y);
         checkTransform(at, topLeftStart, topLeftExpected);
 
-        Point2D.Double bottomRightStart = new Point2D.Double(
+        Point2D bottomRightStart = new Point2D.Double(
                 start.x + start.width,
                 start.y + start.height);
-        Point2D.Double bottomRightExpected = new Point2D.Double(
+        Point2D bottomRightExpected = new Point2D.Double(
                 end.x + end.width,
                 end.y + end.height);
         checkTransform(at, bottomRightStart, bottomRightExpected);

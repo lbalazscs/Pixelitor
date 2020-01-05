@@ -360,7 +360,7 @@ public class Noise implements Function1D, Function2D, Function3D {
         }
         float min = 0, max = 0;
         // Some random numbers here...
-        for (float x = -100; x < 100; x += 1.27139) {
+        for (float x = -100; x < 100; x = (float) (x + 1.27139)) {
             float n = f.evaluate(x);
             min = Math.min(min, n);
             max = Math.max(max, n);
@@ -381,8 +381,8 @@ public class Noise implements Function1D, Function2D, Function3D {
         }
         float min = 0, max = 0;
         // Some random numbers here...
-        for (float y = -100; y < 100; y += 10.35173) {
-            for (float x = -100; x < 100; x += 10.77139) {
+        for (float y = -100; y < 100; y = (float) (y + 10.35173)) {
+            for (float x = -100; x < 100; x = (float) (x + 10.77139)) {
                 float n = f.evaluate(x, y);
                 min = Math.min(min, n);
                 max = Math.max(max, n);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,8 +34,8 @@ public class DDimension extends Dimension2D {
     }
 
     public DDimension(Rectangle2D rect) {
-        this.width = rect.getWidth();
-        this.height = rect.getHeight();
+        width = rect.getWidth();
+        height = rect.getHeight();
     }
 
     @Override

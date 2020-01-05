@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,13 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.Component;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.BorderLayout.NORTH;
+import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.BorderFactory.createTitledBorder;
+import static javax.swing.BoxLayout.Y_AXIS;
 
 /**
  * The GUI for the "Channel Mixer"
@@ -40,33 +44,33 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     protected void setupGUI(ParamSet params,
                             ShowOriginal addShowOriginal,
                             Object otherInfo) {
-        JPanel upperPanel = new JPanel(new BorderLayout());
-        JPanel leftPanel = GUIUtils.arrangeParamsVertically(params.getParams());
-        JPanel rightPanel = createPresetsPanel((Action[]) otherInfo);
-        JCheckBox monochromeCB = new JCheckBox("Convert to Black and White", false);
+        var upperPanel = new JPanel(new BorderLayout());
+        var leftPanel = GUIUtils.arrangeParamsVertically(params.getParams());
+        var rightPanel = createPresetsPanel((Action[]) otherInfo);
+        var monochromeCB = new JCheckBox("Convert to Black and White", false);
         monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         monochromeCB.addChangeListener(e ->
                 ((ChannelMixer) filter).setMonochrome(monochromeCB.isSelected()));
         params.setBeforeResetAction(() -> monochromeCB.setSelected(false));
-        upperPanel.add(monochromeCB, BorderLayout.NORTH);
-        upperPanel.add(leftPanel, BorderLayout.CENTER);
-        upperPanel.add(rightPanel, BorderLayout.EAST);
+        upperPanel.add(monochromeCB, NORTH);
+        upperPanel.add(leftPanel, CENTER);
+        upperPanel.add(rightPanel, EAST);
 
-        JPanel buttonsPanel = createFilterActionsPanel(
+        var buttonsPanel = createFilterActionsPanel(
                 params.getActions(), addShowOriginal, 5);
 
         setLayout(new BorderLayout());
-        add(upperPanel, BorderLayout.CENTER);
-        add(buttonsPanel, BorderLayout.SOUTH);
+        add(upperPanel, CENTER);
+        add(buttonsPanel, SOUTH);
     }
 
     private static JPanel createPresetsPanel(Action[] actions) {
-        JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        var rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
         rightPanel.setBorder(createTitledBorder("Presets"));
         for (Action action : actions) {
             JComponent b = new JButton(action);
-            b.setAlignmentX(Component.LEFT_ALIGNMENT);
+            b.setAlignmentX(LEFT_ALIGNMENT);
             rightPanel.add(b);
         }
         return rightPanel;

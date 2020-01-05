@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import pixelitor.tools.shapes.StrokeType;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.Window;
 import java.util.Arrays;
@@ -143,12 +142,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void considerImageSize(Rectangle bounds) {
-
-    }
-
-    @Override
-    public ParamState copyState() {
+    public StrokeSettings copyState() {
         return new StrokeSettings(
                 strokeWidthParam.getValueAsDouble(),
                 strokeCapParam.getSelected(),
@@ -159,7 +153,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         StrokeSettings setting = (StrokeSettings) state;
 
         strokeWidthParam.setValueNoTrigger(setting.getWidth());
@@ -236,14 +230,14 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public void addDebugNodeInfo(DebugNode node) {
-        DebugNode strokeNode = new DebugNode("Stroke Settings", this);
+        DebugNode strokeNode = new DebugNode("stroke settings", this);
 
-        strokeNode.addInt("Stroke Width", strokeWidthParam.getValue());
-        strokeNode.addString("Stroke Cap", strokeCapParam.getSelected().toString());
-        strokeNode.addString("Stroke Join", strokeJoinParam.getSelected().toString());
-        strokeNode.addString("Stroke Type", strokeTypeParam.getSelected().toString());
-        strokeNode.addString("Shape Type", shapeTypeParam.getSelected().toString());
-        strokeNode.addBoolean("Dashed", dashedParam.isChecked());
+        strokeNode.addInt("width", strokeWidthParam.getValue());
+        strokeNode.addString("cap", strokeCapParam.getSelected().toString());
+        strokeNode.addString("join", strokeJoinParam.getSelected().toString());
+        strokeNode.addString("type", strokeTypeParam.getSelected().toString());
+        strokeNode.addString("shape type", shapeTypeParam.getSelected().toString());
+        strokeNode.addBoolean("dashed", dashedParam.isChecked());
 
         node.add(strokeNode);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,8 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.Math.max;
@@ -114,13 +116,13 @@ public class RotatedRectangle {
     }
 
     public Shape asShape() {
-        GeneralPath p = new GeneralPath();
-        p.moveTo(topLeftX, topLeftY);
-        p.lineTo(topRightX, topRightY);
-        p.lineTo(bottomRightX, bottomRightY);
-        p.lineTo(bottomLeftX, bottomLeftY);
-        p.closePath();
-        return p;
+        var path = new GeneralPath();
+        path.moveTo(topLeftX, topLeftY);
+        path.lineTo(topRightX, topRightY);
+        path.lineTo(bottomRightX, bottomRightY);
+        path.lineTo(bottomLeftX, bottomLeftY);
+        path.closePath();
+        return path;
     }
 
     public Rectangle getBoundingBox() {
@@ -178,16 +180,16 @@ public class RotatedRectangle {
         JFrame f = new JFrame("Test");
         f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        JPanel p = new JPanel();
+        var p = new JPanel();
         p.setLayout(new BorderLayout());
 
-        RotatedRectangleTesterPanel testPanel = new RotatedRectangleTesterPanel();
+        var testPanel = new RotatedRectangleTesterPanel();
         testPanel.setPreferredSize(new Dimension(200, 200));
-        p.add(testPanel, BorderLayout.CENTER);
+        p.add(testPanel, CENTER);
 
-        AngleParam angleParam = new AngleParam("", 0);
+        var angleParam = new AngleParam("", 0);
         angleParam.setAdjustmentListener(() -> testPanel.setRotation(angleParam.getValueInRadians()));
-        p.add(angleParam.createGUI(), BorderLayout.SOUTH);
+        p.add(angleParam.createGUI(), SOUTH);
         f.add(p);
 
         f.pack();
@@ -210,7 +212,7 @@ public class RotatedRectangle {
             g2.draw(rect);
 
             // paint the rotated rectangle in red
-            RotatedRectangle rotatedRect = new RotatedRectangle(rect, rotation);
+            var rotatedRect = new RotatedRectangle(rect, rotation);
             Shape rotatedShape = rotatedRect.asShape();
             g2.setColor(Color.RED);
             g2.draw(rotatedShape);

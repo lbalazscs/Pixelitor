@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import pixelitor.tools.pen.AnchorPoint;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.tools.util.DraggablePoint;
 
@@ -114,7 +113,7 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
     public SubPathAssert firstAnchorIsAt(double x, double y) {
         isNotNull();
 
-        AnchorPoint anchor = actual.getAnchor(0);
+        var anchor = actual.getAnchor(0);
         assertThat(anchor).isAt(x, y);
 
         return this;

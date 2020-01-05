@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
         }
 
         Optional<String> foundExt = FileUtils.findExtension(f.getName());
-        if (!foundExt.isPresent()) {
+        if (foundExt.isEmpty()) {
             // the user has entered no extension
             // determine it from the active FileFilter
             extension = getExtensionFromFileFilter();

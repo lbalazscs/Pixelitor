@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.SubPath;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.PathNode;
+import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -42,7 +42,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         assert path != null;
 
         this.path = path;
-        this.wasFirstSP = path.getNumSubpaths() == 1;
+        wasFirstSP = path.getNumSubpaths() == 1;
         this.subPath = subPath;
     }
 
@@ -77,10 +77,10 @@ public class SubPathStartEdit extends PixelitorEdit {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addBoolean("wasFirstSP", wasFirstSP);
-        node.add(new PathNode(path));
+        node.addBoolean("was first subpath", wasFirstSP);
+        node.add(DebugNodes.createPathNode(path));
 
         return node;
     }

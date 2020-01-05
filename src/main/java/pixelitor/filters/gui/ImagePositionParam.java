@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
-import java.awt.Rectangle;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -42,8 +41,8 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     public ImagePositionParam(String name, float relX, float relY) {
         super(name, ALLOW_RANDOMIZE);
-        this.relativeX = relX;
-        this.relativeY = relY;
+        relativeX = relX;
+        relativeY = relY;
         defaultRelativeX = relX;
         defaultRelativeY = relY;
     }
@@ -53,7 +52,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         double defaultX = 100 * defaultRelativeX;
         double defaultY = 100 * defaultRelativeY;
 
-        ImagePositionParamGUI gui = new ImagePositionParamGUI(this, defaultX, defaultY);
+        var gui = new ImagePositionParamGUI(this, defaultX, defaultY);
         paramGUI = gui;
         setParamGUIEnabledState();
         paramGUI.updateGUI();
@@ -92,8 +91,8 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     public void setRelativeValues(float relX, float relY, boolean updateGUI, boolean isAdjusting, boolean trigger) {
-        this.relativeX = relX;
-        this.relativeY = relY;
+        relativeX = relX;
+        relativeY = relY;
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
@@ -108,10 +107,6 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     public void setRelativeY(float y, boolean isAdjusting) {
         setRelativeValues(relativeX, y, false, isAdjusting, true);
-    }
-
-    @Override
-    public void considerImageSize(Rectangle bounds) {
     }
 
     @Override
@@ -134,7 +129,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState state) {
+    public void setState(ParamState<?> state) {
         IPPState s = (IPPState) state;
         relativeX = (float) s.relativeX;
         relativeY = (float) s.relativeY;
@@ -145,8 +140,8 @@ public class ImagePositionParam extends AbstractFilterParam {
         private final double relativeY;
 
         public IPPState(double relX, double relY) {
-            this.relativeX = relX;
-            this.relativeY = relY;
+            relativeX = relX;
+            relativeY = relY;
         }
 
         @Override

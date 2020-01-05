@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,8 +50,8 @@ public class BatchFilterWizard extends Wizard {
 
     @Override
     protected void finalAction() {
-        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
-        String dialogTitle = "Batch Filter Progress";
+        var busyCursorParent = PixelitorWindow.getInstance();
+        var dialogTitle = "Batch Filter Progress";
 
         Automate.processEachFile(comp -> {
                     filter.run(

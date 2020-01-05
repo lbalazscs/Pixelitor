@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.Filter;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
@@ -45,13 +44,13 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -90,7 +89,7 @@ public class Pixelitor {
             System.setProperty("swing.aatext", "true");
 
             if (GraphicsEnvironment.isHeadless()) {
-                System.err.println("Pixelitor cannot be used in headless mode");
+                System.err.println("Pixelitor can't be used in headless mode");
                 System.exit(1);
             }
         }
@@ -120,7 +119,7 @@ public class Pixelitor {
 
         setLookAndFeel();
 
-        PixelitorWindow pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
 
         // Just to make 100% sure that at the end of GUI
@@ -179,7 +178,7 @@ public class Pixelitor {
 
     public static void exitApp(PixelitorWindow pw) {
         assert EventQueue.isDispatchThread();
-        Set<String> paths = IOThread.getCurrentWritePaths();
+        var paths = IOThread.getCurrentWritePaths();
         if (!paths.isEmpty()) {
             String msg = "<html>The writing of the following files is not finished yet. Exit anyway?<br><ul>";
             for (String path : paths) {
@@ -201,7 +200,7 @@ public class Pixelitor {
             }
         }
 
-        List<Composition> unsavedComps = OpenComps.getUnsavedComps();
+        var unsavedComps = OpenImages.getUnsavedComps();
         if (!unsavedComps.isEmpty()) {
             String msg;
             if (unsavedComps.size() == 1) {
@@ -265,7 +264,7 @@ public class Pixelitor {
     private static void dispatchKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
         int modifiers;
         if (ctrl) {
-            modifiers = KeyEvent.CTRL_MASK;
+            modifiers = InputEvent.CTRL_DOWN_MASK;
         } else {
             modifiers = 0;
         }
@@ -274,9 +273,9 @@ public class Pixelitor {
     }
 
     private static void addTestPath() {
-        Rectangle2D.Double shape = new Rectangle2D.Double(100, 100, 300, 100);
+        var shape = new Rectangle2D.Double(100, 100, 300, 100);
 
-        Path path = Shapes.shapeToPath(shape, OpenComps.getActiveView());
+        Path path = Shapes.shapeToPath(shape, OpenImages.getActiveView());
 
         Tools.PEN.setPath(path);
         Tools.PEN.startRestrictedMode(EDIT, false);
@@ -289,19 +288,19 @@ public class Pixelitor {
 
     private static void addMaskAndShowIt() {
         AddLayerMaskAction.INSTANCE.actionPerformed(null);
-        View view = OpenComps.getActiveView();
+        View view = OpenImages.getActiveView();
         Layer layer = view.getComp()
                 .getActiveLayer();
         MaskViewMode.SHOW_MASK.activate(view, layer, "after-start test");
     }
 
     private static void startFilter(Filter filter) {
-        filter.startOn(OpenComps.getActiveDrawableOrThrow());
+        filter.startOn(OpenImages.getActiveDrawableOrThrow());
     }
 
     private static void addNewImage() {
         NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-        OpenComps.getActiveLayerOrNull()
+        OpenImages.getActiveLayer()
                 .addMask(LayerMaskAddType.PATTERN);
     }
 

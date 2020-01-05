@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,19 +41,19 @@ public class Contours extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        EdgeFilter edgeFilter = new EdgeFilter(NAME);
+        var edgeFilter = new EdgeFilter(NAME);
         edgeFilter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
         edgeFilter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
 
         dest = edgeFilter.filter(src, dest);
         Invert.invertImage(dest, dest);
 
-        Luminosity luminosity = new Luminosity();
+        var luminosity = new Luminosity();
         dest = luminosity.transform(dest, dest);
 
         int iterations = lineThickness.getValue();
         if (iterations > 0) {
-            MorphologyFilter morphology = new MorphologyFilter(NAME);
+            var morphology = new MorphologyFilter(NAME);
             morphology.setIterations(iterations);
             morphology.setKernel(MorphologyFilter.KERNEL_DIAMOND);
             morphology.setOp(MorphologyFilter.OP_ERODE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,9 +51,9 @@ public abstract class AbstractAngleUI extends JComponent
     int cy;
 
     AbstractAngleUI(AngleParam angleParam) {
-        this.model = angleParam;
+        model = angleParam;
 
-        Dimension size2D = new Dimension(SIZE + 1, SIZE + 1);
+        var size2D = new Dimension(SIZE + 1, SIZE + 1);
         setSize(size2D);
         setMinimumSize(size2D);
         setPreferredSize(size2D);

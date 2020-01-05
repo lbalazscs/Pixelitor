@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,22 +40,22 @@ public class DrosteFilter extends TransformFilter {
     }
 
     public void setRadiusInside(float radiusInside) {
-        this.r1 = radiusInside;
+        r1 = radiusInside;
     }
 
     public void setRadiusOutside(float radiusOutside) {
-        this.r2 = radiusOutside;
+        r2 = radiusOutside;
     }
 
     public void setPeriodicity(float periodicity) {
-        this.p1 = periodicity;
+        p1 = periodicity;
         if (p1 == 0.0f) {
             p1 = 0.001f; // Prevent divide by zero
         }
     }
 
     public void setStrands(float strands) {
-        this.p2 = strands;
+        p2 = strands;
         if (p2 == 0.0f) {
             p2 = 0.0001f;
         }

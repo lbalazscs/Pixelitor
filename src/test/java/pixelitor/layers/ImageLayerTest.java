@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,6 +32,7 @@ import pixelitor.TestHelper;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
 import pixelitor.testutils.WithMask;
+import pixelitor.testutils.WithSelection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.utils.ImageUtils;
 
@@ -61,17 +62,21 @@ public class ImageLayerTest {
     @Parameter(value = 1)
     public WithTranslation withTranslation;
 
+    @Parameter(value = 2)
+    public WithSelection withSelection;
+
     private Composition comp;
 
     private IconUpdateChecker iconUpdates;
 
-    @Parameters(name = "{index}: mask = {0}, translation = {1}")
+    @Parameters(name = "{index}: mask = {0}, transl = {1}, sel = {2}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {WithMask.NO, WithTranslation.NO},
-                {WithMask.YES, WithTranslation.NO},
-                {WithMask.NO, WithTranslation.YES},
-                {WithMask.YES, WithTranslation.YES},
+                {WithMask.NO, WithTranslation.NO, WithSelection.NO},
+                {WithMask.YES, WithTranslation.NO, WithSelection.NO},
+                {WithMask.NO, WithTranslation.YES, WithSelection.NO},
+                {WithMask.YES, WithTranslation.YES, WithSelection.NO},
+                {WithMask.NO, WithTranslation.NO, WithSelection.YES},
         });
     }
 
@@ -93,6 +98,7 @@ public class ImageLayerTest {
         }
 
         withTranslation.setupFor(layer);
+        withSelection.setupFor(comp);
 
         int layerIconUpdatesAtStart = 0;
         if (withTranslation.isYes()) {
@@ -131,27 +137,19 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_startPreviewing_WOSelection() {
+    public void test_startPreviewing() {
         BufferedImage imageBefore = layer.getImage();
 
         layer.startPreviewing();
 
-        assertThat(layer)
-                .stateIs(PREVIEW)
-                .previewImageIs(imageBefore);
-        iconUpdates.check(0, 0);
-    }
+        assertThat(layer).stateIs(PREVIEW);
 
-    @Test
-    public void test_startPreviewing_WithSelection() {
-        BufferedImage imageBefore = layer.getImage();
-        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
+        if (withSelection.isYes()) {
+            assertThat(layer).previewImageIsNot(imageBefore);
+        } else {
+            assertThat(layer).previewImageIs(imageBefore);
+        }
 
-        layer.startPreviewing();
-
-        assertThat(layer)
-                .stateIs(PREVIEW)
-                .previewImageIsNot(imageBefore);
         iconUpdates.check(0, 0);
     }
 
@@ -271,24 +269,23 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getImageForFilterDialogs_WOSelection() {
+    public void test_getImageForFilterDialogs() {
         BufferedImage image = layer.getImageForFilterDialogs();
 
-        assertThat(image).isNotNull();
-        // no selection, we expect it to return the image
-        assertThat(image).isSameAs(layer.getImage());
-        iconUpdates.check(0, 0);
-    }
+        if (withSelection.isYes()) {
+            Rectangle selShape = WithSelection.SELECTION_SHAPE;
+            assertThat(image)
+                    .isNotNull()
+                    .isNotSameAs(layer.getImage())
+                    .widthIs(selShape.width)
+                    .heightIs(selShape.height);
+        } else {
+            // no selection, we expect it to return the image
+            assertThat(image)
+                    .isNotNull()
+                    .isSameAs(layer.getImage());
+        }
 
-    @Test
-    public void test_getImageForFilterDialogs_WithSelection() {
-        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
-
-        BufferedImage image = layer.getImageForFilterDialogs();
-
-        assertThat(image).isNotNull();
-        assertThat(image).isNotSameAs(layer.getImage());
-        assertThat(image).widthIs(2).heightIs(2);
         iconUpdates.check(0, 0);
     }
 
@@ -329,30 +326,63 @@ public class ImageLayerTest {
 
     @Test
     public void test_getFilterSourceImage() {
-        BufferedImage image = layer.getFilterSourceImage();
+        var filterSourceImage = layer.getFilterSourceImage();
 
-        assertThat(image).isNotNull();
+        assertThat(filterSourceImage).isNotNull();
         iconUpdates.check(0, 0);
-        // TODO
+        if (withSelection.isYes()) {
+            Rectangle selShape = WithSelection.SELECTION_SHAPE;
+            assertThat(filterSourceImage)
+                    .isNotSameAs(layer.getImage())
+                    .widthIs(selShape.width)
+                    .heightIs(selShape.height);
+        } else {
+            assertThat(filterSourceImage).isSameAs(layer.getImage());
+        }
     }
 
     @Test
     public void test_getSelectedSubImage() {
         BufferedImage imageT = layer.getSelectedSubImage(true);
         assertThat(imageT).isNotNull();
+        BufferedImage layerImage = layer.getImage();
+        if (withSelection.isYes()) {
+            Rectangle selShape = WithSelection.SELECTION_SHAPE;
+            assertThat(imageT)
+                    .isNotSameAs(layerImage)
+                    .widthIs(selShape.width)
+                    .heightIs(selShape.height);
+        } else {
+            assertThat(imageT)
+                    .isNotSameAs(layerImage) // copy even if there is no selection
+                    .widthIs(layerImage.getWidth())
+                    .heightIs(layerImage.getHeight());
+        }
 
         BufferedImage imageF = layer.getSelectedSubImage(false);
         assertThat(imageF).isNotNull();
 
+        if (withSelection.isYes()) {
+            Rectangle selShape = WithSelection.SELECTION_SHAPE;
+            assertThat(imageF)
+                    .isNotSameAs(layerImage)
+                    .widthIs(selShape.width)
+                    .heightIs(selShape.height);
+        } else {
+            assertThat(imageF)
+                    .isSameAs(layerImage) // don't copy if there is no selection
+                    .widthIs(layerImage.getWidth())
+                    .heightIs(layerImage.getHeight());
+        }
+
         iconUpdates.check(0, 0);
-        // TODO
     }
 
     @Test
     public void test_crop_deletePixels_noGrowing() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
         assertThat(layer).imageBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 3, 5, 5);
@@ -370,8 +400,8 @@ public class ImageLayerTest {
     @Test
     public void test_crop_deletePixels_withGrowing() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
         assertThat(layer).imageBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 3, 50, 50);
@@ -387,8 +417,8 @@ public class ImageLayerTest {
     @Test
     public void test_crop_keepPixels_noGrowing() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origImBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
         assertThat(layer).imageBoundsIsEqualTo(origImBounds);
         Rectangle cropRect = new Rectangle(3, 4, 50, 50);
@@ -406,8 +436,8 @@ public class ImageLayerTest {
     @Test
     public void test_crop_keepPixels_withGrowingRightDown() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
         assertThat(layer).imageBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 4, 50, 50);
@@ -423,8 +453,8 @@ public class ImageLayerTest {
     @Test
     public void test_crop_keepPixels_withGrowingLeft() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
         assertThat(layer).imageBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(-10, 3, 20, 3);
@@ -440,8 +470,8 @@ public class ImageLayerTest {
     @Test
     public void test_crop_keepPixels_withGrowingDown() {
         // given
-        int tx = layer.getTX();
-        int ty = layer.getTY();
+        int tx = layer.getTx();
+        int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - ty);
         assertThat(layer).imageBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(8, 5, 4, 10);

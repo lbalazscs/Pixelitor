@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class BooleanParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        BooleanParam param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
+        var param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
             assertThat(param.isChecked()).isTrue();
@@ -38,26 +38,26 @@ public class BooleanParamTest {
 
     @Test
     public void test_setValue() {
-        BooleanParam param = new BooleanParam("Test", true);
+        var param = new BooleanParam("Test", true);
         assertThat(param.isChecked()).isTrue();
         assertThat(param).isSetToDefault();
 
-        ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
-        param.setAdjustmentListener(al);
+        var adjListener = mock(ParamAdjustmentListener.class);
+        param.setAdjustmentListener(adjListener);
 
         param.setValue(true, false, true);
         assertThat(param).isSetToDefault();
         // expect no triggering because the value didn't change
-        verify(al, never()).paramAdjusted();
+        verify(adjListener, never()).paramAdjusted();
 
         param.setValue(false, false, true);
         assertThat(param.isSetToDefault()).isFalse();
         // expect one triggering
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(true, false, false);
         assertThat(param).isSetToDefault();
         // expect no new triggering, because triggering was set to false
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
     }
 }

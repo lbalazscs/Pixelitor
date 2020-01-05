@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -359,7 +359,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void updateLayerIconImage(ImageLayer layer) {
+    public void updateLayerIconImageAsync(ImageLayer layer) {
         assert EventQueue.isDispatchThread();
 
         boolean isMask = layer instanceof LayerMask;
@@ -423,9 +423,9 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         if (dragReorderHandler != null) {
             dragReorderHandler.attachToComponent(maskIconLabel);
-            this.maskAddedBeforeDragHandler = false;
+            maskAddedBeforeDragHandler = false;
         } else {
-            this.maskAddedBeforeDragHandler = true;
+            maskAddedBeforeDragHandler = true;
         }
 
         revalidate();

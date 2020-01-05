@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,14 +21,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.Composition.LayerAdder;
-import pixelitor.filters.comp.Crop;
+import pixelitor.compactions.Crop;
 import pixelitor.history.History;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.Tools;
 
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
@@ -143,8 +141,8 @@ public class CompositionTest {
                 .isNotDirty()
                 .numLayersIs(2);
 
-        ImageLayer newLayer = TestHelper.createImageLayer("layer 3", comp);
-        comp.addLayerInInitMode(newLayer);
+        comp.addLayerInInitMode(
+                TestHelper.createImageLayer("layer 3", comp));
 
         assertThat(comp)
                 .isNotDirty()  // still not dirty!
@@ -788,7 +786,7 @@ public class CompositionTest {
     public void test_deselect() {
         assertThat(comp).doesNotHaveSelection();
 
-        Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+        var selectionShape = new Rectangle(4, 4, 8, 4);
         TestHelper.setRectangleSelection(comp, selectionShape);
 
         assertThat(comp)
@@ -811,13 +809,13 @@ public class CompositionTest {
 
     @Test
     public void test_cropSelection() {
-        Rectangle selectionShape = new Rectangle(4, 4, 8, 4);
+        var selectionShape = new Rectangle(4, 4, 8, 4);
         TestHelper.setRectangleSelection(comp, selectionShape);
         assertThat(comp)
                 .hasSelection()
                 .selectionBoundsIs(selectionShape);
 
-        Rectangle cropRect = new Rectangle(2, 2, 4, 4);
+        var cropRect = new Rectangle(2, 2, 4, 4);
         comp.intersectSelection(cropRect);
 
         assertThat(comp)
@@ -826,7 +824,7 @@ public class CompositionTest {
 
         Tools.setCurrentTool(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
 
-        AffineTransform tx = Crop.createCanvasImTx(cropRect);
+        var tx = Crop.createCanvasImTransform(cropRect);
         comp.imCoordsChanged(tx, false);
 
         assertThat(comp)

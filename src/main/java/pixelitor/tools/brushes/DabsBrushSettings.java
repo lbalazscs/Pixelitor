@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,6 @@
 package pixelitor.tools.brushes;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The settings of a {@link DabsBrush}
@@ -27,7 +25,6 @@ import java.util.List;
 public class DabsBrushSettings extends BrushSettings {
     private AngleSettings angleSettings;
     private SpacingStrategy spacingStrategy;
-    private final List<DabsBrush> brushes = new ArrayList<>(4);
 
     public DabsBrushSettings(AngleSettings angleSettings, SpacingStrategy spacingStrategy) {
         this.angleSettings = angleSettings;
@@ -56,26 +53,12 @@ public class DabsBrushSettings extends BrushSettings {
         return spacingStrategy;
     }
 
-    private void notifyBrushes() {
-        for (DabsBrush brush : brushes) {
-            brush.settingsChanged();
-        }
-    }
-
-    public void registerBrush(DabsBrush brush) {
-        brushes.add(brush);
-
-        assert brushes.size() <= 4;
-    }
-
-    public void unregisterBrush(DabsBrush brush) {
-        brushes.remove(brush);
-    }
-
     @Override
     protected JPanel createConfigPanel() {
-        // TODO either the class should be abstract or this should do something
-        // why instantiate
-        return new JPanel();
+        // This class will be abstract and this method will be
+        // unimplemented when all dabs brushes will have settings,
+        // and will use subclasses of this class. In the meantime
+        // this method is never called for brushes without settings.
+        throw new UnsupportedOperationException();
     }
 }

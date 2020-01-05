@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.OpenImages;
 import pixelitor.filters.gui.StrokeParam;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -129,7 +129,7 @@ public class TracePathPanel extends JPanel {
     }
 
     public static void showInDialog(Path path) {
-        TracePathPanel p = new TracePathPanel(path, OpenComps.getActiveDrawableOrNull());
+        TracePathPanel p = new TracePathPanel(path, OpenImages.getActiveDrawable());
         JDialog d = new DialogBuilder()
                 .title("Trace Path")
                 .content(p)

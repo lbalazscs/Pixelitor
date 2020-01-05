@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 public class RangeParamTest {
     @Test
     public void isIgnoreRandomizeWorking() {
-        RangeParam param = new RangeParam("Test", 0, 100, 1000,
+        var param = new RangeParam("Test", 0, 100, 1000,
                 true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
@@ -40,27 +40,27 @@ public class RangeParamTest {
 
     @Test
     public void test_setValue() {
-        RangeParam param = new RangeParam("Test", 0, 50, 100);
+        var param = new RangeParam("Test", 0, 50, 100);
         assertThat(param.getValue()).isEqualTo(50);
         assertThat(param).isSetToDefault();
 
-        ParamAdjustmentListener al = mock(ParamAdjustmentListener.class);
-        param.setAdjustmentListener(al);
+        var adjListener = mock(ParamAdjustmentListener.class);
+        param.setAdjustmentListener(adjListener);
 
         param.setValue(50, true);
         assertThat(param).isSetToDefault();
         // expect no triggering because the value didn't change
-        verify(al, never()).paramAdjusted();
+        verify(adjListener, never()).paramAdjusted();
 
         param.setValue(60, true);
         assertThat(param).isNotSetToDefault();
         // expect one triggering
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
 
         param.setValue(50, false);
         assertThat(param).isSetToDefault();
         // expect no new triggering, because triggering was set to false
-        verify(al, times(1)).paramAdjusted();
+        verify(adjListener, times(1)).paramAdjusted();
     }
 
     @Test(expected = AssertionError.class)

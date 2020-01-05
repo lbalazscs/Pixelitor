@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import pixelitor.utils.ImageUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Colorize
@@ -37,7 +37,7 @@ public class Colorize extends ParametrizedFilter {
     private final RangeParam adjustBrightness = new RangeParam(
             "Adjust Brightness", -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
-            "Color", new Color(255, 207, 119), NO_OPACITY);
+            "Color", new Color(255, 207, 119), NO_TRANSPARENCY);
     private final RangeParam opacityParam = new RangeParam(
             "Amount (%)", 0, 100, 100);
 
@@ -53,8 +53,8 @@ public class Colorize extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        float briShift = adjustBrightness.getValueAsPercentage();
-        float opacity = opacityParam.getValueAsPercentage();
+        float briShift = adjustBrightness.getPercentageValF();
+        float opacity = opacityParam.getPercentageValF();
 
         Color color = colorParam.getColor();
 
@@ -112,7 +112,7 @@ public class Colorize extends ParametrizedFilter {
                 destBlue = (int) (destBlue * opacity + srcB * translucence);
             }
 
-            destData[i] = a | (destRed << 16) | (destGreen << 8) | destBlue;
+            destData[i] = a | destRed << 16 | destGreen << 8 | destBlue;
         }
 
         return dest;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,7 @@ public class CalligraphyBrush extends StrokeBrush {
 
         targetG.setStroke(pointStroke);
 
-        Line2D.Double line = new Line2D.Double(startX, startY, endX, endY);
+        var line = new Line2D.Double(startX, startY, endX, endY);
 
         targetG.draw(line);
 

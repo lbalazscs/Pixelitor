@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,12 +20,12 @@ import com.jhlabs.image.MarbleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.IntChoiceParam.EDGE_REPEAT_PIXELS;
+import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 
 /**
  * Turbulent Distortion filter based on the JHLabs MarbleFilter
@@ -53,7 +53,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
                 time,
                 edgeAction.withDefaultChoice(EDGE_REPEAT_PIXELS),
                 interpolation
-        ).withAction(new ReseedNoiseFilterAction());
+        ).withAction(reseedNoise());
     }
 
     @Override
@@ -66,10 +66,10 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
             filter = new MarbleFilter(NAME);
         }
 
-        filter.setTurbulence(turbulence.getValueAsPercentage());
+        filter.setTurbulence(turbulence.getPercentageValF());
         filter.setScale(scale.getValueAsFloat());
         filter.setAmount(amount.getValueAsFloat());
-        filter.setTime(time.getValueAsPercentage() * 5);
+        filter.setTime(time.getPercentageValF() * 5);
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());
 

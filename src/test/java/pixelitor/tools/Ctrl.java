@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,16 +20,13 @@ package pixelitor.tools;
 import java.awt.event.MouseEvent;
 
 /**
- * Whether we simulate the pressing of the Ctrl key
- * during testing
+ * Whether the pressing of the Ctrl key is simulated
  */
 public enum Ctrl implements EventMaskModifier {
     YES {
         @Override
         public int modify(int in) {
             in |= MouseEvent.CTRL_DOWN_MASK;
-            in |= MouseEvent.CTRL_MASK;
-
             return in;
         }
     }, NO {

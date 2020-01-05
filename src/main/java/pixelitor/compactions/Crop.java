@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,19 +15,17 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.comp;
+package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
-import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
-import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
@@ -84,7 +82,7 @@ public class Crop implements CompAction {
             return CompletableFuture.completedFuture(comp);
         }
 
-        AffineTransform canvasTx = createCanvasImTx(cropRect);
+        var canvasTransform = createCanvasImTransform(cropRect);
 
         View view = comp.getView();
         Composition newComp = comp.createCopy(true, !selectionCrop);
@@ -117,14 +115,14 @@ public class Crop implements CompAction {
         // into the coordinate system of the new, cropped image.
         // It is important to call thins only AFTER the actual canvas size was changed
         // so that the component coords are calculated correctly from the new image coords.
-        newComp.imCoordsChanged(canvasTx, false);
+        newComp.imCoordsChanged(canvasTransform, false);
 
         if (addHidingMask) {
             assert selectionCrop;
             assert comp.hasSelection();
 
-            Selection hidingSelection = new Selection(comp.getSelection(), true);
-            hidingSelection.transform(canvasTx);
+            var hidingSelection = new Selection(comp.getSelection(), true);
+            hidingSelection.transform(canvasTransform);
             addHidingMask(newComp, hidingSelection, false);
         }
 
@@ -137,8 +135,8 @@ public class Crop implements CompAction {
 
         assert comp != newComp;
         String editName = addHidingMask ? "Crop and Hide" : "Crop";
-        History.addEdit(new CompositionReplacedEdit(
-                editName, false, view, comp, newComp, canvasTx));
+        History.add(new CompositionReplacedEdit(
+                editName, false, view, comp, newComp, canvasTransform));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
@@ -169,10 +167,9 @@ public class Crop implements CompAction {
      * The returned transform describes how the image space
      * coordinates for a surviving pixel change after a crop
      */
-    public static AffineTransform createCanvasImTx(Rectangle2D imCropRect) {
-        double txx = -imCropRect.getX();
-        double txy = -imCropRect.getY();
-        return AffineTransform.getTranslateInstance(txx, txy);
+    public static AffineTransform createCanvasImTransform(Rectangle2D imCropRect) {
+        return AffineTransform.getTranslateInstance(
+                -imCropRect.getX(), -imCropRect.getY());
     }
 
     /**
@@ -182,10 +179,8 @@ public class Crop implements CompAction {
                                            boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
         try {
-            OpenComps.onActiveComp(comp -> {
-                new Crop(cropRect, false, allowGrowing, deleteCroppedPixels, false)
-                        .process(comp);
-            });
+            OpenImages.onActiveComp(comp -> new Crop(cropRect, false, allowGrowing, deleteCroppedPixels, false)
+                    .process(comp));
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -196,7 +191,7 @@ public class Crop implements CompAction {
      */
     public static void selectionCropActiveImage() {
         try {
-            OpenComps.onActiveComp(Crop::selectionCrop);
+            OpenImages.onActiveComp(Crop::selectionCrop);
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -263,7 +258,7 @@ public class Crop implements CompAction {
         for (int i = 0; i < numLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (addToHistory) {
-                PixelitorEdit edit = layer.addHidingMask(sel, true);
+                var edit = layer.addHidingMask(sel, true);
                 multiEdit.add(edit);
             } else {
                 layer.addHidingMask(sel, false);
@@ -271,10 +266,10 @@ public class Crop implements CompAction {
         }
 
         if (addToHistory) {
-            DeselectEdit deselectEdit = comp.deselect(false);
+            var deselectEdit = comp.deselect(false);
             multiEdit.add(deselectEdit);
 
-            History.addEdit(multiEdit);
+            History.add(multiEdit);
         }
     }
 }

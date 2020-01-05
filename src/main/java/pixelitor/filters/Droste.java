@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,8 +71,8 @@ public class Droste extends ParametrizedFilter {
             filter = new DrosteFilter(NAME);
         }
 
-        filter.setRadiusInside(innerRadius.getValueAsPercentage());
-        filter.setRadiusOutside(outerRadius.getValueAsPercentage());
+        filter.setRadiusInside(innerRadius.getPercentageValF());
+        filter.setRadiusOutside(outerRadius.getPercentageValF());
         filter.setPeriodicity(periodicity.getValue());
         filter.setStrands(strands.getValue());
 

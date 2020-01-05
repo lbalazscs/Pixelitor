@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,6 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.Color;
@@ -59,10 +58,10 @@ public class ColorWheel extends ParametrizedFilter {
         int cy = (int) (height * center.getRelativeY());
 
         float hueShift = (float) hueShiftParam.getValueInRadians();
-        float saturation = satParam.getValueAsPercentage();
-        float brightness = brightnessParam.getValueAsPercentage();
+        float saturation = satParam.getPercentageValF();
+        float brightness = brightnessParam.getPercentageValF();
 
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, height);
+        var pt = new StatusBarProgressTracker(NAME, height);
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
@@ -71,7 +70,7 @@ public class ColorWheel extends ParametrizedFilter {
                     destData, width, finalY, cx, cy, hueShift, saturation, brightness);
             futures[y] = ThreadPool.submit(lineTask);
         }
-        ThreadPool.waitToFinish(futures, pt);
+        ThreadPool.waitFor(futures, pt);
         pt.finished();
 
         return dest;

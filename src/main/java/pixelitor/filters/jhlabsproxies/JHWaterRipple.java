@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,7 +73,7 @@ public class JHWaterRipple extends ParametrizedFilter {
         filter.setCentreY(center.getRelativeY());
         filter.setRadius(radius.getValueAsFloat());
         filter.setWavelength(wavelength.getValueAsFloat());
-        filter.setAmplitude(amplitude.getValueAsPercentage());
+        filter.setAmplitude(amplitude.getPercentageValF());
         filter.setPhase(phase.getValueInRadians());
         filter.setEdgeAction(edgeAction.getValue());
         filter.setInterpolation(interpolation.getValue());

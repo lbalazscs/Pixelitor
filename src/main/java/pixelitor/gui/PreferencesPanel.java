@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,7 @@ import javax.swing.border.Border;
 import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
+import static javax.swing.SwingConstants.LEFT;
 
 /**
  * The GUI for the preferences dialog
@@ -46,7 +47,7 @@ public class PreferencesPanel extends JPanel {
     private JComboBox<IntChoiceParam.Value> thumbSizeCB;
 
     private PreferencesPanel() {
-        JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.LEFT);
+        JTabbedPane tabbedPane = new JTabbedPane(LEFT);
         JPanel generalPanel = createGeneralPanel();
         JPanel guidesPanel = createGuidesPanel();
 
@@ -58,12 +59,12 @@ public class PreferencesPanel extends JPanel {
     private JPanel createGeneralPanel() {
         JPanel generalPanel = new JPanel(new GridBagLayout());
 
-        GridBagHelper gbh = new GridBagHelper(generalPanel);
+        var gbh = new GridBagHelper(generalPanel);
 
         JComboBox<ImageArea.Mode> uiChooser = new JComboBox<>(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
-        gbh.addLabelWithControl("Images In: ", uiChooser);
+        gbh.addLabelAndControl("Images In: ", uiChooser);
         uiChooser.addActionListener(e -> {
             ImageArea.Mode mode = (ImageArea.Mode) uiChooser.getSelectedItem();
             ImageArea.changeUI(mode);
@@ -72,7 +73,7 @@ public class PreferencesPanel extends JPanel {
         undoLevelsTF = new JTextField(3);
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
-        gbh.addLabelWithControl("Undo/Redo Levels: ",
+        gbh.addLabelAndControl("Undo/Redo Levels: ",
                 TextFieldValidator.createPositiveIntLayer("Undo/Redo Levels",
                         undoLevelsTF, true));
 
@@ -88,7 +89,7 @@ public class PreferencesPanel extends JPanel {
         int currentSize = LayerButtonLayout.getThumbSize();
         thumbSizeCB.setSelectedIndex(currentSize / 24 - 1);
 
-        gbh.addLabelWithControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
+        gbh.addLabelAndControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
 
         generalPanel.setBorder(EMPTY_BORDER);
@@ -97,7 +98,7 @@ public class PreferencesPanel extends JPanel {
 
     private static JPanel createGuidesPanel() {
         JPanel guidesPanel = new JPanel(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(guidesPanel);
+        var gbh = new GridBagHelper(guidesPanel);
         configureGuidesSettings(gbh);
         configureCropGuidesSettings(gbh);
         guidesPanel.setBorder(EMPTY_BORDER);
@@ -108,12 +109,12 @@ public class PreferencesPanel extends JPanel {
         GuideStyle guideStyle = AppPreferences.getGuideStyle();
 
         ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        JComboBox guideStyleCB = new JComboBox<>(GuideStrokeType.values());
+        var guideStyleCB = new JComboBox<GuideStrokeType>(GuideStrokeType.values());
         guideStyleCB.setName("guideStyleCB");
         guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelWithControl("Guide Color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Guide Style: ", guideStyleCB);
+        gbh.addLabelAndControl("Guide Color: ", guideColorSwatch);
+        gbh.addLabelAndControl("Guide Style: ", guideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());
@@ -130,12 +131,12 @@ public class PreferencesPanel extends JPanel {
         GuideStyle guideStyle = AppPreferences.getCropGuideStyle();
 
         ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        JComboBox cropGuideStyleCB = new JComboBox<>(GuideStrokeType.values());
+        var cropGuideStyleCB = new JComboBox<GuideStrokeType>(GuideStrokeType.values());
         cropGuideStyleCB.setName("cropGuideStyleCB");
         cropGuideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
-        gbh.addLabelWithControl("Cropping Guide Color: ", guideColorSwatch);
-        gbh.addLabelWithControl("Cropping Guide Style: ", cropGuideStyleCB);
+        gbh.addLabelAndControl("Cropping Guide Color: ", guideColorSwatch);
+        gbh.addLabelAndControl("Cropping Guide Style: ", cropGuideStyleCB);
 
         new ColorPickerDialog(guideColorSwatch, e -> {
             guideStyle.setColorA(guideColorSwatch.getForeground());

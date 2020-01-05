@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,10 +32,12 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 
+import static java.awt.BorderLayout.CENTER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
+import static java.awt.FlowLayout.LEFT;
 
 /**
  * Configuration panel for SwingX area effects.
@@ -51,6 +53,7 @@ public class EffectsPanel extends JPanel implements Resettable {
     private EffectPanel innerGlowPanel;
     private NeonBorderPanel neonBorderPanel;
     private DropShadowPanel dropShadowPanel;
+    private final EffectPanel[] panels = new EffectPanel[4];
 
     private final JTabbedPane tabs;
 
@@ -58,16 +61,19 @@ public class EffectsPanel extends JPanel implements Resettable {
         setLayout(new BorderLayout());
 
         setEffects(givenEffects);
+        panels[0] = glowPanel;
+        panels[1] = innerGlowPanel;
+        panels[2] = neonBorderPanel;
+        panels[3] = dropShadowPanel;
 
         if (listener != null) {
-            glowPanel.setAdjustmentListener(listener);
-            innerGlowPanel.setAdjustmentListener(listener);
-            neonBorderPanel.setAdjustmentListener(listener);
-            dropShadowPanel.setAdjustmentListener(listener);
+            for (EffectPanel panel : panels) {
+                panel.setAdjustmentListener(listener);
+            }
         }
 
         tabs = new JTabbedPane();
-        tabs.setTabPlacement(JTabbedPane.LEFT);
+        tabs.setTabPlacement(SwingConstants.LEFT);
         tabs.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
 
         addTab(GLOW_TAB_NAME, glowPanel);
@@ -75,7 +81,7 @@ public class EffectsPanel extends JPanel implements Resettable {
         addTab(NEON_BORDER_TAB_NAME, neonBorderPanel);
         addTab(DROP_SHADOW_TAB_NAME, dropShadowPanel);
 
-        add(tabs, BorderLayout.CENTER);
+        add(tabs, CENTER);
     }
 
     public void setEffects(AreaEffects effects) {
@@ -90,7 +96,7 @@ public class EffectsPanel extends JPanel implements Resettable {
         Color color = WHITE;
         int width = 10;
         if (effects != null) {
-            GlowPathEffect effect = effects.getGlowEffect();
+            var effect = effects.getGlowEffect();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -112,7 +118,7 @@ public class EffectsPanel extends JPanel implements Resettable {
         Color color = RED;
         int width = 10;
         if (effects != null) {
-            InnerGlowPathEffect effect = effects.getInnerGlowEffect();
+            var effect = effects.getInnerGlowEffect();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -135,7 +141,7 @@ public class EffectsPanel extends JPanel implements Resettable {
         Color innerColor = WHITE;
         int width = 10;
         if (effects != null) {
-            NeonBorderEffect effect = effects.getNeonBorderEffect();
+            var effect = effects.getNeonBorderEffect();
             if (effect != null) {
                 enable = true;
                 color = effect.getEdgeColor();
@@ -161,7 +167,7 @@ public class EffectsPanel extends JPanel implements Resettable {
         double angle = 0.7;
         int spread = 10;
         if (effects != null) {
-            ShadowPathEffect effect = effects.getDropShadowEffect();
+            var effect = effects.getDropShadowEffect();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -236,7 +242,7 @@ public class EffectsPanel extends JPanel implements Resettable {
     }
 
     private void addTab(String name, EffectPanel configurator) {
-        JPanel tabPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel tabPanel = new JPanel(new FlowLayout(LEFT));
         JCheckBox tabCB = new JCheckBox();
         tabCB.setModel(configurator.getEnabledModel());
         tabPanel.add(tabCB);
@@ -262,10 +268,12 @@ public class EffectsPanel extends JPanel implements Resettable {
 
     @Override
     public boolean isSetToDefault() {
-        return glowPanel.isSetToDefault()
-                && innerGlowPanel.isSetToDefault()
-                && neonBorderPanel.isSetToDefault()
-                && dropShadowPanel.isSetToDefault();
+        for (EffectPanel panel : panels) {
+            if (!panel.isSetToDefault()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -273,14 +281,19 @@ public class EffectsPanel extends JPanel implements Resettable {
         glowPanel.reset(false);
         innerGlowPanel.reset(false);
         neonBorderPanel.reset(false);
-        dropShadowPanel.reset(trigger);
+        dropShadowPanel.reset(trigger); // trigger at most one of them
+    }
+
+    public void randomize() {
+        for (EffectPanel panel : panels) {
+            panel.randomize();
+        }
     }
 
     public void setDefaultButton(DefaultButton button) {
-        glowPanel.setDefaultButton(button);
-        innerGlowPanel.setDefaultButton(button);
-        neonBorderPanel.setDefaultButton(button);
-        dropShadowPanel.setDefaultButton(button);
+        for (EffectPanel panel : panels) {
+            panel.setDefaultButton(button);
+        }
     }
 
     @Override

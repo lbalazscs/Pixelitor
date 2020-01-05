@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 package pixelitor.io;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -38,6 +39,24 @@ public class FileUtils {
             return Optional.empty();
         }
         return Optional.of(fileName.substring(lastIndex + 1));
+    }
+
+    public static boolean hasExtension(String fileName) {
+        return findExtension(fileName).isPresent();
+    }
+
+    public static boolean hasPNGExtension(String fileName) {
+        return hasTheExtension(fileName, "png");
+    }
+
+    public static boolean hasGIFExtension(String fileName) {
+        return hasTheExtension(fileName, "gif");
+    }
+
+    private static boolean hasTheExtension(String fileName, String ext) {
+        return findExtension(fileName)
+                .filter(s -> s.equalsIgnoreCase(ext))
+                .isPresent();
     }
 
     public static String stripExtension(String fileName) {
@@ -70,12 +89,12 @@ public class FileUtils {
     }
 
     public static File[] listSupportedInputFilesIn(File dir) {
-        java.io.FileFilter imageFilter = FileUtils::hasSupportedInputExt;
+        FileFilter imageFilter = FileUtils::hasSupportedInputExt;
         return dir.listFiles(imageFilter);
     }
 
     public static String replaceExt(String fileName, String newExt) {
-        if (!findExtension(fileName).isPresent()) {
+        if (findExtension(fileName).isEmpty()) {
             return fileName + '.' + newExt;
         }
         String woExt = stripExtension(fileName);

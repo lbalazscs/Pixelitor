@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ public enum ToneCurveType {
     ToneCurveType(String name, Color color) {
         this.name = name;
         this.color = color;
-        this.inactiveColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
+        inactiveColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
     }
 
     public Color getColor() {

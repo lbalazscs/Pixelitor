@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,12 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
-import pixelitor.filters.comp.Flip;
-import pixelitor.filters.comp.Rotate;
+import pixelitor.OpenImages;
+import pixelitor.compactions.Flip;
+import pixelitor.compactions.Rotate;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TranslatedTextPainter;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.ContentLayerMoveEdit;
@@ -81,11 +81,11 @@ public class TextLayer extends ContentLayer {
 
         painter = new TranslatedTextPainter();
         settings.configurePainter(painter);
-        painter.setTranslation(getTX(), getTY());
+        painter.setTranslation(getTx(), getTy());
     }
 
     public static void createNew(PixelitorWindow pw) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp == null) {
             // It is possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77
@@ -112,7 +112,7 @@ public class TextLayer extends ContentLayer {
                     NewLayerEdit newLayerEdit = new NewLayerEdit(
                             "Add Text Layer", comp, textLayer,
                             activeLayerBefore, oldViewMode);
-                    History.addEdit(newLayerEdit);
+                    History.add(newLayerEdit);
                 })
                 .cancelAction(() -> comp.deleteLayer(textLayer,
                         false, true))
@@ -144,7 +144,7 @@ public class TextLayer extends ContentLayer {
                 this,
                 oldSettings
         );
-        History.addEdit(edit);
+        History.add(edit);
     }
 
     private void resetOldSettings(TextSettings oldSettings) {
@@ -160,8 +160,8 @@ public class TextLayer extends ContentLayer {
         d.translationX = translationX;
         d.translationY = translationY;
         d.painter.setTranslation(
-                painter.getTX(),
-                painter.getTY());
+                painter.getTx(),
+                painter.getTy());
 
         d.setSettings(new TextSettings(settings));
 
@@ -193,7 +193,7 @@ public class TextLayer extends ContentLayer {
                 if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
                     int maskPixel = maskImage.getRGB(ix, iy);
                     int maskAlpha = maskPixel & 0xff;
-                    return 0x00ffffff | (maskAlpha << 24);
+                    return 0x00ffffff | maskAlpha << 24;
                 }
             }
             return 0xffffffff;
@@ -217,7 +217,7 @@ public class TextLayer extends ContentLayer {
 
         if(addHistory) {
             TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
-            History.addEdit(edit);
+            History.add(edit);
         }
 
         LayerAdder layerAdder = new LayerAdder(comp)
@@ -267,12 +267,12 @@ public class TextLayer extends ContentLayer {
     @Override
     public void moveWhileDragging(double x, double y) {
         super.moveWhileDragging(x, y);
-        painter.setTranslation(getTX(), getTY());
+        painter.setTranslation(getTx(), getTy());
     }
 
     @Override
-    ContentLayerMoveEdit createMovementEdit(int oldTX, int oldTY) {
-        return new ContentLayerMoveEdit(this, null, oldTX, oldTY);
+    ContentLayerMoveEdit createMovementEdit(int oldTx, int oldTy) {
+        return new ContentLayerMoveEdit(this, null, oldTx, oldTy);
     }
 
     @Override
@@ -302,26 +302,26 @@ public class TextLayer extends ContentLayer {
     public void enlargeCanvas(int north, int east, int south, int west) {
         VerticalAlignment verticalAlignment = painter.getVerticalAlignment();
         HorizontalAlignment horizontalAlignment = painter.getHorizontalAlignment();
-        int newTX = translationX;
-        int newTY = translationY;
+        int newTx = translationX;
+        int newTy = translationY;
 
         if (horizontalAlignment == LEFT) {
-            newTX += west;
+            newTx += west;
         } else if (horizontalAlignment == CENTER) {
-            newTX += (west - east) / 2;
+            newTx += (west - east) / 2;
         } else { // RIGHT
-            newTX -= east;
+            newTx -= east;
         }
 
         if (verticalAlignment == TOP) {
-            newTY += north;
+            newTy += north;
         } else if (verticalAlignment == VerticalAlignment.CENTER) {
-            newTY += (north - south) / 2;
+            newTy += (north - south) / 2;
         } else { // BOTTOM
-            newTY -= south;
+            newTy -= south;
         }
 
-        setTranslation(newTX, newTY);
+        setTranslation(newTx, newTy);
     }
 
     @Override
@@ -397,7 +397,7 @@ public class TextLayer extends ContentLayer {
         Shape shape = getTextShape();
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit != null) {
-            History.addEdit(selectionEdit);
+            History.add(selectionEdit);
         }
     }
 

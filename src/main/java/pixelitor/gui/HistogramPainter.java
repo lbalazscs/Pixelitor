@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -78,7 +78,7 @@ public class HistogramPainter extends JComponent {
             x++;
             int value = values[i];
             if (value > 0) {
-                int lineHeight = (int) (PREFERRED_HEIGHT * ((double) value / (double) maxValue));
+                int lineHeight = (int) (PREFERRED_HEIGHT * ((double) value / maxValue));
                 int yTop = 1 + PREFERRED_HEIGHT - lineHeight;
                 int yBottom = PREFERRED_HEIGHT + 1;
                 g.drawLine(x, yTop, x, yBottom);

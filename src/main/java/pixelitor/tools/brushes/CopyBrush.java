@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,7 @@ public abstract class CopyBrush extends DabsBrush {
     @Override
     public void setRadius(double radius) {
         super.setRadius(radius);
-        if (type != null) { // cannot initialize properly when called from superclass constructor
+        if (type != null) { // can't initialize properly when called from superclass constructor
             int size = (int) diameter;
             brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
             type.setSize(diameter);
@@ -73,9 +73,9 @@ public abstract class CopyBrush extends DabsBrush {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addString("Type", type.toString());
+        node.addString("type", type.toString());
 
         return node;
     }

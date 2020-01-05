@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,7 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.gui.OpenComps;
-import pixelitor.gui.View;
+import pixelitor.OpenImages;
 import pixelitor.selection.Selection;
 
 /**
@@ -32,12 +31,9 @@ public class ShowHideSelectionAction extends ShowHideAction {
 
     @Override
     public boolean getCurrentVisibility() {
-        View view = OpenComps.getActiveView();
-        if (view != null) {
-            Selection selection = view.getComp().getSelection();
-            if (selection != null) {
-                return !selection.isHidden();
-            }
+        var selection = OpenImages.getActiveSelection();
+        if (selection != null) {
+            return !selection.isHidden();
         }
 
         return true;
@@ -50,12 +46,12 @@ public class ShowHideSelectionAction extends ShowHideAction {
 
     @Override
     public void setVisibility(boolean value) {
-        OpenComps.onActiveSelection(
+        OpenImages.onActiveSelection(
                 selection -> selection.setHidden(!value, true));
     }
 
     public void updateTextFrom(Selection sel) {
-        if(sel == null) {
+        if (sel == null) {
             setHideText();
         } else {
             updateText(!sel.isHidden());

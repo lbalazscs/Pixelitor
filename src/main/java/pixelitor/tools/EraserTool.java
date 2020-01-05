@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class EraserTool extends AbstractBrushTool {
     }
 
     @Override
-    protected void initializeGraphics(Graphics2D g) {
+    protected void initGraphics(Graphics2D g) {
         // the color does not matter as long as AlphaComposite.DST_OUT is used
         g.setComposite(AlphaComposite.getInstance(DST_OUT));
     }

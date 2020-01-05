@@ -96,8 +96,8 @@ public class PolarFilter extends TransformFilter {
 
     @Override
     protected void transformInverse(int x, int y, float[] out) {
-        float theta, t;
-        float m, xmax, ymax;
+        float theta;
+//        float m, xmax, ymax;
         float r = 0;
 
         switch (type) {
@@ -152,7 +152,7 @@ public class PolarFilter extends TransformFilter {
 //                out[0] = (width - 1) - (width - 1) / ImageMath.TWO_PI * theta;
 //                out[1] = height * r / radius;
 
-                out[0] = (width - 1) - (((width - 1) / (ImageMath.TWO_PI)) * theta);
+                out[0] = (width - 1) - (((width - 1) / ImageMath.TWO_PI) * theta);
                 out[1] = height * r / radius;
 
 

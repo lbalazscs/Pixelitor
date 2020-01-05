@@ -130,7 +130,7 @@ public class GaussianFilter extends ConvolveFilter {
             resultLines[y] = ThreadPool.submit(lineTask);
         }
 
-        ThreadPool.waitToFinish(resultLines, pt);
+        ThreadPool.waitFor(resultLines, pt);
     }
 
     private static void convolveAndTransposeLine(int[] inPixels, int[] outPixels, int width, int height, boolean alpha, boolean premultiply, boolean unpremultiply, int edgeAction, float[] matrix, int cols2, int y) {
@@ -164,9 +164,9 @@ public class GaussianFilter extends ConvolveFilter {
                     int pb = rgb & 0xff;
                     if (premultiply) {
                         float a255 = pa * (1.0f / 255.0f);
-                        pr *= a255;
-                        pg *= a255;
-                        pb *= a255;
+                        pr = (int) (pr * a255);
+                        pg = (int) (pg * a255);
+                        pb = (int) (pb * a255);
                     }
                     a += f * pa;
                     r += f * pr;
@@ -212,7 +212,7 @@ public class GaussianFilter extends ConvolveFilter {
             if (distance > radius2) {
                 matrix[index] = 0;
             } else {
-                matrix[index] = (float) Math.exp(-(distance) / sigma22) / sqrtSigmaPi2;
+                matrix[index] = (float) Math.exp(-distance / sigma22) / sqrtSigmaPi2;
             }
             total += matrix[index];
             index++;

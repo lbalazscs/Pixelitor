@@ -217,10 +217,10 @@ public class BoxBlurFilter extends AbstractBufferedImageOp {
                 r1 = r2 + (int) ((r1 + r3) * radius);
                 g1 = g2 + (int) ((g1 + g3) * radius);
                 b1 = b2 + (int) ((b1 + b3) * radius);
-                a1 *= f;
-                r1 *= f;
-                g1 *= f;
-                b1 *= f;
+                a1 = (int) (a1 * f);
+                r1 = (int) (r1 * f);
+                g1 = (int) (g1 * f);
+                b1 = (int) (b1 * f);
                 out[outIndex] = (a1 << 24) | (r1 << 16) | (g1 << 8) | b1;
                 outIndex += height;
             }

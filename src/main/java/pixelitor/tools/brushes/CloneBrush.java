@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,9 +58,9 @@ public class CloneBrush extends CopyBrush {
     }
 
     public void setSource(BufferedImage image, double x, double y) {
-        this.sourceImage = image;
-        this.origSrcX = x;
-        this.origSrcY = y;
+        sourceImage = image;
+        origSrcX = x;
+        origSrcY = y;
         newSourcePointWasJustSet = true;
     }
 
@@ -81,8 +81,8 @@ public class CloneBrush extends CopyBrush {
         newSourcePointWasJustSet = false;
 
         if (reinitializeDistance) {
-            this.dx = destX - origSrcX;
-            this.dy = destY - origSrcY;
+            dx = destX - origSrcX;
+            dy = destY - origSrcY;
         }
     }
 
@@ -103,8 +103,8 @@ public class CloneBrush extends CopyBrush {
         // Concatenated transformations have a last-specified-first-applied
         // order, so start with the last transformation
         // that works when there is no scaling/rotating
-        AffineTransform transform = AffineTransform.getTranslateInstance(
-            currSrcX + radius, currSrcY + radius);
+        var transform = AffineTransform.getTranslateInstance(
+                currSrcX + radius, currSrcY + radius);
 
         if (scaleX != 1.0 || scaleY != 1.0 || rotate != 0.0) {
             g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
@@ -117,21 +117,21 @@ public class CloneBrush extends CopyBrush {
         }
 
         g.drawImage(sourceImage, transform, null);
-
         type.afterDrawImage(g);
 
         g.dispose();
-        super.debugImage();
+
+        debugImage();
     }
 
     @Override
     public void putDab(PPoint p, double theta) {
-        AffineTransform transform = AffineTransform.getTranslateInstance(
+        var transform = AffineTransform.getTranslateInstance(
                 p.getImX() - radius,
                 p.getImY() - radius
         );
         targetG.drawImage(brushImage, transform, null);
-        updateComp(p);
+        repaintComp(p);
     }
 
     public void setAligned(boolean aligned) {
@@ -153,17 +153,17 @@ public class CloneBrush extends CopyBrush {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addDouble("origSrcX", origSrcX);
-        node.addDouble("origSrcY", origSrcY);
+        node.addDouble("orig src x", origSrcX);
+        node.addDouble("orig src y", origSrcY);
         node.addDouble("dx", dx);
         node.addDouble("dy", dy);
-        node.addDouble("scaleX", scaleX);
-        node.addDouble("scaleY", scaleY);
+        node.addDouble("scale x", scaleX);
+        node.addDouble("scale y", scaleY);
         node.addDouble("rotate", rotate);
         node.addBoolean("aligned", aligned);
-        node.addBoolean("newSourcePointWasJustSet", newSourcePointWasJustSet);
+        node.addBoolean("new source point was just set", newSourcePointWasJustSet);
 
         return node;
     }

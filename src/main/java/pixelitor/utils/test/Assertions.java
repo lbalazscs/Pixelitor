@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,13 +17,9 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
+import pixelitor.OpenImages;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 
 /**
  * Static, boolean-returning methods that
@@ -33,23 +29,8 @@ public class Assertions {
     private Assertions() {
     }
 
-    public static boolean hasMask(boolean enabled, boolean linked) {
-        Layer layer = OpenComps.getActiveLayerOrNull();
-        if (layer == null) {
-            throw new IllegalStateException();
-        }
-        if (!layer.hasMask()) {
-            return false;
-        }
-        if (layer.isMaskEnabled() != enabled) {
-            return false;
-        }
-        LayerMask mask = layer.getMask();
-        return mask.isLinked() == linked;
-    }
-
     public static boolean numLayersIs(int expected) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp == null) {
             throw new IllegalStateException();
         }
@@ -65,7 +46,7 @@ public class Assertions {
     @SuppressWarnings("SameReturnValue")
     public static boolean checkRasterMinimum(BufferedImage newImage) {
         if (RandomGUITest.isRunning()) {
-            WritableRaster raster = newImage.getRaster();
+            var raster = newImage.getRaster();
             if (raster.getMinX() != 0 || raster.getMinY() != 0) {
                 throw new
                         IllegalArgumentException("Raster " + raster +

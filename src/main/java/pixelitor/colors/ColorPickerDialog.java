@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,15 +20,18 @@ package pixelitor.colors;
 import com.bric.swing.ColorSwatch;
 import pixelitor.gui.utils.GUIUtils;
 
+import java.awt.Color;
+import java.util.function.Consumer;
+
 /**
  * Color picker dialog helper class, to make using {@link ColorSwatch} easier.
  * When the user selects a new color, the provided action is performed.
  */
 public class ColorPickerDialog {
     private final ColorSwatch colorSwatch;
-    private final ColorPickerDialogAction action;
+    private final Consumer<Color> action;
 
-    public ColorPickerDialog(ColorSwatch colorSwatch, ColorPickerDialogAction action) {
+    public ColorPickerDialog(ColorSwatch colorSwatch, Consumer<Color> action) {
         this.colorSwatch = colorSwatch;
         this.action = action;
         GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
@@ -39,7 +42,7 @@ public class ColorPickerDialog {
                 colorSwatch.getForeground(), false,
                 color -> {
                     colorSwatch.setForeground(color);
-                    action.colorChanged(color);
+                    action.accept(color);
                 }
         );
     }

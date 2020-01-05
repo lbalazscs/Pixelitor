@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public void setRadius(double radius) {
         this.radius = radius;
-        this.diameter = 2 * radius;
+        diameter = 2 * radius;
     }
 
     @Override
@@ -58,18 +58,18 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public void setTarget(Composition comp, Graphics2D g) {
         this.comp = comp;
-        this.targetG = g;
+        targetG = g;
     }
 
     // always call it before rememberPrevious!
-    protected void updateComp(PPoint p) {
-        comp.updateRegion(previous, p, diameter);
+    protected void repaintComp(PPoint p) {
+        comp.repaintRegion(previous, p, diameter);
     }
 
     // Same as setPrevious, but with a more expressive name.
-    // Always call it after updateComp!
+    // Always call it after repaintComp!
     protected void rememberPrevious(PPoint p) {
-        this.previous = p;
+        previous = p;
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class AbstractBrush implements Brush {
     }
 
     @Override
-    public void finish() {
+    public void finishBrushStroke() {
         assert drawing : "uninitialized brush stroke in " + getClass().getSimpleName();
         drawing = false;
     }
@@ -130,14 +130,18 @@ public abstract class AbstractBrush implements Brush {
         return drawing;
     }
 
+    public void settingsChanged() {
+        // do nothing as a convenience for subclasses without settings
+    }
+
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("Brush", this);
+        var node = new DebugNode("brush", this);
         node.addClass();
-        node.addDouble("Radius", radius);
+        node.addDouble("radius", radius);
         if (previous != null) {
-            node.addDouble("PreviousX", previous.getImX());
-            node.addDouble("PreviousY", previous.getImY());
+            node.addDouble("previous x", previous.getImX());
+            node.addDouble("previous y", previous.getImY());
         }
 
         return node;

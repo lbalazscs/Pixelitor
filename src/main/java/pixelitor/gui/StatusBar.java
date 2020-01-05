@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,6 +25,9 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.EAST;
+import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEtchedBorder;
 
 /**
@@ -40,12 +43,12 @@ public class StatusBar extends JPanel {
     private StatusBar() {
         super(new BorderLayout(0, 0));
 
-        leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        leftPanel = new JPanel(new FlowLayout(LEFT, 5, 0));
         statusBarLabel = new JLabel("Pixelitor started");
         leftPanel.add(statusBarLabel);
 
-        add(leftPanel, BorderLayout.CENTER);
-        add(ZoomControl.INSTANCE, BorderLayout.EAST);
+        add(leftPanel, CENTER);
+        add(ZoomControl.INSTANCE, EAST);
 
         setBorder(createEtchedBorder());
     }
@@ -125,7 +128,7 @@ public class StatusBar extends JPanel {
 
             leftPanel.revalidate();
             leftPanel.repaint();
-            StatusBar.numProgressBars--;
+            numProgressBars--;
         }
     } 
 }

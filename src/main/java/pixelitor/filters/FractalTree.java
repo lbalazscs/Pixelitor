@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -86,7 +86,6 @@ public class FractalTree extends ParametrizedFilter {
             new float[]{0.25f, 0.75f},
             new Color[]{BROWN, GREEN}, IGNORE_RANDOMIZE);
     private double defaultLength;
-    private double randPercent;
     private double lengthDeviation;
     private double angleDeviation;
 
@@ -113,8 +112,8 @@ public class FractalTree extends ParametrizedFilter {
         Random rand = ReseedSupport.reInitialize();
         leftFirst = true;
 
-        defaultLength = src.getHeight() * zoom.getValueAsPercentage() / 100.0;
-        randPercent = randomnessParam.getValue() / 100.0;
+        defaultLength = src.getHeight() * zoom.getPercentageValD() / 100.0;
+        double randPercent = randomnessParam.getValue() / 100.0;
         hasRandomness = randomnessParam.getValue() > 0;
         lengthDeviation = defaultLength * randPercent;
         angleDeviation = 10.0 * randPercent;
@@ -156,7 +155,7 @@ public class FractalTree extends ParametrizedFilter {
             }
         }
 
-        float c = curvedness.getValueAsPercentage();
+        float c = curvedness.getPercentageValF();
         if (rand.nextBoolean()) {
             c = -c;
         }
@@ -258,10 +257,10 @@ public class FractalTree extends ParametrizedFilter {
                                       double x1, double y1,
                                       double x2, double y2, float c) {
         if (c == 0) {
-            Line2D.Double line = new Line2D.Double(x1, y1, x2, y2);
+            var line = new Line2D.Double(x1, y1, x2, y2);
             g.draw(line);
         } else {
-            Path2D.Double path = new Path2D.Double();
+            Path2D path = new Path2D.Double();
             path.moveTo(x1, y1);
 
             double dx = x2 - x1;

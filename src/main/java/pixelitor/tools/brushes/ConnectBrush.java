@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,7 @@ public class ConnectBrush extends AbstractBrush {
     @Override
     public void continueTo(PPoint p) {
         float lineWidth = settings.getLineWidth();
-        Line2D.Double line = new Line2D.Double();
+        var line = new Line2D.Double();
         Stroke stroke = new BasicStroke(lineWidth);
         targetG.setStroke(stroke);
 
@@ -80,7 +80,7 @@ public class ConnectBrush extends AbstractBrush {
 
         ConnectBrushHistory.drawConnectingLines(targetG, settings, p, diamSq);
 
-        updateComp(p);
+        repaintComp(p);
         rememberPrevious(p);
     }
 
@@ -94,7 +94,7 @@ public class ConnectBrush extends AbstractBrush {
         return 0;
     }
 
-    public void deleteHistory() {
+    public static void deleteHistory() {
         ConnectBrushHistory.clear();
     }
 }

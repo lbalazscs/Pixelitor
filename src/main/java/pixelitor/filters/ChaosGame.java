@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,16 +21,15 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedNoiseFilterAction;
+import pixelitor.filters.gui.ReseedActions;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class ChaosGame extends ParametrizedFilter {
                 centerJump,
                 midpointJump,
                 restrict,
-                showPoly).withAction(ReseedNoiseFilterAction.noOpReseed());
+                showPoly).withAction(ReseedActions.noOpReseed());
     }
 
     @Override
@@ -92,7 +91,7 @@ public class ChaosGame extends ParametrizedFilter {
         int numIterations = iterations.getValue() * 1_000_000;
         int workUnit = numIterations / 20;
         int numWorkUnits = 20;
-        ProgressTracker pt = new StatusBarProgressTracker(NAME, numWorkUnits);
+        var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
 
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -193,7 +192,7 @@ public class ChaosGame extends ParametrizedFilter {
 
         Random r = ThreadLocalRandom.current();
 
-        double factor = fraction.getValueAsDPercentage();
+        double factor = fraction.getPercentageValD();
         double factor2 = 1 - factor;
 
         // start at a random location
@@ -277,7 +276,7 @@ public class ChaosGame extends ParametrizedFilter {
         if(color) {
             for (Point p : points) {
                 g.setColor(new Color(p.color));
-                Ellipse2D.Double circle = new Ellipse2D.Double(p.x - MARGIN, p.y - MARGIN, 2 * MARGIN, 2 * MARGIN);
+                var circle = Shapes.createCircle(p.x, p.y, MARGIN);
                 g.fill(circle);
                 g.setColor(Color.BLACK);
                 g.draw(circle);

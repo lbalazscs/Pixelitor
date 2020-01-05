@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.guitest;
 
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
-import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
@@ -100,7 +99,7 @@ public class WorkflowTest {
 
     private void createNewImage() {
         app.runMenuCommand("New Image...");
-        DialogFixture dialog = app.findDialogByTitle("New Image");
+        var dialog = app.findDialogByTitle("New Image");
         dialog.textBox("widthTF").deleteText().enterText(String.valueOf(INITIAL_WIDTH));
         dialog.textBox("heightTF").deleteText().enterText(String.valueOf(INITIAL_HEIGHT));
         dialog.button("ok").click();
@@ -115,21 +114,25 @@ public class WorkflowTest {
 
     private void addTextLayer() {
         pw.button("addTextLayer").click();
-        DialogFixture dialog = app.findDialogByTitle("Create Text Layer");
+
+        var dialog = app.findDialogByTitle("Create Text Layer");
         dialog.textBox("textTF")
                 .requireText("Pixelitor")
                 .deleteText()
                 .enterText("Wood");
         dialog.button("ok").click();
+
         keyboard.undoRedo("Add Text Layer");
     }
 
     private void setTextSize() {
         app.runMenuCommand("Edit...");
-        DialogFixture dialog = app.findDialogByTitle("Edit Text Layer");
+
+        var dialog = app.findDialogByTitle("Edit Text Layer");
         dialog.textBox("textTF").requireText("Wood");
         dialog.slider("fontSize").slideTo(200);
         dialog.button("ok").click();
+
         keyboard.undoRedo("Edit Text Layer");
     }
 
@@ -194,7 +197,7 @@ public class WorkflowTest {
         AppRunner.findButtonByText(pw, "Stroke Settings...")
                 .requireEnabled()
                 .click();
-        DialogFixture dialog = app.findDialogByTitle("Stroke Settings");
+        var dialog = app.findDialogByTitle("Stroke Settings");
         dialog.slider().slideTo(10);
         dialog.comboBox("strokeType").selectItem(StrokeType.ZIGZAG.toString());
         dialog.button("ok").click();
@@ -307,7 +310,7 @@ public class WorkflowTest {
 
     private void pasteSelection() {
         app.runMenuCommand("Paste Selection");
-        DialogFixture dialog = app.findDialogByTitle("Existing Selection");
+        var dialog = app.findDialogByTitle("Existing Selection");
         AppRunner.findButtonByText(dialog, "Intersect").click();
     }
 }

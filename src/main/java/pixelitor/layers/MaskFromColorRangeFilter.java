@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,8 +69,8 @@ class MaskFromColorRangeFilter extends PointFilter {
         // otherwise tolerance = 0 does not select exact matches - why?
         double adjustedTolerance = tolerance + 0.1;
 
-        this.maxTolerance = adjustedTolerance * (1.0 - fuzziness);
-        this.minTolerance = adjustedTolerance * (1.0 + fuzziness);
+        maxTolerance = adjustedTolerance * (1.0 - fuzziness);
+        minTolerance = adjustedTolerance * (1.0 + fuzziness);
     }
 
     public void setInvert(boolean invert) {
@@ -145,7 +145,7 @@ class MaskFromColorRangeFilter extends PointFilter {
             if (invert) {
                 v = 255 - v;
             }
-            return 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
+            return 0xFF_00_00_00 | v << 16 | v << 8 | v;
         }
     }
 }

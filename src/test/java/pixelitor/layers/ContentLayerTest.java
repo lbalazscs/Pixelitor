@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,6 @@ import pixelitor.testutils.WithMask;
 import pixelitor.tools.move.MoveMode;
 
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -45,7 +44,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 public class ContentLayerTest {
 
     @Parameter
-    public Class layerClass;
+    public Class<?> layerClass;
 
     @Parameter(value = 1)
     public WithMask withMask;
@@ -158,8 +157,8 @@ public class ContentLayerTest {
 
     @Test
     public void test_applyLayer() {
-        Graphics2D g2 = TestHelper.createGraphics();
-        BufferedImage image = TestHelper.createImage();
+        var g2 = TestHelper.createGraphics();
+        var image = TestHelper.createImage();
 
         layer.applyLayer(g2, image, true);
         layer.applyLayer(g2, image, false);

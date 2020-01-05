@@ -840,9 +840,9 @@ public class ImageMath {
             int g = (rgb >> 8) & 0xff;
             int b = rgb & 0xff;
             float f = a * (1.0f / 255.0f);
-            r *= f;
-            g *= f;
-            b *= f;
+            r = (int) (r * f);
+            g = (int) (g * f);
+            b = (int) (b * f);
             p[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
     }
@@ -860,9 +860,9 @@ public class ImageMath {
             int b = rgb & 0xff;
             if (a != 0 && a != 255) {
                 float f = 255.0f / a;
-                r *= f;
-                g *= f;
-                b *= f;
+                r = (int) (r * f);
+                g = (int) (g * f);
+                b = (int) (b * f);
                 if (r > 255) {
                     r = 255;
                 }

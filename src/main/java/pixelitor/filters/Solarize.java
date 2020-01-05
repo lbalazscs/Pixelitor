@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -134,7 +134,7 @@ public class Solarize extends ParametrizedFilter {
                 int newG = greenLookup[g];
                 int newB = blueLookup[b];
 
-                destData[i] = (a << 24) | (newR << 16) | (newG << 8) | newB;
+                destData[i] = a << 24 | newR << 16 | newG << 8 | newB;
             }
         }
 

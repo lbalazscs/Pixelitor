@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.NO_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
  * Drop Shadow filter based on the JHLabs ShadowFilter
@@ -48,7 +48,7 @@ public class JHDropShadow extends ParametrizedFilter {
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 90, 100);
     private final RangeParam softness = new RangeParam("Softness", 0, 10, 25);
     private final BooleanParam shadowOnly = new BooleanParam("Shadow Only", false);
-    private final ColorParam color = new ColorParam("Color", BLACK, NO_OPACITY);
+    private final ColorParam color = new ColorParam("Color", BLACK, NO_TRANSPARENCY);
 
     private ShadowFilter filter;
 
@@ -73,31 +73,31 @@ public class JHDropShadow extends ParametrizedFilter {
 
         filter.setAddMargins(false);
         filter.setAngle((float) angle.getValueInIntuitiveRadians());
-        filter.setOpacity(opacity.getValueAsPercentage());
+        filter.setOpacity(opacity.getPercentageValF());
         filter.setShadowColor(color.getColor().getRGB());
         filter.setShadowOnly(shadowOnly.isChecked());
 
-        ResizingFilterHelper r = new ResizingFilterHelper(src);
-        boolean shouldResize = r.shouldResize();
+        var helper = new ResizingFilterHelper(src);
+        boolean shouldResize = helper.shouldResize();
         if (shouldResize) {
             boolean addSource = !shadowOnly.isChecked();
 
-            int resizeUnits = r.getResizeWorkUnits(BILINEAR_FAST);
+            int resizeUnits = helper.getResizeWorkUnits(BILINEAR_FAST);
             int filterUnits = 2; // estimated
             int workUnits = resizeUnits + filterUnits;
             if (addSource) {
                 workUnits++;
             }
-            ProgressTracker pt = new StatusBarProgressTracker(NAME, workUnits);
-//            ProgressTracker pt = new DebugProgressTracker(NAME, workUnits);
+            var pt = new StatusBarProgressTracker(NAME, workUnits);
+//            var pt = new DebugProgressTracker(NAME, workUnits);
             filter.setProgressTracker(ProgressTracker.NULL_TRACKER);
 
-            double resizeFactor = r.getResizeFactor();
+            double resizeFactor = helper.getResizeFactor();
             filter.setDistance((float) (distance.getValueAsFloat() / resizeFactor));
             filter.setRadius((float) (softness.getValueAsFloat() / resizeFactor));
             filter.setShadowOnly(true); // we only want to resize the shadow
 
-            dest = r.invoke(BILINEAR_FAST, filter, pt, filterUnits);
+            dest = helper.invoke(BILINEAR_FAST, filter, pt, filterUnits);
 
             if (addSource) {
                 Graphics2D g = dest.createGraphics();

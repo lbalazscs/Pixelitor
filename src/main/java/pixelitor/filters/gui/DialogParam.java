@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.gui.utils.GUIUtils;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Iterator;
 
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -82,17 +82,30 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState copyState() {
+    public CompositeState copyState() {
         return new CompositeState(children);
     }
 
     @Override
-    public void setState(ParamState state) {
-
+    public void setState(ParamState<?> state) {
+        // it is assumed that the argument contains the same types
+        // of filter parameters as the children that can be animated
+        CompositeState newStates = (CompositeState) state;
+        Iterator<ParamState<?>> stateIterator = newStates.iterator();
+        for (FilterParam child : children) {
+            if (child.canBeAnimated()) {
+                child.setState(stateIterator.next());
+            }
+        }
     }
 
     @Override
     public boolean canBeAnimated() {
+        for (FilterParam child : children) {
+            if (child.canBeAnimated()) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -139,25 +152,6 @@ public class DialogParam extends AbstractFilterParam {
 
         for (FilterParam child : children) {
             child.setAdjustmentListener(decoratedListener);
-        }
-    }
-
-    static class CompositeState implements ParamState {
-        private Map<String, ParamState> childStates;
-
-        public CompositeState(FilterParam[] children) {
-            for (FilterParam child : children) {
-                if (child.canBeAnimated()) {
-                    childStates.put(child.getName(), child.copyState());
-                }
-            }
-        }
-
-        @Override
-        public CompositeState interpolate(ParamState endState, double progress) {
-            CompositeState end = (CompositeState) endState;
-            // TODO
-            return null;
         }
     }
 }

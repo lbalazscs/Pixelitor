@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.gui;
 
-import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
@@ -26,6 +26,8 @@ import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+
+import static java.awt.BorderLayout.CENTER;
 
 /**
  * A {@link ViewContainer} used in the tabs UI.
@@ -40,7 +42,7 @@ public class ImageTab extends JComponent implements ViewContainer {
         this.tabsUI = tabsUI;
         scrollPane = new JScrollPane(this.view);
         setLayout(new BorderLayout());
-        this.add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, CENTER);
     }
 
     @Override
@@ -73,7 +75,7 @@ public class ImageTab extends JComponent implements ViewContainer {
     }
 
     public void activated() {
-        OpenComps.viewActivated(view);
+        OpenImages.viewActivated(view);
     }
 
     public View getView() {
@@ -87,24 +89,24 @@ public class ImageTab extends JComponent implements ViewContainer {
         popup.add(new AbstractAction("Close") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenComps.warnAndClose(view);
+                OpenImages.warnAndClose(view);
             }
         });
         popup.add(new AbstractAction("Close Others") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenComps.warnAndCloseAllBut(view);
+                OpenImages.warnAndCloseAllBut(view);
             }
         });
-        popup.add(OpenComps.CLOSE_UNMODIFIED_ACTION);
-        popup.add(OpenComps.CLOSE_ALL_ACTION);
+        popup.add(OpenImages.CLOSE_UNMODIFIED_ACTION);
+        popup.add(OpenImages.CLOSE_ALL_ACTION);
 
         if (Desktop.isDesktopSupported()) {
-            Composition comp = view.getComp();
+            var comp = view.getComp();
             File file = comp.getFile();
             if (file != null && file.exists()) {
                 popup.addSeparator();
-                popup.add(GUIUtils.createShowInFileManagerAction(file));
+                popup.add(GUIUtils.createShowInFolderAction(file));
 
                 String fileName = file.getName();
                 if (!fileName.endsWith("pxc")

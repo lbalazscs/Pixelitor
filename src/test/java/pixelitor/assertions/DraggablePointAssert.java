@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,7 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
 
         double dx = Math.abs(actual.x - x);
         double dy = Math.abs(actual.y - y);
-        if ((dx > 0.1) || (dy > 0.1)) {
+        if (dx > 0.1 || dy > 0.1) {
             throw new AssertionError(format(
                     "found (%.1f, %.1f) instead of the expected (%.1f, %.1f)",
                     actual.x, actual.y, x, y));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -77,18 +77,18 @@ public class BricTransitionFilter extends AbstractBufferedImageOp {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dest) {
-        BufferedImage frameA = src;
-        BufferedImage frameB = ImageUtils.createImageWithSameCM(src);
+        var frameA = src;
+        var frameB = ImageUtils.createImageWithSameCM(src);
 
         Graphics2D g2 = dest.createGraphics();
         Transition transition;
 
         switch (type) {
             case BARS_HORIZONTAL:
-                transition = new BarsTransition2D(BarsTransition2D.HORIZONTAL, false);
+                transition = new BarsTransition2D(Transition.HORIZONTAL, false);
                 break;
             case BARS_VERTICAL:
-                transition = new BarsTransition2D(BarsTransition2D.VERTICAL, false);
+                transition = new BarsTransition2D(Transition.VERTICAL, false);
                 break;
             case FADE:
                 transition = new BlendTransition2D();

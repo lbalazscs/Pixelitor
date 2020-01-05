@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -113,11 +113,11 @@ public class BlurredAnyShape implements BlurredShape {
         g2.fillRect(0, 0, imgWidth, imgHeight);
         g2.dispose();
 
-        // cast first to int in order to avoid fractional blurring
         int numIterations = 3;
-        float hRadius = (float) (int) (shapeStartX / numIterations);
-        float vRadius = (float) (int) (shapeStartY / numIterations);
-        BoxBlurFilter blurFilter = new BoxBlurFilter(
+        // cast first to int in order to avoid fractional blurring
+        float hRadius = (int) (shapeStartX / numIterations);
+        float vRadius = (int) (shapeStartY / numIterations);
+        var blurFilter = new BoxBlurFilter(
                 hRadius, vRadius, numIterations, "");
         blurFilter.setPremultiplyAlpha(false);
 

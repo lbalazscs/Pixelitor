@@ -51,17 +51,17 @@ public final class ColorBurnComposite extends RGBComposite {
                 int dor, dog, dob;
 
                 if (sr != 0) {
-                    dor = Math.max(255 - ((255 - dir << 8) / sr), 0);
+                    dor = Math.max(255 - (((255 - dir) << 8) / sr), 0);
                 } else {
                     dor = sr;
                 }
                 if (sg != 0) {
-                    dog = Math.max(255 - ((255 - dig << 8) / sg), 0);
+                    dog = Math.max(255 - (((255 - dig) << 8) / sg), 0);
                 } else {
                     dog = sg;
                 }
                 if (sb != 0) {
-                    dob = Math.max(255 - ((255 - dib << 8) / sb), 0);
+                    dob = Math.max(255 - (((255 - dib) << 8) / sb), 0);
                 } else {
                     dob = sb;
                 }

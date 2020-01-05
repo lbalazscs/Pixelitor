@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,7 @@ public abstract class DabsBrush extends AbstractBrush {
                         boolean refreshBrushForEachDab) {
         super(radius);
         this.settings = settings;
-        this.spacingStrategy = settings.getSpacingStrategy();
+        spacingStrategy = settings.getSpacingStrategy();
         dabsStrategy = new LinearDabsStrategy(this,
                 spacingStrategy,
                 settings.getAngleSettings(),
@@ -64,7 +64,7 @@ public abstract class DabsBrush extends AbstractBrush {
     public void startAt(PPoint p) {
         super.startAt(p);
         dabsStrategy.onStrokeStart(p);
-        updateComp(p);
+        repaintComp(p);
     }
 
     @Override
@@ -76,7 +76,7 @@ public abstract class DabsBrush extends AbstractBrush {
     @Override
     public void continueTo(PPoint p) {
         dabsStrategy.onNewStrokePoint(p);
-        updateComp(p);
+        repaintComp(p);
         rememberPrevious(p);
     }
 
@@ -94,6 +94,7 @@ public abstract class DabsBrush extends AbstractBrush {
         dabsStrategy.setPrevious(previous);
     }
 
+    @Override
     public void settingsChanged() {
         dabsStrategy.settingsChanged();
     }
@@ -105,14 +106,14 @@ public abstract class DabsBrush extends AbstractBrush {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addBoolean("Angle Aware", settings.isAngleAware());
+        node.addBoolean("angle aware", settings.isAngleAware());
 
         AngleSettings angleSettings = settings.getAngleSettings();
-        node.addBoolean("Jitter Aware", angleSettings.shouldJitterAngle());
+        node.addBoolean("jitter aware", angleSettings.shouldJitterAngle());
 
-        node.addDouble("Spacing", spacingStrategy.getSpacing(radius));
+        node.addDouble("spacing", spacingStrategy.getSpacing(radius));
 
         return node;
     }

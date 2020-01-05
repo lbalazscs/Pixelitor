@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ public abstract class FilterWithGUI extends Filter {
 
     /**
      * Creates a new {@link FilterGUI} for this GUI filter.
-     * The panel must be created at the moment of this call (cannot be cached).
+     * The panel must be created at the moment of this call (can't be cached).
      * Creating a {@link FilterGUI} should also automatically calculate
      * the first preview of this filter based on the default settings.
      */

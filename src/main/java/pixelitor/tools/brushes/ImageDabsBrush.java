@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.EnumMap;
 import java.util.Map;
@@ -118,7 +117,7 @@ public class ImageDabsBrush extends DabsBrush {
             //int a = (srcRGB >>> 24) & 0xFF;
             int srcR = (srcRGB >>> 16) & 0xFF;
             int srcG = (srcRGB >>> 8) & 0xFF;
-            int srcB = (srcRGB) & 0xFF;
+            int srcB = srcRGB & 0xFF;
             int srcAverage = (srcR + srcG + srcB) / 3;
 
             destPixels[i] = (0xFF - srcAverage) << 24 | destR << 16 | destG << 8 | destB;
@@ -136,12 +135,12 @@ public class ImageDabsBrush extends DabsBrush {
         if (!settings.isAngleAware() || theta == 0) {
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
         } else {
-            AffineTransform oldTransform = targetG.getTransform();
+            var oldTransform = targetG.getTransform();
             targetG.rotate(theta, x, y);
             targetG.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
             targetG.drawImage(finalScaledImg, drawStartX, drawStartY, null);
             targetG.setTransform(oldTransform);
         }
-        updateComp(p);
+        repaintComp(p);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import com.bric.util.JVM;
-import pixelitor.Composition;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.DialogBuilder;
@@ -107,11 +106,11 @@ public class CloneTool extends BlendingModeBrushTool {
             return;
         }
 
-        JPanel p = new JPanel(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(p);
-        gbh.addLabelWithControl("Scale (%):", scaleParam.createGUI());
-        gbh.addLabelWithControl("Rotate (Degrees):", rotationParam.createGUI());
-        gbh.addLabelWithControl("Mirror:", mirrorParam.createGUI());
+        var p = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(p);
+        gbh.addLabelAndControl("Scale (%):", scaleParam.createGUI());
+        gbh.addLabelAndControl("Rotate (Degrees):", rotationParam.createGUI());
+        gbh.addLabelAndControl("Mirror:", mirrorParam.createGUI());
         transformDialog = new DialogBuilder()
                 .title("Clone Transform")
                 .content(p)
@@ -165,7 +164,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private void startNewCloningStroke(PPoint p, boolean lineConnect) {
         state = CLONING;
 
-        float scaleAbs = scaleParam.getValueAsPercentage();
+        float scaleAbs = scaleParam.getPercentageValF();
         Mirror mirror = mirrorParam.getSelected();
         cloneBrush.setScale(
                 mirror.getScaleX(scaleAbs),
@@ -203,7 +202,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void setCloningSource(PPoint e) {
-        Composition comp = e.getComp();
+        var comp = e.getComp();
         BufferedImage sourceImage;
         int dx = 0;
         int dy = 0;
@@ -212,8 +211,8 @@ public class CloneTool extends BlendingModeBrushTool {
         } else {
             Drawable dr = comp.getActiveDrawableOrThrow();
             sourceImage = dr.getImage();
-            dx = -dr.getTX();
-            dy = -dr.getTY();
+            dx = -dr.getTx();
+            dy = -dr.getTy();
         }
         double x = e.getImX();
         double y = e.getImY();
@@ -244,7 +243,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void setupRandomSource(Drawable dr, PPoint start) {
-        Composition comp = dr.getComp();
+        var comp = dr.getComp();
 
         int canvasWidth = comp.getCanvasImWidth();
         int canvasHeight = comp.getCanvasImHeight();
@@ -263,16 +262,16 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
-        node.addString("Brush", cloneBrush.getType().toString());
-        node.addString("State", state.toString());
-        node.addBoolean("Sample All Layers", sampleAllLayers);
-        node.addBoolean("Aligned", cloneBrush.isAligned());
+        node.addString("brush", cloneBrush.getType().toString());
+        node.addString("state", state.toString());
+        node.addBoolean("sample all layers", sampleAllLayers);
+        node.addBoolean("aligned", cloneBrush.isAligned());
 
-        node.addFloat("Scale", scaleParam.getValueAsPercentage());
-        node.addInt("Rotation", rotationParam.getValue());
-        node.addString("Mirror", mirrorParam.getSelected().toString());
+        node.addFloat("scale", scaleParam.getPercentageValF());
+        node.addInt("rotation", rotationParam.getValue());
+        node.addString("mirror", mirrorParam.getSelected().toString());
 
         return node;
     }

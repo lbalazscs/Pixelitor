@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
-import pixelitor.selection.Selection;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -55,7 +54,7 @@ public class SelectionShapeChangeEdit extends PixelitorEdit {
     private void swapShapes() {
         Shape tmp;
 
-        Selection selection = comp.getSelection();
+        var selection = comp.getSelection();
         if (selection == null) {
             throw new IllegalStateException(
                     "no selection in " + comp.getName());
@@ -66,5 +65,10 @@ public class SelectionShapeChangeEdit extends PixelitorEdit {
         selection.setShape(backupShape);
 
         backupShape = tmp;
+    }
+
+    @Override
+    public boolean makesDirty() {
+        return false;
     }
 }

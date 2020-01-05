@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,7 +75,7 @@ public class SpiralGradientPaint implements Paint {
     public int getTransparency() {
         int a1 = startColor.getAlpha();
         int a2 = endColor.getAlpha();
-        return (((a1 & a2) == 0xFF) ? OPAQUE : TRANSLUCENT);
+        return (a1 & a2) == 0xFF ? OPAQUE : TRANSLUCENT;
     }
 
     static class SpiralGradientPaintContext implements PaintContext {
@@ -153,7 +153,7 @@ public class SpiralGradientPaint implements Paint {
                         } else { // REPEAT
                             threshold = 1.0 / dragDistance;
                         }
-                        needsAA = interpolation > (1.0 - threshold) || interpolation < threshold;
+                        needsAA = interpolation > 1.0 - threshold || interpolation < threshold;
                     }
 
                     if (needsAA) {
@@ -211,9 +211,9 @@ public class SpiralGradientPaint implements Paint {
                 relativeAngle = drawAngle - renderAngle;
             }
             if (relativeAngle < 0) {
-                relativeAngle += (2 * Math.PI);
+                relativeAngle += 2 * Math.PI;
             }
-            relativeAngle /= (2.0 * Math.PI);
+            relativeAngle /= 2.0 * Math.PI;
 
 //                    double renderDist = Math.sqrt(renderRelativeX*renderRelativeX + renderRelativeY*renderRelativeY);
             double renderDist = imDrag.getStartDistanceFrom(x, y);
@@ -264,7 +264,7 @@ public class SpiralGradientPaint implements Paint {
 
             for (int j = 0; j < height; j++) {
                 for (int i = 0; i < width; i++) {
-                    int base = (j * width + i);
+                    int base = j * width + i;
 
                     int x = startX + i;
                     int y = startY + j;
@@ -279,7 +279,7 @@ public class SpiralGradientPaint implements Paint {
                         } else { // REPEAT
                             threshold = 1.0 / dragDistance;
                         }
-                        needsAA = interpolation > (1.0 - threshold) || interpolation < threshold;
+                        needsAA = interpolation > 1.0 - threshold || interpolation < threshold;
                     }
 
                     if (needsAA) {

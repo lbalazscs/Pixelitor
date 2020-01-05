@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.menus.file;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.LayerAnimation;
@@ -29,6 +29,7 @@ import javax.swing.*;
 import java.awt.FlowLayout;
 import java.io.File;
 
+import static java.awt.FlowLayout.LEFT;
 import static java.lang.Integer.parseInt;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.io.FileChoosers.gifFilter;
@@ -38,7 +39,7 @@ public class AnimGifExport {
     }
 
     public static void start(JFrame dialogOwner) {
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
                     "Animation frames are based on the layers of the image.\n" +
@@ -46,7 +47,7 @@ public class AnimGifExport {
             return;
         }
 
-        ExportPanel p = new ExportPanel(comp.getNumLayers());
+        var p = new ExportPanel(comp.getNumLayers());
         new DialogBuilder()
                 .title("Export Animated GIF")
                 .owner(dialogOwner)
@@ -59,7 +60,7 @@ public class AnimGifExport {
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
         if (file != null) {
-            LayerAnimation animation = new LayerAnimation(activeComp,
+            var animation = new LayerAnimation(activeComp,
                     delayMillis, pingPong);
             animation.saveToFile(file);
             Messages.showFileSavedMessage(file);
@@ -76,13 +77,13 @@ public class AnimGifExport {
 
             add(new JLabel(" Animation frames are based on the layers of the image. "));
 
-            JPanel settings = new JPanel();
-            settings.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-            settings.add(new JLabel("Delay Between Frames (Milliseconds):"));
+            var settingsPanel = new JPanel();
+            settingsPanel.setLayout(new FlowLayout(LEFT, 10, 10));
+            settingsPanel.add(new JLabel("Delay Between Frames (Milliseconds):"));
             delayTF = new JTextField("200", 4);
-            settings.add(delayTF);
+            settingsPanel.add(delayTF);
 
-            add(settings);
+            add(settingsPanel);
 
             if (nrLayers > 2) {
                 pingPongCB = new JCheckBox("Ping Pong Animation");

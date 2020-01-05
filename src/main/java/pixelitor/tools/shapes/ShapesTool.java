@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.shapes;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
@@ -157,7 +157,7 @@ public class ShapesTool extends DragTool {
 
         userDrag.setStartFromCenter(e.isAltDown());
 
-        Composition comp = e.getComp();
+        var comp = e.getComp();
 
         assert styledShape != null;
         styledShape.updateFromDrag(userDrag);
@@ -190,7 +190,7 @@ public class ShapesTool extends DragTool {
         }
 
         userDrag.setStartFromCenter(e.isAltDown());
-        Composition comp = e.getComp();
+        var comp = e.getComp();
 
         transformBox = styledShape.createBox(userDrag, e.getView());
         if(transformBox == null) {
@@ -204,7 +204,7 @@ public class ShapesTool extends DragTool {
 
         e.getView().repaint();
         setState(TRANSFORM);
-        History.addEdit(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
+        History.add(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
 
         settings.invalidateStroke();
     }
@@ -224,7 +224,7 @@ public class ShapesTool extends DragTool {
             assert styledShape != null;
             styledShape.updateFromDrag(userDrag);
 
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             comp.imageChanged(REPAINT);
         }
         altDown = true;
@@ -238,7 +238,7 @@ public class ShapesTool extends DragTool {
             assert styledShape != null;
             styledShape.updateFromDrag(userDrag);
 
-            Composition comp = OpenComps.getActiveCompOrNull();
+            var comp = OpenImages.getActiveComp();
             comp.imageChanged(REPAINT);
         }
         altDown = false;
@@ -250,7 +250,7 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM) {
-            OpenComps.onActiveComp(this::finalizeShape);
+            OpenImages.onActiveComp(this::finalizeShape);
         }
     }
 
@@ -291,7 +291,7 @@ public class ShapesTool extends DragTool {
             assert transformBox != null;
 
             DrawableAction.run(editName,
-                    (dr) -> styledShape.regenerate(transformBox, settings, editName));
+                    dr -> styledShape.regenerate(transformBox, settings, editName));
         }
     }
 
@@ -380,17 +380,17 @@ public class ShapesTool extends DragTool {
 
         Shape shape = styledShape.getShapeForSelection();
 
-        Composition comp = OpenComps.getActiveCompOrNull();
+        var comp = OpenImages.getActiveComp();
 
         PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
         if (selectionEdit == null) {
             Dialogs.showInfoDialog("No Selection",
-                "No selection was created because the shape is outside the canvas.");
+                    "No selection was created because the shape is outside the canvas.");
             return;
         }
 
-        History.addEdit(new ConvertShapeToSelectionEdit(
-            comp, transformBox, styledShape, selectionEdit));
+        History.add(new ConvertShapeToSelectionEdit(
+                comp, transformBox, styledShape, selectionEdit));
 
         resetInitialState();
         Tools.SELECTION.activate();
@@ -426,7 +426,7 @@ public class ShapesTool extends DragTool {
         styledShape = null;
         setState(NO_INTERACTION);
 
-        OpenComps.onActiveComp(comp -> {
+        OpenImages.onActiveComp(comp -> {
             if (hadShape) {
                 comp.imageChanged();
             } else {
@@ -452,7 +452,7 @@ public class ShapesTool extends DragTool {
         styledShape = shape;
         transformBox = box;
         setState(TRANSFORM);
-        OpenComps.getActiveCompOrNull().imageChanged();
+        OpenImages.getActiveComp().imageChanged();
     }
 
     public StyledShape getStyledShape() {
@@ -480,7 +480,7 @@ public class ShapesTool extends DragTool {
     protected void toolEnded() {
         super.toolEnded();
 
-        finalizeBoxIfExists(OpenComps.getActiveCompOrNull());
+        finalizeBoxIfExists(OpenImages.getActiveComp());
 
         resetInitialState();
     }
@@ -517,10 +517,10 @@ public class ShapesTool extends DragTool {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         if (transformBox == null) {
-            node.addString("transformBox", "null");
+            node.addString("transform box", "null");
         } else {
             node.add(transformBox.getDebugNode());
         }

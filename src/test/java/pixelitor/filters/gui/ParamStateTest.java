@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,15 +31,16 @@ import static java.awt.Color.BLUE;
 import static java.awt.Color.GREEN;
 import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.FREE_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
 @RunWith(Parameterized.class)
 public class ParamStateTest {
+    @SuppressWarnings("rawtypes")
     @Parameter
     public ParamState start;
 
     @Parameter(value = 1)
-    public ParamState end;
+    public ParamState<?> end;
 
     @Parameters
     public static Collection<Object[]> instancesToTest() {
@@ -58,8 +59,8 @@ public class ParamStateTest {
         FilterParam imagePositionParamStart = new ImagePositionParam("ImagePositionParam", 0.1f, 0.0f);
         FilterParam imagePositionParamEnd = new ImagePositionParam("ImagePositionParam", 0.9f, 1.0f);
 
-        FilterParam colorParamStart = new ColorParam("ColorParam", RED, FREE_OPACITY);
-        FilterParam colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_OPACITY);
+        FilterParam colorParamStart = new ColorParam("ColorParam", RED, FREE_TRANSPARENCY);
+        FilterParam colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_TRANSPARENCY);
 
         return Arrays.asList(new Object[][]{
                 {angleParamStart.copyState(), angleParamEnd.copyState()},
@@ -74,7 +75,7 @@ public class ParamStateTest {
     @Test
     @SuppressWarnings("unchecked")
     public void test_interpolate() {
-        ParamState interpolated = start.interpolate(end, 0.0);
+        ParamState<?> interpolated = start.interpolate(end, 0.0);
         assertThat(interpolated).isNotNull();
 
         interpolated = start.interpolate(end, 0.5);

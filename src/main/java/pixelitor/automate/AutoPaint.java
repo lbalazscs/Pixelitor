@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,6 @@ import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
@@ -73,14 +72,11 @@ public class AutoPaint {
     }
 
     public static void showDialog(Drawable dr) {
-        ConfigPanel configPanel = new ConfigPanel();
+        var configPanel = new ConfigPanel();
         new DialogBuilder()
                 .validatedContent(configPanel)
                 .title("Auto Paint")
-                .okAction(() -> {
-                    Settings settings = configPanel.getSettings();
-                    paintStrokes(dr, settings);
-                })
+                .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
                 .show();
     }
 
@@ -92,7 +88,7 @@ public class AutoPaint {
 
         String msg = format("Auto Paint with %s Tool: ", settings.getTool());
 
-        ProgressHandler progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
+        var progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
 
         BufferedImage backupImage = dr.getSelectedSubImage(true);
         History.setIgnoreEdits(true);
@@ -103,7 +99,7 @@ public class AutoPaint {
             Messages.showException(e);
         } finally {
             History.setIgnoreEdits(false);
-            History.addEdit(new ImageEdit("Auto Paint", dr.getComp(),
+            History.add(new ImageEdit("Auto Paint", dr.getComp(),
                     dr, backupImage, false, false));
 
             progressHandler.stopProgress();
@@ -120,9 +116,9 @@ public class AutoPaint {
     private static void runStrokes(Settings settings,
                                    Drawable dr,
                                    ProgressHandler progressHandler) {
-        Random random = new Random();
-        Composition comp = dr.getComp();
-        View view = comp.getView();
+        var random = new Random();
+        var comp = dr.getComp();
+        var view = comp.getView();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
@@ -222,27 +218,27 @@ public class AutoPaint {
 
         private ConfigPanel() {
             super(new GridBagLayout());
-            GridBagHelper gbh = new GridBagHelper(this);
+            var gbh = new GridBagHelper(this);
 
             toolSelector = new JComboBox<>(ALLOWED_TOOLS);
             toolSelector.setSelectedItem(defaultTool);
             toolSelector.setName("toolSelector");
-            gbh.addLabelWithControl("Tool:", toolSelector);
+            gbh.addLabelAndControl("Tool:", toolSelector);
 
             numStrokesTF = new JTextField(String.valueOf(defaultNumStrokes));
             numStrokesTF.setName("numStrokesTF");
-            gbh.addLabelWithControl("Number of Strokes:",
+            gbh.addLabelAndControl("Number of Strokes:",
                     TextFieldValidator.createPositiveIntLayer(
                             "Number of Strokes", numStrokesTF, false));
 
             lengthTF = new JTextField(String.valueOf(defaultLength));
-            gbh.addLabelWithControl("Average Stroke Length:",
+            gbh.addLabelAndControl("Average Stroke Length:",
                     TextFieldValidator.createPositiveIntLayer(
                             "Average Stroke Length", lengthTF, false));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
-            gbh.addLabelWithControl("Stroke Length Variability (%):",
-                    SliderSpinner.simpleFrom(lengthVariability));
+            gbh.addLabelAndControl("Stroke Length Variability (%):",
+                    SliderSpinner.from(lengthVariability));
 
 
             colorsLabel = new JLabel("Random Colors:");
@@ -284,7 +280,7 @@ public class AutoPaint {
                     && colorsSelected.equals(COL_INTERPOLATED);
             defaultColors = colorsSelected;
 
-            float lengthRandomnessPercentage = lengthVariability.getValueAsPercentage();
+            float lengthRandomnessPercentage = lengthVariability.getPercentageValF();
             defaultLengthVariability = lengthVariability.getValue();
 
             return new Settings(tool, numStrokes, strokeLength,
@@ -301,7 +297,7 @@ public class AutoPaint {
 
         @Override
         public ValidationResult checkValidity() {
-            ValidationResult retVal = ValidationResult.ok();
+            var retVal = ValidationResult.ok();
             try {
                 int ns = getNumStrokes();
                 retVal = retVal.addErrorIfZero(ns, "Number of Strokes");
@@ -361,8 +357,8 @@ public class AutoPaint {
             if (minStrokeLength == maxStrokeLength) {
                 return minStrokeLength;
             } else {
-                ThreadLocalRandom rnd = ThreadLocalRandom.current();
-                return rnd.nextInt(minStrokeLength, maxStrokeLength + 1);
+                return ThreadLocalRandom.current()
+                        .nextInt(minStrokeLength, maxStrokeLength + 1);
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,9 +23,11 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.net.URL;
+
+import static java.awt.Component.CENTER_ALIGNMENT;
+import static javax.swing.SwingConstants.CENTER;
 
 /**
  * The "About" dialog of the app.
@@ -41,7 +43,7 @@ public class AboutDialog {
     public static void showDialog(PixelitorWindow pw) {
         createAboutBox();
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        var tabbedPane = new JTabbedPane();
 
         tabbedPane.add("About", box);
         tabbedPane.add("Credits", createCreditsPanel());
@@ -57,19 +59,19 @@ public class AboutDialog {
     }
 
     private static JPanel createCreditsPanel() {
-        JPanel p = new JPanel();
+        var p = new JPanel();
         String text = "<html>Pixelitor was written by <b>L\u00e1szl\u00f3 Bal\u00e1zs-Cs\u00edki</b>." +
                 "<br><br><b>Łukasz Kurzaj</b> contributed many improvements," +
                 "<br>see the release notes</b>." +
-            "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
-            "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
-            "<li>many components by <b>Jeremy Wood</b>" +
-            "<li>the fast math library by <b>Jeff Hain</b>" +
-            "<li>the metadata library by <b>Drew Noakes</b>" +
-            "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
-            "<li>the GIF decoder by <b>Dhyan Blum</b>" +
-            "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
-            "<li>the SwingX library";
+                "<br>The Sepia filter was contributed by <b>Daniel Wreczycki</b>." +
+                "<br><br>Pixelitor uses <ul><li>the image filter library by <b>Jerry Huxtable</b> " +
+                "<li>many components by <b>Jeremy Wood</b>" +
+                "<li>the fast math library by <b>Jeff Hain</b>" +
+                "<li>the metadata library by <b>Drew Noakes</b>" +
+                "<li>the animated GIF encoder by <b>Kevin Weiner</b>" +
+                "<li>the GIF decoder by <b>Dhyan Blum</b>" +
+                "<li>the Canny Edge Detector by <b>Tom Gibara</b>" +
+                "<li>the SwingX library";
         p.add(new JLabel(text));
 
         return p;
@@ -87,36 +89,34 @@ public class AboutDialog {
             "<br>and Contributors<br><br>");
         addLabel("lbalazscs\u0040gmail.com");
 
-        JButton linkButton = createLinkButton();
-        box.add(linkButton);
-
+        box.add(createLinkButton());
         box.add(Box.createGlue());
     }
 
     private static JButton createLinkButton() {
-        JButton linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
+        var linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
 
-        linkButton.setHorizontalAlignment(SwingConstants.CENTER);
+        linkButton.setHorizontalAlignment(CENTER);
         linkButton.setBorderPainted(false);
         linkButton.setFocusPainted(false);
         linkButton.setOpaque(false);
         linkButton.setBackground(box.getBackground());
-        linkButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        linkButton.setAlignmentX(CENTER_ALIGNMENT);
 
         linkButton.addActionListener(new OpenInBrowserAction(null, HOME_PAGE));
         return linkButton;
     }
 
     private static void addLabel(URL url) {
-        ImageIcon imageIcon = new ImageIcon(url);
-        JLabel label = new JLabel(imageIcon, JLabel.CENTER);
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        var imageIcon = new ImageIcon(url);
+        var label = new JLabel(imageIcon, CENTER);
+        label.setAlignmentX(CENTER_ALIGNMENT);
         box.add(label);
     }
 
     private static void addLabel(String text) {
-        JLabel label = new JLabel(text, JLabel.CENTER);
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        var label = new JLabel(text, CENTER);
+        label.setAlignmentX(CENTER_ALIGNMENT);
         box.add(label);
     }
 }

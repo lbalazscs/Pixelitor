@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,8 @@
 package pixelitor.gui.utils;
 
 import java.awt.Component;
+
+import static java.lang.String.format;
 
 /**
  * Represents the result of a validation.
@@ -82,7 +84,7 @@ public class ValidationResult {
             assert this == okInstance;
             return new ValidationResult(false, msg);
         } else {
-            return new ValidationResult(false, this.errorMsg + "<br>" + msg);
+            return new ValidationResult(false, errorMsg + "<br>" + msg);
         }
     }
 
@@ -118,7 +120,7 @@ public class ValidationResult {
 
     public ValidationResult addErrorIfZero(int value, String fieldName) {
         if (value == 0) {
-            return addError(String.format("<b>%s</b> can't be zero.", fieldName));
+            return addError(format("<b>%s</b> can't be zero.", fieldName));
         } else {
             return this;
         }
@@ -126,7 +128,7 @@ public class ValidationResult {
 
     public ValidationResult addErrorIfNegative(int value, String fieldName) {
         if (value < 0) {
-            return addError(String.format("<b>%s</b> must be positive.", fieldName));
+            return addError(format("<b>%s</b> must be positive.", fieldName));
         } else {
             return this;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,27 +48,27 @@ public class Layers {
     }
 
     public static void maskAddedTo(Layer layer) {
-        for (GlobalLayerMaskChangeListener listener : layerMaskChangeListeners) {
+        for (var listener : layerMaskChangeListeners) {
             listener.maskAddedTo(layer);
         }
     }
 
     public static void maskDeletedFrom(Layer layer) {
-        for (GlobalLayerMaskChangeListener listener : layerMaskChangeListeners) {
+        for (var listener : layerMaskChangeListeners) {
             listener.maskDeletedFrom(layer);
         }
     }
 
     // used for GUI updates
     public static void numLayersChanged(Composition comp, int newLayerCount) {
-        for (GlobalLayerChangeListener listener : layerChangeListeners) {
+        for (var listener : layerChangeListeners) {
             listener.numLayersChanged(comp, newLayerCount);
         }
     }
 
     public static void activeLayerChanged(Layer newActiveLayer, boolean viewChanged) {
         assert newActiveLayer != null;
-        for (GlobalLayerChangeListener listener : layerChangeListeners) {
+        for (var listener : layerChangeListeners) {
             listener.activeLayerChanged(newActiveLayer);
         }
 
@@ -86,10 +86,9 @@ public class Layers {
     }
 
     public static void layerOrderChanged(Composition comp) {
-        for (GlobalLayerChangeListener listener : layerChangeListeners) {
+        for (var listener : layerChangeListeners) {
             listener.layerOrderChanged(comp);
         }
     }
-
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,15 +18,12 @@
 package pixelitor.utils.debug;
 
 import pixelitor.Build;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
 import java.util.List;
 
 /**
@@ -37,9 +34,9 @@ public class AppNode extends DebugNode {
         super("Pixelitor", PixelitorWindow.getInstance());
 
         addString("Pixelitor Version", Build.VERSION_NUMBER);
-        addSystemNode();
-        addActiveToolNode();
-        addHistoryNode();
+        add(DebugNodes.createSystemNode());
+        add(Tools.getCurrent().getDebugNode());
+        add(History.getDebugNode());
 
         addImageNodes();
 
@@ -47,35 +44,19 @@ public class AppNode extends DebugNode {
 //        addQuotedStringChild("Saving Folder", FileChoosers.getLastSaveDir().getAbsolutePath());
     }
 
-    private void addActiveToolNode() {
-        Tool tool = Tools.getCurrent();
-        DebugNode toolNode = tool.getDebugNode();
-        add(toolNode);
-    }
-
-    private void addHistoryNode() {
-        DebugNode toolNode = History.getDebugNode();
-        add(toolNode);
-    }
-
-    private void addSystemNode() {
-        GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        add(new SystemNode(device));
-    }
-
     private void addImageNodes() {
-        List<View> views = OpenComps.getViews();
+        List<View> views = OpenImages.getViews();
 
         int nrOpenImages = views.size();
         addInt("Number of Open Images", nrOpenImages);
 
-        View activeView = OpenComps.getActiveView();
+        View activeView = OpenImages.getActiveView();
         for (View view : views) {
-            ViewNode node;
+            DebugNode node;
             if (view == activeView) {
-                node = new ViewNode("ACTIVE Image - " + view.getComp().getName(), view);
+                node = DebugNodes.createViewNode("ACTIVE Image - " + view.getComp().getName(), view);
             } else {
-                node = new ViewNode("Image - " + view.getComp().getName(), view);
+                node = DebugNodes.createViewNode("Image - " + view.getComp().getName(), view);
             }
             add(node);
         }

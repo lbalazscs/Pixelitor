@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import pixelitor.Build;
-import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -44,13 +43,13 @@ public class PathTest {
 
     @Before
     public void setUp() {
-        Composition comp = TestHelper.createMockComposition();
+        var comp = TestHelper.createMockComposition();
         view = comp.getView();
     }
 
     @Test
     public void testDeletingSubPathPoints() {
-        Rectangle shape = new Rectangle(10, 10, 100, 100);
+        var shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
         SubPath sp = path.getActiveSubpath();
         assertThat(sp).numAnchorsIs(4);
@@ -92,7 +91,7 @@ public class PathTest {
 
         sp.storeTransformRefPoints(); // the ref point for the first anchor is 10, 10
 
-        AffineTransform at = AffineTransform.getTranslateInstance(20, 10);
+        var at = AffineTransform.getTranslateInstance(20, 10);
         sp.refTransform(at);
         assertThat(sp).firstAnchorIsAt(30, 20);
 

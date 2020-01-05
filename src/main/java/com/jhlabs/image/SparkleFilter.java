@@ -137,7 +137,7 @@ public class SparkleFilter extends PointFilter {
         float dy = y - centreY;
         float distance = dx * dx + dy * dy;
         float angle = (float) atan2(dy, dx);
-        float d = (angle + PI) / (TWO_PI) * rays;
+        float d = (angle + PI) / TWO_PI * rays;
         int i = (int) d;
         float f = d - i;
 

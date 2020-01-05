@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -101,12 +101,11 @@ public class ColorHistory {
         int colorsInRow = 10;
         int rows = 1 + (numColors - 1) / colorsInRow;
         int cols = colorsInRow;
-        JPanel panel = new JPanel(new GridLayout(rows, cols, 2, 2));
+        var panel = new JPanel(new GridLayout(rows, cols, 2, 2));
         panel.setBorder(createEmptyBorder(2, 2, 2, 2));
         for (Color color : colors) {
-            ColorSwatchButton swatch
-                    = new ColorSwatchButton(color, clickHandler, 0, 0);
-            panel.add(swatch);
+            panel.add(new ColorSwatchButton(
+                    color, clickHandler, 0, 0));
         }
 
         Messages.showInStatusBar(type.getHelpText());

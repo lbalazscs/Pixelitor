@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class ImageEdit extends FadeableEdit {
 //        Utils.debugImage(backupImage, "Backup for " + name);
         
         // the backup image is stored in an SoftReference
-        this.imgRef = new SoftReference<>(backupImage);
+        imgRef = new SoftReference<>(backupImage);
         this.dr = dr;
         this.canRepeat = canRepeat;
 
@@ -153,12 +153,12 @@ public class ImageEdit extends FadeableEdit {
 
     @Override
     public DebugNode getDebugNode() {
-        DebugNode node = super.getDebugNode();
+        var node = super.getDebugNode();
 
         BufferedImage img = imgRef.get();
         if (img != null) {
-            node.addInt("Backup Image Width", img.getWidth());
-            node.addInt("Backup Image Height", img.getHeight());
+            node.addInt("backup image width", img.getWidth());
+            node.addInt("backup image height", img.getHeight());
         }
 
         return node;

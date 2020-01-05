@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.gui;
 
+import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
@@ -117,7 +118,7 @@ public class ImageArea {
         }
         ImageArea.mode = mode;
 
-        PixelitorWindow pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.getInstance();
         pw.removeImagesArea(getUI());
         setUI();
         pw.addImagesArea();
@@ -132,7 +133,7 @@ public class ImageArea {
             // in the top-left corner when they are re-added
             FramesUI.resetCascadeIndex();
         }
-        OpenComps.forEachView(ImageArea::addNewView);
+        OpenImages.forEachView(ImageArea::addNewView);
 
         uiChangeListeners.forEach(listener -> listener.accept(mode));
     }

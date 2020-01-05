@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,8 @@ package pixelitor.layers;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
+import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.OpenComps;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
@@ -77,7 +77,7 @@ public enum MaskViewMode {
         Action action = new MenuAction(guiName, allowedLayerType) {
             @Override
             public void onClick() {
-                OpenComps.onActiveView(view -> {
+                OpenImages.onActiveView(view -> {
                     Layer activeLayer = view.getComp().getActiveLayer();
                     activate(view, activeLayer, "main menu");
                 });

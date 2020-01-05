@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.NORTH;
+
 /**
  * A panel with {@link CardLayout}, and a {@link JComboBox}
  * that can select the current card
@@ -35,18 +38,18 @@ public class CardPanelWithCombo extends JPanel implements ItemListener {
         super(new BorderLayout());
 
         selectorModel = new DefaultComboBoxModel<>();
-        JComboBox<String> selector = new JComboBox<>(selectorModel);
+        var selector = new JComboBox<String>(selectorModel);
         selector.addItemListener(this);
 
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new FlowLayout());
         northPanel.add(selector);
 
-        add(northPanel, BorderLayout.NORTH);
+        add(northPanel, NORTH);
 
         cardPanel = new JPanel();
         cardPanel.setLayout(new CardLayout());
-        add(cardPanel, BorderLayout.CENTER);
+        add(cardPanel, CENTER);
     }
 
     public void addNewCard(Card card) {
@@ -57,8 +60,8 @@ public class CardPanelWithCombo extends JPanel implements ItemListener {
 
     @Override
     public void itemStateChanged(ItemEvent e) {
-        CardLayout cl = (CardLayout) cardPanel.getLayout();
-        cl.show(cardPanel, (String) e.getItem());
+        var layout = (CardLayout) cardPanel.getLayout();
+        layout.show(cardPanel, (String) e.getItem());
     }
 
     public static class Card extends JPanel {

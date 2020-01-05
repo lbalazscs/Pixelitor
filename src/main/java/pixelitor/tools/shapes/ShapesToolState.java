@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,7 @@
 package pixelitor.tools.shapes;
 
 /**
- * The current state of the crop tool
- *
- * TODO possibly it could be merged with CropToolState
+ * The current state of the shapes tool
  */
 public enum ShapesToolState {
     /**

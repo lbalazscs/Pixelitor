@@ -21,7 +21,6 @@ package com.bric.math;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * This contains a static method to solve a system of simple linear equations.
@@ -33,7 +32,7 @@ public class Equations {
      */
     private static final boolean VERBOSE_EXCEPTIONS = true;
 
-    private static final Comparator<double[]> coefficientComparator = (d1, d2) -> {
+    private static int compareCoeffs(double[] d1, double[] d2) {
         int v1 = 0;
         int v2 = 0;
         int a;
@@ -50,9 +49,9 @@ public class Equations {
             }
         }
         return v1 - v2;
-    };
+    }
 
-    private static final Comparator<BigDecimal[]> bigCoefficientComparator = (d1, d2) -> {
+    private static int compareBigCoeffs(BigDecimal[] d1, BigDecimal[] d2) {
         int v1 = 0;
         int v2 = 0;
         int a;
@@ -69,7 +68,7 @@ public class Equations {
             }
         }
         return v1 - v2;
-    };
+    }
 
     public static String toString(double[][] d) {
         String s = "";
@@ -304,7 +303,7 @@ public class Equations {
         // it is the only solved row.
         //So we can skip it, and move to the row that reads: "0 ... 1 a b".
 
-        ctr = 0;
+//        ctr = 0;
         for (a = order.length - 2; a >= 0; a--) {
             row = order[a];
             for (i = coefficients[row].length - 2; i > a; i--) {
@@ -316,7 +315,7 @@ public class Equations {
             //println(coefficients);
         }
         if (sort) {
-            Arrays.sort(coefficients, coefficientComparator);
+            Arrays.sort(coefficients, Equations::compareCoeffs);
         }
     }
 
@@ -455,7 +454,7 @@ public class Equations {
             //println(coefficients);
         }
         if (sort) {
-            Arrays.sort(coefficients, bigCoefficientComparator);
+            Arrays.sort(coefficients, Equations::compareBigCoeffs);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.menus.file;
 
 import pixelitor.Composition;
-import pixelitor.gui.OpenComps;
+import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
@@ -60,13 +60,13 @@ public class ScreenCaptureAction extends AbstractAction {
     }
 
     private JPanel getSettingsPanel() {
-        JPanel p = new JPanel();
+        var p = new JPanel();
         p.setLayout(new GridBagLayout());
-        GridBagHelper gbh = new GridBagHelper(p);
+        var gbh = new GridBagHelper(p);
 
         hidePixelitorCB = new JCheckBox();
         hidePixelitorCB.setSelected(true);
-        gbh.addLabelWithControl("Hide Pixelitor", hidePixelitorCB);
+        gbh.addLabelAndControl("Hide Pixelitor", hidePixelitorCB);
 
         return p;
     }
@@ -118,8 +118,8 @@ public class ScreenCaptureAction extends AbstractAction {
         }
 
         String name = "Screen Capture " + captureCount++;
-        Composition comp = Composition.fromImage(screenCapture, null, name);
+        var comp = Composition.fromImage(screenCapture, null, name);
         comp.setDirty(true);
-        OpenComps.addAsNewImage(comp);
+        OpenImages.addAsNewComp(comp);
     }
 }

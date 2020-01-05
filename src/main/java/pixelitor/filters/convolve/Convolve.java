@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
 import java.awt.image.Kernel;
 import java.util.Random;
@@ -47,7 +46,7 @@ public class Convolve extends FilterWithGUI {
     }
 
     public void setKernelMatrix(float[] kernelMatrix) {
-        if (kernelMatrix.length != (size * size)) {
+        if (kernelMatrix.length != size * size) {
             throw new IllegalArgumentException("kernelMatrix.length = " + kernelMatrix.length + ", size = " + size);
         }
         this.kernelMatrix = kernelMatrix;
@@ -55,9 +54,9 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        Kernel kernel = new Kernel(size, size, kernelMatrix);
-        ConvolveMethod method = convolveMethodModel.getSelectedItem();
-        BufferedImageOp convolveOp = method.getConvolveOp(kernel, filterName);
+        var kernel = new Kernel(size, size, kernelMatrix);
+        var convolveMethod = convolveMethodModel.getSelectedItem();
+        var convolveOp = convolveMethod.createConvolveOp(kernel, filterName);
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {

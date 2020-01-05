@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,8 +32,8 @@ public class ContentLayerAssert<S extends ContentLayerAssert<S, T>, T extends Co
     public S translationIs(int tx, int ty) {
         isNotNull();
 
-        assertThat(actual.getTX()).isEqualTo(tx);
-        assertThat(actual.getTY()).isEqualTo(ty);
+        assertThat(actual.getTx()).isEqualTo(tx);
+        assertThat(actual.getTy()).isEqualTo(ty);
 
         return myself;
     }

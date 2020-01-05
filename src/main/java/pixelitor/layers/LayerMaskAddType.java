@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,42 +38,42 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum LayerMaskAddType {
     REVEAL_ALL("Reveal All", false) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             // a fully white image
             return createFilledImage(canvas, Color.WHITE, null, null);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             // a fully black image
             return createFilledImage(canvas, Color.BLACK, null, null);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             // back image, but the selection is white
             return createFilledImage(canvas, Color.BLACK, Color.WHITE, selection.getShape());
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             // white image, but the selection is black
             return createFilledImage(canvas, Color.WHITE, Color.BLACK, selection.getShape());
         }
     }, FROM_TRANSPARENCY("From Transparency", false) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             return createMaskFromLayer(layer, true, canvas);
         }
     }, FROM_LAYER("From Layer", false) {
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             return createMaskFromLayer(layer, false, canvas);
         }
     }, PATTERN ("Pattern", false) { // only for debugging
 
         @Override
-        BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
             BufferedImage bi = createFilledImage(canvas, Color.WHITE, null, null);
             Graphics2D g = bi.createGraphics();
             int width = canvas.getImWidth();
@@ -130,7 +130,7 @@ public enum LayerMaskAddType {
             return createMaskFromImage(rasterizedImage, onlyTransparency, canvas);
         } else {
             // there is nothing better
-            return REVEAL_ALL.getBWImage(layer, canvas, null);
+            return REVEAL_ALL.createBWImage(layer, canvas, null);
         }
     }
 
@@ -168,7 +168,7 @@ public enum LayerMaskAddType {
         this.needsSelection = needsSelection;
     }
 
-    abstract BufferedImage getBWImage(Layer layer, Canvas canvas, Selection selection);
+    abstract BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection);
 
     @Override
     public String toString() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,57 +17,18 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.Composition;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
-
-import java.awt.Graphics2D;
 
 /**
  * A decorator for other brushes that tracks their affected area.
  */
-public class AffectedAreaTracker implements Brush {
-    private final Brush delegate;
+public class AffectedAreaTracker extends BrushDecorator {
     private final AffectedArea affectedArea;
 
     public AffectedAreaTracker(Brush delegate, AffectedArea affectedArea) {
-        this.delegate = delegate;
+        super(delegate);
         this.affectedArea = affectedArea;
-    }
-
-    @Override
-    public void setTarget(Composition comp, Graphics2D g) {
-        delegate.setTarget(comp, g);
-    }
-
-    @Override
-    public void setRadius(double radius) {
-        delegate.setRadius(radius);
-    }
-
-    @Override
-    public double getEffectiveRadius() {
-        return delegate.getEffectiveRadius();
-    }
-
-    @Override
-    public PPoint getPrevious() {
-        return delegate.getPrevious();
-    }
-
-    @Override
-    public void setPrevious(PPoint previous) {
-        delegate.setPrevious(previous);
-    }
-
-    @Override
-    public boolean isDrawing() {
-        return delegate.isDrawing();
-    }
-
-    @Override
-    public void initDrawing(PPoint p) {
-        delegate.initDrawing(p);
     }
 
     @Override
@@ -89,18 +50,8 @@ public class AffectedAreaTracker implements Brush {
     }
 
     @Override
-    public void finish() {
-        delegate.finish();
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return delegate.getPreferredSpacing();
-    }
-
-    @Override
     public DebugNode getDebugNode() {
-        DebugNode node = new DebugNode("Affected Area Tracker", this);
+        var node = new DebugNode("affected area tracker", this);
 
         node.add(delegate.getDebugNode());
         node.add(affectedArea.getDebugNode());

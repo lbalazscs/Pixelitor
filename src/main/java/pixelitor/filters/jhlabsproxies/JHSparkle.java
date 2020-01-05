@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,6 @@ import com.jhlabs.image.SparkleFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterAction;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -31,7 +30,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import static java.awt.Color.WHITE;
-import static pixelitor.filters.gui.ColorParam.OpacitySetting.USER_ONLY_OPACITY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
  * Sparkle filter based on the JHLabs SparkleFilter
@@ -46,14 +45,14 @@ public class JHSparkle extends ParametrizedFilter {
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
 
-    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_OPACITY);
+    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
 
     private SparkleFilter filter;
 
     public JHSparkle() {
         super(ShowOriginal.YES);
 
-        FilterAction reseed = ReseedSupport.createAction("", "Reseed Randomness");
+        var reseed = ReseedSupport.createAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseed);
         setParams(
                 center,

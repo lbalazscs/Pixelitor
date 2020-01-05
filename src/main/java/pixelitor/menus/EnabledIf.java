@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,22 +27,22 @@ import javax.swing.*;
 enum EnabledIf {
     THERE_IS_OPEN_IMAGE {
         @Override
-        public JMenuItem getMenuItem(Action a) {
+        public JMenuItem createMenuItem(Action a) {
             return new OpenImageEnabledMenuItem(a);
         }
     }, CAN_REPEAT {
         @Override
-        public JMenuItem getMenuItem(Action a) {
+        public JMenuItem createMenuItem(Action a) {
             return new RepeatMenuItem(a);
         }
     }, UNDO_POSSIBLE {
         @Override
-        public JMenuItem getMenuItem(Action a) {
+        public JMenuItem createMenuItem(Action a) {
             return new UndoMenuItem(a);
         }
     }, REDO_POSSIBLE {
         @Override
-        public JMenuItem getMenuItem(Action a) {
+        public JMenuItem createMenuItem(Action a) {
             return new RedoMenuItem(a);
         }
     },
@@ -52,10 +52,10 @@ enum EnabledIf {
      */
     ACTION_ENABLED {
         @Override
-        public JMenuItem getMenuItem(Action a) {
+        public JMenuItem createMenuItem(Action a) {
             return new JMenuItem(a);
         }
     };
 
-    public abstract JMenuItem getMenuItem(Action a);
+    public abstract JMenuItem createMenuItem(Action a);
 }

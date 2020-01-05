@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,13 @@
 
 package pixelitor.tools.util;
 
+import pixelitor.tools.DragTool;
+
 import java.awt.Graphics2D;
 
+/**
+ * Determines how {@link DragTool} subclasses draw the drag display
+ */
 public enum DragDisplayType {
     NONE {
         @Override

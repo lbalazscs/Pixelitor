@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,12 @@
 package pixelitor.testutils;
 
 import java.awt.Shape;
-import java.awt.geom.PathIterator;
+
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_CUBICTO;
+import static java.awt.geom.PathIterator.SEG_LINETO;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.SEG_QUADTO;
 
 public class ShapeChecker {
     private int numMoveTos = 0;
@@ -28,31 +33,31 @@ public class ShapeChecker {
     private int numCloses = 0;
 
     public ShapeChecker(Shape shape) {
-        PathIterator it = shape.getPathIterator(null);
+        var it = shape.getPathIterator(null);
         float[] coords = new float[6];
         while (!it.isDone()) {
             int type = it.currentSegment(coords);
-            float x = coords[0];
-            float y = coords[1];
-            float xx = coords[2];
-            float yy = coords[3];
-            float xxx = coords[4];
-            float yyy = coords[5];
+//            float x = coords[0];
+//            float y = coords[1];
+//            float xx = coords[2];
+//            float yy = coords[3];
+//            float xxx = coords[4];
+//            float yyy = coords[5];
 
             switch (type) {
-                case PathIterator.SEG_MOVETO:
+                case SEG_MOVETO:
                     numMoveTos++;
                     break;
-                case PathIterator.SEG_LINETO:
+                case SEG_LINETO:
                     numLineTos++;
                     break;
-                case PathIterator.SEG_QUADTO:
+                case SEG_QUADTO:
                     numQuadTos++;
                     break;
-                case PathIterator.SEG_CUBICTO:
+                case SEG_CUBICTO:
                     numCubicTos++;
                     break;
-                case PathIterator.SEG_CLOSE:
+                case SEG_CLOSE:
                     numCloses++;
                     break;
                 default:

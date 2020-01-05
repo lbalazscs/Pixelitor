@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -60,7 +60,7 @@ public class MysticRose extends ShapeFilter {
         int numPoints = nrPoints.getValue();
         Point2D[] points = new Point2D[numPoints];
         double r = radius.getValueAsDouble();
-        double startAngle = 2 * Math.PI / numPoints * rotate.getValueAsPercentage();
+        double startAngle = 2 * Math.PI / numPoints * rotate.getPercentageValD();
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 

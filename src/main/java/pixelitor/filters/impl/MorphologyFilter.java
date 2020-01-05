@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -121,7 +121,7 @@ public class MorphologyFilter extends WholeImageFilter {
                             }
                         }
                     }
-                    outPixels[index++] = (a << 24) | (r << 16) | (g << 8) | b;
+                    outPixels[index++] = a << 24 | r << 16 | g << 8 | b;
                 }
             }
             pt.unitDone();

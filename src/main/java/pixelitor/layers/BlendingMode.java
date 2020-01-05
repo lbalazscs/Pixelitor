@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -149,10 +149,10 @@ public enum BlendingMode {
     }
 
     public static BlendingMode fromSVGName(String svgName) {
-        BlendingMode[] values = values();
-        for (BlendingMode mode : values) {
+        BlendingMode[] blendingModes = values();
+        for (BlendingMode mode : blendingModes) {
             String modeSVGName = mode.toSVGName();
-            if(modeSVGName.equals(svgName)) {
+            if (modeSVGName.equals(svgName)) {
                 return mode;
             }
         }
