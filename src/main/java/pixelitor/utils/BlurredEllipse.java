@@ -19,12 +19,13 @@ package pixelitor.utils;
 
 import net.jafama.FastMath;
 
+import java.awt.geom.Point2D;
+
 /**
  * An ellipse-shaped {@link BlurredShape}
  */
 public class BlurredEllipse implements BlurredShape {
-    private final double cx;
-    private final double cy;
+    private final Point2D center;
 
     private final boolean linkedRadius;
     private final double innerRadiusY;
@@ -40,11 +41,10 @@ public class BlurredEllipse implements BlurredShape {
 
     private final double yRadiusDifference;
 
-    public BlurredEllipse(double centerX, double centerY,
+    public BlurredEllipse(Point2D center,
                           double innerRadiusX, double innerRadiusY,
                           double outerRadiusX, double outerRadiusY) {
-        cx = centerX;
-        cy = centerY;
+        this.center = center;
         this.innerRadiusY = innerRadiusY;
         this.outerRadiusX = outerRadiusX;
         this.outerRadiusY = outerRadiusY;
@@ -69,8 +69,8 @@ public class BlurredEllipse implements BlurredShape {
 
     @Override
     public double isOutside(int x, int y) {
-        double dx = x - cx;
-        double dy = y - cy;
+        double dx = x - center.getX();
+        double dy = y - center.getY();
         double dist2 = dx * dx + dy * dy;
 
         if (linkedRadius) {

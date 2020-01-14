@@ -26,6 +26,7 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.BlurredShape;
 
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -76,8 +77,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
     }
 
     private static class Impl extends PointFilter {
-        private double cx;
-        private double cy;
+        private Point2D center;
         private double innerRadiusX;
         private double innerRadiusY;
         private double outerRadiusX;
@@ -105,8 +105,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
         }
 
         public void setCenter(double cx, double cy) {
-            this.cx = cx;
-            this.cy = cy;
+            center = new Point2D.Double(cx, cy);
         }
 
         public void setRadius(double radiusX, double radiusY, double softness) {
@@ -119,7 +118,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
 
         // must be called after the shape arguments!
         public void setShape(int type) {
-            shape = BlurredShape.create(type, cx, cy,
+            shape = BlurredShape.create(type, center,
                     innerRadiusX, innerRadiusY,
                     outerRadiusX, outerRadiusY);
         }

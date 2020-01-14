@@ -217,24 +217,24 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public void randomize() {
-        if (randomizePolicy.allow()) {
-            int range = maxValue - minValue;
-            int newValue = minValue + Rnd.nextInt(range);
+    protected void doRandomize() {
+        int range = maxValue - minValue;
+        int newValue = minValue + Rnd.nextInt(range);
 
-            setValueNoTrigger(newValue);
-        }
+        setValueNoTrigger(newValue);
     }
 
     public void increaseValue() {
-        if (value < maxValue) {
-            setValue((int) value + 1);
+        int intValue = (int) value;
+        if (intValue < maxValue) {
+            setValue(intValue + 1);
         }
     }
 
     public void decreaseValue() {
-        if (value > minValue) {
-            setValue((int) value - 1);
+        int intValue = (int) value;
+        if (intValue > minValue) {
+            setValue(intValue - 1);
         }
     }
 
@@ -416,9 +416,30 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         value = ((RPState) state).getValue();
     }
 
-    public RangeParam setRandomizePolicy(RandomizePolicy randomizePolicy) {
-        this.randomizePolicy = randomizePolicy;
-        return this;
+    @Override
+    public String getResetToolTip() {
+        String defaultAsString;
+        if (decimalPlaces == 0) {
+            defaultAsString = String.valueOf((int) defaultValue);
+        } else if (decimalPlaces == 1) {
+            defaultAsString = format("%.1f", defaultValue);
+        } else if (decimalPlaces == 2) {
+            defaultAsString = format("%.2f", defaultValue);
+        } else {
+            throw new IllegalStateException();
+        }
+        return super.getResetToolTip() + " to " + defaultAsString;
+    }
+
+    @Override
+    public Object getParamValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s', value = %.2f]",
+                getClass().getSimpleName(), getName(), value);
     }
 
     public static class Builder {
@@ -478,6 +499,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
+    /**
+     * The state of a {@link RangeParam}
+     */
     private static class RPState implements ParamState<RPState> {
         final double value;
 
@@ -494,26 +518,5 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         public double getValue() {
             return value;
         }
-    }
-
-    @Override
-    public String getResetToolTip() {
-        String defaultAsString;
-        if(decimalPlaces == 0) {
-            defaultAsString = String.valueOf((int)defaultValue);
-        } else if(decimalPlaces == 1) {
-            defaultAsString = format("%.1f", defaultValue);
-        } else if(decimalPlaces == 2) {
-            defaultAsString = format("%.2f", defaultValue);
-        } else {
-            throw new IllegalStateException();
-        }
-        return super.getResetToolTip() + " to " + defaultAsString;
-    }
-
-    @Override
-    public String toString() {
-        return format("%s[name = '%s', value = %.2f]",
-                getClass().getSimpleName(), getName(), value);
     }
 }

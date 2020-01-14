@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ public enum BasicStrokeCap {
     BUTT("Butt", CAP_BUTT),
     SQUARE("Square", CAP_SQUARE);
 
+    public static final String NAME = "Endpoint Cap";
     private final int value;
     private final String guiName;
 
@@ -47,7 +48,7 @@ public enum BasicStrokeCap {
         return guiName;
     }
 
-    public static EnumParam<BasicStrokeCap> asParam(String name) {
-        return new EnumParam<>(name, BasicStrokeCap.class);
+    public static EnumParam<BasicStrokeCap> asParam() {
+        return new EnumParam<>(NAME, BasicStrokeCap.class);
     }
 }

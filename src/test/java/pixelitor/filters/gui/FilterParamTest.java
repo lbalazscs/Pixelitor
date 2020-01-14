@@ -45,7 +45,6 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENC
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
  * Checks whether different FilterParam implementations implement
@@ -68,7 +67,6 @@ public class FilterParamTest {
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
                 {new RangeParam("Param Name", 0, 0, 10)},
-                {new RangeParam("Param Name", 0, 5, 10).setRandomizePolicy(IGNORE_RANDOMIZE)},
                 {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},
                 {new GroupedRangeParam("Param Name", 0, 0, 100, true)},
                 {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
@@ -88,6 +86,11 @@ public class FilterParamTest {
                 },
                 {new StrokeParam("Param Name")},
                 {new EffectsParam("Param Name")},
+                {new DialogParam("Param Name",
+                        new RangeParam("Child", 0, 50, 100),
+                        new AngleParam("Child 2", 0),
+                        new BooleanParam("Child 3", true))
+                },
                 {new LogZoomParam("Param Name", 200, 200, 1000)}
         });
     }
@@ -124,8 +127,16 @@ public class FilterParamTest {
 
     @Test
     public void test_randomize() {
+        param.setRandomizePolicy(RandomizePolicy.ALLOW_RANDOMIZE);
         param.randomize();
+        checkThatFilterWasNotCalled();
 
+        Object beforeValue = param.getParamValue();
+        param.setRandomizePolicy(RandomizePolicy.IGNORE_RANDOMIZE);
+        param.randomize();
+        assertThat(param.getParamValue())
+                .isNotNull()
+                .isEqualTo(beforeValue);
         checkThatFilterWasNotCalled();
     }
 
@@ -139,11 +150,10 @@ public class FilterParamTest {
 
     @Test
     public void test_reset_true() {
+        Object defaultValue = param.getParamValue();
         // we can change the value in a general way only
         // through randomize
-        if (param.ignoresRandomize()) {
-            // in this case we don't know whether to expect
-            // the calling of the filter
+        if (!param.allowRandomize()) {
             param.reset(true);
             assertThat(param).isSetToDefault();
             return;
@@ -156,9 +166,16 @@ public class FilterParamTest {
             checkThatFilterWasNotCalled();
             changed = !param.isSetToDefault();
         }
+        assertThat(param.getParamValue())
+                .isNotNull()
+                .isNotEqualTo(defaultValue);
 
         param.reset(true);
+
         assertThat(param).isSetToDefault();
+        assertThat(param.getParamValue())
+                .isNotNull()
+                .isEqualTo(defaultValue);
 
         verify(adjustmentListener, times(1)).paramAdjusted();
     }
@@ -170,7 +187,7 @@ public class FilterParamTest {
             assertThat(paramState).isNotNull();
             param.setState(paramState);
         } catch (UnsupportedOperationException e) {
-            // It is OK to catch this exception
+            // It is OK to ignore this exception
         }
         checkThatFilterWasNotCalled();
     }

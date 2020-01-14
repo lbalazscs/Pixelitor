@@ -26,8 +26,11 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.ApplyLayerMaskEdit;
 import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.History;
+import pixelitor.history.ImageAndMaskEdit;
 import pixelitor.history.ImageEdit;
+import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.history.TranslationEdit;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageTrimUtil;
@@ -371,7 +374,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void replaceImage(BufferedImage newImage, String editName) {
         BufferedImage oldImage = image;
         setImage(newImage);
-        ImageEdit edit = new ImageEdit(editName, comp, this, oldImage, true, false);
+        var edit = new ImageEdit(editName, comp, this, oldImage, true, false);
         History.add(edit);
 
         updateIconImage();
@@ -420,7 +423,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert previewImage != null;
 
         if (imageContentChanged) {
-            ImageEdit edit = new ImageEdit(filterName, comp, this,
+            var edit = new ImageEdit(filterName, comp, this,
                     getSelectedSubImage(true),
                     false, true);
             History.add(edit);
@@ -537,7 +540,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             throw new IllegalStateException("imageForUndo == image");
         }
         assert imageForUndo != null;
-        ImageEdit edit = new ImageEdit(filterName, comp, this,
+        var edit = new ImageEdit(filterName, comp, this,
                 imageForUndo, false, true);
         History.add(edit);
 
@@ -924,10 +927,22 @@ public class ImageLayer extends ContentLayer implements Drawable {
         setTranslation(0, 0);
     }
 
+    public void toCanvasSizeWithHistory() {
+        BufferedImage backupImage = getImage();
+        // must be created before the change
+        var translationEdit = new TranslationEdit(comp, this, true);
+
+        boolean changed = toCanvasSize();
+        if (changed) {
+            addToCanvasSizeToHistory(backupImage, translationEdit);
+        }
+    }
+
     /**
-     * Returns true if something was changed
+     * Crops to the canvas size, without managing history.
+     * Returns true if something was changed.
      */
-    public boolean cropToCanvasSize() {
+    public boolean toCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
         int canvasWidth = canvas.getImWidth();
@@ -945,6 +960,28 @@ public class ImageLayer extends ContentLayer implements Drawable {
             return true;
         }
         return false;
+    }
+
+    private void addToCanvasSizeToHistory(BufferedImage backupImage,
+                                          TranslationEdit translationEdit) {
+        ImageEdit imageEdit;
+        String editName = "Layer to Canvas Size";
+
+        boolean maskChanged = false;
+        BufferedImage maskBackupImage = null;
+        if (hasMask()) {
+            LayerMask mask = getMask();
+            maskBackupImage = mask.getImage();
+            maskChanged = mask.toCanvasSize();
+        }
+        if (maskChanged) {
+            imageEdit = new ImageAndMaskEdit(editName, comp, this, backupImage, maskBackupImage, false);
+        } else {
+            // no mask or no mask change, a simple ImageEdit will do
+            imageEdit = new ImageEdit(editName, comp, this, backupImage, true, false);
+            imageEdit.setFadeable(false);
+        }
+        History.add(new MultiEdit(editName, comp, translationEdit, imageEdit));
     }
 
     @Override

@@ -94,9 +94,9 @@ public class EffectsPanel extends JPanel implements Resettable {
     private void initGlowPanel(AreaEffects effects) {
         boolean enable = false;
         Color color = WHITE;
-        int width = 10;
+        double width = 10;
         if (effects != null) {
-            var effect = effects.getGlowEffect();
+            var effect = effects.getGlow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -116,9 +116,9 @@ public class EffectsPanel extends JPanel implements Resettable {
     private void initInnerGlowPanel(AreaEffects effects) {
         boolean enable = false;
         Color color = RED;
-        int width = 10;
+        double width = 10;
         if (effects != null) {
-            var effect = effects.getInnerGlowEffect();
+            var effect = effects.getInnerGlow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -139,9 +139,9 @@ public class EffectsPanel extends JPanel implements Resettable {
         boolean enable = false;
         Color color = GREEN;
         Color innerColor = WHITE;
-        int width = 10;
+        double width = 10;
         if (effects != null) {
-            var effect = effects.getNeonBorderEffect();
+            var effect = effects.getNeonBorder();
             if (effect != null) {
                 enable = true;
                 color = effect.getEdgeColor();
@@ -165,9 +165,9 @@ public class EffectsPanel extends JPanel implements Resettable {
         Color color = BLACK;
         int distance = 10;
         double angle = 0.7;
-        int spread = 10;
+        double spread = 10;
         if (effects != null) {
-            var effect = effects.getDropShadowEffect();
+            var effect = effects.getDropShadow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
@@ -206,7 +206,7 @@ public class EffectsPanel extends JPanel implements Resettable {
             glowEffect = new GlowPathEffect(glowPanel.getOpacity());
             glowPanel.updateEffectColorAndBrush(glowEffect);
         }
-        effects.setGlowEffect(glowEffect);
+        effects.setGlow(glowEffect);
     }
 
     private void updateInnerGlowFromGUI(AreaEffects effects) {
@@ -215,7 +215,7 @@ public class EffectsPanel extends JPanel implements Resettable {
             innerGlowEffect = new InnerGlowPathEffect(innerGlowPanel.getOpacity());
             innerGlowPanel.updateEffectColorAndBrush(innerGlowEffect);
         }
-        effects.setInnerGlowEffect(innerGlowEffect);
+        effects.setInnerGlow(innerGlowEffect);
     }
 
     private void updateNeonBorderFromGUI(AreaEffects effects) {
@@ -223,12 +223,12 @@ public class EffectsPanel extends JPanel implements Resettable {
         if (neonBorderPanel.isSelected()) {
             Color edgeColor = neonBorderPanel.getColor();
             Color centerColor = neonBorderPanel.getInnerColor();
-            int effectWidth = neonBorderPanel.getBrushWidth();
+            double effectWidth = neonBorderPanel.getBrushWidth();
 
             neonBorderEffect = new NeonBorderEffect(edgeColor, centerColor, effectWidth,
                     neonBorderPanel.getOpacity());
         }
-        effects.setNeonBorderEffect(neonBorderEffect);
+        effects.setNeonBorder(neonBorderEffect);
     }
 
     private void updateDropShadowFromGUI(AreaEffects effects) {
@@ -238,7 +238,7 @@ public class EffectsPanel extends JPanel implements Resettable {
             dropShadowPanel.updateEffectColorAndBrush(dropShadowEffect);
             dropShadowEffect.setOffset(dropShadowPanel.getOffset());
         }
-        effects.setDropShadowEffect(dropShadowEffect);
+        effects.setDropShadow(dropShadowEffect);
     }
 
     private void addTab(String name, EffectPanel configurator) {

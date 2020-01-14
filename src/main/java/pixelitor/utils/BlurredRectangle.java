@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
@@ -35,11 +36,11 @@ public class BlurredRectangle implements BlurredShape {
     private final Rectangle2D outerRect;
     private final Rectangle2D innerRect;
 
-    public BlurredRectangle(double centerX, double centerY,
+    public BlurredRectangle(Point2D center,
                             double innerRadiusX, double innerRadiusY,
                             double outerRadiusX, double outerRadiusY) {
-        cx = centerX;
-        cy = centerY;
+        cx = center.getX();
+        cy = center.getY();
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
 

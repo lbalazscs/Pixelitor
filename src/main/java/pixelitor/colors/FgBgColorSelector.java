@@ -52,6 +52,11 @@ public class FgBgColorSelector extends JLayeredPane {
 
     private Color fgColor = BLACK;
     private Color bgColor = WHITE;
+
+    // in layer mask editing mode only grayscale colors are shown
+    private boolean layerMaskEditing = false;
+
+    // the grayscale colors used while in mask editing mode
     private Color maskFgColor = BLACK;
     private Color maskBgColor = WHITE;
 
@@ -62,9 +67,6 @@ public class FgBgColorSelector extends JLayeredPane {
     private Action randomizeColorsAction;
     private Action resetToDefaultAction;
     private Action swapColorsAction;
-
-    // in layer mask editing mode we should show only grayscale colors
-    private boolean layerMaskEditing = false;
 
     public FgBgColorSelector(PixelitorWindow pw) {
         this.pw = pw;
@@ -268,12 +270,32 @@ public class FgBgColorSelector extends JLayeredPane {
                 color -> setBgColor(color, true));
     }
 
+    /**
+     * Return the user-visible foreground color
+     */
     public Color getFgColor() {
         return layerMaskEditing ? maskFgColor : fgColor;
     }
 
+    /**
+     * Return the user-visible background color
+     */
     public Color getBgColor() {
         return layerMaskEditing ? maskBgColor : bgColor;
+    }
+
+    /**
+     * Return the actual foreground color, even in mask editing mode
+     */
+    public Color getRealFgColor() {
+        return fgColor;
+    }
+
+    /**
+     * Return the actual background color, even in mask editing mode
+     */
+    public Color getRealBgColor() {
+        return bgColor;
     }
 
     public void setFgColor(Color c, boolean notifyListeners) {

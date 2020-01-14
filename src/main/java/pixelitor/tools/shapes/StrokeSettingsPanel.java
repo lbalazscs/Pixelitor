@@ -51,11 +51,6 @@ public class StrokeSettingsPanel extends JPanel {
 
     public StrokeSettingsPanel(StrokeParam sp) {
         RangeParam strokeWidthParam = sp.getStrokeWidthParam();
-        EnumParam<BasicStrokeCap> capParam = sp.getStrokeCapParam();
-        EnumParam<BasicStrokeJoin> joinParam = sp.getStrokeJoinParam();
-        EnumParam<StrokeType> strokeTypeParam = sp.getStrokeTypeParam();
-        BooleanParam dashedParam = sp.getDashedParam();
-        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
 
         setLayout(new GridBagLayout());
 
@@ -69,12 +64,11 @@ public class StrokeSettingsPanel extends JPanel {
                 3, 3);
         add(strokeWidthGUI, gbc);
 
-        JPanel capJoinPanel = createCapJoinPanel(capParam, joinParam);
+        JPanel capJoinPanel = createCapJoinPanel(sp);
         gbc.gridy = 1;
         add(capJoinPanel, gbc);
 
-        JPanel strokeTypePanel = createStrokeTypePanel(strokeTypeParam,
-                shapeTypeParam, dashedParam);
+        JPanel strokeTypePanel = createStrokeTypePanel(sp);
         gbc.gridy = 2;
         add(strokeTypePanel, gbc);
 
@@ -85,9 +79,10 @@ public class StrokeSettingsPanel extends JPanel {
         add(strokePreviewPanel, gbc);
     }
 
-    private static JPanel createCapJoinPanel(
-            EnumParam<BasicStrokeCap> capParam,
-            EnumParam<BasicStrokeJoin> joinParam) {
+    private static JPanel createCapJoinPanel(StrokeParam sp) {
+        EnumParam<BasicStrokeCap> capParam = sp.getStrokeCapParam();
+        EnumParam<BasicStrokeJoin> joinParam = sp.getStrokeJoinParam();
+
         var p = new JPanel();
         p.setBorder(createTitledBorder("Line Endpoints"));
         p.setLayout(new GridBagLayout());
@@ -103,20 +98,22 @@ public class StrokeSettingsPanel extends JPanel {
         dim.setSize(dim.getWidth() * 2, dim.getHeight());
         capSelector.setPreferredSize(dim);
 
-        capParam.setToolTip("The shape of the line endpoints");
-
         JComponent joinSelector = joinParam.createGUI();
+
+        capParam.setToolTip("The shape of the line endpoints");
         joinParam.setToolTip("The way lines connect at the corners");
 
-        gbh.addLabelAndControl("Endpoint Cap:", capSelector);
-        gbh.addLabelAndControl("Corner Join:", joinSelector);
+        gbh.addLabelAndControl(BasicStrokeCap.NAME + ":", capSelector);
+        gbh.addLabelAndControl(BasicStrokeJoin.NAME + ":", joinSelector);
 
         return p;
     }
 
-    private static JPanel createStrokeTypePanel(EnumParam<StrokeType> strokeTypeParam,
-                                                EnumParam<ShapeType> shapeTypeParam,
-                                                BooleanParam dashedParam) {
+    private static JPanel createStrokeTypePanel(StrokeParam sp) {
+        EnumParam<StrokeType> strokeTypeParam = sp.getStrokeTypeParam();
+        BooleanParam dashedParam = sp.getDashedParam();
+        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
+
         var p = new JPanel();
         p.setBorder(createTitledBorder("Stroke Type"));
 
@@ -135,11 +132,11 @@ public class StrokeSettingsPanel extends JPanel {
         var gbh = new GridBagHelper(p);
         JComponent strokeTypeGUI = strokeTypeParam.createGUI();
         strokeTypeGUI.setName("strokeType");
-        gbh.addLabelAndControl("Line Type:", strokeTypeGUI);
+        gbh.addLabelAndControl(StrokeType.NAME + ":", strokeTypeGUI);
 
         JComponent shapeTypeGUI = shapeTypeParam.createGUI();
         shapeTypeGUI.setName("shapeType");
-        gbh.addLabelAndControl("Shape:", shapeTypeGUI);
+        gbh.addLabelAndControl(ShapeType.NAME + ":", shapeTypeGUI);
 
         JComponent dashedGUI = dashedParam.createGUI();
         dashedGUI.setName("dashed");

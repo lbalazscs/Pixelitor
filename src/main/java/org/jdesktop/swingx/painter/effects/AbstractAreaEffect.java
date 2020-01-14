@@ -22,6 +22,9 @@
 
 package org.jdesktop.swingx.painter.effects;
 
+import com.jhlabs.image.ImageMath;
+import pixelitor.colors.ColorUtils;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -35,6 +38,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 /**
  * The abstract base class for path effects. It takes care
@@ -82,8 +86,8 @@ public class AbstractAreaEffect implements AreaEffect {
         width = (int) (clipShapeBounds.getWidth() + clipShapeBounds.getX());
         height = (int) (clipShapeBounds.getHeight() + clipShapeBounds.getY());
         Rectangle effectBounds = new Rectangle(0, 0,
-                width + getEffectWidth() * 2 + 1,
-                height + getEffectWidth() * 2 + 1);
+                (int) (width + getEffectWidth() * 2 + 1),
+                (int) (height + getEffectWidth() * 2 + 1));
 
         if (effectBounds.isEmpty()) {
             // check added by lbalazscs
@@ -138,7 +142,9 @@ public class AbstractAreaEffect implements AreaEffect {
                 g2.dispose();
             }
 
-            g.drawImage(clipImage, -getEffectWidth() + (int) getOffset().getX(), -getEffectWidth() + (int) getOffset().getY(), null);
+            int drawX = (int) (-getEffectWidth() + getOffset().getX());
+            int drawY = (int) (-getEffectWidth() + getOffset().getY());
+            g.drawImage(clipImage, drawX, drawY, null);
         } else {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             paintBorderGlow(g, clipShape, width, height);
@@ -245,7 +251,7 @@ public class AbstractAreaEffect implements AreaEffect {
 
         // draw the effect
         for (float i = 0; i < steps; i = i + 1f) {
-            float brushWidth = i * effectWidth / steps;
+            float brushWidth = (float) (i * effectWidth / steps);
             g2.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(clipShape);
@@ -332,15 +338,19 @@ public class AbstractAreaEffect implements AreaEffect {
     /**
      * Holds value of property effectWidth.
      */
-    protected int effectWidth;
+    protected double effectWidth;
 
     /**
      * Getter for property effectWidth.
      *
      * @return Value of property effectWidth.
      */
-    public int getEffectWidth() {
+    public double getEffectWidth() {
         return this.effectWidth;
+    }
+
+    public int getEffectWidthInt() {
+        return (int) this.effectWidth;
     }
 
     /**
@@ -348,12 +358,12 @@ public class AbstractAreaEffect implements AreaEffect {
      *
      * @param effectWidth New value of property effectWidth.
      */
-    public void setEffectWidth(int effectWidth) {
-        int oldEffectWidth = this.effectWidth;
+    public void setEffectWidth(double effectWidth) {
+        double oldEffectWidth = this.effectWidth;
         this.effectWidth = effectWidth;
         propertyChangeSupport.firePropertyChange("effectWidth",
-                Integer.valueOf(oldEffectWidth),
-                Integer.valueOf(effectWidth));
+                oldEffectWidth,
+                effectWidth);
     }
 
     /**
@@ -469,4 +479,45 @@ public class AbstractAreaEffect implements AreaEffect {
         this.opacity = opacity;
     }
 
+    public float getOpacity() {
+        return opacity;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AbstractAreaEffect that = (AbstractAreaEffect) o;
+        return brushSteps == that.brushSteps &&
+                effectWidth == that.effectWidth &&
+                renderInsideShape == that.renderInsideShape &&
+                shouldFillShape == that.shouldFillShape &&
+                shapeMasked == that.shapeMasked &&
+                Float.compare(that.opacity, opacity) == 0 &&
+                brushColor.equals(that.brushColor) &&
+                Objects.equals(offset, that.offset);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(brushColor, brushSteps,
+                effectWidth, renderInsideShape, offset,
+                shouldFillShape, shapeMasked, opacity);
+    }
+
+    public Color interpolateBrushColor(Color endColor, float progress) {
+        return ColorUtils.interpolateInRGB(brushColor, endColor, progress);
+    }
+
+    public float interpolateOpacity(float endOpacity, float progress) {
+        return ImageMath.lerp(progress, opacity, endOpacity);
+    }
+
+    public double interpolateEffectWidth(double endWidth, double progress) {
+        return ImageMath.lerp(progress, effectWidth, endWidth);
+    }
 }

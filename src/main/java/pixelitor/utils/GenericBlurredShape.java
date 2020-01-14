@@ -24,6 +24,7 @@ import pixelitor.tools.util.ImDrag;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
 
@@ -32,7 +33,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 /**
  * A {@link BlurredShape} which can take any shape
  */
-public class BlurredAnyShape implements BlurredShape {
+public class GenericBlurredShape implements BlurredShape {
     private double imgTx;
     private double imgTy;
     private final int imgWidth, imgHeight;
@@ -44,22 +45,22 @@ public class BlurredAnyShape implements BlurredShape {
     private final double outerRadiusY;
     private final byte[] pixels;
 
-    private static WeakReference<BlurredAnyShape> lastRef;
+    private static WeakReference<GenericBlurredShape> lastRef;
 
-    public static BlurredAnyShape get(ShapeType shapeType,
-                                      double centerX, double centerY,
-                                      double innerRadiusX, double innerRadiusY,
-                                      double outerRadiusX, double outerRadiusY) {
+    public static GenericBlurredShape of(ShapeType shapeType,
+                                         Point2D center,
+                                         double innerRadiusX, double innerRadiusY,
+                                         double outerRadiusX, double outerRadiusY) {
         if (lastRef == null) {
-            BlurredAnyShape last = new BlurredAnyShape(shapeType,
-                    centerX, centerY,
+            GenericBlurredShape last = new GenericBlurredShape(shapeType,
+                    center,
                     innerRadiusX, innerRadiusY,
                     outerRadiusX, outerRadiusY);
             lastRef = new WeakReference<>(last);
             return last;
         }
 
-        BlurredAnyShape last = lastRef.get();
+        GenericBlurredShape last = lastRef.get();
         if (last != null
                 && shapeType == last.shapeType
                 && innerRadiusX == last.innerRadiusX
@@ -68,30 +69,30 @@ public class BlurredAnyShape implements BlurredShape {
                 && outerRadiusY == last.outerRadiusY) {
             // if only the center changed,
             // there is no need to recreate the image
-            last.recenter(centerX, centerY);
+            last.recenter(center);
             return last;
         }
 
         // there was a radius or softness change
-        last = new BlurredAnyShape(shapeType,
-                centerX, centerY,
+        last = new GenericBlurredShape(shapeType,
+                center,
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
         lastRef = new WeakReference<>(last);
         return last;
     }
 
-    private BlurredAnyShape(ShapeType shapeType,
-                            double centerX, double centerY,
-                            double innerRadiusX, double innerRadiusY,
-                            double outerRadiusX, double outerRadiusY) {
+    private GenericBlurredShape(ShapeType shapeType,
+                                Point2D center,
+                                double innerRadiusX, double innerRadiusY,
+                                double outerRadiusX, double outerRadiusY) {
         this.shapeType = shapeType;
         this.innerRadiusX = innerRadiusX;
         this.innerRadiusY = innerRadiusY;
         this.outerRadiusX = outerRadiusX;
         this.outerRadiusY = outerRadiusY;
 
-        recenter(centerX, centerY);
+        recenter(center);
 
         imgWidth = (int) (2 * outerRadiusX);
         imgHeight = (int) (2 * outerRadiusY);
@@ -129,10 +130,10 @@ public class BlurredAnyShape implements BlurredShape {
         pixels = ImageUtils.getGrayPixelsAsByteArray(img);
     }
 
-    private void recenter(double centerX, double centerY) {
+    private void recenter(Point2D center) {
         // the blurred image translation relative to the source
-        imgTx = centerX - outerRadiusX;
-        imgTy = centerY - outerRadiusY;
+        imgTx = center.getX() - outerRadiusX;
+        imgTy = center.getY() - outerRadiusY;
     }
 
     @Override

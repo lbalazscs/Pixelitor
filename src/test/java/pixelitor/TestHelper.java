@@ -31,10 +31,8 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
-import pixelitor.tools.Alt;
-import pixelitor.tools.Ctrl;
+import pixelitor.tools.KeyModifiers;
 import pixelitor.tools.MouseButton;
-import pixelitor.tools.Shift;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -188,23 +186,21 @@ public class TestHelper {
 
     public static PMouseEvent createPEvent(int x, int y, int id,
                                            View view) {
-        return createPEvent(x, y, id, Ctrl.NO, Alt.NO, Shift.NO, MouseButton.LEFT, view);
+        return createPEvent(x, y, id, KeyModifiers.NONE, MouseButton.LEFT, view);
     }
 
     public static PMouseEvent createPEvent(int x, int y, int id,
-                                           Ctrl ctrl, Alt alt, Shift shift,
+                                           KeyModifiers keys,
                                            MouseButton mouseButton, View view) {
-        MouseEvent e = createEvent(x, y, id, ctrl, alt, shift, mouseButton, view);
+        MouseEvent e = createEvent(x, y, id, keys, mouseButton, view);
         return new PMouseEvent(e, view);
     }
 
     public static MouseEvent createEvent(int x, int y, int id,
-                                         Ctrl ctrl, Alt alt, Shift shift,
+                                         KeyModifiers keys,
                                          MouseButton mouseButton, View view) {
         int modifiers = 0;
-        modifiers = ctrl.modify(modifiers);
-        modifiers = alt.modify(modifiers);
-        modifiers = shift.modify(modifiers);
+        modifiers = keys.modify(modifiers);
         modifiers = mouseButton.modify(modifiers);
         boolean popupTrigger = false;
         if (mouseButton == MouseButton.RIGHT) {
@@ -274,7 +270,7 @@ public class TestHelper {
         when(view.imageXToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(view.imageYToComponentSpace(anyDouble())).then(returnsFirstArg());
         when(view.getScaling()).thenReturn(1.0);
-        
+
         Point fakeLocationOnScreen = new Point(0, 0);
         when(view.getLocationOnScreen()).thenReturn(fakeLocationOnScreen);
 
@@ -353,46 +349,46 @@ public class TestHelper {
     }
 
     public static void press(int x, int y, View view) {
-        press(x, y, Ctrl.NO, Alt.NO, Shift.NO, view);
+        press(x, y, KeyModifiers.NONE, view);
     }
 
     public static void press(int x, int y,
-                             Ctrl ctrl, Alt alt, Shift shift, View view) {
+                             KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_PRESSED,
-            ctrl, alt, shift, MouseButton.LEFT, view);
+                keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mousePressed(e, view);
     }
 
     public static void drag(int x, int y, View view) {
-        drag(x, y, Ctrl.NO, Alt.NO, Shift.NO, view);
+        drag(x, y, KeyModifiers.NONE, view);
     }
 
     public static void drag(int x, int y,
-                            Ctrl ctrl, Alt alt, Shift shift, View view) {
+                            KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_DRAGGED,
-            ctrl, alt, shift, MouseButton.LEFT, view);
+                keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseDragged(e, view);
     }
 
     public static void release(int x, int y, View view) {
-        release(x, y, Ctrl.NO, Alt.NO, Shift.NO, view);
+        release(x, y, KeyModifiers.NONE, view);
     }
 
     public static void release(int x, int y,
-                               Ctrl ctrl, Alt alt, Shift shift, View view) {
+                               KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_RELEASED,
-            ctrl, alt, shift, MouseButton.LEFT, view);
+                keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseReleased(e, view);
     }
 
     public static void move(int x, int y, View view) {
-        move(x, y, Ctrl.NO, Alt.NO, Shift.NO, view);
+        move(x, y, KeyModifiers.NONE, view);
     }
 
     public static void move(int x, int y,
-                            Ctrl ctrl, Alt alt, Shift shift, View view) {
+                            KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_MOVED,
-            ctrl, alt, shift, MouseButton.LEFT, view);
+                keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseMoved(e, view);
     }
 

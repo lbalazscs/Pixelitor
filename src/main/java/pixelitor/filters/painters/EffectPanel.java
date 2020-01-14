@@ -124,9 +124,9 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         return opacityRange.getPercentageValF();
     }
 
-    public abstract int getBrushWidth();
+    public abstract double getBrushWidth();
 
-    public abstract void setBrushWidth(int value);
+    public abstract void setBrushWidth(double value);
 
     public void setAdjustmentListener(ParamAdjustmentListener adjustmentListener) {
         if (this.adjustmentListener != null) {
@@ -142,14 +142,14 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     public void updateEffectColorAndBrush(AbstractAreaEffect effect) {
         effect.setBrushColor(getColor());
 
-        int brushWidth = getBrushWidth();
+        double brushWidth = getBrushWidth();
         effect.setEffectWidth(brushWidth);
 
         effect.setBrushSteps(calculateBrushSteps(brushWidth));
     }
 
-    private static int calculateBrushSteps(int brushWidth) {
-        return 1 + brushWidth / 3;
+    private static int calculateBrushSteps(double brushWidth) {
+        return (int) (1 + brushWidth / 3);
     }
 
     @Override

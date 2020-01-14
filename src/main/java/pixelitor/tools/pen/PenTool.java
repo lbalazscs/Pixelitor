@@ -18,7 +18,6 @@
 package pixelitor.tools.pen;
 
 import pixelitor.Build;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
@@ -276,8 +275,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         mode.paint(g2);

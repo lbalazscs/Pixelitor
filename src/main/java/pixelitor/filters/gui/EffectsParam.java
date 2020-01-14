@@ -34,7 +34,9 @@ public class EffectsParam extends AbstractFilterParam {
     private final boolean separateDialog;
 
     public EffectsParam(String name) {
-        super(name, IGNORE_RANDOMIZE); // randomize() is not implemented!
+        // ignore randomize because effects (especially
+        // inner glow) can be very slow in shape filters
+        super(name, IGNORE_RANDOMIZE);
         separateDialog = true;
     }
 
@@ -100,7 +102,7 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         if (effectsPanel == null) { // happens in unit tests
             effectsPanel = new EffectsPanel(adjustmentListener, null);
         }
@@ -119,7 +121,7 @@ public class EffectsParam extends AbstractFilterParam {
 
     @Override
     public boolean canBeAnimated() {
-        return false;
+        return true;
     }
 
     @Override
@@ -140,5 +142,10 @@ public class EffectsParam extends AbstractFilterParam {
         if (effectsPanel != null) {
             effectsPanel.reset(trigger);
         }
+    }
+
+    @Override
+    public Object getParamValue() {
+        return getEffects();
     }
 }

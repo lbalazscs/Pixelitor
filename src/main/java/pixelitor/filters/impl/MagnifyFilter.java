@@ -22,6 +22,7 @@ import pixelitor.utils.BlurredShape;
 import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -103,7 +104,7 @@ public class MagnifyFilter extends CenteredTransformFilter {
 
     // must be called after the shape arguments!
     public void setShape(int type) {
-        shape = BlurredShape.create(type, cx, cy,
+        shape = BlurredShape.create(type, new Point2D.Double(cx, cy),
                 innerRadiusX, innerRadiusY,
                 outerRadiusX, outerRadiusY);
     }

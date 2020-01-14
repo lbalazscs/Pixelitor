@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import java.awt.Rectangle;
 import java.util.Objects;
 
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
  * An abstract parent class for {@link FilterParam} implementations.
@@ -28,10 +28,10 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
     protected ParamAdjustmentListener adjustmentListener;
-    private boolean enabledByAnimationSetting = true;
-    private boolean enabledByFilterLogic = true;
+    private boolean enabledByAnimation = true;
+    private boolean enabledByAppLogic = true;
     protected ParamGUI paramGUI;
-    protected RandomizePolicy randomizePolicy;
+    private RandomizePolicy randomizePolicy;
 
     // an extra action button to the right of the normal GUI,
     // typically some randomization, which will be enabled
@@ -70,15 +70,15 @@ public abstract class AbstractFilterParam implements FilterParam {
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
             case APP_LOGIC:
-                enabledByFilterLogic = b;
+                enabledByAppLogic = b;
                 break;
             case FINAL_ANIMATION_SETTING:
                 if (canBeAnimated()) {
-                    // ignore - the whole point of the final animation setting mode
+                    // the whole point of the final animation setting mode
                     // is to disable/enable the filter params that can't be animated
                     return;
                 }
-                enabledByAnimationSetting = b;
+                enabledByAnimation = b;
                 break;
         }
 
@@ -91,7 +91,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     private boolean shouldBeEnabled() {
-        return enabledByFilterLogic && enabledByAnimationSetting;
+        return enabledByAppLogic && enabledByAnimation;
     }
 
     void setEnabled(boolean b) {
@@ -101,13 +101,30 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     @Override
-    public boolean ignoresRandomize() {
-        return randomizePolicy == IGNORE_RANDOMIZE;
+    public boolean allowRandomize() {
+        return randomizePolicy == ALLOW_RANDOMIZE;
+    }
+
+    @Override
+    public void randomize() {
+        if (allowRandomize()) {
+            doRandomize();
+        }
+    }
+
+    /**
+     * Randomize the settings without checking the permission
+     */
+    protected abstract void doRandomize();
+
+    @Override
+    public void setRandomizePolicy(RandomizePolicy policy) {
+        randomizePolicy = policy;
     }
 
     @Override
     public void setToolTip(String tip) {
-        if(paramGUI != null) {
+        if (paramGUI != null) {
             paramGUI.setToolTip(tip);
         }
     }

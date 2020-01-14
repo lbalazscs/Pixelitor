@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,8 @@
 
 package pixelitor.tools;
 
-import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.View;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.UserDrag;
@@ -106,8 +105,7 @@ public abstract class DragTool extends Tool {
     public abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
         if (ended) {
             return;

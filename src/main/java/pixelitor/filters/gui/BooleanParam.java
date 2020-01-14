@@ -122,11 +122,9 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
-        if (randomizePolicy.allow()) {
-            boolean randomValue = Rnd.nextBoolean();
-            setValue(randomValue, true, false);
-        }
+    protected void doRandomize() {
+        boolean randomValue = Rnd.nextBoolean();
+        setValue(randomValue, true, false);
     }
 
     public boolean isChecked() {
@@ -160,12 +158,6 @@ public class BooleanParam extends AbstractFilterParam {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public String toString() {
-        return format("%s[name = '%s', currentValue = %s]",
-                getClass().getSimpleName(), getName(), currentValue);
-    }
-
     public void addActionListener(ActionListener actionListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
@@ -179,5 +171,16 @@ public class BooleanParam extends AbstractFilterParam {
             actionListenerList = new ArrayList<>(2);
         }
         actionListenerList.add(actionListener);
+    }
+
+    @Override
+    public Object getParamValue() {
+        return isChecked();
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s', currentValue = %s]",
+                getClass().getSimpleName(), getName(), currentValue);
     }
 }

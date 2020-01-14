@@ -38,7 +38,7 @@ public class DropShadowPanel extends EffectPanel {
 
     DropShadowPanel(boolean defaultEnabled, Color defaultColor,
                     int defaultDistance, double defaultAngle,
-                    int defaultSpread) {
+                    double defaultSpread) {
         super("Drop Shadow", defaultEnabled, defaultColor);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
@@ -75,13 +75,13 @@ public class DropShadowPanel extends EffectPanel {
     }
 
     @Override
-    public int getBrushWidth() {
-        return spreadParam.getValue();
+    public double getBrushWidth() {
+        return spreadParam.getValueAsDouble();
     }
 
     @Override
-    public void setBrushWidth(int value) {
-        spreadParam.setValue(value);
+    public void setBrushWidth(double value) {
+        spreadParam.setValue(value, true);
     }
 
     public void setAngle(double rad) {

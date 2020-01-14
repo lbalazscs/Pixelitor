@@ -32,7 +32,7 @@ public class EffectWithWidthPanel extends EffectPanel {
     private final SliderSpinner widthSlider;
 
     public EffectWithWidthPanel(String effectName, boolean defaultSelected,
-                                Color defaultColor, int defaultWidth) {
+                                Color defaultColor, double defaultWidth) {
         super(effectName, defaultSelected, defaultColor);
 
         widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
@@ -44,13 +44,13 @@ public class EffectWithWidthPanel extends EffectPanel {
     }
 
     @Override
-    public int getBrushWidth() {
-        return widthSlider.getCurrentValue();
+    public double getBrushWidth() {
+        return widthRange.getValueAsDouble();
     }
 
     @Override
-    public void setBrushWidth(int value) {
-        widthSlider.setValue(value);
+    public void setBrushWidth(double value) {
+        widthRange.setValue(value, true);
     }
 
     @Override

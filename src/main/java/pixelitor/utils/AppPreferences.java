@@ -21,6 +21,7 @@ import com.bric.util.JVM;
 import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
+import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
@@ -46,8 +47,6 @@ import static javax.swing.SwingConstants.BOTTOM;
 import static javax.swing.SwingConstants.LEFT;
 import static javax.swing.SwingConstants.RIGHT;
 import static javax.swing.SwingConstants.TOP;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.menus.file.RecentFilesMenu.MAX_RECENT_FILES;
@@ -355,12 +354,12 @@ public final class AppPreferences {
     }
 
     private static void saveFgBgColors() {
-        Color fgColor = getFGColor();
+        Color fgColor = FgBgColors.getRealFgColor();
         if (fgColor != null) {
             mainNode.putInt(FG_COLOR_KEY, fgColor.getRGB());
         }
 
-        Color bgColor = getBGColor();
+        Color bgColor = FgBgColors.getRealBgColor();
         if (bgColor != null) {
             mainNode.putInt(BG_COLOR_KEY, bgColor.getRGB());
         }

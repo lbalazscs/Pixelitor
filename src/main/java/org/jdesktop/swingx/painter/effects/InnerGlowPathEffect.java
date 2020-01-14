@@ -140,7 +140,7 @@ public class InnerGlowPathEffect extends AbstractAreaEffect {
 
         // draw the effect
         for (float i = 0; i < steps; i = i + 1.0f) {
-            float brushWidth = i * effectWidth / steps;
+            float brushWidth = (float) (i * effectWidth / steps);
             g2.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(clipShape);

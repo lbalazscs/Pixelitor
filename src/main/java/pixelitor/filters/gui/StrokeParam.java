@@ -30,7 +30,10 @@ import javax.swing.*;
 import java.awt.Stroke;
 import java.awt.Window;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -40,10 +43,10 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
     // controls in the Stroke Settings dialog
-    private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam("");
-    private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam("");
-    private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam("");
-    private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam("");
+    private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam();
+    private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam();
+    private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
+    private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
     private final BooleanParam dashedParam = new BooleanParam("", false);
     private DefaultButton defaultButton;
     private JComponent previewer;
@@ -137,7 +140,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
 
     }
 
@@ -166,7 +169,17 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public boolean canBeAnimated() {
-        return false;
+        return true;
+    }
+
+    @Override
+    public void setEnabled(boolean b, EnabledReason reason) {
+        // call super to set the enabled state of the launching button
+        super.setEnabled(b, reason);
+
+        for (FilterParam param : allParams) {
+            param.setEnabled(b, reason);
+        }
     }
 
     @Override
@@ -240,5 +253,13 @@ public class StrokeParam extends AbstractFilterParam {
         strokeNode.addBoolean("dashed", dashedParam.isChecked());
 
         node.add(strokeNode);
+    }
+
+    @Override
+    public Object getParamValue() {
+        List<Object> childValues = Stream.of(allParams)
+                .map(FilterParam::getParamValue)
+                .collect(toList());
+        return childValues;
     }
 }

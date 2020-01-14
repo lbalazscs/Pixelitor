@@ -120,13 +120,13 @@ public class Rnd {
         var ae = new AreaEffects();
         float f = rand.nextFloat();
         if (f < 0.25f) {
-            ae.setNeonBorderEffect(new NeonBorderEffect());
+            ae.setNeonBorder(new NeonBorderEffect());
         } else if (f < 0.5f) {
-            ae.setDropShadowEffect(new ShadowPathEffect(1.0f));
+            ae.setDropShadow(new ShadowPathEffect(1.0f));
         } else if (f < 0.75f) {
-            ae.setInnerGlowEffect(new InnerGlowPathEffect(1.0f));
+            ae.setInnerGlow(new InnerGlowPathEffect(1.0f));
         } else {
-            ae.setGlowEffect(new GlowPathEffect(1.0f));
+            ae.setGlow(new GlowPathEffect(1.0f));
         }
         return ae;
     }

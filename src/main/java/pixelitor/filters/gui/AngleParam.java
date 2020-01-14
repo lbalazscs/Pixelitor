@@ -145,7 +145,7 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         double random = Math.random();
         setValue(random * 2 * Math.PI - Math.PI, false);
     }
@@ -179,6 +179,17 @@ public class AngleParam extends AbstractFilterParam {
         setValueInDegrees(((APState) state).angle, false);
     }
 
+    @Override
+    public Object getParamValue() {
+        return angle;
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s', angle = %.2f]",
+                getClass().getSimpleName(), getName(), angle);
+    }
+
     private static class APState implements ParamState<APState> {
         private final double angle;
 
@@ -191,11 +202,5 @@ public class AngleParam extends AbstractFilterParam {
             double interpolatedAngle = ImageMath.lerp(progress, angle, endState.angle);
             return new APState(interpolatedAngle);
         }
-    }
-
-    @Override
-    public String toString() {
-        return format("%s[name = '%s', angle = %.2f]",
-                getClass().getSimpleName(), getName(), angle);
     }
 }

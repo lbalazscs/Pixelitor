@@ -17,7 +17,6 @@
 
 package pixelitor.tools.gradient;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.BlendingModePanel;
@@ -401,11 +400,10 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
         // the superclass draws the drag display
-        super.paintOverImage(g2, canvas, view, componentTransform, imageTransform);
+        super.paintOverImage(g2, comp, imageTransform);
 
         if (handles != null) {
             handles.paint(g2);

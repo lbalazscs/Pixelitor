@@ -19,7 +19,7 @@ package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Build;
-import pixelitor.Canvas;
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
@@ -690,9 +690,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas,
-                               View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
         if (paintBrushOutline) {
             outlinePainter.paint(g2, outlineCoX, outlineCoY);

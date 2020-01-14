@@ -18,7 +18,6 @@
 package pixelitor.tools;
 
 import pixelitor.Build;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.GlobalEvents;
@@ -146,13 +145,12 @@ public abstract class Tool implements KeyListener {
     }
 
     /**
-     * Paint on the {@link View} after all the layers have been painted.
+     * Paint on the {@link Composition} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
-    public void paintOverImage(Graphics2D g2, Canvas canvas,
-                               View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
+
     }
 
     public void mouseMoved(MouseEvent e, View view) {

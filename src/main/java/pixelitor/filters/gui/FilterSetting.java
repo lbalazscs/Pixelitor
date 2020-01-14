@@ -47,7 +47,7 @@ public interface FilterSetting {
 
     /**
      * This object can be disabled for two independent reasons:
-     * (1) because of the filter logic and (2) because non-animatable
+     * (1) because of the app logic and (2) because non-animatable
      * parameters should be disabled in the final animation dialogs.
      */
     void setEnabled(boolean b, EnabledReason reason);

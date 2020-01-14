@@ -500,7 +500,7 @@ public class ImageLayerTest {
 
     @Test
     public void test_cropToCanvasSize() {
-        layer.cropToCanvasSize();
+        layer.toCanvasSize();
 
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();

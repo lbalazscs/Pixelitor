@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
+import java.util.Arrays;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
 import static java.awt.Color.BLACK;
@@ -139,19 +140,17 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
-        if (randomizePolicy.allow()) {
-            Color[] randomColors = new Color[defaultThumbPositions.length];
-            for (int i = 0; i < randomColors.length; i++) {
-                randomColors[i] = Rnd.createRandomColor();
-            }
+    protected void doRandomize() {
+        Color[] randomColors = new Color[defaultThumbPositions.length];
+        for (int i = 0; i < randomColors.length; i++) {
+            randomColors[i] = Rnd.createRandomColor();
+        }
 
-            trigger = false;
-            gradientSlider.setValues(defaultThumbPositions, randomColors);
-            trigger = true;
-            if (gui != null) {
-                gui.updateDefaultButtonIcon();
-            }
+        trigger = false;
+        gradientSlider.setValues(defaultThumbPositions, randomColors);
+        trigger = true;
+        if (gui != null) {
+            gui.updateDefaultButtonIcon();
         }
     }
 
@@ -235,6 +234,16 @@ public class GradientParam extends AbstractFilterParam {
         trigger = true;
     }
 
+    @Override
+    public Object getParamValue() {
+        return Arrays.asList(gradientSlider.getValues());
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
+    }
+
     private static class GState implements ParamState<GState> {
         final float[] thumbPositions;
         final Color[] colors;
@@ -276,11 +285,6 @@ public class GradientParam extends AbstractFilterParam {
             }
             return interpolatedColors;
         }
-    }
-
-    @Override
-    public String toString() {
-        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
     static class GUI extends JPanel {

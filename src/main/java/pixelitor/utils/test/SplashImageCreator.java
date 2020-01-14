@@ -231,7 +231,7 @@ public class SplashImageCreator {
             ShadowPathEffect dropShadowEffect = new ShadowPathEffect(0.6f);
             dropShadowEffect.setEffectWidth(3);
             dropShadowEffect.setOffset(Utils.offsetFromPolar(4, 0.7));
-            effects.setDropShadowEffect(dropShadowEffect);
+            effects.setDropShadow(dropShadowEffect);
         }
 
         TextSettings settings = new TextSettings(text, font, textColor, effects,

@@ -22,6 +22,8 @@
 
 package org.jdesktop.swingx.painter.effects;
 
+import pixelitor.colors.ColorUtils;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -59,7 +61,7 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     /**
      * Creates a new instance of NeonBorderEffect
      */
-    public NeonBorderEffect(Color edgeColor, Color centerColor, int effectWidth, float opacity) {
+    public NeonBorderEffect(Color edgeColor, Color centerColor, double effectWidth, float opacity) {
         super();
         setEffectWidth(effectWidth);
         this.setEdgeColor(edgeColor);
@@ -96,7 +98,7 @@ public class NeonBorderEffect extends AbstractAreaEffect {
         */
         gfx.translate(getOffset().getX(), getOffset().getY());
         gfx.setComposite(AlphaComposite.SrcOver);
-        int steps = getEffectWidth();
+        int steps = getEffectWidthInt();
         if (borderPosition == BorderPosition.Centered) {
             steps = steps / 2;
         }
@@ -199,5 +201,13 @@ public class NeonBorderEffect extends AbstractAreaEffect {
         }
         if (borderPosition == BorderPosition.Centered) {
         }
+    }
+
+    public Color interpolateEdgeColor(Color endColor, float progress) {
+        return ColorUtils.interpolateInRGB(edgeColor, endColor, progress);
+    }
+
+    public Color interpolateCenterColor(Color endColor, float progress) {
+        return ColorUtils.interpolateInRGB(centerColor, endColor, progress);
     }
 }

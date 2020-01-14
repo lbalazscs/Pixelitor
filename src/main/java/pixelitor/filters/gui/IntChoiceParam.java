@@ -70,11 +70,9 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     }
 
     @Override
-    public void randomize() {
-        if (randomizePolicy.allow()) {
-            Value choice = Rnd.chooseFrom(choicesList);
-            setCurrentChoice(choice, false);
-        }
+    protected void doRandomize() {
+        Value choice = Rnd.chooseFrom(choicesList);
+        setCurrentChoice(choice, false);
     }
 
     public int getValue() {
@@ -195,7 +193,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     public static IntChoiceParam forEdgeAction(boolean reflectFirst) {
         var choice = new IntChoiceParam("Edge Action", edgeActions, ALLOW_RANDOMIZE);
-        if(reflectFirst) {
+        if (reflectFirst) {
             return choice.withDefaultChoice(EDGE_REFLECT);
         }
         return choice;
@@ -280,6 +278,11 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     @Override
     public String getResetToolTip() {
         return super.getResetToolTip() + " to " + defaultChoice;
+    }
+
+    @Override
+    public Object getParamValue() {
+        return currentChoice;
     }
 
     @Override

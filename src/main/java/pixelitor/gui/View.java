@@ -390,8 +390,7 @@ public class View extends JComponent
         comp.drawGuides(g2);
 
         if (isActive()) {
-            currentTool.paintOverImage(g2, canvas, this,
-                    componentTransform, imageTransform);
+            currentTool.paintOverImage(g2, comp, imageTransform);
         }
 
         g2.setClip(canvasClip);

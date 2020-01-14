@@ -101,7 +101,7 @@ public class ToolTest {
     }
 
     @Before
-    public void setUp()  {
+    public void setUp() {
         PenTool.path = null;
         var comp = TestHelper.create2LayerComposition(true);
         view = comp.getView();
@@ -125,38 +125,39 @@ public class ToolTest {
     }
 
     private void stroke(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton) {
+        KeyModifiers keys = new KeyModifiers(ctrl, alt, shift);
         // stroke with all the modifiers
-        press(alt, ctrl, shift, mouseButton, 2, 2);
-        drag(alt, ctrl, shift, mouseButton, 3, 3);
-        release(alt, ctrl, shift, mouseButton, 4, 4);
+        press(keys, mouseButton, 2, 2);
+        drag(keys, mouseButton, 3, 3);
+        release(keys, mouseButton, 4, 4);
 
         // press the modifiers, but release them before finishing
-        press(alt, ctrl, shift, mouseButton, 2, 2);
-        drag(alt, ctrl, shift, mouseButton, 3, 3);
-        release(Alt.NO, Ctrl.NO, Shift.NO, mouseButton, 4, 4);
+        press(keys, mouseButton, 2, 2);
+        drag(keys, mouseButton, 3, 3);
+        release(KeyModifiers.NONE, mouseButton, 4, 4);
 
         // start without the modifiers, but finish with them
-        press(Alt.NO, Ctrl.NO, Shift.NO, mouseButton, 2, 2);
-        drag(alt, ctrl, shift, mouseButton, 3, 3);
-        release(alt, ctrl, shift, mouseButton, 4, 4);
+        press(KeyModifiers.NONE, mouseButton, 2, 2);
+        drag(keys, mouseButton, 3, 3);
+        release(keys, mouseButton, 4, 4);
 
         // do a simple click
-        press(alt, ctrl, shift, mouseButton, 1, 1);
-        release(alt, ctrl, shift, mouseButton, 1, 1);
+        press(keys, mouseButton, 1, 1);
+        release(keys, mouseButton, 1, 1);
     }
 
-    private void press(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, ctrl, alt, shift, mouseButton, view);
+    private void press(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, keys, mouseButton, view);
         tool.handlerChain.handleMousePressed(e);
     }
 
-    private void drag(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, ctrl, alt, shift, mouseButton, view);
+    private void drag(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, keys, mouseButton, view);
         tool.handlerChain.handleMouseDragged(e);
     }
 
-    private void release(Alt alt, Ctrl ctrl, Shift shift, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, ctrl, alt, shift, mouseButton, view);
+    private void release(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
+        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, keys, mouseButton, view);
         tool.handlerChain.handleMouseReleased(e);
     }
 }

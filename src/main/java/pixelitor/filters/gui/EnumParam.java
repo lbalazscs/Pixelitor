@@ -39,9 +39,9 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         setSelectedItem(
-            Rnd.chooseFrom(enumConstants),
+                Rnd.chooseFrom(enumConstants),
                 false);
     }
 
@@ -109,5 +109,10 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     @Override
     public String getResetToolTip() {
         return super.getResetToolTip() + " to " + defaultValue;
+    }
+
+    @Override
+    public Object getParamValue() {
+        return getSelectedItem();
     }
 }

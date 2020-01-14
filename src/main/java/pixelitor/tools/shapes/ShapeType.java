@@ -379,6 +379,7 @@ public enum ShapeType {
 //        }
     };
 
+    public static final String NAME = "Shape";
     private final String guiName;
 
     // if a shape is not closed, then it can't be filled directly
@@ -442,13 +443,13 @@ public enum ShapeType {
     public abstract Shape createShape(double x, double y, double diameter);
 
     public static EnumParam<ShapeType> asParam(ShapeType defaultValue) {
-        EnumParam<ShapeType> param = asParam("Shape");
+        EnumParam<ShapeType> param = asParam();
         param.selectAndSetAsDefault(defaultValue);
         return param;
     }
 
-    public static EnumParam<ShapeType> asParam(String name) {
-        return new EnumParam<>(name, ShapeType.class);
+    public static EnumParam<ShapeType> asParam() {
+        return new EnumParam<>(NAME, ShapeType.class);
     }
 
     @Override

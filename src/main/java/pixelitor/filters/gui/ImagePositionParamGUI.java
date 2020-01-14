@@ -139,6 +139,6 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     @Override
     public void setToolTip(String tip) {
-        // TODO should have some generic tooltip
+        imgPosSelector.setToolTipText(tip);
     }
 }

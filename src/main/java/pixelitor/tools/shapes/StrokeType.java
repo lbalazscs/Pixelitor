@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -173,6 +173,7 @@ public enum StrokeType {
         }
     };
 
+    public static final String NAME = "Line Type";
     private static final float OUTLINE_WIDTH = 1.0f;
     private static final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
@@ -202,8 +203,8 @@ public enum StrokeType {
      */
     public abstract int getExtraThickness(int specifiedWidth);
 
-    public static EnumParam<StrokeType> asParam(String name) {
-        return new EnumParam<>(name, StrokeType.class);
+    public static EnumParam<StrokeType> asParam() {
+        return new EnumParam<>(NAME, StrokeType.class);
     }
 
     @Override

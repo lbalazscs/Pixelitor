@@ -23,7 +23,18 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
-import pixelitor.history.*;
+import pixelitor.history.DeleteLayerEdit;
+import pixelitor.history.DeselectEdit;
+import pixelitor.history.History;
+import pixelitor.history.LayerOrderChangeEdit;
+import pixelitor.history.LayerSelectionChangeEdit;
+import pixelitor.history.MergeDownEdit;
+import pixelitor.history.MultiEdit;
+import pixelitor.history.NewLayerEdit;
+import pixelitor.history.NewSelectionEdit;
+import pixelitor.history.NotUndoableEdit;
+import pixelitor.history.PixelitorEdit;
+import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.io.IOThread;
 import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
@@ -31,7 +42,6 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
 import pixelitor.layers.LayerMoveAction;
 import pixelitor.layers.LayerUI;
 import pixelitor.layers.MaskViewMode;
@@ -664,7 +674,7 @@ public class Composition implements Serializable {
             }
         }
 
-        PixelitorEdit combinedEdit = MultiEdit.combine(
+        var combinedEdit = MultiEdit.combine(
                 layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
         if (combinedEdit != null) {
             History.add(combinedEdit);
@@ -1196,7 +1206,7 @@ public class Composition implements Serializable {
         for (Layer layer : layerList) {
             if(layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                imageLayerToCanvasSize(imageLayer);
+                imageLayer.toCanvasSizeWithHistory();
             }
         }
     }
@@ -1207,36 +1217,7 @@ public class Composition implements Serializable {
             return;
         }
 
-        ImageLayer layer = (ImageLayer) activeLayer;
-        imageLayerToCanvasSize(layer);
-    }
-
-    private void imageLayerToCanvasSize(ImageLayer layer) {
-        BufferedImage backupImage = layer.getImage();
-
-        TranslationEdit translationEdit = new TranslationEdit(this, layer, true);
-        boolean changed = layer.cropToCanvasSize();
-
-        if (changed) {
-            ImageEdit imageEdit;
-            String editName = "Layer to Canvas Size";
-
-            boolean maskChanged = false;
-            BufferedImage maskBackupImage = null;
-            if (layer.hasMask()) {
-                LayerMask mask = layer.getMask();
-                maskBackupImage = mask.getImage();
-                maskChanged = mask.cropToCanvasSize();
-            }
-            if (maskChanged) {
-                imageEdit = new ImageAndMaskEdit(editName, this, layer, backupImage, maskBackupImage, false);
-            } else {
-                // no mask or no mask change, a simple ImageEdit will do
-                imageEdit = new ImageEdit(editName, this, layer, backupImage, true, false);
-                imageEdit.setFadeable(false);
-            }
-            History.add(new MultiEdit(editName, this, translationEdit, imageEdit));
-        }
+        ((ImageLayer) activeLayer).toCanvasSizeWithHistory();
     }
 
     /**
@@ -1273,10 +1254,11 @@ public class Composition implements Serializable {
     }
 
     public void createSelectionFromTextLayer() {
-        // this method will be called only the active layer is a text layer
         if (activeLayer instanceof TextLayer) {
             TextLayer textLayer = (TextLayer) activeLayer;
             textLayer.createSelectionFromText();
+        } else {
+            throw new IllegalStateException("active layer is not text layer");
         }
     }
 

@@ -24,7 +24,10 @@ import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -68,7 +71,7 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         for (FilterParam child : children) {
             child.randomize();
         }
@@ -107,6 +110,16 @@ public class DialogParam extends AbstractFilterParam {
             }
         }
         return false;
+    }
+
+    @Override
+    public void setEnabled(boolean b, EnabledReason reason) {
+        // call super to set the enabled state of the launching button
+        super.setEnabled(b, reason);
+
+        for (FilterParam child : children) {
+            child.setEnabled(b, reason);
+        }
     }
 
     @Override
@@ -153,5 +166,13 @@ public class DialogParam extends AbstractFilterParam {
         for (FilterParam child : children) {
             child.setAdjustmentListener(decoratedListener);
         }
+    }
+
+    @Override
+    public Object getParamValue() {
+        List<Object> childValues = Stream.of(children)
+                .map(FilterParam::getParamValue)
+                .collect(toList());
+        return childValues;
     }
 }

@@ -23,8 +23,11 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -163,7 +166,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         if (isLinked()) {
             rangeParams[0].randomize();
         } else {
@@ -278,6 +281,14 @@ public class GroupedRangeParam extends AbstractFilterParam {
     public GroupedRangeParam withDecimalPlaces(int dp) {
         setDecimalPlaces(dp);
         return this;
+    }
+
+    @Override
+    public Object getParamValue() {
+        List<Object> childValues = Stream.of(rangeParams)
+                .map(FilterParam::getParamValue)
+                .collect(toList());
+        return childValues;
     }
 
     private static class GRState implements ParamState<GRState> {

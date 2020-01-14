@@ -34,7 +34,7 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
 
     NeonBorderPanel(boolean defaultSelected,
                     Color defaultColor, Color innerColor,
-                    int defaultWidth) {
+                    double defaultWidth) {
         super("Neon Border", defaultSelected, defaultColor, defaultWidth);
 
         this.innerColor = innerColor;

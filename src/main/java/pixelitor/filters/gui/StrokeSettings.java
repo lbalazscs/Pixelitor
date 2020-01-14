@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters.gui;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.tools.shapes.BasicStrokeCap;
 import pixelitor.tools.shapes.BasicStrokeJoin;
 import pixelitor.tools.shapes.ShapeType;
@@ -46,8 +47,10 @@ public class StrokeSettings implements ParamState<StrokeSettings> {
 
     @Override
     public StrokeSettings interpolate(StrokeSettings endState, double progress) {
-        // TODO add animation support
-        return null;
+        // the stroke width is the only thing that can be animated
+        double newWidth = ImageMath.lerp(progress, width, endState.width);
+
+        return new StrokeSettings(newWidth, cap, join, type, shapeType, dashed);
     }
 
     public double getWidth() {

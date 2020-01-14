@@ -72,7 +72,7 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         setColor(Rnd.createRandomColor(
                 transparencyPolicy.allowTransparencyWhenRandomized), false);
     }
@@ -120,6 +120,17 @@ public class ColorParam extends AbstractFilterParam {
         color = ((CState) state).color;
     }
 
+    @Override
+    public Object getParamValue() {
+        return color;
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s', color = '%s']",
+                getClass().getSimpleName(), getName(), color);
+    }
+
     private static class CState implements ParamState<CState> {
         private final Color color;
 
@@ -132,12 +143,6 @@ public class ColorParam extends AbstractFilterParam {
             return new CState(ColorUtils.interpolateInRGB(
                     color, endState.color, (float) progress));
         }
-    }
-
-    @Override
-    public String toString() {
-        return format("%s[name = '%s', color = '%s']",
-                getClass().getSimpleName(), getName(), color);
     }
 
     public enum TransparencyPolicy {

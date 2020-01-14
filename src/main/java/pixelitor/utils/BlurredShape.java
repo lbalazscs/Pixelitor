@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.utils;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 import pixelitor.tools.shapes.ShapeType;
+
+import java.awt.geom.Point2D;
 
 /**
  * A shape which is blurred in the sense that a floating point value
@@ -49,33 +51,33 @@ public interface BlurredShape {
         });
     }
 
-    static BlurredShape create(int type, double centerX, double centerY,
+    static BlurredShape create(int type, Point2D center,
                                double innerRadiusX, double innerRadiusY,
                                double outerRadiusX, double outerRadiusY) {
         switch (type) {
             case TYPE_ELLIPSE:
-                return new BlurredEllipse(centerX, centerY,
+                return new BlurredEllipse(center,
                         innerRadiusX, innerRadiusY,
                         outerRadiusX, outerRadiusY);
             case TYPE_RECTANGLE:
-                return new BlurredRectangle(centerX, centerY,
+                return new BlurredRectangle(center,
                         innerRadiusX, innerRadiusY,
                         outerRadiusX, outerRadiusY);
             case TYPE_RECTANGLE2:
-                return BlurredAnyShape
-                        .get(ShapeType.RECTANGLE, centerX, centerY,
-                                innerRadiusX, innerRadiusY,
-                                outerRadiusX, outerRadiusY);
+                return GenericBlurredShape.of(
+                        ShapeType.RECTANGLE, center,
+                        innerRadiusX, innerRadiusY,
+                        outerRadiusX, outerRadiusY);
             case TYPE_HEART:
-                return BlurredAnyShape
-                        .get(ShapeType.HEART, centerX, centerY,
-                                innerRadiusX, innerRadiusY,
-                                outerRadiusX, outerRadiusY);
+                return GenericBlurredShape.of(
+                        ShapeType.HEART, center,
+                        innerRadiusX, innerRadiusY,
+                        outerRadiusX, outerRadiusY);
             case TYPE_DIAMOND:
-                return BlurredAnyShape
-                        .get(ShapeType.DIAMOND, centerX, centerY,
-                                innerRadiusX, innerRadiusY,
-                                outerRadiusX, outerRadiusY);
+                return GenericBlurredShape.of(
+                        ShapeType.DIAMOND, center,
+                        innerRadiusX, innerRadiusY,
+                        outerRadiusX, outerRadiusY);
             default:
                 throw new IllegalStateException();
         }

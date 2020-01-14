@@ -24,9 +24,7 @@ import pixelitor.Build;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.tools.Alt;
-import pixelitor.tools.Ctrl;
-import pixelitor.tools.Shift;
+import pixelitor.tools.KeyModifiers;
 import pixelitor.tools.Tools;
 
 import java.awt.Graphics2D;
@@ -836,25 +834,25 @@ public class PathBuilderTest {
     }
 
     private void press(int x, int y, BuildState state) {
-        press(x, y, Ctrl.NO, Alt.NO, Shift.NO, state);
+        press(x, y, state, KeyModifiers.NONE);
     }
 
     private void ctrlPress(int x, int y, BuildState state) {
-        press(x, y, Ctrl.YES, Alt.NO, Shift.NO, state);
+        press(x, y, state, KeyModifiers.CTRL);
     }
 
     private void altPress(int x, int y, BuildState state) {
-        press(x, y, Ctrl.NO, Alt.YES, Shift.NO, state);
+        press(x, y, state, KeyModifiers.ALT);
     }
 
     private void shiftPress(int x, int y, BuildState state) {
-        press(x, y, Ctrl.NO, Alt.NO, Shift.YES, state);
+        press(x, y, state, KeyModifiers.SHIFT);
     }
 
-    private void press(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
+    private void press(int x, int y, BuildState state, KeyModifiers keys) {
         // go through the event dispatcher
         // because the undo uses its "mouseDown" state
-        TestHelper.press(x, y, ctrl, alt, shift, view);
+        TestHelper.press(x, y, keys, view);
         checkState(state);
         pb.paint(g);
     }
@@ -880,59 +878,59 @@ public class PathBuilderTest {
     }
 
     private void drag(int x, int y, BuildState state) {
-        drag(x, y, Ctrl.NO, Alt.NO, Shift.NO, state);
+        drag(x, y, state, KeyModifiers.NONE);
     }
 
     private void altDrag(int x, int y, BuildState state) {
-        drag(x, y, Ctrl.NO, Alt.YES, Shift.NO, state);
+        drag(x, y, state, KeyModifiers.ALT);
     }
 
     private void shiftDrag(int x, int y, BuildState state) {
-        drag(x, y, Ctrl.NO, Alt.NO, Shift.YES, state);
+        drag(x, y, state, KeyModifiers.SHIFT);
     }
 
-    private void drag(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.drag(x, y, ctrl, alt, shift, view);
+    private void drag(int x, int y, BuildState state, KeyModifiers keys) {
+        TestHelper.drag(x, y, keys, view);
         checkState(state);
         pb.paint(g);
     }
 
     private void release(int x, int y, BuildState state) {
-        release(x, y, Ctrl.NO, Alt.NO, Shift.NO, state);
+        release(x, y, state, KeyModifiers.NONE);
     }
 
     private void shiftRelease(int x, int y, BuildState state) {
-        release(x, y, Ctrl.NO, Alt.NO, Shift.YES, state);
+        release(x, y, state, KeyModifiers.SHIFT);
     }
 
     private void ctrlRelease(int x, int y, BuildState state) {
-        release(x, y, Ctrl.YES, Alt.NO, Shift.NO, state);
+        release(x, y, state, KeyModifiers.CTRL);
     }
 
-    private void release(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.release(x, y, ctrl, alt, shift, view);
+    private void release(int x, int y, BuildState state, KeyModifiers keys) {
+        TestHelper.release(x, y, keys, view);
         checkState(state);
         pb.paint(g);
     }
 
     private void move(int x, int y, BuildState state) {
-        move(x, y, Ctrl.NO, Alt.NO, Shift.NO, state);
+        move(x, y, state, KeyModifiers.NONE);
     }
 
     private void ctrlMove(int x, int y, BuildState state) {
-        move(x, y, Ctrl.YES, Alt.NO, Shift.NO, state);
+        move(x, y, state, KeyModifiers.CTRL);
     }
 
     private void altMove(int x, int y, BuildState state) {
-        move(x, y, Ctrl.NO, Alt.YES, Shift.NO, state);
+        move(x, y, state, KeyModifiers.ALT);
     }
 
     private void shiftMove(int x, int y, BuildState state) {
-        move(x, y, Ctrl.NO, Alt.NO, Shift.YES, state);
+        move(x, y, state, KeyModifiers.SHIFT);
     }
 
-    private void move(int x, int y, Ctrl ctrl, Alt alt, Shift shift, BuildState state) {
-        TestHelper.move(x, y, ctrl, alt, shift, view);
+    private void move(int x, int y, BuildState state, KeyModifiers keys) {
+        TestHelper.move(x, y, keys, view);
         checkState(state);
         pb.paint(g);
     }

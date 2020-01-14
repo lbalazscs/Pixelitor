@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ public enum BasicStrokeJoin {
     BEVEL("Bevel", JOIN_BEVEL),
     MITER("Miter", JOIN_MITER);
 
+    public static final String NAME = "Corner Join";
     private final int value;
     private final String guiName;
 
@@ -47,7 +48,7 @@ public enum BasicStrokeJoin {
         return guiName;
     }
 
-    public static EnumParam<BasicStrokeJoin> asParam(String name) {
-        return new EnumParam<>(name, BasicStrokeJoin.class);
+    public static EnumParam<BasicStrokeJoin> asParam() {
+        return new EnumParam<>(NAME, BasicStrokeJoin.class);
     }
 }

@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.utils.VisibleForTesting;
+
 import java.awt.Rectangle;
 
 /**
@@ -64,7 +66,21 @@ public interface FilterParam extends FilterSetting, Resettable {
      * Whether a filter parameter was configured to be
      * affected when the user presses "Randomize"
      */
-    boolean ignoresRandomize();
+    boolean allowRandomize();
+
+    /**
+     * Override the randomize policy
+     */
+    @VisibleForTesting
+    void setRandomizePolicy(RandomizePolicy policy);
 
     void setToolTip(String tip);
+
+    /**
+     * Returns the parameter value.
+     * The return type can't be more specific than Object,
+     * but this is still useful for testing.
+     */
+    @VisibleForTesting
+    Object getParamValue();
 }

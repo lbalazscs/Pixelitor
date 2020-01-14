@@ -17,7 +17,6 @@
 
 package pixelitor.tools.shapes;
 
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
@@ -335,12 +334,11 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g, Canvas canvas, View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g, Composition comp,
                                AffineTransform imageTransform) {
         if (state == INITIAL_DRAG) {
             // paint the drag display for the initial drag
-            super.paintOverImage(g, canvas, view, componentTransform, imageTransform);
+            super.paintOverImage(g, comp, imageTransform);
         } else if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;

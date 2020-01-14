@@ -68,7 +68,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         trigger = false;
         setValue(Rnd.createRandomString(15));
         trigger = true;
@@ -106,13 +106,18 @@ public class TextParam extends AbstractFilterParam {
         throw new UnsupportedOperationException();
     }
 
+    public boolean isTrigger() {
+        return trigger;
+    }
+
+    @Override
+    public Object getParamValue() {
+        return getValue();
+    }
+
     @Override
     public String toString() {
         return format("%s[name = '%s', text = '%s']",
                 getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
-    }
-
-    public boolean isTrigger() {
-        return trigger;
     }
 }

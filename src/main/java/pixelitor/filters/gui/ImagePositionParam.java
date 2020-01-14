@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 import com.jhlabs.image.ImageMath;
 
 import javax.swing.*;
+import java.awt.geom.Point2D;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -75,7 +76,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void randomize() {
+    protected void doRandomize() {
         float rx = (float) Math.random();
         float ry = (float) Math.random();
 
@@ -135,6 +136,17 @@ public class ImagePositionParam extends AbstractFilterParam {
         relativeY = (float) s.relativeY;
     }
 
+    @Override
+    public Object getParamValue() {
+        return new Point2D.Float(getRelativeX(), getRelativeY());
+    }
+
+    @Override
+    public String toString() {
+        return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
+                getClass().getSimpleName(), getName(), relativeX, relativeY);
+    }
+
     private static class IPPState implements ParamState<IPPState> {
         private final double relativeX;
         private final double relativeY;
@@ -150,11 +162,5 @@ public class ImagePositionParam extends AbstractFilterParam {
             double interpolatedY = ImageMath.lerp(progress, relativeY, endState.relativeY);
             return new IPPState(interpolatedX, interpolatedY);
         }
-    }
-
-    @Override
-    public String toString() {
-        return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
-                getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 }

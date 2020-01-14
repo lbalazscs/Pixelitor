@@ -316,13 +316,13 @@ public class CropTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Canvas canvas, View view,
-                               AffineTransform componentTransform,
+    public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
         if (ended) {
             return;
         }
-        if (view != OpenImages.getActiveView()) {
+        View view = comp.getView();
+        if (!view.isActive()) {
             return;
         }
         PRectangle cropRect = getCropRect();
@@ -331,11 +331,13 @@ public class CropTool extends DragTool {
         }
 
         // TODO done for compatibility. The whole code should be re-evaluated
+        AffineTransform componentTransform = g2.getTransform();
         g2.setTransform(imageTransform);
 
         // paint the semi-transparent dark area outside the crop rectangle
         Shape origClip = g2.getClip();  // save for later use
 
+        Canvas canvas = comp.getCanvas();
         Rectangle canvasBounds = canvas.getImBounds();
 
         // Similar to ClipStrategy.FULL, but we need some intermediary variables
