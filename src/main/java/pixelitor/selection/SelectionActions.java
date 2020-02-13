@@ -31,8 +31,8 @@ import pixelitor.menus.view.ShowHideSelectionAction;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
@@ -98,14 +98,14 @@ public final class SelectionActions {
 
     static {
         pasteSel.setEnabled(false);
-        OpenImages.addActivationListener(new CompActivationListener() {
+        OpenImages.addActivationListener(new ViewActivationListener() {
             @Override
-            public void compActivated(View oldView, View newView) {
+            public void viewActivated(View oldView, View newView) {
                 pasteSel.setEnabled(copiedSelShape != null);
             }
 
             @Override
-            public void allCompsClosed() {
+            public void allViewsClosed() {
                 pasteSel.setEnabled(false);
             }
         });

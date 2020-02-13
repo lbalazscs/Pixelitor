@@ -19,8 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -30,7 +30,7 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 /**
  * An Action that adds a new layer to the active composition
  */
-public class AddNewLayerAction extends AbstractAction implements CompActivationListener {
+public class AddNewLayerAction extends AbstractAction implements ViewActivationListener {
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
 
     private AddNewLayerAction() {
@@ -50,12 +50,12 @@ public class AddNewLayerAction extends AbstractAction implements CompActivationL
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

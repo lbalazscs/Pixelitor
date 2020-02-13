@@ -19,8 +19,8 @@ package pixelitor.gui;
 
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -41,7 +41,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 /**
  * The panel that shows the histograms
  */
-public class HistogramsPanel extends JPanel implements CompActivationListener {
+public class HistogramsPanel extends JPanel implements ViewActivationListener {
     public static final HistogramsPanel INSTANCE = new HistogramsPanel();
     private static final String TYPE_LOGARITHMIC = "Logarithmic";
     private static final String TYPE_LINEAR = "Linear";
@@ -52,6 +52,7 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
     private static final int HISTOGRAM_RESOLUTION = 256;
 
     private boolean logarithmic;
+    private final JComboBox<String> typeChooser;
 
     private HistogramsPanel() {
         setLayout(new BorderLayout());
@@ -71,26 +72,25 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
         painters.add(green);
         painters.add(blue);
 
-        JComboBox<String> typeChooser = new JComboBox<>(
+        typeChooser = new JComboBox<>(
                 new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
         JPanel northPanel = new JPanel(new FlowLayout(LEFT));
         northPanel.add(new JLabel("Type:"));
         northPanel.add(typeChooser);
         add(northPanel, NORTH);
-        typeChooser.addActionListener(e ->
-                typeChanged((String) typeChooser.getSelectedItem()));
+        typeChooser.addActionListener(e -> typeChanged());
 
         setBorder(createTitledBorder("Histograms"));
         JScrollPane scrollPane = new JScrollPane(painters);
         add(scrollPane, CENTER);
     }
 
-    private void typeChanged(String selected) {
-        boolean isLogarithmicNow = selected.equals(TYPE_LOGARITHMIC);
+    private void typeChanged() {
+        String newType = (String) typeChooser.getSelectedItem();
+        boolean isLogarithmicNow = newType.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            OpenImages.getActiveCompOpt().ifPresent(
-                    this::updateFrom);
+            OpenImages.onActiveComp(this::updateFrom);
         }
     }
 
@@ -99,15 +99,15 @@ public class HistogramsPanel extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void allCompsClosed() {
-        red.allCompsClosed();
-        green.allCompsClosed();
-        blue.allCompsClosed();
+    public void allViewsClosed() {
+        red.allViewsClosed();
+        green.allViewsClosed();
+        blue.allViewsClosed();
         repaint();
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         updateFrom(newView.getComp());
     }
 

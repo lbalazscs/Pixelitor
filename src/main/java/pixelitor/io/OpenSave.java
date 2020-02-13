@@ -184,15 +184,7 @@ public class OpenSave {
 
         try {
             if (format == OutputFormat.JPG) {
-                JpegSettings settings;
-                if (saveSettings instanceof JpegSettings) {
-                    settings = (JpegSettings) saveSettings;
-                } else {
-                    settings = JpegSettings.DEFAULTS;
-                    settings.setFile(saveSettings.getFile());
-                    settings.setOutputFormat(saveSettings.getOutputFormat());
-                }
-                JpegOutput.writeJPG(image, selectedFile, settings);
+                JpegOutput.save(image, saveSettings, selectedFile);
             } else {
                 TrackedIO.write(image, format.toString(), selectedFile);
             }

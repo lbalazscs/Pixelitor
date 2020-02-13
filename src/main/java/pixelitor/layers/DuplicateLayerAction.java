@@ -19,8 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -29,7 +29,7 @@ import java.awt.event.ActionEvent;
  * An Action that duplicates the active layer of the active composition
  */
 public class DuplicateLayerAction extends AbstractAction
-    implements CompActivationListener {
+        implements ViewActivationListener {
 
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
@@ -47,12 +47,12 @@ public class DuplicateLayerAction extends AbstractAction
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

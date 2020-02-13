@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 
 /**
@@ -143,8 +144,8 @@ public class Resize implements CompAction {
         newComp.getView().revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();
-        Messages.showInStatusBar("Image resized to "
-                + canvasTargetWidth + " x " + canvasTargetHeight + " pixels.");
+        Messages.showInStatusBar(format("<html><b>%s</b> was resized to %dx%d pixels.",
+                newComp.getName(), canvasTargetWidth, canvasTargetHeight));
         return newComp;
     }
 

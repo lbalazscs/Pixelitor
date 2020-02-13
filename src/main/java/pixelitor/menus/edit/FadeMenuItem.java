@@ -22,7 +22,7 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.FilterAction;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -31,7 +31,7 @@ import javax.swing.event.UndoableEditListener;
 /**
  * The Fade menu item. It is enabled only if fading is possible.
  */
-public class FadeMenuItem extends JMenuItem implements UndoableEditListener, CompActivationListener {
+public class FadeMenuItem extends JMenuItem implements UndoableEditListener, ViewActivationListener {
     public static final FadeMenuItem INSTANCE = new FadeMenuItem();
 
     private FadeMenuItem() {
@@ -58,12 +58,12 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Com
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(false);
 
 // the following should be very slightly better, but goes into a complex territory:

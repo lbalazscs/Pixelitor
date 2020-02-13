@@ -21,7 +21,7 @@ import pixelitor.Build;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
 /**
  * The part of the GUI that manages the layers of a composition.
  */
-public class LayersContainer extends JPanel implements CompActivationListener {
+public class LayersContainer extends JPanel implements ViewActivationListener {
     private LayersPanel layersPanel;
     private final JScrollPane scrollPane;
 
@@ -94,12 +94,12 @@ public class LayersContainer extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         scrollPane.setViewportView(null);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         // the layers pane of the CompositionView is set in
         // CompositionView.onActivation()
     }

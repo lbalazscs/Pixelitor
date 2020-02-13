@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,19 @@ public final class JpegOutput {
     private JpegOutput() {
     }
 
-    public static void writeJPG(BufferedImage image, File file, JpegSettings settings) throws IOException {
+    public static void save(BufferedImage image, SaveSettings saveSettings, File selectedFile) throws IOException {
+        JpegSettings settings;
+        if (saveSettings instanceof JpegSettings) {
+            settings = (JpegSettings) saveSettings;
+        } else {
+            settings = JpegSettings.DEFAULTS;
+            settings.setFile(saveSettings.getFile());
+            settings.setOutputFormat(saveSettings.getOutputFormat());
+        }
+        write(image, selectedFile, settings);
+    }
+
+    private static void write(BufferedImage image, File file, JpegSettings settings) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         if (ios == null) {
             TrackedIO.throwNoIOSErrorFor(file);

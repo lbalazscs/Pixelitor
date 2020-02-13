@@ -22,7 +22,7 @@ import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import static pixelitor.OpenImages.onActiveLayer;
 
@@ -30,7 +30,7 @@ import static pixelitor.OpenImages.onActiveLayer;
  * The GUI selector for the opacity and blending mode of the layers
  */
 public class LayerBlendingModePanel extends BlendingModePanel
-    implements CompActivationListener, GlobalLayerChangeListener {
+        implements ViewActivationListener, GlobalLayerChangeListener {
 
     private boolean userInteractionChange = true;
 
@@ -72,12 +72,12 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 

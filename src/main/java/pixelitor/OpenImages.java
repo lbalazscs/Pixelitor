@@ -39,9 +39,9 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
 
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -69,7 +69,7 @@ import static pixelitor.gui.ImageArea.Mode.FRAMES;
 public class OpenImages {
     private static final List<View> views = new ArrayList<>();
     private static View activeView;
-    private static final List<CompActivationListener> activationListeners
+    private static final List<ViewActivationListener> activationListeners
             = new ArrayList<>();
 
     public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
@@ -136,6 +136,8 @@ public class OpenImages {
         if (activeView != null) {
             return function.apply(activeView.getComp());
         }
+
+        // there is no open image
         return null;
     }
 
@@ -209,8 +211,7 @@ public class OpenImages {
 
     public static Drawable getActiveDrawableOrThrow() {
         if (activeView != null) {
-            var comp = activeView.getComp();
-            return comp.getActiveDrawableOrThrow();
+            return activeView.getComp().getActiveDrawableOrThrow();
         }
 
         throw new IllegalStateException("no active image");
@@ -273,17 +274,17 @@ public class OpenImages {
         }
     }
 
-    public static void addActivationListener(CompActivationListener listener) {
+    public static void addActivationListener(ViewActivationListener listener) {
         activationListeners.add(listener);
     }
 
-    public static void removeActivationListener(CompActivationListener listener) {
+    public static void removeActivationListener(ViewActivationListener listener) {
         activationListeners.remove(listener);
     }
 
     private static void onAllImagesClosed() {
         setActiveView(null, false);
-        activationListeners.forEach(CompActivationListener::allCompsClosed);
+        activationListeners.forEach(ViewActivationListener::allViewsClosed);
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
@@ -306,8 +307,8 @@ public class OpenImages {
         SelectionActions.setEnabled(comp.hasSelection(), comp);
         view.activateUI(true);
 
-        for (CompActivationListener listener : activationListeners) {
-            listener.compActivated(oldView, view);
+        for (ViewActivationListener listener : activationListeners) {
+            listener.viewActivated(oldView, view);
         }
 
         Layer layer = comp.getActiveLayer();

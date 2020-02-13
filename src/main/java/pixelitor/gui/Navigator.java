@@ -25,9 +25,9 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.BasicStroke;
@@ -50,14 +50,17 @@ import java.awt.event.MouseMotionListener;
  * The navigator component that allows the user to pan a zoomed-in image.
  */
 public class Navigator extends JComponent
-    implements MouseListener, MouseMotionListener, CompActivationListener {
+        implements MouseListener, MouseMotionListener, ViewActivationListener {
 
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter
             = ImageUtils.createCheckerboardPainter();
 
-    private View view; // can be null if all images are closed
+    // The navigated active view.
+    // Null if all images are closed.
+    private View view;
+
     private boolean dragging = false;
     private double imgScalingRatio;
     private Rectangle viewBoxRect;
@@ -76,8 +79,8 @@ public class Navigator extends JComponent
     private int preferredWidth;
     private int preferredHeight;
 
-    // it not null, the scaling factor should be calculated
-    // based on this instead of the navigator size
+    // if not null, the scaling factor is calculated based on this
+    // explicitly given zoom level instead of the navigator size
     private ZoomLevel exactZoom = null;
 
     private Navigator(View view) {
@@ -147,8 +150,7 @@ public class Navigator extends JComponent
     }
 
     private void addNavigatorResizedListener() {
-        // if the navigator is resized, then the size calculations
-        // have to be refreshed
+        // update size calculations if the navigator is resized
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -198,12 +200,12 @@ public class Navigator extends JComponent
     }
 
     public void recalculateSize(View view,
-                                boolean newCV,
-                                boolean cvSizeChanged,
+                                boolean newView,
+                                boolean viewSizeChanged,
                                 boolean navigatorResized) {
-        assert newCV || cvSizeChanged || navigatorResized : "why did you call me?";
+        assert newView || viewSizeChanged || navigatorResized : "why did you call me?";
 
-        if (newCV) {
+        if (newView) {
             if (this.view != null) {
                 releaseImage();
             }
@@ -219,9 +221,9 @@ public class Navigator extends JComponent
             }
         }
 
-        if (newCV) {
+        if (newView) {
             recalculateScaling(view, DEFAULT_NAVIGATOR_SIZE, DEFAULT_NAVIGATOR_SIZE);
-        } else if (cvSizeChanged || navigatorResized) {
+        } else if (viewSizeChanged || navigatorResized) {
             recalculateScaling(view, getWidth(), getHeight());
         } else {
             throw new IllegalStateException();
@@ -232,18 +234,19 @@ public class Navigator extends JComponent
 
         updateViewBoxPosition();
 
-        if (newCV) {
+        if (newView) {
             view.setNavigator(this);
             scrollPane.getHorizontalScrollBar().addAdjustmentListener(adjListener);
             scrollPane.getVerticalScrollBar().addAdjustmentListener(adjListener);
         }
 
-        if (cvSizeChanged) {
+        if (viewSizeChanged) {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window != null) {
                 window.pack();
             }
         }
+
         repaint();
     }
 
@@ -287,12 +290,12 @@ public class Navigator extends JComponent
         double scaleX = (double) viewWidth / thumbWidth;
         double scaleY = (double) viewHeight / thumbHeight;
 
-        int bigX = (int) (viewBoxRect.x * scaleX);
-        int bigY = (int) (viewBoxRect.y * scaleY);
-        int bigWidth = (int) (viewBoxRect.width * scaleX);
-        int bigHeight = (int) (viewBoxRect.height * scaleY);
+        int x = (int) (viewBoxRect.x * scaleX);
+        int y = (int) (viewBoxRect.y * scaleY);
+        int width = (int) (viewBoxRect.width * scaleX);
+        int height = (int) (viewBoxRect.height * scaleY);
 
-        view.scrollRectToVisible(new Rectangle(bigX, bigY, bigWidth, bigHeight));
+        view.scrollRectToVisible(new Rectangle(x, y, width, height));
     }
 
     @Override
@@ -414,10 +417,10 @@ public class Navigator extends JComponent
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        resetCursor(e.getX(), e.getY());
+        setCursorAt(e.getX(), e.getY());
     }
 
-    private void resetCursor(int x, int y) {
+    private void setCursorAt(int x, int y) {
         if (viewBoxRect.contains(x, y)) {
             setCursor(Cursors.HAND);
         } else {
@@ -426,18 +429,16 @@ public class Navigator extends JComponent
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         releaseImage();
         repaint();
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         recalculateSize(newView, true, true, false);
     }
 
-    // called when the dialog is closed - then this
-    // navigator instance is no longer needed
     private void dispose() {
         OpenImages.removeActivationListener(this);
     }
@@ -447,5 +448,3 @@ public class Navigator extends JComponent
         return new Dimension(preferredWidth, preferredHeight);
     }
 }
-
-

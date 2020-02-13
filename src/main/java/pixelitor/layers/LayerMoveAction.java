@@ -21,8 +21,8 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
  * up or down in the layer stack
  */
 public class LayerMoveAction extends AbstractAction
-    implements CompActivationListener, GlobalLayerChangeListener {
+        implements ViewActivationListener, GlobalLayerChangeListener {
 
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
@@ -66,12 +66,12 @@ public class LayerMoveAction extends AbstractAction
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         enableDisable(newView.getComp());
     }
 

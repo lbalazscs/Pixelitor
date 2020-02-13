@@ -22,7 +22,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
@@ -32,7 +32,7 @@ import javax.swing.event.UndoableEditListener;
  * A menu item that is enabled only when the last edit can be repeated.
  * Currently only the filters can be repeated.
  */
-public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, CompActivationListener {
+public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ViewActivationListener {
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
@@ -55,12 +55,12 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, C
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         var comp = newView.getComp();
         onNewComp(comp);
     }

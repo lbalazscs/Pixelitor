@@ -21,8 +21,8 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -38,8 +38,8 @@ import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
  * to the active layer of the active composition.
  */
 public class AddLayerMaskAction extends AbstractAction
-    implements CompActivationListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
-    
+        implements ViewActivationListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
@@ -79,12 +79,12 @@ public class AddLayerMaskAction extends AbstractAction
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         boolean hasMask = newView.getComp().getActiveLayer().hasMask();
         setEnabled(!hasMask);
     }

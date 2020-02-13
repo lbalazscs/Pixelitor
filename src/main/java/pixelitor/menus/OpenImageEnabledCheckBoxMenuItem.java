@@ -19,14 +19,14 @@ package pixelitor.menus;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 
 /**
  * A JCheckBoxMenuItem that becomes enabled only if there is an open image
  */
-public class OpenImageEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implements CompActivationListener {
+public class OpenImageEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implements ViewActivationListener {
     public OpenImageEnabledCheckBoxMenuItem(String name) {
         super(name);
         setName(name);
@@ -35,12 +35,12 @@ public class OpenImageEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implemen
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 }

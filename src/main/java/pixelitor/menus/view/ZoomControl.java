@@ -19,7 +19,7 @@ package pixelitor.menus.view;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -35,7 +35,7 @@ import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
 /**
  * The zoom widget in the status bar
  */
-public class ZoomControl extends JPanel implements CompActivationListener {
+public class ZoomControl extends JPanel implements ViewActivationListener {
 
     public static final ZoomControl INSTANCE = new ZoomControl();
 
@@ -139,12 +139,12 @@ public class ZoomControl extends JPanel implements CompActivationListener {
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setLookIfNoImage();
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setToNewZoom(newView.getZoomLevel());
     }
 

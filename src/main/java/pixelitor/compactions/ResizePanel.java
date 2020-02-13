@@ -77,7 +77,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         newHeightInPercent = 100.0;
 
         String[] items = {"pixels", "percent"};
-        ComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>(items);
+        var sharedComboBoxModel = new DefaultComboBoxModel<>(items);
         var p = new JPanel();
         p.setLayout(new GridBagLayout());
 
@@ -86,23 +86,23 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         widthTF = new JTextField(NR_OF_COLUMNS);
         widthTF.setName("widthTF");
         widthTF.addKeyListener(this);
-        widthTF.setText(String.valueOf(oldWidth));
-        pixelPercentChooser1 = new JComboBox<>(comboBoxModel);
-        JLayer<JTextField> widthLayer = new JLayer<>(widthTF,
+        updateWidthTextPixels();
+        pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
+        var widthLayer = new JLayer<>(widthTF,
                 new TFValidationLayerUI(widthValidator));
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
         heightTF = new JTextField(NR_OF_COLUMNS);
         heightTF.setName("heightTF");
-        heightTF.setText(String.valueOf(oldHeight));
+        updateHeightTextPixels();
         heightTF.addKeyListener(this);
-        JComboBox<String> pixelPercentChooser2 = new JComboBox<>(comboBoxModel);
-        JLayer<JTextField> heightLayer = new JLayer<>(heightTF,
+        var pixelPercentChooser2 = new JComboBox<>(sharedComboBoxModel);
+        var heightLayer = new JLayer<>(heightTF,
                 new TFValidationLayerUI(heightValidator));
         gbh.addLabelAndTwoControls("Height:", heightLayer, pixelPercentChooser2);
 
         titledBorder = BorderFactory.createTitledBorder("");
-        updateInfo();
+        updateStatusLine();
         p.setBorder(titledBorder);
         Box verticalBox = Box.createVerticalBox();
         verticalBox.add(p);
@@ -119,17 +119,6 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         pixelPercentChooser2.addItemListener(this);
 
         constrainProportionsCB.addItemListener(this);
-    }
-
-    private void updateInfo() {
-        String oldSize = oldWidth + "\u00d7" + oldHeight + " \u2794 ";
-        if (newWidth > 0 && newHeight > 0) {
-            titledBorder.setTitle(oldSize + newWidth + "\u00d7" + newHeight);
-        } else {
-            titledBorder.setTitle(oldSize + "??");
-        }
-
-        repaint();
     }
 
     private boolean unitsArePixels() {
@@ -163,9 +152,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
             newHeight = (int) (newWidth / origProportion);
             newHeightInPercent = newWidthInPercent;
             if (unitsArePixels()) {
-                heightTF.setText(String.valueOf(newHeight));
+                updateHeightTextPixels();
             } else {
-                heightTF.setText(doubleFormatter.format(newHeightInPercent));
+                updateHeightTextPercent();
             }
         }
     }
@@ -174,13 +163,13 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (unitsArePixels()) {
             widthValidator.setPixels(true);
             heightValidator.setPixels(true);
-            widthTF.setText(String.valueOf(newWidth));
-            heightTF.setText(String.valueOf(newHeight));
+            updateWidthTextPixels();
+            updateHeightTextPixels();
         } else {
             widthValidator.setPixels(false);
             heightValidator.setPixels(false);
-            widthTF.setText(doubleFormatter.format(newWidthInPercent));
-            heightTF.setText(doubleFormatter.format(newHeightInPercent));
+            updateWidthTextPercent();
+            updateHeightTextPercent();
         }
     }
 
@@ -196,10 +185,10 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     public void keyReleased(KeyEvent e) {
         if (e.getSource() == widthTF) {
             keyReleasedInWidthTF();
-            updateInfo();
+            updateStatusLine();
         } else if (e.getSource() == heightTF) {
             keyReleasedInHeightTF();
-            updateInfo();
+            updateStatusLine();
         }
     }
 
@@ -213,12 +202,12 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     if (newHeight == 0) {
                         newHeight = 1;
                     }
-                    heightTF.setText(String.valueOf(newHeight));
+                    updateHeightTextPixels();
 //                    newHeightInPercent = ((double) newHeight) * 100 / oldHeight;
                     newHeightInPercent = newWidthInPercent;
                 }
             } catch (NumberFormatException ex) {
-                resetWidth();
+                resetWidthPixels();
             }
         } else { // percent was selected
             try {
@@ -227,7 +216,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 if (constrainProportions()) {
                     newHeight = (int) (newWidth / origProportion);
                     newHeightInPercent = newWidthInPercent;
-                    heightTF.setText(doubleFormatter.format(newHeightInPercent));
+                    updateHeightTextPercent();
                 }
             } catch (NumberFormatException e) {
                 resetWidthInPercent();
@@ -235,11 +224,11 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         }
     }
 
-    private void resetWidth() {
+    private void resetWidthPixels() {
         if (widthIsEmpty()) {
             newWidth = -1;
         } else if (newWidth > 0) {
-            widthTF.setText(String.valueOf(newWidth));
+            updateWidthTextPixels();
         }
     }
 
@@ -247,7 +236,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (widthIsEmpty()) {
             newWidth = -1;
         } else if (newWidthInPercent > 0) {
-            widthTF.setText(doubleFormatter.format(newWidthInPercent));
+            updateWidthTextPercent();
         }
     }
 
@@ -261,7 +250,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                     if (newWidth == 0) {
                         newWidth = 1;
                     }
-                    widthTF.setText(String.valueOf(newWidth));
+                    updateWidthTextPixels();
                     newWidthInPercent = newHeightInPercent;
                 }
             } catch (NumberFormatException ex) {
@@ -274,7 +263,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 if (constrainProportions()) {
                     newWidth = (int) (newHeight * origProportion);
                     newWidthInPercent = newHeightInPercent;
-                    widthTF.setText(doubleFormatter.format(newWidthInPercent));
+                    updateWidthTextPercent();
                 }
             } catch (NumberFormatException e) {
                 resetHeightInPercent();
@@ -286,7 +275,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (heightIsEmpty()) {
             newHeight = -1;
         } else if (newHeight > 0) {
-            heightTF.setText(String.valueOf(newHeight)); // reset
+            updateHeightTextPixels();
         }
     }
 
@@ -294,8 +283,35 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         if (heightIsEmpty()) {
             newHeight = -1;
         } else if (newHeightInPercent > 0) {
-            heightTF.setText(doubleFormatter.format(newHeightInPercent));
+            updateHeightTextPercent();
         }
+    }
+
+    private void updateWidthTextPixels() {
+        widthTF.setText(String.valueOf(newWidth));
+    }
+
+    private void updateHeightTextPixels() {
+        heightTF.setText(String.valueOf(newHeight));
+    }
+
+    private void updateWidthTextPercent() {
+        widthTF.setText(doubleFormatter.format(newWidthInPercent));
+    }
+
+    private void updateHeightTextPercent() {
+        heightTF.setText(doubleFormatter.format(newHeightInPercent));
+    }
+
+    private void updateStatusLine() {
+        String oldSize = oldWidth + "\u00d7" + oldHeight + " \u2794 ";
+        if (newWidth > 0 && newHeight > 0) {
+            titledBorder.setTitle(oldSize + newWidth + "\u00d7" + newHeight);
+        } else {
+            titledBorder.setTitle(oldSize + "??");
+        }
+
+        repaint();
     }
 
     @Override

@@ -21,8 +21,8 @@ import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
 import pixelitor.filters.Invert;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Icons;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,7 +31,7 @@ import java.awt.event.ActionEvent;
  * An Action that adds a new adjustment layer to the active composition.
  */
 public class AddAdjLayerAction extends AbstractAction
-    implements CompActivationListener {
+        implements ViewActivationListener {
 
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
@@ -54,12 +54,12 @@ public class AddAdjLayerAction extends AbstractAction
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

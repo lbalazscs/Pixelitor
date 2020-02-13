@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,17 +20,17 @@ package pixelitor.utils;
 import pixelitor.gui.View;
 
 /**
- * Listener for events related to changing the active composition
+ * Listener for events related to changing the active {@link View}
  */
-public interface CompActivationListener {
+public interface ViewActivationListener {
     /**
      * Called when the active image changes either because the user
      * switches to another image or because a new image was opened.
      */
-    void compActivated(View oldView, View newView);
+    void viewActivated(View oldView, View newView);
 
     /**
      * Called when the user has closed all images
      */
-    void allCompsClosed();
+    void allViewsClosed();
 }

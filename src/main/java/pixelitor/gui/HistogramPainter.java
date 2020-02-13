@@ -53,7 +53,7 @@ public class HistogramPainter extends JComponent {
         }
     }
 
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         maxValue = 0;
     }
 

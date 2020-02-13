@@ -31,9 +31,9 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.AppPreferences;
-import pixelitor.utils.CompActivationListener;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.VisibleForTesting;
 
 import java.awt.event.MouseEvent;
@@ -62,18 +62,17 @@ public class Tools {
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
 
-    // leave it set to null so that the first changeTo initializes the default tool
     public static Tool currentTool;
 
     static {
-        OpenImages.addActivationListener(new CompActivationListener() {
+        OpenImages.addActivationListener(new ViewActivationListener() {
             @Override
-            public void compActivated(View oldView, View newView) {
+            public void viewActivated(View oldView, View newView) {
                 currentTool.compActivated(oldView, newView);
             }
 
             @Override
-            public void allCompsClosed() {
+            public void allViewsClosed() {
                 currentTool.allCompsClosed();
             }
         });
@@ -256,8 +255,9 @@ public class Tools {
 
         public static void toolChanged(Tool oldTool, Tool newTool) {
             if (mouseDown) {
-                // We switched tools via keyboard in the middle of a drag
-                // In order to avoid broken internal tool states,
+                // Tools were switched via keyboard hotkey in the
+                // middle of a mouse drag.
+                // In order to avoid inconsistent tool states,
                 // simulate a mouse release for the old tool...
                 oldTool.handlerChain.handleMouseReleased(lastEvent);
 

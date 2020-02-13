@@ -18,14 +18,14 @@ package pixelitor.menus;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 
 /**
  * A menu item that is enabled only if there is an open image
  */
-public class OpenImageEnabledMenuItem extends JMenuItem implements CompActivationListener {
+public class OpenImageEnabledMenuItem extends JMenuItem implements ViewActivationListener {
     public OpenImageEnabledMenuItem(Action a) {
         super(a);
         setEnabled(false);
@@ -33,12 +33,12 @@ public class OpenImageEnabledMenuItem extends JMenuItem implements CompActivatio
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         setEnabled(false);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         setEnabled(true);
     }
 }

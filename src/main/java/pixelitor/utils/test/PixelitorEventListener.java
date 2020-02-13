@@ -25,7 +25,7 @@ import pixelitor.gui.View;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
 import pixelitor.layers.Layer;
-import pixelitor.utils.CompActivationListener;
+import pixelitor.utils.ViewActivationListener;
 
 import static java.lang.String.format;
 
@@ -34,7 +34,7 @@ import static java.lang.String.format;
  * Listens to changes and generates events.
  */
 public class PixelitorEventListener implements GlobalLayerChangeListener,
-    GlobalLayerMaskChangeListener, CompActivationListener {
+        GlobalLayerMaskChangeListener, ViewActivationListener {
 
     public PixelitorEventListener() {
         if (Build.isFinal()) {
@@ -76,15 +76,15 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         Events.postListenerEvent("allCompsClosed", null, null);
     }
 
     @Override
-    public void compActivated(View oldView, View newView) {
+    public void viewActivated(View oldView, View newView) {
         String oldCVName = oldView == null ? "null" : oldView.getName();
         Events.postListenerEvent(format("compActivated %s => %s",
-            oldCVName, newView.getName()),
-            newView.getComp(), null);
+                oldCVName, newView.getName()),
+                newView.getComp(), null);
     }
 }
