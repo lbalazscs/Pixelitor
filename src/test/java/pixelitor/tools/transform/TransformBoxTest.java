@@ -17,8 +17,9 @@
 
 package pixelitor.tools.transform;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -30,7 +31,6 @@ import java.awt.geom.Point2D;
 import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
 import static java.awt.event.MouseEvent.MOUSE_PRESSED;
 import static java.awt.event.MouseEvent.MOUSE_RELEASED;
-import static org.junit.Assert.assertEquals;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
@@ -38,14 +38,14 @@ public class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
     private View view;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         var comp = TestHelper.createMockComposition();
         view = comp.getView();
     }
 
     @Test
-    public void moveNWFromInitialState() {
+    void moveNWFromInitialState() {
         var box = new TransformBox(originalRect,
                 view, at -> {});
         CornerHandle nw = box.getNW();
@@ -90,7 +90,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void moveSEFromInitialState() {
+    void moveSEFromInitialState() {
         var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
@@ -134,7 +134,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void pureTranslation() {
+    void pureTranslation() {
         var box = new TransformBox(originalRect,
                 view, at -> {});
         CornerHandle nw = box.getNW();
@@ -162,12 +162,12 @@ public class TransformBoxTest {
 
         var at = box.calcImTransform();
         // should be a pure (30, 20) translation and nothing else
-        assertEquals(AffineTransform.TYPE_TRANSLATION, at.getType());
+        Assertions.assertEquals(AffineTransform.TYPE_TRANSLATION, at.getType());
         checkTransform(at, 100, 100, 130, 120);
     }
 
     @Test
-    public void pureScaling() {
+    void pureScaling() {
         var box = new TransformBox(originalRect,
                 view, at -> {});
         CornerHandle nw = box.getNW();
@@ -200,7 +200,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void pureRotation() {
+    void pureRotation() {
         var box = new TransformBox(originalRect,
                 view, at -> {});
         CornerHandle nw = box.getNW();
@@ -255,7 +255,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void testCursorAfterTurnedInsideOut() {
+    void cursorAfterTurnedInsideOut() {
         var box = new TransformBox(originalRect,
                 view, at -> {});
         CornerHandle nw = box.getNW();
@@ -328,7 +328,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void testImageSpaceRotation() throws NoninvertibleTransformException {
+    void imageSpaceRotation() throws NoninvertibleTransformException {
         var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
@@ -385,7 +385,7 @@ public class TransformBoxTest {
     }
 
     @Test
-    public void test_calcAngleCursorOffset() {
+    void calcAngleCursorOffset() {
         checkOffset(0, 0);
         checkOffset(20, 0);
         checkOffset(40, 1);
@@ -397,7 +397,7 @@ public class TransformBoxTest {
 
     private static void checkOffset(int angleDegrees, int expectedOffset) {
         int offset = TransformBox.calcCursorOffset(angleDegrees);
-        assertEquals(expectedOffset, offset);
+        Assertions.assertEquals(expectedOffset, offset);
     }
 
     private static void checkTransform(AffineTransform at, double startX, double startY,
@@ -431,15 +431,15 @@ public class TransformBoxTest {
         checkTransform(at, bottomRightStart, bottomRightExpected);
     }
 
-    private boolean press(TransformBox box, int x, int y) {
-        return box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, view));
+    private void press(TransformBox box, int x, int y) {
+        box.processMousePressed(TestHelper.createPEvent(x, y, MOUSE_PRESSED, view));
     }
 
-    private boolean drag(TransformBox box, int x, int y) {
-        return box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, view));
+    private void drag(TransformBox box, int x, int y) {
+        box.processMouseDragged(TestHelper.createPEvent(x, y, MOUSE_DRAGGED, view));
     }
 
-    private boolean release(TransformBox box, int x, int y) {
-        return box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, view));
+    private void release(TransformBox box, int x, int y) {
+        box.processMouseReleased(TestHelper.createPEvent(x, y, MOUSE_RELEASED, view));
     }
 }

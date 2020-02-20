@@ -95,13 +95,13 @@ public class ToolTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
         TestHelper.setupMockFgBgSelector();
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         PenTool.path = null;
         var comp = TestHelper.create2LayerComposition(true);
         view = comp.getView();
@@ -109,7 +109,7 @@ public class ToolTest {
     }
 
     @After
-    public void tearDown() {
+    public void afterEachTest() {
         tool.toolEnded();
         OpenImages.setActiveView(null, false);
     }

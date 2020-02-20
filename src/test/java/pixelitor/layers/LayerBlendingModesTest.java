@@ -19,8 +19,10 @@ package pixelitor.layers;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
@@ -34,6 +36,7 @@ import java.awt.Font;
 
 import static pixelitor.Composition.fromImage;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.layers.BlendingMode.*;
 import static pixelitor.utils.ImageUtils.create1x1Image;
 
 public class LayerBlendingModesTest {
@@ -49,8 +52,13 @@ public class LayerBlendingModesTest {
     private AdjustmentLayer alwaysUpperColorAdjustment;
     private TextLayer upperColorTextLayer;
 
-    @Before
-    public void setUp() {
+    @BeforeAll
+    static void beforeAllTests() {
+        Build.setUnitTestingMode();
+    }
+
+    @BeforeEach
+    void beforeEachTest() {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
         TestHelper.setupMockViewFor(comp);
 
@@ -69,111 +77,111 @@ public class LayerBlendingModesTest {
     }
 
     @Test
-    public void testNormal() {
-        testBlendingMode(BlendingMode.NORMAL, upperColor);
+    void normal() {
+        testBlendingMode(NORMAL, upperColor);
     }
 
     @Test
-    public void testDarken() {
+    void darken() {
         // MIN(211, 119) = 119
         // MIN(141,  86) = 86
         // MIN(86,  132) = 86
-        testBlendingMode(BlendingMode.DARKEN, new Color(119, 86, 86));
+        testBlendingMode(DARKEN, new Color(119, 86, 86));
     }
 
     @Test
-    public void testMultiply() {
+    void multiply() {
         // 211 * 119 / 255 = 98
         // 141 *  86 / 255 = 48
         //  86 * 132 / 255 = 45
-        testBlendingMode(BlendingMode.MULTIPLY, new Color(98, 48, 45));
+        testBlendingMode(MULTIPLY, new Color(98, 48, 45));
     }
 
     @Test
-    public void testColorBurn() {
-        testBlendingMode(BlendingMode.COLOR_BURN, new Color(161, 0, 0));
+    void colorBurn() {
+        testBlendingMode(COLOR_BURN, new Color(161, 0, 0));
     }
 
     @Test
-    public void testLighten() {
+    void lighten() {
         // MAX(211, 119) = 211
         // MAX(141,  86) = 141
         // MAX(86,  132)  = 132
-        testBlendingMode(BlendingMode.LIGHTEN, new Color(211, 141, 132));
+        testBlendingMode(LIGHTEN, new Color(211, 141, 132));
     }
 
     @Test
-    public void testScreen() {
+    void screen() {
         // 255 - (255 - 211)(255 - 119)/255 = 232
-        testBlendingMode(BlendingMode.SCREEN, new Color(232, 179, 173));
+        testBlendingMode(SCREEN, new Color(232, 179, 173));
     }
 
     @Test
-    public void testColorDodge() {
-        testBlendingMode(BlendingMode.COLOR_DODGE, new Color(255, 213, 178));
+    void colorDodge() {
+        testBlendingMode(COLOR_DODGE, new Color(255, 213, 178));
     }
 
     @Test
-    public void testLinearDodge() {
+    void linearDodge() {
         // 211 + 119 = 330 -> 255
         // 141 +  86 = 227
         //  86 + 132 = 218
-        testBlendingMode(BlendingMode.LINEAR_DODGE, new Color(255, 227, 218));
+        testBlendingMode(LINEAR_DODGE, new Color(255, 227, 218));
     }
 
     @Test
-    public void testOverlay() {
+    void overlay() {
         // PS: 208, 104, 89
-        testBlendingMode(BlendingMode.OVERLAY, new Color(208, 102, 90));
+        testBlendingMode(OVERLAY, new Color(208, 102, 90));
     }
 
     @Test
-    public void testSoftLight() {
-        testBlendingMode(BlendingMode.SOFT_LIGHT, new Color(209, 120, 88));
+    void softLight() {
+        testBlendingMode(SOFT_LIGHT, new Color(209, 120, 88));
     }
 
     @Test
-    public void testHardLight() {
+    void hardLight() {
         // PS: 197, 95, 91
-        testBlendingMode(BlendingMode.HARD_LIGHT, new Color(196, 96, 91));
+        testBlendingMode(HARD_LIGHT, new Color(196, 96, 91));
     }
 
     @Test
-    public void testDifference() {
+    void difference() {
         // ABS(211 - 119) = 92
         // ABS(141 - 86)  = 55
         // ABS(86  - 132) = 46
-        testBlendingMode(BlendingMode.DIFFERENCE, new Color(92, 55, 46));
+        testBlendingMode(DIFFERENCE, new Color(92, 55, 46));
     }
 
     @Test
-    public void testExclusion() {
+    void exclusion() {
         // PS: 134, 131, 128
-        testBlendingMode(BlendingMode.EXCLUSION, new Color(133, 132, 129));
+        testBlendingMode(EXCLUSION, new Color(133, 132, 129));
     }
 
     @Test
-    public void testHue() {
+    void hue() {
         // PS: 205, 115, 240
-        testBlendingMode(BlendingMode.HUE, new Color(176, 86, 211));
+        testBlendingMode(HUE, new Color(176, 86, 211));
     }
 
     @Test
-    public void testSaturation() {
+    void saturation() {
         // PS: 176, 150, 130
-        testBlendingMode(BlendingMode.SATURATION, new Color(211, 170, 137));
+        testBlendingMode(SATURATION, new Color(211, 170, 137));
     }
 
     @Test
-    public void testColor() {
+    void color() {
         // PS: 174, 141, 187
-        testBlendingMode(BlendingMode.COLOR, new Color(190, 137, 211));
+        testBlendingMode(COLOR, new Color(190, 137, 211));
     }
 
     @Test
-    public void testLuminosity() {
+    void luminosity() {
         // PS: 156, 86, 31
-        testBlendingMode(BlendingMode.LUMINOSITY, new Color(132, 88, 54));
+        testBlendingMode(LUMINOSITY, new Color(132, 88, 54));
     }
 
     private void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {

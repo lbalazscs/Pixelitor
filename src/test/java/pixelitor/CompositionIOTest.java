@@ -17,9 +17,9 @@
 
 package pixelitor;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import pixelitor.colors.FillType;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.OpenSave;
 import pixelitor.io.PXCFormat;
@@ -38,86 +38,39 @@ import java.util.function.Consumer;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
+@DisplayName("Composition I/O tests")
 public class CompositionIOTest {
-    @BeforeClass
-    public static void setupClass() {
+    @BeforeAll
+    static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
     @Test
-    public void testNewImage() {
-        var comp = NewImage.createNewComposition(FillType.WHITE, 20, 20, "New Image");
-        comp.checkInvariant();
-        assertThat(comp)
-                .numLayersIs(1)
-                .hasCanvasImWidth(20)
-                .hasCanvasImHeight(20);
-    }
-
-    private static void testSingleLayerRead(File f) {
-        var future = OpenSave.loadCompAsync(f);
-        checkLoadFuture(future);
-
-        var comp = future.join();
-        assertThat(comp)
-                .numLayersIs(1)
-                .hasCanvasImWidth(10)
-                .hasCanvasImHeight(10)
-                .invariantIsOK();
-    }
-
-    private static void checkLoadFuture(CompletableFuture<Composition> cf) {
-        assertThat(cf)
-                .isNotCancelled()
-                .isNotCompletedExceptionally();
-        // usually isNotDone is also true, but since these are very
-        // small files, the reading could be finished by now
-    }
-
-    private static Composition testMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        var future = OpenSave.loadCompAsync(f);
-        checkLoadFuture(future);
-
-        var comp = future.join();
-        assertThat(comp)
-                .numLayersIs(2)
-                .hasCanvasImWidth(10)
-                .hasCanvasImHeight(10)
-                .invariantIsOK();
-
-        var secondLayer = comp.getLayer(1);
-        secondLayerChecker.accept(secondLayer);
-
-        return comp;
-    }
-
-    @Test
-    public void testReadJPEG() {
+    void readJPEG() {
         File f = new File("src/test/resources/jpeg_test_input.jpg");
-        testSingleLayerRead(f);
+        checkSingleLayerRead(f);
     }
 
     @Test
-    public void testReadPNG() {
+    void readPNG() {
         File f = new File("src/test/resources/png_test_input.png");
-        testSingleLayerRead(f);
+        checkSingleLayerRead(f);
     }
 
     @Test
-    public void testReadBMP() {
+    void readBMP() {
         File f = new File("src/test/resources/bmp_test_input.bmp");
-        testSingleLayerRead(f);
+        checkSingleLayerRead(f);
     }
 
     @Test
-    public void testReadGIF() {
+    void readGIF() {
         File f = new File("src/test/resources/gif_test_input.gif");
-        testSingleLayerRead(f);
+        checkSingleLayerRead(f);
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testReadWritePXC() {
+    void readWritePXC() {
         // read and test
         String[] fileNames = {
                 "src/test/resources/pxc_test_input.pxc",
@@ -154,14 +107,14 @@ public class CompositionIOTest {
             String fileName = fileNames[i];
             try {
                 File f = new File(fileName);
-                var comp = testMultiLayerRead(f, extraChecks.get(i));
+                var comp = checkMultiLayerRead(f, extraChecks.get(i));
 
                 // write to tmp file
                 File tmp = File.createTempFile("pix_tmp", ".pxc");
                 PXCFormat.write(comp, tmp);
 
                 // read back and test
-                testMultiLayerRead(tmp, extraChecks.get(i));
+                checkMultiLayerRead(tmp, extraChecks.get(i));
 
                 tmp.delete();
             } catch (Exception e) {
@@ -171,8 +124,7 @@ public class CompositionIOTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testReadWriteORA() throws IOException {
+    void readWriteORA() throws IOException {
         Consumer<Layer> extraCheck = secondLayer ->
                 assertThat(secondLayer)
                         .classIs(ImageLayer.class)
@@ -181,14 +133,51 @@ public class CompositionIOTest {
 
         // read and test
         File f = new File("src/test/resources/gimp_ora_test_input.ora");
-        var comp = testMultiLayerRead(f, extraCheck);
+        var comp = checkMultiLayerRead(f, extraCheck);
 
         File tmp = File.createTempFile("pix_tmp", ".ora");
         OpenRaster.write(comp, tmp, true);
 
         // read back and test
-        testMultiLayerRead(tmp, extraCheck);
+        checkMultiLayerRead(tmp, extraCheck);
 
         tmp.delete();
+    }
+
+    private static void checkSingleLayerRead(File f) {
+        var future = OpenSave.loadCompAsync(f);
+        checkAsyncReadResult(future);
+
+        var comp = future.join();
+        assertThat(comp)
+                .numLayersIs(1)
+                .hasCanvasImWidth(10)
+                .hasCanvasImHeight(10)
+                .invariantIsOK();
+    }
+
+    private static void checkAsyncReadResult(CompletableFuture<Composition> cf) {
+        assertThat(cf)
+                .isNotCancelled()
+                .isNotCompletedExceptionally();
+        // usually isNotDone is also true, but since these are very
+        // small files, the reading could be finished by now
+    }
+
+    private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
+        var future = OpenSave.loadCompAsync(f);
+        checkAsyncReadResult(future);
+
+        var comp = future.join();
+        assertThat(comp)
+                .numLayersIs(2)
+                .hasCanvasImWidth(10)
+                .hasCanvasImHeight(10)
+                .invariantIsOK();
+
+        var secondLayer = comp.getLayer(1);
+        secondLayerChecker.accept(secondLayer);
+
+        return comp;
     }
 }

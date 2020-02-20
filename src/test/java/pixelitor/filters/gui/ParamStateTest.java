@@ -17,14 +17,12 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.BLUE;
@@ -33,17 +31,9 @@ import static java.awt.Color.RED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
-@RunWith(Parameterized.class)
+@DisplayName("ParamState tests")
 public class ParamStateTest {
-    @SuppressWarnings("rawtypes")
-    @Parameter
-    public ParamState start;
-
-    @Parameter(value = 1)
-    public ParamState<?> end;
-
-    @Parameters
-    public static Collection<Object[]> instancesToTest() {
+    static Stream<Arguments> instancesToTest() {
         FilterParam angleParamStart = new AngleParam("AngleParam", 0);
         FilterParam angleParamEnd = new AngleParam("AngleParam", 1);
 
@@ -51,7 +41,7 @@ public class ParamStateTest {
         FilterParam rangeParamEnd = new RangeParam("RangeParam", 0, 100, 100);
 
         FilterParam groupedRangeParamStart = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
-        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 0, 200);
+        FilterParam groupedRangeParamEnd = new GroupedRangeParam("GroupedRangeParam", 0, 100, 200);
 
         FilterParam gradientParamStart = new GradientParam("GradientParam", BLACK, GREEN);
         FilterParam gradientParamEnd = new GradientParam("GradientParam", BLUE, RED);
@@ -62,19 +52,21 @@ public class ParamStateTest {
         FilterParam colorParamStart = new ColorParam("ColorParam", RED, FREE_TRANSPARENCY);
         FilterParam colorParamEnd = new ColorParam("ColorParam", BLUE, FREE_TRANSPARENCY);
 
-        return Arrays.asList(new Object[][]{
-                {angleParamStart.copyState(), angleParamEnd.copyState()},
-                {rangeParamStart.copyState(), rangeParamEnd.copyState()},
-                {groupedRangeParamStart.copyState(), groupedRangeParamEnd.copyState()},
-                {gradientParamStart.copyState(), gradientParamEnd.copyState()},
-                {imagePositionParamStart.copyState(), imagePositionParamEnd.copyState()},
-                {colorParamStart.copyState(), colorParamEnd.copyState()},
-        });
+        return Stream.of(
+                Arguments.of(angleParamStart.copyState(), angleParamEnd.copyState()),
+                Arguments.of(rangeParamStart.copyState(), rangeParamEnd.copyState()),
+                Arguments.of(groupedRangeParamStart.copyState(), groupedRangeParamEnd.copyState()),
+                Arguments.of(gradientParamStart.copyState(), gradientParamEnd.copyState()),
+                Arguments.of(imagePositionParamStart.copyState(), imagePositionParamEnd.copyState()),
+                Arguments.of(colorParamStart.copyState(), colorParamEnd.copyState())
+        );
     }
 
-    @Test
+    @DisplayName("interpolation test")
+    @ParameterizedTest(name = "#{index}: interpolate between {0} and {1}")
+    @MethodSource("instancesToTest")
     @SuppressWarnings("unchecked")
-    public void test_interpolate() {
+    void interpolate(ParamState start, ParamState<?> end) {
         ParamState<?> interpolated = start.interpolate(end, 0.0);
         assertThat(interpolated).isNotNull();
 

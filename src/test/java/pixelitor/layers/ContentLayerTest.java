@@ -65,7 +65,7 @@ public class ContentLayerTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 

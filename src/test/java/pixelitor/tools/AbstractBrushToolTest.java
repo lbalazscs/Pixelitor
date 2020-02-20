@@ -77,13 +77,13 @@ public class AbstractBrushToolTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         TestHelper.setupMockFgBgSelector();
         Build.setUnitTestingMode();
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         var comp = TestHelper.create2LayerComposition(false);
         view = comp.getView();
 
@@ -97,7 +97,7 @@ public class AbstractBrushToolTest {
     }
 
     @After
-    public void tearDown() {
+    public void afterEachTest() {
         tool.toolEnded();
 
         // restore it so that next time we don't spy on a spy...

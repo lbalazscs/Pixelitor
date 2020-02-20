@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.transform;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import pixelitor.tools.TransformHelper;
 
 import java.awt.Cursor;
@@ -27,12 +27,8 @@ import java.awt.Rectangle;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransformHelperTest {
-
-    // --- test calcAspectRatio() -------------------------------
-
     @Test
-    public void calcAspectRatio() {
-
+    void aspectRatio() {
         double aspectRatio;
         Rectangle rect;
 
@@ -67,10 +63,8 @@ public class TransformHelperTest {
         assertThat(aspectRatio).isEqualTo(1.0);
     }
 
-    // --- test resize() -------------------------------
-
     @Test
-    public void resize_by_north_handle() {
+    void resize_by_north_handle() {
         // up by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(30, 20, 10, 40);
@@ -89,7 +83,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_south_handle() {
+    void resize_by_south_handle() {
         // up by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(30, 40, 10, 0);
@@ -108,7 +102,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_west_handle() {
+    void resize_by_west_handle() {
         // west by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(10, 40, 30, 20);
@@ -127,7 +121,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_east_handle() {
+    void resize_by_east_handle() {
         // west by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(30, 40, -10, 20);
@@ -146,7 +140,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_north_east_handle() {
+    void resize_by_north_east_handle() {
         // up xy by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(30, 20, 30, 40);
@@ -165,7 +159,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_north_west_handle() {
+    void resize_by_north_west_handle() {
         // up xy by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(10, 20, 30, 40);
@@ -184,7 +178,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_south_east_handle() {
+    void resize_by_south_east_handle() {
         // up xy by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(30, 40, -10, 0);
@@ -203,7 +197,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void resize_by_south_west_handle() {
+    void resize_by_south_west_handle() {
         // up xy by 20
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectExpected = new Rectangle(50, 40, -10, 0);
@@ -221,10 +215,8 @@ public class TransformHelperTest {
         assertThat(rect).isEqualTo(rectExpected);
     }
 
-    // --- test keepAspectRatio() -------------------------------
-
     @Test
-    public void keepAspectRatio_by_north_or_south_handle() {
+    void keepAspectRatio_by_north_or_south_handle() {
         Rectangle rect, rectExpected;
 
         // resize from 10x20 (aspectRatio: 0.5) to 10x40
@@ -239,7 +231,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void keepAspectRatio_by_west_or_east_handle() {
+    void keepAspectRatio_by_west_or_east_handle() {
         Rectangle rect, rectExpected;
 
         // resize from 10x20 (aspectRatio: 0.5) to 20x20
@@ -254,7 +246,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void keepAspectRatio_by_north_east_handle() {
+    void keepAspectRatio_by_north_east_handle() {
         Rectangle rect, rectExpected;
 
         // resize from 10x20 (aspectRatio: 0.5) to 20x20 (aspectRatio: 1.0) -> adjust height
@@ -273,7 +265,7 @@ public class TransformHelperTest {
     }
 
     @Test
-    public void keepAspectRatio_by_north_west_handle() {
+    void keepAspectRatio_by_north_west_handle() {
         Rectangle rect, rectExpected;
 
         // resize from 10x20 (aspectRatio: 0.5) to 20x20 (aspectRatio: 1.0) -> adjust height

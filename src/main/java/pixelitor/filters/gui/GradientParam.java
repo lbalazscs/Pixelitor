@@ -221,13 +221,13 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public GState copyState() {
-        return new GState(gradientSlider.getThumbPositions(), gradientSlider.getColors());
+    public GradientParamState copyState() {
+        return new GradientParamState(gradientSlider.getThumbPositions(), gradientSlider.getColors());
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        GState gr = (GState) state;
+        GradientParamState gr = (GradientParamState) state;
 
         trigger = false;
         createGradientSlider(gr.thumbPositions, gr.colors);
@@ -244,27 +244,27 @@ public class GradientParam extends AbstractFilterParam {
         return format("%s[name = '%s']", getClass().getSimpleName(), getName());
     }
 
-    private static class GState implements ParamState<GState> {
+    private static class GradientParamState implements ParamState<GradientParamState> {
         final float[] thumbPositions;
         final Color[] colors;
 
-        public GState(float[] thumbPositions, Color[] colors) {
+        public GradientParamState(float[] thumbPositions, Color[] colors) {
             this.thumbPositions = thumbPositions;
             this.colors = colors;
         }
 
         @Override
-        public GState interpolate(GState endState, double progress) {
+        public GradientParamState interpolate(GradientParamState endState, double progress) {
             // This will not work if the number of thumbs changes
 
             float[] interpolatedPositions = getInterpolatedPositions((float) progress, endState);
 
             Color[] interpolatedColors = getInterpolatedColors((float) progress, endState);
 
-            return new GState(interpolatedPositions, interpolatedColors);
+            return new GradientParamState(interpolatedPositions, interpolatedColors);
         }
 
-        private float[] getInterpolatedPositions(float progress, GState grEndState) {
+        private float[] getInterpolatedPositions(float progress, GradientParamState grEndState) {
             float[] interpolatedPositions = new float[thumbPositions.length];
             for (int i = 0; i < thumbPositions.length; i++) {
                 float initial = thumbPositions[i];
@@ -275,7 +275,7 @@ public class GradientParam extends AbstractFilterParam {
             return interpolatedPositions;
         }
 
-        private Color[] getInterpolatedColors(float progress, GState grEndState) {
+        private Color[] getInterpolatedColors(float progress, GradientParamState grEndState) {
             Color[] interpolatedColors = new Color[colors.length];
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
@@ -284,6 +284,13 @@ public class GradientParam extends AbstractFilterParam {
                 interpolatedColors[i] = interpolated;
             }
             return interpolatedColors;
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[thumbPositions=%s]",
+                    getClass().getSimpleName(),
+                    Arrays.toString(thumbPositions));
         }
     }
 

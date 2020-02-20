@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,7 +28,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class BooleanParamTest {
     @Test
-    public void isIgnoreRandomizeWorking() {
+    void isIgnoreRandomizeWorking() {
         var param = new BooleanParam("Test", true, IGNORE_RANDOMIZE);
         for (int i = 0; i < 10; i++) {
             param.randomize();
@@ -37,7 +37,7 @@ public class BooleanParamTest {
     }
 
     @Test
-    public void test_setValue() {
+    void setValue() {
         var param = new BooleanParam("Test", true);
         assertThat(param.isChecked()).isTrue();
         assertThat(param).isSetToDefault();

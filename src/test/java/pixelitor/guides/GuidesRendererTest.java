@@ -17,8 +17,8 @@
 
 package pixelitor.guides;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -34,14 +34,14 @@ public class GuidesRendererTest {
     private GuideStyle guideStyle;
     private GuidesRenderer guidesRenderer;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         guideStyle = new GuideStyle();
         guidesRenderer = new GuidesRenderer(guideStyle);
     }
 
     @Test
-    public void testDrawNone() {
+    void drawNone() {
         var g2 = mock(Graphics2D.class);
         var lines = new ArrayList<Shape>();
 
@@ -51,7 +51,7 @@ public class GuidesRendererTest {
     }
 
     @Test
-    public void testDrawInSingleStrokeMode() {
+    void drawInSingleStrokeMode() {
         var g2 = mock(Graphics2D.class);
         var lines = new ArrayList<Shape>();
         lines.add(new Line2D.Double(1, 2, 3, 4));
@@ -65,7 +65,7 @@ public class GuidesRendererTest {
     }
 
     @Test
-    public void testDrawInDoubleStrokeMode() {
+    void drawInDoubleStrokeMode() {
         var g2 = mock(Graphics2D.class);
         var lines = new ArrayList<Shape>();
         lines.add(new Line2D.Double(1, 2, 3, 4));

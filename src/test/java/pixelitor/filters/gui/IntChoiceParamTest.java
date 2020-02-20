@@ -17,7 +17,7 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import pixelitor.filters.gui.IntChoiceParam.Value;
 
 import static org.mockito.Mockito.mock;
@@ -29,7 +29,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 public class IntChoiceParamTest {
     @Test
-    public void isIgnoreRandomizeWorking() {
+    void isIgnoreRandomizeWorking() {
         var param = new IntChoiceParam("Test", new Value[]{
                 new Value("Name 1", 1),
                 new Value("Name 2", 2),
@@ -43,13 +43,10 @@ public class IntChoiceParamTest {
     }
 
     @Test
-    public void test_setSelectedItem() {
+    void setSelectedItem() {
         Value v1 = new Value("Item 1", 1);
         Value v2 = new Value("Item 2", 2);
-        var param = new IntChoiceParam("Test", new Value[]{
-                v1,
-                v2,
-        });
+        var param = new IntChoiceParam("Test", new Value[]{v1, v2});
 
         assertThat(param)
                 .isSetToDefault()

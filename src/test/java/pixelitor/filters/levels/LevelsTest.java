@@ -17,12 +17,12 @@
 
 package pixelitor.filters.levels;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import pixelitor.filters.gui.PreviewExecutor;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,8 +35,8 @@ public class LevelsTest {
     private OneChannelLevelsModel rgbPage;
     private OneChannelLevelsModel rPage;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         levels = mock(Levels.class);
         captor = ArgumentCaptor.forClass(RGBLookup.class);
         model = new LevelsModel(levels);
@@ -47,7 +47,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void testDefaultSettingsProduceIdentity() {
+    void defaultSettingsProduceIdentity() {
         model.resetToDefaultSettings();
 
         var lookup = getCalculatedLookup();
@@ -60,7 +60,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageRGB_inputBlack100() {
+    void pageRGB_inputBlack100() {
         rgbPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -70,7 +70,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageR_inputBlack100() {
+    void pageR_inputBlack100() {
         rPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -80,7 +80,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageRGB_inputWhite150() {
+    void pageRGB_inputWhite150() {
         rgbPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -90,7 +90,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageR_inputWhite150() {
+    void pageR_inputWhite150() {
         rPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -100,7 +100,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageRGB_outputBlack100() {
+    void pageRGB_outputBlack100() {
         rgbPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -110,7 +110,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageR_outputBlack100() {
+    void pageR_outputBlack100() {
         rPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -120,7 +120,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageRGB_outputWhite150() {
+    void pageRGB_outputWhite150() {
         rgbPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -130,7 +130,7 @@ public class LevelsTest {
     }
 
     @Test
-    public void pageR_outputWhite150() {
+    void pageR_outputWhite150() {
         rPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -146,21 +146,21 @@ public class LevelsTest {
     }
 
     private static void checkRedMapping(RGBLookup lookup, int input, int expected) {
-        assertEquals(expected, lookup.mapRed(input));
+        Assertions.assertEquals(expected, lookup.mapRed(input));
     }
 
     private static void checkGreenMapping(RGBLookup lookup, int input, int expected) {
-        assertEquals(expected, lookup.mapGreen(input));
+        Assertions.assertEquals(expected, lookup.mapGreen(input));
     }
 
     private static void checkBlueMapping(RGBLookup lookup, int input, int expected) {
-        assertEquals(expected, lookup.mapBlue(input));
+        Assertions.assertEquals(expected, lookup.mapBlue(input));
     }
 
     private static void checkRGBMapping(RGBLookup lookup, int input,
                                         int expectedRed, int expectedGreen, int expectedBlue) {
-        assertEquals(expectedRed, lookup.mapRed(input));
-        assertEquals(expectedGreen, lookup.mapGreen(input));
-        assertEquals(expectedBlue, lookup.mapBlue(input));
+        Assertions.assertEquals(expectedRed, lookup.mapRed(input));
+        Assertions.assertEquals(expectedGreen, lookup.mapGreen(input));
+        Assertions.assertEquals(expectedBlue, lookup.mapBlue(input));
     }
 }

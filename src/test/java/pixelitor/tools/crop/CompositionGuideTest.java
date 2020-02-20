@@ -17,7 +17,8 @@
 
 package pixelitor.tools.crop;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import pixelitor.guides.GuidesRenderer;
 
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.mock;
@@ -50,7 +51,7 @@ public class CompositionGuideTest {
     private CompositionGuide compositionGuide;
 
     @Test
-    public void draw_Type_NONE() {
+    void draw_Type_NONE() {
         var rect = new Rectangle2D.Double(0, 0, 90, 30);
         var g2 = mock(Graphics2D.class);
         var guidesRenderer = mock(GuidesRenderer.class);
@@ -63,7 +64,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_RULE_OF_THIRDS() {
+    void draw_Type_RULE_OF_THIRDS() {
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
         var g2 = mock(Graphics2D.class);
         var guidesRenderer = mock(GuidesRenderer.class);
@@ -82,7 +83,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_GOLDEN_SECTIONS() {
+    void draw_Type_GOLDEN_SECTIONS() {
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
         var g2 = mock(Graphics2D.class);
         var guidesRenderer = mock(GuidesRenderer.class);
@@ -105,7 +106,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_DIAGONALS_width_gt_height() {
+    void draw_Type_DIAGONALS_width_gt_height() {
         // rect orientation: width >= height
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
         var g2 = mock(Graphics2D.class);
@@ -125,7 +126,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_DIAGONALS_height_gt_width() {
+    void draw_Type_DIAGONALS_height_gt_width() {
         // rect orientation: height > width
         var rect = new Rectangle2D.Double(0, 0, 12, 90);
         var g2 = mock(Graphics2D.class);
@@ -145,7 +146,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_TRIANGLES_top_left_to_bottom_down() {
+    void draw_Type_TRIANGLES_top_left_to_bottom_down() {
         // orientation: 0 (diagonal line from top left to bottom down)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         var g2 = mock(Graphics2D.class);
@@ -166,7 +167,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_TRIANGLES_bottom_down_to_top_left() {
+    void draw_Type_TRIANGLES_bottom_down_to_top_left() {
         // orientation: 1 (diagonal line from bottom down to top left)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         var g2 = mock(Graphics2D.class);
@@ -187,7 +188,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_GRID_less_than_2xSize() {
+    void draw_Type_GRID_less_than_2xSize() {
         var rect = new Rectangle2D.Double(0, 0, 90, 90);
         var g2 = mock(Graphics2D.class);
         var guidesRenderer = mock(GuidesRenderer.class);
@@ -205,7 +206,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_GRID_exact_2xSize() {
+    void draw_Type_GRID_exact_2xSize() {
         // gridSize: 50 (one cross at the center if size less than 2xSize)
         var rect = new Rectangle2D.Double(0, 0, 100, 100);
         var g2 = mock(Graphics2D.class);
@@ -230,7 +231,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_GRID_more_than_2xSize() {
+    void draw_Type_GRID_more_than_2xSize() {
         var rect = new Rectangle2D.Double(0, 0, 102, 102);
         var g2 = mock(Graphics2D.class);
         var guidesRenderer = mock(GuidesRenderer.class);
@@ -254,7 +255,7 @@ public class CompositionGuideTest {
     }
 
     @Test
-    public void draw_Type_SPIRAL_orientation_0() {
+    void draw_Type_SPIRAL_orientation_0() {
         // orientation: 0 (spiral that starts from bottom left)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
         var g2 = mock(Graphics2D.class);

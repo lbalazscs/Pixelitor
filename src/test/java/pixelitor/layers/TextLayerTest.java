@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,6 +35,7 @@ import pixelitor.testutils.WithMask;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @RunWith(Parameterized.class)
@@ -55,12 +56,12 @@ public class TextLayerTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         comp = TestHelper.createEmptyComposition();
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
@@ -79,7 +80,7 @@ public class TextLayerTest {
     }
 
     @Test
-    public void test_replaceWithRasterized() {
+    public void replaceWithRasterized() {
         assertThat(comp)
                 .numLayersIs(1)
                 .typeOfLayerNIs(0, TextLayer.class);
@@ -104,30 +105,31 @@ public class TextLayerTest {
     }
 
     @Test
-    public void test_enlargeCanvas() {
+    public void enlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
 
         iconUpdates.check(0, 0);
     }
 
     @Test
-    public void test_createMovementEdit() {
+    public void createMovementEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
 
         assertThat(edit).isNotNull();
         iconUpdates.check(0, 0);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_commitSettings_Fail() {
+    @Test
+    public void commitSettings_Fail() {
         TextSettings oldSettings = layer.getSettings();
         // expected to throw exception because it
         // is the same settings object
-        layer.commitSettings(oldSettings);
+        assertThrows(IllegalArgumentException.class, () ->
+                layer.commitSettings(oldSettings));
     }
 
     @Test
-    public void test_commitSettings_OK() {
+    public void commitSettings_OK() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
         assertThat(layer).nameIs(oldText);

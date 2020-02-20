@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,40 +17,33 @@
 
 package pixelitor.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
-/**
- * Tests utility helpers
- */
 public class UtilsTest {
-    @Test
-    public void test_parseJavaVersion() {
-        int v8 = Utils.parseJavaVersion("1.8.0_161");
-        int v9 = Utils.parseJavaVersion("9.0.1");
-        int v10 = Utils.parseJavaVersion("10.0.1");
-        int v11 = Utils.parseJavaVersion("11");
-
-        assertThat(v8).isEqualTo(8);
-        assertThat(v9).isEqualTo(9);
-        assertThat(v10).isEqualTo(10);
-        assertThat(v11).isEqualTo(11);
+    @ParameterizedTest(name = "\"{0}\" should be parsed as {1}")
+    @CsvSource({"1.8.0_161, 8", "9.0.1, 9", "10.0.1, 10", "11, 11"})
+    void parseJavaVersion(String s, int versionNum) {
+        int parsed = Utils.parseJavaVersion(s);
+        assertThat(parsed).isEqualTo(versionNum);
     }
 
     @Test
-    public void testAngleFunctions() {
+    void angleFunctions() {
         for (double a = -Math.PI; a < Math.PI; a += 0.1) {
             double intuitive = Utils.atan2AngleToIntuitive(a);
             double atan = Utils.intuitiveToAtan2Angle(intuitive);
-            assertEquals(atan, a, 0.01);
+            Assertions.assertEquals(atan, a, 0.01);
         }
 
         for (double a = 0.0; a < 2 * Math.PI; a += 0.1) {
             double atan = Utils.intuitiveToAtan2Angle(a);
             double b = Utils.atan2AngleToIntuitive(atan);
-            assertEquals(a, b, 0.01);
+            Assertions.assertEquals(a, b, 0.01);
         }
     }
 }

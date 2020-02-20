@@ -168,15 +168,15 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public APState copyState() {
+    public AngleParamState copyState() {
         // save the degrees so that the interpolation
         // does not confuse the user
-        return new APState(getValueInDegrees());
+        return new AngleParamState(getValueInDegrees());
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        setValueInDegrees(((APState) state).angle, false);
+        setValueInDegrees(((AngleParamState) state).angle, false);
     }
 
     @Override
@@ -190,17 +190,23 @@ public class AngleParam extends AbstractFilterParam {
                 getClass().getSimpleName(), getName(), angle);
     }
 
-    private static class APState implements ParamState<APState> {
+    private static class AngleParamState implements ParamState<AngleParamState> {
         private final double angle;
 
-        public APState(double angle) {
+        public AngleParamState(double angle) {
             this.angle = angle;
         }
 
         @Override
-        public APState interpolate(APState endState, double progress) {
+        public AngleParamState interpolate(AngleParamState endState, double progress) {
             double interpolatedAngle = ImageMath.lerp(progress, angle, endState.angle);
-            return new APState(interpolatedAngle);
+            return new AngleParamState(interpolatedAngle);
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[degrees=%.2f]",
+                    getClass().getSimpleName(), angle);
         }
     }
 }

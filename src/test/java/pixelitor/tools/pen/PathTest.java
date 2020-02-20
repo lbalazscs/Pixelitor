@@ -17,9 +17,9 @@
 
 package pixelitor.tools.pen;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.Build;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
@@ -36,19 +36,19 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 public class PathTest {
     private View view;
 
-    @BeforeClass
-    public static void setupClass() {
+    @BeforeAll
+    static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         var comp = TestHelper.createMockComposition();
         view = comp.getView();
     }
 
     @Test
-    public void testDeletingSubPathPoints() {
+    void deletingSubPathPoints() {
         var shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
         SubPath sp = path.getActiveSubpath();
@@ -71,19 +71,19 @@ public class PathTest {
     }
 
     @Test
-    public void testConversionsForRectangle() {
+    void conversionsForRectangle() {
         testConversionsFor(
                 new Rectangle(20, 20, 40, 10));
     }
 
     @Test
-    public void testConversionsForEllipse() {
+    void conversionsForEllipse() {
         testConversionsFor(
                 new Ellipse2D.Double(20, 20, 40, 10));
     }
 
     @Test
-    public void testTransform() {
+    void transform() {
         Rectangle shape = new Rectangle(10, 10, 100, 100);
         Path path = Shapes.shapeToPath(shape, view);
         SubPath sp = path.getActiveSubpath();

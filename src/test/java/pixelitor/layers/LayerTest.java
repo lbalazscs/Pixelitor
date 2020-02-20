@@ -72,12 +72,12 @@ public class LayerTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         comp = TestHelper.createEmptyComposition();
         // make sure each test runs with a fresh Layer
         layer = TestHelper.createLayerOfClass(layerClass, comp);

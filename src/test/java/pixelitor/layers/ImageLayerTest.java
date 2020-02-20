@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
@@ -81,12 +82,12 @@ public class ImageLayerTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         comp = TestHelper.createMockComposition();
 
         layer = TestHelper.createImageLayer("layer 1", comp);
@@ -109,7 +110,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getSetImage() {
+    public void getSetImage() {
         // setImage is called already in the ImageLayer constructor
         int expectedImageChangedCalls = 1;
         if (withMask.isYes()) {
@@ -137,7 +138,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_startPreviewing() {
+    public void startPreviewing() {
         BufferedImage imageBefore = layer.getImage();
 
         layer.startPreviewing();
@@ -154,7 +155,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_onDialogAccepted() {
+    public void onDialogAccepted() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.onFilterDialogAccepted("filterName");
@@ -165,13 +166,14 @@ public class ImageLayerTest {
         iconUpdates.check(0, 0);
     }
 
-    @Test(expected = AssertionError.class)
-    public void test_onDialogCanceled_Fail() {
-        layer.onFilterDialogCanceled();
+    @Test
+    public void onDialogCanceled_Fail() {
+        assertThrows(AssertionError.class, () ->
+                layer.onFilterDialogCanceled());
     }
 
     @Test
-    public void test_onDialogCanceled_OK() {
+    public void onDialogCanceled_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.onFilterDialogCanceled();
@@ -183,7 +185,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_tweenCalculatingStarted() {
+    public void tweenCalculatingStarted() {
         assertThat(layer)
                 .stateIs(NORMAL)
                 .previewImageIs(null);
@@ -196,14 +198,15 @@ public class ImageLayerTest {
         iconUpdates.check(0, 0);
     }
 
-    @Test(expected = AssertionError.class)
-    public void test_tweenCalculatingEnded_Fail() {
+    @Test
+    public void tweenCalculatingEnded_Fail() {
         // fails because the the tween calculation was not started
-        layer.tweenCalculatingEnded();
+        assertThrows(AssertionError.class, () ->
+                layer.tweenCalculatingEnded());
     }
 
     @Test
-    public void test_tweenCalculatingEnded_OK() {
+    public void tweenCalculatingEnded_OK() {
         layer.tweenCalculatingStarted(); // make sure that the layer is in PREVIEW mode
 
         layer.tweenCalculatingEnded();
@@ -214,13 +217,14 @@ public class ImageLayerTest {
         iconUpdates.check(0, 0);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void test_changePreviewImage_Fail() {
-        layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
+    @Test
+    public void changePreviewImage_Fail() {
+        assertThrows(IllegalStateException.class, () ->
+                layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING));
     }
 
     @Test
-    public void test_changePreviewImage_OK() {
+    public void changePreviewImage_OK() {
         layer.startPreviewing(); // make sure that the layer is in PREVIEW mode
 
         layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
@@ -232,7 +236,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_filterWithoutDialogFinished() {
+    public void filterWithoutDialogFinished() {
         assert ConsistencyChecks.imageCoversCanvas(layer);
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
 
@@ -244,7 +248,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_changeImageForUndoRedo() {
+    public void changeImageForUndoRedo() {
         TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
 
         layer.changeImageForUndoRedo(TestHelper.createImage(),
@@ -256,7 +260,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getImageBounds() {
+    public void getImageBounds() {
         Rectangle bounds = layer.getImageBounds();
 
         assertThat(bounds).isNotNull();
@@ -269,7 +273,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getImageForFilterDialogs() {
+    public void getImageForFilterDialogs() {
         BufferedImage image = layer.getImageForFilterDialogs();
 
         if (withSelection.isYes()) {
@@ -290,7 +294,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_TmpDrawingLayer() {
+    public void tmpDrawingLayer() {
         TmpDrawingLayer tmpDrawingLayer
                 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpDrawingLayer).isNotNull();
@@ -302,7 +306,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_createCanvasSizedTmpImage() {
+    public void createCanvasSizedTmpImage() {
         BufferedImage image = layer.createCanvasSizedTmpImage();
 
         assertThat(image)
@@ -313,7 +317,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getCanvasSizedSubImage() {
+    public void getCanvasSizedSubImage() {
         BufferedImage image = layer.getCanvasSizedSubImage();
 
         Canvas canvas = layer.getComp().getCanvas();
@@ -325,7 +329,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getFilterSourceImage() {
+    public void getFilterSourceImage() {
         var filterSourceImage = layer.getFilterSourceImage();
 
         assertThat(filterSourceImage).isNotNull();
@@ -342,7 +346,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_getSelectedSubImage() {
+    public void getSelectedSubImage() {
         BufferedImage imageT = layer.getSelectedSubImage(true);
         assertThat(imageT).isNotNull();
         BufferedImage layerImage = layer.getImage();
@@ -379,7 +383,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_deletePixels_noGrowing() {
+    public void crop_deletePixels_noGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -398,7 +402,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_deletePixels_withGrowing() {
+    public void crop_deletePixels_withGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -415,7 +419,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_keepPixels_noGrowing() {
+    public void crop_keepPixels_noGrowing() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -434,7 +438,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_keepPixels_withGrowingRightDown() {
+    public void crop_keepPixels_withGrowingRightDown() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -451,7 +455,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_keepPixels_withGrowingLeft() {
+    public void crop_keepPixels_withGrowingLeft() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -468,7 +472,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_crop_keepPixels_withGrowingDown() {
+    public void crop_keepPixels_withGrowingDown() {
         // given
         int tx = layer.getTx();
         int ty = layer.getTy();
@@ -499,7 +503,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_cropToCanvasSize() {
+    public void cropToCanvasSize() {
         layer.toCanvasSize();
 
         Canvas canvas = layer.getComp().getCanvas();
@@ -511,14 +515,14 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_enlargeCanvas() {
+    public void enlargeCanvas() {
         layer.enlargeCanvas(5, 5, 5, 10);
 
         iconUpdates.check(0, 0);
     }
 
     @Test
-    public void test_createMovementEdit() {
+    public void createMovementEdit() {
         ContentLayerMoveEdit edit = layer.createMovementEdit(5, 5);
 
         assertThat(edit).isNotNull();
@@ -526,7 +530,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_duplicate() {
+    public void duplicate() {
         ImageLayer duplicate = layer.duplicate(false);
 
         assertThat(duplicate)
@@ -544,7 +548,7 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void test_applyLayerMask() {
+    public void applyLayerMask() {
         if (withMask.isYes()) {
             History.clear();
             assertThat(layer).hasMask();

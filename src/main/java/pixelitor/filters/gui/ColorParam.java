@@ -111,13 +111,13 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public CState copyState() {
-        return new CState(color);
+    public ColorParamState copyState() {
+        return new ColorParamState(color);
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        color = ((CState) state).color;
+        color = ((ColorParamState) state).color;
     }
 
     @Override
@@ -131,17 +131,23 @@ public class ColorParam extends AbstractFilterParam {
                 getClass().getSimpleName(), getName(), color);
     }
 
-    private static class CState implements ParamState<CState> {
+    private static class ColorParamState implements ParamState<ColorParamState> {
         private final Color color;
 
-        public CState(Color color) {
+        public ColorParamState(Color color) {
             this.color = color;
         }
 
         @Override
-        public CState interpolate(CState endState, double progress) {
-            return new CState(ColorUtils.interpolateInRGB(
+        public ColorParamState interpolate(ColorParamState endState, double progress) {
+            return new ColorParamState(ColorUtils.interpolateInRGB(
                     color, endState.color, (float) progress));
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[color=%s]",
+                    getClass().getSimpleName(), color);
         }
     }
 

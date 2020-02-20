@@ -17,9 +17,10 @@
 
 package pixelitor.tools.pen;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -28,7 +29,6 @@ import pixelitor.history.History;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 
-import static org.junit.Assert.assertTrue;
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.history.History.redo;
@@ -42,16 +42,16 @@ public class PenToolTest {
     private View view;
     private Composition comp;
 
-    @BeforeClass
-    public static void setupClass() {
+    @BeforeAll
+    static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void beforeEachTest() {
         Tools.setCurrentTool(Tools.PEN);
 
-        // a real comp that can store paths
+        // a real composition that can store paths
         comp = TestHelper.createEmptyComposition(300, 300);
         view = comp.getView(); // a mock view
         PenTool.path = null;
@@ -67,7 +67,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testConvertBuildPathToSelection() {
+    void convertBuildPathToSelection() {
         createSimpleClosedPathInBuildMode();
 
         Tools.PEN.convertToSelection();
@@ -88,7 +88,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testConvertEditPathToSelection() {
+    void convertEditPathToSelection() {
         createSimpleClosedPathInBuildMode();
         Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
@@ -114,7 +114,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testConvertSelectionToPath() {
+    void convertSelectionToPath() {
         Tools.setCurrentTool(Tools.SELECTION);
         assertThat(Tools.SELECTION)
                 .isActive()
@@ -150,7 +150,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testUndoEditModeChangeInBuildMode() {
+    void undoEditModeChangeInBuildMode() {
         // create a 2-point path in build mode
         Tools.PEN.startBuilding(false);
         click(100, 100);
@@ -192,7 +192,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testUndoBuildModeChangeInEditMode() {
+    void undoBuildModeChangeInEditMode() {
         SubPath sp = createSimpleClosedPathInBuildMode();
 
         // switch to edit mode
@@ -247,7 +247,7 @@ public class PenToolTest {
     }
 
     @Test
-    public void testDeleteSubPathAndPathInEditMode() {
+    void deleteSubPathAndPathInEditMode() {
         // create a path with two subpaths
         Path path = new Path(comp, true);
         path.startNewSubpath(10, 20, view);
@@ -373,7 +373,7 @@ public class PenToolTest {
                 .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
-        assertTrue(sp == PenTool.path.getSubPath(0));
+        Assertions.assertTrue(sp == PenTool.path.getSubPath(0));
         assertThat(sp)
                 .isClosed()
                 .isFinished()

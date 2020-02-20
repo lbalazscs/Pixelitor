@@ -407,13 +407,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     @Override
-    public RPState copyState() {
-        return new RPState(value);
+    public RangeParamState copyState() {
+        return new RangeParamState(value);
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        value = ((RPState) state).getValue();
+        value = ((RangeParamState) state).getValue();
     }
 
     @Override
@@ -499,24 +499,27 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
-    /**
-     * The state of a {@link RangeParam}
-     */
-    private static class RPState implements ParamState<RPState> {
+    private static class RangeParamState implements ParamState<RangeParamState> {
         final double value;
 
-        public RPState(double value) {
+        public RangeParamState(double value) {
             this.value = value;
         }
 
         @Override
-        public RPState interpolate(RPState endState, double progress) {
+        public RangeParamState interpolate(RangeParamState endState, double progress) {
             double interpolated = ImageMath.lerp(progress, value, endState.value);
-            return new RPState(interpolated);
+            return new RangeParamState(interpolated);
         }
 
         public double getValue() {
             return value;
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[value=%.2f]",
+                    getClass().getSimpleName(), value);
         }
     }
 }

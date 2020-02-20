@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.history;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.Build;
 
 import javax.swing.*;
@@ -38,13 +38,13 @@ public class PixelitorUndoManagerTest {
     private PixelitorEdit edit1;
     private PixelitorEdit edit2;
 
-    @BeforeClass
-    public static void setupClass() {
+    @BeforeAll
+    static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         undoManager = new PixelitorUndoManager();
 
         edit0 = createMockEdit("edit 0");
@@ -60,7 +60,7 @@ public class PixelitorUndoManagerTest {
     }
 
     @Test
-    public void jumpingOneStepBySelection() {
+    void jumpingOneStepBySelection() {
         selectIndex(1);
 
         // expect that only the last edit is undone
@@ -77,7 +77,7 @@ public class PixelitorUndoManagerTest {
     }
 
     @Test
-    public void jumpingTwoStepsBySelection() {
+    void jumpingTwoStepsBySelection() {
         selectIndex(0);
 
         // expect that only the last two edits are undone
@@ -94,7 +94,7 @@ public class PixelitorUndoManagerTest {
     }
 
     @Test
-    public void undoingAndRedoingEverythingAdjustsSelection() {
+    void undoingAndRedoingEverythingAdjustsSelection() {
         assertThat(undoManager.getSelectedIndex()).isEqualTo(2);
 
         // first undo
@@ -136,7 +136,7 @@ public class PixelitorUndoManagerTest {
     }
 
     @Test
-    public void undoEverythingThenSelect() {
+    void undoEverythingThenSelect() {
         undoManager.undo();
         undoManager.undo();
         undoManager.undo();

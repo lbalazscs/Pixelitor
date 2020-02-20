@@ -17,8 +17,9 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,7 +30,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 public class RangeParamTest {
     @Test
-    public void isIgnoreRandomizeWorking() {
+    void isIgnoreRandomizeWorking() {
         var param = new RangeParam("Test", 0, 100, 1000,
                 true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
@@ -39,7 +40,7 @@ public class RangeParamTest {
     }
 
     @Test
-    public void test_setValue() {
+    void setValue() {
         var param = new RangeParam("Test", 0, 50, 100);
         assertThat(param.getValue()).isEqualTo(50);
         assertThat(param).isSetToDefault();
@@ -63,23 +64,27 @@ public class RangeParamTest {
         verify(adjListener, times(1)).paramAdjusted();
     }
 
-    @Test(expected = AssertionError.class)
-    public void invalidArgsMinIsMax() {
-        new RangeParam("name", 10, 10, 10);
+    @Test
+    void invalidArgsMinIsMax() {
+        assertThrows(AssertionError.class, () ->
+                new RangeParam("name", 10, 10, 10));
     }
 
-    @Test(expected = AssertionError.class)
-    public void invalidArgsMinBiggerThanMax() {
-        new RangeParam("name", 11, 10, 10);
+    @Test
+    void invalidArgsMinBiggerThanMax() {
+        assertThrows(AssertionError.class, () ->
+                new RangeParam("name", 11, 10, 10));
     }
 
-    @Test(expected = AssertionError.class)
-    public void invalidArgsDefaultSmallerThanMin() {
-        new RangeParam("name", 5, 2, 10);
+    @Test
+    void invalidArgsDefaultSmallerThanMin() {
+        assertThrows(AssertionError.class, () ->
+                new RangeParam("name", 5, 2, 10));
     }
 
-    @Test(expected = AssertionError.class)
-    public void invalidArgsDefaultBiggerThanMax() {
-        new RangeParam("name", 5, 15, 10);
+    @Test
+    void invalidArgsDefaultBiggerThanMax() {
+        assertThrows(AssertionError.class, () ->
+                new RangeParam("name", 5, 15, 10));
     }
 }

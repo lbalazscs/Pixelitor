@@ -95,14 +95,14 @@ public class MultiLayerEditTest {
     }
 
     @BeforeClass
-    public static void setupClass() {
+    public static void beforeAllTests() {
         Build.setUnitTestingMode();
 
         Tools.setCurrentTool(Tools.CROP);
     }
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         comp = TestHelper.create2LayerComposition(true);
         assertThat(comp)
                 .isNotEmpty()

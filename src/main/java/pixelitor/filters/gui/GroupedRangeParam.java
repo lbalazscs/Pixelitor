@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
@@ -254,17 +255,17 @@ public class GroupedRangeParam extends AbstractFilterParam {
     }
 
     @Override
-    public GRState copyState() {
+    public GroupedRangeParamState copyState() {
         double[] values = Arrays.stream(rangeParams)
                 .mapToDouble(RangeParam::getValue)
                 .toArray();
 
-        return new GRState(values);
+        return new GroupedRangeParamState(values);
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        GRState grState = (GRState) state;
+        GroupedRangeParamState grState = (GroupedRangeParamState) state;
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
@@ -291,22 +292,29 @@ public class GroupedRangeParam extends AbstractFilterParam {
         return childValues;
     }
 
-    private static class GRState implements ParamState<GRState> {
+    private static class GroupedRangeParamState implements ParamState<GroupedRangeParamState> {
         private final double[] values;
 
-        public GRState(double[] values) {
+        public GroupedRangeParamState(double[] values) {
             this.values = values;
         }
 
         @Override
-        public GRState interpolate(GRState endState, double progress) {
+        public GroupedRangeParamState interpolate(GroupedRangeParamState endState, double progress) {
             double[] interpolatedValues = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 interpolatedValues[i] = ImageMath.lerp(
                         progress, values[i], endState.values[i]);
             }
 
-            return new GRState(interpolatedValues);
+            return new GroupedRangeParamState(interpolatedValues);
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[values=%s]",
+                    getClass().getSimpleName(),
+                    Arrays.toString(values));
         }
     }
 }

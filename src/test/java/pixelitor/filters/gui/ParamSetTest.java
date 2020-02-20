@@ -17,8 +17,8 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
@@ -35,8 +35,8 @@ public class ParamSetTest {
     private ParamAdjustmentListener adjustmentListener;
     private RangeParam extraParam;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         params = new ParamSet(ParamTest.getTestParams())
                 .withAction(ReseedSupport.createAction())
                 .addCommonActions();
@@ -49,19 +49,19 @@ public class ParamSetTest {
     }
 
     @Test
-    public void test_reset() {
+    void reset() {
         params.reset();
         verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
-    public void test_randomize() {
+    void randomize() {
         params.randomize();
         verify(adjustmentListener, never()).paramAdjusted();
     }
 
     @Test
-    public void testFilterTriggering() {
+    void filterTriggering() {
         extraParam.setValue(42, false);
         verify(adjustmentListener, never()).paramAdjusted();
 
@@ -73,7 +73,7 @@ public class ParamSetTest {
     }
 
     @Test
-    public void test_copyState_setState() {
+    void copyState_setState() {
         CompositeState state = params.copyState();
         params.setState(state);
 
@@ -81,12 +81,12 @@ public class ParamSetTest {
     }
 
     @Test
-    public void test_canBeAnimated() {
+    void canBeAnimated() {
         assertThat(params.canBeAnimated()).isTrue();
     }
 
     @Test
-    public void test_setFinalAnimationSettingMode() {
+    void setFinalAnimationSettingMode() {
         params.setFinalAnimationSettingMode(false);
         params.setFinalAnimationSettingMode(true);
 
@@ -94,7 +94,7 @@ public class ParamSetTest {
     }
 
     @Test
-    public void test_hasGradient() {
+    void hasGradient() {
         assertThat(params.hasGradient()).isTrue();
     }
 }

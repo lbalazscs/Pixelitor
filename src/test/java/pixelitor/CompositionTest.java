@@ -17,9 +17,10 @@
 
 package pixelitor;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
@@ -34,16 +35,17 @@ import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
+@DisplayName("Composition tests")
 public class CompositionTest {
     private Composition comp;
 
-    @BeforeClass
-    public static void setupClass() {
+    @BeforeAll
+    static void beforeAllTests() {
         Build.setUnitTestingMode();
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         comp = TestHelper.create2LayerComposition(true);
         assertThat(comp)
                 .isNotDirty()
@@ -60,7 +62,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_addNewEmptyLayer() {
+    void addNewEmptyLayer() {
         assertThat(comp)
                 .isNotDirty()
                 .numLayersIs(2)
@@ -114,7 +116,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_setActiveLayer() {
+    void setActiveLayer() {
         assertThat(comp)
                 .isNotDirty()
                 .secondLayerIsActive();
@@ -136,7 +138,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_addLayerInInitMode() {
+    void addLayerInInitMode() {
         assertThat(comp)
                 .isNotDirty()
                 .numLayersIs(2);
@@ -152,7 +154,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void testLayerAdder() {
+    void layerAdder() {
         // add bellow active
         new LayerAdder(comp)
                 .withHistory("bellow active")
@@ -262,7 +264,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_duplicateActiveLayer() {
+    void duplicateActiveLayer() {
         assertThat(comp)
                 .isNotDirty()
                 .numLayersIs(2)
@@ -292,7 +294,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_flattenImage() {
+    void flattenImage() {
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2");
@@ -308,7 +310,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_mergeActiveLayerDown() {
+    void mergeActiveLayerDown() {
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
@@ -332,7 +334,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void testMovingTheActiveLayer() {
+    void movingTheActiveLayer() {
         // check initial state
         assertThat(comp)
                 .isNotDirty()
@@ -425,7 +427,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void testMoveLayerSelection() {
+    void moveLayerSelection() {
         // initial state
         assertThat(comp)
                 .isNotDirty()
@@ -465,7 +467,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_generateNewLayerName() {
+    void generateNewLayerName() {
         assertThat(comp.generateNewLayerName()).isEqualTo("layer 1");
         assertThat(comp.generateNewLayerName()).isEqualTo("layer 2");
         assertThat(comp.generateNewLayerName()).isEqualTo("layer 3");
@@ -475,7 +477,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_deleteActiveLayer() {
+    void deleteActiveLayer() {
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
@@ -500,7 +502,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_deleteLayer() {
+    void deleteLayer() {
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
@@ -547,7 +549,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_addNewLayerFromComposite() {
+    void addNewLayerFromComposite() {
         assertThat(comp)
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2")
@@ -573,7 +575,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_isActive() {
+    void isActive() {
         Layer layer1 = comp.getLayer(0);
         Layer layer2 = comp.getLayer(1);
 
@@ -589,7 +591,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_invertSelection() {
+    void invertSelection() {
         assertThat(comp).doesNotHaveSelection();
 
         comp.invertSelection(); // nothing to invert yet
@@ -623,7 +625,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_createSelectionFromShape() {
+    void createSelectionFromShape() {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle rect = new Rectangle(3, 3, 5, 5);
@@ -636,7 +638,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_dragFinished() {
+    void dragFinished() {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
@@ -648,12 +650,12 @@ public class CompositionTest {
     }
 
     @Test
-    public void testTranslationWODuplicating() {
+    void translationWODuplicating() {
         testTranslation(false);
     }
 
     @Test
-    public void testTranslationWithDuplicating() {
+    void translationWithDuplicating() {
         testTranslation(true);
     }
 
@@ -783,7 +785,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_deselect() {
+    void deselect() {
         assertThat(comp).doesNotHaveSelection();
 
         var selectionShape = new Rectangle(4, 4, 8, 4);
@@ -808,7 +810,7 @@ public class CompositionTest {
     }
 
     @Test
-    public void test_cropSelection() {
+    void cropSelection() {
         var selectionShape = new Rectangle(4, 4, 8, 4);
         TestHelper.setRectangleSelection(comp, selectionShape);
         assertThat(comp)

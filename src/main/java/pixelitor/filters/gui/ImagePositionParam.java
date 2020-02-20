@@ -125,13 +125,13 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public IPPState copyState() {
-        return new IPPState(relativeX, relativeY);
+    public ImagePositionParamState copyState() {
+        return new ImagePositionParamState(relativeX, relativeY);
     }
 
     @Override
     public void setState(ParamState<?> state) {
-        IPPState s = (IPPState) state;
+        ImagePositionParamState s = (ImagePositionParamState) state;
         relativeX = (float) s.relativeX;
         relativeY = (float) s.relativeY;
     }
@@ -147,20 +147,27 @@ public class ImagePositionParam extends AbstractFilterParam {
                 getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 
-    private static class IPPState implements ParamState<IPPState> {
+    private static class ImagePositionParamState implements ParamState<ImagePositionParamState> {
         private final double relativeX;
         private final double relativeY;
 
-        public IPPState(double relX, double relY) {
+        public ImagePositionParamState(double relX, double relY) {
             relativeX = relX;
             relativeY = relY;
         }
 
         @Override
-        public IPPState interpolate(IPPState endState, double progress) {
+        public ImagePositionParamState interpolate(ImagePositionParamState endState, double progress) {
             double interpolatedX = ImageMath.lerp(progress, relativeX, endState.relativeX);
             double interpolatedY = ImageMath.lerp(progress, relativeY, endState.relativeY);
-            return new IPPState(interpolatedX, interpolatedY);
+            return new ImagePositionParamState(interpolatedX, interpolatedY);
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[relX=%.2f, relY=%.2f]",
+                    getClass().getSimpleName(),
+                    relativeX, relativeY);
         }
     }
 }

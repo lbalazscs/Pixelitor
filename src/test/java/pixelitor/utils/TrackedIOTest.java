@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,8 @@
 
 package pixelitor.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import pixelitor.io.TrackedIO;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,15 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link TrackedIO}
  */
 public class TrackedIOTest {
-    @Test
-    public void testCalcSubsamplingCols() {
-        int cols = TrackedIO.calcSubsamplingCols(5000, 2000, 100, 100);
-        assertThat(cols).isEqualTo(50);
-
-        cols = TrackedIO.calcSubsamplingCols(2000, 5000, 100, 100);
-        assertThat(cols).isEqualTo(50);
-
-        cols = TrackedIO.calcSubsamplingCols(250, 250, 100, 100);
-        assertThat(cols).isEqualTo(3);
+    @ParameterizedTest(name = "{0}x{1} image => {2} cols")
+    @CsvSource({"5000, 2000, 50", "2000, 5000, 50", "250, 250, 3"})
+    void calcSubsamplingCols(int imgWidth, int imgHeight, int expected) {
+        int cols = TrackedIO.calcSubsamplingCols(imgWidth, imgHeight, 100, 100);
+        assertThat(cols).isEqualTo(expected);
     }
 }

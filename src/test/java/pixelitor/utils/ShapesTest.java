@@ -17,8 +17,8 @@
 
 package pixelitor.utils;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.testutils.ShapeChecker;
@@ -36,14 +36,14 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 public class ShapesTest {
     private View view;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void beforeEachTest() {
         var comp = TestHelper.createEmptyComposition();
         view = TestHelper.setupMockViewFor(comp);
     }
 
     @Test
-    public void convertRectangle() {
+    void convertRectangle() {
         Shape s = new Rectangle2D.Double(2, 2, 10, 10);
         checkRectangleShape(s);
 
@@ -58,7 +58,7 @@ public class ShapesTest {
     }
 
     @Test
-    public void convertEllipse() {
+    void convertEllipse() {
         Shape s = new Ellipse2D.Double(2, 2, 10, 10);
         checkEllipseShape(s);
 
@@ -145,7 +145,7 @@ public class ShapesTest {
     }
 
     @Test
-    public void toPositiveRect_fromRectangle_whenWidthHeightPositive() {
+    void toPositiveRect_fromRectangle_whenWidthHeightPositive() {
         Rectangle rect = new Rectangle(30, 40, 10, 20);
         Rectangle rectOut = Shapes.toPositiveRect(rect);
 
@@ -153,7 +153,7 @@ public class ShapesTest {
     }
 
     @Test
-    public void toPositiveRect_fromRectangle_whenWidthNegative() {
+    void toPositiveRect_fromRectangle_whenWidthNegative() {
         Rectangle rect = new Rectangle(30, 40, -10, 20);
         Rectangle rectExcepted = new Rectangle(20, 40, 10, 20);
 
@@ -162,7 +162,7 @@ public class ShapesTest {
     }
 
     @Test
-    public void toPositiveRect_fromRectangle_whenHeightNegative() {
+    void toPositiveRect_fromRectangle_whenHeightNegative() {
         Rectangle rect = new Rectangle(30, 40, 10, -20);
         Rectangle rectExcepted = new Rectangle(30, 20, 10, 20);
 
@@ -171,7 +171,7 @@ public class ShapesTest {
     }
 
     @Test
-    public void toPositiveRect_fromRectangle_whenWidthHeightNegative() {
+    void toPositiveRect_fromRectangle_whenWidthHeightNegative() {
         Rectangle rect = new Rectangle(30, 40, -10, -20);
         Rectangle rectExcepted = new Rectangle(20, 20, 10, 20);
 

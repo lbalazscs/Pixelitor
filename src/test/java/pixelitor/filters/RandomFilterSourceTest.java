@@ -17,19 +17,23 @@
 
 package pixelitor.filters;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
+@DisplayName("RandomFilterSource tests")
 public class RandomFilterSourceTest {
     private RandomFilterSource source;
 
-    @BeforeClass
-    public static void globalInit() {
+    @BeforeAll
+    static void beforeAllTests() {
         // generate mock filters with the names "A", "B" ... "Z"
         for (int i = 'A'; i < 'Z' + 1; i++) {
             char[] charsInFilterName = {(char) i};
@@ -45,21 +49,23 @@ public class RandomFilterSourceTest {
         }
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void beforeEachTest() {
         source = new RandomFilterSource();
     }
 
     @Test
-    public void testNewSource() {
+    void newSource() {
         assertThat(source)
                 .doesNotHavePrevious()
                 .doesNotHaveNext()
                 .lastFilterIsNull();
     }
 
-    @Test(timeout = 1000) // make sure there is no infinite loop
-    public void testAfterOne() {
+    @Test
+    @Timeout(value = 1, unit = SECONDS)
+        // make sure there is no infinite loop
+    void afterOne() {
         Filter one = source.choose();
 
         assertThat(source)
@@ -69,8 +75,10 @@ public class RandomFilterSourceTest {
                 .lastFilterIs(one);
     }
 
-    @Test(timeout = 1000) // make sure there is no infinite loop
-    public void testAfterTwo() {
+    @Test
+    @Timeout(value = 1, unit = SECONDS)
+        // make sure there is no infinite loop
+    void afterTwo() {
         Filter one = source.choose();
         Filter two = source.choose();
 
@@ -93,8 +101,10 @@ public class RandomFilterSourceTest {
                 .hasNext();
     }
 
-    @Test(timeout = 1000) // make sure there is no infinite loop
-    public void testMultipleBackForward() {
+    @Test
+    @Timeout(value = 1, unit = SECONDS)
+        // make sure there is no infinite loop
+    void multipleBackForward() {
         Filter one = source.choose();
         Filter two = source.choose();
 
@@ -109,8 +119,10 @@ public class RandomFilterSourceTest {
         }
     }
 
-    @Test(timeout = 1000) // make sure there is no infinite loop
-    public void testGenerateWhenBackInHistory() {
+    @Test
+    @Timeout(value = 1, unit = SECONDS)
+        // make sure there is no infinite loop
+    void generateWhenBackInHistory() {
         Filter one = source.choose();
         Filter two = source.choose();
         Filter three = source.choose();
