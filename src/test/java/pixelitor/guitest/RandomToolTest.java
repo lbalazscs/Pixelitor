@@ -17,7 +17,6 @@
 
 package pixelitor.guitest;
 
-import org.assertj.swing.core.Robot;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
@@ -45,7 +44,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +54,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -93,7 +92,6 @@ public class RandomToolTest {
 
     private List<Runnable> events;
     private final ArrowKey[] arrowKeys = ArrowKey.values();
-    private final Robot robot;
     private final List<Double> testTimes = new ArrayList<>();
 
     private static final String[] simpleMultiLayerEdits = {
@@ -102,20 +100,20 @@ public class RandomToolTest {
     };
 
     private static final int[] TOOL_HOTKEYS = {
-            KeyEvent.VK_V,
-            KeyEvent.VK_C,
-            KeyEvent.VK_M,
-            KeyEvent.VK_B,
-            KeyEvent.VK_S,
-            KeyEvent.VK_E,
-            KeyEvent.VK_K,
-            KeyEvent.VK_G,
-            KeyEvent.VK_N,
-            KeyEvent.VK_I,
-            KeyEvent.VK_P,
-            KeyEvent.VK_U,
-            KeyEvent.VK_H,
-            KeyEvent.VK_Z,
+            VK_V,
+            VK_C,
+            VK_M,
+            VK_B,
+            VK_S,
+            VK_E,
+            VK_K,
+            VK_G,
+            VK_N,
+            VK_I,
+            VK_P,
+            VK_U,
+            VK_H,
+            VK_Z,
     };
     private static final String[] ADD_MASK_MENU_COMMANDS = {
             "Add White (Reveal All)", "Add Black (Hide All)", "Add from Layer"};
@@ -139,7 +137,6 @@ public class RandomToolTest {
         app = new AppRunner(inputDir, "b.jpg", "a.jpg");
         keyboard = app.getKeyboard();
         mouse = app.getMouse();
-        robot = app.getRobot();
         ExceptionHandler.INSTANCE.addFirstHandler((t, e) -> {
             e.printStackTrace();
             keyboard.releaseModifierKeysFromAnyThread();
@@ -198,12 +195,12 @@ public class RandomToolTest {
     }
 
     private void testLoop() {
-        Tool[] preferredTools = {};
+        List<Tool> preferredTools = List.of();
 
         // exit this infinite loop only by throwing an exception
         while (true) {
             Tool selectedTool;
-            if (preferredTools.length == 0) {
+            if (preferredTools.isEmpty()) {
                 // there is no preferred tool, each tool gets equal chance
                 selectedTool = Tools.getRandomTool();
             } else {
@@ -785,14 +782,14 @@ public class RandomToolTest {
 
     private void randomKeyboardToolSwitch() {
         int keyCode = Rnd.chooseFrom(TOOL_HOTKEYS);
-        log("random keyboard tool switch using " + Ansi.cyan(KeyEvent.getKeyText(keyCode)));
+        log("random keyboard tool switch using " + Ansi.cyan(getKeyText(keyCode)));
         cleanupAfterTool();
         keyboard.press(keyCode);
     }
 
     private void changeUI() {
         log("changing the UI (Ctrl-K)");
-        keyboard.ctrlPress(KeyEvent.VK_K);
+        keyboard.ctrlPress(VK_K);
     }
 
     private void changeMaskView() {

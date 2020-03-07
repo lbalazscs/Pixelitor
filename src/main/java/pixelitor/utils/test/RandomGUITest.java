@@ -156,8 +156,8 @@ public class RandomGUITest {
     }
 
     public static void start() {
-        if (Build.CURRENT != Build.DEVELOPMENT) {
-            Messages.showError("Error", "Build is not DEVELOPMENT");
+        if (Build.isFinal()) {
+            Messages.showError("Error", "Build is FINAL");
             return;
         }
         if (running) {
@@ -578,9 +578,11 @@ public class RandomGUITest {
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
-                    "Exception in random tween: filter name = %s, srcWidth = %d, srcHeight = %d, " +
+                    "Exception in random tween: filter name = %s, " +
+                            "srcWidth = %d, srcHeight = %d, " +
                             "isMaskEditing = %b, params = %s",
-                    filterName, src.getWidth(), src.getHeight(), dr.isMaskEditing(), paramSet);
+                    filterName, src.getWidth(), src.getHeight(),
+                    dr.isMaskEditing(), paramSet);
             throw new IllegalStateException(msg, e);
         }
 

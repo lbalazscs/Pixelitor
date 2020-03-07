@@ -83,7 +83,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
      * This can be overridden if a custom arrangement is necessary
      */
     public JPanel createFilterParamsPanel(List<FilterParam> paramList) {
-        return GUIUtils.arrangeParamsVertically(paramList);
+        return GUIUtils.arrangeVertically(paramList);
     }
 
     protected JPanel createFilterActionsPanel(List<FilterButtonModel> actionList,

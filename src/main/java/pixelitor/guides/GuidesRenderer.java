@@ -46,7 +46,7 @@ public class GuidesRenderer {
             g2.draw(shape);
         }
 
-        if (null != guideStyle.getStrokeB()) {
+        if (guideStyle.getStrokeB() != null) {
             g2.setStroke(guideStyle.getStrokeB());
             g2.setColor(guideStyle.getColorB());
             for (Shape shape : shapes) {

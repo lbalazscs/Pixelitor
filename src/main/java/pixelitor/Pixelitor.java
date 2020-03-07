@@ -229,7 +229,7 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions(PixelitorWindow pw) {
-        if (Build.CURRENT == Build.FINAL) {
+        if (Build.isFinal()) {
             // in the final builds nothing should run
             return;
         }

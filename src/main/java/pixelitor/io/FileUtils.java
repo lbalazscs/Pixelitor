@@ -18,8 +18,6 @@ package pixelitor.io;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,8 +25,8 @@ import java.util.Set;
  * Utility class with static methods related to files
  */
 public class FileUtils {
-    private static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<>(Arrays.asList(
-            "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff"));
+    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(
+            "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff");
 
     private FileUtils() {
     }

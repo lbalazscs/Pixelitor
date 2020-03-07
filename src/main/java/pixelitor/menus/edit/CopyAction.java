@@ -17,6 +17,7 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
@@ -50,41 +51,43 @@ public class CopyAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            var comp = OpenImages.getActiveComp();
-
-            if (source == CopySource.LAYER_OR_MASK) {
-                Layer layer = comp.getActiveLayer();
-                if (layer instanceof AdjustmentLayer) {
-                    if (!RandomGUITest.isRunning()) {
-                        Dialogs.showErrorDialog("Adjustment Layer", "Adjustment layers cannot be copied");
-                    }
-                    return;
-                }
-            }
-
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            BufferedImage activeImage = source.getImage(comp);
-            Transferable imageTransferable = new ImageTransferable(activeImage);
-
-            try {
-                // Sun Jan 04 08:00:30 CET 2015, RandomGUITest:
-                // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
-                // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
-                // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
-                // https://bugs.openjdk.java.net/browse/JDK-8041558
-
-                // TODO A different issue in September 2018: OpenJDK 11 prints an
-                // exception stack trace here, but the image copied.
-                clipboard.setContents(imageTransferable, null);
-            } catch (RasterFormatException rfe) {
-                rfe.printStackTrace();
-                var node = DebugNodes.createBufferedImageNode("active image", activeImage);
-                String s = node.toDetailedString();
-                System.out.println(format(
-                        "CopyAction: RasterFormatException in actionPerformed: %s", s));
-            }
+            OpenImages.onActiveComp(this::copyToClipboard);
         } catch (Exception ex) {
             Messages.showException(ex);
+        }
+    }
+
+    private void copyToClipboard(Composition comp) {
+        if (source == CopySource.LAYER_OR_MASK) {
+            Layer layer = comp.getActiveLayer();
+            if (layer instanceof AdjustmentLayer) {
+                if (!RandomGUITest.isRunning()) {
+                    Dialogs.showErrorDialog("Adjustment Layer", "Adjustment layers cannot be copied");
+                }
+                return;
+            }
+        }
+
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        BufferedImage activeImage = source.getImage(comp);
+        Transferable imageTransferable = new ImageTransferable(activeImage);
+
+        try {
+            // Sun Jan 04 08:00:30 CET 2015, RandomGUITest:
+            // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
+            // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
+            // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
+            // https://bugs.openjdk.java.net/browse/JDK-8041558
+
+            // TODO A different issue in September 2018: OpenJDK 11 prints an
+            // exception stack trace here, but the image copied.
+            clipboard.setContents(imageTransferable, null);
+        } catch (RasterFormatException rfe) {
+            rfe.printStackTrace();
+            var node = DebugNodes.createBufferedImageNode("active image", activeImage);
+            String s = node.toDetailedString();
+            System.out.println(format(
+                    "CopyAction: RasterFormatException in actionPerformed: %s", s));
         }
     }
 }

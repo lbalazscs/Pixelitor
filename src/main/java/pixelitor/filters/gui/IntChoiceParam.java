@@ -26,7 +26,6 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -53,7 +52,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     public IntChoiceParam(String name, Value[] choices, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
-        choicesList.addAll(Arrays.asList(choices));
+        choicesList.addAll(List.of(choices));
 
         defaultChoice = choices[0];
         currentChoice = defaultChoice;

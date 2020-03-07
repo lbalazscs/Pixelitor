@@ -112,7 +112,7 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer, String reason) {
         assert view != null;
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer, reason);
         }
 

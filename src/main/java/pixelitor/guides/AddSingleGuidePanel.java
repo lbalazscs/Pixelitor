@@ -24,7 +24,6 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -44,13 +43,13 @@ public class AddSingleGuidePanel extends JPanel {
 
         var canvas = builder.getCanvas();
         int maxSize = horizontal ? canvas.getImWidth() : canvas.getImHeight();
-        percents = new RangeParam("Position %", 0, 50, 100);
-        var pixels = new RangeParam("Position Pixels", 0, maxSize / 2, maxSize);
+        percents = new RangeParam("Position (%)", 0, 50, 100);
+        var pixels = new RangeParam("Position (Pixels)", 0, maxSize / 2.0, maxSize);
         percents.linkWith(pixels, maxSize / 100.0);
 
         BooleanParam clearExisting = builder.getClearExisting();
-        List<FilterParam> params = Arrays.asList(percents, pixels, clearExisting);
-        GUIUtils.arrangeParamsVertically(this, params);
+        List<FilterParam> params = List.of(percents, pixels, clearExisting);
+        GUIUtils.arrangeVertically(this, params);
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
         percents.setAdjustmentListener(updatePreview);

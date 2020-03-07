@@ -395,7 +395,7 @@ public class View extends JComponent
 
         g2.setClip(canvasClip);
 
-        if (showPixelGrid && showPixelGridIfEnabled()) {
+        if (showPixelGrid && allowPixelGrid()) {
             drawPixelGrid(g2);
         }
 
@@ -406,7 +406,7 @@ public class View extends JComponent
         paintImmediately(getX(), getY(), getWidth(), getHeight());
     }
 
-    public boolean showPixelGridIfEnabled() {
+    public boolean allowPixelGrid() {
         // for some reason the pixel grid is very slow if there is
         // a selection visible, so don't show it
         return zoomLevel.allowPixelGrid() && !comp.showsSelection();
@@ -444,7 +444,7 @@ public class View extends JComponent
         }
         showPixelGrid = newValue;
         if (newValue) {
-            OpenImages.pixelGridEnabled();
+            ImageArea.pixelGridEnabled();
         } else {
             OpenImages.repaintVisible();
         }

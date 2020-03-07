@@ -161,7 +161,7 @@ public class MenuBar extends JMenuBar {
         add(createFilterMenu());
         add(createViewMenu(pw));
 
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
@@ -572,7 +572,7 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAdjustmentLayersSubmenu() {
         PMenu sub = new PMenu("New Adjustment Layer");
 
-        // TODO not called "Invert" because of assertj test lookup confusion
+        // not called "Invert" because of assertj test lookup confusion
         sub.addAction(new MenuAction("Invert Adjustment") {
             @Override
             public void onClick() {

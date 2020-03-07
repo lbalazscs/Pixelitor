@@ -33,7 +33,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -82,7 +81,7 @@ public class CropBox {
         lower = new CropHandle("S", Cursor.S_RESIZE_CURSOR, view);
         lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, view);
 
-        handles = Arrays.asList(upperLeft, upperRight, lowerRight, lowerLeft,
+        handles = List.of(upperLeft, upperRight, lowerRight, lowerLeft,
                 right, upper, lower, left);
         update(rect);
     }

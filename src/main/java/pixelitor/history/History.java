@@ -103,7 +103,7 @@ public class History {
         numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
             ConsistencyChecks.checkAll(comp, false);

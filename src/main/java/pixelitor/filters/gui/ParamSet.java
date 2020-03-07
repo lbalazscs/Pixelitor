@@ -23,7 +23,6 @@ import pixelitor.utils.Utils;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +39,7 @@ public class ParamSet {
     private Runnable beforeResetAction;
 
     public ParamSet(FilterParam... params) {
-        paramList.addAll(Arrays.asList(params));
+        paramList.addAll(List.of(params));
     }
 
     public ParamSet(FilterParam param) {
@@ -52,7 +51,7 @@ public class ParamSet {
     }
 
     public ParamSet withActions(FilterButtonModel... actions) {
-        actionList.addAll(Arrays.asList(actions));
+        actionList.addAll(List.of(actions));
         return this;
     }
 

@@ -30,7 +30,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.text.DecimalFormat;
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import static java.awt.BorderLayout.CENTER;
@@ -255,21 +254,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
-    }
-
-    public void showTicksAsFloat() {
-        // TODO throws NullPointerException
-
-        slider.createStandardLabels(10);
-
-        @SuppressWarnings("unchecked")
-        Dictionary<Integer, JLabel> labelsDict = slider.getLabelTable();
-
-        var keys = labelsDict.keys();
-        while (keys.hasMoreElements()) {
-            Integer i = keys.nextElement();
-            labelsDict.get(i).setText(String.valueOf(i / 100.0f));
-        }
     }
 
     public int getCurrentValue() {

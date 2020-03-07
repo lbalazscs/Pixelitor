@@ -45,7 +45,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
                             ShowOriginal addShowOriginal,
                             Object otherInfo) {
         var upperPanel = new JPanel(new BorderLayout());
-        var leftPanel = GUIUtils.arrangeParamsVertically(params.getParams());
+        var leftPanel = GUIUtils.arrangeVertically(params.getParams());
         var rightPanel = createPresetsPanel((Action[]) otherInfo);
         var monochromeCB = new JCheckBox("Convert to Black and White", false);
         monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

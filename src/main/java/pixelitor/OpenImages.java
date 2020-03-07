@@ -89,7 +89,7 @@ public class OpenImages {
     public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
         @Override
         public void onClick() {
-            closeUnmodified();
+            warnAndCloseUnmodified();
         }
     };
 
@@ -505,14 +505,14 @@ public class OpenImages {
                 expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
-    public static void assertNumOpenImagesIsAtLeast(int expected) {
+    public static void assertNumOpenImagesIsAtLeast(int minimum) {
         int numOpenImages = getNumOpenImages();
-        if (numOpenImages >= expected) {
+        if (numOpenImages >= minimum) {
             return;
         }
         throw new AssertionError(format(
                 "Expected at least %d images, found %d (%s)",
-                expected, numOpenImages, getOpenImageNamesAsString()));
+                minimum, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
@@ -572,7 +572,7 @@ public class OpenImages {
         warnAndCloseAllIf(view -> view != selected);
     }
 
-    private static void closeUnmodified() {
+    private static void warnAndCloseUnmodified() {
         warnAndCloseAllIf(view -> !view.getComp().isDirty());
     }
 
@@ -586,36 +586,13 @@ public class OpenImages {
         }
     }
 
-    public static void pixelGridEnabled() {
-        if (ImageArea.currentModeIs(FRAMES)) {
-            if (isAnyPixelGridVisibleIfEnabled()) {
-                repaintAll();
-            } else {
-                showPixelGridHelp();
-            }
-        } else { // Tabs: check only the current view
-            View view = getActiveView();
-            if (view != null && view.showPixelGridIfEnabled()) {
-                view.repaint();
-            } else {
-                showPixelGridHelp();
-            }
-        }
-    }
-
-    private static boolean isAnyPixelGridVisibleIfEnabled() {
+    public static boolean isAnyPixelGridAllowed() {
         for (View view : views) {
-            if (view.showPixelGridIfEnabled()) {
+            if (view.allowPixelGrid()) {
                 return true;
             }
         }
         return false;
     }
 
-    private static void showPixelGridHelp() {
-        Messages.showInfo("Pixel Grid",
-                "The pixel grid consists of lines between the pixels,\n" +
-                        "and is shown only if the zoom is at least 1600%\n" +
-                        "and there is no selection.");
-    }
 }

@@ -21,6 +21,7 @@ import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.io.DropListener;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -185,6 +186,33 @@ public class ImageArea {
 
     public static void setTabPlacement(int tabPlacement) {
         ImageArea.tabPlacement = tabPlacement;
+    }
+
+    public static void pixelGridEnabled() {
+        // the global pixel grid switch was turned on
+        if (currentModeIs(FRAMES)) {
+            if (OpenImages.isAnyPixelGridAllowed()) {
+                OpenImages.repaintAll();
+            } else {
+                showNoPixelGridMsg();
+            }
+        } else { // Tabs: check only the current view
+            View view = OpenImages.getActiveView();
+            if (view != null) {
+                if (view.allowPixelGrid()) {
+                    view.repaint();
+                } else {
+                    showNoPixelGridMsg();
+                }
+            }
+        }
+    }
+
+    private static void showNoPixelGridMsg() {
+        Messages.showInfo("Pixel Grid",
+                "The pixel grid consists of lines between the pixels,\n" +
+                        "and is shown only if the zoom is at least 1600%\n" +
+                        "and there is no selection.");
     }
 
     public static class SavedInfo {

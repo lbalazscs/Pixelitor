@@ -121,19 +121,19 @@ public final class Utils {
     }
 
     public static void throwTestException() {
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             throw new IllegalStateException("Test");
         }
     }
 
     public static void throwTestIOException() throws IOException {
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             throw new IOException("Test");
         }
     }
 
     public static void throwTestError() {
-        if (Build.CURRENT != Build.FINAL) {
+        if (Build.isDevelopment()) {
             throw new AssertionError("Test");
         }
     }
