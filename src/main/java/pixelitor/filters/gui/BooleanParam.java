@@ -57,7 +57,7 @@ public class BooleanParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new BooleanParamGUI(this, addDefaultButton, action);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
 
         if (actionListenerList != null) {
             // some action listeners for the GUI
@@ -114,11 +114,6 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public void reset(boolean trigger) {
         setValue(defaultValue, true, trigger);
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override

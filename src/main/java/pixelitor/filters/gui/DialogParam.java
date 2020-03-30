@@ -53,7 +53,7 @@ public class DialogParam extends AbstractFilterParam {
 
         paramGUI = new ConfigureParamGUI(this::createDialog, defaultButton);
 
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return (JComponent) paramGUI;
     }
 
@@ -75,6 +75,7 @@ public class DialogParam extends AbstractFilterParam {
         for (FilterParam child : children) {
             child.randomize();
         }
+        updateDefaultButtonState();
     }
 
     @Override
@@ -91,8 +92,6 @@ public class DialogParam extends AbstractFilterParam {
 
     @Override
     public void setState(ParamState<?> state) {
-        // it is assumed that the argument contains the same types
-        // of filter parameters as the children that can be animated
         CompositeState newStates = (CompositeState) state;
         Iterator<ParamState<?>> stateIterator = newStates.iterator();
         for (FilterParam child : children) {
@@ -120,11 +119,6 @@ public class DialogParam extends AbstractFilterParam {
         for (FilterParam child : children) {
             child.setEnabled(b, reason);
         }
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override

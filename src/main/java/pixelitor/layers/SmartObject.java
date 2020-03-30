@@ -38,8 +38,8 @@ import java.util.concurrent.CompletableFuture;
 public class SmartObject extends ContentLayer {
     private Composition content;
 
-    SmartObject(Composition comp, String name, Layer parent) {
-        super(comp, name, parent);
+    SmartObject(Composition comp, String name) {
+        super(comp, name, null);
     }
 
     @Override
@@ -64,8 +64,7 @@ public class SmartObject extends ContentLayer {
 
     @Override
     public Layer duplicate(boolean compCopy) {
-
-        return null; // TODO
+        return new SmartObject(comp, name);
     }
 
     @Override

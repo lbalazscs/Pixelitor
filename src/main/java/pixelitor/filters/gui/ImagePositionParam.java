@@ -55,7 +55,7 @@ public class ImagePositionParam extends AbstractFilterParam {
 
         var gui = new ImagePositionParamGUI(this, defaultX, defaultY);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         paramGUI.updateGUI();
         return gui;
     }
@@ -68,11 +68,6 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void reset(boolean trigger) {
         setRelativeValues(defaultRelativeX, defaultRelativeY, true, false, trigger);
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 1;
     }
 
     @Override

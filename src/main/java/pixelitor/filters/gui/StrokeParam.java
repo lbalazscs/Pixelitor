@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
  * A {@link FilterParam} for stroke settings.
@@ -57,7 +57,7 @@ public class StrokeParam extends AbstractFilterParam {
     };
 
     public StrokeParam(String name) {
-        super(name, IGNORE_RANDOMIZE);
+        super(name, ALLOW_RANDOMIZE);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class StrokeParam extends AbstractFilterParam {
                 owner -> createSettingsDialog(this, owner)
                 , defaultButton);
 
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return (JComponent) paramGUI;
     }
 
@@ -141,7 +141,19 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     protected void doRandomize() {
+        strokeWidthParam.doRandomize();
+        strokeCapParam.doRandomize();
+        strokeJoinParam.doRandomize();
 
+        // make sure that the slow settings can't be set by "randomize settings"
+        do {
+            strokeTypeParam.doRandomize();
+        } while (strokeTypeParam.getSelected().isSlow());
+
+        shapeTypeParam.doRandomize();
+        dashedParam.doRandomize();
+
+        updateDefaultButtonState();
     }
 
     @Override
@@ -180,11 +192,6 @@ public class StrokeParam extends AbstractFilterParam {
         for (FilterParam param : allParams) {
             param.setEnabled(b, reason);
         }
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override

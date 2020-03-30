@@ -101,26 +101,22 @@ public class FilterParamTest {
         assertThat(gui).isNotNull();
         assertThat(gui.isEnabled()).isTrue();
 
-        // all params return a GUI that implements ParamGUI
-        // with the exception of GradientParam
-        if (!(param instanceof GradientParam)) {
-            assertThat(gui).isInstanceOf(ParamGUI.class);
-            ParamGUI paramGUI = (ParamGUI) gui;
+        assertThat(gui).isInstanceOf(ParamGUI.class);
+        ParamGUI paramGUI = (ParamGUI) gui;
 
-            paramGUI.setEnabled(false);
-            assertThat(gui.isEnabled()).isFalse();
-            paramGUI.setEnabled(true);
-            assertThat(gui.isEnabled()).isTrue();
+        paramGUI.setEnabled(false);
+        assertThat(gui.isEnabled()).isFalse();
+        paramGUI.setEnabled(true);
+        assertThat(gui.isEnabled()).isTrue();
 
-            paramGUI.updateGUI();
-        }
+        paramGUI.updateGUI();
 
         checkThatFilterWasNotCalled();
     }
 
     @Test
     public void test_getNumGridBagCols() {
-        int cols = param.getNumGridBagCols();
+        int cols = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
         assertThat(cols > 0 && cols < 3).isTrue();
         checkThatFilterWasNotCalled();
     }

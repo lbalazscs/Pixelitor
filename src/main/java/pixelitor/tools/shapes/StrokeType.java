@@ -37,7 +37,7 @@ import java.awt.Stroke;
  * Some members are also used in some brushes.
  */
 public enum StrokeType {
-    BASIC("Basic") {
+    BASIC("Basic", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BasicStroke(width, cap, join, 1.5f,
@@ -49,7 +49,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    }, ZIGZAG("Zigzag") {
+    }, ZIGZAG("Zigzag", false) {
         private Stroke tmp;
 
         @Override
@@ -67,7 +67,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return specifiedWidth / 2;
         }
-    }, WOBBLE("Wobble") {
+    }, WOBBLE("Wobble", true) {
         private float lastWidth = 0.0f;
         private WobbleStroke wobbleStroke;
 
@@ -94,7 +94,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return (int) (specifiedWidth * 1.5);
         }
-    }, CHARCOAL("Charcoal (can be slow!)") {
+    }, CHARCOAL("Charcoal (can be slow!)", true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CharcoalStroke(width, 0.5f);
@@ -104,7 +104,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    }, BRISTLE("Bristle (can be slow!)") {
+    }, BRISTLE("Bristle (can be slow!)", true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BristleStroke(width, 0.5f);
@@ -114,7 +114,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    }, OUTLINE("Outline") {
+    }, OUTLINE("Outline", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CompositeStroke(
@@ -131,7 +131,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    }, CALLIGRAPHY("Calligraphy") {
+    }, CALLIGRAPHY("Calligraphy", false) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CalligraphyStroke(width);
@@ -141,7 +141,7 @@ public enum StrokeType {
         public int getExtraThickness(int specifiedWidth) {
             return 0;
         }
-    }, SHAPE("Shape") {
+    }, SHAPE("Shape", false) {
         private ShapeType shapeType;
 
         @Override
@@ -178,9 +178,11 @@ public enum StrokeType {
     private static final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 
     private final String guiName;
+    private final boolean slow;
 
-    StrokeType(String guiName) {
+    StrokeType(String guiName, boolean slow) {
         this.guiName = guiName;
+        this.slow = slow;
     }
 
     /**
@@ -196,6 +198,10 @@ public enum StrokeType {
     }
 
     public abstract Stroke createStroke(float width, int cap, int join, float[] dashFloats);
+
+    public boolean isSlow() {
+        return slow;
+    }
 
     /**
      * Return the real thickness (for the undo), which can be bigger

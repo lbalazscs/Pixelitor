@@ -2475,7 +2475,7 @@ public class AssertJSwingTest {
                         findButtonByText(pw, "Crop Selection").requireEnabled().click(),
                 true, 300.0, 200.0);
 
-        if(!quick) {
+        if (!quick) {
             // test crop selection by using the menu
             testCropSelection(() -> runMenuCommand("Crop Selection"),
                     true, 300.0, 200.0);
@@ -3160,8 +3160,9 @@ public class AssertJSwingTest {
 
         if (EDT.active(Composition::isDirty)) {
             String compName = EDT.active(Composition::getName);
-            throw new AssertionError(format("New comp '%s', loaded from %s is dirty",
-                    compName, fileName));
+            throw new AssertionError(
+                    format("New comp '%s', loaded from %s is dirty",
+                            compName, fileName));
         }
 
         maskMode.set(this);

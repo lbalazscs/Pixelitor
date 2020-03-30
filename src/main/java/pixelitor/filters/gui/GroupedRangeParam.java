@@ -92,7 +92,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new GroupedRangeParamGUI(this);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return gui;
     }
 
@@ -159,11 +159,6 @@ public class GroupedRangeParam extends AbstractFilterParam {
 
     public void setLinked(boolean linked) {
         checkBoxModel.setSelected(linked);
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 1;
     }
 
     @Override

@@ -141,4 +141,9 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     public void setToolTip(String tip) {
         imgPosSelector.setToolTipText(tip);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
+    }
 }

@@ -38,42 +38,42 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum LayerMaskAddType {
     REVEAL_ALL("Reveal All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             // a fully white image
             return createFilledImage(canvas, Color.WHITE, null, null);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             // a fully black image
             return createFilledImage(canvas, Color.BLACK, null, null);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             // back image, but the selection is white
-            return createFilledImage(canvas, Color.BLACK, Color.WHITE, selection.getShape());
+            return createFilledImage(canvas, Color.BLACK, Color.WHITE, selShape);
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             // white image, but the selection is black
-            return createFilledImage(canvas, Color.WHITE, Color.BLACK, selection.getShape());
+            return createFilledImage(canvas, Color.WHITE, Color.BLACK, selShape);
         }
     }, FROM_TRANSPARENCY("From Transparency", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             return createMaskFromLayer(layer, true, canvas);
         }
     }, FROM_LAYER("From Layer", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             return createMaskFromLayer(layer, false, canvas);
         }
     }, PATTERN ("Pattern", false) { // only for debugging
 
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection) {
+        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
             BufferedImage bi = createFilledImage(canvas, Color.WHITE, null, null);
             Graphics2D g = bi.createGraphics();
             int width = canvas.getImWidth();
@@ -92,7 +92,7 @@ public enum LayerMaskAddType {
         }
     };
 
-    private static BufferedImage createFilledImage(Canvas canvas, Color bg, Color fg, Shape shape) {
+    private static BufferedImage createFilledImage(Canvas canvas, Color bg, Color fg, Shape selShape) {
         int width = canvas.getImWidth();
         int height = canvas.getImHeight();
         BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
@@ -105,9 +105,9 @@ public enum LayerMaskAddType {
         // fill foreground
         if(fg != null) {
             g.setColor(fg);
-            if (shape != null) {
+            if (selShape != null) {
                 g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-                g.fill(shape);
+                g.fill(selShape);
             } else {
                 g.fillRect(0, 0, width, height);
             }
@@ -168,7 +168,7 @@ public enum LayerMaskAddType {
         this.needsSelection = needsSelection;
     }
 
-    abstract BufferedImage createBWImage(Layer layer, Canvas canvas, Selection selection);
+    abstract BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape);
 
     @Override
     public String toString() {

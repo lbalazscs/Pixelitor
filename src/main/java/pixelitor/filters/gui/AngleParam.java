@@ -50,7 +50,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = new AngleParamGUI(this);
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return (JComponent) paramGUI;
     }
 
@@ -111,11 +111,6 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public boolean isSetToDefault() {
         return angle == defaultVal;
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 1;
     }
 
     private void fireStateChanged() {

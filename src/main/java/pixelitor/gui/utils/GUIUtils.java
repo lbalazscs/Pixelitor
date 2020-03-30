@@ -20,6 +20,7 @@ package pixelitor.gui.utils;
 import com.bric.util.JVM;
 import pixelitor.Composition;
 import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.ParamGUI;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.OpenSave;
@@ -143,7 +144,7 @@ public final class GUIUtils {
         for (FilterParam param : params) {
             JComponent control = param.createGUI();
 
-            int numColumns = param.getNumGridBagCols();
+            int numColumns = ((ParamGUI) control).getNumLayoutColumns();
             if (numColumns == 1) {
                 gbh.addOnlyControlToRow(control, row);
             } else if (numColumns == 2) {

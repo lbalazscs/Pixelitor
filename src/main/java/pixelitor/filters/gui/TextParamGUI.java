@@ -90,4 +90,9 @@ public class TextParamGUI extends JPanel implements ParamGUI {
     public void setToolTip(String tip) {
         tf.setToolTipText(tip);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
+    }
 }

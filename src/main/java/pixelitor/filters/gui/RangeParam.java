@@ -25,15 +25,12 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
-import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.util.function.BooleanSupplier;
 
-import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
-import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * Represents an integer value with a minimum, a maximum and a default.
@@ -92,14 +89,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public JComponent createGUI() {
         var sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
 
         if (action != null) {
-            var p = new JPanel(new FlowLayout(LEFT));
-            var actionGUI = action.createGUI();
-            p.add(sliderSpinner);
-            p.add(actionGUI);
-            return p;
+            return new ParamGUIWithAction(sliderSpinner, action);
         }
 
         return sliderSpinner;
@@ -206,14 +199,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      */
     public float getValueInRadians() {
         return (float) Math.toRadians(getValueAsDouble());
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        if (textPosition == NONE) {
-            return 2;
-        }
-        return 1;
     }
 
     @Override

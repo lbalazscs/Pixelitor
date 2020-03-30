@@ -42,7 +42,7 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return gui;
     }
 
@@ -60,11 +60,6 @@ public class TextParam extends AbstractFilterParam {
             setValue(defaultValue);
             this.trigger = true;
         }
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 1;
     }
 
     @Override

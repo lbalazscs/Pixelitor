@@ -37,13 +37,8 @@ public abstract class AbstractMultipleChoiceParam<E>
     public JComponent createGUI() {
         var gui = new ComboBoxParamGUI<E>(this, action);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return gui;
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override

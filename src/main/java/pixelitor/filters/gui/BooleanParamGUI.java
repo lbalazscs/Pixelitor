@@ -84,8 +84,9 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     public void addActionListener(ActionListener listener) {
         checkBox.addActionListener(listener);
     }
-//
-//    public boolean isChecked() {
-//        return checkBox.isSelected();
-//    }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 2;
+    }
 }

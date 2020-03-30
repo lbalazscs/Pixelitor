@@ -53,7 +53,7 @@ public class EffectsParam extends AbstractFilterParam {
                     buildDialog(owner, true), defaultButton);
 
             paramGUI = configureParamGUI;
-            setParamGUIEnabledState();
+            setGUIEnabledState();
             return configureParamGUI;
         } else {
             effectsPanel.setBorder(createTitledBorder("Effects"));
@@ -122,11 +122,6 @@ public class EffectsParam extends AbstractFilterParam {
     @Override
     public boolean canBeAnimated() {
         return true;
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return separateDialog ? 2 : 1;
     }
 
     @Override

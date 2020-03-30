@@ -88,11 +88,6 @@ public class FilterButtonModel implements FilterSetting {
         return enabledByFilterLogic && enabledByAnimationSetting;
     }
 
-    @Override
-    public int getNumGridBagCols() {
-        return 1;
-    }
-
     public void setIgnoreFinalAnimationSettingMode(boolean ignoreFinalAnimationSettingMode) {
         this.ignoreFinalAnimationSettingMode = ignoreFinalAnimationSettingMode;
     }
@@ -131,6 +126,10 @@ public class FilterButtonModel implements FilterSetting {
                 beforeTriggeringTask.run();
                 adjustmentListener.paramAdjusted();
             });
+        }
+
+        public int getNumGridBagCols() {
+            return 1;
         }
     }
 }

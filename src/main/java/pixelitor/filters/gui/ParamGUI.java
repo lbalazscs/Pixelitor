@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,4 +30,11 @@ public interface ParamGUI {
     void setEnabled(boolean b);
 
     void setToolTip(String tip);
+
+    /**
+     * Return the number of layout columns, either 1 or 2.
+     * If 2 is returned, then a label based on the name is added
+     * to the GUI.
+     */
+    int getNumLayoutColumns();
 }

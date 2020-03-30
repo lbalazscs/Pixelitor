@@ -34,10 +34,12 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 
 /**
@@ -113,7 +115,7 @@ public class Crop implements CompAction {
 
         // The intersected selection, tool widgets etc. have to be moved
         // into the coordinate system of the new, cropped image.
-        // It is important to call thins only AFTER the actual canvas size was changed
+        // It is important to call this only AFTER the actual canvas size was changed
         // so that the component coords are calculated correctly from the new image coords.
         newComp.imCoordsChanged(canvasTransform, false);
 
@@ -121,9 +123,9 @@ public class Crop implements CompAction {
             assert selectionCrop;
             assert comp.hasSelection();
 
-            var hidingSelection = new Selection(comp.getSelection(), true);
-            hidingSelection.transform(canvasTransform);
-            addHidingMask(newComp, hidingSelection, false);
+            Shape hidingShape = comp.getSelectionShape();
+            hidingShape = canvasTransform.createTransformedShape(hidingShape);
+            addHidingMask(newComp, hidingShape, false);
         }
 
         newComp.updateAllIconImages();
@@ -142,12 +144,17 @@ public class Crop implements CompAction {
 
         newComp.imageChanged(FULL, true);
 
-        Messages.showInStatusBar("Image cropped to "
-                + newWidth + " x " + newHeight + " pixels.");
+        Messages.showInStatusBar(format(
+                "Image cropped to %d x %d pixels.",
+                newWidth, newHeight));
+
         return CompletableFuture.completedFuture(newComp);
     }
 
-    // in zoomed-in images fractional widths and heights can happen
+    /**
+     * Transform fractional crop dimensions (in zoomed-in images)
+     * into the actual pixel boundaries
+     */
     private static Rectangle roundCropRect(Rectangle2D rect) {
         int x = (int) Math.round(rect.getX());
         int y = (int) Math.round(rect.getY());
@@ -168,8 +175,9 @@ public class Crop implements CompAction {
      * coordinates for a surviving pixel change after a crop
      */
     public static AffineTransform createCanvasImTransform(Rectangle2D imCropRect) {
-        return AffineTransform.getTranslateInstance(
-                -imCropRect.getX(), -imCropRect.getY());
+        double tx = -imCropRect.getX();
+        double ty = -imCropRect.getY();
+        return AffineTransform.getTranslateInstance(tx, ty);
     }
 
     /**
@@ -179,8 +187,10 @@ public class Crop implements CompAction {
                                            boolean allowGrowing,
                                            boolean deleteCroppedPixels) {
         try {
-            OpenImages.onActiveComp(comp -> new Crop(cropRect, false, allowGrowing, deleteCroppedPixels, false)
-                    .process(comp));
+            OpenImages.onActiveComp(comp ->
+                    new Crop(cropRect, false, allowGrowing,
+                            deleteCroppedPixels, false)
+                            .process(comp));
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -234,7 +244,7 @@ public class Crop implements CompAction {
             rectangularCrop(comp, sel, false);
         } else if (answer == 2) {
             // only hide
-            addHidingMask(comp, sel, true);
+            addHidingMask(comp, sel.getShape(), true);
         } else {
             throw new IllegalStateException("answer = " + answer);
         }
@@ -248,7 +258,7 @@ public class Crop implements CompAction {
                 .process(comp);
     }
 
-    private static void addHidingMask(Composition comp, Selection sel, boolean addToHistory) {
+    private static void addHidingMask(Composition comp, Shape shape, boolean addToHistory) {
         MultiEdit multiEdit = null;
         if (addToHistory) {
             multiEdit = new MultiEdit("Add Hiding Mask", comp);
@@ -258,10 +268,10 @@ public class Crop implements CompAction {
         for (int i = 0; i < numLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (addToHistory) {
-                var edit = layer.addHidingMask(sel, true);
+                var edit = layer.addHidingMask(shape, true);
                 multiEdit.add(edit);
             } else {
-                layer.addHidingMask(sel, false);
+                layer.addHidingMask(shape, false);
             }
         }
 

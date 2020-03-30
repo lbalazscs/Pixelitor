@@ -131,5 +131,10 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         angleUI.setToolTipText(tip);
         sliderSpinner.setToolTip(tip);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
+    }
 }
 

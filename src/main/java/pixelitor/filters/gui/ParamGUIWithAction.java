@@ -17,30 +17,38 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.SliderSpinner;
-
 import javax.swing.*;
-import java.awt.Color;
+import java.awt.FlowLayout;
+
+import static java.awt.FlowLayout.LEFT;
 
 /**
- * A range where the endpoints correspond to colors.
- * Its {@link ParamGUI} is a colorized SliderSpinner
+ * A {@link ParamGUI} with an added {@link FilterButtonModel}
  */
-public class RangeWithColorsParam extends RangeParam {
-    private final Color leftColor;
-    private final Color rightColor;
+public class ParamGUIWithAction extends JPanel implements ParamGUI {
+    private final ParamGUI paramGUI;
 
-    public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int def, int max) {
-        super(name, min, def, max);
-        this.leftColor = leftColor;
-        this.rightColor = rightColor;
+    public ParamGUIWithAction(ParamGUI paramGUI, FilterButtonModel action) {
+        super(new FlowLayout(LEFT));
+
+        this.paramGUI = paramGUI;
+
+        add((JComponent) paramGUI);
+        add(action.createGUI());
     }
 
     @Override
-    public JComponent createGUI() {
-        var sliderSpinner = new SliderSpinner(this, leftColor, rightColor);
-        paramGUI = sliderSpinner;
-        setGUIEnabledState();
-        return sliderSpinner;
+    public void updateGUI() {
+        paramGUI.updateGUI();
+    }
+
+    @Override
+    public void setToolTip(String tip) {
+        paramGUI.setToolTip(tip);
+    }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return paramGUI.getNumLayoutColumns();
     }
 }

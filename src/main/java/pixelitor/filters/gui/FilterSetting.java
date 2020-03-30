@@ -36,13 +36,6 @@ public interface FilterSetting {
      */
     JComponent createGUI();
 
-    /**
-     * Should return either 1 or 2.
-     * If 2 is returned, then a label based on the name is added
-     * to the GUI.
-     */
-    int getNumGridBagCols();
-
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
     /**

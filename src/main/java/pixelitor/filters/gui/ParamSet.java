@@ -132,7 +132,7 @@ public class ParamSet {
 
         paramList.forEach(FilterParam::randomize);
 
-        // this call is not supposed to trigger the filter!
+        // the filter is not supposed to be triggered
         long after = Filter.runCount;
         assert before == after : "before = " + before + ", after = " + after;
     }

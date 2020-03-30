@@ -86,4 +86,9 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     public void setName(String name) {
         comboBox.setName(name);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 2;
+    }
 }

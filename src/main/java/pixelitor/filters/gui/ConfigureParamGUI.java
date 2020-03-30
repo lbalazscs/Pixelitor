@@ -53,6 +53,11 @@ public class ConfigureParamGUI extends JPanel implements ParamGUI {
     }
 
     @Override
+    public int getNumLayoutColumns() {
+        return 2;
+    }
+
+    @Override
     public void updateGUI() {
 
     }

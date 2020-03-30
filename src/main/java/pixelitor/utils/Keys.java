@@ -19,11 +19,9 @@ package pixelitor.utils;
 
 import javax.swing.*;
 import java.awt.Toolkit;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import static java.awt.event.InputEvent.ALT_DOWN_MASK;
-import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
-import static java.awt.event.InputEvent.SHIFT_DOWN_MASK;
 import static java.awt.event.KeyEvent.VK_ADD;
 import static java.awt.event.KeyEvent.VK_BACK_SPACE;
 import static java.awt.event.KeyEvent.VK_EQUALS;
@@ -43,68 +41,71 @@ import static javax.swing.KeyStroke.getKeyStroke;
  */
 public class Keys {
     // Ctrl on Win/Linux, Command on Mac
-    private static final int MENU_CTRL_MASK
+    private static final int CTRL
             = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+    //    private static final int CTRL = InputEvent.CTRL_DOWN_MASK;
+    private static final int ALT = InputEvent.ALT_DOWN_MASK;
+    private static final int SHIFT = InputEvent.SHIFT_DOWN_MASK;
 
-    public static final KeyStroke CTRL_MINUS = getKeyStroke(VK_MINUS, MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_PLUS = getKeyStroke(VK_PLUS, MENU_CTRL_MASK);
-    public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK + ALT_DOWN_MASK);
-    public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(KeyEvent.VK_0, MENU_CTRL_MASK);
+    public static final KeyStroke CTRL_MINUS = getKeyStroke(VK_MINUS, CTRL);
+    public static final KeyStroke CTRL_PLUS = getKeyStroke(VK_PLUS, CTRL);
+    public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(KeyEvent.VK_0, CTRL + ALT);
+    public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(KeyEvent.VK_0, CTRL);
 
-    public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_DOWN_MASK);
-    public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', MENU_CTRL_MASK + ALT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', MENU_CTRL_MASK + ALT_DOWN_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', MENU_CTRL_MASK + ALT_DOWN_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', MENU_CTRL_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', MENU_CTRL_MASK + SHIFT_DOWN_MASK);
+    public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL + ALT);
+    public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL + ALT);
+    public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL + ALT + SHIFT);
+    public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL + ALT + SHIFT);
+    public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', CTRL + SHIFT);
+    public static final KeyStroke CTRL_SHIFT_L = getKeyStroke('L', CTRL + SHIFT);
 
-    public static final KeyStroke CTRL_SHIFT_ALT_E = getKeyStroke('E', MENU_CTRL_MASK + ALT_DOWN_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', MENU_CTRL_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_BACKSPACE = getKeyStroke(VK_BACK_SPACE, MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', MENU_CTRL_MASK | ALT_DOWN_MASK);
-    public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', MENU_CTRL_MASK | ALT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_V = getKeyStroke('V', MENU_CTRL_MASK | SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_C = getKeyStroke('C', MENU_CTRL_MASK | SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_F = getKeyStroke('F', MENU_CTRL_MASK | SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_Z = getKeyStroke('Z', SHIFT_DOWN_MASK | MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', MENU_CTRL_MASK | ALT_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_S = getKeyStroke('S', MENU_CTRL_MASK | SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_W = getKeyStroke('W', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_Z = getKeyStroke('Z', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_V = getKeyStroke('V', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_U = getKeyStroke('U', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_T = getKeyStroke('T', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_S = getKeyStroke('S', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_R = getKeyStroke('R', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_O = getKeyStroke('O', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_N = getKeyStroke('N', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_M = getKeyStroke('M', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_L = getKeyStroke('L', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_K = getKeyStroke('K', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_J = getKeyStroke('J', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_I = getKeyStroke('I', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_H = getKeyStroke('H', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_F = getKeyStroke('F', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_E = getKeyStroke('E', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_D = getKeyStroke('D', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_C = getKeyStroke('C', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_B = getKeyStroke('B', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_4 = getKeyStroke('4', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_3 = getKeyStroke('3', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_2 = getKeyStroke('2', MENU_CTRL_MASK);
-    public static final KeyStroke CTRL_1 = getKeyStroke('1', MENU_CTRL_MASK);
-    public static final KeyStroke ALT_BACKSPACE = getKeyStroke(VK_BACK_SPACE, ALT_DOWN_MASK);
+    public static final KeyStroke CTRL_SHIFT_ALT_E = getKeyStroke('E', CTRL + ALT + SHIFT);
+    public static final KeyStroke CTRL_SHIFT_I = getKeyStroke('I', CTRL + SHIFT);
+    public static final KeyStroke CTRL_BACKSPACE = getKeyStroke(VK_BACK_SPACE, CTRL);
+    public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', CTRL | ALT);
+    public static final KeyStroke CTRL_SHIFT_V = getKeyStroke('V', CTRL | SHIFT);
+    public static final KeyStroke CTRL_SHIFT_C = getKeyStroke('C', CTRL | SHIFT);
+    public static final KeyStroke CTRL_SHIFT_F = getKeyStroke('F', CTRL | SHIFT);
+    public static final KeyStroke CTRL_SHIFT_Z = getKeyStroke('Z', SHIFT | CTRL);
+    public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
+    public static final KeyStroke CTRL_SHIFT_S = getKeyStroke('S', CTRL | SHIFT);
+    public static final KeyStroke CTRL_W = getKeyStroke('W', CTRL);
+    public static final KeyStroke CTRL_Z = getKeyStroke('Z', CTRL);
+    public static final KeyStroke CTRL_V = getKeyStroke('V', CTRL);
+    public static final KeyStroke CTRL_U = getKeyStroke('U', CTRL);
+    public static final KeyStroke CTRL_T = getKeyStroke('T', CTRL);
+    public static final KeyStroke CTRL_S = getKeyStroke('S', CTRL);
+    public static final KeyStroke CTRL_R = getKeyStroke('R', CTRL);
+    public static final KeyStroke CTRL_O = getKeyStroke('O', CTRL);
+    public static final KeyStroke CTRL_N = getKeyStroke('N', CTRL);
+    public static final KeyStroke CTRL_M = getKeyStroke('M', CTRL);
+    public static final KeyStroke CTRL_L = getKeyStroke('L', CTRL);
+    public static final KeyStroke CTRL_K = getKeyStroke('K', CTRL);
+    public static final KeyStroke CTRL_J = getKeyStroke('J', CTRL);
+    public static final KeyStroke CTRL_I = getKeyStroke('I', CTRL);
+    public static final KeyStroke CTRL_H = getKeyStroke('H', CTRL);
+    public static final KeyStroke CTRL_F = getKeyStroke('F', CTRL);
+    public static final KeyStroke CTRL_E = getKeyStroke('E', CTRL);
+    public static final KeyStroke CTRL_D = getKeyStroke('D', CTRL);
+    public static final KeyStroke CTRL_C = getKeyStroke('C', CTRL);
+    public static final KeyStroke CTRL_B = getKeyStroke('B', CTRL);
+    public static final KeyStroke CTRL_4 = getKeyStroke('4', CTRL);
+    public static final KeyStroke CTRL_3 = getKeyStroke('3', CTRL);
+    public static final KeyStroke CTRL_2 = getKeyStroke('2', CTRL);
+    public static final KeyStroke CTRL_1 = getKeyStroke('1', CTRL);
+    public static final KeyStroke ALT_BACKSPACE = getKeyStroke(VK_BACK_SPACE, ALT);
     public static final KeyStroke T = getKeyStroke('T');
     public static final KeyStroke F6 = getKeyStroke(VK_F6, 0);
     public static final KeyStroke F7 = getKeyStroke(VK_F7, 0);
     public static final KeyStroke F12 = getKeyStroke(VK_F12, 0);
     public static final KeyStroke TAB = getKeyStroke(VK_TAB, 0);
 
-    public static final KeyStroke CTRL_NUMPAD_PLUS = getKeyStroke(VK_ADD, CTRL_DOWN_MASK);
-    public static final KeyStroke CTRL_NUMPAD_MINUS = getKeyStroke(VK_SUBTRACT, CTRL_DOWN_MASK);
-    public static final KeyStroke CTRL_SHIFT_EQUALS = getKeyStroke(VK_EQUALS, CTRL_DOWN_MASK + SHIFT_DOWN_MASK);
-    public static final KeyStroke CTRL_NUMPAD_0 = getKeyStroke(VK_NUMPAD0, CTRL_DOWN_MASK);
-    public static final KeyStroke CTRL_ALT_NUMPAD_0 = getKeyStroke(VK_NUMPAD0, CTRL_DOWN_MASK + ALT_DOWN_MASK);
+    public static final KeyStroke CTRL_NUMPAD_PLUS = getKeyStroke(VK_ADD, CTRL);
+    public static final KeyStroke CTRL_NUMPAD_MINUS = getKeyStroke(VK_SUBTRACT, CTRL);
+    public static final KeyStroke CTRL_SHIFT_EQUALS = getKeyStroke(VK_EQUALS, CTRL + SHIFT);
+    public static final KeyStroke CTRL_NUMPAD_0 = getKeyStroke(VK_NUMPAD0, CTRL);
+    public static final KeyStroke CTRL_ALT_NUMPAD_0 = getKeyStroke(VK_NUMPAD0, CTRL + ALT);
 
     public static final KeyStroke ESC = getKeyStroke(VK_ESCAPE, 0);
 

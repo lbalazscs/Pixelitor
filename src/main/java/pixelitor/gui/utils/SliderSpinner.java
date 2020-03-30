@@ -39,6 +39,7 @@ import static java.awt.BorderLayout.WEST;
 import static java.awt.Color.GRAY;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
+import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 /**
  * A GUI Component consisting of a JSlider, a JSpinner and optionally a default button.
@@ -46,6 +47,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
  */
 public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private final JLabel label;
+    private final TextPosition textPosition;
 
     public enum TextPosition {
         BORDER, WEST, NORTH, NONE
@@ -74,6 +76,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private SliderSpinner(RangeParam model,
                           Color leftColor, Color rightColor,
                           TextPosition textPosition, boolean addDefaultButton) {
+        this.textPosition = textPosition;
 
         setLayout(new BorderLayout());
         this.model = model;
@@ -359,5 +362,13 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         super.setName(name);
         slider.setName(name);
         spinner.setName(name);
+    }
+
+    @Override
+    public int getNumLayoutColumns() {
+        if (textPosition == NONE) {
+            return 2;
+        }
+        return 1;
     }
 }

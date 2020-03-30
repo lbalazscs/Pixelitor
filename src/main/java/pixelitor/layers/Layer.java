@@ -35,7 +35,6 @@ import pixelitor.history.LayerRenameEdit;
 import pixelitor.history.LayerVisibilityChangeEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
-import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
@@ -175,8 +174,7 @@ public abstract class Layer implements Serializable {
         }
 
         if (addToHistory) {
-            History.add(
-                    new LayerVisibilityChangeEdit(comp, this, newVisibility));
+            History.add(new LayerVisibilityChangeEdit(comp, this, newVisibility));
         }
     }
 
@@ -310,13 +308,13 @@ public abstract class Layer implements Serializable {
     }
 
     /**
-     * Adds a mask corresponding to the selection if there is no mask,
-     * or modifies the existing one. It doesn't deselect.
-     * It also doesn't add the edit to the history, only returns it.
+     * Adds a mask corresponding to the given selection shape if there is no mask,
+     * or modifies the existing one.
+     * It doesn't add an edit to the history, only returns one, if requested.
      */
-    public PixelitorEdit addHidingMask(Selection sel, boolean createEdit) {
+    public PixelitorEdit addHidingMask(Shape selShape, boolean createEdit) {
         if (mask == null) {
-            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, canvas, sel);
+            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, canvas, selShape);
             return addImageAsMask(bwMask, false, "Add Layer Mask",
                     false, false, createEdit);
         } else {
@@ -328,7 +326,7 @@ public abstract class Layer implements Serializable {
             Graphics2D g = maskImage.createGraphics();
 
             // fill the unselected part with black to hide it
-            Shape unselectedShape = comp.getCanvas().invertShape(sel.getShape());
+            Shape unselectedShape = comp.getCanvas().invertShape(selShape);
             g.setColor(Color.BLACK);
             g.fill(unselectedShape);
             g.dispose();
@@ -358,7 +356,8 @@ public abstract class Layer implements Serializable {
             return;
         }
 
-        BufferedImage bwMask = addType.createBWImage(this, canvas, selection);
+        Shape selShape = selection == null ? null : selection.getShape();
+        BufferedImage bwMask = addType.createBWImage(this, canvas, selShape);
 
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();

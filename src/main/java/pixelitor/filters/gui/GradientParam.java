@@ -136,11 +136,6 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public int getNumGridBagCols() {
-        return 2;
-    }
-
-    @Override
     protected void doRandomize() {
         Color[] randomColors = new Color[defaultThumbPositions.length];
         for (int i = 0; i < randomColors.length; i++) {
@@ -210,9 +205,9 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    void setEnabled(boolean b) {
+    protected void setEnabledState() {
         if (gradientSlider != null) {
-            gradientSlider.setEnabled(b);
+            gradientSlider.setEnabled(shouldBeEnabled());
         }
     }
 
@@ -295,7 +290,7 @@ public class GradientParam extends AbstractFilterParam {
         }
     }
 
-    static class GUI extends JPanel {
+    static class GUI extends JPanel implements ParamGUI {
         private final GradientSlider slider;
         private final DefaultButton defaultButton;
 
@@ -308,8 +303,18 @@ public class GradientParam extends AbstractFilterParam {
         }
 
         @Override
+        public void updateGUI() {
+
+        }
+
+        @Override
         public void setEnabled(boolean enabled) {
             slider.setEnabled(enabled);
+        }
+
+        @Override
+        public void setToolTip(String tip) {
+            slider.setToolTipText(tip);
         }
 
         @Override
@@ -319,6 +324,11 @@ public class GradientParam extends AbstractFilterParam {
 
         public void updateDefaultButtonIcon() {
             defaultButton.updateIcon();
+        }
+
+        @Override
+        public int getNumLayoutColumns() {
+            return 2;
         }
     }
 }

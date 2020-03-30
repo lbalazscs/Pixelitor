@@ -51,7 +51,7 @@ public class ColorParam extends AbstractFilterParam {
     public JComponent createGUI() {
         var gui = new ColorParamGUI(this, true);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
 
         return gui;
     }
@@ -64,11 +64,6 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     public void reset(boolean trigger) {
         setColor(defaultColor, trigger);
-    }
-
-    @Override
-    public int getNumGridBagCols() {
-        return 2;
     }
 
     @Override

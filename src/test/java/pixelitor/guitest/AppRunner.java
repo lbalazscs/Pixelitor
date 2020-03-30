@@ -36,6 +36,7 @@ import org.assertj.swing.fixture.JPopupMenuFixture;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.io.Dirs;
 import pixelitor.io.IOThread;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.Tool;
@@ -70,6 +71,9 @@ public class AppRunner {
     private final Keyboard keyboard;
     private final FrameFixture pw;
 
+    private static File startingOpenDir;
+    private static File startingSaveDir;
+
     public AppRunner(File inputDir, String... fileNames) {
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
@@ -83,6 +87,7 @@ public class AppRunner {
                 .start();
 
         new PixelitorEventListener().register();
+        saveNormalSettings();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
                 .withTimeout(30, SECONDS)
@@ -90,7 +95,7 @@ public class AppRunner {
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
 
-        if(fileNames.length == 0) {
+        if (fileNames.length == 0) {
             return;
         }
 
@@ -150,6 +155,7 @@ public class AppRunner {
     }
 
     void exit() {
+        restoreNormalSettings();
         String exitMenuName = JVM.isMac ? "Quit" : "Exit";
         runMenuCommand(exitMenuName);
         findJOptionPane().yesButton().click();
@@ -196,7 +202,7 @@ public class AppRunner {
         // even if the dialog is not visible, the
         // async saving of the last file might be still running
         boolean stillWriting = EDT.call(IOThread::isBusyWriting);
-        while(stillWriting) {
+        while (stillWriting) {
             System.out.println("waiting 1s for the IO thread...");
             Utils.sleep(1, SECONDS);
             stillWriting = EDT.call(IOThread::isBusyWriting);
@@ -497,6 +503,16 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+    }
+
+    private static void saveNormalSettings() {
+        startingOpenDir = Dirs.getLastOpen();
+        startingSaveDir = Dirs.getLastSave();
+    }
+
+    private static void restoreNormalSettings() {
+        Dirs.setLastOpen(startingOpenDir);
+        Dirs.setLastSave(startingSaveDir);
     }
 
     public enum Randomize {YES, NO}

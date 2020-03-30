@@ -37,7 +37,7 @@ public class LogZoomParam extends RangeParam {
     public JComponent createGUI() {
         var gui = new LogRangeGUI(this);
         paramGUI = gui;
-        setParamGUIEnabledState();
+        setGUIEnabledState();
         return gui;
     }
 

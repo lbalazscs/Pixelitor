@@ -18,6 +18,7 @@
 package pixelitor.gui.utils;
 
 import pixelitor.filters.gui.FilterParam;
+import pixelitor.filters.gui.ParamGUI;
 
 import javax.swing.*;
 import java.awt.Component;
@@ -163,11 +164,12 @@ public class GridBagHelper {
     }
 
     public void addParam(FilterParam param) {
-        int cols = param.getNumGridBagCols();
+        JComponent paramGUI = param.createGUI();
+        int cols = ((ParamGUI) paramGUI).getNumLayoutColumns();
         if (cols == 2) {
-            addLabelAndControl(param.getName(), param.createGUI());
+            addLabelAndControl(param.getName(), paramGUI);
         } else if (cols == 1) {
-            addOnlyControl(param.createGUI());
+            addOnlyControl(paramGUI);
         }
     }
 }

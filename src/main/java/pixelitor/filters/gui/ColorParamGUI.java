@@ -103,4 +103,9 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         super.setEnabled(enabled); // so that isEnabled() works
         colorSwatch.setEnabled(enabled);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 2;
+    }
 }

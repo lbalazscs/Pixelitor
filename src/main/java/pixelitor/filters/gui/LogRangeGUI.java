@@ -74,4 +74,9 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
     public void setToolTip(String tip) {
         slider.setToolTipText(tip);
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
+    }
 }

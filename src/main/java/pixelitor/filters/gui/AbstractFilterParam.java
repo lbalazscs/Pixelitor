@@ -23,7 +23,7 @@ import java.util.Objects;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
- * An abstract parent class for {@link FilterParam} implementations.
+ * A base class for {@link FilterParam} implementations.
  */
 public abstract class AbstractFilterParam implements FilterParam {
     private final String name;
@@ -35,7 +35,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     // an extra action button to the right of the normal GUI,
     // typically some randomization, which will be enabled
-    // only for certain values of this param
+    // only for certain values of this filter parameter
     protected FilterButtonModel action;
 
     AbstractFilterParam(String name, RandomizePolicy randomizePolicy) {
@@ -82,22 +82,23 @@ public abstract class AbstractFilterParam implements FilterParam {
                 break;
         }
 
-        setEnabled(shouldBeEnabled());
+        setEnabledState();
     }
 
-    protected void setParamGUIEnabledState() {
+    protected void setEnabledState() {
+        if (paramGUI != null) {
+            boolean b = shouldBeEnabled();
+            paramGUI.setEnabled(b);
+        }
+    }
+
+    protected void setGUIEnabledState() {
         boolean b = shouldBeEnabled();
         paramGUI.setEnabled(b);
     }
 
-    private boolean shouldBeEnabled() {
+    protected boolean shouldBeEnabled() {
         return enabledByAppLogic && enabledByAnimation;
-    }
-
-    void setEnabled(boolean b) {
-        if (paramGUI != null) {
-            paramGUI.setEnabled(b);
-        }
     }
 
     @Override
@@ -113,7 +114,8 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     /**
-     * Randomize the settings without checking the permission
+     * Randomize the settings without checking the permission,
+     * and without triggering the filter
      */
     protected abstract void doRandomize();
 

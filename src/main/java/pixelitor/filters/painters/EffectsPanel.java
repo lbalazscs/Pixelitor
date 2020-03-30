@@ -23,7 +23,9 @@ import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
 import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.filters.gui.DefaultButton;
+import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamAdjustmentListener;
+import pixelitor.filters.gui.ParamGUI;
 import pixelitor.filters.gui.Resettable;
 
 import javax.swing.*;
@@ -40,10 +42,10 @@ import static java.awt.Color.WHITE;
 import static java.awt.FlowLayout.LEFT;
 
 /**
- * Configuration panel for SwingX area effects.
- * See {@link AreaEffect}
+ * Configuration panel for SwingX {@link AreaEffect}s.
+ * it can be the {@link ParamGUI} for an {@link EffectsParam}
  */
-public class EffectsPanel extends JPanel implements Resettable {
+public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
     public static final String GLOW_TAB_NAME = "Glow               ";
     public static final String INNER_GLOW_TAB_NAME = "Inner Glow     ";
     public static final String NEON_BORDER_TAB_NAME = "Neon Border ";
@@ -299,6 +301,21 @@ public class EffectsPanel extends JPanel implements Resettable {
     @Override
     public String getResetToolTip() {
         return "Reset the default effect settings";
+    }
+
+    @Override
+    public void updateGUI() {
+
+    }
+
+    @Override
+    public void setToolTip(String tip) {
+
+    }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
     }
 }
 

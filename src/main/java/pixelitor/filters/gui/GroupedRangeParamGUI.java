@@ -80,4 +80,9 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
             slider.setToolTip(tip);
         }
     }
+
+    @Override
+    public int getNumLayoutColumns() {
+        return 1;
+    }
 }
