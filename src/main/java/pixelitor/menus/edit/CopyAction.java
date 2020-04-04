@@ -33,6 +33,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
+import java.util.ResourceBundle;
 
 import static java.lang.String.format;
 
@@ -43,8 +44,8 @@ import static java.lang.String.format;
 public class CopyAction extends AbstractAction {
     private final CopySource source;
 
-    public CopyAction(CopySource source) {
-        super(source.toString());
+    public CopyAction(CopySource source, ResourceBundle texts) {
+        super(texts.getString(source.toResourceKey()));
         this.source = source;
     }
 

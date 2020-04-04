@@ -34,8 +34,8 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum PasteDestination {
     NEW_LAYER {
         @Override
-        public String toString() {
-            return "Paste as New Layer";
+        public String toResourceKey() {
+            return "paste_as_new_layer";
         }
 
         @Override
@@ -48,8 +48,8 @@ public enum PasteDestination {
         private int pastedCount = 1;
 
         @Override
-        public String toString() {
-            return "Paste as New Image";
+        public String toResourceKey() {
+            return "paste_as_new_img";
         }
 
         @Override
@@ -62,8 +62,8 @@ public enum PasteDestination {
         }
     }, MASK {
         @Override
-        public String toString() {
-            return "Paste as Layer Mask";
+        public String toResourceKey() {
+            return "paste_as_layer_mask";
         }
 
         @Override
@@ -103,4 +103,6 @@ public enum PasteDestination {
     };
 
     abstract void paste(BufferedImage pastedImage);
+
+    abstract String toResourceKey();
 }

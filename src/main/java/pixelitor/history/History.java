@@ -56,7 +56,8 @@ public class History {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
 
-    public static final Action UNDO_ACTION = new MenuAction("Undo",
+    public static final Action UNDO_ACTION = new MenuAction(
+            UIManager.getString("AbstractUndoableEdit.undoText"),
             Icons.getUndoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {
@@ -64,7 +65,8 @@ public class History {
         }
     };
 
-    public static final Action REDO_ACTION = new MenuAction("Redo",
+    public static final Action REDO_ACTION = new MenuAction(
+            UIManager.getString("AbstractUndoableEdit.redoText"),
             Icons.getRedoIcon(), AllowedLayerType.ANY) {
         @Override
         public void onClick() {

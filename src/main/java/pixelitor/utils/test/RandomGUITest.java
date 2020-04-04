@@ -93,7 +93,9 @@ import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
@@ -148,6 +150,8 @@ public class RandomGUITest {
     private static Rectangle startBounds;
 
     private static final boolean enableCopyPaste = false;
+
+    private static ResourceBundle texts = ResourceBundle.getBundle("texts", Locale.ENGLISH);
 
     /**
      * Utility class with static methods
@@ -953,10 +957,10 @@ public class RandomGUITest {
     private static void randomCopy() {
         if (rand.nextBoolean()) {
             log("copy layer");
-            executeAction(new CopyAction(CopySource.LAYER_OR_MASK));
+            executeAction(new CopyAction(CopySource.LAYER_OR_MASK, texts));
         } else {
             log("copy composite");
-            executeAction(new CopyAction(CopySource.COMPOSITE));
+            executeAction(new CopyAction(CopySource.COMPOSITE, texts));
         }
     }
 
@@ -974,13 +978,14 @@ public class RandomGUITest {
                 return;
             }
             log("paste as new image");
-            executeAction(new PasteAction(PasteDestination.NEW_IMAGE));
+            executeAction(new PasteAction(PasteDestination.NEW_IMAGE, texts));
             numPastedImages++;
         } else if (r == 1) {
             log("paste as new layer");
-            executeAction(new PasteAction(PasteDestination.NEW_LAYER));
+            executeAction(new PasteAction(PasteDestination.NEW_LAYER, texts));
             numPastedImages++;
         }
+        // paste as mask?
     }
 
     private static void randomChangeLayerOpacityOrBlending() {

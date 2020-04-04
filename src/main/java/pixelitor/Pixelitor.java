@@ -79,7 +79,10 @@ public class Pixelitor {
         // settings leads to mixed-language problems (see issue #35),
         // but keep the system locale for number formatting
         SYS_LOCALE = Locale.getDefault();
-        Locale.setDefault(Locale.US);
+
+        if (!"es".equals(SYS_LOCALE.getLanguage())) { // except for Spanish
+            Locale.setDefault(Locale.US);
+        }
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 

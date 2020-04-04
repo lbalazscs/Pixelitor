@@ -93,8 +93,8 @@ public enum CopySource {
         }
 
         @Override
-        public String toString() {
-            return "Copy Layer/Mask";
+        public String toResourceKey() {
+            return "copy_layer_mask";
         }
     }, COMPOSITE {
         @Override
@@ -103,10 +103,12 @@ public enum CopySource {
         }
 
         @Override
-        public String toString() {
-            return "Copy Composite";
+        public String toResourceKey() {
+            return "copy_composite";
         }
     };
 
     abstract BufferedImage getImage(Composition comp);
+
+    abstract String toResourceKey();
 }

@@ -104,6 +104,8 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
@@ -152,8 +154,12 @@ import static pixelitor.utils.Utils.getJavaMainVersion;
 public class MenuBar extends JMenuBar {
 
     public MenuBar(PixelitorWindow pw) {
+        Locale locale = Locale.getDefault();
+//        Locale locale = Locale.US;
+        ResourceBundle texts = ResourceBundle.getBundle("texts", locale);
+
         add(createFileMenu(pw));
-        add(createEditMenu());
+        add(createEditMenu(texts));
         add(createLayerMenu(pw));
         add(createSelectMenu());
         add(createImageMenu());
@@ -318,8 +324,9 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createEditMenu() {
-        PMenu editMenu = new PMenu("Edit", 'E');
+    private static JMenu createEditMenu(ResourceBundle texts) {
+        String editMenuName = texts.getString("edit");
+        PMenu editMenu = new PMenu(editMenuName, 'E');
 
         // last op
         editMenu.buildAction(RepeatLast.INSTANCE)
@@ -348,18 +355,28 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // copy
-        editMenu.addActionWithKey(new CopyAction(CopySource.LAYER_OR_MASK), CTRL_C);
-        editMenu.addActionWithKey(new CopyAction(CopySource.COMPOSITE), CTRL_SHIFT_C);
+        var copyLayerOrMask = new CopyAction(CopySource.LAYER_OR_MASK, texts);
+        editMenu.addActionWithKey(copyLayerOrMask, CTRL_C);
+
+        var copyComposite = new CopyAction(CopySource.COMPOSITE, texts);
+        editMenu.addActionWithKey(copyComposite, CTRL_SHIFT_C);
+
         // paste
-        editMenu.buildAction(new PasteAction(PasteDestination.NEW_IMAGE))
+        var pasteAsNewImage = new PasteAction(PasteDestination.NEW_IMAGE, texts);
+        editMenu.buildAction(pasteAsNewImage)
                 .alwaysEnabled().withKey(CTRL_V).add();
-        editMenu.addActionWithKey(new PasteAction(PasteDestination.NEW_LAYER), CTRL_SHIFT_V);
-        editMenu.addActionWithKey(new PasteAction(PasteDestination.MASK), CTRL_ALT_V);
+
+        var pasteAsNewLayer = new PasteAction(PasteDestination.NEW_LAYER, texts);
+        editMenu.addActionWithKey(pasteAsNewLayer, CTRL_SHIFT_V);
+
+        var pasteAsMask = new PasteAction(PasteDestination.MASK, texts);
+        editMenu.addActionWithKey(pasteAsMask, CTRL_ALT_V);
 
         editMenu.addSeparator();
 
         // preferences
-        Action preferencesAction = new MenuAction("Preferences...") {
+        String prefsMenuName = texts.getString("preferences");
+        Action preferencesAction = new MenuAction(prefsMenuName) {
             @Override
             public void onClick() {
                 PreferencesPanel.showInDialog();
