@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
@@ -32,7 +33,7 @@ public class AddTextLayerAction extends PAction implements ViewActivationListene
     public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
 
     private AddTextLayerAction() {
-        super("Add Text Layer", Icons.load("add_text_layer.png"));
+        super("Add Text Layer", Icons.loadThemed("add_text_layer.png", ThemedImageIcon.GREEN));
         setToolTip("Adds a new text layer.");
         setEnabled(false);
         Views.addActivationListener(this);

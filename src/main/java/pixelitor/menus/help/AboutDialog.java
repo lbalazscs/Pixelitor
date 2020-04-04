@@ -19,6 +19,7 @@ package pixelitor.menus.help;
 
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.DialogBuilder;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.OpenInBrowserAction;
 
 import javax.swing.*;
@@ -91,7 +92,13 @@ public class AboutDialog {
     }
 
     private static JButton createLinkButton(JComponent aboutPanel) {
-        var linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
+        String linkButtonText;
+        if (Themes.getCurrent().isDark()) {
+            linkButtonText = "<HTML><FONT color=\"#77ABD4\"><U>" + HOME_PAGE + "</U></FONT>";
+        } else {
+            linkButtonText = "<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT>";
+        }
+        var linkButton = new JButton(linkButtonText);
 
         linkButton.setHorizontalAlignment(CENTER);
         linkButton.setBorderPainted(false);

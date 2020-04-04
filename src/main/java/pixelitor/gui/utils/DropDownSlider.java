@@ -35,13 +35,12 @@ public class DropDownSlider extends JComboBox<String> {
     private final JSlider slider;
     private Dimension preferredSize;
 
-    public DropDownSlider(int minValue, int value, int maxValue, boolean limitRange) {
+    public DropDownSlider(int minValue, int value, int maxValue) {
         super(new String[]{String.valueOf(value)});
         recalcPreferredSize();
         setEditable(true);
 
-        JTextField textField = getEditorComponent();
-        new IntDocumentFilter(0, 100).useFor(textField);
+        new IntDocumentFilter(minValue, maxValue).useFor(getEditorComponent());
 
         slider = new JSlider(HORIZONTAL, minValue, maxValue, value);
         popupMenu = new JPopupMenu();

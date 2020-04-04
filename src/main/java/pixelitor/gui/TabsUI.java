@@ -139,5 +139,4 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     public JMenu getTabPlacementMenu() {
         return tabPlacementMenu.get();
     }
-
 }

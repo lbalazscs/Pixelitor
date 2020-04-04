@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,10 +21,7 @@ import org.jdesktop.swingx.JXList;
 import org.jdesktop.swingx.JXTextField;
 import org.jdesktop.swingx.prompt.BuddySupport;
 import org.jdesktop.swingx.prompt.PromptSupport;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.TFValidationLayerUI;
-import pixelitor.gui.utils.VectorIcon;
+import pixelitor.gui.utils.*;
 import pixelitor.layers.LayerButton;
 
 import javax.swing.*;
@@ -98,7 +95,7 @@ public class FilterSearchPanel extends JPanel {
         });
     }
 
-    public void forwardUpDownToFilterList(KeyEvent e) {
+    private void forwardUpDownToFilterList(KeyEvent e) {
         int keyCode = e.getKeyCode();
         if (keyCode == VK_DOWN || keyCode == VK_UP) {
             int numFilters = numMatchingFilters();
@@ -249,7 +246,7 @@ public class FilterSearchPanel extends JPanel {
 
     private static class SearchIcon extends VectorIcon {
         public SearchIcon() {
-            super(LayerButton.SELECTED_COLOR, 20, 14);
+            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : LayerButton.SELECTED_COLOR, 20, 14);
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.gui;
+
+import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
@@ -74,7 +76,11 @@ class CloseTabButton extends JButton {
         if (getModel().isRollover()) {
             g2.setColor(Color.RED);
         } else {
-            g2.setColor(Color.BLACK);
+            if (Themes.getCurrent().isDark()) {
+                g2.setColor(Themes.LIGHT_ICON_COLOR);
+            } else {
+                g2.setColor(Color.BLACK);
+            }
         }
         g2.drawLine(MARGIN, MARGIN, SIZE - MARGIN - 1, SIZE - MARGIN - 1);
         g2.drawLine(SIZE - MARGIN - 1, MARGIN, MARGIN, SIZE - MARGIN - 1);

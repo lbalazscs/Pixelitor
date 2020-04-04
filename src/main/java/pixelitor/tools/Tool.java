@@ -24,6 +24,7 @@ import pixelitor.filters.gui.PresetOwner;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.VectorIcon;
 import pixelitor.layers.Layer;
 import pixelitor.tools.gui.ToolButton;
@@ -37,12 +38,13 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+
+import static java.awt.Color.BLACK;
 
 /**
  * An abstract superclass for all tools.
@@ -363,7 +365,8 @@ public abstract class Tool implements KeyListener, PresetOwner {
 
     protected abstract static class ToolIcon extends VectorIcon {
         protected ToolIcon() {
-            super(Color.BLACK, ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
+            super(Themes.getCurrent().isDark() ? Themes.LIGHT_ICON_COLOR : BLACK,
+                ToolButton.TOOL_ICON_SIZE, ToolButton.TOOL_ICON_SIZE);
         }
     }
 }

@@ -23,6 +23,7 @@ import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
@@ -43,7 +44,7 @@ public class AddLayerMaskAction extends NamedAction
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
-        super("Add Layer Mask", Icons.load("add_layer_mask.png"));
+        super("Add Layer Mask", Icons.loadThemed("add_layer_mask.png", ThemedImageIcon.GREEN));
         setToolTip("<html>Adds a layer mask to the active layer. " +
             "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);

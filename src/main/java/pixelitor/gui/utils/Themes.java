@@ -30,8 +30,8 @@ public class Themes {
         // do not instantiate
     }
 
-    public static final Color DISABLED_TEXT_COLOR = new ColorUIResource(133, 133, 133);
-
+    public static final Color LIGHT_ICON_COLOR = new ColorUIResource(187, 187, 187);
+    public static final Color LIGHTER_ICON_COLOR = new ColorUIResource(217, 217, 217);
     // this theme will be used for the unit tests, otherwise it's overwritten at startup
     private static Theme currentTheme = Theme.NIMBUS;
 

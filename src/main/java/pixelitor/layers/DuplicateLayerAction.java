@@ -19,6 +19,7 @@ package pixelitor.layers;
 
 import pixelitor.Views;
 import pixelitor.gui.utils.OpenViewEnabledAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 
 import static pixelitor.utils.Texts.i18n;
@@ -30,7 +31,7 @@ public class DuplicateLayerAction extends OpenViewEnabledAction {
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
     private DuplicateLayerAction() {
-        super(i18n("duplicate_layer"), Icons.load("duplicate_layer.png"));
+        super(i18n("duplicate_layer"), Icons.loadThemed("duplicate_layer.png", ThemedImageIcon.GREEN));
         setToolTip(i18n("duplicate_layer_tt"));
     }
 

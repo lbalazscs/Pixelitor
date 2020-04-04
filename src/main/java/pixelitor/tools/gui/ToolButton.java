@@ -87,6 +87,14 @@ public class ToolButton extends JToggleButton {
         setPreferredSize(preferredSize);
     }
 
+    @Override
+    public void updateUI() {
+        if (tool != null) { // changing the theme
+            setIcon(tool.createIcon());
+        }
+        super.updateUI();
+    }
+
     private void addPreset(UserPreset preset) {
         if (numPresets == 0) {
             if (GUIUtils.CAN_USE_FILE_MANAGER) {

@@ -17,6 +17,7 @@
 package pixelitor.utils;
 
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.ThemedImageIcon;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -29,15 +30,15 @@ import java.net.URL;
  * Icon-related static utility methods
  */
 public final class Icons {
-    private static final Icon westArrowIcon = load("west_arrow.gif");
+    private static final Icon westArrowIcon = loadThemed("west_arrow.gif", ThemedImageIcon.BLUE);
     private static final Icon diceIcon = load("dice.png");
     private static final Icon dice2Icon = load("dice2.png");
-    private static final Icon northArrowIcon = load("north_arrow.gif");
-    private static final Icon southArrowIcon = load("south_arrow.gif");
-    private static final Icon textLayerIcon = load("text_layer.png");
+    private static final Icon northArrowIcon = loadThemed("north_arrow.gif", ThemedImageIcon.BLUE);
+    private static final Icon southArrowIcon = loadThemed("south_arrow.gif", ThemedImageIcon.BLUE);
+    private static final Icon textLayerIcon = load("text_layer.png", "text_layer_icon_dark.png");
     private static final Icon adjLayerIcon = load("adj_layer.png");
-    private static final Icon undoIcon = load("undo.png");
-    private static final Icon redoIcon = load("redo.png");
+    private static final Icon undoIcon = loadThemed("undo.png", ThemedImageIcon.BLUE);
+    private static final Icon redoIcon = loadThemed("redo.png", ThemedImageIcon.BLUE);
 
     private Icons() {
         // should not be instantiated
@@ -55,9 +56,17 @@ public final class Icons {
         return dice2Icon;
     }
 
+    public static Icon loadThemed(String iconFileName, int newPixelColor) {
+        assert iconFileName != null;
+        return new ThemedImageIcon(iconFileName, newPixelColor);
+    }
+
+    public static Icon load(String ltIconFileName, String dtIconFileName) {
+        return new ThemedImageIcon(ltIconFileName, dtIconFileName);
+    }
+
     public static Icon load(String iconFileName) {
         assert iconFileName != null;
-
         URL imgURL = ImageUtils.imagePathToURL(iconFileName);
         return new ImageIcon(imgURL);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,6 +24,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 
+import static java.awt.Color.BLACK;
 import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
 import static java.awt.RenderingHints.VALUE_STROKE_PURE;
 
@@ -36,6 +37,8 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
     private static final Stroke ARROW_STROKE = new BasicStroke(1.7f);
     protected static final Color ENABLED_ARROW_COLOR = new Color(45, 66, 85);
     protected static final Color DISABLED_ARROW_COLOR = new Color(160, 160, 160);
+    private static final Color ENABLED_ARROW_DARK_COLOR = new Color(181, 181, 181);
+    private static final Color DISABLED_ARROW_DARK_COLOR = new Color(95, 95, 95);
 
     protected final AngleParam model;
     protected boolean enabled = true;
@@ -55,12 +58,39 @@ public abstract class AbstractAngleUI extends JComponent implements MouseListene
         addMouseMotionListener(this);
     }
 
-    void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
+    void setupOuterColor(Graphics2D g, boolean darkTheme) {
         if (enabled) {
-            g2.setColor(ENABLED_ARROW_COLOR);
+            if (darkTheme) {
+                g.setColor(ENABLED_ARROW_DARK_COLOR);
+            } else {
+                g.setColor(BLACK);
+            }
         } else {
-            g2.setColor(DISABLED_ARROW_COLOR);
+            if (darkTheme) {
+                g.setColor(DISABLED_ARROW_DARK_COLOR);
+            } else {
+                g.setColor(Color.GRAY);
+            }
         }
+    }
+
+    protected void setupArrowColor(Graphics2D g, boolean darkTheme) {
+        if (enabled) {
+            if (darkTheme) {
+                g.setColor(ENABLED_ARROW_DARK_COLOR);
+            } else {
+                g.setColor(ENABLED_ARROW_COLOR);
+            }
+        } else {
+            if (darkTheme) {
+                g.setColor(DISABLED_ARROW_DARK_COLOR);
+            } else {
+                g.setColor(DISABLED_ARROW_COLOR);
+            }
+        }
+    }
+
+    static void drawArrow(Graphics2D g2, double angle, float startX, float startY, float endX, float endY) {
         g2.setStroke(ARROW_STROKE);
 
         g2.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);

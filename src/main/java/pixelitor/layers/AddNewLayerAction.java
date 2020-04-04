@@ -20,6 +20,7 @@ package pixelitor.layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ViewActivationListener;
@@ -36,7 +37,7 @@ public class AddNewLayerAction extends NamedAction implements ViewActivationList
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
 
     private AddNewLayerAction() {
-        super(i18n("new_layer"), Icons.load("add_layer.gif"));
+        super(i18n("new_layer"), Icons.loadThemed("add_layer.gif", ThemedImageIcon.GREEN));
         setToolTip("<html>Adds a new transparent image layer." +
             "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);

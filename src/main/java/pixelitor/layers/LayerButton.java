@@ -44,13 +44,14 @@ import static pixelitor.utils.Threads.threadInfo;
  * a layer in the "Layers" part of the GUI.
  */
 public class LayerButton extends JToggleButton implements LayerUI {
-    private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png");
-    private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png");
+    private static final Icon OPEN_EYE_ICON = Icons.load("eye_open.png", "eye_open_dark.png");
+    private static final Icon CLOSED_EYE_ICON = Icons.load("eye_closed.png", "eye_closed_dark.png");
 
     private static final String uiClassID = "LayerButtonUI";
 
     public static final Color UNSELECTED_COLOR = new Color(214, 217, 223);
     public static final Color SELECTED_COLOR = new Color(48, 76, 111);
+    public static final Color SELECTED_DARK_COLOR = new Color(16, 16, 16);
 
     public static final int BORDER_WIDTH = 2;
     private DragReorderHandler dragReorderHandler;

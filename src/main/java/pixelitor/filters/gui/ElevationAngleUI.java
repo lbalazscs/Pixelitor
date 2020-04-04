@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,6 +15,8 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 package pixelitor.filters.gui;
+
+import pixelitor.gui.utils.Themes;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -37,14 +39,12 @@ public class ElevationAngleUI extends AbstractAngleUI {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (enabled) {
-            g.setColor(ENABLED_ARROW_COLOR);
-        } else {
-            g.setColor(DISABLED_ARROW_COLOR);
-        }
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
+
+        boolean darkTheme = Themes.getCurrent().isDark();
+        setupOuterColor(g2, darkTheme);
 
         g2.drawLine(0, 0, 0, SIZE);
         g2.drawLine(0, SIZE, SIZE, SIZE);
@@ -55,6 +55,7 @@ public class ElevationAngleUI extends AbstractAngleUI {
         float endX = (float) (cx + radius * Math.cos(angle));
         float endY = (float) (cy + radius * Math.sin(angle));
 
+        setupArrowColor(g2, darkTheme);
         drawArrow(g2, Math.PI + angle, endX, endY, cx, cy);
     }
 }

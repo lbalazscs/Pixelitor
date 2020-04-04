@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.GUIText;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -112,6 +113,6 @@ public class BrushTool extends BlendingModeBrushTool {
 
     @Override
     public Icon createIcon() {
-        return Icons.load("brush_tool.png");
+        return Icons.loadThemed("brush_tool.png", ThemedImageIcon.WHITE);
     }
 }

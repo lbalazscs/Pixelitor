@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,22 +19,25 @@ package pixelitor.gui.utils;
 
 import javax.swing.*;
 
+/**
+ * The available Swing Look and Feels.
+ */
 public enum Theme {
     NIMBUS("Nimbus", false, true) {
         @Override
         String getLAFClassName() {
             return "javax.swing.plaf.nimbus.NimbusLookAndFeel";
         }
-//    }, FLAT_DARK("Flat Dark", true, false) {
-//        @Override
-//        String getLAFClassName() {
-//            return "com.formdev.flatlaf.FlatDarculaLaf";
-//        }
-//    }, FLAT_LIGHT("Flat Light", false, false) {
-//        @Override
-//        String getLAFClassName() {
-//            return "com.formdev.flatlaf.FlatIntelliJLaf";
-//        }
+    }, FLAT_DARK("Flat Dark", true, false) {
+        @Override
+        String getLAFClassName() {
+            return "com.formdev.flatlaf.FlatDarculaLaf";
+        }
+    }, FLAT_LIGHT("Flat Light", false, false) {
+        @Override
+        String getLAFClassName() {
+            return "com.formdev.flatlaf.FlatIntelliJLaf";
+        }
     }, SYSTEM("System", false, false) {
         @Override
         String getLAFClassName() {

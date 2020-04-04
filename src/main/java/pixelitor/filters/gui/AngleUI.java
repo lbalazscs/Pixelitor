@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2022 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,12 @@
 
 package pixelitor.filters.gui;
 
-import java.awt.Color;
+import pixelitor.gui.utils.Themes;
+
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 
-import static java.awt.Color.BLACK;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -41,12 +41,10 @@ public class AngleUI extends AbstractAngleUI {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (enabled) {
-            g.setColor(BLACK);
-        } else {
-            g.setColor(Color.GRAY);
-        }
+
+        boolean darkTheme = Themes.getCurrent().isDark();
         Graphics2D g2 = (Graphics2D) g;
+        setupOuterColor(g2, darkTheme);
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g2.draw(new Ellipse2D.Float(0, 0, SIZE, SIZE));
 
@@ -56,6 +54,7 @@ public class AngleUI extends AbstractAngleUI {
         float endX = (float) (cx + radius * Math.cos(angle));
         float endY = (float) (cy + radius * Math.sin(angle));
 
+        setupArrowColor(g2, darkTheme);
         drawArrow(g2, angle, cx, cy, endX, endY);
     }
 }

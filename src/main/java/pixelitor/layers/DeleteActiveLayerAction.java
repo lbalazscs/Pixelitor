@@ -23,6 +23,7 @@ import pixelitor.Layers;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
@@ -39,7 +40,7 @@ public class DeleteActiveLayerAction extends PAction
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
-        super(i18n("delete_layer"), Icons.load("delete_layer.gif"));
+        super(i18n("delete_layer"), Icons.loadThemed("delete_layer.gif", ThemedImageIcon.RED));
         setToolTip("Deletes the active layer.");
         setEnabled(false);
         Views.addActivationListener(this);

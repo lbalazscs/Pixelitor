@@ -20,6 +20,7 @@ package pixelitor.tools;
 import pixelitor.Composition;
 import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.Themes;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
@@ -170,6 +171,8 @@ public class ColorPickerTool extends Tool {
     private static class ColorPickerToolIcon extends Tool.ToolIcon {
         @Override
         public void paintIcon(Graphics2D g) {
+            boolean dark = Themes.getCurrent().isDark();
+
             // based on color_picker_tool.svg
             Path2D shape = new Path2D.Float();
 
@@ -182,7 +185,13 @@ public class ColorPickerTool extends Tool {
 
             g.setPaint(new Color(0x68_00_00_00, true));
             g.fill(shape);
-            g.setPaint(new Color(0xA5_00_00_00, true));
+
+            if (dark) {
+                g.setPaint(Themes.LIGHT_ICON_COLOR);
+            } else {
+                g.setPaint(new Color(0xA5_00_00_00, true));
+            }
+
             g.setStroke(new BasicStroke(0.9106483f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(shape);
 
@@ -197,7 +206,11 @@ public class ColorPickerTool extends Tool {
             shape.lineTo(20.03321, 14.331303);
             shape.closePath();
 
-            g.setPaint(Color.BLACK);
+            if (dark) {
+                g.setPaint(Themes.LIGHTER_ICON_COLOR);
+            } else {
+                g.setPaint(Color.BLACK);
+            }
             g.fill(shape);
             g.setStroke(new BasicStroke(0.90921646f, CAP_BUTT, JOIN_MITER, 4));
             g.draw(shape);

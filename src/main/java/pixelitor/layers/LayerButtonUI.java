@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.layers;
+
+import pixelitor.gui.utils.Themes;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
@@ -41,7 +43,11 @@ public class LayerButtonUI extends BasicToggleButtonUI {
         // paint a rounded rectangle with the selection color
         // on the selected layer button
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setColor(LayerButton.SELECTED_COLOR);
+        if (Themes.getCurrent().isDark()) {
+            g.setColor(LayerButton.SELECTED_DARK_COLOR);
+        } else {
+            g.setColor(LayerButton.SELECTED_COLOR);
+        }
         g.fillRoundRect(0, 0, b.getWidth(), b.getHeight(), 10, 10);
 
         // restore Graphics settings

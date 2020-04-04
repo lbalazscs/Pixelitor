@@ -22,6 +22,7 @@ import pixelitor.Views;
 import pixelitor.filters.curves.ToneCurvesFilter;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.PAction;
+import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
@@ -32,7 +33,8 @@ public class AddAdjLayerAction extends PAction implements ViewActivationListener
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
-        super("Add Adjustment Layer", Icons.load("add_adj_layer.png"));
+        super("Add Adjustment Layer",
+            Icons.loadThemed("add_adj_layer.png", ThemedImageIcon.WHITE));
         setToolTip("Adds a new adjustment layer.");
         setEnabled(false);
         Views.addActivationListener(this);
