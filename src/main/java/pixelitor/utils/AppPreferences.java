@@ -25,6 +25,8 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
+import pixelitor.gui.utils.Theme;
+import pixelitor.gui.utils.Themes;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
@@ -88,6 +90,8 @@ public final class AppPreferences {
     private static final String THUMB_SIZE_KEY = "thumb_size";
 
     private static final String LAST_TOOL_KEY = "last_tool";
+    private static final String THEME_KEY = "theme";
+    private static final String LANG_KEY = "lang";
 
     private static final String GUIDE_COLOR_KEY = "guide_color";
     private static final String GUIDE_STROKE_KEY = "guide_stroke";
@@ -341,6 +345,8 @@ public final class AppPreferences {
         saveLastToolName();
         saveGuideStyles();
         saveCropGuideStyles();
+        saveTheme();
+        saveLanguage();
     }
 
     public static Color loadFgColor() {
@@ -442,4 +448,26 @@ public final class AppPreferences {
         toolsNode.put(LAST_TOOL_KEY, Tools.getCurrent().getName());
     }
 
+    public static Theme getDefaultTheme() {
+        String code = mainNode.get(THEME_KEY, "Nimbus");
+        Theme[] themes = Theme.values();
+        for (Theme theme : themes) {
+            if (code.equals(theme.toString())) {
+                return theme;
+            }
+        }
+        return Theme.NIMBUS;
+    }
+
+    private static void saveTheme() {
+        mainNode.put(THEME_KEY, Themes.getCurrent().getSaveCode());
+    }
+
+    public static String loadLanguageCode() {
+        return mainNode.get(LANG_KEY, "en");
+    }
+
+    private static void saveLanguage() {
+        mainNode.put(LANG_KEY, Texts.getCurrentLanguage().getCode());
+    }
 }

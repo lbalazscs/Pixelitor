@@ -93,9 +93,7 @@ import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
-import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
@@ -150,8 +148,6 @@ public class RandomGUITest {
     private static Rectangle startBounds;
 
     private static final boolean enableCopyPaste = false;
-
-    private static ResourceBundle texts = ResourceBundle.getBundle("texts", Locale.ENGLISH);
 
     /**
      * Utility class with static methods
@@ -957,10 +953,10 @@ public class RandomGUITest {
     private static void randomCopy() {
         if (rand.nextBoolean()) {
             log("copy layer");
-            executeAction(new CopyAction(CopySource.LAYER_OR_MASK, texts));
+            executeAction(new CopyAction(CopySource.LAYER_OR_MASK));
         } else {
             log("copy composite");
-            executeAction(new CopyAction(CopySource.COMPOSITE, texts));
+            executeAction(new CopyAction(CopySource.COMPOSITE));
         }
     }
 
@@ -978,11 +974,11 @@ public class RandomGUITest {
                 return;
             }
             log("paste as new image");
-            executeAction(new PasteAction(PasteDestination.NEW_IMAGE, texts));
+            executeAction(new PasteAction(PasteDestination.NEW_IMAGE));
             numPastedImages++;
         } else if (r == 1) {
             log("paste as new layer");
-            executeAction(new PasteAction(PasteDestination.NEW_LAYER, texts));
+            executeAction(new PasteAction(PasteDestination.NEW_LAYER));
             numPastedImages++;
         }
         // paste as mask?
@@ -1054,8 +1050,8 @@ public class RandomGUITest {
         log("new text layer");
         var comp = OpenImages.getActiveComp();
         TextLayer textLayer = new TextLayer(comp);
-        TextSettings textSettings = textLayer.getSettings();
-        textSettings.randomize();
+        TextSettings textSettings = TextSettings.createRandomSettings();
+        textLayer.setSettings(textSettings);
         new LayerAdder(comp)
                 .withHistory("New Random Text Layer")
                 .atPosition(ABOVE_ACTIVE)

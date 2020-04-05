@@ -19,6 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -30,7 +31,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 
@@ -40,8 +40,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 public class PasteAction extends AbstractAction {
     private final PasteDestination destination;
 
-    public PasteAction(PasteDestination destination, ResourceBundle texts) {
-        super(texts.getString(destination.toResourceKey()));
+    public PasteAction(PasteDestination destination) {
+        super(Texts.get(destination.toResourceKey()));
 
         this.destination = destination;
     }

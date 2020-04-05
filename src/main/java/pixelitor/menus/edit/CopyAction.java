@@ -23,6 +23,7 @@ import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Texts;
 import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -33,7 +34,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
-import java.util.ResourceBundle;
 
 import static java.lang.String.format;
 
@@ -44,8 +44,8 @@ import static java.lang.String.format;
 public class CopyAction extends AbstractAction {
     private final CopySource source;
 
-    public CopyAction(CopySource source, ResourceBundle texts) {
-        super(texts.getString(source.toResourceKey()));
+    public CopyAction(CopySource source) {
+        super(Texts.get(source.toResourceKey()));
         this.source = source;
     }
 

@@ -26,6 +26,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
 import pixelitor.io.IOThread;
 import pixelitor.io.OpenSave;
 import pixelitor.layers.AddLayerMaskAction;
@@ -39,9 +40,9 @@ import pixelitor.tools.util.DragDisplay;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Shapes;
+import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
-import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.InputEvent;
@@ -84,6 +85,8 @@ public class Pixelitor {
             Locale.setDefault(Locale.US);
         }
 
+        Texts.loadLanguage();
+
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 
         if (JVM.isLinux) {
@@ -120,7 +123,8 @@ public class Pixelitor {
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
-        setLookAndFeel();
+        Themes.install(AppPreferences.getDefaultTheme(),
+                false, true);
 
         var pw = PixelitorWindow.getInstance();
         Dialogs.setMainWindowInitialized(true);
@@ -140,20 +144,6 @@ public class Pixelitor {
                 .thenRunAsync(Utils::preloadFontNames,
                         IOThread.getExecutor())
                 .exceptionally(Messages::showExceptionOnEDT);
-    }
-
-    private static void setLookAndFeel() {
-        try {
-//            // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/color.html
-//            UIManager.put("nimbusBase", new ColorUIResource(19, 111, 13));
-//            UIManager.put("nimbusBlueGrey", new ColorUIResource(5, 27, 111));
-//            UIManager.put("control", new ColorUIResource(111, 0, 18));
-
-            UIManager.setLookAndFeel(
-                    "javax.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception e) {
-            Dialogs.showExceptionDialog(e);
-        }
     }
 
     /**

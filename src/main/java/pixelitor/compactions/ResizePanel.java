@@ -24,6 +24,7 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.TFValidationLayerUI;
 import pixelitor.gui.utils.TextFieldValidator;
+import pixelitor.gui.utils.Themes;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.utils.Utils;
@@ -65,6 +66,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private final Validator widthValidator = new Validator("Width");
     private final Validator heightValidator = new Validator("Height");
     private final TitledBorder titledBorder;
+    private String arrowString;
 
     private ResizePanel(Canvas canvas) {
         oldWidth = canvas.getImWidth();
@@ -119,6 +121,17 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         pixelPercentChooser2.addItemListener(this);
 
         constrainProportionsCB.addItemListener(this);
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+
+        if (Themes.getCurrent().isNimbus()) {
+            arrowString = " \u2794 ";
+        } else {
+            arrowString = " to ";
+        }
     }
 
     private boolean unitsArePixels() {
@@ -304,7 +317,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     }
 
     private void updateStatusLine() {
-        String oldSize = oldWidth + "\u00d7" + oldHeight + " \u2794 ";
+        String oldSize = oldWidth + "\u00d7" + oldHeight + arrowString;
         if (newWidth > 0 && newHeight > 0) {
             titledBorder.setTitle(oldSize + newWidth + "\u00d7" + newHeight);
         } else {

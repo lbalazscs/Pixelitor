@@ -52,6 +52,7 @@ import pixelitor.gui.View;
 import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
@@ -94,6 +95,7 @@ import pixelitor.utils.FilterCreator;
 import pixelitor.utils.Messages;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Tests3x3;
+import pixelitor.utils.Texts;
 import pixelitor.utils.debug.AppNode;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -104,7 +106,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static java.awt.BorderLayout.CENTER;
@@ -154,9 +155,7 @@ import static pixelitor.utils.Utils.getJavaMainVersion;
 public class MenuBar extends JMenuBar {
 
     public MenuBar(PixelitorWindow pw) {
-        Locale locale = Locale.getDefault();
-//        Locale locale = Locale.US;
-        ResourceBundle texts = ResourceBundle.getBundle("texts", locale);
+        ResourceBundle texts = Texts.getResources();
 
         add(createFileMenu(pw));
         add(createEditMenu(texts));
@@ -355,21 +354,21 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // copy
-        var copyLayerOrMask = new CopyAction(CopySource.LAYER_OR_MASK, texts);
+        var copyLayerOrMask = new CopyAction(CopySource.LAYER_OR_MASK);
         editMenu.addActionWithKey(copyLayerOrMask, CTRL_C);
 
-        var copyComposite = new CopyAction(CopySource.COMPOSITE, texts);
+        var copyComposite = new CopyAction(CopySource.COMPOSITE);
         editMenu.addActionWithKey(copyComposite, CTRL_SHIFT_C);
 
         // paste
-        var pasteAsNewImage = new PasteAction(PasteDestination.NEW_IMAGE, texts);
+        var pasteAsNewImage = new PasteAction(PasteDestination.NEW_IMAGE);
         editMenu.buildAction(pasteAsNewImage)
                 .alwaysEnabled().withKey(CTRL_V).add();
 
-        var pasteAsNewLayer = new PasteAction(PasteDestination.NEW_LAYER, texts);
+        var pasteAsNewLayer = new PasteAction(PasteDestination.NEW_LAYER);
         editMenu.addActionWithKey(pasteAsNewLayer, CTRL_SHIFT_V);
 
-        var pasteAsMask = new PasteAction(PasteDestination.MASK, texts);
+        var pasteAsMask = new PasteAction(PasteDestination.MASK);
         editMenu.addActionWithKey(pasteAsMask, CTRL_ALT_V);
 
         editMenu.addSeparator();
@@ -1337,6 +1336,13 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 pw.getContentPane().revalidate();
+            }
+        });
+
+        sub.addAlwaysEnabledAction(new MenuAction("update all UI") {
+            @Override
+            public void onClick() {
+                Themes.updateAllUI();
             }
         });
 
