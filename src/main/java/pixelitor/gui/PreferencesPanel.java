@@ -32,6 +32,7 @@ import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
 import pixelitor.layers.LayerButtonLayout;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Cursors;
 import pixelitor.utils.Language;
 import pixelitor.utils.Texts;
 
@@ -108,7 +109,12 @@ public class PreferencesPanel extends JPanel {
         gbh.addLabelAndControl("Theme: ", themeChooser);
         themeChooser.addActionListener(e -> {
             Theme theme = themes.getSelectedItem();
-            Themes.install(theme, true, false);
+            setCursor(Cursors.BUSY);
+            EventQueue.invokeLater(() -> {
+                Themes.install(theme, true, false);
+                SwingUtilities.getWindowAncestor(this).pack();
+                setCursor(Cursors.DEFAULT);
+            });
         });
     }
 

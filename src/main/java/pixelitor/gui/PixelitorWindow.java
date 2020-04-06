@@ -23,7 +23,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.GUIUtils;
+import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
 import pixelitor.menus.MenuBar;
 import pixelitor.menus.help.AboutDialog;
@@ -71,7 +71,7 @@ public class PixelitorWindow extends JFrame {
     private PixelitorWindow() {
         super(Build.getPixelitorWindowFixTitle());
 
-        Dimension screenSize = GUIUtils.getMaxWindowSize();
+        Dimension screenSize = Screens.getMaxWindowSize();
 
         setupWindowClosing();
 

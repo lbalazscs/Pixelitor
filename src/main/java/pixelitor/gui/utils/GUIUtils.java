@@ -32,13 +32,10 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -48,6 +45,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,6 +55,7 @@ import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
 import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 import static pixelitor.utils.Cursors.BUSY;
 import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Keys.ESC;
@@ -69,42 +69,7 @@ public final class GUIUtils {
     private GUIUtils() {
     }
 
-    public static void centerOnScreen(Component component) {
-        Dimension screen = getMaxWindowSize();
-        Dimension window = component.getSize();
-
-        if (window.height > screen.height) {
-            window.height = screen.height;
-        }
-
-        if (window.width > screen.width) {
-            window.width = screen.width;
-        }
-
-        // center it
-        component.setLocation((screen.width - window.width) / 2,
-                (screen.height - window.height) / 2);
-
-        // if it was bigger than the screen, restrict it to screen size
-        component.setSize(window);
-    }
-
-    public static Dimension getMaxWindowSize() {
-        Rectangle bounds;
-        try {
-            // use this because it takes into account areas
-            // like the taskbar, but it can throw
-            // a "Window must not be zero" if there are 3 monitors
-            // on Linux with some newer Java versions, see
-            // https://github.com/lbalazscs/Pixelitor/issues/15
-            bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                    .getMaximumWindowBounds();
-        } catch (Exception e) {
-            return Toolkit.getDefaultToolkit().getScreenSize();
-        }
-
-        return new Dimension(bounds.width, bounds.height);
-    }
+    private static final Map<String, Point> lastDialogLocationsByTitle = new HashMap<>();
 
     /**
      * @return true if any app window has focus
@@ -172,13 +137,26 @@ public final class GUIUtils {
     }
 
     public static void showDialog(JDialog d) {
-        centerOnScreen(d);
+        showDialog(d, SCREEN_CENTER);
+    }
+
+    public static void showDialog(JDialog d, Screens.Align align) {
+        Point loc = lastDialogLocationsByTitle.get(d.getTitle());
+        if (loc != null) {
+            d.setLocation(loc);
+        } else {
+            Screens.position(d, align);
+        }
+
         d.setVisible(true);
     }
 
     public static void closeDialog(JDialog d, boolean dispose) {
         if (d != null && d.isVisible()) {
+            lastDialogLocationsByTitle.put(d.getTitle(), d.getLocationOnScreen());
             d.setVisible(false);
+            // dispose should not be called if the dialog will be re-shown
+            // because then AssertJ-Swing doesn't find it even if it is there
             if (dispose) {
                 d.dispose();
             }

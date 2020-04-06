@@ -21,6 +21,8 @@ import pixelitor.filters.Filter;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
 
+import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
+
 /**
  * A filter that has a GUI for customization
  */
@@ -47,6 +49,7 @@ public abstract class FilterWithGUI extends Filter {
                 .title(getName())
                 .name("filterDialog")
                 .content(gui)
+                .align(FRAME_RIGHT)
                 .withScrollbars()
                 .okAction(() -> dr.onFilterDialogAccepted(getName()))
                 .cancelAction(dr::onFilterDialogCanceled)

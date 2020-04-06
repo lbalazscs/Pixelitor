@@ -31,6 +31,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
+import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 
 /**
  * A fluent interface for building JDialogs
@@ -51,6 +52,7 @@ public class DialogBuilder {
     private boolean notifyGlobalEvents = true;
     private boolean modal = true;
     private boolean disposeWhenClosing = true;
+    private Screens.Align align = SCREEN_CENTER;
 
     private Runnable okAction;
     private Runnable cancelAction;
@@ -142,6 +144,11 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder align(Screens.Align align) {
+        this.align = align;
+        return this;
+    }
+
     public DialogBuilder willBeShownAgain() {
         disposeWhenClosing = false;
         return this;
@@ -204,7 +211,7 @@ public class DialogBuilder {
      */
     public JDialog show() {
         JDialog d = build();
-        GUIUtils.showDialog(d);
+        GUIUtils.showDialog(d, align);
         return d;
     }
 
@@ -325,12 +332,8 @@ public class DialogBuilder {
     }
 
     private void closeDialog(JDialog d) {
-        d.setVisible(false);
-        // dispose should not be called if the dialog will be re-shown
-        // because then AssertJ-Swing doesn't find it even if it is there
-        if (disposeWhenClosing) {
-            d.dispose();
-        }
+        assert d.isVisible();
+        GUIUtils.closeDialog(d, disposeWhenClosing);
     }
 
     private void setupDefaults() {

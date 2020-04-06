@@ -103,6 +103,9 @@ import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
+import java.awt.GraphicsConfiguration;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
@@ -1381,6 +1384,19 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 GlobalEvents.registerDebugMouseWatching(false);
+            }
+        });
+
+        sub.addAction(new MenuAction("Debug Screen Location") {
+            @Override
+            public void onClick() {
+                Point locationOnScreen = pw.getLocationOnScreen();
+                System.out.println("locationOnScreen = " + locationOnScreen);
+                Rectangle bounds = pw.getBounds();
+                System.out.println("bounds = " + bounds);
+                GraphicsConfiguration gc = pw.getGraphicsConfiguration();
+                Rectangle gcBounds = gc.getBounds();
+                System.out.println("gcBounds = " + gcBounds);
             }
         });
 

@@ -31,6 +31,7 @@ import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
+import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 
 /**
  * A dialog with OK and Cancel buttons at the bottom.
@@ -90,7 +91,7 @@ public abstract class OKCancelDialog extends JDialog {
         GUIUtils.setupCancelWhenEscIsPressed(this, this::cancelAction);
 
         pack();
-        GUIUtils.centerOnScreen(this);
+        Screens.position(this, SCREEN_CENTER);
     }
 
     public void setOKButtonText(String text) {

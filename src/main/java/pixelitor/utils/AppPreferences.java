@@ -25,6 +25,7 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
+import pixelitor.gui.utils.Screens;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
 import pixelitor.guides.GuideStrokeType;
@@ -119,12 +120,27 @@ public final class AppPreferences {
             width = screen.width;
             height = screen.height;
         }
-        if (width > screen.width) {
-            width = screen.width;
+
+        if (!Screens.hasMultipleMonitors()) {
+            // if there are multiple monitors, then negative coordinates
+            // are fine if there is an extended desktop, with the
+            // main monitor on the right side
+            if (x < 0 || y < 0) {
+                x = 0;
+                y = 0;
+            }
+
+            // if there are multiple monitors, then screen refers to the
+            // primary monitor while the actual coordinates could be
+            // for the secondary one
+            if (width > screen.width) {
+                width = screen.width;
+            }
+            if (height > screen.height) {
+                height = screen.height;
+            }
         }
-        if (height > screen.height) {
-            height = screen.height;
-        }
+
         if (width < 300) { // something went wrong
             width = 300;
         }
@@ -132,13 +148,8 @@ public final class AppPreferences {
             height = 200;
         }
 
-        if (x < 0 || y < 0) {
-            x = 0;
-            y = 0;
-        }
-
         boolean maximized = mainNode.getBoolean(MAXIMIZED_KEY, false);
-        if (maximized && JVM.isWindows) {
+        if (maximized && saveMaximizedState()) {
             pw.setSavedNormalBounds(new Rectangle(x, y, width, height));
             pw.maximize();
         } else {
@@ -146,10 +157,18 @@ public final class AppPreferences {
         }
     }
 
+    private static boolean saveMaximizedState() {
+        // With multiple monitors it would maximize to the primary one
+        // even if it has saved coordinates in another one
+        // The active screen index or GraphicsDevice.getIDstring()
+        // could be also saved, but it seems error-prone...
+        return JVM.isWindows && !Screens.hasMultipleMonitors();
+    }
+
     private static void saveFramePosition(PixelitorWindow pw) {
         boolean maximized = pw.isMaximized();
         Rectangle bounds;
-        if (maximized && JVM.isWindows) {
+        if (maximized && saveMaximizedState()) {
             bounds = pw.getNormalBounds();
             if (bounds == null) { // Fallback for safety. Should not be necessary.
                 bounds = pw.getBounds();
