@@ -759,6 +759,10 @@ public class ImageUtils {
         return image;
     }
 
+    public static BufferedImage crop(BufferedImage input, Rectangle bounds) {
+        return crop(input, bounds.x, bounds.y, bounds.width, bounds.height);
+    }
+
     public static BufferedImage crop(BufferedImage input, int x, int y, int width, int height) {
         assert input != null;
 

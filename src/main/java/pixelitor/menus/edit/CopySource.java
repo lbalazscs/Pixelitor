@@ -17,17 +17,20 @@
 
 package pixelitor.menus.edit;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
+import pixelitor.compactions.Crop;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
+import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -60,36 +63,7 @@ public enum CopySource {
                 return null;
             }
 
-            if (!comp.hasSelection()) {
-                return canvasSizedImage;
-            }
-
-            return createImageWithSelectedPixels(comp, canvasSizedImage);
-        }
-
-        private BufferedImage createImageWithSelectedPixels(Composition comp, BufferedImage canvasSizedImage) {
-            Shape selectionShape = comp.getSelection().getShape();
-            Rectangle bounds = selectionShape.getBounds();
-
-            // just to be sure that the bounds are inside the canvas
-            bounds = SwingUtilities.computeIntersection(
-                    0, 0, comp.getCanvasImWidth(), comp.getCanvasImHeight(), // image bounds
-                    bounds
-            );
-            if (bounds.isEmpty()) { // the selection was outside the image
-                return null;
-            }
-
-            BufferedImage boundsSizeImg = canvasSizedImage.getSubimage(
-                    bounds.x, bounds.y, bounds.width, bounds.height);
-
-            BufferedImage finalImage = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
-            Graphics2D g2 = finalImage.createGraphics();
-            var at = AffineTransform.getTranslateInstance(-bounds.x, -bounds.y);
-            g2.setClip(at.createTransformedShape(selectionShape));
-            g2.drawImage(boundsSizeImg, 0, 0, null);
-            g2.dispose();
-            return finalImage;
+            return createImageWithSelectedPixels(canvasSizedImage, comp);
         }
 
         @Override
@@ -99,7 +73,7 @@ public enum CopySource {
     }, COMPOSITE {
         @Override
         BufferedImage getImage(Composition comp) {
-            return comp.getCompositeImage();
+            return createImageWithSelectedPixels(comp.getCompositeImage(), comp);
         }
 
         @Override
@@ -107,6 +81,45 @@ public enum CopySource {
             return "copy_composite";
         }
     };
+
+    private static BufferedImage createImageWithSelectedPixels(
+            BufferedImage canvasSizedImage, Composition comp) {
+        if (!comp.hasSelection()) {
+            return canvasSizedImage;
+        }
+
+        Selection selection = comp.getSelection();
+        Shape selectionShape = selection.getShape();
+        if (selection.isRectangular()) {
+            // for rectangular selections a simple crop is needed
+            Rectangle2D selRect = (Rectangle2D) selectionShape;
+            Rectangle selBounds = Crop.roundCropRect(selRect);
+            return cropToSelectionBounds(canvasSizedImage, comp.getCanvas(), selBounds);
+        }
+
+        // in the case of a nonrectangular selection
+        // set the unselected parts to transparent with an AA border
+        Rectangle selBounds = selectionShape.getBounds();
+
+        BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(selBounds.width, selBounds.height);
+        Graphics2D g2 = ImageUtils.setupForSoftSelection(tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+
+        g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
+        g2.dispose();
+        return tmpImg;
+    }
+
+    private static BufferedImage cropToSelectionBounds(BufferedImage canvasSizedImage, Canvas canvas, Rectangle selBounds) {
+        // just to be sure that the bounds are inside the canvas
+        selBounds = SwingUtilities.computeIntersection(
+                0, 0, canvas.getImWidth(), canvas.getImHeight(),
+                selBounds
+        );
+        if (selBounds.isEmpty()) { // the selection was outside the image
+            return null;
+        }
+        return ImageUtils.crop(canvasSizedImage, selBounds);
+    }
 
     abstract BufferedImage getImage(Composition comp);
 

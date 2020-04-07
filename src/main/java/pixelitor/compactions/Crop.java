@@ -155,7 +155,7 @@ public class Crop implements CompAction {
      * Transform fractional crop dimensions (in zoomed-in images)
      * into the actual pixel boundaries
      */
-    private static Rectangle roundCropRect(Rectangle2D rect) {
+    public static Rectangle roundCropRect(Rectangle2D rect) {
         int x = (int) Math.round(rect.getX());
         int y = (int) Math.round(rect.getY());
         int width = (int) Math.round(rect.getWidth());
