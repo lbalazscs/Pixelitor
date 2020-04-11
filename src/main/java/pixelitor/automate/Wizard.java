@@ -104,20 +104,20 @@ public abstract class Wizard {
             return;
         }
 
-        WizardPage nextPage = currentPage.getNext();
-        if (nextPage == null) { // dialog finished
-            dialog.close();
-            finalAction();
-        } else {
+        currentPage.getNext().ifPresentOrElse(nextPage -> {
             JComponent panel = nextPage.createPanel(this, dr);
-            this.dialog.changeForm(panel);
-            this.dialog.setHeaderMessage(nextPage.getHeaderText(this));
+            dialog.changeForm(panel);
+            dialog.setHeaderMessage(nextPage.getHeaderText(this));
             currentPage = nextPage;
 
-            if (currentPage.getNext() == null) { // this is the last page
+            if (currentPage.isLast()) {
                 dialog.setOKButtonText(finishButtonText);
             }
-        }
+        }, () -> {
+            // dialog finished
+            dialog.close();
+            finalAction();
+        });
     }
 
     protected abstract boolean mayMoveForwardIfNextPressed(WizardPage wizardPage,

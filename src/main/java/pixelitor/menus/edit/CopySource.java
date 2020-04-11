@@ -20,11 +20,13 @@ package pixelitor.menus.edit;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.compactions.Crop;
+import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Result;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
@@ -39,7 +41,7 @@ import java.awt.image.BufferedImage;
 public enum CopySource {
     LAYER_OR_MASK {
         @Override
-        BufferedImage getImage(Composition comp) {
+        Result<BufferedImage, String> getImage(Composition comp) {
             Layer layer = comp.getActiveLayer();
             if (layer.isMaskEditing()) {
                 layer = layer.getMask();
@@ -47,20 +49,20 @@ public enum CopySource {
 
             BufferedImage canvasSizedImage = null;
 
-            if (layer instanceof ImageLayer) {
+            if (layer instanceof AdjustmentLayer) {
+                return Result.error("adjustment layers cannot be copied");
+            } else if (layer instanceof ImageLayer) {
                 canvasSizedImage = ((ImageLayer) layer).getCanvasSizedSubImage();
-            }
-
-            // TODO Text layers are rasterized, but they should be probably copied
-            // in other formats as well (as a string, as a serialized object)
-            // and pasting into Pixelitor should choose the serialized object
-            // There could be also an internal clipboard, to handle such cases
-            if (layer instanceof TextLayer) {
+            } else if (layer instanceof TextLayer) {
+                // TODO Text layers are rasterized, but they should be probably copied
+                //   in other formats as well (as a string, as a serialized object)
+                //   and pasting into Pixelitor should choose the serialized object
+                //   There could be also an internal clipboard, to handle such cases
                 canvasSizedImage = ((TextLayer) layer).createRasterizedImage();
             }
 
             if (canvasSizedImage == null) {
-                return null;
+                return Result.error("program error (no image from layer)");
             }
 
             return createImageWithSelectedPixels(canvasSizedImage, comp);
@@ -72,7 +74,7 @@ public enum CopySource {
         }
     }, COMPOSITE {
         @Override
-        BufferedImage getImage(Composition comp) {
+        Result<BufferedImage, String> getImage(Composition comp) {
             return createImageWithSelectedPixels(comp.getCompositeImage(), comp);
         }
 
@@ -82,10 +84,10 @@ public enum CopySource {
         }
     };
 
-    private static BufferedImage createImageWithSelectedPixels(
+    private static Result<BufferedImage, String> createImageWithSelectedPixels(
             BufferedImage canvasSizedImage, Composition comp) {
         if (!comp.hasSelection()) {
-            return canvasSizedImage;
+            return Result.ok(canvasSizedImage);
         }
 
         Selection selection = comp.getSelection();
@@ -106,22 +108,22 @@ public enum CopySource {
 
         g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
-        return tmpImg;
+        return Result.ok(tmpImg);
     }
 
-    private static BufferedImage cropToSelectionBounds(BufferedImage canvasSizedImage, Canvas canvas, Rectangle selBounds) {
+    private static Result<BufferedImage, String> cropToSelectionBounds(BufferedImage canvasSizedImage, Canvas canvas, Rectangle selBounds) {
         // just to be sure that the bounds are inside the canvas
         selBounds = SwingUtilities.computeIntersection(
                 0, 0, canvas.getImWidth(), canvas.getImHeight(),
                 selBounds
         );
-        if (selBounds.isEmpty()) { // the selection was outside the image
-            return null;
+        if (selBounds.isEmpty()) {
+            return Result.error("the selection is outside the image");
         }
-        return ImageUtils.crop(canvasSizedImage, selBounds);
+        return Result.ok(ImageUtils.crop(canvasSizedImage, selBounds));
     }
 
-    abstract BufferedImage getImage(Composition comp);
+    abstract Result<BufferedImage, String> getImage(Composition comp);
 
     abstract String toResourceKey();
 }

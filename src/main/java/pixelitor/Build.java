@@ -40,7 +40,7 @@ public enum Build {
 
     public static Build CURRENT = FINAL;
 
-    public static final String VERSION_NUMBER = "4.2.3";
+    public static final String VERSION_NUMBER = "4.2.4";
 
     // these references are here only in order to make sure that
     // their dynamically loaded classes are included into the final jar

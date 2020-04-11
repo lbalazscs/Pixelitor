@@ -40,7 +40,6 @@ import java.util.concurrent.CompletableFuture;
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
 import static pixelitor.OpenImages.addJustLoadedComp;
-import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
  * Utility class with static methods related to opening and saving files.
@@ -107,11 +106,6 @@ public class OpenSave {
         String msg = format("Could not load \"%s\" as an image file.",
                 file.getName());
 
-        String ext = FileUtils.findExtension(file.getName()).orElse("");
-        if (ext.startsWith("tif") && getJavaMainVersion() == 8) {
-            msg += "\nNote that TIFF files are supported only when Pixelitor is running on Java 9+.";
-            msg += "\nCurrently it is running on Java 8.";
-        }
         Messages.showError("Error", msg);
     }
 

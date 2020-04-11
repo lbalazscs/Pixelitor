@@ -19,19 +19,8 @@ package pixelitor.utils;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class UtilsTest {
-    @ParameterizedTest(name = "\"{0}\" should be parsed as {1}")
-    @CsvSource({"1.8.0_161, 8", "9.0.1, 9", "10.0.1, 10", "11, 11"})
-    void parseJavaVersion(String s, int versionNum) {
-        int parsed = Utils.parseJavaVersion(s);
-        assertThat(parsed).isEqualTo(versionNum);
-    }
-
     @Test
     void angleFunctions() {
         for (double a = -Math.PI; a < Math.PI; a += 0.1) {

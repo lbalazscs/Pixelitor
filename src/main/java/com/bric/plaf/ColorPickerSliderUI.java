@@ -64,7 +64,12 @@ public class ColorPickerSliderUI extends BasicSliderUI {
         cp.getColorPanel().addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                calculateGeometry();
+                try {
+                    calculateGeometry();
+                } catch (Exception ex) {
+                    // can throw NullPointerException
+                    // when changing the look-and-feel
+                }
                 slider.repaint();
             }
         });

@@ -20,6 +20,7 @@ package pixelitor.automate;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
+import java.util.Optional;
 
 /**
  * A page in a {@link Wizard}
@@ -27,7 +28,7 @@ import javax.swing.*;
 public interface WizardPage {
     String getHeaderText(Wizard wizard);
 
-    WizardPage getNext();
+    Optional<WizardPage> getNext();
 
     JComponent createPanel(Wizard wizard, Drawable dr);
 
@@ -40,4 +41,8 @@ public interface WizardPage {
      * Called if next was pressed while in this state before moving to the next
      */
     void onMovingToTheNext(Wizard wizard, Drawable dr);
+
+    default boolean isLast() {
+        return getNext().isEmpty();
+    }
 }

@@ -26,6 +26,7 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.util.Optional;
 
 /**
  * A page in the batch filter wizard
@@ -41,12 +42,12 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
+        public Optional<WizardPage> getNext() {
             var filter = ((FilterAction) filtersCB.getSelectedItem()).getFilter();
             if (filter instanceof FilterWithGUI) {
-                return FILTER_GUI;
+                return Optional.of(FILTER_GUI);
             } else {
-                return null;
+                return Optional.empty();
             }
         }
 
@@ -91,8 +92,8 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
-            return null;
+        public Optional<WizardPage> getNext() {
+            return Optional.empty();
         }
 
         @Override

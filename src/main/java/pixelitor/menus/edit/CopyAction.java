@@ -20,9 +20,8 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.Layer;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Result;
 import pixelitor.utils.Texts;
 import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.RandomGUITest;
@@ -59,19 +58,19 @@ public class CopyAction extends AbstractAction {
     }
 
     private void copyToClipboard(Composition comp) {
-        if (source == CopySource.LAYER_OR_MASK) {
-            Layer layer = comp.getActiveLayer();
-            if (layer instanceof AdjustmentLayer) {
-                if (!RandomGUITest.isRunning()) {
-                    Dialogs.showErrorDialog("Adjustment Layer", "Adjustment layers cannot be copied");
-                }
-                return;
+        Result<BufferedImage, String> result = source.getImage(comp);
+        if (!result.isOK()) {
+            String msg = "Could not copy because " + result.getError();
+            if (RandomGUITest.isRunning()) {
+                System.err.println("Error:" + msg);
+            } else {
+                Dialogs.showErrorDialog("Error", msg);
             }
+            return;
         }
-
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        BufferedImage activeImage = source.getImage(comp);
+        BufferedImage activeImage = result.get();
         Transferable imageTransferable = new ImageTransferable(activeImage);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         try {
             // Sun Jan 04 08:00:30 CET 2015, RandomGUITest:

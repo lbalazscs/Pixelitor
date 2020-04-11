@@ -35,7 +35,6 @@ import java.io.File;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
-import static pixelitor.utils.Utils.getJavaMainVersion;
 
 /**
  * Utility class with static methods related to file choosers
@@ -52,17 +51,9 @@ public class FileChoosers {
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
-    private static final FileFilter[] OPEN_SAVE_FILTERS;
-
-    static {
-        if (getJavaMainVersion() == 8) {
-            OPEN_SAVE_FILTERS = new FileFilter[]{
-                    bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter};
-        } else {
-            OPEN_SAVE_FILTERS = new FileFilter[]{
-                    bmpFilter, gifFilter, jpegFilter, oraFilter, pngFilter, pxcFilter, tiffFilter};
-        }
-    }
+    private static final FileFilter[] OPEN_SAVE_FILTERS = {
+            bmpFilter, gifFilter, jpegFilter, oraFilter,
+            pngFilter, pxcFilter, tiffFilter};
 
     private FileChoosers() {
     }

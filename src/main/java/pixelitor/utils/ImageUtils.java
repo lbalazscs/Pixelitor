@@ -701,6 +701,13 @@ public class ImageUtils {
         g.dispose();
     }
 
+    public static void main(String[] args) {
+        BufferedImage img = createSysCompatibleImage(100, 100);
+        copyImage(img);
+        BufferedImage sub = img.getSubimage(20, 20, 50, 50);
+        copyImage(sub);
+    }
+
     // it seems that for images with an IndexColorModel this
     // still returns an image with a shared raster (jdk bug?)
     public static BufferedImage copyImage(BufferedImage src) {

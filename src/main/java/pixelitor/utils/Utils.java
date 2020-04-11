@@ -455,26 +455,7 @@ public final class Utils {
     }
 
     public static int getJavaMainVersion() {
-        return parseJavaVersion(System.getProperty("java.version"));
-    }
-
-    public static int parseJavaVersion(String versionProp) {
-        // handles version strings like: "1.8.0_161", "9.0.1", "10.0.1", "11"
-        int firstDotPos = versionProp.indexOf('.');
-
-        if (firstDotPos == -1) {
-            // no dot, must be something newer than Java 11
-            return Integer.parseInt(versionProp);
-        }
-
-        String beforeFirstDot = versionProp.substring(0, firstDotPos);
-        int asInt = Integer.parseInt(beforeFirstDot);
-        if (asInt == 1) {
-            // the minimum requirement as of writing
-            // this code is Java 8 anyway
-            return 8;
-        }
-        return asInt;
+        return Runtime.Version.parse(System.getProperty("java.version")).feature();
     }
 
     public static Point2D constrainEndPoint(double relX, double relY, double mouseX, double mouseY) {

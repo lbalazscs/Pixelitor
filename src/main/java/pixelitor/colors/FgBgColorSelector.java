@@ -21,6 +21,8 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.utils.ColorIcon;
+import pixelitor.gui.utils.Themes;
 import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
@@ -31,6 +33,7 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -49,6 +52,8 @@ public class FgBgColorSelector extends JLayeredPane {
     private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
+    private ColorIcon fgColorIcon;
+    private ColorIcon bgColorIcon;
 
     private Color fgColor = BLACK;
     private Color bgColor = WHITE;
@@ -72,33 +77,48 @@ public class FgBgColorSelector extends JLayeredPane {
         this.pw = pw;
         setLayout(null);
 
+        int iconSize = BIG_BUTTON_SIZE - 4;
+        Color fg = AppPreferences.loadFgColor();
+        fgColorIcon = new ColorIcon(fg, iconSize, iconSize);
         initFGButton();
+
+        Color bg = AppPreferences.loadBgColor();
+        bgColorIcon = new ColorIcon(bg, iconSize, iconSize);
         initBGButton();
+
         initResetDefaultsButton();
         initSwapColorsButton();
         initRandomizeButton();
 
         setupSize();
 
-        setFgColor(AppPreferences.loadFgColor(), false);
-        setBgColor(AppPreferences.loadBgColor(), false);
+        setFgColor(fg, false);
+        setBgColor(bg, false);
 
         setupKeyboardShortcuts();
     }
 
     private void initFGButton() {
-        fgButton = initButton("Set Foreground Color",
-                BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME);
-        fgButton.addActionListener(e -> fgButtonPressed());
+        if (Themes.getCurrent().isNimbus()) {
+            fgButton = new JButton();
+        } else {
+            fgButton = new JButton(fgColorIcon);
+        }
+        initButton(fgButton, "Set Foreground Color",
+                BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> fgButtonPressed());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
 
         fgButton.setComponentPopupMenu(createPopupMenu(true));
     }
 
     private void initBGButton() {
-        bgButton = initButton("Set Background Color",
-                BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME);
-        bgButton.addActionListener(e -> bgButtonPressed());
+        if (Themes.getCurrent().isNimbus()) {
+            bgButton = new JButton();
+        } else {
+            bgButton = new JButton(bgColorIcon);
+        }
+        initButton(bgButton, "Set Background Color",
+                BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> bgButtonPressed());
         bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
 
         bgButton.setComponentPopupMenu(createPopupMenu(false));
@@ -173,16 +193,17 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initResetDefaultsButton() {
-        JButton defaultsButton = initButton("Reset Default Colors (D)",
-                SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME);
-        defaultsButton.setLocation(0, 0);
         resetToDefaultAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 setDefaultColors();
             }
         };
-        defaultsButton.addActionListener(resetToDefaultAction);
+        JButton defaultsButton = new JButton();
+        initButton(defaultsButton, "Reset Default Colors (D)",
+                SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME,
+                resetToDefaultAction);
+        defaultsButton.setLocation(0, 0);
     }
 
     public void setDefaultColors() {
@@ -191,16 +212,17 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initSwapColorsButton() {
-        JButton swapButton = initButton("Swap Colors (X)",
-                SMALL_BUTTON_SIZE, 1, SWAP_COLORS_BUTTON_NAME);
-        swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
         swapColorsAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 swapColors();
             }
         };
-        swapButton.addActionListener(swapColorsAction);
+        JButton swapButton = new JButton();
+        initButton(swapButton, "Swap Colors (X)",
+                SMALL_BUTTON_SIZE, 1, SWAP_COLORS_BUTTON_NAME,
+                swapColorsAction);
+        swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
     }
 
     private void swapColors() {
@@ -224,10 +246,11 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         };
 
-        JButton randomizeButton = initButton("Randomize Colors (R)",
-                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME);
+        JButton randomizeButton = new JButton();
+        initButton(randomizeButton, "Randomize Colors (R)",
+                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME,
+                randomizeColorsAction);
         randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
-        randomizeButton.addActionListener(randomizeColorsAction);
     }
 
     private void setupSize() {
@@ -239,10 +262,17 @@ public class FgBgColorSelector extends JLayeredPane {
         setMaximumSize(dim);
     }
 
-    private JButton initButton(String toolTip, int size, int layer, String name) {
-        JButton button = new JButton();
-        button.setToolTipText(toolTip);
+    private JButton initButton(JButton button, String toolTip,
+                               int size, int layer,
+                               String name, ActionListener action) {
         button.setSize(size, size);
+        button.addActionListener(action);
+//        button.setContentAreaFilled(false);
+//        button.setOpaque(true);
+        button.setBorderPainted(true);
+//        button.setDefaultCapable(false);
+
+        button.setToolTipText(toolTip);
         button.setName(name);
         add(button, Integer.valueOf(layer));
         return button;
@@ -308,11 +338,16 @@ public class FgBgColorSelector extends JLayeredPane {
             newColor = fgColor;
         }
 
-        fgButton.setBackground(newColor);
+        setFgButtonColor(newColor);
         ColorHistory.FOREGROUND.add(newColor);
         if (notifyListeners) {
             Tools.fgBgColorsChanged();
         }
+    }
+
+    private void setFgButtonColor(Color newColor) {
+        fgColorIcon.setColor(newColor);
+        fgButton.setBackground(newColor);
     }
 
     public void setBgColor(Color c, boolean notifyListeners) {
@@ -325,11 +360,16 @@ public class FgBgColorSelector extends JLayeredPane {
             newColor = bgColor;
         }
 
-        bgButton.setBackground(newColor);
+        setBgButtonColor(newColor);
         ColorHistory.BACKGROUND.add(newColor);
         if (notifyListeners) {
             Tools.fgBgColorsChanged();
         }
+    }
+
+    private void setBgButtonColor(Color newColor) {
+        bgColorIcon.setColor(newColor);
+        bgButton.setBackground(newColor);
     }
 
     private void setupKeyboardShortcuts() {
@@ -356,5 +396,14 @@ public class FgBgColorSelector extends JLayeredPane {
 
     public void randomize() {
         randomizeColorsAction.actionPerformed(null);
+    }
+
+    public void themeChanged() {
+        remove(fgButton);
+        remove(bgButton);
+        initFGButton();
+        initBGButton();
+        setFgButtonColor(fgColor);
+        setBgButtonColor(bgColor);
     }
 }

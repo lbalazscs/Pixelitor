@@ -27,6 +27,7 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
+import java.util.Optional;
 
 /**
  * A page in the tweening animation wizard
@@ -41,8 +42,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
-            return INITIAL_FILTER_SETTINGS;
+        public Optional<WizardPage> getNext() {
+            return Optional.of(INITIAL_FILTER_SETTINGS);
         }
 
         @Override
@@ -71,8 +72,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
-            return FINAL_FILTER_SETTINGS;
+        public Optional<WizardPage> getNext() {
+            return Optional.of(FINAL_FILTER_SETTINGS);
         }
 
         @Override
@@ -107,8 +108,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
-            return OUTPUT_SETTINGS;
+        public Optional<WizardPage> getNext() {
+            return Optional.of(OUTPUT_SETTINGS);
         }
 
         @Override
@@ -147,8 +148,8 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public WizardPage getNext() {
-            return null;
+        public Optional<WizardPage> getNext() {
+            return Optional.empty();
         }
 
         @Override

@@ -87,8 +87,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     protected void setEnabledState() {
         if (paramGUI != null) {
-            boolean b = shouldBeEnabled();
-            paramGUI.setEnabled(b);
+            setGUIEnabledState();
         }
     }
 

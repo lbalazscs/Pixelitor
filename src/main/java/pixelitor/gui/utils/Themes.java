@@ -17,6 +17,8 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.colors.FgBgColors;
+
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
 import java.awt.Color;
@@ -35,6 +37,7 @@ public class Themes {
             setLookAndFeel(theme.getLAFClassName());
             currentTheme = theme;
             if (updateGUI) {
+                FgBgColors.getGUI().themeChanged();
                 updateAllUI();
             }
         }
