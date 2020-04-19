@@ -17,6 +17,7 @@
 
 package pixelitor.utils;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -31,17 +32,28 @@ public class Texts {
     private Texts() {
     }
 
+    public static boolean isLangCodeSupported(String code) {
+        for (Language lang : languages) {
+            if(lang.getCode().equals(code)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Language getCurrentLanguage() {
         return currentLang;
     }
 
     public static void loadLanguage() {
-        String code = AppPreferences.loadLanguageCode();
-        for (Language lang : languages) {
-            if (lang.getCode().equals(code)) {
-                setCurrentLang(lang);
-            }
-        }
+        String loadedCode = AppPreferences.loadLanguageCode();
+
+        Language loadedLang = Arrays.stream(languages)
+              .filter(lang -> lang.getCode().equals(loadedCode))
+              .findFirst()
+              .orElse(Language.ENGLISH);
+
+        setCurrentLang(loadedLang);
     }
 
     public static void setCurrentLang(Language lang) {

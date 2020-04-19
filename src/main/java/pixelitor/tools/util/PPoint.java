@@ -160,6 +160,10 @@ public abstract class PPoint {
         return new EagerImage(view, imX, imY);
     }
 
+    public static PPoint eagerFromIm(Point2D im, View view) {
+        return new EagerImage(view, im.getX(), im.getY());
+    }
+
     public static PPoint lazyFromIm(double imX, double imY, View view) {
         return new LazyImage(view, imX, imY);
     }

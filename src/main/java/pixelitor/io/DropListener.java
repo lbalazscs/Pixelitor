@@ -56,10 +56,10 @@ public class DropListener extends DropTargetAdapter {
                                 "<br>Do you want to open all image files inside it?", file.getName());
 
                         if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                            OpenSave.openAllImagesInDir(file);
+                            IO.openAllImagesInDir(file);
                         }
                     } else if (file.isFile()) {
-                        OpenSave.openFileAsync(file);
+                        IO.openFileAsync(file);
                     }
                 }
             }
@@ -85,10 +85,10 @@ public class DropListener extends DropTargetAdapter {
                                 + comp.getName() + "?", file.getName());
 
                         if (Dialogs.showYesNoQuestionDialog("Question", question)) {
-                            OpenSave.addAsLayersAllImagesInDir(file, comp);
+                            IO.addAllImagesInDirAsLayers(file, comp);
                         }
                     } else if (file.isFile()) {
-                        OpenSave.loadToNewImageLayerAsync(file, comp);
+                        IO.loadToNewImageLayerAsync(file, comp);
                     }
                 }
             }

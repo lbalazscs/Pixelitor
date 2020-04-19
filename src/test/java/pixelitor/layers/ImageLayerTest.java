@@ -88,13 +88,13 @@ public class ImageLayerTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.createMockComposition();
+        comp = TestHelper.createMockComp();
 
-        layer = TestHelper.createImageLayer("layer 1", comp);
+        layer = ImageLayer.createEmpty(comp, "layer 1");
 
         withMask.setupFor(layer);
         LayerMask mask = null;
-        if (withMask.isYes()) {
+        if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 
@@ -102,7 +102,7 @@ public class ImageLayerTest {
         withSelection.setupFor(comp);
 
         int layerIconUpdatesAtStart = 0;
-        if (withTranslation.isYes()) {
+        if (withTranslation.isTrue()) {
             layerIconUpdatesAtStart = 1;
         }
 
@@ -113,11 +113,11 @@ public class ImageLayerTest {
     public void getSetImage() {
         // setImage is called already in the ImageLayer constructor
         int expectedImageChangedCalls = 1;
-        if (withMask.isYes()) {
+        if (withMask.isTrue()) {
             // plus the mask constructor
             expectedImageChangedCalls++;
         }
-        if (withTranslation.isYes()) {
+        if (withTranslation.isTrue()) {
             expectedImageChangedCalls++;
         }
         verify(comp, times(expectedImageChangedCalls)).imageChanged(INVALIDATE_CACHE);
@@ -145,7 +145,7 @@ public class ImageLayerTest {
 
         assertThat(layer).stateIs(PREVIEW);
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             assertThat(layer).previewImageIsNot(imageBefore);
         } else {
             assertThat(layer).previewImageIs(imageBefore);
@@ -249,7 +249,7 @@ public class ImageLayerTest {
 
     @Test
     public void changeImageForUndoRedo() {
-        TestHelper.addSelectionRectTo(comp, 2, 2, 2, 2);
+        TestHelper.setSelection(comp, new Rectangle(2, 2, 2, 2));
 
         layer.changeImageForUndoRedo(TestHelper.createImage(),
                 false);
@@ -264,10 +264,11 @@ public class ImageLayerTest {
         Rectangle bounds = layer.getImageBounds();
 
         assertThat(bounds).isNotNull();
+        Canvas canvas = layer.getComp().getCanvas();
         if (withTranslation == WithTranslation.NO) {
-            assertThat(bounds).isEqualTo(layer.canvas.getImBounds());
+            assertThat(bounds).isEqualTo(canvas.getImBounds());
         } else {
-            assertThat(bounds).isNotEqualTo(layer.canvas.getImBounds());
+            assertThat(bounds).isNotEqualTo(canvas.getImBounds());
         }
         iconUpdates.check(0, 0);
     }
@@ -276,7 +277,7 @@ public class ImageLayerTest {
     public void getImageForFilterDialogs() {
         BufferedImage image = layer.getImageForFilterDialogs();
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(image)
                     .isNotNull()
@@ -298,8 +299,9 @@ public class ImageLayerTest {
         TmpDrawingLayer tmpDrawingLayer
                 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpDrawingLayer).isNotNull();
-        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(layer.canvas.getImWidth());
-        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(layer.canvas.getImHeight());
+        Canvas canvas = layer.getComp().getCanvas();
+        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(canvas.getImWidth());
+        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(canvas.getImHeight());
 
         layer.mergeTmpDrawingLayerDown();
         iconUpdates.check(0, 0);
@@ -307,12 +309,13 @@ public class ImageLayerTest {
 
     @Test
     public void createCanvasSizedTmpImage() {
-        BufferedImage image = layer.createCanvasSizedTmpImage();
+        Canvas canvas = layer.getComp().getCanvas();
+        BufferedImage image = canvas.createTmpImage();
 
         assertThat(image)
                 .isNotNull()
-                .widthIs(layer.canvas.getImWidth())
-                .heightIs(layer.canvas.getImHeight());
+                .widthIs(canvas.getImWidth())
+                .heightIs(canvas.getImHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -334,7 +337,7 @@ public class ImageLayerTest {
 
         assertThat(filterSourceImage).isNotNull();
         iconUpdates.check(0, 0);
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(filterSourceImage)
                     .isNotSameAs(layer.getImage())
@@ -350,7 +353,7 @@ public class ImageLayerTest {
         BufferedImage imageT = layer.getSelectedSubImage(true);
         assertThat(imageT).isNotNull();
         BufferedImage layerImage = layer.getImage();
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageT)
                     .isNotSameAs(layerImage)
@@ -366,7 +369,7 @@ public class ImageLayerTest {
         BufferedImage imageF = layer.getSelectedSubImage(false);
         assertThat(imageF).isNotNull();
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageF)
                     .isNotSameAs(layerImage)
@@ -549,7 +552,7 @@ public class ImageLayerTest {
 
     @Test
     public void applyLayerMask() {
-        if (withMask.isYes()) {
+        if (withMask.isTrue()) {
             History.clear();
             assertThat(layer).hasMask();
 

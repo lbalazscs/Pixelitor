@@ -92,7 +92,7 @@ public final class SelectionActions {
     private static final Action pasteSel = new MenuAction("Paste Selection") {
         @Override
         public void onClick() {
-            getActiveComp().changeSelectionFromShape(copiedSelShape);
+            getActiveComp().changeSelection(copiedSelShape);
         }
     };
 

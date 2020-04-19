@@ -52,8 +52,8 @@ public class FgBgColorSelector extends JLayeredPane {
     private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
-    private ColorIcon fgColorIcon;
-    private ColorIcon bgColorIcon;
+    private final ColorIcon fgColorIcon;
+    private final ColorIcon bgColorIcon;
 
     private Color fgColor = BLACK;
     private Color bgColor = WHITE;
@@ -179,7 +179,8 @@ public class FgBgColorSelector extends JLayeredPane {
 
         popup.addSeparator();
 
-        ColorUtils.setupCopyColorPopupMenu(popup, () -> fg ? getFgColor() : getBgColor());
+        ColorUtils.setupCopyColorPopupMenu(popup,
+                () -> fg ? getFgColor() : getBgColor());
 
         ColorUtils.setupPasteColorPopupMenu(popup, pw, color -> {
             if (fg) {
@@ -262,7 +263,7 @@ public class FgBgColorSelector extends JLayeredPane {
         setMaximumSize(dim);
     }
 
-    private JButton initButton(JButton button, String toolTip,
+    private void initButton(JButton button, String toolTip,
                                int size, int layer,
                                String name, ActionListener action) {
         button.setSize(size, size);
@@ -275,7 +276,6 @@ public class FgBgColorSelector extends JLayeredPane {
         button.setToolTipText(toolTip);
         button.setName(name);
         add(button, Integer.valueOf(layer));
-        return button;
     }
 
     private void fgButtonPressed() {

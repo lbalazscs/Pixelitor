@@ -232,10 +232,8 @@ public class GlobalEvents {
      * key for navigating the UI, and not for "Hide All".
      */
     public static void dialogOpened(String title) {
-//        System.out.println("--- dialog opened: " + title
-//                + ", nesting: " + numNestedDialogs
-//                + " => " + (numNestedDialogs + 1));
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
+
         numNestedDialogs++;
         if(numNestedDialogs == 1) {
             Tools.firstModalDialogShown();
@@ -243,10 +241,8 @@ public class GlobalEvents {
     }
 
     public static void dialogClosed(String title) {
-//        System.out.println("--- dialog closed: " + title
-//                + ", nesting: " + numNestedDialogs
-//                + " => " + (numNestedDialogs - 1));
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
+
         numNestedDialogs--;
         assert numNestedDialogs >= 0;
         if(numNestedDialogs == 0) {

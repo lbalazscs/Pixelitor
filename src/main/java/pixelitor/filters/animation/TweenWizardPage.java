@@ -23,9 +23,11 @@ import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
+import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.util.Optional;
 
@@ -37,8 +39,8 @@ public enum TweenWizardPage implements WizardPage {
         JComboBox<FilterAction> filtersCB;
 
         @Override
-        public String getHeaderText(Wizard wizard) {
-            return "<html> Here you can create a tweening animation <br>based on the settings of a filter.";
+        public String getHelpText(Wizard wizard) {
+            return "<html> Create a tweening animation based on the settings of a filter.";
         }
 
         @Override
@@ -60,14 +62,14 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
+        public void finish(Wizard wizard, Drawable dr) {
             FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
             ParametrizedFilter filter = (ParametrizedFilter) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
         }
     }, INITIAL_FILTER_SETTINGS {
         @Override
-        public String getHeaderText(Wizard wizard) {
+        public String getHelpText(Wizard wizard) {
             return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
         }
 
@@ -90,7 +92,7 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
+        public void finish(Wizard wizard, Drawable dr) {
             getAnimation(wizard).copyInitialStateFromCurrent();
 
             ParametrizedFilterGUI.setResetParams(false);
@@ -98,11 +100,11 @@ public enum TweenWizardPage implements WizardPage {
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
-        public String getHeaderText(Wizard wizard) {
+        public String getHelpText(Wizard wizard) {
             String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
             boolean hasGradient = getAnimation(wizard).getFilter().getParamSet().hasGradient();
             if (hasGradient) {
-                text += "<br>Do not change the number of thumbs for the gradient, only their color or position.";
+                text += "<br>Don't change the number of thumbs for the gradient, only their color or position.";
             }
             return text;
         }
@@ -130,18 +132,18 @@ public enum TweenWizardPage implements WizardPage {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
+        public void finish(Wizard wizard, Drawable dr) {
             // cancel the previewing
             onWizardCanceled(dr);
 
-            // save final state
+            // save the final state
             getAnimation(wizard).copyFinalStateFromCurrent();
         }
     }, OUTPUT_SETTINGS {
         TweenOutputSettingsPanel outputSettingsPanel;
 
         @Override
-        public String getHeaderText(Wizard wizard) {
+        public String getHelpText(Wizard wizard) {
             return "<html> <b>Output settings</b>" +
                     "<p>For file sequence output select an existing folder." +
                     "<br>For file output select a new or existing file in an existing folder.";
@@ -154,9 +156,10 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            if (outputSettingsPanel == null) {
-                outputSettingsPanel = new TweenOutputSettingsPanel();
+            if (outputSettingsPanel != null) {
+                throw new IllegalStateException("called twice");
             }
+            outputSettingsPanel = new TweenOutputSettingsPanel();
             return outputSettingsPanel;
         }
 
@@ -165,18 +168,32 @@ public enum TweenWizardPage implements WizardPage {
 
         }
 
-
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
+        public boolean isValid(Wizard wizard, Component dialogParent) {
+            ValidationResult validity = outputSettingsPanel.checkValidity();
+            if (!validity.isOK()) {
+                validity.showErrorDialog(dialogParent);
+                return false;
+            }
+
             TweenAnimation animation = getAnimation(wizard);
             outputSettingsPanel.copySettingsInto(animation);
+
+            if (!animation.checkOverwrite(dialogParent)) {
+                return false;
+            }
+
+            return true;
         }
 
+        @Override
+        public void finish(Wizard wizard, Drawable dr) {
+            // the settings were already saved while validating
+        }
     };
 
     private static TweenAnimation getAnimation(Wizard wizard) {
         // all wizards here can be casted to TweenWizard
         return ((TweenWizard) wizard).getAnimation();
     }
-
 }

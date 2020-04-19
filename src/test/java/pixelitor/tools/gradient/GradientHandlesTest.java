@@ -18,7 +18,10 @@
 package pixelitor.tools.gradient;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -26,8 +29,9 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
+@DisplayName("GradientHandles tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class GradientHandlesTest {
-
     private static final int START_X_FOR_END = 30;
     private static final int START_Y_FOR_END = 50;
     private static final int START_X_FOR_START = 10;
@@ -62,7 +66,8 @@ public class GradientHandlesTest {
     }
 
     @Test
-    void testCenterMovesTheOtherTwo() {
+    @DisplayName("dragging the center handle moves the other two")
+    void centerMovesTheOtherTwo() {
         int dragStartX = START_X_FOR_MIDDLE - 1;
         int dragStartY = START_Y_FOR_MIDDLE + 1;
         int dx = -5;
@@ -85,7 +90,8 @@ public class GradientHandlesTest {
     }
 
     @Test
-    void testEndMovesTheCenter() {
+    @DisplayName("dragging the end handle moves the center")
+    void endMovesTheCenter() {
         int dragStartX = START_X_FOR_END + 1;
         int dragStartY = START_Y_FOR_END + 2;
         int dx = 20;
@@ -108,6 +114,7 @@ public class GradientHandlesTest {
     }
 
     @Test
+    @DisplayName("translate handles")
     void imCoordsChanged_translate() {
         int dx = 10;
         int dy = 20;
@@ -126,6 +133,7 @@ public class GradientHandlesTest {
     }
 
     @Test
+    @DisplayName("zoom handles")
     void imCoordsChanged_scale() {
         var at = AffineTransform.getScaleInstance(0.5, 0.5);
         handles.imCoordsChanged(at);

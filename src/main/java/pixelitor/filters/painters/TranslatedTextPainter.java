@@ -137,6 +137,8 @@ public class TranslatedTextPainter extends TextPainter {
     private FontMetrics setupGraphics(Graphics2D g, int canvasWidth, int canvasHeight, String text) {
         g.setRenderingHint(KEY_FRACTIONALMETRICS, VALUE_FRACTIONALMETRICS_ON);
         g.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_GASP);
+
+        assert font != null;
         g.setFont(font);
 
         FontMetrics metrics = g.getFontMetrics(font);

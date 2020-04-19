@@ -18,7 +18,10 @@
 package pixelitor.utils;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.testutils.ShapeChecker;
@@ -33,12 +36,14 @@ import java.awt.geom.Rectangle2D;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
+@DisplayName("Shapes tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class ShapesTest {
     private View view;
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createEmptyComposition();
+        var comp = TestHelper.createEmptyComp();
         view = TestHelper.setupMockViewFor(comp);
     }
 

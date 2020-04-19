@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,7 +52,7 @@ public class ProgressPanel extends JPanel {
     }
 
     public void repaintOnEDT() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         // this code, together with the tracked code,
         // is supposed to run on the EDT, therefore

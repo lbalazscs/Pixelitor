@@ -20,7 +20,9 @@ package pixelitor.filters;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Timeout;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("RandomFilterSource tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class RandomFilterSourceTest {
     private RandomFilterSource source;
 

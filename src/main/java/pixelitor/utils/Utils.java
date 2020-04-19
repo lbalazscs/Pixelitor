@@ -70,7 +70,7 @@ import java.util.function.Supplier;
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.lang.String.format;
 import static pixelitor.OpenImages.addAsNewComp;
-import static pixelitor.OpenImages.findCompositionByName;
+import static pixelitor.OpenImages.findCompByName;
 
 /**
  * Utility class with static methods
@@ -231,7 +231,7 @@ public final class Utils {
 
         View previousView = OpenImages.getActiveView();
 
-        findCompositionByName(name).ifPresentOrElse(
+        findCompByName(name).ifPresentOrElse(
                 comp -> replaceImageInDebugComp(comp, copy),
                 () -> addAsNewComp(copy, null, name));
 
@@ -514,9 +514,14 @@ public final class Utils {
     }
 
     public static void preloadFontNames() {
-        GraphicsEnvironment localGE = GraphicsEnvironment.getLocalGraphicsEnvironment();
         // the results are cached, no need to cache them here
-        localGE.getAvailableFontFamilyNames();
+        getAvailableFontNames();
+    }
+
+    public static String[] getAvailableFontNames() {
+        return GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getAvailableFontFamilyNames();
     }
 
     /**

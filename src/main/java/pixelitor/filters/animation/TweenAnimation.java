@@ -98,7 +98,7 @@ public class TweenAnimation {
      * @return true if the rendering can proceed
      */
     public boolean checkOverwrite(Component dialogParent) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         if (outputType.needsDirectory()) {
             if (output.list().length == 0) {

@@ -33,55 +33,36 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Callable;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
-import static pixelitor.OpenImages.addJustLoadedComp;
 
 /**
  * Utility class with static methods related to opening and saving files.
  */
-public class OpenSave {
-    private OpenSave() {
+public class IO {
+    private IO() {
     }
 
     public static CompletableFuture<Composition> openFileAsync(File file) {
         return loadCompAsync(file).
-                thenApplyAsync(comp -> addJustLoadedComp(comp, file),
+                thenApplyAsync(OpenImages::addJustLoadedComp,
                         EventQueue::invokeLater)
                 .exceptionally(Messages::showExceptionOnEDT);
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
-        CompletableFuture<Composition> cf;
-
-        String ext = FileUtils.findExtension(file.getName()).orElse("");
-        if ("pxc".equals(ext)) {
-            cf = loadLayered(file, "pxc");
-        } else if ("ora".equals(ext)) {
-            cf = loadLayered(file, "ora");
-        } else {
-            cf = loadSimple(file);
-        }
-
-        return cf;
+        // if the file format is not recognized, this will still try to
+        // read it in a single-layered format, which doesn't have to be JPG
+        FileFormat format = FileFormat.fromFile(file).orElse(FileFormat.JPG);
+        return format.readFrom(file);
     }
 
-    /**
-     * Loads a composition from a file with a single-layer image format
-     */
-    private static CompletableFuture<Composition> loadSimple(File file) {
-        return CompletableFuture.supplyAsync(
-                () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
-                .handle((img, e) -> handleDecodingError(file, img, e))
-                .thenApplyAsync(img -> Composition.fromImage(img, file, null),
-                        EventQueue::invokeLater);
-    }
-
-    private static BufferedImage handleDecodingError(File file,
+    public static BufferedImage handleDecodingError(File file,
                                                      BufferedImage img,
                                                      Throwable e) {
         // For some decoding problems (ImageIO bugs?) we get an
@@ -119,25 +100,6 @@ public class OpenSave {
                         EventQueue::invokeLater);
     }
 
-    private static CompletableFuture<Composition> loadLayered(File selectedFile,
-                                                              String type) {
-        Callable<Composition> loadTask;
-        switch (type) {
-            case "pxc":
-                loadTask = () -> PXCFormat.read(selectedFile);
-                break;
-            case "ora":
-                loadTask = () -> OpenRaster.read(selectedFile);
-                break;
-            default:
-                throw new IllegalStateException("type = " + type);
-        }
-
-        return CompletableFuture.supplyAsync(
-                Utils.toSupplier(loadTask),
-                IOThread.getExecutor());
-    }
-
     public static void save(boolean saveAs) {
         var comp = OpenImages.getActiveComp();
         save(comp, saveAs);
@@ -159,26 +121,33 @@ public class OpenSave {
                     return false;
                 }
             }
-            OutputFormat outputFormat = OutputFormat.fromFile(file);
-            SaveSettings saveSettings = new SaveSettings(outputFormat, file);
-            comp.saveAsync(saveSettings, true);
-            return true;
+            Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
+            if(fileFormat.isPresent()) {
+                SaveSettings saveSettings = new SaveSettings(fileFormat.get(), file);
+                comp.saveAsync(saveSettings, true);
+                return true;
+            } else {
+                // the file was read from a file with an unsupported
+                // extension, save it with a file chooser
+                return FileChoosers.saveWithChooser(comp);
+            }
         }
     }
 
     public static void saveImageToFile(BufferedImage image,
                                        SaveSettings saveSettings) {
-        OutputFormat format = saveSettings.getOutputFormat();
+        FileFormat format = saveSettings.getFormat();
         File selectedFile = saveSettings.getFile();
 
         Objects.requireNonNull(format);
         Objects.requireNonNull(selectedFile);
         Objects.requireNonNull(image);
-        assert !EventQueue.isDispatchThread() : "EDT thread";
+        assert !EventQueue.isDispatchThread() : "on EDT";
 
         try {
-            if (format == OutputFormat.JPG) {
-                JpegOutput.save(image, saveSettings, selectedFile);
+            if (format == FileFormat.JPG) {
+                JpegSettings settings = JpegSettings.from(saveSettings);
+                JpegOutput.save(image, settings.getJpegInfo(), selectedFile);
             } else {
                 TrackedIO.write(image, format.toString(), selectedFile);
             }
@@ -201,32 +170,28 @@ public class OpenSave {
     }
 
     public static void openAllImagesInDir(File dir) {
-        File[] files = FileUtils.listSupportedInputFilesIn(dir);
+        List<File> files = FileUtils.listSupportedInputFilesIn(dir);
         boolean found = false;
-        if (files != null) {
-            for (File file : files) {
-                found = true;
-                openFileAsync(file);
-            }
+        for (File file : files) {
+            found = true;
+            openFileAsync(file);
         }
-        if(!found) {
+        if (!found) {
             Messages.showInfo("No files found",
                     format("<html>No supported image files found in <b>%s</b>.",
                             dir.getName()));
         }
     }
 
-    public static void addAsLayersAllImagesInDir(File dir, Composition comp) {
-        File[] files = FileUtils.listSupportedInputFilesIn(dir);
-        if (files != null) {
-            for (File file : files) {
-                loadToNewImageLayerAsync(file, comp);
-            }
+    public static void addAllImagesInDirAsLayers(File dir, Composition comp) {
+        List<File> files = FileUtils.listSupportedInputFilesIn(dir);
+        for (File file : files) {
+            loadToNewImageLayerAsync(file, comp);
         }
     }
 
     public static void exportLayersToPNGAsync() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         boolean okPressed = SingleDirChooser.selectOutputDir();
         if (!okPressed) {
@@ -244,7 +209,7 @@ public class OpenSave {
     }
 
     private static int exportLayersToPNG(Composition comp) {
-        assert !EventQueue.isDispatchThread() : "EDT thread";
+        assert !EventQueue.isDispatchThread() : "on EDT";
 
         int numSavedImages = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
@@ -275,13 +240,13 @@ public class OpenSave {
     private static void saveLayerImage(BufferedImage image,
                                        String layerName,
                                        int layerIndex) {
-        assert !EventQueue.isDispatchThread() : "EDT thread";
+        assert !EventQueue.isDispatchThread() : "on EDT";
 
         File outputDir = Dirs.getLastSave();
         String fileName = format("%03d_%s.%s", layerIndex,
                 Utils.toFileName(layerName), "png");
         File file = new File(outputDir, fileName);
-        saveImageToFile(image, new SaveSettings(OutputFormat.PNG, file));
+        saveImageToFile(image, new SaveSettings(FileFormat.PNG, file));
     }
 
     public static void saveCurrentImageInAllFormats() {
@@ -293,22 +258,22 @@ public class OpenSave {
         }
         File saveDir = Dirs.getLastSave();
         if (saveDir != null) {
-            OutputFormat[] outputFormats = OutputFormat.values();
-            for (OutputFormat outputFormat : outputFormats) {
-                File f = new File(saveDir, "all_formats." + outputFormat);
-                SaveSettings saveSettings = new SaveSettings(outputFormat, f);
+            FileFormat[] fileFormats = FileFormat.values();
+            for (FileFormat format : fileFormats) {
+                File f = new File(saveDir, "all_formats." + format);
+                SaveSettings saveSettings = new SaveSettings(format, f);
                 comp.saveAsync(saveSettings, false).join();
             }
         }
     }
 
-    public static void saveJpegWithQuality(JpegSettings settings) {
+    public static void saveJpegWithQuality(JpegInfo jpegInfo) {
         try {
             FileChoosers.initSaveChooser();
             FileChoosers.setOnlyOneSaveExtension(FileChoosers.jpegFilter);
 
             var comp = OpenImages.getActiveComp();
-            FileChoosers.showSaveChooserAndSaveComp(comp, settings);
+            FileChoosers.showSaveChooserAndSaveComp(comp, jpegInfo);
         } finally {
             FileChoosers.setDefaultSaveExtensions();
         }

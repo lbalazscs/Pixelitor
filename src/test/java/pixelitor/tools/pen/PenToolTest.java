@@ -20,7 +20,10 @@ package pixelitor.tools.pen;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -38,6 +41,8 @@ import static pixelitor.selection.ShapeCombination.REPLACE;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
+@DisplayName("Pen Tool tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class PenToolTest {
     private View view;
     private Composition comp;
@@ -52,7 +57,7 @@ public class PenToolTest {
         Tools.setCurrentTool(Tools.PEN);
 
         // a real composition that can store paths
-        comp = TestHelper.createEmptyComposition(300, 300);
+        comp = TestHelper.createEmptyComp(300, 300);
         view = comp.getView(); // a mock view
         PenTool.path = null;
         Tools.PEN.startBuilding(false);
@@ -67,7 +72,8 @@ public class PenToolTest {
     }
 
     @Test
-    void convertBuildPathToSelection() {
+    @DisplayName("convert path to selection (build mode)")
+    void convertBuiltPathToSelection() {
         createSimpleClosedPathInBuildMode();
 
         Tools.PEN.convertToSelection();
@@ -88,6 +94,7 @@ public class PenToolTest {
     }
 
     @Test
+    @DisplayName("convert path to selection (edit mode)")
     void convertEditPathToSelection() {
         createSimpleClosedPathInBuildMode();
         Tools.PEN.startRestrictedMode(EDIT, false);
@@ -114,6 +121,7 @@ public class PenToolTest {
     }
 
     @Test
+    @DisplayName("convert selection to path")
     void convertSelectionToPath() {
         Tools.setCurrentTool(Tools.SELECTION);
         assertThat(Tools.SELECTION)
@@ -150,6 +158,7 @@ public class PenToolTest {
     }
 
     @Test
+    @DisplayName("undo an edit-mode change in build-mode")
     void undoEditModeChangeInBuildMode() {
         // create a 2-point path in build mode
         Tools.PEN.startBuilding(false);
@@ -192,6 +201,7 @@ public class PenToolTest {
     }
 
     @Test
+    @DisplayName("undo a build-mode change in edit-mode")
     void undoBuildModeChangeInEditMode() {
         SubPath sp = createSimpleClosedPathInBuildMode();
 
@@ -247,6 +257,7 @@ public class PenToolTest {
     }
 
     @Test
+    @DisplayName("delete subpath and path in edit mode")
     void deleteSubPathAndPathInEditMode() {
         // create a path with two subpaths
         Path path = new Path(comp, true);

@@ -19,7 +19,10 @@ package pixelitor.tools.transform;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -34,13 +37,15 @@ import static java.awt.event.MouseEvent.MOUSE_RELEASED;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
+@DisplayName("TransformBox tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
     private View view;
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createMockComposition();
+        var comp = TestHelper.createMockComp();
         view = comp.getView();
     }
 
@@ -262,12 +267,10 @@ public class TransformBoxTest {
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
         CornerHandle se = box.getSE();
-//        RotationHandle rot = box.getRot();
 
         // drag NW downwards
         press(box, 200, 100);
         drag(box, 200, 200);
-//        drag(box, 200, 299);
         release(box, 200, 300);
         assertThat(box)
                 .angleDegreesIs(180)

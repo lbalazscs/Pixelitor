@@ -30,6 +30,7 @@ import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Shapes;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
@@ -67,7 +68,7 @@ public class Crop implements CompAction {
 
     @Override
     public CompletableFuture<Composition> process(Composition comp) {
-        Rectangle roundedImCropRect = roundCropRect(imCropRect);
+        Rectangle roundedImCropRect = Shapes.roundCropRect(imCropRect);
         Canvas oldCanvas = comp.getCanvas();
 
         if (!allowGrowing) {
@@ -99,7 +100,7 @@ public class Crop implements CompAction {
         if (!selectionCrop) {
             // if this crop was started from the crop tool, there
             // still could be a selection that needs to be cropped
-            newComp.intersectSelection(cropRect);
+            newComp.cropSelection(cropRect);
         }
 
         newComp.forEachLayer(layer -> {
@@ -149,35 +150,6 @@ public class Crop implements CompAction {
                 newWidth, newHeight));
 
         return CompletableFuture.completedFuture(newComp);
-    }
-
-    /**
-     * Transform fractional crop dimensions (in zoomed-in images)
-     * into the actual pixel boundaries
-     */
-    public static Rectangle roundCropRect(Rectangle2D rect) {
-        int x = (int) Math.round(rect.getX());
-        int y = (int) Math.round(rect.getY());
-        int width = (int) Math.round(rect.getWidth());
-        int height = (int) Math.round(rect.getHeight());
-
-        if (width == 0) {
-            width = 1;
-        }
-        if (height == 0) {
-            height = 1;
-        }
-        return new Rectangle(x, y, width, height);
-    }
-
-    /**
-     * The returned transform describes how the image space
-     * coordinates for a surviving pixel change after a crop
-     */
-    public static AffineTransform createCanvasImTransform(Rectangle2D imCropRect) {
-        double tx = -imCropRect.getX();
-        double ty = -imCropRect.getY();
-        return AffineTransform.getTranslateInstance(tx, ty);
     }
 
     /**
@@ -281,5 +253,15 @@ public class Crop implements CompAction {
 
             History.add(multiEdit);
         }
+    }
+
+    /**
+     * The returned transform describes how the image space
+     * coordinates for a surviving pixel change after a crop
+     */
+    public static AffineTransform createCanvasImTransform(Rectangle2D imCropRect) {
+        double tx = -imCropRect.getX();
+        double ty = -imCropRect.getY();
+        return AffineTransform.getTranslateInstance(tx, ty);
     }
 }

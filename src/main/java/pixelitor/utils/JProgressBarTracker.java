@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,7 +48,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     void startProgressTracking() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         topContainer.setCursor(Cursors.BUSY);
 
@@ -57,7 +57,7 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     void updateProgressTracking(int percent) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         progressPanel.setProgress(percent);
 

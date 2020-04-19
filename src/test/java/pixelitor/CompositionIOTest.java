@@ -19,9 +19,11 @@ package pixelitor;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import pixelitor.io.IO;
 import pixelitor.io.OpenRaster;
-import pixelitor.io.OpenSave;
 import pixelitor.io.PXCFormat;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.BlendingMode;
@@ -39,6 +41,7 @@ import java.util.function.Consumer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Composition I/O tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class CompositionIOTest {
     @BeforeAll
     static void beforeAllTests() {
@@ -145,14 +148,13 @@ public class CompositionIOTest {
     }
 
     private static void checkSingleLayerRead(File f) {
-        var future = OpenSave.loadCompAsync(f);
+        var future = IO.loadCompAsync(f);
         checkAsyncReadResult(future);
 
         var comp = future.join();
         assertThat(comp)
                 .numLayersIs(1)
-                .hasCanvasImWidth(10)
-                .hasCanvasImHeight(10)
+                .canvasImSizeIs(10, 10)
                 .invariantIsOK();
     }
 
@@ -165,14 +167,13 @@ public class CompositionIOTest {
     }
 
     private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
-        var future = OpenSave.loadCompAsync(f);
+        var future = IO.loadCompAsync(f);
         checkAsyncReadResult(future);
 
         var comp = future.join();
         assertThat(comp)
                 .numLayersIs(2)
-                .hasCanvasImWidth(10)
-                .hasCanvasImHeight(10)
+                .canvasImSizeIs(10, 10)
                 .invariantIsOK();
 
         var secondLayer = comp.getLayer(1);

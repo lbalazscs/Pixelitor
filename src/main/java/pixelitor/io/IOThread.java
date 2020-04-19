@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,7 +55,7 @@ public class IOThread {
     }
 
     public static synchronized boolean isProcessing(String absolutePath) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         if (currentReadPaths.contains(absolutePath)) {
             return true;
@@ -75,7 +75,7 @@ public class IOThread {
     }
 
     private static void mark(Set<String> trackingSet, String path) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         trackingSet.add(path);
     }
@@ -89,20 +89,20 @@ public class IOThread {
     }
 
     private static void unMark(Set<String> trackingSet, String path) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         boolean contained = trackingSet.remove(path);
         assert contained;
     }
 
     public static boolean isBusyWriting() {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         return !currentWritePaths.isEmpty();
     }
 
     public static Set<String> getCurrentWritePaths() {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         return currentWritePaths;
     }

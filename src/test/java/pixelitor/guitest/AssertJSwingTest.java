@@ -29,7 +29,6 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JFileChooserFixture;
-import org.assertj.swing.fixture.JOptionPaneFixture;
 import org.fest.util.Files;
 import pixelitor.Build;
 import pixelitor.Canvas;
@@ -39,6 +38,7 @@ import pixelitor.automate.AutoPaint;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.painters.EffectsPanel;
+import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.ImageArea;
@@ -50,7 +50,7 @@ import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.FileFormat;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
@@ -92,6 +92,7 @@ import static java.awt.event.KeyEvent.VK_CONTROL;
 import static java.awt.event.KeyEvent.VK_ENTER;
 import static java.awt.event.KeyEvent.VK_T;
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertFalse;
@@ -176,7 +177,7 @@ public class AssertJSwingTest {
             app.delayBetweenEvents(AppRunner.ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testSelectionToolAndMenus();
+            testExportOptimizedJPEG();
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -207,7 +208,7 @@ public class AssertJSwingTest {
         if (EDT.call(OpenImages::getNumOpenImages) > 0) {
             app.closeAll();
         }
-        openInputFileWithDialog("a.jpg");
+        openFileWithDialog(inputDir, "a.jpg");
 
         clickAndResetSelectTool();
         clickAndResetShapesTool();
@@ -743,10 +744,10 @@ public class AssertJSwingTest {
     private void testCheckForUpdate() {
         runMenuCommand("Check for Update...");
         try {
-            findJOptionPane().buttonWithText("Close").click();
+            app.findJOptionPane().buttonWithText("Close").click();
         } catch (ComponentLookupException e) {
             // can happen if the current version is the same as the latest
-            findJOptionPane().okButton().click();
+            app.findJOptionPane().okButton().click();
         }
     }
 
@@ -981,7 +982,7 @@ public class AssertJSwingTest {
         testCloseAll();
 
         // open an image for the next test
-        openInputFileWithDialog("a.jpg");
+        openFileWithDialog(inputDir, "a.jpg");
 
         fileMenuTested = true;
     }
@@ -1021,28 +1022,31 @@ public class AssertJSwingTest {
         var openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
         openDialog.cancel();
 
-        openInputFileWithDialog("b.jpg");
+        openFileWithDialog(inputDir, "b.jpg");
 
         checkConsistency();
     }
 
     private void testSave(String extension) {
-        log(1, "testing save");
+        log(1, "testing save, ext = " + extension);
 
         // create a new image to be saved
         String compName = createNewImage();
         maskMode.set(this);
 
-        // the new image s unsaved => has no file
+        // the new image is unsaved => has no file
         assertThat(EDT.active(Composition::getFile)).isNull();
 
-        // new unsaved image, will be saved as save as
+        // new unsaved image, will be saved with a file chooser
         runMenuCommand("Save");
         var saveDialog = app.findSaveFileChooser();
 
         String fileName = "saved." + extension;
         File file = new File(baseTestingDir, fileName);
-        boolean fileExistedAlready = file.exists();
+
+        System.out.println("AssertJSwingTest::testSave: found file chooser, file = " + file);
+
+        boolean fileExistsAlready = file.exists();
 
         saveDialog.setCurrentDirectory(baseTestingDir);
         saveDialog.fileNameTextBox()
@@ -1051,21 +1055,25 @@ public class AssertJSwingTest {
                 .enterText(fileName);
         saveDialog.approve();
 
-        if (fileExistedAlready) {
+        if (fileExistsAlready) {
             // say OK to the overwrite question
-            findJOptionPane().yesButton().click();
+            app.findJOptionPane().yesButton().click();
         }
+        Utils.sleep(500, MILLISECONDS);
         assertThat(file).exists().isFile();
+
+        System.out.println("AssertJSwingTest::testSave: run Save, expect no file chooser");
 
         // now that the file is saved, save again:
         // no file chooser should appear
         runMenuCommand("Save");
+        Utils.sleep(500, MILLISECONDS);
 
         // test "Save As"
         runMenuCommand("Save As...");
 
         // there is always a dialog for "Save As"
-        saveWithOverwrite(fileName);
+        app.saveWithOverwrite(baseTestingDir, fileName);
         assert !EDT.active(Composition::isDirty);
 
         runMenuCommand("Close");
@@ -1106,7 +1114,7 @@ public class AssertJSwingTest {
         Utils.sleep(2, SECONDS);
 
         findDialogByTitle("Save Optimized JPEG").button("ok").click();
-        saveWithOverwrite("saved.png");
+        app.saveWithOverwrite(baseTestingDir, "saved.jpg");
 
         checkConsistency();
     }
@@ -1117,12 +1125,12 @@ public class AssertJSwingTest {
         EDT.assertNumLayersIs(1);
 
         runMenuCommand("Export OpenRaster...");
-        findJOptionPane().noButton().click(); // don't save
+        app.findJOptionPane().noButton().click(); // don't save
 
         runMenuCommand("Export OpenRaster...");
-        findJOptionPane().yesButton().click(); // save anyway
+        app.findJOptionPane().yesButton().click(); // save anyway
         acceptOpenRasterExportDefaultSettings();
-        saveWithOverwrite("saved.ora");
+        app.saveWithOverwrite(baseTestingDir, "saved.ora");
 
         checkNumLayersAfterReOpening("saved.ora", 1);
 
@@ -1132,7 +1140,7 @@ public class AssertJSwingTest {
 
         runMenuCommand("Export OpenRaster...");
         acceptOpenRasterExportDefaultSettings();
-        saveWithOverwrite("saved.ora");
+        app.saveWithOverwrite(baseTestingDir, "saved.ora");
         checkNumLayersAfterReOpening("saved.ora", 2);
 
         // leave the method with one layer
@@ -1161,14 +1169,14 @@ public class AssertJSwingTest {
 
         runMenuCommand("Export Layer Animation...");
         // error dialog, because there is only one layer
-        findJOptionPane().okButton().click();
+        app.findJOptionPane().okButton().click();
 
         addNewLayer();
         // this time it should work
         runMenuCommand("Export Layer Animation...");
         findDialogByTitle("Export Animated GIF").button("ok").click();
 
-        saveWithOverwrite("layeranim.gif");
+        app.saveWithOverwrite(baseTestingDir, "layeranim.gif");
 
         checkConsistency();
     }
@@ -1206,7 +1214,7 @@ public class AssertJSwingTest {
         dialog.requireVisible(); // still visible because of the validation error
 
         // say OK to the folder not empty question
-        var optionPane = findJOptionPane();
+        var optionPane = app.findJOptionPane();
         optionPane.yesButton().click();
         dialog.requireNotVisible();
 
@@ -1240,7 +1248,7 @@ public class AssertJSwingTest {
     }
 
     private void closeDoYouWantToSaveChangesDialog() {
-        var optionPane = findJOptionPane();
+        var optionPane = app.findJOptionPane();
         var matcher = JButtonMatcher.withText("Don't Save").andShowing();
         optionPane.button(matcher).click();
     }
@@ -1267,7 +1275,7 @@ public class AssertJSwingTest {
         dialog.button("collapseButton").click();
 
         findButtonByText(dialog, "Help").click();
-        findJOptionPane().buttonWithText("OK").click();
+        app.findJOptionPane().buttonWithText("OK").click();
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -1280,7 +1288,7 @@ public class AssertJSwingTest {
         EDT.run(() -> {
             Dirs.setLastOpen(inputDir);
             Dirs.setLastSave(batchResizeOutputDir);
-            OutputFormat.setLastUsed(OutputFormat.JPG);
+            FileFormat.setLastOutput(FileFormat.JPG);
         });
 
         runMenuCommand("Batch Resize...");
@@ -1824,7 +1832,8 @@ public class AssertJSwingTest {
         runMenuCommand("Text...");
         var dialog = app.findFilterDialog();
 
-        testTextDialog(dialog, textFilterTestedAlready ? "my text" : "");
+        testTextDialog(dialog, textFilterTestedAlready ?
+                "my text" : TextSettings.DEFAULT_TEXT);
 
         findButtonByText(dialog, "OK").click();
         afterFilterRunActions("Text");
@@ -2521,7 +2530,7 @@ public class AssertJSwingTest {
         }
 
         // not rectangular: test choosing "Only Crop"
-        findJOptionPane()
+        app.findJOptionPane()
                 .buttonWithText("Only Crop")
                 .click();
         undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
@@ -2532,7 +2541,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Only Hide"
         triggerTask.run();
-        findJOptionPane()
+        app.findJOptionPane()
                 .buttonWithText("Only Hide")
                 .click();
 
@@ -2549,7 +2558,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Crop and Hide"
         triggerTask.run();
-        findJOptionPane()
+        app.findJOptionPane()
                 .buttonWithText("Crop and Hide")
                 .click();
         checkAfterSelectionCrop(selWidth, selHeight);
@@ -2562,7 +2571,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Cancel"
         triggerTask.run();
-        findJOptionPane()
+        app.findJOptionPane()
                 .buttonWithText("Cancel")
                 .click();
 
@@ -3132,18 +3141,6 @@ public class AssertJSwingTest {
 
     private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
         return AppRunner.findButtonByText(container, text);
-    }
-
-    private JOptionPaneFixture findJOptionPane() {
-        return app.findJOptionPane();
-    }
-
-    private void saveWithOverwrite(String fileName) {
-        app.saveWithOverwrite(baseTestingDir, fileName);
-    }
-
-    private void openInputFileWithDialog(String fileName) {
-        openFileWithDialog(inputDir, fileName);
     }
 
     private void openFileWithDialog(File dir, String fileName) {

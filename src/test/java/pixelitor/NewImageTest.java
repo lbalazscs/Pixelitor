@@ -32,14 +32,14 @@ class NewImageTest {
         TestHelper.setupMockFgBgSelector();
     }
 
-    @ParameterizedTest
+    @DisplayName("create new comp")
+    @ParameterizedTest(name="filled with {0}")
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
         var comp = NewImage.createNewComposition(fillType, 20, 20, "New Image");
         comp.checkInvariant();
         assertThat(comp)
                 .numLayersIs(1)
-                .hasCanvasImWidth(20)
-                .hasCanvasImHeight(20);
+                .canvasImSizeIs(20, 20);
     }
 }

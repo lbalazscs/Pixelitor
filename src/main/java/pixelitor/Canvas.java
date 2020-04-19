@@ -19,12 +19,14 @@ package pixelitor;
 
 import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 /**
@@ -142,7 +144,7 @@ public class Canvas implements Serializable {
         return fullArea;
     }
 
-    public Shape clipShapeToBounds(Shape shape) {
+    public Shape clip(Shape shape) {
         assert shape != null;
 
         Rectangle2D canvasBounds = getImBounds();
@@ -162,6 +164,15 @@ public class Canvas implements Serializable {
 
     public static void activeCanvasImSizeChanged(Canvas canvas) {
         Symmetry.setCanvasImSize(canvas);
+    }
+
+    /**
+     * Create a temporary image with the size of this canvas
+     */
+    public BufferedImage createTmpImage() {
+        // it is important that the tmp image has transparency
+        // even for layer masks, otherwise drawing is not possible
+        return ImageUtils.createSysCompatibleImage(this);
     }
 
     @Override

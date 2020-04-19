@@ -18,10 +18,11 @@
 package pixelitor.automate;
 
 import org.jdesktop.swingx.VerticalLayout;
+import pixelitor.filters.Filter;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.FileFormat;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -37,13 +38,14 @@ public enum BatchFilterWizardPage implements WizardPage {
         private JComboBox<FilterAction> filtersCB;
 
         @Override
-        public String getHeaderText(Wizard wizard) {
+        public String getHelpText(Wizard wizard) {
             return "<html> Apply a filter to every image in a folder.";
         }
 
         @Override
         public Optional<WizardPage> getNext() {
-            var filter = ((FilterAction) filtersCB.getSelectedItem()).getFilter();
+            var selectedAction = (FilterAction) filtersCB.getSelectedItem();
+            var filter = selectedAction.getFilter();
             if (filter instanceof FilterWithGUI) {
                 return Optional.of(FILTER_GUI);
             } else {
@@ -65,7 +67,7 @@ public enum BatchFilterWizardPage implements WizardPage {
             mainPanel.add(p);
             if (openSaveDirsPanel == null) {
                 openSaveDirsPanel = new OpenSaveDirsPanel(
-                        false, OutputFormat.getLastUsed());
+                        false, FileFormat.getLastOutput());
             }
             mainPanel.add(openSaveDirsPanel);
 
@@ -78,8 +80,9 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
-            var filter = ((FilterAction) filtersCB.getSelectedItem()).getFilter();
+        public void finish(Wizard wizard, Drawable dr) {
+            var selectedAction = (FilterAction) filtersCB.getSelectedItem();
+            var filter = selectedAction.getFilter();
 
             ((BatchFilterWizard) wizard).setFilter(filter);
 
@@ -87,7 +90,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
     }, FILTER_GUI {
         @Override
-        public String getHeaderText(Wizard wizard) {
+        public String getHelpText(Wizard wizard) {
             return "<html> Select filter settings.";
         }
 
@@ -98,12 +101,15 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            // we get here only if the chosen filter is a filter with GUI
-            var filter = (FilterWithGUI) ((BatchFilterWizard) wizard).getFilter();
+            Filter filter = ((BatchFilterWizard) wizard).getFilter();
+
+            // this page will be invoked only if
+            // the selected filter is a filter with GUI
+            FilterWithGUI guiFilter = (FilterWithGUI) filter;
 
             dr.startPreviewing();
 
-            return filter.createGUI(dr);
+            return guiFilter.createGUI(dr);
         }
 
         @Override
@@ -113,7 +119,7 @@ public enum BatchFilterWizardPage implements WizardPage {
         }
 
         @Override
-        public void onMovingToTheNext(Wizard wizard, Drawable dr) {
+        public void finish(Wizard wizard, Drawable dr) {
             // cancel the previewing
             onWizardCanceled(dr);
         }

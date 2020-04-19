@@ -84,7 +84,7 @@ public class AbstractBrushToolTest {
 
     @Before
     public void beforeEachTest() {
-        var comp = TestHelper.create2LayerComposition(false);
+        var comp = TestHelper.create2LayerComp(false);
         view = comp.getView();
 
         dr = comp.getActiveDrawableOrThrow();
@@ -105,7 +105,7 @@ public class AbstractBrushToolTest {
     }
 
     @Test
-    public void test_trace() {
+    public void trace() {
         tool.trace(dr, new Rectangle(2, 2, 2, 2));
 
         verify(brushSpy).setTarget(any(), any());
@@ -114,7 +114,7 @@ public class AbstractBrushToolTest {
     }
 
     @Test
-    public void test_drawBrushStrokeProgrammatically() {
+    public void drawBrushStrokeProgrammatically() {
         PPoint start = PPoint.eagerFromIm(2.0, 2.0, view);
         PPoint end = PPoint.eagerFromIm(5.0, 5.0, view);
         tool.drawBrushStrokeProgrammatically(dr, start, end);

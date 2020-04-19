@@ -70,15 +70,15 @@ public class ContentLayerTest {
     }
 
     @Before
-    public void setUp() {
-        comp = TestHelper.createEmptyComposition();
+    public void beforeEachTest() {
+        comp = TestHelper.createEmptyComp();
         layer = (ContentLayer) TestHelper.createLayerOfClass(layerClass, comp);
 
         comp.addLayerInInitMode(layer);
 
         withMask.setupFor(layer);
         LayerMask mask = null;
-        if (withMask.isYes()) {
+        if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 
@@ -89,7 +89,7 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void testLayerMovingMethods() {
+    public void movingTheLayer() {
         assertThat(layer).translationIs(0, 0);
 
         layer.startMovement();
@@ -156,7 +156,7 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void test_applyLayer() {
+    public void applyLayer() {
         var g2 = TestHelper.createGraphics();
         var image = TestHelper.createImage();
 
@@ -166,14 +166,14 @@ public class ContentLayerTest {
     }
 
     @Test
-    public void test_paintLayerOnGraphics() {
+    public void paintLayerOnGraphics() {
         Graphics2D g2 = TestHelper.createGraphics();
         layer.paintLayerOnGraphics(g2, false);
         iconUpdates.check(0, 0);
     }
 
     @Test
-    public void test_setupDrawingComposite() {
+    public void setupDrawingComposite() {
         Graphics2D g = TestHelper.createGraphics();
         layer.setupDrawingComposite(g, true);
         layer.setupDrawingComposite(g, false);

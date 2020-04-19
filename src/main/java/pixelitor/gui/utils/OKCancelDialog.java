@@ -52,7 +52,7 @@ public abstract class OKCancelDialog extends JDialog {
 
     private void init(JComponent form,
                       String okText, String cancelText, boolean addScrollBars) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         formPanel = form;
 

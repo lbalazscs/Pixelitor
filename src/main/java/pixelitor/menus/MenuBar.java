@@ -56,7 +56,7 @@ import pixelitor.gui.utils.Themes;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
-import pixelitor.io.OpenSave;
+import pixelitor.io.IO;
 import pixelitor.io.OptimizedJpegSavePanel;
 import pixelitor.layers.AddAdjLayerAction;
 import pixelitor.layers.AddNewLayerAction;
@@ -116,7 +116,7 @@ import static java.awt.BorderLayout.NORTH;
 import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.OpenImages.duplicateActive;
+import static pixelitor.OpenImages.duplicateActiveComp;
 import static pixelitor.OpenImages.getActiveComp;
 import static pixelitor.OpenImages.getActiveCompositeImage;
 import static pixelitor.OpenImages.getActiveLayer;
@@ -201,14 +201,14 @@ public class MenuBar extends JMenuBar {
         fileMenu.addActionWithKey(new MenuAction("Save") {
             @Override
             public void onClick() {
-                OpenSave.save(false);
+                IO.save(false);
             }
         }, CTRL_S);
 
         fileMenu.addActionWithKey(new MenuAction("Save As...") {
             @Override
             public void onClick() {
-                OpenSave.save(true);
+                IO.save(true);
             }
         }, CTRL_SHIFT_S);
 
@@ -312,7 +312,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Export Layers to PNG...") {
             @Override
             public void onClick() {
-                OpenSave.exportLayersToPNGAsync();
+                IO.exportLayersToPNGAsync();
             }
         });
 
@@ -649,7 +649,7 @@ public class MenuBar extends JMenuBar {
         imageMenu.addAction(new MenuAction("Duplicate") {
             @Override
             public void onClick() {
-                duplicateActive();
+                duplicateActiveComp();
             }
         });
 
@@ -1418,7 +1418,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Save Current Image in All Formats...") {
             @Override
             public void onClick() {
-                OpenSave.saveCurrentImageInAllFormats();
+                IO.saveCurrentImageInAllFormats();
             }
         });
 

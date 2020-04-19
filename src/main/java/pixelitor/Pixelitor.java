@@ -27,8 +27,8 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.Themes;
+import pixelitor.io.IO;
 import pixelitor.io.IOThread;
-import pixelitor.io.OpenSave;
 import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.AddTextLayerAction;
 import pixelitor.layers.Layer;
@@ -80,8 +80,8 @@ public class Pixelitor {
         // settings leads to mixed-language problems (see issue #35),
         // but keep the system locale for number formatting
         SYS_LOCALE = Locale.getDefault();
-
-        if (!"es".equals(SYS_LOCALE.getLanguage())) { // except for Spanish
+        String sysLangCode = SYS_LOCALE.getLanguage();
+        if (!Texts.isLangCodeSupported(sysLangCode)) { // except if supported
             Locale.setDefault(Locale.US);
         }
 
@@ -119,7 +119,7 @@ public class Pixelitor {
     }
 
     private static void createAndShowGUI(String[] args) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
@@ -159,7 +159,7 @@ public class Pixelitor {
         for (String fileName : args) {
             File f = new File(fileName);
             if (f.exists()) {
-                openedFiles.add(OpenSave.openFileAsync(f));
+                openedFiles.add(IO.openFileAsync(f));
             } else {
                 Messages.showError("File not found",
                         format("The file \"%s\" does not exist", f.getAbsolutePath()));
@@ -170,7 +170,7 @@ public class Pixelitor {
     }
 
     public static void exitApp(PixelitorWindow pw) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
         var paths = IOThread.getCurrentWritePaths();
         if (!paths.isEmpty()) {
             String msg = "<html>The writing of the following files is not finished yet. Exit anyway?<br><ul>";

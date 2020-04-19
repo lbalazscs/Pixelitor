@@ -718,10 +718,7 @@ public class RandomToolTest {
     }
 
     private void clickCropToolButton() {
-        String[] texts = {
-                "Crop",
-                "Cancel",
-        };
+        String[] texts = {"Crop", "Cancel",};
         clickRandomToolButton(texts);
     }
 
@@ -900,6 +897,7 @@ class StoppedException extends TestControlException {
 }
 
 class MeasuredTask implements Runnable {
+    private static final boolean TRACK_MEMORY = false;
     private final Runnable task;
     private final String name;
 
@@ -911,17 +909,23 @@ class MeasuredTask implements Runnable {
     @Override
     public void run() {
         long startTime = System.nanoTime();
-        long startFree = Runtime.getRuntime().freeMemory();
+        long startFree;
+        if (TRACK_MEMORY) {
+            startFree = Runtime.getRuntime().freeMemory();
+        }
 
         task.run();
 
         double seconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        long allocatedKB = (startFree - Runtime.getRuntime().freeMemory()) / 1024;
-
-        System.out.println(format("%s was running for %.2f s, allocated %d kBytes",
-                name, seconds, allocatedKB));
-        if(allocatedKB > 100*1024) { // more than 100 mega: why?
-            System.exit(1);
+        long allocatedKB;
+        if (TRACK_MEMORY) {
+            allocatedKB = (startFree - Runtime.getRuntime().freeMemory()) / 1024;
+            System.out.println(format("%s was running for %.2f s, allocated %d kBytes", name, seconds, allocatedKB));
+            if (allocatedKB > 100 * 1024) { // more than 100 mega: why?
+                System.exit(1);
+            }
+        } else {
+            System.out.println(format("%s was running for %.2f s", name, seconds));
         }
     }
 }

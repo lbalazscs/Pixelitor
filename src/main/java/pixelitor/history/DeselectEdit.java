@@ -41,7 +41,7 @@ public class DeselectEdit extends PixelitorEdit {
 
         assert !comp.hasSelection();
 
-        comp.createSelectionFromShape(backupShape);
+        comp.createSelectionFrom(backupShape);
     }
 
     @Override

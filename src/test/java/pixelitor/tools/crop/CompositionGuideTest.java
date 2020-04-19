@@ -18,7 +18,11 @@
 package pixelitor.tools.crop;
 
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentMatcher;
 import pixelitor.guides.GuidesRenderer;
 
@@ -46,17 +50,24 @@ import static pixelitor.tools.crop.CompositionGuideType.NONE;
 import static pixelitor.tools.crop.CompositionGuideType.RULE_OF_THIRDS;
 import static pixelitor.tools.crop.CompositionGuideType.TRIANGLES;
 
+@DisplayName("CompositionGuide tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class CompositionGuideTest {
-
+    private Graphics2D g2;
+    private GuidesRenderer guidesRenderer;
     private CompositionGuide compositionGuide;
 
+    @BeforeEach
+    void beforeEachTest() {
+        g2 = mock(Graphics2D.class);
+        guidesRenderer = mock(GuidesRenderer.class);
+        compositionGuide = new CompositionGuide(guidesRenderer);
+    }
+
     @Test
+    @DisplayName("no guide")
     void draw_Type_NONE() {
         var rect = new Rectangle2D.Double(0, 0, 90, 30);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(NONE);
         compositionGuide.draw(rect, g2);
 
@@ -64,12 +75,9 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("rule of thirds")
     void draw_Type_RULE_OF_THIRDS() {
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(RULE_OF_THIRDS);
         compositionGuide.draw(rect, g2);
 
@@ -83,12 +91,9 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("golden sections")
     void draw_Type_GOLDEN_SECTIONS() {
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(GOLDEN_SECTIONS);
         compositionGuide.draw(rect, g2);
 
@@ -106,13 +111,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("diagonals, width >= height")
     void draw_Type_DIAGONALS_width_gt_height() {
         // rect orientation: width >= height
         var rect = new Rectangle2D.Double(0, 0, 90, 12);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(DIAGONALS);
         compositionGuide.draw(rect, g2);
 
@@ -126,13 +128,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("diagonals, height > width")
     void draw_Type_DIAGONALS_height_gt_width() {
         // rect orientation: height > width
         var rect = new Rectangle2D.Double(0, 0, 12, 90);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(DIAGONALS);
         compositionGuide.draw(rect, g2);
 
@@ -146,13 +145,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("triangles, from top left to bottom down")
     void draw_Type_TRIANGLES_top_left_to_bottom_down() {
         // orientation: 0 (diagonal line from top left to bottom down)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(TRIANGLES);
         compositionGuide.setOrientation(0);
         compositionGuide.draw(rect, g2);
@@ -167,13 +163,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("triangles, from bottom down to top left")
     void draw_Type_TRIANGLES_bottom_down_to_top_left() {
         // orientation: 1 (diagonal line from bottom down to top left)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(TRIANGLES);
         compositionGuide.setOrientation(1);
         compositionGuide.draw(rect, g2);
@@ -188,12 +181,9 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("grid, < 2*size")
     void draw_Type_GRID_less_than_2xSize() {
         var rect = new Rectangle2D.Double(0, 0, 90, 90);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(GRID);
         compositionGuide.draw(rect, g2);
 
@@ -206,13 +196,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("grid, = 2*size")
     void draw_Type_GRID_exact_2xSize() {
         // gridSize: 50 (one cross at the center if size less than 2xSize)
         var rect = new Rectangle2D.Double(0, 0, 100, 100);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(GRID);
         compositionGuide.draw(rect, g2);
 
@@ -231,12 +218,9 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("grid, > 2*size")
     void draw_Type_GRID_more_than_2xSize() {
         var rect = new Rectangle2D.Double(0, 0, 102, 102);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(GRID);
         compositionGuide.draw(rect, g2);
 
@@ -255,13 +239,10 @@ public class CompositionGuideTest {
     }
 
     @Test
+    @DisplayName("spiral, starts from bottom left")
     void draw_Type_SPIRAL_orientation_0() {
         // orientation: 0 (spiral that starts from bottom left)
         var rect = new Rectangle2D.Double(0, 0, 10, 10);
-        var g2 = mock(Graphics2D.class);
-        var guidesRenderer = mock(GuidesRenderer.class);
-
-        compositionGuide = new CompositionGuide(guidesRenderer);
         compositionGuide.setType(GOLDEN_SPIRAL);
         compositionGuide.setOrientation(0);
         compositionGuide.draw(rect, g2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.selection.Selection;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.ImageUtils;
@@ -43,12 +44,13 @@ public class TmpDrawingLayer {
     public TmpDrawingLayer(ImageLayer imageLayer, Composite composite, boolean softSelection) {
         this.composite = Objects.requireNonNull(composite);
 
-        Selection sel = imageLayer.getComp().getSelection();
+        Composition comp = imageLayer.getComp();
+        Selection sel = comp.getSelection();
         if (sel != null) {
             Shape selShape = sel.getShape();
             if (sel.isRectangular() || !softSelection) {
                 // hard selection clipping
-                image = imageLayer.createCanvasSizedTmpImage();
+                image = comp.getCanvas().createTmpImage();
                 g = image.createGraphics();
                 g.setClip(selShape);
                 smallImage = false;
@@ -66,7 +68,7 @@ public class TmpDrawingLayer {
             }
         } else {
             // no selection
-            image = imageLayer.createCanvasSizedTmpImage();
+            image = comp.getCanvas().createTmpImage();
             g = image.createGraphics();
             smallImage = false;
         }

@@ -24,15 +24,16 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.io.Dirs;
+import pixelitor.io.FileFormat;
 import pixelitor.io.FileUtils;
-import pixelitor.io.OpenSave;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.IO;
 import pixelitor.io.SaveSettings;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
@@ -59,50 +60,57 @@ public class Automate {
      */
     public static void processEachFile(CompAction action,
                                        String dialogTitle) {
+        assert EventQueue.isDispatchThread() : "not on EDT";
+
         File openDir = Dirs.getLastOpen();
         File saveDir = Dirs.getLastSave();
 
-        File[] inputFiles = FileUtils.listSupportedInputFilesIn(openDir);
-        if (inputFiles.length == 0) {
+        List<File> inputFiles = FileUtils.listSupportedInputFilesIn(openDir);
+        if (inputFiles.isEmpty()) {
             Messages.showInfo("No files", "There are no supported files in " + openDir.getAbsolutePath());
             return;
         }
 
+        stopProcessing = false;
         var progressMonitor = GUIUtils.createPercentageProgressMonitor(
                 dialogTitle);
         var worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-                overwriteAll = false;
-
-                for (int i = 0, nrOfFiles = inputFiles.length; i < nrOfFiles; i++) {
-                    if (progressMonitor.isCanceled()) {
-                        break;
-                    }
-
-                    File file = inputFiles[i];
-                    progressMonitor.setProgress((int) ((float) i * 100 / nrOfFiles));
-
-                    String msg = "Processing " + (i + 1) + " of " + nrOfFiles;
-                    progressMonitor.setNote(msg);
-                    System.out.println(msg);
-
-                    processFile(file, action, saveDir);
-
-                    if (stopProcessing) {
-                        break;
-                    }
-
-                } // end of for loop
-                progressMonitor.close();
-                return null;
+                return processEachFileOutsideTheEDT(inputFiles, action, saveDir, progressMonitor);
             } // end of doInBackground
         };
         worker.execute();
     }
 
+    private static Void processEachFileOutsideTheEDT(List<File> inputFiles,
+                                                     CompAction action,
+                                                     File saveDir,
+                                                     ProgressMonitor progressMonitor) {
+        assert !EventQueue.isDispatchThread() : "on EDT";
+        overwriteAll = false;
+
+        for (int i = 0, numFiles = inputFiles.size(); i < numFiles; i++) {
+            if (progressMonitor.isCanceled() || stopProcessing) {
+                break;
+            }
+
+            File file = inputFiles.get(i);
+            progressMonitor.setProgress((int) ((float) i * 100 / numFiles));
+
+            String msg = "Processing " + (i + 1) + " of " + numFiles;
+            progressMonitor.setNote(msg);
+            System.out.println(msg);
+
+            processFile(file, action, saveDir);
+        }
+        progressMonitor.close();
+        return null;
+    }
+
     private static void processFile(File file, CompAction action, File saveDir) {
-        OpenSave.openFileAsync(file)
+        assert !EventQueue.isDispatchThread() : "on EDT";
+        IO.openFileAsync(file)
                 .thenComposeAsync(
                         comp -> process(comp, action),
                         EventQueue::invokeLater)
@@ -115,26 +123,28 @@ public class Automate {
 
     private static CompletableFuture<Composition> process(Composition comp,
                                                           CompAction action) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
         assert comp.getView() != null : "no view for " + comp.getName();
 
         return action.process(comp);
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
+        assert EventQueue.isDispatchThread() : "not on EDT";
+
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
 
-        var outputFormat = OutputFormat.getLastUsed();
-        File outputFile = calcOutputFile(comp, lastSaveDir, outputFormat);
+        var format = FileFormat.getLastOutput();
+        File file = calcOutputFile(comp, lastSaveDir, format);
         CompletableFuture<Void> retVal = null;
 
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
-        var saveSettings = new SaveSettings(outputFormat, outputFile);
-        if (outputFile.exists() && !overwriteAll) {
-            String answer = showOverwriteWarningDialog(outputFile);
+        var saveSettings = new SaveSettings(format, file);
+        if (file.exists() && !overwriteAll) {
+            String answer = showOverwriteWarningDialog(file);
 
             switch (answer) {
                 case OVERWRITE_YES:
@@ -165,9 +175,9 @@ public class Automate {
         }
     }
 
-    private static File calcOutputFile(Composition comp, File lastSaveDir, OutputFormat outputFormat) {
+    private static File calcOutputFile(Composition comp, File lastSaveDir, FileFormat format) {
         String inFileName = comp.getFile().getName();
-        String outFileName = FileUtils.replaceExt(inFileName, outputFormat.toString());
+        String outFileName = FileUtils.replaceExt(inFileName, format.toString());
         return new File(lastSaveDir, outFileName);
     }
 

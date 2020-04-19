@@ -18,12 +18,17 @@
 package pixelitor.guides;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.awt.Color;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("GuideStyle tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class GuideStyleTest {
     private GuideStyle guideStyle;
 

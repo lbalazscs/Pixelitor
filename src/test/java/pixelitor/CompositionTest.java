@@ -20,10 +20,13 @@ package pixelitor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
+import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.Tools;
 
@@ -36,6 +39,7 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Composition tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class CompositionTest {
     private Composition comp;
 
@@ -46,7 +50,7 @@ public class CompositionTest {
 
     @BeforeEach
     void beforeEachTest() {
-        comp = TestHelper.create2LayerComposition(true);
+        comp = TestHelper.create2LayerComp(true);
         assertThat(comp)
                 .isNotDirty()
                 .isNotEmpty()
@@ -143,8 +147,7 @@ public class CompositionTest {
                 .isNotDirty()
                 .numLayersIs(2);
 
-        comp.addLayerInInitMode(
-                TestHelper.createImageLayer("layer 3", comp));
+        comp.addLayerInInitMode(ImageLayer.createEmpty(comp, "layer 3"));
 
         assertThat(comp)
                 .isNotDirty()  // still not dirty!
@@ -159,7 +162,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("bellow active")
                 .atPosition(BELLOW_ACTIVE)
-                .add(TestHelper.createImageLayer("layer A", comp));
+                .add(ImageLayer.createEmpty(comp, "layer A"));
 
         assertThat(comp)
                 .isDirty()
@@ -172,7 +175,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("above active")
                 .atPosition(ABOVE_ACTIVE)
-                .add(TestHelper.createImageLayer("layer B", comp));
+                .add(ImageLayer.createEmpty(comp, "layer B"));
 
         assertThat(comp)
                 .numLayersIs(4)
@@ -184,7 +187,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("position 0")
                 .atIndex(0)
-                .add(TestHelper.createImageLayer("layer C", comp));
+                .add(ImageLayer.createEmpty(comp, "layer C"));
 
         assertThat(comp)
                 .numLayersIs(5)
@@ -196,7 +199,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("position 2")
                 .atIndex(2)
-                .add(TestHelper.createImageLayer("layer D", comp));
+                .add(ImageLayer.createEmpty(comp, "layer D"));
 
         assertThat(comp)
                 .numLayersIs(6)
@@ -599,7 +602,7 @@ public class CompositionTest {
 
         // set a selection
         Rectangle2D originalSelectionRect = new Rectangle2D.Double(3, 3, 4, 4);
-        comp.createSelectionFromShape(originalSelectionRect);
+        comp.createSelectionFrom(originalSelectionRect);
 
         assertThat(comp).hasSelection();
         assertThat(comp.getSelection())
@@ -629,7 +632,7 @@ public class CompositionTest {
         assertThat(comp).doesNotHaveSelection();
 
         Rectangle rect = new Rectangle(3, 3, 5, 5);
-        comp.createSelectionFromShape(rect);
+        comp.createSelectionFrom(rect);
 
         assertThat(comp)
                 .hasSelection()
@@ -642,7 +645,7 @@ public class CompositionTest {
         assertThat(comp).layerNamesAre("layer 1", "layer 2");
 
         Layer layer = comp.getLayer(0);
-        comp.dragFinished(layer, 1);
+        comp.layerReorderingFinished(layer, 1);
 
         assertThat(comp)
                 .layerNamesAre("layer 2", "layer 1")
@@ -789,7 +792,7 @@ public class CompositionTest {
         assertThat(comp).doesNotHaveSelection();
 
         var selectionShape = new Rectangle(4, 4, 8, 4);
-        TestHelper.setRectangleSelection(comp, selectionShape);
+        TestHelper.setSelection(comp, selectionShape);
 
         assertThat(comp)
                 .hasSelection()
@@ -812,13 +815,13 @@ public class CompositionTest {
     @Test
     void cropSelection() {
         var selectionShape = new Rectangle(4, 4, 8, 4);
-        TestHelper.setRectangleSelection(comp, selectionShape);
+        TestHelper.setSelection(comp, selectionShape);
         assertThat(comp)
                 .hasSelection()
                 .selectionBoundsIs(selectionShape);
 
         var cropRect = new Rectangle(2, 2, 4, 4);
-        comp.intersectSelection(cropRect);
+        comp.cropSelection(cropRect);
 
         assertThat(comp)
                 .hasSelection()

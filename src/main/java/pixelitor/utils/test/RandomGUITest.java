@@ -39,7 +39,6 @@ import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.gui.CompositeState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.AutoZoom;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.ImageArea;
@@ -92,7 +91,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -1050,13 +1048,12 @@ public class RandomGUITest {
         log("new text layer");
         var comp = OpenImages.getActiveComp();
         TextLayer textLayer = new TextLayer(comp);
-        TextSettings textSettings = TextSettings.createRandomSettings();
-        textLayer.setSettings(textSettings);
+        textLayer.randomizeSettings();
         new LayerAdder(comp)
                 .withHistory("New Random Text Layer")
                 .atPosition(ABOVE_ACTIVE)
                 .add(textLayer);
-        textLayer.setName(textSettings.getText(), true);
+        textLayer.setName(textLayer.getSettings().getText(), true);
     }
 
     private static void randomTextLayerRasterize() {
@@ -1189,14 +1186,12 @@ public class RandomGUITest {
     // to prevent paths growing too large
     private static void setPathsToNull() {
         log("setPathsToNull");
-        List<View> views = OpenImages.getViews();
-        View activeView = OpenImages.getActiveView();
-        for (View view : views) {
+        OpenImages.forEachView(view -> {
             // don't touch the active, as its path might be edited just now
-            if (view != activeView) {
+            if (!view.isActive()) {
                 view.getComp().setActivePath(null);
             }
-        }
+        });
         // history is in an inconsistent state now
         History.clear();
     }

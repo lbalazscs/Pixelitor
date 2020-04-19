@@ -142,7 +142,8 @@ public class PenTool extends Tool {
             return;
         }
 
-        assert OpenImages.activePathIs(path);
+        assert OpenImages.activePathIs(path) :
+                "path = " + path + ", active path = " + OpenImages.getActivePath();
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -232,7 +233,7 @@ public class PenTool extends Tool {
         Shape shape = path.toImageSpaceShape();
         var comp = OpenImages.getActiveComp();
 
-        PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
+        PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
             if (!RandomGUITest.isRunning()) {
                 Dialogs.showInfoDialog("No Selection",
@@ -362,7 +363,8 @@ public class PenTool extends Tool {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
-        assert OpenImages.activePathIs(path);
+        assert OpenImages.activePathIs(path) :
+                "path = " + path + ", active path = " + OpenImages.getActivePath();
 
         Composition activeComp = OpenImages.getActiveComp();
         if (activeComp == null) {

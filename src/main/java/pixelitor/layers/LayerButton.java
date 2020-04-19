@@ -83,7 +83,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         /**
          * The layer is active, but not in mask editing mode.
          */
-        SELECT_LAYER {
+        LAYER_SELECTED {
             @Override
             public void show(JLabel layer, JLabel mask) {
                 layer.setBorder(selectedBorder);
@@ -95,7 +95,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         /**
          * The layer is active, and in mask editing mode.
          */
-        SELECT_MASK {
+        MASK_SELECTED {
             @Override
             public void show(JLabel layer, JLabel mask) {
                 layer.setBorder(unselectedIconOnSelectedLayerBorder);
@@ -157,7 +157,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     public LayerButton(Layer layer) {
         assert !Build.isUnitTesting() : "Swing component in unit test";
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         this.layer = layer;
 
@@ -190,27 +190,12 @@ public class LayerButton extends JToggleButton implements LayerUI {
         layerIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int clickCount = e.getClickCount();
-                if (clickCount == 1) {
-                    MaskViewMode.NORMAL.activate(layer, "layer icon clicked");
-                } else {
-                    if (layer instanceof TextLayer) {
-                        ((TextLayer) layer).edit(PixelitorWindow.getInstance());
-                    } else if (layer instanceof AdjustmentLayer) {
-                        ((AdjustmentLayer) layer).configure();
-                    }
-                }
+                layerIconClicked(e, layer);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // by putting it into mouse pressed, it is consistent
-                // with the mask clicks
-                if (SwingUtilities.isLeftMouseButton(e)) {
-                    selectLayerIfIconClicked(e);
-                } else if (e.isPopupTrigger()) {
-                    layerPopupTriggered(e);
-                }
+                layerIconPressed(e);
             }
 
             @Override
@@ -223,6 +208,29 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         layerIconLabel.setName("layerIcon");
         add(layerIconLabel, LayerButtonLayout.LAYER);
+    }
+
+    private static void layerIconClicked(MouseEvent e, Layer layer) {
+        int clickCount = e.getClickCount();
+        if (clickCount == 1) {
+            MaskViewMode.NORMAL.activate(layer, "layer icon clicked");
+        } else {
+            if (layer instanceof TextLayer) {
+                ((TextLayer) layer).edit(PixelitorWindow.getInstance());
+            } else if (layer instanceof AdjustmentLayer) {
+                ((AdjustmentLayer) layer).configure();
+            }
+        }
+    }
+
+    private void layerIconPressed(MouseEvent e) {
+        // by putting it into mouse pressed, it is consistent
+        // with the mask clicks
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            selectLayerIfIconClicked(e);
+        } else if (e.isPopupTrigger()) {
+            layerPopupTriggered(e);
+        }
     }
 
     private void layerPopupTriggered(MouseEvent e) {
@@ -275,7 +283,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private void buttonActivationChanged(Layer layer) {
         if (isSelected()) {
             // the layer was just activated
-            layer.makeActive(userInteraction);
+            layer.activate(userInteraction);
         } else {
             // the layer was just deactivated
             nameEditor.disableEditing();
@@ -332,7 +340,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     public void dragFinished(int newLayerIndex) {
-        layer.dragFinished(newLayerIndex);
+        layer.reorderingFinished(newLayerIndex);
     }
 
     public Layer getLayer() {
@@ -360,7 +368,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void updateLayerIconImageAsync(ImageLayer layer) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         boolean isMask = layer instanceof LayerMask;
 
@@ -381,7 +389,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void updateIconOnEDT(ImageLayer layer, boolean isMask, BufferedImage thumb) {
-        assert EventQueue.isDispatchThread();
+        assert EventQueue.isDispatchThread() : "not on EDT";
         if (isMask) {
             if (!hasMaskIcon()) {
                 return;
@@ -493,18 +501,11 @@ public class LayerButton extends JToggleButton implements LayerUI {
             newSelectionState = SelectionState.UNSELECTED;
         } else {
             if (layer.isMaskEditing()) {
-                newSelectionState = SelectionState.SELECT_MASK;
+                newSelectionState = SelectionState.MASK_SELECTED;
             } else {
-                newSelectionState = SelectionState.SELECT_LAYER;
+                newSelectionState = SelectionState.LAYER_SELECTED;
             }
         }
-
-//        System.out.println("LayerButton::updateBorders: "
-//                + "maskEditing = " + layer.isMaskEditing()
-//                + ", active = " + isSelected()
-//                + ", new selection state = " + newSelectionState
-//                + ", name = " + layer.getName());
-//        Thread.dumpStack();
 
         if (newSelectionState != selectionState) {
             selectionState = newSelectionState;

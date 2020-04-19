@@ -17,18 +17,18 @@
 
 package pixelitor.layers;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
 import pixelitor.filters.NoOpFilter;
 import pixelitor.filters.OneColorFilter;
-import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 
 import java.awt.Color;
@@ -39,6 +39,8 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.*;
 import static pixelitor.utils.ImageUtils.create1x1Image;
 
+@DisplayName("Layer blending mode tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class LayerBlendingModesTest {
     private Composition comp;
 
@@ -285,15 +287,11 @@ public class LayerBlendingModesTest {
 
     private TextLayer createTestTextLayerWithColor(Color color) {
         var layer = new TextLayer(comp);
-        layer.setSettings(new TextSettings(
-                "T", // a huge T should cover everything
-                new Font(Font.SANS_SERIF, Font.BOLD, 100),
-                color,
-                new AreaEffects(),
-                HorizontalAlignment.CENTER,
-                VerticalAlignment.CENTER,
-                false,
-                0));
+        TextSettings settings = layer.getSettings();
+        settings.setText("T"); // a huge T should cover everything
+        settings.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 100));
+        settings.setColor(color);
+        layer.setSettings(settings);
         return layer;
     }
 

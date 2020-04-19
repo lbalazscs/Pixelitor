@@ -18,8 +18,13 @@ package pixelitor.io;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class with static methods related to files
@@ -86,16 +91,24 @@ public class FileUtils {
                 .isPresent();
     }
 
-    public static File[] listSupportedInputFilesIn(File dir) {
-        FileFilter imageFilter = FileUtils::hasSupportedInputExt;
-        return dir.listFiles(imageFilter);
-    }
-
     public static String replaceExt(String fileName, String newExt) {
         if (findExtension(fileName).isEmpty()) {
             return fileName + '.' + newExt;
         }
         String woExt = stripExtension(fileName);
         return woExt + '.' + newExt;
+    }
+
+    public static List<File> listSupportedInputFilesIn(File dir) {
+        FileFilter imageFilter = FileUtils::hasSupportedInputExt;
+        File[] files = dir.listFiles(imageFilter);
+        if(files == null) {
+            return Collections.emptyList();
+        }
+
+        // filter out crazily named directories with image file extensions
+        return Stream.of(files)
+                .filter(File::isFile)
+                .collect(toList());
     }
 }

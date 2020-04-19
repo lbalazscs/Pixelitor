@@ -18,7 +18,6 @@
 package pixelitor.layers;
 
 import pixelitor.Build;
-import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.gui.HistogramsPanel;
@@ -70,8 +69,9 @@ import static pixelitor.Composition.ImageChangeActions.FULL;
 public abstract class Layer implements Serializable {
     private static final long serialVersionUID = 2L;
 
+    // the composition to which this layer belongs
     protected Composition comp;
-    protected Canvas canvas;
+
     protected String name;
 
     // the real layer for layer masks,
@@ -108,7 +108,7 @@ public abstract class Layer implements Serializable {
         assert comp != null;
         assert name != null;
 
-        setCompAndCanvas(comp);
+        setComp(comp);
         this.name = name;
         this.owner = owner;
         opacity = 1.0f;
@@ -147,10 +147,10 @@ public abstract class Layer implements Serializable {
     private LayerUI createUI() {
         if (Build.isUnitTesting()) {
             return new TestLayerUI();
+        } else {
+            assert EventQueue.isDispatchThread() : "not on EDT";
+            return new LayerButton(this);
         }
-        assert EventQueue.isDispatchThread();
-
-        return new LayerButton(this);
     }
 
     public boolean isVisible() {
@@ -186,10 +186,10 @@ public abstract class Layer implements Serializable {
         this.ui = ui;
     }
 
-    /**
-     * If sameName is true, then the duplicate layer will
-     * have the same name, otherwise a new "copy name" is generated
-     */
+    public Layer duplicate() {
+        return duplicate(false);
+    }
+
     public abstract Layer duplicate(boolean compCopy);
 
     // helper method used in multiple subclasses
@@ -287,15 +287,14 @@ public abstract class Layer implements Serializable {
         return comp;
     }
 
-    public void setCompAndCanvas(Composition comp) {
+    public void setComp(Composition comp) {
         this.comp = comp;
-        canvas = comp.getCanvas();
         if (hasMask()) {
-            mask.setCompAndCanvas(comp);
+            mask.setComp(comp);
         }
     }
 
-    public void makeActive(boolean addToHistory) {
+    public void activate(boolean addToHistory) {
         comp.setActiveLayer(this, true, addToHistory, null);
     }
 
@@ -314,7 +313,7 @@ public abstract class Layer implements Serializable {
      */
     public PixelitorEdit addHidingMask(Shape selShape, boolean createEdit) {
         if (mask == null) {
-            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, canvas, selShape);
+            BufferedImage bwMask = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, selShape);
             return addImageAsMask(bwMask, false, "Add Layer Mask",
                     false, false, createEdit);
         } else {
@@ -357,11 +356,12 @@ public abstract class Layer implements Serializable {
         }
 
         Shape selShape = selection == null ? null : selection.getShape();
-        BufferedImage bwMask = addType.createBWImage(this, canvas, selShape);
+        BufferedImage bwMask = addType.createBWImage(this, selShape);
 
         String editName = "Add Layer Mask";
         boolean deselect = addType.needsSelection();
         if (deselect) {
+            assert comp.hasSelection();
             editName = "Layer Mask from Selection";
         }
 
@@ -406,6 +406,7 @@ public abstract class Layer implements Serializable {
 
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
+            assert comp.hasSelection();
             Shape backupShape = comp.getSelectionShape();
             comp.deselect(false);
             if (backupShape != null) {
@@ -505,7 +506,7 @@ public abstract class Layer implements Serializable {
         // 1. create the masked image
         // TODO the masked image should be cached
         BufferedImage maskedImage = new BufferedImage(
-                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB);
+                comp.getCanvasImWidth(), comp.getCanvasImHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
@@ -565,8 +566,8 @@ public abstract class Layer implements Serializable {
         return isVisible() ? "visible" : "hidden";
     }
 
-    public void dragFinished(int newIndex) {
-        comp.dragFinished(this, newIndex);
+    public void reorderingFinished(int newIndex) {
+        comp.layerReorderingFinished(this, newIndex);
     }
 
     public void setMaskEditing(boolean newValue) {
@@ -608,10 +609,12 @@ public abstract class Layer implements Serializable {
         }
     }
 
-    // On this level startMovement, moveWhileDragging and
-    // endMovement only care about the movement of the
-    // mask or parent. Our own movement is handled in
-    // ContentLayer.
+    /**
+     * On this level startMovement, moveWhileDragging and
+     * endMovement only care about the movement of the linked
+     * mask or owner.
+     * This object's own movement is handled in {@link ContentLayer}.
+     */
     public void startMovement() {
         Layer linked = getLinked();
         if (linked != null) {
@@ -666,7 +669,7 @@ public abstract class Layer implements Serializable {
      * Return a canvas-sized image representing this layer.
      * This can be the temporarily rasterized image of a text layer.
      */
-    public abstract BufferedImage getTmpLayerImage();
+    public abstract BufferedImage getRepresentingImage();
 
     public boolean isMaskEnabled() {
         return maskEnabled;

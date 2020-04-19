@@ -73,7 +73,7 @@ public enum Build {
     }
 
     public static String getPixelitorWindowFixTitle() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         return fixTitle.get();
     }

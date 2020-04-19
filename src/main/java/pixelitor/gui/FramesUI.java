@@ -75,12 +75,12 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void cascadeWindows() {
-        List<View> views = OpenImages.getViews();
-        if (views.isEmpty()) {
+        if (OpenImages.getNumOpenImages() == 0) {
             Dialogs.showInfoDialog("No open windows",
                     "There are no open internal windows to cascade.");
             return;
         }
+        List<View> views = OpenImages.getViews();
         int locX = 0;
         int locY = 0;
         for (View view : views) {
@@ -111,8 +111,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
     }
 
     public void tileWindows() {
-        List<View> views = OpenImages.getViews();
-        int numWindows = views.size();
+        int numWindows = OpenImages.getNumOpenImages();
         if (numWindows == 0) {
             Dialogs.showInfoDialog("No open windows",
                     "There are no open internal windows to tile.");
@@ -128,6 +127,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         int currRow = 0;
         int currCol = 0;
 
+        List<View> views = OpenImages.getViews();
         for (View view : views) {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
             try {

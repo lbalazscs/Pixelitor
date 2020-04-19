@@ -23,7 +23,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Dirs;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.FileFormat;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -41,11 +41,11 @@ import static pixelitor.gui.utils.BrowseFilesSupport.SelectionMode.DIRECTORY;
  */
 public class SingleDirChooser extends ValidatedPanel {
     private final BrowseFilesSupport dirChooser;
-    private OutputFormatSelector outputFormatSelector;
+    private FileFormatSelector fileFormatSelector;
 
     private SingleDirChooser(String label, String initialPath,
                              String fileChooserTitle,
-                             OutputFormat outputFormat) {
+                             FileFormat outputFormat) {
         dirChooser = new BrowseFilesSupport(initialPath, fileChooserTitle, DIRECTORY);
         JTextField dirTF = dirChooser.getNameTF();
         JButton browseButton = dirChooser.getBrowseButton();
@@ -56,9 +56,9 @@ public class SingleDirChooser extends ValidatedPanel {
             var gbh = new GridBagHelper(this);
             gbh.addLabelAndTwoControls(label, dirTF, browseButton);
 
-            outputFormatSelector = new OutputFormatSelector(outputFormat);
+            fileFormatSelector = new FileFormatSelector(outputFormat);
 
-            gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
+            gbh.addLabelAndControlNoStretch("Output Format:", fileFormatSelector);
         } else {
             setLayout(new BorderLayout());
             add(new JLabel(label), WEST);
@@ -67,8 +67,8 @@ public class SingleDirChooser extends ValidatedPanel {
         }
     }
 
-    private OutputFormat getSelectedFormat() {
-        return outputFormatSelector.getSelectedFormat();
+    private FileFormat getSelectedFormat() {
+        return fileFormatSelector.getSelectedFormat();
     }
 
     private File getSelectedDir() {
@@ -105,7 +105,7 @@ public class SingleDirChooser extends ValidatedPanel {
      * Lets the user select the output directory property of the application.
      * Returns true if a selection was made, false if the operation was cancelled.
      */
-    public static boolean selectOutputDir(OutputFormat defaultFormat) {
+    public static boolean selectOutputDir(FileFormat defaultFormat) {
         var chooserPanel = new SingleDirChooser("Output Folder:",
                 Dirs.getLastSave().getAbsolutePath(),
                 "Select Output Folder", defaultFormat);
@@ -122,7 +122,7 @@ public class SingleDirChooser extends ValidatedPanel {
                 .show();
 
         if (defaultFormat != null) {
-            OutputFormat.setLastUsed(chooserPanel.getSelectedFormat());
+            FileFormat.setLastOutput(chooserPanel.getSelectedFormat());
         }
 
         return selectionWasMade[0];

@@ -17,29 +17,32 @@
 
 package pixelitor.io;
 
-import java.io.File;
-
 /**
- * Settings for writing JPEG images
+ *  Custom configuration JPEG images
  */
-public class JpegSettings extends SaveSettings {
-    private final JpegInfo jpegInfo;
+public class JpegInfo {
+    private final float quality;
+    private final boolean progressive;
+    private static final float DEFAULT_JPEG_QUALITY = 0.87f;
 
-    public JpegSettings(JpegInfo jpegInfo, File outputFile) {
-        super(FileFormat.JPG, outputFile);
-        this.jpegInfo = jpegInfo;
+    public static final JpegInfo DEFAULTS = new JpegInfo(DEFAULT_JPEG_QUALITY, false);
+
+    public JpegInfo(float quality, boolean progressive) {
+        this.quality = quality;
+        this.progressive = progressive;
     }
 
-    public static JpegSettings from(SaveSettings settings) {
-        if(settings instanceof JpegSettings) {
-            return (JpegSettings) settings;
-        }
-        assert settings.getFormat() == FileFormat.JPG;
-        return new JpegSettings(JpegInfo.DEFAULTS,
-                settings.getFile());
+    public float getQuality() {
+        return quality;
     }
 
-    public JpegInfo getJpegInfo() {
-        return jpegInfo;
+    public boolean isProgressive() {
+        return progressive;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("JpegInfo{quality=%.2f, progressive=%s}",
+                quality, progressive);
     }
 }

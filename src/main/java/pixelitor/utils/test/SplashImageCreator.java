@@ -33,7 +33,7 @@ import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.io.Dirs;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.FileFormat;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
@@ -78,9 +78,9 @@ public class SplashImageCreator {
     }
 
     public static void saveManySplashImages() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
-        boolean okPressed = SingleDirChooser.selectOutputDir(OutputFormat.PNG);
+        boolean okPressed = SingleDirChooser.selectOutputDir(FileFormat.PNG);
         if (!okPressed) {
             return;
         }
@@ -109,7 +109,7 @@ public class SplashImageCreator {
         var comp = createSplashComp();
         comp.getView().paintImmediately();
 
-        OutputFormat format = OutputFormat.getLastUsed();
+        FileFormat format = FileFormat.getLastOutput();
         String fileName = format("splash%04d.%s", seqNo, format);
         File f = new File(Dirs.getLastSave(), fileName);
         comp.setFile(f);
@@ -118,7 +118,7 @@ public class SplashImageCreator {
     }
 
     public static Composition createSplashComp() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         FgBgColors.setFGColor(WHITE);
 //        FgBgColors.setBGColor(new Color(6, 83, 81));
@@ -144,7 +144,7 @@ public class SplashImageCreator {
     }
 
     public static Composition createOldSplashImage() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         ValueNoise.reseed();
         var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
@@ -250,7 +250,7 @@ public class SplashImageCreator {
         return layer;
     }
 
-    public static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
+    private static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
         Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getImWidth();
         int canvasHeight = canvas.getImHeight();
@@ -284,7 +284,7 @@ public class SplashImageCreator {
 
     private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp) {
         SaveSettings saveSettings = new SaveSettings(
-                OutputFormat.getLastUsed(), comp.getFile());
+                FileFormat.getLastOutput(), comp.getFile());
         return comp.saveAsync(saveSettings, false)
                 .thenAcceptAsync(v -> comp.getView().close(), EventQueue::invokeLater);
     }

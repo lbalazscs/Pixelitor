@@ -19,7 +19,10 @@ package pixelitor.tools.pen;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Build;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
@@ -41,6 +44,8 @@ import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
 import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 
+@DisplayName("Pen Tool/PathBuilder tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class PathBuilderTest {
     private View view;
     private Graphics2D g;
@@ -57,7 +62,7 @@ public class PathBuilderTest {
     @BeforeEach
     void beforeEachTest() {
         // a real comp that can store paths
-        var comp = TestHelper.createEmptyComposition();
+        var comp = TestHelper.createEmptyComp();
         view = comp.getView(); // a mock view
         g = mock(Graphics2D.class);
         pb = BUILD;
@@ -74,30 +79,35 @@ public class PathBuilderTest {
     }
 
     @Test
+    @DisplayName("closed, curved path")
     void closedCurvedPath() {
         SubPath sp = build3PointSubPath(true, true, 100, 100);
         undoRedo3PointSubpath(sp, true);
     }
 
     @Test
+    @DisplayName("closed, straight path")
     void closedStraightPath() {
         SubPath sp = build3PointSubPath(true, false, 100, 100);
         undoRedo3PointSubpath(sp, true);
     }
 
     @Test
+    @DisplayName("open, curved path")
     void openCurvedPath() {
         SubPath sp = build3PointSubPath(false, true, 100, 100);
         undoRedo3PointSubpath(sp, false);
     }
 
     @Test
+    @DisplayName("open, straight path")
     void openStraightPath() {
         SubPath sp = build3PointSubPath(false, false, 100, 100);
         undoRedo3PointSubpath(sp, false);
     }
 
     @Test
+    @DisplayName("multiple subpaths")
     void multipleSubPaths() {
         build3PointSubPath(false, false, 100, 100);
         build3PointSubPath(true, true, 300, 100);
@@ -105,6 +115,7 @@ public class PathBuilderTest {
     }
 
     @Test
+    @DisplayName("undo after mouse press")
     void undoAfterMousePressed() {
         press(100, 100, DRAGGING_THE_CONTROL_OF_LAST);
         Path path = PenTool.path;
@@ -135,6 +146,7 @@ public class PathBuilderTest {
     }
 
     @Test
+    @DisplayName("undo after mouse click")
     void undoAfterMouseClicked() {
         click(100, 100);
 
@@ -164,6 +176,7 @@ public class PathBuilderTest {
      * The handles are broken twice with Alt while building the shape
      */
     @Test
+    @DisplayName("two-point heart")
     void buildingTwoPointHeart() {
         int p1x = 100;
         int p1y = 100;
@@ -247,6 +260,7 @@ public class PathBuilderTest {
     // broke the currently dragged handles by alt-dragging.
     // This one tests breaking old handles.
     @Test
+    @DisplayName("breaking old handles with Alt")
     void breakingOldHandlesWithAlt() {
         // add the first anchor point
         press(100, 100, DRAGGING_THE_CONTROL_OF_LAST);
@@ -299,16 +313,19 @@ public class PathBuilderTest {
     // This test drags on a previous anchor point, rather than on a control point.
     // Expected result: drag out new, symmetric control handles
     @Test
+    @DisplayName("Alt-drag on a previous anchor")
     void altDragOnPreviousAnchor() {
         testSpecialDragPrevious(CtrlOrAlt.ALT);
     }
 
     @Test
+    @DisplayName("Ctrl-drag on a previous anchor")
     void movingPreviousAnchorsWithCtrl() {
         testSpecialDragPrevious(CtrlOrAlt.CTRL);
     }
 
     @Test
+    @DisplayName("moving position after undoing the closing of a subpath")
     void movingPositionAfterUndoingCloseMustBeAtMouse() {
         SubPath sp = build3PointSubPath(true, true, 100, 100);
 
@@ -321,6 +338,7 @@ public class PathBuilderTest {
     }
 
     @Test
+    @DisplayName("constrainted straight path")
     void constrainedStraightPath() {
         click(100, 100);
         shiftClick(300, 110);
@@ -372,18 +390,7 @@ public class PathBuilderTest {
     }
 
     @Test
-    void startingWithShiftClick() {
-        // starting with shift-click should not cause any exceptions,
-        // even tough the last relative coordinates are not yet initialized
-        shiftClick(456, 654);
-
-        assertThat(PenTool.path.getActiveSubpath())
-                .isNotFinished()
-                .numAnchorsIs(1)
-                .firstAnchorIsAt(456, 654);
-    }
-
-    @Test
+    @DisplayName("constrained curved path")
     void constrainedCurvedPath() {
         // Start a new curve with shift-press.
         // As this is the first point on the subpath, it should not be constrained.
@@ -424,6 +431,19 @@ public class PathBuilderTest {
                 .numAnchorsIs(2);
         AnchorPoint secondAnchor = sp.getAnchor(1);
         assertThat(secondAnchor).isAt(314, 510);
+    }
+
+    @Test
+    @DisplayName("starting with Shift-click")
+    void startingWithShiftClick() {
+        // starting with shift-click should not cause any exceptions,
+        // even tough the last relative coordinates are not yet initialized
+        shiftClick(456, 654);
+
+        assertThat(PenTool.path.getActiveSubpath())
+                .isNotFinished()
+                .numAnchorsIs(1)
+                .firstAnchorIsAt(456, 654);
     }
 
     private void testSpecialDragPrevious(CtrlOrAlt modifier) {

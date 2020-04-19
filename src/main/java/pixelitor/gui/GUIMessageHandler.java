@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,14 +32,14 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         StatusBar.INSTANCE.setMessage(msg);
     }
 
     @Override
     public ProgressHandler startProgress(String msg, int max) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         return StatusBar.INSTANCE.startProgress(msg, max);
     }

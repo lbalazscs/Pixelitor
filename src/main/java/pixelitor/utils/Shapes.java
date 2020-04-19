@@ -1426,4 +1426,23 @@ public class Shapes {
 
         return path;
     }
+
+    /**
+     * Transform fractional crop dimensions (in zoomed-in images)
+     * into the actual pixel boundaries
+     */
+    public static Rectangle roundCropRect(Rectangle2D rect) {
+        int x = (int) Math.round(rect.getX());
+        int y = (int) Math.round(rect.getY());
+        int width = (int) Math.round(rect.getWidth());
+        int height = (int) Math.round(rect.getHeight());
+
+        if (width == 0) {
+            width = 1;
+        }
+        if (height == 0) {
+            height = 1;
+        }
+        return new Rectangle(x, y, width, height);
+    }
 }

@@ -19,7 +19,10 @@ package pixelitor.filters.levels;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import pixelitor.filters.gui.PreviewExecutor;
 
@@ -27,6 +30,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@DisplayName("Levels tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class LevelsTest {
     private Levels levels;
     private ArgumentCaptor<RGBLookup> captor;
@@ -60,7 +65,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageRGB_inputBlack100() {
+    @DisplayName("page RGB, input dark = 100")
+    void pageRGB_inputDark100() {
         rgbPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -70,7 +76,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageR_inputBlack100() {
+    @DisplayName("page Red, input dark = 100")
+    void pageR_inputDark100() {
         rPage.getInputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -80,7 +87,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageRGB_inputWhite150() {
+    @DisplayName("page RGB, input light = 150")
+    void pageRGB_inputLight150() {
         rgbPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -90,7 +98,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageR_inputWhite150() {
+    @DisplayName("page Red, input light = 150")
+    void pageR_inputLight150() {
         rPage.getInputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -100,7 +109,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageRGB_outputBlack100() {
+    @DisplayName("page RGB, output dark = 100")
+    void pageRGB_outputDark100() {
         rgbPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -110,7 +120,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageR_outputBlack100() {
+    @DisplayName("page Red, output dark = 100")
+    void pageR_outputDark100() {
         rPage.getOutputDark().setValue(100);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -120,7 +131,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageRGB_outputWhite150() {
+    @DisplayName("page RGB, output light = 150")
+    void pageRGB_outputLight150() {
         rgbPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 
@@ -130,7 +142,8 @@ public class LevelsTest {
     }
 
     @Test
-    void pageR_outputWhite150() {
+    @DisplayName("page Red, output light = 150")
+    void pageR_outputLight150() {
         rPage.getOutputLight().setValue(150);
         RGBLookup lookup = getCalculatedLookup();
 

@@ -17,11 +17,11 @@
 
 package pixelitor.automate;
 
+import pixelitor.compactions.CompAction;
 import pixelitor.filters.Filter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Drawable;
 
-import java.awt.Component;
 import java.util.concurrent.CompletableFuture;
 
 import static pixelitor.ChangeReason.BATCH_AUTOMATE;
@@ -39,27 +39,15 @@ public class BatchFilterWizard extends Wizard {
     }
 
     @Override
-    protected boolean mayMoveForwardIfNextPressed(WizardPage wizardPage, Component dialogParent) {
-        return true;
-    }
-
-    @Override
-    protected boolean mayProceedAfterMovingForward(WizardPage wizardPage, Component dialogParent) {
-        return true;
-    }
-
-    @Override
     protected void finalAction() {
         var busyCursorParent = PixelitorWindow.getInstance();
         var dialogTitle = "Batch Filter Progress";
 
-        Automate.processEachFile(comp -> {
-                    filter.run(
-                            comp.getActiveDrawableOrThrow(),
-                            BATCH_AUTOMATE, busyCursorParent);
-                    return CompletableFuture.completedFuture(comp);
-                },
-                dialogTitle);
+        CompAction batchFilterAction = comp -> {
+            filter.run(comp.getActiveDrawableOrThrow(), BATCH_AUTOMATE, busyCursorParent);
+            return CompletableFuture.completedFuture(comp);
+        };
+        Automate.processEachFile(batchFilterAction, dialogTitle);
     }
 
     @Override

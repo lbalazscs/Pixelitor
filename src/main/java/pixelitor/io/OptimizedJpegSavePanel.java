@@ -70,7 +70,7 @@ public class OptimizedJpegSavePanel extends JPanel {
         add(comparePanel, CENTER);
         add(controlsPanel, SOUTH);
 
-        updatePreview();
+        updatePreviewAsync();
     }
 
     private JPanel createComparePanel(BufferedImage image) {
@@ -120,11 +120,11 @@ public class OptimizedJpegSavePanel extends JPanel {
 
         p.add(new JLabel("Progressive:"));
         progressiveCB = new JCheckBox("", false);
-        progressiveCB.addActionListener(e -> updatePreview());
+        progressiveCB.addActionListener(e -> updatePreviewAsync());
         p.add(progressiveCB);
 
         qualityParam = new RangeParam("  JPEG Quality", 1, 60, 100);
-        qualityParam.setAdjustmentListener(this::updatePreview);
+        qualityParam.setAdjustmentListener(this::updatePreviewAsync);
         p.add(new SliderSpinner(qualityParam, WEST, false));
 
         sizeLabel = new JLabel();
@@ -138,12 +138,12 @@ public class OptimizedJpegSavePanel extends JPanel {
         return p;
     }
 
-    private void updatePreview() {
-        JpegSettings settings = getSelectedSettings();
+    private void updatePreviewAsync() {
+        JpegInfo config = getSelectedConfig();
 
         CompletableFuture
             .supplyAsync(
-                () -> createPreview(settings),
+                () -> createPreview(config),
                 IOThread.getExecutor())
             .thenAcceptAsync(
                 this::setPreview,
@@ -151,9 +151,9 @@ public class OptimizedJpegSavePanel extends JPanel {
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
-    private ImageWithSize createPreview(JpegSettings settings) {
+    private ImageWithSize createPreview(JpegInfo config) {
         ProgressTracker pt = new JProgressBarTracker(progressPanel);
-        return JpegOutput.writeJPGtoPreviewImage(image, settings, pt);
+        return JpegOutput.writeJPGtoPreviewImage(image, config, pt);
     }
 
     private void setPreview(ImageWithSize imageWithSize) {
@@ -164,8 +164,8 @@ public class OptimizedJpegSavePanel extends JPanel {
         sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
     }
 
-    private JpegSettings getSelectedSettings() {
-        return new JpegSettings(qualityParam.getPercentageValF(),
+    private JpegInfo getSelectedConfig() {
+        return new JpegInfo(qualityParam.getPercentageValF(),
                 progressiveCB.isSelected());
     }
 
@@ -179,8 +179,8 @@ public class OptimizedJpegSavePanel extends JPanel {
             .title("Save Optimized JPEG")
             .okText("Save")
             .okAction(() -> {
-                JpegSettings settings = p.getSelectedSettings();
-                OpenSave.saveJpegWithQuality(settings);
+                JpegInfo config = p.getSelectedConfig();
+                IO.saveJpegWithQuality(config);
             })
             .show();
     }

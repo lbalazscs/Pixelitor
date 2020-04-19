@@ -85,7 +85,7 @@ public class AdjustmentLayer extends Layer {
     }
 
     @Override
-    public BufferedImage getTmpLayerImage() {
+    public BufferedImage getRepresentingImage() {
         throw new UnsupportedOperationException();
     }
 

@@ -31,7 +31,7 @@ public enum WithSelection {
     YES {
         @Override
         public void setupFor(Composition comp) {
-            TestHelper.setRectangleSelection(comp, SELECTION_SHAPE);
+            TestHelper.setSelection(comp, SELECTION_SHAPE);
             assertThat(comp).selectionBoundsIs(SELECTION_SHAPE);
         }
     }, NO {
@@ -45,7 +45,7 @@ public enum WithSelection {
 
     public abstract void setupFor(Composition comp);
 
-    public boolean isYes() {
+    public boolean isTrue() {
         return this == YES;
     }
 }

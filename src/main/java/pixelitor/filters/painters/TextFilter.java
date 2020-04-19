@@ -22,7 +22,6 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -36,11 +35,12 @@ public class TextFilter extends FilterWithGUI {
     private static TextFilter instance;
 
     private TextFilter() {
+        settings = new TextSettings();
     }
 
     @SuppressWarnings("NonThreadSafeLazyInitialization")
     public static TextFilter getInstance() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         if (instance == null) {
             instance = new TextFilter();
@@ -87,15 +87,11 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void randomizeSettings() {
-        if (RandomGUITest.isRunning() && settings == null) {
-            // the random GUI test could call this without
-            // initializing the GUI
-            settings = TextSettings.createRandomSettings();
-            return;
-        }
-        // otherwise don't do null check: it is an error if the settings
-        // is null now (initialized GUI), and *should* throw an exception
         settings.randomize();
+    }
+
+    public TextSettings getSettings() {
+        return settings;
     }
 
     public void setSettings(TextSettings settings) {

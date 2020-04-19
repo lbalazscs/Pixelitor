@@ -17,7 +17,12 @@
 
 package pixelitor.transform;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.tools.TransformHelper;
 
 import java.awt.Cursor;
@@ -26,6 +31,9 @@ import java.awt.Rectangle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("TransformHelper tests")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestMethodOrder(MethodOrderer.Random.class)
 public class TransformHelperTest {
     @Test
     void aspectRatio() {

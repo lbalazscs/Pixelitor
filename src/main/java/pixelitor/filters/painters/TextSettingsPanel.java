@@ -32,14 +32,13 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,7 +46,6 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.Color.WHITE;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
@@ -57,35 +55,30 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
  */
 public class TextSettingsPanel extends FilterGUI
         implements ParamAdjustmentListener, ActionListener {
-    private static final String DEFAULT_TEXT = "Pixelitor";
     private TextLayer textLayer;
+    private Map<TextAttribute, Object> map;
 
     private JTextField textTF;
     private JComboBox<String> fontFamilyChooserCB;
     private SliderSpinner fontSizeSlider;
     private AngleParam rotationParam;
-
     private JCheckBox boldCB;
     private JCheckBox italicCB;
-
     private ColorParam color;
-
     private EffectsPanel effectsPanel;
     private JComboBox<VerticalAlignment> vAlignmentCB;
     private JComboBox<HorizontalAlignment> hAlignmentCB;
-
     private JCheckBox watermarkCB;
 
-    private static String lastText = "";
-
-    private Map<TextAttribute, Object> map;
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
-    // called for image layers
+    /**
+     * Used for the text filter on images
+     */
     public TextSettingsPanel(TextFilter textFilter, Drawable dr) {
         super(textFilter, dr);
-        createGUI(null, dr.getComp().getCanvasImHeight());
+        createGUI(textFilter.getSettings());
 
         if(!textTF.getText().isEmpty()) {
             // a "last text" was set
@@ -93,26 +86,29 @@ public class TextSettingsPanel extends FilterGUI
         }
     }
 
-    // called for text layers
+    /**
+     * Used for text layers
+     */
     public TextSettingsPanel(TextLayer textLayer) {
         super(null, null);
         this.textLayer = textLayer;
-        createGUI(textLayer.getSettings(), textLayer.getComp().getCanvasImHeight());
+        createGUI(textLayer.getSettings());
 
         // make sure that the text layer has a settings object
         // even if the user presses OK without making any adjustments
         paramAdjusted();
 
-        if(textTF.getText().equals(DEFAULT_TEXT)) {
+        if(textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
             textTF.selectAll();
         }
     }
 
-    private void createGUI(TextSettings settings, int canvasHeight) {
+    private void createGUI(TextSettings settings) {
+        assert settings != null;
         setLayout(new VerticalLayout());
 
         add(createTextPanel(settings));
-        add(createFontPanel(settings, canvasHeight));
+        add(createFontPanel(settings));
 
         createEffectsPanel(settings);
         add(effectsPanel);
@@ -131,32 +127,23 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLastControl(textTF);
 
         gbh.addLabel("Color:", 0, 1);
-        Color defaultColor = settings == null ? WHITE : settings.getColor();
-        color = new ColorParam("Color", defaultColor, USER_ONLY_TRANSPARENCY);
+        color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
         gbh.addControl(new ColorParamGUI(color, false));
         color.setAdjustmentListener(this);
 
         gbh.addLabel("Rotation:", 2, 1);
-        double defaultRotation = 0;
-        if (settings != null) {
-            defaultRotation = settings.getRotation();
-        }
-        rotationParam = new AngleParam("", defaultRotation);
+        rotationParam = new AngleParam("", settings.getRotation());
         rotationParam.setAdjustmentListener(this);
         gbh.addControl(rotationParam.createGUI());
 
         hAlignmentCB = new JComboBox<>(HorizontalAlignment.values());
-        if (settings != null) {
-            hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
-        }
+        hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
         gbh.addLabel("Horizontal Alignment:", 0, 2);
         hAlignmentCB.addActionListener(this);
         gbh.addControl(hAlignmentCB);
 
         vAlignmentCB = new JComboBox<>(VerticalAlignment.values());
-        if (settings != null) {
-            vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
-        }
+        vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
         gbh.addLabel("Vertical Alignment:", 0, 3);
         vAlignmentCB.addActionListener(this);
         gbh.addControl(vAlignmentCB);
@@ -165,22 +152,7 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void createTextTF(TextSettings settings) {
-        String defaultText;
-        if (settings == null) {
-            if (isInFilterMode()) { 
-                // Remember the last text in filter mode.
-                // This was a requested feature when we didn't have text layers,
-                // probably it is not so useful now
-                defaultText = lastText;
-            } else { // text layer mode
-                // no last text remembering when creating new text layers
-                defaultText = DEFAULT_TEXT;
-            }
-        } else {
-            defaultText = settings.getText();
-        }
-
-        textTF = new JTextField(defaultText, 20);
+        textTF = new JTextField(settings.getText(), 20);
         textTF.setName("textTF");
 
         textTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -201,7 +173,7 @@ public class TextSettingsPanel extends FilterGUI
         });
     }
 
-    private JPanel createFontPanel(TextSettings settings, int canvasHeight) {
+    private JPanel createFontPanel(TextSettings settings) {
         JPanel fontPanel = new JPanel();
         fontPanel.setBorder(createTitledBorder("Font"));
         fontPanel.setLayout(new GridBagLayout());
@@ -209,19 +181,12 @@ public class TextSettingsPanel extends FilterGUI
         var gbh = new GridBagHelper(fontPanel);
 
         int maxFontSize = 1000;
-        int defaultFontSize;
-        if (settings == null) {
-            defaultFontSize = (int) (canvasHeight * 0.2);
-            if (canvasHeight > maxFontSize) {
-                maxFontSize = canvasHeight;
-            }
-        } else {
-            defaultFontSize = settings.getFont().getSize();
-            if (maxFontSize < defaultFontSize) {
-                // can get here if the canvas is downsized
-                // after the text later creation
-                maxFontSize = defaultFontSize;
-            }
+        Font font = settings.getFont();
+        int defaultFontSize = font.getSize();
+        if (maxFontSize < defaultFontSize) {
+            // can get here if the canvas is downsized
+            // after the text layer creation
+            maxFontSize = defaultFontSize;
         }
 
         gbh.addLabel("Font Size:", 0, 0);
@@ -233,25 +198,20 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLastControl(fontSizeSlider);
 
         gbh.addLabel("Font Type:", 0, 1);
-        String[] availableFonts = getAvailableFonts();
+        String[] availableFonts = Utils.getAvailableFontNames();
         fontFamilyChooserCB = new JComboBox<>(availableFonts);
-        if (settings != null) {
-            // it is important to use Font.getName(), and not Font.getFontName(),
-            // otherwise it might not be in the combo box
-            String fontName = settings.getFont().getName();
-            fontFamilyChooserCB.setSelectedItem(fontName);
-        }
+
+        // it is important to use Font.getName(), and not Font.getFontName(),
+        // otherwise it might not be in the combo box
+        String fontName = font.getName();
+        fontFamilyChooserCB.setSelectedItem(fontName);
+
         fontFamilyChooserCB.addActionListener(this);
         gbh.addLastControl(fontFamilyChooserCB);
 
-        boolean defaultBold = false;
-        boolean defaultItalic = false;
-        if (settings != null) {
-            Font font = settings.getFont();
-            defaultBold = font.isBold();
-            defaultItalic = font.isItalic();
-            setAttributeMapFromFontSettings(font);
-        }
+        boolean defaultBold = font.isBold();
+        boolean defaultItalic = font.isItalic();
+        setAttributeMapFromFontSettings(font);
 
         gbh.addLabel("Bold:", 0, 2);
         boldCB = createCheckBox("boldCB", gbh, defaultBold);
@@ -266,12 +226,6 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addControl(showAdvancedSettingsButton);
 
         return fontPanel;
-    }
-
-    private static String[] getAvailableFonts() {
-        return GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames();
     }
 
     @SuppressWarnings("unchecked")
@@ -346,20 +300,14 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     private void createEffectsPanel(TextSettings settings) {
-        AreaEffects areaEffects = null;
-        if (settings != null) {
-            areaEffects = settings.getAreaEffects();
-        }
+        AreaEffects areaEffects = settings.getAreaEffects();
         effectsPanel = new EffectsPanel(this, areaEffects);
         effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 
     private JPanel createWatermarkPanel(TextSettings settings) {
-        boolean hasWatermark = false;
-        if (settings != null) {
-            hasWatermark = settings.isWatermark();
-        }
-        watermarkCB = new JCheckBox("Use Text for Watermarking", hasWatermark);
+        watermarkCB = new JCheckBox("Use Text for Watermarking",
+                settings.isWatermark());
         watermarkCB.addActionListener(this);
 
         var p = new JPanel(new FlowLayout(LEFT));
@@ -374,29 +322,12 @@ public class TextSettingsPanel extends FilterGUI
 
     @Override
     public void paramAdjusted() {
-        TextFilter textFilter = (TextFilter) filter;
         String text = textTF.getText();
-
-        if (isInFilterMode()) {
-            lastText = text;
-        }
 
         AreaEffects areaEffects = null;
         double textRotationAngle = rotationParam.getValueInRadians();
         if (effectsPanel != null) {
             areaEffects = effectsPanel.getEffects();
-
-//            // adjust the drop shadow angle so that it is
-//            // in the right direction even if the text is rotated
-//            ShadowPathEffect dropShadowEffect = areaEffects.getDropShadowEffect();
-//            if (dropShadowEffect != null && textRotationAngle != 0) {
-//                Point2D offset = dropShadowEffect.getOffset();
-//                double distance = offset.distance(0, 0);
-//                double angle = Math.atan2(offset.getY(), offset.getX());
-//                angle -= textRotationAngle;
-//                Point2D adjustedOffset = Utils.offsetFromPolar(distance, angle);
-//                dropShadowEffect.setOffset(adjustedOffset);
-//            }
         }
 
         Font selectedFont = getSelectedFont();
@@ -407,8 +338,8 @@ public class TextSettingsPanel extends FilterGUI
                 (VerticalAlignment) vAlignmentCB.getSelectedItem(),
                 watermarkCB.isSelected(), textRotationAngle);
 
-        if (textFilter != null) { // filter mode
-            textFilter.setSettings(settings);
+        if (isInFilterMode()) {
+            ((TextFilter) filter).setSettings(settings);
             runFilterPreview();
         } else {
             assert textLayer != null;

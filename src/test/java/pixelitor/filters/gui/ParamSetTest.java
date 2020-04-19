@@ -18,7 +18,10 @@
 package pixelitor.filters.gui;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
@@ -30,6 +33,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@DisplayName("ParamSet tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class ParamSetTest {
     private ParamSet params;
     private ParamAdjustmentListener adjustmentListener;
@@ -73,6 +78,7 @@ public class ParamSetTest {
     }
 
     @Test
+    @DisplayName("copyState()/setState()")
     void copyState_setState() {
         CompositeState state = params.copyState();
         params.setState(state);

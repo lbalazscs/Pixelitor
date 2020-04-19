@@ -24,8 +24,8 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
+import pixelitor.io.IO;
 import pixelitor.io.IOThread;
-import pixelitor.io.OpenSave;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -96,13 +96,6 @@ public class OpenImages {
     private OpenImages() {
     }
 
-    public static List<Composition> getUnsavedComps() {
-        return views.stream()
-                .map(View::getComp)
-                .filter(Composition::isDirty)
-                .collect(toList());
-    }
-
     public static List<View> getViews() {
         return views;
     }
@@ -111,118 +104,8 @@ public class OpenImages {
         return activeView;
     }
 
-    public static Composition getActiveComp() {
-        if (activeView != null) {
-            return activeView.getComp();
-        }
-
-        // there is no open image
-        return null;
-    }
-
-    public static Optional<Composition> getActiveCompOpt() {
-        return Optional.ofNullable(getActiveComp());
-    }
-
-    public static boolean checkActiveComp(Predicate<Composition> check, boolean ifNoImage) {
-        if (activeView != null) {
-            return check.test(activeView.getComp());
-        }
-
-        return ifNoImage;
-    }
-
-    public static <T> T fromActiveComp(Function<Composition, T> function) {
-        if (activeView != null) {
-            return function.apply(activeView.getComp());
-        }
-
-        // there is no open image
-        return null;
-    }
-
-    public static Path getActivePath() {
-        if (activeView != null) {
-            return activeView.getComp().getActivePath();
-        }
-
-        // there is no open image
-        return null;
-    }
-
-    // to be used in assertions
-    public static boolean activePathIs(Path path) {
-        if (activeView != null) {
-            Path activePath = activeView.getComp().getActivePath();
-            if (activePath == path) {
-                return true;
-            } else {
-                throw new AssertionError(format("active path = %s, path = %s",
-                        activePath, path));
-            }
-        }
-
-        // no open image
-        if (path == null) {
-            return true;
-        } else {
-            throw new AssertionError("there is no open image");
-        }
-    }
-
-    public static void setActivePath(Path path) {
-        if (activeView != null) {
-            activeView.getComp().setActivePath(path);
-        }
-    }
-
-    public static Selection getActiveSelection() {
-        if (activeView != null) {
-            return activeView.getComp().getSelection();
-        }
-
-        // there is no open image
-        return null;
-    }
-
-    public static Optional<Composition> findCompositionByName(String name) {
-        return views.stream()
-                .map(View::getComp)
-                .filter(c -> c.getName().equals(name))
-                .findFirst();
-    }
-
-    public static Layer getActiveLayer() {
-        if (activeView != null) {
-            return activeView.getComp().getActiveLayer();
-        }
-
-        return null;
-    }
-
-    public static Drawable getActiveDrawable() {
-        if (activeView != null) {
-            var comp = activeView.getComp();
-            return comp.getActiveDrawable();
-        }
-
-        return null;
-    }
-
-    public static Drawable getActiveDrawableOrThrow() {
-        if (activeView != null) {
-            return activeView.getComp().getActiveDrawableOrThrow();
-        }
-
-        throw new IllegalStateException("no active image");
-    }
-
     public static int getNumOpenImages() {
         return views.size();
-    }
-
-    public static BufferedImage getActiveCompositeImage() {
-        return fromActiveComp(Composition::getCompositeImage);
     }
 
     public static void imageClosed(View view) {
@@ -233,15 +116,20 @@ public class OpenImages {
         activateAViewIfNoneIs();
     }
 
+    private static void onAllImagesClosed() {
+        setActiveView(null, false);
+        activationListeners.forEach(ViewActivationListener::allViewsClosed);
+        History.onAllImagesClosed();
+        SelectionActions.setEnabled(false, null);
+
+        PixelitorWindow.getInstance().updateTitle(null);
+        FramesUI.resetCascadeIndex();
+    }
+
     private static void activateAViewIfNoneIs() {
         if (!views.isEmpty()) {
-            boolean activeFound = false;
-            for (View view : views) {
-                if (view == activeView) {
-                    activeFound = true;
-                    break;
-                }
-            }
+            boolean activeFound = views.stream()
+                    .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
                 setActiveView(views.get(0), true);
@@ -282,19 +170,6 @@ public class OpenImages {
         activationListeners.remove(listener);
     }
 
-    private static void onAllImagesClosed() {
-        setActiveView(null, false);
-        activationListeners.forEach(ViewActivationListener::allViewsClosed);
-        History.onAllImagesClosed();
-        SelectionActions.setEnabled(false, null);
-
-        PixelitorWindow.getInstance().updateTitle(null);
-        FramesUI.resetCascadeIndex();
-    }
-
-    /**
-     * Another view became active
-     */
     public static void viewActivated(View view) {
         if (view == activeView) {
             return;
@@ -373,27 +248,18 @@ public class OpenImages {
             return;
         }
 
-        // prevents starting a new reload on the EDT while an asynchronous
+        // prevent starting a new reload on the EDT while an asynchronous
         // reload is already scheduled or running on the IO thread
         if (IOThread.isProcessing(path)) {
             return;
         }
         IOThread.markReadProcessing(path);
 
-        OpenSave.loadCompAsync(file)
+        IO.loadCompAsync(file)
                 .thenAcceptAsync(view::replaceJustReloadedComp,
                         EventQueue::invokeLater)
                 .whenComplete((v, e) -> IOThread.readingFinishedFor(path))
                 .exceptionally(Messages::showExceptionOnEDT);
-    }
-
-    public static void duplicateActive() {
-        assert activeView != null;
-
-        Composition activeComp = activeView.getComp();
-        Composition newComp = activeComp.createCopy(false, true);
-
-        addAsNewComp(newComp);
     }
 
     public static void onActiveView(Consumer<View> action) {
@@ -405,85 +271,6 @@ public class OpenImages {
     public static void forEachView(Consumer<View> action) {
         for (View view : views) {
             action.accept(view);
-        }
-    }
-
-    public static void onActiveComp(Consumer<Composition> action) {
-        if (activeView != null) {
-            var comp = activeView.getComp();
-            action.accept(comp);
-        }
-    }
-
-    public static void onActiveSelection(Consumer<Selection> action) {
-        if (activeView != null) {
-            activeView.getComp().onSelection(action);
-        }
-    }
-
-    public static void onActiveLayer(Consumer<Layer> action) {
-        if (activeView != null) {
-            Layer activeLayer = activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
-        }
-    }
-
-    public static void onActiveImageLayer(Consumer<ImageLayer> action) {
-        if (activeView != null) {
-            ImageLayer activeLayer = (ImageLayer) activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
-        }
-    }
-
-    public static void onActiveTextLayer(Consumer<TextLayer> action) {
-        if (activeView != null) {
-            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
-            action.accept(activeLayer);
-        }
-    }
-
-    public static <T> T fromActiveTextLayer(Function<TextLayer, T> function) {
-        if (activeView != null) {
-            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
-            return function.apply(activeLayer);
-        }
-        return null;
-    }
-
-    public static void onActiveDrawable(Consumer<Drawable> action) {
-        Drawable dr = getActiveDrawable();
-        if (dr != null) {
-            action.accept(dr);
-        }
-    }
-
-    public static Composition addJustLoadedComp(Composition comp, File file) {
-        if (comp != null) { // there was no decoding problem
-            addAsNewComp(comp);
-            RecentFilesMenu.getInstance().addFile(file);
-            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
-        }
-        return comp;
-    }
-
-    public static void addAsNewComp(BufferedImage image, File file, String name) {
-        var comp = Composition.fromImage(image, file, name);
-        addAsNewComp(comp);
-    }
-
-    public static void addAsNewComp(Composition comp) {
-        try {
-            assert comp.getView() == null : "already has a view";
-
-            View view = new View(comp);
-            comp.addAllLayersToGUI();
-            view.setCursor(Tools.getCurrent().getStartingCursor());
-            views.add(view);
-            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer(), "image added");
-            ImageArea.addNewView(view);
-            setActiveView(view, false);
-        } catch (Exception e) {
-            Messages.showException(e);
         }
     }
 
@@ -543,7 +330,7 @@ public class OpenImages {
                 int answer = Dialogs.showCloseWarningDialog(comp.getName());
 
                 if (answer == YES_OPTION) { // "Save"
-                    boolean fileSaved = OpenSave.save(comp, false);
+                    boolean fileSaved = IO.save(comp, false);
                     if (fileSaved) {
                         view.close();
                     }
@@ -595,4 +382,191 @@ public class OpenImages {
         return false;
     }
 
+    public static boolean activeCompIs(Composition comp) {
+        if (activeView != null) {
+            return activeView.getComp() == comp;
+        }
+        // there is no open image
+        return comp == null;
+    }
+
+    public static Composition getActiveComp() {
+        if (activeView != null) {
+            return activeView.getComp();
+        }
+
+        // there is no open image
+        return null;
+    }
+
+    public static Optional<Composition> getActiveCompOpt() {
+        return Optional.ofNullable(getActiveComp());
+    }
+
+    public static void onActiveComp(Consumer<Composition> action) {
+        if (activeView != null) {
+            var comp = activeView.getComp();
+            action.accept(comp);
+        }
+    }
+
+    public static <T> T fromActiveComp(Function<Composition, T> function) {
+        if (activeView != null) {
+            return function.apply(activeView.getComp());
+        }
+
+        // there is no open image
+        return null;
+    }
+
+    public static BufferedImage getActiveCompositeImage() {
+        return fromActiveComp(Composition::getCompositeImage);
+    }
+
+    public static Optional<Composition> findCompByName(String name) {
+        return views.stream()
+                .map(View::getComp)
+                .filter(c -> c.getName().equals(name))
+                .findFirst();
+    }
+
+    public static List<Composition> getUnsavedComps() {
+        return views.stream()
+                .map(View::getComp)
+                .filter(Composition::isDirty)
+                .collect(toList());
+    }
+
+    public static void duplicateActiveComp() {
+        assert activeView != null;
+
+        Composition activeComp = activeView.getComp();
+        Composition newComp = activeComp.createCopy(false, true);
+
+        addAsNewComp(newComp);
+    }
+
+    public static Composition addJustLoadedComp(Composition comp) {
+        if (comp != null) { // there was no decoding problem
+            addAsNewComp(comp);
+            File file = comp.getFile();
+            RecentFilesMenu.getInstance().addFile(file);
+            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
+        }
+        return comp;
+    }
+
+    public static void addAsNewComp(BufferedImage image, File file, String name) {
+        var comp = Composition.fromImage(image, file, name);
+        addAsNewComp(comp);
+    }
+
+    public static void addAsNewComp(Composition comp) {
+        try {
+            assert comp.getView() == null : "already has a view";
+
+            View view = new View(comp);
+            comp.addAllLayersToGUI();
+            view.setCursor(Tools.getCurrent().getStartingCursor());
+            views.add(view);
+            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer(), "image added");
+            ImageArea.addNewView(view);
+            setActiveView(view, false);
+        } catch (Exception e) {
+            Messages.showException(e);
+        }
+    }
+
+    public static Layer getActiveLayer() {
+        if (activeView != null) {
+            return activeView.getComp().getActiveLayer();
+        }
+
+        return null;
+    }
+
+    public static void onActiveLayer(Consumer<Layer> action) {
+        if (activeView != null) {
+            Layer activeLayer = activeView.getComp().getActiveLayer();
+            action.accept(activeLayer);
+        }
+    }
+
+    public static void onActiveImageLayer(Consumer<ImageLayer> action) {
+        if (activeView != null) {
+            ImageLayer activeLayer = (ImageLayer) activeView.getComp().getActiveLayer();
+            action.accept(activeLayer);
+        }
+    }
+
+    public static void onActiveTextLayer(Consumer<TextLayer> action) {
+        if (activeView != null) {
+            TextLayer activeLayer = (TextLayer) activeView.getComp().getActiveLayer();
+            action.accept(activeLayer);
+        }
+    }
+
+    public static Drawable getActiveDrawable() {
+        if (activeView != null) {
+            var comp = activeView.getComp();
+            return comp.getActiveDrawable();
+        }
+
+        return null;
+    }
+
+    public static Drawable getActiveDrawableOrThrow() {
+        if (activeView != null) {
+            return activeView.getComp().getActiveDrawableOrThrow();
+        }
+
+        throw new IllegalStateException("no active image");
+    }
+
+    public static void onActiveDrawable(Consumer<Drawable> action) {
+        Drawable dr = getActiveDrawable();
+        if (dr != null) {
+            action.accept(dr);
+        }
+    }
+
+    public static Selection getActiveSelection() {
+        if (activeView != null) {
+            return activeView.getComp().getSelection();
+        }
+
+        // there is no open image
+        return null;
+    }
+
+    public static void onActiveSelection(Consumer<Selection> action) {
+        if (activeView != null) {
+            activeView.getComp().onSelection(action);
+        }
+    }
+
+    public static Path getActivePath() {
+        if (activeView != null) {
+            return activeView.getComp().getActivePath();
+        }
+
+        // there is no open image
+        return null;
+    }
+
+    public static boolean activePathIs(Path path) {
+        if (activeView != null) {
+            Path activePath = activeView.getComp().getActivePath();
+            return activePath == path;
+        }
+
+        // no open image
+        return path == null;
+    }
+
+    public static void setActivePath(Path path) {
+        if (activeView != null) {
+            activeView.getComp().setActivePath(path);
+        }
+    }
 }

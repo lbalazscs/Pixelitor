@@ -81,7 +81,7 @@ public class AutoPaint {
     }
 
     private static void paintStrokes(Drawable dr, Settings settings) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         origFg = getFGColor();
         origBg = getBGColor();

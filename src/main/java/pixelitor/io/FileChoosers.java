@@ -59,7 +59,7 @@ public class FileChoosers {
     }
 
     private static void initOpenChooser() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         if (openChooser == null) {
             //noinspection NonThreadSafeLazyInitialization
@@ -95,7 +95,7 @@ public class FileChoosers {
     }
 
     public static void initSaveChooser() {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         File lastSaveDir = Dirs.getLastSave();
         if (saveChooser == null) {
@@ -124,7 +124,7 @@ public class FileChoosers {
             Dirs.setLastOpen(selectedFile.getParentFile());
 
             if (FileUtils.hasSupportedInputExt(fileName)) {
-                OpenSave.openFileAsync(selectedFile);
+                IO.openFileAsync(selectedFile);
             } else { // unsupported extension
                 handleUnsupportedExtensionWhileOpening(fileName);
             }
@@ -145,7 +145,7 @@ public class FileChoosers {
     }
 
     public static boolean showSaveChooserAndSaveComp(Composition comp,
-                                                     SaveSettings settings) {
+                                                     Object extraInfo) {
         String defaultFileName = FileUtils.stripExtension(comp.getName());
         saveChooser.setSelectedFile(new File(defaultFileName));
 
@@ -154,6 +154,7 @@ public class FileChoosers {
             File customSaveDir = file.getParentFile();
             saveChooser.setCurrentDirectory(customSaveDir);
         }
+        assert saveChooser.getFileSelectionMode() == JFileChooser.FILES_ONLY;
 
         GlobalEvents.dialogOpened("Save");
         int status = saveChooser.showSaveDialog(PixelitorWindow.getInstance());
@@ -161,18 +162,30 @@ public class FileChoosers {
 
         if (status == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
-
-            Dirs.setLastSave(selectedFile.getParentFile());
-
-            String extension = saveChooser.getExtension();
-            OutputFormat outputFormat = OutputFormat.fromExtension(extension);
-            settings.setOutputFormat(outputFormat);
-            settings.setFile(selectedFile);
-            comp.saveAsync(settings, true);
+            saveToChosenFile(comp, selectedFile, extraInfo);
             return true;
         }
 
         return false;
+    }
+
+    private static void saveToChosenFile(Composition comp, File file, Object extraInfo) {
+        Dirs.setLastSave(file.getParentFile());
+
+        String extension = saveChooser.getExtension();
+        FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
+
+        SaveSettings settings;
+        if(extraInfo != null) {
+            // currently the only type of extra information
+            assert format == FileFormat.JPG : "format = " + format + ", extraInfo = " + extraInfo;
+            JpegInfo jpegInfo = (JpegInfo) extraInfo;
+            settings = new JpegSettings(jpegInfo, file);
+        } else {
+            settings = new SaveSettings(format, file);
+        }
+
+        comp.saveAsync(settings, true);
     }
 
     /**
@@ -183,10 +196,10 @@ public class FileChoosers {
 
         String defaultExt = FileUtils
                 .findExtension(comp.getName())
-                .orElse(OutputFormat.getLastUsed().toString());
+                .orElse(FileFormat.getLastOutput().toString());
         saveChooser.setFileFilter(getFileFilterForExtension(defaultExt));
 
-        return showSaveChooserAndSaveComp(comp, new SaveSettings());
+        return showSaveChooserAndSaveComp(comp, null);
     }
 
     private static FileFilter getFileFilterForExtension(String ext) {

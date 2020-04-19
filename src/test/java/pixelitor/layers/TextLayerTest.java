@@ -62,14 +62,14 @@ public class TextLayerTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.createEmptyComposition();
+        comp = TestHelper.createEmptyComp();
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
         comp.addLayerInInitMode(layer);
 
         withMask.setupFor(layer);
         LayerMask mask = null;
-        if (withMask.isYes()) {
+        if (withMask.isTrue()) {
             mask = layer.getMask();
         }
 

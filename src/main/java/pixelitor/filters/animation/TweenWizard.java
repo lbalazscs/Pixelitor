@@ -18,18 +18,11 @@
 package pixelitor.filters.animation;
 
 import pixelitor.automate.Wizard;
-import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
-import javax.swing.*;
-import java.awt.Component;
-
-import static pixelitor.filters.animation.TweenWizardPage.OUTPUT_SETTINGS;
 import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
 
 /**
@@ -53,42 +46,15 @@ public class TweenWizard extends Wizard {
     }
 
     private void calculateAnimation() {
-        ProgressMonitor progressMonitor =
-                GUIUtils.createPercentageProgressMonitor("Rendering Frames");
+        var progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Frames");
 
-        RenderTweenFramesTask task = new RenderTweenFramesTask(animation, dr);
-        task.addPropertyChangeListener(evt ->
-                task.onPropertyChange(evt, progressMonitor));
+        var task = new RenderTweenFramesTask(animation, dr);
+        task.addPropertyChangeListener(evt -> task.onPropertyChange(evt, progressMonitor));
         task.execute();
     }
 
     public TweenAnimation getAnimation() {
         return animation;
-    }
-
-    @Override
-    protected boolean mayMoveForwardIfNextPressed(WizardPage currentPage,
-                                                  Component dialogParent) {
-        if(currentPage == OUTPUT_SETTINGS) {
-            ValidatedPanel settings = (ValidatedPanel) currentPage.createPanel(this, dr);
-            ValidationResult validity = settings.checkValidity();
-            if (!validity.isOK()) {
-                validity.showErrorDialog(dialogParent);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    protected boolean mayProceedAfterMovingForward(WizardPage wizardPage,
-                                                   Component dialogParent) {
-        if(wizardPage == OUTPUT_SETTINGS) {
-            if (!animation.checkOverwrite(dialogParent)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override

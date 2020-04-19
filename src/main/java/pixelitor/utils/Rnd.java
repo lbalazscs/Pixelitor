@@ -25,6 +25,8 @@ import pixelitor.filters.painters.AreaEffects;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +64,12 @@ public class Rnd {
 
     public static int nextInt(int bound) {
         return rand.nextInt(bound);
+    }
+
+    public static Point nextPoint(Rectangle bounds) {
+        int x = intInRange(bounds.x, bounds.x + bounds.width);
+        int y = intInRange(bounds.y, bounds.y + bounds.height);
+        return new Point(x, y);
     }
 
     public static int intInRange(int min, int max) {

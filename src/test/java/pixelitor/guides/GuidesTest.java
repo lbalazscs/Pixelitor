@@ -18,47 +18,57 @@
 package pixelitor.guides;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("Guides tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class GuidesTest {
     private Guides guides;
     private Composition comp;
 
     @BeforeEach
     void beforeEachTest() {
-        comp = TestHelper.createMockComposition();
+        comp = TestHelper.createMockComp();
         guides = new Guides();
     }
 
     @Test
+    @DisplayName("horizontal line, relative")
     void addHorRelative() {
         guides.addHorRelative(0.25);
         assertThat(guides.getHorizontals()).containsOnly(0.25);
     }
 
     @Test
+    @DisplayName("horizontal line, absolute")
     void addHorAbsolute() {
         guides.addHorAbsolute((int) (TestHelper.TEST_WIDTH * 0.75), comp.getCanvas());
         assertThat(guides.getHorizontals()).containsOnly(0.75);
     }
 
     @Test
+    @DisplayName("vertical line, relative")
     void addVerRelative() {
         guides.addVerRelative(0.33);
         assertThat(guides.getVerticals()).containsOnly(0.33);
     }
 
     @Test
+    @DisplayName("vertical line, absolute")
     void addVerAbsolute() {
         guides.addVerAbsolute((int) (TestHelper.TEST_HEIGHT * 0.5), comp.getCanvas());
         assertThat(guides.getVerticals()).containsOnly(0.5);
     }
 
     @Test
+    @DisplayName("relative grid")
     void addRelativeGrid() {
         guides.addRelativeGrid(4, 4);
         assertThat(guides.getHorizontals()).containsOnly(0.25, 0.5, 0.75);
@@ -66,6 +76,7 @@ public class GuidesTest {
     }
 
     @Test
+    @DisplayName("absolute grid")
     void addAbsoluteGrid() {
         int horDist = (int) (TestHelper.TEST_HEIGHT * 0.2);
         int verDist = (int) (TestHelper.TEST_WIDTH * 0.25);

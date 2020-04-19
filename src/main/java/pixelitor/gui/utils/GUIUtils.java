@@ -23,7 +23,7 @@ import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamGUI;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.io.OpenSave;
+import pixelitor.io.IO;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -190,7 +190,7 @@ public final class GUIUtils {
     }
 
     public static void invokeAndWait(Runnable task) {
-        assert !EventQueue.isDispatchThread() : "EDT thread";
+        assert !EventQueue.isDispatchThread() : "on EDT";
         try {
             EventQueue.invokeAndWait(task);
         } catch (InterruptedException | InvocationTargetException e) {
@@ -342,7 +342,7 @@ public final class GUIUtils {
                     if (!saveAndPrint) {
                         return;
                     }
-                    OpenSave.save(comp, false);
+                    IO.save(comp, false);
                 }
                 try {
                     Desktop.getDesktop().print(file);

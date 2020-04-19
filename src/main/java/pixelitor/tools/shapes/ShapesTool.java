@@ -380,7 +380,7 @@ public class ShapesTool extends DragTool {
 
         var comp = OpenImages.getActiveComp();
 
-        PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
+        PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
             Dialogs.showInfoDialog("No Selection",
                     "No selection was created because the shape is outside the canvas.");

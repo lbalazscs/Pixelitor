@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,8 @@ public enum WithTranslation {
     }, YES(-4, -4) {
         @Override
         public void setupFor(Composition comp) {
-            TestHelper.setStandardTestTranslationToAllLayers(comp, this);
+            comp.forEachContentLayer(contentLayer ->
+                    TestHelper.setTranslation(comp, contentLayer, this));
         }
 
         @Override
@@ -82,7 +83,7 @@ public enum WithTranslation {
         return expectedTY;
     }
 
-    public boolean isYes() {
+    public boolean isTrue() {
         return expectedTX != 0 || expectedTY != 0;
     }
 }

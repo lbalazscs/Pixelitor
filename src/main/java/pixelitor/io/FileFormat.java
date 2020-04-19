@@ -18,14 +18,18 @@ package pixelitor.io;
 
 import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
 
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
- * The output file format
+ * The input and output file formats
  */
-public enum OutputFormat {
+public enum FileFormat {
     JPG(false, false) {
     }, PNG(false, true) {
     }, TIFF(false, true) {
@@ -36,17 +40,31 @@ public enum OutputFormat {
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
             return () -> PXCFormat.write(comp, settings.getFile());
         }
+
+        @Override
+        public CompletableFuture<Composition> readFrom(File file) {
+            return CompletableFuture.supplyAsync(
+                    Utils.toSupplier(() -> PXCFormat.read(file)),
+                    IOThread.getExecutor());
+        }
     }, ORA(true, true) {
         @Override
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
             return () -> OpenRaster.uncheckedWrite(comp, settings.getFile(), false);
+        }
+
+        @Override
+        public CompletableFuture<Composition> readFrom(File file) {
+            return CompletableFuture.supplyAsync(
+                    Utils.toSupplier(() -> OpenRaster.read(file)),
+                    IOThread.getExecutor());
         }
     };
 
     private final boolean supportsMultipleLayers;
     private final boolean supportsAlpha;
 
-    OutputFormat(boolean layered, boolean hasAlpha) {
+    FileFormat(boolean layered, boolean hasAlpha) {
         supportsMultipleLayers = layered;
         supportsAlpha = hasAlpha;
     }
@@ -57,6 +75,22 @@ public enum OutputFormat {
         return () -> saveSingleLayered(comp, settings);
     }
 
+    public CompletableFuture<Composition> readFrom(File file) {
+        // overwritten for multi-layered formats
+        return readSimpleFrom(file);
+    }
+
+    /**
+     * Loads a composition from a file with a single-layer image format
+     */
+    private static CompletableFuture<Composition> readSimpleFrom(File file) {
+        return CompletableFuture.supplyAsync(
+                () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
+                .handle((img, e) -> IO.handleDecodingError(file, img, e))
+                .thenApplyAsync(img -> Composition.fromImage(img, file, null),
+                        EventQueue::invokeLater);
+    }
+
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
         BufferedImage img = comp.getCompositeImage();
         if (!supportsAlpha) {
@@ -65,7 +99,7 @@ public enum OutputFormat {
         } else if(this == GIF) {
             img = ImageUtils.convertToIndexed(img, false);
         }
-        OpenSave.saveImageToFile(img, settings);
+        IO.saveImageToFile(img, settings);
     }
 
     @Override
@@ -73,43 +107,43 @@ public enum OutputFormat {
         return super.toString().toLowerCase();
     }
 
-    public static OutputFormat fromFile(File file) {
+    public static Optional<FileFormat> fromFile(File file) {
         String fileName = file.getName();
         String extension = FileUtils.findExtension(fileName).orElse("");
         return fromExtension(extension);
     }
 
-    public static OutputFormat fromExtension(String extension) {
+    public static Optional<FileFormat> fromExtension(String extension) {
         String extLC = extension.toLowerCase();
         switch (extLC) {
             case "jpg":
             case "jpeg":
-                return JPG;
+                return Optional.of(JPG);
             case "png":
-                return PNG;
+                return Optional.of(PNG);
             case "bmp":
-                return BMP;
+                return Optional.of(BMP);
             case "gif":
-                return GIF;
+                return Optional.of(GIF);
             case "pxc":
-                return PXC;
+                return Optional.of(PXC);
             case "ora":
-                return ORA;
+                return Optional.of(ORA);
             case "tif":
             case "tiff":
-                return TIFF;
+                return Optional.of(TIFF);
             default:
-                throw new IllegalArgumentException("extension = " + extension);
+                return Optional.empty();
         }
     }
 
-    private static volatile OutputFormat lastUsed = JPG;
+    private static volatile FileFormat lastOutput = JPG;
 
-    public static OutputFormat getLastUsed() {
-        return lastUsed;
+    public static FileFormat getLastOutput() {
+        return lastOutput;
     }
 
-    public static void setLastUsed(OutputFormat format) {
-        lastUsed = format;
+    public static void setLastOutput(FileFormat format) {
+        lastOutput = format;
     }
 }

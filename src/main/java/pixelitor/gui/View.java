@@ -839,7 +839,7 @@ public class View extends JComponent
     }
 
     public void repaintNavigator(boolean viewSizeChanged) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         if (navigator != null) {
             if (viewSizeChanged) {

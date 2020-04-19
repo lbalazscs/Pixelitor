@@ -37,12 +37,12 @@ public class JHCustomHalftone extends JHMaskedHalftone {
 
     @Override
     protected BufferedImage createMaskImage(BufferedImage src) {
-        Optional<Composition> opt = OpenImages.findCompositionByName("Untitled1");
+        Optional<Composition> opt = OpenImages.findCompByName("Untitled1");
         if (opt.isPresent()) {
             return opt.get().getCompositeImage();
         }
         // to avoid exceptions if in an auto test
-        // this is selected as a random filter
+        // this filter is selected as a random filter
         return ImageUtils.copyImage(src);
     }
 }

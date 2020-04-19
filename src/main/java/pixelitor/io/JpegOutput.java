@@ -47,28 +47,20 @@ public final class JpegOutput {
     private JpegOutput() {
     }
 
-    public static void save(BufferedImage image, SaveSettings saveSettings, File selectedFile) throws IOException {
-        JpegSettings settings;
-        if (saveSettings instanceof JpegSettings) {
-            settings = (JpegSettings) saveSettings;
-        } else {
-            settings = JpegSettings.DEFAULTS;
-            settings.setFile(saveSettings.getFile());
-            settings.setOutputFormat(saveSettings.getOutputFormat());
-        }
-        write(image, selectedFile, settings);
+    public static void save(BufferedImage image, JpegInfo config, File selectedFile) throws IOException {
+        write(image, selectedFile, config);
     }
 
-    private static void write(BufferedImage image, File file, JpegSettings settings) throws IOException {
+    private static void write(BufferedImage image, File file, JpegInfo config) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         if (ios == null) {
             TrackedIO.throwNoIOSErrorFor(file);
         }
         ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
-        writeJPGtoStream(image, ios, settings, tracker);
+        writeJPGtoStream(image, ios, config, tracker);
     }
 
-    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegSettings settings, ProgressTracker pt) {
+    public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegInfo config, ProgressTracker pt) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream(32768);
         BufferedImage previewImage = null;
         byte[] bytes = null;
@@ -77,7 +69,7 @@ public final class JpegOutput {
             // approximately 70% of the total time is spent here
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
             ProgressTracker pt1 = new SubtaskProgressTracker(0.7, pt);
-            writeJPGtoStream(image, ios, settings, pt1);
+            writeJPGtoStream(image, ios, config, pt1);
 
             // ...then reads it back into an image
             // approximately 30% of the total time is spent here
@@ -100,7 +92,7 @@ public final class JpegOutput {
 
     private static void writeJPGtoStream(BufferedImage image,
                                          ImageInputStream ios,
-                                         JpegSettings jpegSettings,
+                                         JpegInfo config,
                                          ProgressTracker tracker) throws IOException {
         Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
         if (!jpgWriters.hasNext()) {
@@ -110,14 +102,14 @@ public final class JpegOutput {
 
         ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
 
-        if (jpegSettings.isProgressive()) {
+        if (config.isProgressive()) {
             imageWriteParam.setProgressiveMode(MODE_DEFAULT);
         } else {
             imageWriteParam.setProgressiveMode(MODE_DISABLED);
         }
 
         imageWriteParam.setCompressionMode(MODE_EXPLICIT);
-        imageWriteParam.setCompressionQuality(jpegSettings.getQuality());
+        imageWriteParam.setCompressionQuality(config.getQuality());
 
         IIOImage iioImage = new IIOImage(image, null, null);
 

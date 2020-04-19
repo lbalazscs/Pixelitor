@@ -19,7 +19,10 @@ package pixelitor.history;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Build;
 
 import javax.swing.*;
@@ -32,6 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@DisplayName("PixelitorUndoManager tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class PixelitorUndoManagerTest {
     private PixelitorUndoManager undoManager;
     private PixelitorEdit edit0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,30 +20,19 @@ package pixelitor.io;
 import java.io.File;
 
 public class SaveSettings {
-    private File file; // the output file
-    private OutputFormat outputFormat;
+    private final File outputFile;
+    private final FileFormat format;
 
-    public SaveSettings() {
-    }
-
-    public SaveSettings(OutputFormat outputFormat, File file) {
-        this.file = file;
-        this.outputFormat = outputFormat;
-    }
-
-    public void setFile(File file) {
-        this.file = file;
+    public SaveSettings(FileFormat format, File outputFile) {
+        this.outputFile = outputFile;
+        this.format = format;
     }
 
     public File getFile() {
-        return file;
+        return outputFile;
     }
 
-    public void setOutputFormat(OutputFormat outputFormat) {
-        this.outputFormat = outputFormat;
-    }
-
-    public OutputFormat getOutputFormat() {
-        return outputFormat;
+    public FileFormat getFormat() {
+        return format;
     }
 }

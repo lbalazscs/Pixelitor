@@ -19,7 +19,10 @@ package pixelitor.tools.pen;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import pixelitor.Build;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
@@ -33,6 +36,8 @@ import java.awt.geom.Ellipse2D;
 
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
+@DisplayName("Path tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class PathTest {
     private View view;
 
@@ -43,7 +48,7 @@ public class PathTest {
 
     @BeforeEach
     void beforeEachTest() {
-        var comp = TestHelper.createMockComposition();
+        var comp = TestHelper.createMockComp();
         view = comp.getView();
     }
 

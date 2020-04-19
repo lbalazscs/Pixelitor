@@ -108,7 +108,7 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
-    public BufferedImage getTmpLayerImage() {
+    public BufferedImage getRepresentingImage() {
         throw new UnsupportedOperationException();
     }
 }

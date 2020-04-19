@@ -38,43 +38,44 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 public enum LayerMaskAddType {
     REVEAL_ALL("Reveal All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
             // a fully white image
-            return createFilledImage(canvas, Color.WHITE, null, null);
+            return createFilledImage(layer, Color.WHITE, null, null);
         }
     }, HIDE_ALL("Hide All", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
             // a fully black image
-            return createFilledImage(canvas, Color.BLACK, null, null);
+            return createFilledImage(layer, Color.BLACK, null, null);
         }
     }, REVEAL_SELECTION("Reveal Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
             // back image, but the selection is white
-            return createFilledImage(canvas, Color.BLACK, Color.WHITE, selShape);
+            return createFilledImage(layer, Color.BLACK, Color.WHITE, selShape);
         }
     }, HIDE_SELECTION("Hide Selection", true) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
             // white image, but the selection is black
-            return createFilledImage(canvas, Color.WHITE, Color.BLACK, selShape);
+            return createFilledImage(layer, Color.WHITE, Color.BLACK, selShape);
         }
     }, FROM_TRANSPARENCY("From Transparency", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
-            return createMaskFromLayer(layer, true, canvas);
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
+            return createMaskFromLayer(layer, true);
         }
     }, FROM_LAYER("From Layer", false) {
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
-            return createMaskFromLayer(layer, false, canvas);
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
+            return createMaskFromLayer(layer, false);
         }
     }, PATTERN ("Pattern", false) { // only for debugging
 
         @Override
-        BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape) {
-            BufferedImage bi = createFilledImage(canvas, Color.WHITE, null, null);
+        BufferedImage createBWImage(Layer layer, Shape selShape) {
+            Canvas canvas = layer.getComp().getCanvas();
+            BufferedImage bi = createFilledImage(layer, Color.WHITE, null, null);
             Graphics2D g = bi.createGraphics();
             int width = canvas.getImWidth();
             int height = canvas.getImHeight();
@@ -92,7 +93,8 @@ public enum LayerMaskAddType {
         }
     };
 
-    private static BufferedImage createFilledImage(Canvas canvas, Color bg, Color fg, Shape selShape) {
+    private static BufferedImage createFilledImage(Layer layer, Color bg, Color fg, Shape selShape) {
+        Canvas canvas = layer.getComp().getCanvas();
         int width = canvas.getImWidth();
         int height = canvas.getImHeight();
         BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
@@ -117,8 +119,8 @@ public enum LayerMaskAddType {
     }
 
     private static BufferedImage createMaskFromLayer(Layer layer,
-                                                     boolean onlyTransparency,
-                                                     Canvas canvas) {
+                                                     boolean onlyTransparency) {
+        Canvas canvas = layer.getComp().getCanvas();
         if (layer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) layer;
             BufferedImage image = imageLayer.getCanvasSizedSubImage();
@@ -130,7 +132,7 @@ public enum LayerMaskAddType {
             return createMaskFromImage(rasterizedImage, onlyTransparency, canvas);
         } else {
             // there is nothing better
-            return REVEAL_ALL.createBWImage(layer, canvas, null);
+            return REVEAL_ALL.createBWImage(layer, null);
         }
     }
 
@@ -168,7 +170,7 @@ public enum LayerMaskAddType {
         this.needsSelection = needsSelection;
     }
 
-    abstract BufferedImage createBWImage(Layer layer, Canvas canvas, Shape selShape);
+    abstract BufferedImage createBWImage(Layer layer, Shape selShape);
 
     @Override
     public String toString() {

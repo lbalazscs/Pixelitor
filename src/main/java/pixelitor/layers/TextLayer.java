@@ -35,7 +35,6 @@ import pixelitor.history.NewLayerEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.TextLayerChangeEdit;
 import pixelitor.history.TextLayerRasterizeEdit;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -72,6 +71,7 @@ public class TextLayer extends ContentLayer {
     public TextLayer(Composition comp, String name) {
         super(comp, name, null);
 
+        settings = new TextSettings();
         painter = new TranslatedTextPainter();
     }
 
@@ -234,7 +234,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public BufferedImage createRasterizedImage() {
-        BufferedImage img = ImageUtils.createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
+        BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
         applyLayer(g, img, true);
         g.dispose();
@@ -292,6 +292,11 @@ public class TextLayer extends ContentLayer {
         return settings;
     }
 
+    public void randomizeSettings() {
+        settings.randomize();
+        setSettings(settings); // to re-configure the painter
+    }
+
     public void updateLayerName() {
         if (settings != null) {
             setName(settings.getText(), false);
@@ -340,7 +345,7 @@ public class TextLayer extends ContentLayer {
         return CompletableFuture.completedFuture(null);
     }
 
-    public Shape getTextShape() {
+    private Shape getTextShape() {
         return painter.getTextShape(comp.getCanvas());
     }
 
@@ -352,15 +357,15 @@ public class TextLayer extends ContentLayer {
         // calculate the corresponding margins...
         int northMargin = (int) cropRect.getY();
         int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (canvas.getImHeight() - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (canvas.getImWidth() - cropRect.getWidth() - cropRect.getX());
+        int southMargin = (int) (comp.getCanvasImHeight() - cropRect.getHeight() - cropRect.getY());
+        int eastMargin = (int) (comp.getCanvasImWidth() - cropRect.getWidth() - cropRect.getX());
 
         // ...and do a negative enlargement
         enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);
     }
 
     @Override
-    public BufferedImage getTmpLayerImage() {
+    public BufferedImage getRepresentingImage() {
         return createRasterizedImage();
     }
 
@@ -395,7 +400,7 @@ public class TextLayer extends ContentLayer {
 
     public void createSelectionFromText() {
         Shape shape = getTextShape();
-        PixelitorEdit selectionEdit = comp.changeSelectionFromShape(shape);
+        PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit != null) {
             History.add(selectionEdit);
         }

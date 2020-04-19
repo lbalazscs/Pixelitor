@@ -47,7 +47,7 @@ import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
 import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
 
 @RunWith(Parameterized.class)
-public class MultiLayerEditTest {
+public class CompActionTest {
     private static final int ORIG_CANVAS_WIDTH = 20;
     private static final int ORIG_CANVAS_HEIGHT = 10;
 
@@ -67,10 +67,10 @@ public class MultiLayerEditTest {
     private final WithSelection withSelection;
     private final WithMask withMask;
 
-    public MultiLayerEditTest(NumLayers numLayers,
-                              WithTranslation withTranslation,
-                              WithSelection withSelection,
-                              WithMask withMask) {
+    public CompActionTest(NumLayers numLayers,
+                          WithTranslation withTranslation,
+                          WithSelection withSelection,
+                          WithMask withMask) {
         this.numLayers = numLayers;
         this.withSelection = withSelection;
         this.withTranslation = withTranslation;
@@ -103,7 +103,7 @@ public class MultiLayerEditTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.create2LayerComposition(true);
+        comp = TestHelper.create2LayerComp(true);
         assertThat(comp)
                 .isNotEmpty()
                 .hasName("Test")
@@ -122,7 +122,7 @@ public class MultiLayerEditTest {
         withSelection.setupFor(comp);
         withMask.setupFor(comp);
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             origSelection = WithSelection.SELECTION_SHAPE;
         }
         History.clear();
@@ -130,13 +130,12 @@ public class MultiLayerEditTest {
 
     private void checkOriginalState() {
         assertThat(comp)
-                .hasCanvasImWidth(ORIG_CANVAS_WIDTH)
-                .hasCanvasImHeight(ORIG_CANVAS_HEIGHT)
+                .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
                 .activeLayerTranslationIs(origTX, origTY)
                 .invariantIsOK();
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             assertThat(comp).selectionBoundsIs(origSelection);
         }
 
@@ -147,7 +146,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testEnlargeCanvas() {
+    public void enlargeCanvas() {
         checkOriginalState();
 
         int north = 3;
@@ -156,7 +155,7 @@ public class MultiLayerEditTest {
         int west = 2;
         new EnlargeCanvas(north, east, south, west).process(comp).join();
 
-        checkEnlargeCanvasAfterState(north, east, south, west);
+        checkStateAfterEnlargeCanvas(north, east, south, west);
 
         History.assertNumEditsIs(1);
 
@@ -164,11 +163,10 @@ public class MultiLayerEditTest {
         checkOriginalState();
 
         History.redo("Enlarge Canvas");
-        checkEnlargeCanvasAfterState(north, east, south, west);
-
+        checkStateAfterEnlargeCanvas(north, east, south, west);
     }
 
-    private void checkEnlargeCanvasAfterState(int north, int east, int south, int west) {
+    private void checkStateAfterEnlargeCanvas(int north, int east, int south, int west) {
         int newCanvasWidth = ORIG_CANVAS_WIDTH + west + east;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT + north + south;
 
@@ -176,7 +174,7 @@ public class MultiLayerEditTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+                .canvasImSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerTranslationIs(
                         Math.min(0, origTX + west),
                         Math.min(0, origTY + north))
@@ -184,7 +182,7 @@ public class MultiLayerEditTest {
                         origImageWidth + east + Math.max(0, origTX + west),
                         origImageHeight + south + Math.max(0, origTY + north));
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             assertThat(newComp).selectionBoundsIs(new Rectangle(
                     origSelection.x + west,
                     origSelection.y + north,
@@ -194,7 +192,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testResize() {
+    public void resize() {
         checkOriginalState();
 
         int targetWidth = ORIG_CANVAS_WIDTH / 2;
@@ -215,7 +213,7 @@ public class MultiLayerEditTest {
     private void checkStateAfterResize() {
         var newComp = OpenImages.getActiveComp();
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             var halfOfOrigSelection = new Rectangle(
                     origSelection.x / 2,
                     origSelection.y / 2,
@@ -229,7 +227,7 @@ public class MultiLayerEditTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+                .canvasImSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerAndMaskImageSizeIs(
                         newCanvasWidth - origTX / 2,
                         newCanvasHeight - origTY / 2)
@@ -239,7 +237,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testRotate90() {
+    public void rotate90() {
         checkOriginalState();
         new Rotate(ANGLE_90).process(comp).join();
         checkStateAfterRotate(ANGLE_90);
@@ -254,7 +252,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testRotate180() {
+    public void rotate180() {
         checkOriginalState();
         new Rotate(ANGLE_180).process(comp).join();
         checkStateAfterRotate(ANGLE_180);
@@ -269,7 +267,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testRotate270() {
+    public void rotate270() {
         checkOriginalState();
         new Rotate(ANGLE_270).process(comp).join();
         checkStateAfterRotate(ANGLE_270);
@@ -289,13 +287,13 @@ public class MultiLayerEditTest {
 
         if (angle == ANGLE_180) {
             assertThat(newComp)
-                    .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                    .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                     .activeLayerAndMaskImageSizeIs(
                             origImageWidth,
                             origImageHeight);
         } else {
             assertThat(newComp)
-                    .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
+                    .canvasImSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
                     .activeLayerAndMaskImageSizeIs(
                             origImageHeight,
                             origImageWidth);
@@ -319,7 +317,7 @@ public class MultiLayerEditTest {
                     canvasDistFromImgRight);
         }
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             Rectangle rotatedSelectionBounds = null;
 
             int distFromBottom = ORIG_CANVAS_HEIGHT - origSelection.height - origSelection.y;
@@ -359,7 +357,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testFlipHorizontal() {
+    public void flipHorizontal() {
         checkOriginalState();
 
         new Flip(HORIZONTAL).process(comp).join();
@@ -375,7 +373,7 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testFlipVertical() {
+    public void flipVertical() {
         checkOriginalState();
 
         new Flip(VERTICAL).process(comp).join();
@@ -395,7 +393,7 @@ public class MultiLayerEditTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 
         if (direction == HORIZONTAL) {
@@ -410,7 +408,7 @@ public class MultiLayerEditTest {
             throw new IllegalStateException();
         }
 
-        if (withSelection.isYes()) {
+        if (withSelection.isTrue()) {
             int flippedX, flippedY;
             if (direction == HORIZONTAL) {
                 flippedX = ORIG_CANVAS_WIDTH - origSelection.x - origSelection.width;
@@ -436,13 +434,13 @@ public class MultiLayerEditTest {
     }
 
     @Test
-    public void testCrop() {
+    public void crop() {
         checkOriginalState();
 
         var imCropRect = new Rectangle(3, 3, 6, 3);
         new Crop(imCropRect, false, false, true, false)
                 .process(comp).join();
-        checkAfterCropState();
+        checkStateAfterCrop();
 
         // test undo with one layer
         History.assertNumEditsIs(1);
@@ -451,7 +449,7 @@ public class MultiLayerEditTest {
         checkOriginalState();
 
         History.redo("Crop");
-        checkAfterCropState();
+        checkStateAfterCrop();
 
         // TODO
         // test selection crop with selection
@@ -459,7 +457,7 @@ public class MultiLayerEditTest {
         // test with allow growing
     }
 
-    private void checkAfterCropState() {
+    private void checkStateAfterCrop() {
         String afterCropState = "{canvasWidth=6, canvasHeight=3, tx=0, ty=0, imgWidth=6, imgHeight=3}";
 
         // the layer references have changed after the crop

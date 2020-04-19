@@ -103,7 +103,7 @@ public class SelectionBuilder {
         Selection builtSelection = comp.getBuiltSelection();
 
         Shape newShape = builtSelection.getShape();
-        newShape = comp.clipShapeToCanvasSize(newShape);
+        newShape = comp.clipToCanvasBounds(newShape);
         if (newShape.getBounds2D().isEmpty()) {
             return;
         }
@@ -138,7 +138,6 @@ public class SelectionBuilder {
             if (newShape.getBounds().isEmpty()) {
                 // the new shape can be empty if it has width or height = 0
                 comp.deselect(false);
-                oldSelection = null;
             } else {
                 builtSelection.setShape(newShape);
                 comp.promoteSelection();

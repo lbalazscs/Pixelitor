@@ -103,7 +103,7 @@ public class ToolTest {
     @Before
     public void beforeEachTest() {
         PenTool.path = null;
-        var comp = TestHelper.create2LayerComposition(true);
+        var comp = TestHelper.create2LayerComp(true);
         view = comp.getView();
         tool.toolStarted();
     }

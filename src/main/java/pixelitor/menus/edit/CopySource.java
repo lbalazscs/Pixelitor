@@ -19,7 +19,6 @@ package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.compactions.Crop;
 import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -27,6 +26,7 @@ import pixelitor.layers.TextLayer;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Result;
+import pixelitor.utils.Shapes;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
@@ -95,7 +95,7 @@ public enum CopySource {
         if (selection.isRectangular()) {
             // for rectangular selections a simple crop is needed
             Rectangle2D selRect = (Rectangle2D) selectionShape;
-            Rectangle selBounds = Crop.roundCropRect(selRect);
+            Rectangle selBounds = Shapes.roundCropRect(selRect);
             return cropToSelectionBounds(canvasSizedImage, comp.getCanvas(), selBounds);
         }
 
@@ -103,15 +103,19 @@ public enum CopySource {
         // set the unselected parts to transparent with an AA border
         Rectangle selBounds = selectionShape.getBounds();
 
-        BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(selBounds.width, selBounds.height);
-        Graphics2D g2 = ImageUtils.setupForSoftSelection(tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+        BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(
+                selBounds.width, selBounds.height);
+        Graphics2D g2 = ImageUtils.setupForSoftSelection(
+                tmpImg, selection.getShape(), selBounds.x, selBounds.y);
 
         g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
         return Result.ok(tmpImg);
     }
 
-    private static Result<BufferedImage, String> cropToSelectionBounds(BufferedImage canvasSizedImage, Canvas canvas, Rectangle selBounds) {
+    private static Result<BufferedImage, String> cropToSelectionBounds(BufferedImage canvasSizedImage,
+                                                                       Canvas canvas,
+                                                                       Rectangle selBounds) {
         // just to be sure that the bounds are inside the canvas
         selBounds = SwingUtilities.computeIntersection(
                 0, 0, canvas.getImWidth(), canvas.getImHeight(),

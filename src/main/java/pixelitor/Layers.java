@@ -24,7 +24,7 @@ import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Static methods related to layer listeners
@@ -33,8 +33,8 @@ public class Layers {
     /**
      * Global listeners which always act on the active layer of the active composition
      */
-    private static final Collection<GlobalLayerChangeListener> layerChangeListeners = new ArrayList<>();
-    private static final Collection<GlobalLayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
+    private static final List<GlobalLayerChangeListener> layerChangeListeners = new ArrayList<>();
+    private static final List<GlobalLayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
 
     private Layers() {
     }
@@ -74,13 +74,13 @@ public class Layers {
 
         View view = newActiveLayer.getComp().getView();
         if (view == null) {
-            // can happen at when adding a new image:
+            // can happen when adding a new image:
             // the active layer changes, but there is no view yet
             return;
         }
         if(!viewChanged) {
             // go to normal mask-viewing mode on the activated layer,
-            // except when we got here because of a view change
+            // except if we got here because of a view change
             MaskViewMode.NORMAL.activate(view, newActiveLayer, "active layer changed");
         }
     }

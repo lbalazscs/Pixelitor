@@ -62,7 +62,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert isDirty() {
         isNotNull();
 
-        // check that property call/field access is true
         if (!actual.isDirty()) {
             failWithMessage("\nExpecting that actual Composition is dirty but is not.");
         }
@@ -73,7 +72,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert isNotDirty() {
         isNotNull();
 
-        // check that property call/field access is false
         if (actual.isDirty()) {
             failWithMessage("\nExpecting that actual Composition is not dirty but is.");
         }
@@ -114,7 +112,6 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
 
         return this;
     }
-
 
     public CompositionAssert activeLayerIs(Layer expected) {
         isNotNull();
@@ -184,10 +181,9 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert hasCanvasImWidth(int canvasWidth) {
         isNotNull();
 
-        String msg = "\nExpecting canvasWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
         int actualCanvasWidth = actual.getCanvasImWidth();
         if (actualCanvasWidth != canvasWidth) {
+            String msg = "\nExpecting canvasWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
             failWithMessage(msg, actual, canvasWidth, actualCanvasWidth);
         }
 
@@ -197,17 +193,16 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
     public CompositionAssert hasCanvasImHeight(int canvasHeight) {
         isNotNull();
 
-        String msg = "\nExpecting canvasHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
-
         int actualCanvasHeight = actual.getCanvasImHeight();
         if (actualCanvasHeight != canvasHeight) {
+            String msg = "\nExpecting canvasHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
             failWithMessage(msg, actual, canvasHeight, actualCanvasHeight);
         }
 
         return this;
     }
 
-    public CompositionAssert canvasSizeIs(int w, int h) {
+    public CompositionAssert canvasImSizeIs(int w, int h) {
         isNotNull();
 
         hasCanvasImWidth(w);

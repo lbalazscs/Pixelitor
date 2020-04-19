@@ -20,8 +20,12 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
+import pixelitor.Composition;
+import pixelitor.OpenImages;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Utils;
+import pixelitor.utils.VisibleForTesting;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -38,6 +42,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
  */
 public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    public static final String DEFAULT_TEXT = "Pixelitor";
 
     private String text;
     private Font font;
@@ -63,7 +69,23 @@ public class TextSettings implements Serializable {
         this.rotation = rotation;
     }
 
-    // copy constructor
+    /**
+     * Default settings
+     */
+    public TextSettings() {
+        areaEffects = null;
+        color = WHITE;
+        font = calcDefaultFont();
+        horizontalAlignment = HorizontalAlignment.CENTER;
+        text = DEFAULT_TEXT;
+        verticalAlignment = VerticalAlignment.CENTER;
+        watermark = false;
+        rotation = 0;
+    }
+
+    /**
+     * Copy constructor
+     */
     public TextSettings(TextSettings other) {
         text = other.text;
         font = other.font;
@@ -77,9 +99,6 @@ public class TextSettings implements Serializable {
         rotation = other.rotation;
     }
 
-    private TextSettings() {
-    }
-
     public AreaEffects getAreaEffects() {
         return areaEffects;
     }
@@ -88,8 +107,18 @@ public class TextSettings implements Serializable {
         return color;
     }
 
+    @VisibleForTesting
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
     public Font getFont() {
         return font;
+    }
+
+    @VisibleForTesting
+    public void setFont(Font font) {
+        this.font = font;
     }
 
     public HorizontalAlignment getHorizontalAlignment() {
@@ -156,9 +185,18 @@ public class TextSettings implements Serializable {
         return dest;
     }
 
-    public static TextSettings createRandomSettings() {
-        TextSettings settings = new TextSettings();
-        settings.randomize();
-        return settings;
+    private static Font calcDefaultFont() {
+        String[] fontNames = Utils.getAvailableFontNames();
+        return new Font(fontNames[0], Font.PLAIN, calcDefaultFontSize());
+    }
+
+    private static int calcDefaultFontSize() {
+        Composition comp = OpenImages.getActiveComp();
+        if(comp != null) {
+           int canvasHeight = comp.getCanvasImHeight();
+           return (int) (canvasHeight * 0.2);
+        } else {
+            return 100;
+        }
     }
 }

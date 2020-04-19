@@ -22,7 +22,7 @@ import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.ValidatedPanel;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.io.Dirs;
-import pixelitor.io.OutputFormat;
+import pixelitor.io.FileFormat;
 
 import java.awt.GridBagLayout;
 import java.io.File;
@@ -43,9 +43,9 @@ class OpenSaveDirsPanel extends ValidatedPanel {
             "Select Output Folder", DIRECTORY);
     private final boolean allowSameDirs;
 
-    private final OutputFormatSelector outputFormatSelector;
+    private final FileFormatSelector outputFormatSelector;
 
-    OpenSaveDirsPanel(boolean allowSameDirs, OutputFormat outputFormat) {
+    OpenSaveDirsPanel(boolean allowSameDirs, FileFormat saveFormat) {
         this.allowSameDirs = allowSameDirs;
         setLayout(new GridBagLayout());
         var gbh = new GridBagHelper(this);
@@ -53,7 +53,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
-        outputFormatSelector = new OutputFormatSelector(outputFormat);
+        outputFormatSelector = new FileFormatSelector(saveFormat);
         gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
@@ -65,7 +65,7 @@ class OpenSaveDirsPanel extends ValidatedPanel {
                 chooser.getBrowseButton());
     }
 
-    private OutputFormat getSelectedFormat() {
+    private FileFormat getSelectedFormat() {
         return outputFormatSelector.getSelectedFormat();
     }
 
@@ -106,6 +106,6 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         File out = outputChooser.getSelectedFile();
         Dirs.setLastSaveIfValid(out);
 
-        OutputFormat.setLastUsed(getSelectedFormat());
+        FileFormat.setLastOutput(getSelectedFormat());
     }
 }

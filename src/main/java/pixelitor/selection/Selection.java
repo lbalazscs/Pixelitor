@@ -50,7 +50,7 @@ public class Selection {
     private View view;
     private Timer marchingAntsTimer;
 
-    // The shape that is currently drawn.
+    // The shape of the selection.
     // The coordinates are in image space, relative to the canvas.
     private Shape shape;
 
@@ -58,11 +58,11 @@ public class Selection {
     private static final float DASH_LENGTH = 4.0f;
     private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
 
-    // if true, then the "marching ants" are not painted at all
-    private boolean hidden = false;
-
     // if true, then the "marching ants" are not marching
     private boolean frozen = false;
+
+    // if true, then the "marching ants" are not painted at all
+    private boolean hidden = false;
 
     // if true, then this object should not be used anymore
     private boolean dead = false;
@@ -174,14 +174,11 @@ public class Selection {
     }
 
     private void repaint() {
-//        if(shape != null && !hidden) {
-//             Rectangle selBounds = shape.getBounds();
-//             view.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
-
-//             the above optimization is not enough, the previous positions should be also considered for the
-//             case when the selection is shrinking while dragging.
-//             But it does not seem to solve the pixel grid problem anyway
-//        }
+//        Rectangle selBounds = shape.getBounds();
+//        view.updateRegion(selBounds.x, selBounds.y, selBounds.x + selBounds.width + 1, selBounds.y + selBounds.height + 1, 1);
+//        the above optimization is not good, the previous positions should be also considered for the
+//        case when the selection is shrinking while dragging.
+//        But it does not seem to solve the pixel grid problem anyway
 
         view.repaint();
     }
@@ -196,10 +193,10 @@ public class Selection {
      *
      * @return true if the selection shape is not empty
      */
-    public boolean clipToCanvasSize(Composition comp) {
+    private boolean clipToCanvasSize(Composition comp) {
         assert comp == view.getComp();
         if (shape != null) {
-            shape = comp.clipShapeToCanvasSize(shape);
+            shape = comp.clipToCanvasBounds(shape);
 
             repaint();
 
@@ -333,7 +330,7 @@ public class Selection {
     public PixelitorEdit endMovement() {
         var comp = view.getComp();
 
-        shape = comp.clipShapeToCanvasSize(shape);
+        shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas
             DeselectEdit deselectEdit = new DeselectEdit(comp, moveStartShape);
             comp.deselect(false);

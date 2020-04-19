@@ -51,7 +51,7 @@ public class NewSelectionEdit extends PixelitorEdit {
 
         assert comp.getView() != null;
 
-        comp.createSelectionFromShape(newShape);
+        comp.createSelectionFrom(newShape);
     }
 
     @Override

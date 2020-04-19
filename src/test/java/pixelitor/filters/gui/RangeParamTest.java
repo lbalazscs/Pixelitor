@@ -17,7 +17,10 @@
 
 package pixelitor.filters.gui;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -28,8 +31,11 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
+@DisplayName("RangeParam tests")
+@TestMethodOrder(MethodOrderer.Random.class)
 public class RangeParamTest {
     @Test
+    @DisplayName("is IGNORE_RANDOMIZE working")
     void isIgnoreRandomizeWorking() {
         var param = new RangeParam("Test", 0, 100, 1000,
                 true, NONE, IGNORE_RANDOMIZE);
@@ -65,24 +71,28 @@ public class RangeParamTest {
     }
 
     @Test
+    @DisplayName("invalid arguments: min == max")
     void invalidArgsMinIsMax() {
         assertThrows(AssertionError.class, () ->
                 new RangeParam("name", 10, 10, 10));
     }
 
     @Test
+    @DisplayName("invalid arguments: min > max")
     void invalidArgsMinBiggerThanMax() {
         assertThrows(AssertionError.class, () ->
                 new RangeParam("name", 11, 10, 10));
     }
 
     @Test
+    @DisplayName("invalid arguments: default < min")
     void invalidArgsDefaultSmallerThanMin() {
         assertThrows(AssertionError.class, () ->
                 new RangeParam("name", 5, 2, 10));
     }
 
     @Test
+    @DisplayName("invalid arguments: default > max")
     void invalidArgsDefaultBiggerThanMax() {
         assertThrows(AssertionError.class, () ->
                 new RangeParam("name", 5, 15, 10));

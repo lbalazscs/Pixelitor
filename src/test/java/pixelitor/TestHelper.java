@@ -21,7 +21,6 @@ import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
 import pixelitor.filters.Invert;
-import pixelitor.filters.painters.TextSettings;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.AdjustmentLayer;
@@ -42,6 +41,7 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -80,25 +80,17 @@ public class TestHelper {
         FgBgColors.setUI(fgBgColorSelector);
     }
 
-    public static ImageLayer createImageLayer(String layerName, Composition comp) {
-        BufferedImage image = createImage();
-        ImageLayer layer = new ImageLayer(comp, image, layerName);
-
-        return layer;
-    }
-
     public static TextLayer createTextLayer(Composition comp, String name) {
         var textLayer = new TextLayer(comp, name);
-        var settings = TextSettings.createRandomSettings();
-        textLayer.setSettings(settings);
+        textLayer.randomizeSettings();
         return textLayer;
     }
 
-    public static Composition createEmptyComposition() {
-        return createEmptyComposition(TEST_WIDTH, TEST_HEIGHT);
+    public static Composition createEmptyComp() {
+        return createEmptyComp(TEST_WIDTH, TEST_HEIGHT);
     }
 
-    public static Composition createEmptyComposition(int width, int height) {
+    public static Composition createEmptyComp(int width, int height) {
         var comp = Composition.createEmpty(width, height);
         comp.setName("Test");
         setupMockViewFor(comp);
@@ -106,7 +98,7 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition createMockComposition() {
+    public static Composition createMockComp() {
         var comp = mock(Composition.class);
         var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
@@ -137,11 +129,11 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition create2LayerComposition(boolean addMasks) {
-        var comp = createEmptyComposition();
+    public static Composition create2LayerComp(boolean addMasks) {
+        var comp = createEmptyComp();
 
-        var layer1 = createImageLayer("layer 1", comp);
-        var layer2 = createImageLayer("layer 2", comp);
+        var layer1 = ImageLayer.createEmpty(comp, "layer 1");
+        var layer2 = ImageLayer.createEmpty(comp, "layer 2");
 
         comp.addLayerInInitMode(layer1);
         comp.addLayerInInitMode(layer2);
@@ -198,7 +190,8 @@ public class TestHelper {
 
     public static MouseEvent createEvent(int x, int y, int id,
                                          KeyModifiers keys,
-                                         MouseButton mouseButton, View view) {
+                                         MouseButton mouseButton,
+                                         View view) {
         int modifiers = 0;
         modifiers = keys.modify(modifiers);
         modifiers = mouseButton.modify(modifiers);
@@ -225,7 +218,7 @@ public class TestHelper {
 
         // the view should be able to return the *new* composition
         // after a replaceComp call, therefore it always returns the
-        // currentComp filed, which initially is set to comp
+        // currentComp field, which initially is set to comp
         currentComp = comp;
 
         // when replaceComp() is called on the mock, then store the received
@@ -286,15 +279,13 @@ public class TestHelper {
         return view;
     }
 
-    public static void addSelectionRectTo(Composition comp,
-                                          int x, int y, int width, int height) {
-        Rectangle shape = new Rectangle(x, y, width, height);
+    public static void setSelection(Composition comp, Shape shape) {
         if (mockingDetails(comp).isMock()) {
             Selection selection = new Selection(shape, comp.getView());
             when(comp.getSelection()).thenReturn(selection);
             when(comp.hasSelection()).thenReturn(true);
         } else {
-            comp.createSelectionFromShape(shape);
+            comp.createSelectionFrom(shape);
         }
     }
 
@@ -305,29 +296,11 @@ public class TestHelper {
         comp.endMovement(MOVE_LAYER_ONLY);
     }
 
-    public static void setRectangleSelection(Composition comp, Rectangle rect) {
-        assert !comp.hasSelection();
-        comp.setSelectionRef(new Selection(rect, comp.getView()));
-    }
-
-    public static void setStandardTestTranslationToAllLayers(Composition comp,
-                                                             WithTranslation translation) {
-        comp.forEachContentLayer(contentLayer -> {
-            // should be used on layers without translation
-            int tx = contentLayer.getTx();
-            assert tx == 0 : "tx = " + tx + " on " + contentLayer.getName();
-            int ty = contentLayer.getTy();
-            assert ty == 0 : "ty = " + ty + " on " + contentLayer.getName();
-
-            setStandardTestTranslation(comp, contentLayer, translation);
-        });
-    }
-
-    public static void setStandardTestTranslation(Composition comp,
-                                                  ContentLayer layer,
-                                                  WithTranslation translation) {
+    public static void setTranslation(Composition comp,
+                                      ContentLayer layer,
+                                      WithTranslation translation) {
         // Composition only allows to move the active layer
-        // so if the given layer is not active, we need to activate it temporarily
+        // so if the given layer is not active, activate it temporarily
         Layer activeLayerBefore = comp.getActiveLayer();
         boolean activeLayerChanged = false;
         if (layer != activeLayerBefore) {
@@ -335,6 +308,7 @@ public class TestHelper {
             activeLayerChanged = true;
         }
 
+        // should be used on layers without translation
         assertThat(layer).translationIs(0, 0);
 
         translation.moveLayer(comp);

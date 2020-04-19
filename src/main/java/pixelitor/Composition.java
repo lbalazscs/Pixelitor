@@ -35,8 +35,8 @@ import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.NotUndoableEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
+import pixelitor.io.FileFormat;
 import pixelitor.io.IOThread;
-import pixelitor.io.OutputFormat;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Drawable;
@@ -131,6 +131,7 @@ public class Composition implements Serializable {
      * methods or through deserialization of pxc files
      */
     private Composition(Canvas canvas) {
+        assert canvas != null;
         this.canvas = canvas;
     }
 
@@ -179,7 +180,7 @@ public class Composition implements Serializable {
         // copy layers
         for (Layer layer : layerList) {
             var layerCopy = layer.duplicate(true);
-            layerCopy.setCompAndCanvas(compCopy);
+            layerCopy.setComp(compCopy);
 
             compCopy.layerList.add(layerCopy);
             if (layer == activeLayer) {
@@ -292,6 +293,12 @@ public class Composition implements Serializable {
         }
     }
 
+    public String generateNewLayerName() {
+        String retVal = "layer " + newLayerCount;
+        newLayerCount++;
+        return retVal;
+    }
+
     public File getFile() {
         return file;
     }
@@ -329,16 +336,68 @@ public class Composition implements Serializable {
     }
 
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String historyName) {
-        var newLayer = ImageLayer.createFromExternalImage(image, this, layerName);
+        var newLayer = ImageLayer.fromExternalImage(image, this, layerName);
         new LayerAdder(this)
                 .withHistory(historyName)
                 .add(newLayer);
     }
 
+    public void addNewLayerFromComposite() {
+        ImageLayer newLayer = new ImageLayer(this,
+                getCompositeImage(), "Composite");
+
+        new LayerAdder(this)
+                .withHistory("New Layer from Composite")
+                .noRefresh()
+                .atIndex(layerList.size())
+                .add(newLayer);
+    }
+
+    public void duplicateActiveLayer() {
+        Layer duplicate = activeLayer.duplicate();
+        if (duplicate == null) {
+            // there was an out of memory error
+            return;
+        }
+        new LayerAdder(this)
+                .withHistory("Duplicate Layer")
+                .add(duplicate);
+        assert checkInvariant();
+    }
+
+    public void flattenImage(boolean updateGUI, boolean addToHistory) {
+        if (updateGUI) {
+            assert isActive();
+        }
+
+        if (layerList.size() < 2) {
+            return;
+        }
+
+        int numLayers = getNumLayers();
+        BufferedImage bi = getCompositeImage();
+
+        Layer flattened = new ImageLayer(this, bi, "flattened");
+        new LayerAdder(this)
+                .atIndex(numLayers) // add to the top
+                .noRefresh()
+                .add(flattened);
+
+        for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
+            deleteLayer(i, false);
+        }
+        if (updateGUI) {
+            Layers.numLayersChanged(this, 1);
+        }
+        if (addToHistory) {
+            History.add(new NotUndoableEdit("Flatten Image", this));
+        }
+    }
+
     public void addAllLayersToGUI() {
         assert checkInvariant();
 
-        // when adding layer buttons the last layer always gets active
+        // when adding layer buttons, the last layer gets active
         // but here we don't want to change the selected layer
         Layer previousActiveLayer = activeLayer;
 
@@ -350,18 +409,6 @@ public class Composition implements Serializable {
     private void addLayerToGUI(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
         view.addLayerToGUI(layer, layerIndex);
-    }
-
-    public void duplicateActiveLayer() {
-        Layer duplicate = activeLayer.duplicate(false);
-        if (duplicate == null) {
-            // there was an out of memory error
-            return;
-        }
-        new LayerAdder(this)
-                .withHistory("Duplicate Layer")
-                .add(duplicate);
-        assert checkInvariant();
     }
 
     public boolean canMergeDown(Layer layer) {
@@ -455,7 +502,7 @@ public class Composition implements Serializable {
         setActiveLayer(newActiveLayer, true, false, null);
     }
 
-    public void setActiveLayer(Layer newActiveLayer, boolean updateGUI) {
+    private void setActiveLayer(Layer newActiveLayer, boolean updateGUI) {
         setActiveLayer(newActiveLayer, updateGUI, false, null);
     }
 
@@ -682,35 +729,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public void flattenImage(boolean updateGUI, boolean addToHistory) {
-        if (updateGUI) {
-            assert isActive();
-        }
-
-        if (layerList.size() < 2) {
-            return;
-        }
-
-        int numLayers = getNumLayers();
-        BufferedImage bi = getCompositeImage();
-
-        Layer flattened = new ImageLayer(this, bi, "flattened");
-        new LayerAdder(this)
-                .atIndex(numLayers) // add to the top
-                .noRefresh()
-                .add(flattened);
-
-        for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
-            deleteLayer(i, false);
-        }
-        if (updateGUI) {
-            Layers.numLayersChanged(this, 1);
-        }
-        if (addToHistory) {
-            History.add(new NotUndoableEdit("Flatten Image", this));
-        }
-    }
-
     public void moveActiveLayerUp() {
         assert checkInvariant();
 
@@ -837,10 +855,8 @@ public class Composition implements Serializable {
         return imageSoFar;
     }
 
-    public String generateNewLayerName() {
-        String retVal = "layer " + newLayerCount;
-        newLayerCount++;
-        return retVal;
+    public void repaint() {
+        view.repaint();
     }
 
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
@@ -864,17 +880,6 @@ public class Composition implements Serializable {
             // stop the timer thread
             selection.die();
         }
-    }
-
-    public void addNewLayerFromComposite() {
-        ImageLayer newLayer = new ImageLayer(this,
-                getCompositeImage(), "Composite");
-
-        new LayerAdder(this)
-                .withHistory("New Layer from Composite")
-                .noRefresh()
-                .atIndex(layerList.size())
-                .add(newLayer);
     }
 
     public void paintSelection(Graphics2D g) {
@@ -922,15 +927,6 @@ public class Composition implements Serializable {
     }
 
     public DeselectEdit deselect(boolean addToHistory) {
-//        if(Build.isDevelopment()) {
-//            boolean hadSelection = selection != null;
-//            boolean hadSelectionShape = hadSelection && selection.getShape() != null;
-//            String msg = "Deselect (" + reason
-//                + "), hadSelection = " + hadSelection
-//                + ", hadSelectionShape = " + hadSelectionShape
-//                + ", hadBuiltSelection = " + (builtSelection != null);
-//            Events.post(new PixelitorEvent(msg, this, activeLayer));
-//        }
         if (builtSelection != null) {
             builtSelection.die();
             builtSelection = null;
@@ -961,8 +957,8 @@ public class Composition implements Serializable {
         return edit;
     }
 
-    public Shape clipShapeToCanvasSize(Shape shape) {
-        return canvas.clipShapeToBounds(shape);
+    public Shape clipToCanvasBounds(Shape shape) {
+        return canvas.clip(shape);
     }
 
     private DeselectEdit createDeselectEdit() {
@@ -1000,12 +996,12 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Creates a selection from a shape and also handles
+     * Creates a selection from the given shape and also handles
      * existing selections
      */
-    public PixelitorEdit changeSelectionFromShape(Shape newShape) {
+    public PixelitorEdit changeSelection(Shape newShape) {
         PixelitorEdit edit;
-        newShape = canvas.clipShapeToBounds(newShape);
+        newShape = clipToCanvasBounds(newShape);
         if (newShape.getBounds().isEmpty()) {
             // the new selection would be outside the canvas
             return null;
@@ -1036,15 +1032,17 @@ public class Composition implements Serializable {
             selection.setHidden(false, false);
             edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);
         } else { // no existing selection
-            createSelectionFromShape(newShape);
+            createSelectionFrom(newShape);
             edit = new NewSelectionEdit(this, selection.getShape());
         }
         return edit;
     }
 
-    // This should be called only if it can be assumed that there is
-    // no existing selection. Otherwise use changeSelectionFromShape
-    public void createSelectionFromShape(Shape shape) {
+    /**
+     * This should be called only if it can be assumed that there is
+     * no existing selection. Otherwise use changeSelection
+     */
+    public void createSelectionFrom(Shape shape) {
         if (selection != null) {
             throw new IllegalStateException("There is already a selection: " + selection);
         }
@@ -1101,10 +1099,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public boolean needsSoftSelection() {
-        return selection != null && !selection.isRectangular();
-    }
-
     public void invertSelection() {
         if (selection != null) {
             Shape backupShape = selection.getShape();
@@ -1117,6 +1111,33 @@ public class Composition implements Serializable {
                 History.add(new SelectionShapeChangeEdit(
                         "Invert Selection", this, backupShape));
             }
+        }
+    }
+
+    /**
+     * Intersects the selection with the given (crop) rectangle.
+     * The selection is not translated here into the coordinate
+     * system of the new, cropped image.
+     */
+    public void cropSelection(Rectangle2D cropRect) {
+        if (selection != null) {
+            Shape currentShape = selection.getShape();
+            Shape intersection = ShapeCombination.INTERSECT.combine(currentShape, cropRect);
+            if (intersection.getBounds().isEmpty()) {
+                selection.die();
+                setSelectionRef(null);
+            } else {
+                selection.setShape(intersection);
+            }
+        }
+    }
+
+    public void createSelectionFromTextLayer() {
+        if (activeLayer instanceof TextLayer) {
+            TextLayer textLayer = (TextLayer) activeLayer;
+            textLayer.createSelectionFromText();
+        } else {
+            throw new IllegalStateException("active layer is not text layer");
         }
     }
 
@@ -1181,7 +1202,7 @@ public class Composition implements Serializable {
     }
 
     public boolean isActive() {
-        return OpenImages.getActiveComp() == this;
+        return OpenImages.activeCompIs(this);
     }
 
     @VisibleForTesting
@@ -1223,43 +1244,10 @@ public class Composition implements Serializable {
     /**
      * The user reordered the layers by dragging
      */
-    public void dragFinished(Layer layer, int newIndex) {
+    public void layerReorderingFinished(Layer layer, int newIndex) {
         layerList.remove(layer);
         layerList.add(newIndex, layer);
         imageChanged();
-    }
-
-    public void repaint() {
-        view.repaint();
-    }
-
-    /**
-     * Intersects the selection with the given (crop) rectangle.
-     * Note that the selection is not translated here
-     * into the coordinate system of the new, cropped image:
-     * this must be done with a separate call to imCoordsChanged
-     * in order to be consistent with other operations
-     */
-    public void intersectSelection(Rectangle2D cropRect) {
-        if (selection != null) {
-            Shape currentShape = selection.getShape();
-            Shape intersection = ShapeCombination.INTERSECT.combine(currentShape, cropRect);
-            if (intersection.getBounds().isEmpty()) {
-                selection.die();
-                setSelectionRef(null);
-            } else {
-                selection.setShape(intersection);
-            }
-        }
-    }
-
-    public void createSelectionFromTextLayer() {
-        if (activeLayer instanceof TextLayer) {
-            TextLayer textLayer = (TextLayer) activeLayer;
-            textLayer.createSelectionFromText();
-        } else {
-            throw new IllegalStateException("active layer is not text layer");
-        }
     }
 
     // called from assertions and unit tests
@@ -1296,7 +1284,7 @@ public class Composition implements Serializable {
 
     public CompletableFuture<Void> saveAsync(SaveSettings saveSettings,
                                              boolean addToRecentMenus) {
-        OutputFormat format = saveSettings.getOutputFormat();
+        FileFormat format = saveSettings.getFormat();
         File f = saveSettings.getFile();
 
         if (Build.isDevelopment()) {
@@ -1304,14 +1292,14 @@ public class Composition implements Serializable {
         }
 
         Runnable saveTask = format.getSaveTask(this, saveSettings);
-        OutputFormat.setLastUsed(format);
+        FileFormat.setLastOutput(format);
         return saveAsync(saveTask, f, addToRecentMenus);
     }
 
     public CompletableFuture<Void> saveAsync(Runnable saveTask,
                                              File file,
                                              boolean addToRecentMenus) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         // prevents starting a new save on the EDT while an asynchronous
         // save is already scheduled or running on the IO thread
@@ -1341,7 +1329,7 @@ public class Composition implements Serializable {
     }
 
     private void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         setFile(file);
         if (addToRecentMenus) {
@@ -1379,9 +1367,6 @@ public class Composition implements Serializable {
     }
 
     public void setGuides(Guides guides) {
-//        if (guides != null) {
-//            System.out.println("Composition::setGuides: guide name = " + guides.getName());
-//        }
         this.guides = guides;
     }
 

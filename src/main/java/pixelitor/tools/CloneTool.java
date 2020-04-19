@@ -41,6 +41,8 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.GridBagLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
@@ -245,12 +247,10 @@ public class CloneTool extends BlendingModeBrushTool {
     private void setupRandomSource(Drawable dr, PPoint start) {
         var comp = dr.getComp();
 
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
-        int sourceX = Rnd.nextInt(canvasWidth);
-        int sourceY = Rnd.nextInt(canvasHeight);
+        Rectangle canvasBounds = comp.getCanvasImBounds();
+        Point source = Rnd.nextPoint(canvasBounds);
 
-        setCloningSource(PPoint.eagerFromIm(sourceX, sourceY, comp.getView()));
+        setCloningSource(PPoint.eagerFromIm(source, comp.getView()));
         startNewCloningStroke(start, true);
     }
 

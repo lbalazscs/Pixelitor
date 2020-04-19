@@ -22,8 +22,8 @@ import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
-import java.awt.Component;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A wizard. The individual pages implement
@@ -38,12 +38,7 @@ public abstract class Wizard {
     private final int initialDialogHeight;
     protected final Drawable dr;
 
-    protected Wizard(WizardPage initialPage,
-                     String dialogTitle,
-                     String finishButtonText,
-                     int initialDialogWidth,
-                     int initialDialogHeight,
-                     Drawable dr) {
+    protected Wizard(WizardPage initialPage, String dialogTitle, String finishButtonText, int initialDialogWidth, int initialDialogHeight, Drawable dr) {
         currentPage = initialPage;
         this.dialogTitle = dialogTitle;
         this.finishButtonText = finishButtonText;
@@ -66,11 +61,7 @@ public abstract class Wizard {
     private void showDialog(JFrame dialogParent, String title) {
         assert dialog == null; // this should be called once per object
 
-        dialog = new OKCancelDialog(
-                currentPage.createPanel(this, dr),
-                dialogParent,
-                title,
-                "Next", "Cancel") {
+        dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next", "Cancel") {
 
             @Override
             protected void cancelAction() {
@@ -83,7 +74,7 @@ public abstract class Wizard {
                 nextPressed(dialog);
             }
         };
-        dialog.setHeaderMessage(currentPage.getHeaderText(this));
+        dialog.setHeaderMessage(currentPage.getHelpText(this));
 
         // it is packed already, but not correctly, because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
@@ -93,38 +84,32 @@ public abstract class Wizard {
     }
 
     private void nextPressed(OKCancelDialog dialog) {
-        if (!mayMoveForwardIfNextPressed(currentPage, dialog)) {
+        if (!currentPage.isValid(this, dialog)) {
             return;
         }
 
-        // move forward
-        currentPage.onMovingToTheNext(this, dr);
+        currentPage.finish(this, dr);
 
-        if (!mayProceedAfterMovingForward(currentPage, dialog)) {
-            return;
-        }
-
-        currentPage.getNext().ifPresentOrElse(nextPage -> {
-            JComponent panel = nextPage.createPanel(this, dr);
-            dialog.changeForm(panel);
-            dialog.setHeaderMessage(nextPage.getHeaderText(this));
-            currentPage = nextPage;
-
-            if (currentPage.isLast()) {
-                dialog.setOKButtonText(finishButtonText);
-            }
-        }, () -> {
+        Optional<WizardPage> nextPage = currentPage.getNext();
+        if(nextPage.isPresent()) {
+            showNextPage(dialog, nextPage.get());
+        } else {
             // dialog finished
             dialog.close();
             finalAction();
-        });
+        }
     }
 
-    protected abstract boolean mayMoveForwardIfNextPressed(WizardPage wizardPage,
-                                                           Component dialogParent);
+    private void showNextPage(OKCancelDialog dialog, WizardPage nextPage) {
+        JComponent panel = nextPage.createPanel(this, dr);
+        dialog.changeForm(panel);
+        dialog.setHeaderMessage(nextPage.getHelpText(this));
+        currentPage = nextPage;
 
-    protected abstract boolean mayProceedAfterMovingForward(WizardPage wizardPage,
-                                                            Component dialogParent);
+        if (currentPage.isLast()) {
+            dialog.setOKButtonText(finishButtonText);
+        }
+    }
 
     protected abstract void finalAction();
 

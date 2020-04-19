@@ -64,7 +64,7 @@ public class StatusBar extends JPanel {
 
     public ProgressHandler startProgress(String msg, int max) {
         assert msg != null;
-        assert EventQueue.isDispatchThread() : "not EDT thread";
+        assert EventQueue.isDispatchThread() : "not on EDT";
 
         statusBarLabel.setText("");
 
@@ -106,7 +106,7 @@ public class StatusBar extends JPanel {
 
         @Override
         public void updateProgress(int value) {
-            assert EventQueue.isDispatchThread() : "not EDT thread";
+            assert EventQueue.isDispatchThread() : "not on EDT";
             assert determinate;
 
             progressBar.setValue(value);
@@ -115,7 +115,7 @@ public class StatusBar extends JPanel {
 
         @Override
         public void stopProgress() {
-            assert EventQueue.isDispatchThread() : "not EDT thread";
+            assert EventQueue.isDispatchThread() : "not on EDT";
 
             if (determinate) {
                 // not sure if this is necessary to stop the animation, but can't be bad

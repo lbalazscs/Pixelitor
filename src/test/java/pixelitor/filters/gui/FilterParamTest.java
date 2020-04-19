@@ -58,7 +58,7 @@ public class FilterParamTest {
     private ParamAdjustmentListener adjustmentListener;
 
     @Before
-    public void setUp() {
+    public void beforeEachTest() {
         adjustmentListener = mock(ParamAdjustmentListener.class);
         param.setAdjustmentListener(adjustmentListener);
     }
@@ -96,7 +96,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_createGUI() {
+    public void createGUI() {
         JComponent gui = param.createGUI();
         assertThat(gui).isNotNull();
         assertThat(gui.isEnabled()).isTrue();
@@ -115,14 +115,14 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_getNumGridBagCols() {
+    public void getNumLayoutColumns() {
         int cols = ((ParamGUI) param.createGUI()).getNumLayoutColumns();
         assertThat(cols > 0 && cols < 3).isTrue();
         checkThatFilterWasNotCalled();
     }
 
     @Test
-    public void test_randomize() {
+    public void randomize() {
         param.setRandomizePolicy(RandomizePolicy.ALLOW_RANDOMIZE);
         param.randomize();
         checkThatFilterWasNotCalled();
@@ -137,7 +137,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_reset_false() {
+    public void reset_false() {
         param.reset(false);
 
         checkThatFilterWasNotCalled();
@@ -145,7 +145,13 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_reset_true() {
+    public void reset_true() {
+        // make sure that the value is set to the real default value,
+        // otherwise (depending on the method execution order) the
+        // copyState_setState test could change the value of the angle param
+        // from 0 to 2*pi, which confuses this test
+        param.reset(false);
+
         Object defaultValue = param.getParamValue();
         // we can change the value in a general way only
         // through randomize
@@ -177,7 +183,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void test_copyState_setState() {
+    public void copyState_setState() {
         try {
             ParamState<?> paramState = param.copyState();
             assertThat(paramState).isNotNull();
@@ -189,7 +195,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void testSimpleMethodsDontCallFilter() {
+    public void simpleMethodsDontRunFilter() {
         assertThat(param).nameIs("Param Name");
 
         JComponent gui = param.createGUI();
