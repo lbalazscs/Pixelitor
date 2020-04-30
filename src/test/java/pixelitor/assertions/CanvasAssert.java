@@ -38,12 +38,12 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         super(actual, CanvasAssert.class);
     }
 
-    public CanvasAssert hasImBounds(Rectangle bounds) {
+    public CanvasAssert hasBounds(Rectangle bounds) {
         isNotNull();
 
         String msg = "\nExpecting bounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        Rectangle actualBounds = actual.getImBounds();
+        Rectangle actualBounds = actual.getBounds();
         if (!Objects.areEqual(actualBounds, bounds)) {
             failWithMessage(msg, actual, bounds, actualBounds);
         }
@@ -51,12 +51,12 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         return this;
     }
 
-    public CanvasAssert hasImHeight(int height) {
+    public CanvasAssert hasHeight(int height) {
         isNotNull();
 
         String msg = "\nExpecting height of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        int actualHeight = actual.getImHeight();
+        int actualHeight = actual.getHeight();
         if (actualHeight != height) {
             failWithMessage(msg, actual, height, actualHeight);
         }
@@ -64,12 +64,12 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         return this;
     }
 
-    public CanvasAssert hasImWidth(int width) {
+    public CanvasAssert hasWidth(int width) {
         isNotNull();
 
         String msg = "\nExpecting width of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
-        int actualWidth = actual.getImWidth();
+        int actualWidth = actual.getWidth();
         if (actualWidth != width) {
             failWithMessage(msg, actual, width, actualWidth);
         }

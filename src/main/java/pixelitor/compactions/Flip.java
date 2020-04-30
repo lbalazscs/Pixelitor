@@ -21,9 +21,9 @@ import pixelitor.Canvas;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
 
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 /**
  * Flips all content layers of a composition horizontally or vertically
@@ -37,7 +37,8 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvas(Canvas canvas, View view) {
+    protected void changeCanvasSize(Canvas newCanvas, View view) {
+        // a flip doesn't change the canvas size
         throw new IllegalStateException("should not be called");
     }
 
@@ -52,13 +53,18 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasImTransform(Canvas canvas) {
-        return direction.createCanvasImTransform(canvas);
+    protected AffineTransform createCanvasTransform(Canvas canvas) {
+        return direction.createCanvasTransform(canvas);
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides guides, View view) {
-        return guides.copyForFlip(direction, view);
+    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
+        return oldGuides.copyForFlip(direction, view);
+    }
+
+    @Override
+    protected String getStatusBarMessage() {
+        return direction.getStatusBarMessage();
     }
 
     /**
@@ -72,17 +78,22 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTransform(Canvas canvas) {
+            public String getStatusBarMessage() {
+                return "The image was flipped horizontally";
+            }
+
+            @Override
+            public AffineTransform createCanvasTransform(Canvas canvas) {
                 var at = new AffineTransform();
-                at.translate(canvas.getImWidth(), 0);
+                at.translate(canvas.getWidth(), 0);
                 at.scale(-1, 1);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTransform(ImageLayer layer) {
+            public AffineTransform createImageTransform(BufferedImage image) {
                 var at = new AffineTransform();
-                at.translate(layer.getImage().getWidth(), 0);
+                at.translate(image.getWidth(), 0);
                 at.scale(-1, 1);
                 return at;
             }
@@ -93,17 +104,22 @@ public class Flip extends SimpleCompAction {
             }
 
             @Override
-            public AffineTransform createCanvasImTransform(Canvas canvas) {
+            public String getStatusBarMessage() {
+                return "The image was flipped vertically";
+            }
+
+            @Override
+            public AffineTransform createCanvasTransform(Canvas canvas) {
                 var at = new AffineTransform();
-                at.translate(0, canvas.getImHeight());
+                at.translate(0, canvas.getHeight());
                 at.scale(1, -1);
                 return at;
             }
 
             @Override
-            public AffineTransform createImageTransform(ImageLayer layer) {
+            public AffineTransform createImageTransform(BufferedImage image) {
                 var at = new AffineTransform();
-                at.translate(0, layer.getImage().getHeight());
+                at.translate(0, image.getHeight());
                 at.scale(1, -1);
                 return at;
             }
@@ -111,15 +127,17 @@ public class Flip extends SimpleCompAction {
 
         public abstract String getName();
 
-        /**
-         * Returns the transformation in canvas space.
-         * Needed for transforming the selection.
-         */
-        public abstract AffineTransform createCanvasImTransform(Canvas canvas);
+        public abstract String getStatusBarMessage();
 
         /**
-         * Returns the transformation for the image.
+         * Returns the transformation in image space, relative to the canvas.
+         * Needed for transforming the selection.
          */
-        public abstract AffineTransform createImageTransform(ImageLayer layer);
+        public abstract AffineTransform createCanvasTransform(Canvas canvas);
+
+        /**
+         * Returns the transformation for the image (image space, relative to the image).
+         */
+        public abstract AffineTransform createImageTransform(BufferedImage image);
     }
 }

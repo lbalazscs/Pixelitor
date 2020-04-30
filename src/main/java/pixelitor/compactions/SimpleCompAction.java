@@ -28,6 +28,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 import pixelitor.selection.SelectionActions;
+import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -41,10 +42,10 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
  * by using the template method pattern.
  */
 public abstract class SimpleCompAction extends AbstractAction implements CompAction {
-    private final boolean changesCanvasDimensions;
+    private final boolean affectsCanvasSize;
 
-    SimpleCompAction(String name, boolean changesCanvasDimensions) {
-        this.changesCanvasDimensions = changesCanvasDimensions;
+    SimpleCompAction(String name, boolean affectsCanvasSize) {
+        this.affectsCanvasSize = affectsCanvasSize;
         assert name != null;
         putValue(Action.NAME, name);
     }
@@ -55,38 +56,43 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition comp) {
-        View view = comp.getView();
-        Composition newComp = comp.createCopy(true, true);
+    public CompletableFuture<Composition> process(Composition oldComp) {
+        View view = oldComp.getView();
+        Composition newComp = oldComp.createCopy(true, true);
         Canvas newCanvas = newComp.getCanvas();
+        Canvas oldCanvas = oldComp.getCanvas();
 
-        var canvasAT = createCanvasImTransform(newCanvas);
+        var canvasAT = createCanvasTransform(newCanvas);
         newComp.imCoordsChanged(canvasAT, false);
 
         newComp.forEachLayer(this::processLayer);
 
-        if (changesCanvasDimensions) {
-            changeCanvas(newCanvas, view);
+        if (affectsCanvasSize) {
+            changeCanvasSize(newCanvas, view);
         }
 
         History.add(new CompositionReplacedEdit(
-                getEditName(), false, view, comp, newComp, canvasAT));
+                getEditName(), false, view, oldComp, newComp, canvasAT));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
-        Guides guides = comp.getGuides();
+        Guides guides = oldComp.getGuides();
         if (guides != null) {
-            Guides newGuides = createGuidesCopy(guides, view);
+            Guides newGuides = createGuidesCopy(guides, view, oldCanvas);
             newComp.setGuides(newGuides);
         }
 
-        // Only after the shared canvas size was updated
+        // Only after the canvas size was updated, because
+        // they are based on the canvas-sized subimage
         newComp.updateAllIconImages();
 
         newComp.imageChanged(REPAINT, true);
-        if (changesCanvasDimensions) {
+        if (affectsCanvasSize) {
             view.revalidate(); // make sure the scrollbars are OK
         }
+
+        Messages.showInStatusBar(getStatusBarMessage());
+
         return CompletableFuture.completedFuture(newComp);
     }
 
@@ -101,7 +107,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         }
     }
 
-    protected abstract void changeCanvas(Canvas canvas, View view);
+    protected abstract void changeCanvasSize(Canvas newCanvas, View view);
 
     protected abstract String getEditName();
 
@@ -114,7 +120,10 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
      * Returns the change made by this action as a transform in
      * image-space coordinates relative to the canvas
      */
-    protected abstract AffineTransform createCanvasImTransform(Canvas canvas);
+    protected abstract AffineTransform createCanvasTransform(Canvas canvas);
 
-    protected abstract Guides createGuidesCopy(Guides guides, View view);
+    // the oldCanvas is used by "Enlarge Canvas"
+    protected abstract Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas);
+
+    protected abstract String getStatusBarMessage();
 }

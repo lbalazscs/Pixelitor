@@ -70,23 +70,25 @@ public enum PasteDestination {
         void paste(BufferedImage pastedImage) {
             var comp = OpenImages.getActiveComp();
             Canvas canvas = comp.getCanvas();
-            int width = canvas.getImWidth();
-            int height = canvas.getImHeight();
+            int canvasWidth = canvas.getWidth();
+            int canvasHeight = canvas.getHeight();
 
             int imgWidth = pastedImage.getWidth();
             int imgHeight = pastedImage.getHeight();
 
-            BufferedImage bwImage = new BufferedImage(width, height,
+            BufferedImage bwImage = new BufferedImage(canvasWidth, canvasHeight,
                     TYPE_BYTE_GRAY);
             Graphics2D g = bwImage.createGraphics();
 
-            if (imgWidth < width || imgHeight < height) {
+            // if the pasted image is too small, pad it with white
+            if (!canvas.isFullyCoveredBy(pastedImage)) {
                 g.setColor(Color.WHITE);
-                g.fillRect(0, 0, width, height);
+                g.fillRect(0, 0, canvasWidth, canvasHeight);
             }
 
-            int x = (width - imgWidth) / 2;
-            int y = (height - imgHeight) / 2;
+            // center the pasted image
+            int x = (canvasWidth - imgWidth) / 2;
+            int y = (canvasHeight - imgHeight) / 2;
             g.drawImage(pastedImage, x, y, null);
 
             g.dispose();
@@ -96,8 +98,7 @@ public enum PasteDestination {
                 LayerMask mask = layer.getMask();
                 mask.replaceImage(bwImage, "Replace Mask");
             } else {
-                layer.addImageAsMask(bwImage, false, "Add Pasted Mask",
-                        false, true, true);
+                layer.addImageAsMask(bwImage, false, true, true, "Add Pasted Mask", false);
             }
         }
     };

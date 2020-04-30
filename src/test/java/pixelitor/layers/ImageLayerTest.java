@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
@@ -49,6 +48,7 @@ import static org.mockito.Mockito.verify;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
+import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.ImageLayer.State.NORMAL;
 import static pixelitor.layers.ImageLayer.State.PREVIEW;
@@ -83,14 +83,14 @@ public class ImageLayerTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @Before
     public void beforeEachTest() {
         comp = TestHelper.createMockComp();
 
-        layer = ImageLayer.createEmpty(comp, "layer 1");
+        layer = createEmptyImageLayer(comp, "layer 1");
 
         withMask.setupFor(layer);
         LayerMask mask = null;
@@ -266,9 +266,9 @@ public class ImageLayerTest {
         assertThat(bounds).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
         if (withTranslation == WithTranslation.NO) {
-            assertThat(bounds).isEqualTo(canvas.getImBounds());
+            assertThat(bounds).isEqualTo(canvas.getBounds());
         } else {
-            assertThat(bounds).isNotEqualTo(canvas.getImBounds());
+            assertThat(bounds).isNotEqualTo(canvas.getBounds());
         }
         iconUpdates.check(0, 0);
     }
@@ -300,8 +300,8 @@ public class ImageLayerTest {
                 = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpDrawingLayer).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
-        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(canvas.getImWidth());
-        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(canvas.getImHeight());
+        assertThat(tmpDrawingLayer.getWidth()).isEqualTo(canvas.getWidth());
+        assertThat(tmpDrawingLayer.getHeight()).isEqualTo(canvas.getHeight());
 
         layer.mergeTmpDrawingLayerDown();
         iconUpdates.check(0, 0);
@@ -314,8 +314,8 @@ public class ImageLayerTest {
 
         assertThat(image)
                 .isNotNull()
-                .widthIs(canvas.getImWidth())
-                .heightIs(canvas.getImHeight());
+                .widthIs(canvas.getWidth())
+                .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -326,8 +326,8 @@ public class ImageLayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         assertThat(image)
                 .isNotNull()
-                .widthIs(canvas.getImWidth())
-                .heightIs(canvas.getImHeight());
+                .widthIs(canvas.getWidth())
+                .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -499,7 +499,7 @@ public class ImageLayerTest {
                         expectedImWidth, expectedImHeight));
         iconUpdates.check(0, 0);
 
-        comp.getCanvas().changeImSize(
+        comp.getCanvas().changeSize(
                 (int) expectedNewCanvas.getWidth(),
                 (int) expectedNewCanvas.getHeight(), comp.getView());
         ConsistencyChecks.imageCoversCanvas(layer);
@@ -512,8 +512,8 @@ public class ImageLayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();
         assertThat(image)
-                .widthIs(canvas.getImWidth())
-                .heightIs(canvas.getImHeight());
+                .widthIs(canvas.getWidth())
+                .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 

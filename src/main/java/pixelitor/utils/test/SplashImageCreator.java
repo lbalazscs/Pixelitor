@@ -157,13 +157,13 @@ public class SplashImageCreator {
         ValueNoise valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
         valueNoise.startOn(layer, FILTER_WITHOUT_DIALOG);
-        layer.setOpacity(0.3f, true, true, true);
-        layer.setBlendingMode(BlendingMode.SCREEN, true, true, true);
+        layer.setOpacity(0.3f, true);
+        layer.setBlendingMode(BlendingMode.SCREEN, true);
 
         layer = addNewLayer(comp, "Gradient");
         addRadialBWGradientToActiveDrawable(layer, true);
-        layer.setOpacity(0.4f, true, true, true);
-        layer.setBlendingMode(BlendingMode.LUMINOSITY, true, true, true);
+        layer.setOpacity(0.4f, true);
+        layer.setBlendingMode(BlendingMode.LUMINOSITY, true);
 
         addTextLayers(comp);
 
@@ -244,16 +244,16 @@ public class SplashImageCreator {
         layer.moveWhileDragging(0, translationY);
         layer.endMovement();
 
-        layer.setOpacity(opacity, true, true, true);
-        layer.setBlendingMode(blendingMode, true, true, true);
+        layer.setOpacity(opacity, true);
+        layer.setBlendingMode(blendingMode, true);
 
         return layer;
     }
 
     private static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
         Canvas canvas = dr.getComp().getCanvas();
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         int startX = canvasWidth / 2;
         int startY = canvasHeight / 2;

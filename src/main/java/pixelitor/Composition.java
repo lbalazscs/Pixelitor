@@ -23,29 +23,11 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
-import pixelitor.history.DeleteLayerEdit;
-import pixelitor.history.DeselectEdit;
-import pixelitor.history.History;
-import pixelitor.history.LayerOrderChangeEdit;
-import pixelitor.history.LayerSelectionChangeEdit;
-import pixelitor.history.MergeDownEdit;
-import pixelitor.history.MultiEdit;
-import pixelitor.history.NewLayerEdit;
-import pixelitor.history.NewSelectionEdit;
-import pixelitor.history.NotUndoableEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.SelectionShapeChangeEdit;
+import pixelitor.history.*;
 import pixelitor.io.FileFormat;
 import pixelitor.io.IOThread;
 import pixelitor.io.SaveSettings;
-import pixelitor.layers.ContentLayer;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMoveAction;
-import pixelitor.layers.LayerUI;
-import pixelitor.layers.MaskViewMode;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
@@ -61,12 +43,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -85,9 +62,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static pixelitor.Composition.ImageChangeActions.FULL;
-import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
-import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
-import static pixelitor.Composition.LayerAdder.Position.TOP;
+import static pixelitor.Composition.LayerAdder.Position.*;
 import static pixelitor.io.FileUtils.stripExtension;
 import static pixelitor.utils.Utils.createCopyName;
 
@@ -217,6 +192,12 @@ public class Composition implements Serializable {
         return compCopy;
     }
 
+    public void createLayerUIs() {
+        for (Layer layer : layerList) {
+            layer.createUI();
+        }
+    }
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // init transient variables
         compositeImage = null; // will be set when needed
@@ -261,16 +242,20 @@ public class Composition implements Serializable {
         return canvas;
     }
 
-    public Rectangle getCanvasImBounds() {
-        return canvas.getImBounds();
+    public Rectangle getCanvasBounds() {
+        return canvas.getBounds();
     }
 
-    public int getCanvasImWidth() {
-        return canvas.getImWidth();
+    public int getCanvasWidth() {
+        return canvas.getWidth();
     }
 
-    public int getCanvasImHeight() {
-        return canvas.getImHeight();
+    public int getCanvasHeight() {
+        return canvas.getHeight();
+    }
+
+    public Shape clipToCanvasBounds(Shape shape) {
+        return canvas.clip(shape);
     }
 
     public void setDirty(boolean dirty) {
@@ -331,7 +316,7 @@ public class Composition implements Serializable {
                 .noRefresh()
                 .add(newLayer);
 
-        newLayer.updateIconImage();
+//        newLayer.updateIconImage();
         return newLayer;
     }
 
@@ -365,10 +350,8 @@ public class Composition implements Serializable {
         assert checkInvariant();
     }
 
-    public void flattenImage(boolean updateGUI, boolean addToHistory) {
-        if (updateGUI) {
-            assert isActive();
-        }
+    public void flattenImage() {
+        assert isActive();
 
         if (layerList.size() < 2) {
             return;
@@ -386,12 +369,9 @@ public class Composition implements Serializable {
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
             deleteLayer(i, false);
         }
-        if (updateGUI) {
-            Layers.numLayersChanged(this, 1);
-        }
-        if (addToHistory) {
-            History.add(new NotUndoableEdit("Flatten Image", this));
-        }
+
+        Layers.numLayersChanged(this, 1);
+        History.add(new NotUndoableEdit("Flatten Image", this));
     }
 
     public void addAllLayersToGUI() {
@@ -422,16 +402,16 @@ public class Composition implements Serializable {
         return false;
     }
 
-    public void mergeActiveLayerDown(boolean updateGUI) {
+    public void mergeActiveLayerDown() {
         assert checkInvariant();
 
         if (canMergeDown(activeLayer)) {
-            mergeDown(activeLayer, updateGUI);
+            mergeDown(activeLayer);
         }
     }
 
     // this method assumes that canMergeDown() previously returned true
-    public void mergeDown(Layer layer, boolean updateGUI) {
+    public void mergeDown(Layer layer) {
         int layerIndex = layerList.indexOf(layer);
         var bellowLayer = (ImageLayer) layerList.get(layerIndex - 1);
 
@@ -450,7 +430,7 @@ public class Composition implements Serializable {
 
         bellowLayer.updateIconImage();
 
-        deleteLayer(layer, false, updateGUI);
+        deleteLayer(layer, false);
 
         History.add(new MergeDownEdit(this, layer,
                 bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
@@ -458,14 +438,14 @@ public class Composition implements Serializable {
 
     private void deleteLayer(int layerIndex, boolean addToHistory) {
         Layer layer = layerList.get(layerIndex);
-        deleteLayer(layer, addToHistory, true);
+        deleteLayer(layer, addToHistory);
     }
 
-    public void deleteActiveLayer(boolean updateGUI, boolean addToHistory) {
-        deleteLayer(activeLayer, addToHistory, updateGUI);
+    public void deleteActiveLayer(boolean addToHistory) {
+        deleteLayer(activeLayer, addToHistory);
     }
 
-    public void deleteLayer(Layer layer, boolean addToHistory, boolean updateGUI) {
+    public void deleteLayer(Layer layer, boolean addToHistory) {
         if (layerList.size() < 2) {
             throw new IllegalStateException("there are " + layerList.size() + " layers");
         }
@@ -480,15 +460,15 @@ public class Composition implements Serializable {
 
         if (layer == activeLayer) {
             if (layerIndex > 0) {
-                setActiveLayer(layerList.get(layerIndex - 1), updateGUI);
+                setActiveLayer(layerList.get(layerIndex - 1));
             } else {  // deleted the fist layer, set the new first layer as active
-                setActiveLayer(layerList.get(0), updateGUI);
+                setActiveLayer(layerList.get(0));
             }
         }
 
-        if (updateGUI) {
-            LayerUI ui = layer.getUI();
-            view.deleteLayerUI(ui);
+        LayerUI ui = layer.getUI();
+        if (ui != null) { // can be null if part of layer rasterization
+            view.removeLayerUI(ui);
 
             if (isActive()) {
                 Layers.numLayersChanged(this, layerList.size());
@@ -499,14 +479,10 @@ public class Composition implements Serializable {
     }
 
     public void setActiveLayer(Layer newActiveLayer) {
-        setActiveLayer(newActiveLayer, true, false, null);
+        setActiveLayer(newActiveLayer, false, null);
     }
 
-    private void setActiveLayer(Layer newActiveLayer, boolean updateGUI) {
-        setActiveLayer(newActiveLayer, updateGUI, false, null);
-    }
-
-    public void setActiveLayer(Layer newActiveLayer, boolean updateGUI, boolean addToHistory, String editName) {
+    public void setActiveLayer(Layer newActiveLayer, boolean addToHistory, String editName) {
         if (activeLayer == newActiveLayer) {
             return;
         }
@@ -517,7 +493,7 @@ public class Composition implements Serializable {
         Layer oldLayer = activeLayer;
         activeLayer = newActiveLayer;
 
-        if (updateGUI) {
+        if (activeLayer.hasUI()) {
             activeLayer.activateUI();
             Layers.activeLayerChanged(newActiveLayer, false);
         }
@@ -527,7 +503,7 @@ public class Composition implements Serializable {
                     editName, this, oldLayer, newActiveLayer));
         }
 
-        if(view != null) {  // shouldn't run while loading the composition
+        if (view != null) {  // shouldn't run while loading the composition
             Tools.editedObjectChanged(activeLayer);
         }
 
@@ -615,7 +591,7 @@ public class Composition implements Serializable {
                 .collect(toList());
 
         for (TextLayer textLayer : textLayers) {
-            textLayer.replaceWithRasterized(false, false);
+            textLayer.replaceWithRasterized(false);
         }
     }
 
@@ -797,8 +773,7 @@ public class Composition implements Serializable {
         if (newIndex >= layerList.size()) {
             return;
         }
-        setActiveLayer(layerList.get(newIndex), true,
-                true, LayerMoveAction.RAISE_LAYER_SELECTION);
+        setActiveLayer(layerList.get(newIndex), true, LayerMoveAction.RAISE_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
@@ -810,8 +785,7 @@ public class Composition implements Serializable {
             return;
         }
 
-        setActiveLayer(layerList.get(newIndex), true,
-                true, LayerMoveAction.LOWER_LAYER_SELECTION);
+        setActiveLayer(layerList.get(newIndex), true, LayerMoveAction.LOWER_LAYER_SELECTION);
 
         assert ConsistencyChecks.fadeWouldWorkOn(this);
     }
@@ -832,7 +806,7 @@ public class Composition implements Serializable {
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
         BufferedImage imageSoFar = new BufferedImage(
-                canvas.getImWidth(), canvas.getImHeight(), TYPE_INT_ARGB_PRE);
+                canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;
@@ -955,10 +929,6 @@ public class Composition implements Serializable {
             ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
         return edit;
-    }
-
-    public Shape clipToCanvasBounds(Shape shape) {
-        return canvas.clip(shape);
     }
 
     private DeselectEdit createDeselectEdit() {
@@ -1103,7 +1073,7 @@ public class Composition implements Serializable {
         if (selection != null) {
             Shape backupShape = selection.getShape();
             Shape inverted = canvas.invertShape(backupShape);
-            if(inverted.getBounds2D().isEmpty()) {
+            if (inverted.getBounds2D().isEmpty()) {
                 // presumably everything was selected, and now nothing is
                 deselect(true);
             } else {
@@ -1141,6 +1111,9 @@ public class Composition implements Serializable {
         }
     }
 
+    /**
+     * Called when the image-space coordinates have changed (resize, crop, etc.)
+     */
     public void imCoordsChanged(AffineTransform at, boolean isUndoRedo) {
         // The selection is explicitly reset to a backup shape
         // when something is undone/redone
@@ -1158,10 +1131,20 @@ public class Composition implements Serializable {
     }
 
     /**
-     * Returns the composite image, which has the same dimensions as the canvas.
+     * Called when the component-space coordinates have changed,
+     * but the pixels remain the same  (zooming, view resizing etc.)
+     */
+    public void coCoordsChanged() {
+        if (guides != null) {
+            guides.coCoordsChanged(view);
+        }
+    }
+
+    /**
+     * Returns the (canvas-sized) composite image.
      */
     public BufferedImage getCompositeImage() {
-        if(compositeImage == null) {
+        if (compositeImage == null) {
             compositeImage = calculateCompositeImage();
         }
         return compositeImage;
@@ -1195,7 +1178,7 @@ public class Composition implements Serializable {
     }
 
     private void invalidateCompositeCache() {
-        if(compositeImage != null) {
+        if (compositeImage != null) {
             compositeImage.flush();
         }
         compositeImage = null;
@@ -1209,7 +1192,7 @@ public class Composition implements Serializable {
     public Rectangle getMaxImageSize() {
         Rectangle max = new Rectangle(0, 0, 0, 0);
         for (Layer layer : layerList) {
-            if(layer instanceof ImageLayer) {
+            if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 Rectangle layerBounds = imageLayer.getImageBounds();
                 max.add(layerBounds);
@@ -1225,7 +1208,7 @@ public class Composition implements Serializable {
     @VisibleForTesting
     public void allImageLayersToCanvasSize() {
         for (Layer layer : layerList) {
-            if(layer instanceof ImageLayer) {
+            if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
                 imageLayer.toCanvasSizeWithHistory();
             }
@@ -1386,12 +1369,6 @@ public class Composition implements Serializable {
         guides.draw(g);
     }
 
-    public void coCoordsChanged() {
-        if (guides != null) {
-            guides.coCoordsChanged(view);
-        }
-    }
-
     public enum ImageChangeActions {
         INVALIDATE_CACHE(false, false) {
         }, REPAINT(true, false) {
@@ -1501,7 +1478,7 @@ public class Composition implements Serializable {
         public void add(Layer newLayer) {
             Layer activeLayerBefore = null;
             MaskViewMode oldViewMode = null;
-            if (editName != null) {
+            if (needsHistory()) {
                 activeLayerBefore = comp.activeLayer;
                 oldViewMode = comp.view.getMaskViewMode();
             }
@@ -1514,20 +1491,31 @@ public class Composition implements Serializable {
                 }
             }
             comp.layerList.add(newLayerIndex, newLayer);
-            comp.setActiveLayer(newLayer, !compInit);
+
+            if (!compInit) {
+                comp.view.addLayerToGUI(newLayer, newLayerIndex);
+
+                // mocked views will not set a UI
+                assert Build.isUnitTesting() || newLayer.hasUI();
+            }
+
+            comp.setActiveLayer(newLayer);
             if (!compInit) {
                 comp.setDirty(true);
-                comp.view.addLayerToGUI(newLayer, newLayerIndex);
 
                 if (refresh) {
                     comp.imageChanged();
                 }
             }
-            if (editName != null) {
+            if (needsHistory()) {
                 History.add(new NewLayerEdit(editName,
                         comp, newLayer, activeLayerBefore, oldViewMode));
             }
             assert comp.checkInvariant();
+        }
+
+        private boolean needsHistory() {
+            return editName != null;
         }
     }
 }

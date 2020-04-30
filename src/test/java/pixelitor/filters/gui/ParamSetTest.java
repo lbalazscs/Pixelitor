@@ -17,21 +17,14 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.Rectangle;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @DisplayName("ParamSet tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -49,7 +42,7 @@ public class ParamSetTest {
         params.setAdjustmentListener(adjustmentListener);
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
         extraParam.setAdjustmentListener(adjustmentListener);
-        params.insertParam(extraParam, 3);
+        params.insertParamAtIndex(extraParam, 3);
         params.considerImageSize(new Rectangle(0, 0, 400, 800));
     }
 

@@ -18,12 +18,7 @@
 package pixelitor.filters.animation;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.gui.utils.BrowseFilesSupport;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TFValidationLayerUI;
-import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
+import pixelitor.gui.utils.*;
 import pixelitor.io.Dirs;
 import pixelitor.utils.Messages;
 
@@ -137,7 +132,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
     private void outputTypeChanged() {
         TweenOutputType selected = (TweenOutputType) outputTypeCB.getSelectedItem();
-        if(selected.needsDirectory()) {
+        if (selected.needsDirectory()) {
             browseFilesSupport.setSelectionMode(DIRECTORY);
             browseFilesSupport.setFileChooserTitle("Select Output Folder");
         } else {
@@ -187,23 +182,21 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     @Override
     public ValidationResult check(JTextField textField) {
         if (textField == numSecondsTF) {
-            return TextFieldValidator.hasValidPositiveDouble("Number of Seconds", textField);
+            return TextFieldValidator.hasPositiveDouble(textField, "Number of Seconds");
         } else if (textField == fpsTF) {
-            return TextFieldValidator.hasValidPositiveDouble("Frames per Second", textField);
-        } else {
-            if (textField == fileNameTF) {
-                TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
+            return TextFieldValidator.hasPositiveDouble(textField, "Frames per Second");
+        } else if (textField == fileNameTF) {
+            TweenOutputType outputType = (TweenOutputType) outputTypeCB.getSelectedItem();
 
-                String fileName = textField.getText().trim();
-                String errorMessage = outputType.isOK(new File(fileName));
-                if (errorMessage == null) {
-                    return ValidationResult.ok();
-                } else {
-                    return ValidationResult.error(errorMessage);
-                }
+            String fileName = textField.getText().trim();
+            String errorMessage = outputType.isOK(new File(fileName));
+            if (errorMessage == null) {
+                return ValidationResult.ok();
             } else {
-                throw new IllegalStateException("unexpected JTextField");
+                return ValidationResult.error(errorMessage);
             }
+        } else {
+            throw new IllegalStateException("unexpected JTextField");
         }
     }
 

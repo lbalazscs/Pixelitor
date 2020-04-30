@@ -25,12 +25,8 @@ import pixelitor.layers.LayerMask;
 import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.tools.util.ImDrag;
 
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.MultipleGradientPaint.CycleMethod;
-import java.awt.Paint;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -84,8 +80,8 @@ public class Gradient {
         Graphics2D g;
         var comp = dr.getComp();
         Canvas canvas = comp.getCanvas();
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
         boolean smallImage; // the temporary image might be smaller than the canvas, if there is selection
         if (dr instanceof LayerMask) {
             BufferedImage subImage = dr.getCanvasSizedSubImage();

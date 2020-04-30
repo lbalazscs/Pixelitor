@@ -40,6 +40,6 @@ class NewImageTest {
         comp.checkInvariant();
         assertThat(comp)
                 .numLayersIs(1)
-                .canvasImSizeIs(20, 20);
+                .canvasSizeIs(20, 20);
     }
 }

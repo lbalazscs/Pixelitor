@@ -20,14 +20,11 @@ package pixelitor;
 import org.mockito.stubbing.Answer;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.colors.FgBgColors;
+import pixelitor.filters.Filter;
 import pixelitor.filters.Invert;
 import pixelitor.gui.View;
 import pixelitor.history.History;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.ContentLayer;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.KeyModifiers;
@@ -36,29 +33,18 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_MOVED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
+import static java.awt.event.MouseEvent.*;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockingDetails;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
 import static pixelitor.layers.MaskViewMode.NORMAL;
@@ -83,6 +69,7 @@ public class TestHelper {
     public static TextLayer createTextLayer(Composition comp, String name) {
         var textLayer = new TextLayer(comp, name);
         textLayer.randomizeSettings();
+        textLayer.createUI();
         return textLayer;
     }
 
@@ -103,10 +90,10 @@ public class TestHelper {
         var canvas = new Canvas(TEST_WIDTH, TEST_HEIGHT);
 
         when(comp.getCanvas()).thenReturn(canvas);
-        when(comp.getCanvasImBounds()).thenReturn(
+        when(comp.getCanvasBounds()).thenReturn(
                 new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
-        when(comp.getCanvasImWidth()).thenReturn(TEST_WIDTH);
-        when(comp.getCanvasImHeight()).thenReturn(TEST_HEIGHT);
+        when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
+        when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
 
         View view = createMockViewWithoutComp();
         when(view.getComp()).thenReturn(comp);
@@ -132,8 +119,8 @@ public class TestHelper {
     public static Composition create2LayerComp(boolean addMasks) {
         var comp = createEmptyComp();
 
-        var layer1 = ImageLayer.createEmpty(comp, "layer 1");
-        var layer2 = ImageLayer.createEmpty(comp, "layer 2");
+        var layer1 = createEmptyImageLayer(comp, "layer 1");
+        var layer2 = createEmptyImageLayer(comp, "layer 2");
 
         comp.addLayerInInitMode(layer1);
         comp.addLayerInInitMode(layer2);
@@ -165,14 +152,32 @@ public class TestHelper {
     public static Layer createLayerOfClass(Class<?> layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
-            layer = ImageLayer.createEmpty(comp, "layer 1");
+            layer = createEmptyImageLayer(comp, "layer 1");
         } else if (layerClass.equals(TextLayer.class)) {
             layer = createTextLayer(comp, "layer 1");
         } else if (layerClass.equals(AdjustmentLayer.class)) {
-            layer = new AdjustmentLayer(comp, "layer 1", new Invert());
+            layer = createAdjustmentLayer(comp, "layer 1", new Invert());
         } else {
             throw new IllegalStateException();
         }
+        return layer;
+    }
+
+    public static AdjustmentLayer createAdjustmentLayer(Composition comp, String name, Filter filter) {
+        var layer = new AdjustmentLayer(comp, name, filter);
+        layer.createUI();
+        return layer;
+    }
+
+    public static ImageLayer createEmptyImageLayer(Composition comp, String name) {
+        ImageLayer layer = ImageLayer.createEmpty(comp, name);
+        layer.createUI();
+        return layer;
+    }
+
+    public static ImageLayer createImageLayer(Composition comp, BufferedImage img, String name) {
+        var layer = new ImageLayer(comp, img, name);
+        layer.createUI();
         return layer;
     }
 
@@ -249,6 +254,9 @@ public class TestHelper {
         when(view.componentToImageSpace(any(Point2D.class))).then(returnsFirstArg());
         when(view.componentToImageSpace(any(Rectangle2D.class))).then(returnsFirstArg());
 
+//        Mockito.doCallRealMethod().when(view).replaceComp(any(Composition.class));
+//        Mockito.doCallRealMethod().when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
+
         // can't just return the argument because this method returns a
         // Rectangle (subclass) from a Rectangle2D (superclass)
         when(view.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
@@ -292,6 +300,9 @@ public class TestHelper {
     public static void moveLayer(Composition comp,
                                  boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
+//        if(makeDuplicateLayer) {
+//            comp.getActiveLayer().setUI(new TestLayerUI());
+//        }
         comp.moveActiveContentRelative(MOVE_LAYER_ONLY, relX, relY);
         comp.endMovement(MOVE_LAYER_ONLY);
     }
@@ -369,5 +380,10 @@ public class TestHelper {
     public static void assertHistoryEditsAre(String... values) {
         List<String> edits = History.getEditNames();
         assertThat(edits).containsExactly(values);
+    }
+
+    public static void setUnitTestingMode() {
+        Build.setUnitTestingMode();
+        Layer.uiFactory = TestLayerUI::new;
     }
 }

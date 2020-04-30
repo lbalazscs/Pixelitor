@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.painters.TextSettings;
@@ -57,7 +56,7 @@ public class TextLayerTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @Before
@@ -65,7 +64,7 @@ public class TextLayerTest {
         comp = TestHelper.createEmptyComp();
         layer = TestHelper.createTextLayer(comp, "Text Layer");
         layer.updateLayerName();
-        comp.addLayerInInitMode(layer);
+        new Composition.LayerAdder(comp).add(layer);
 
         withMask.setupFor(layer);
         LayerMask mask = null;

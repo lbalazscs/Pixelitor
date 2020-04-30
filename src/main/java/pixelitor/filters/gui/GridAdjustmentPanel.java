@@ -31,7 +31,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 
 /**
- * An adjustment panel, where the components (typically representing
+ * A {@link ParametrizedFilterGUI}, where the components (typically representing
  * the four corners of the image) are added in a 2*2 grid.
  * Extra parameters are added in a row bellow the grid.
  */
@@ -46,7 +46,7 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     }
 
     @Override
-    public JPanel createFilterParamsPanel(List<FilterParam> paramList) {
+    public JPanel createFilterParamsPanel(ParamSet paramSet) {
         // hack, otherwise the setting of the flag in the constructor is too late,
         // because this is called by the superclass constructor
         if(filter instanceof JHFourColorGradient) {
@@ -63,7 +63,9 @@ public class GridAdjustmentPanel extends ParametrizedFilterGUI {
         }
         gridPanel.setLayout(layout);
 
+        List<FilterParam> paramList = paramSet.getParams();
         int numParams = paramList.size();
+
         JPanel extraParamsPanel = null;
         if(numParams > MAX_GRID_PARAMS) {
             extraParamsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));

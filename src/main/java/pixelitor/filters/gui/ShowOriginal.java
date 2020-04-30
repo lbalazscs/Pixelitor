@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,17 +22,9 @@ package pixelitor.filters.gui;
  * a "Show Original" checkbox.
  */
 public enum ShowOriginal {
-    YES {
-        @Override
-        public boolean isYes() {
-            return true;
-        }
-    }, NO {
-        @Override
-        public boolean isYes() {
-            return false;
-        }
-    };
+    YES , NO;
 
-    public abstract boolean isYes();
+    public boolean isYes() {
+        return this == YES;
+    };
 }

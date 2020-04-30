@@ -67,14 +67,14 @@ public class Canvas implements Serializable {
     /**
      * Changes the size with values given in image space
      */
-    public void changeImSize(int newImWidth, int newImHeight, View view) {
-        width = newImWidth;
-        height = newImHeight;
+    public void changeSize(int newWidth, int newHeight, View view) {
+        width = newWidth;
+        height = newHeight;
 
         // also update the component space values
         recalcCoSize(view);
 
-        activeCanvasImSizeChanged(this);
+        activeCanvasSizeChanged(this);
     }
 
     /**
@@ -91,28 +91,28 @@ public class Canvas implements Serializable {
     /**
      * Returns the bounds in image space
      */
-    public Rectangle getImBounds() {
+    public Rectangle getBounds() {
         return new Rectangle(0, 0, width, height);
     }
 
     /**
      * Returns the size in image space
      */
-    public Dimension getImSize() {
+    public Dimension getSize() {
         return new Dimension(width, height);
     }
 
     /**
      * Returns the width in image space
      */
-    public int getImWidth() {
+    public int getWidth() {
         return width;
     }
 
     /**
      * Returns the height in image space
      */
-    public int getImHeight() {
+    public int getHeight() {
         return height;
     }
 
@@ -139,7 +139,7 @@ public class Canvas implements Serializable {
 
     public Shape invertShape(Shape shape) {
         Area area = new Area(shape);
-        Area fullArea = new Area(getImBounds());
+        Area fullArea = new Area(getBounds());
         fullArea.subtract(area);
         return fullArea;
     }
@@ -147,7 +147,7 @@ public class Canvas implements Serializable {
     public Shape clip(Shape shape) {
         assert shape != null;
 
-        Rectangle2D canvasBounds = getImBounds();
+        Rectangle2D canvasBounds = getBounds();
 
         if (shape instanceof Rectangle2D) {
             // don't ruin the type information in the shape by
@@ -162,8 +162,14 @@ public class Canvas implements Serializable {
         return shapeArea;
     }
 
-    public static void activeCanvasImSizeChanged(Canvas canvas) {
-        Symmetry.setCanvasImSize(canvas);
+    /**
+     * Either a new composition (therefore a new canvas)
+     * was activated or the active canvas size changed
+     */
+    public static void activeCanvasSizeChanged(Canvas canvas) {
+        // as long as only Symmetry must be notified,
+        // a listener mechanism is not necessary
+        Symmetry.activeCanvasSizeChanged(canvas);
     }
 
     /**
@@ -173,6 +179,10 @@ public class Canvas implements Serializable {
         // it is important that the tmp image has transparency
         // even for layer masks, otherwise drawing is not possible
         return ImageUtils.createSysCompatibleImage(this);
+    }
+
+    public boolean isFullyCoveredBy(BufferedImage img) {
+        return img.getWidth() >= width && img.getHeight() >= height;
     }
 
     @Override

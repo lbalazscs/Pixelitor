@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
@@ -40,6 +39,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.DIFFERENCE;
 import static pixelitor.layers.BlendingMode.NORMAL;
@@ -74,7 +75,7 @@ public class LayerTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @Before
@@ -85,7 +86,7 @@ public class LayerTest {
 
         comp.addLayerInInitMode(layer);
 
-        var layer2 = ImageLayer.createEmpty(comp, "LayerTest layer 2");
+        ImageLayer layer2 = createEmptyImageLayer(comp, "LayerTest layer 2");
         comp.addLayerInInitMode(layer2);
 
         withMask.setupFor(layer);
@@ -96,7 +97,7 @@ public class LayerTest {
 
         iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
 
-        comp.setActiveLayer(layer, true, true, null);
+        comp.setActiveLayer(layer, true, null);
 
         assert comp.getNumLayers() == 2 : "found " + comp.getNumLayers() + " layers";
 
@@ -109,9 +110,7 @@ public class LayerTest {
 
         // hide the previously shown layer
         layer.setVisible(false, true);
-
         checkLayerIsHidden();
-        History.assertNumEditsIs(1);
 
         History.undo("Hide Layer");
         checkLayerIsShown();
@@ -121,9 +120,7 @@ public class LayerTest {
 
         // show the previously hidden layer
         layer.setVisible(true, true);
-
         checkLayerIsShown();
-        History.assertNumEditsIs(2);
 
         History.undo("Show Layer");
         checkLayerIsHidden();
@@ -131,6 +128,7 @@ public class LayerTest {
         History.redo("Show Layer");
         checkLayerIsShown();
 
+        History.assertNumEditsIs(2);
         iconUpdates.check(0, 0);
     }
 
@@ -149,27 +147,29 @@ public class LayerTest {
     @Test
     public void duplicating() {
         Layer copy = layer.duplicate();
-        assertThat(copy)
-                .nameIs("layer 1 copy")
-                .classIs(layer.getClass());
+        checkCopy(copy, "layer 1 copy");
 
         Layer copy2 = copy.duplicate();
-        assertThat(copy2)
-                .nameIs("layer 1 copy 2")
-                .classIs(layer.getClass());
+        checkCopy(copy2, "layer 1 copy 2");
 
         Layer copy3 = copy2.duplicate();
-        assertThat(copy3)
-                .nameIs("layer 1 copy 3")
-                .classIs(layer.getClass());
+        checkCopy(copy3, "layer 1 copy 3");
 
         // in this case the name shouldn't change
         Layer exactCopy = layer.duplicate(true);
-        assertThat(exactCopy)
-                .nameIs("layer 1")
-                .classIs(layer.getClass());
+        checkCopy(exactCopy, "layer 1");
 
         iconUpdates.check(0, 0);
+    }
+
+    private void checkCopy(Layer copy, String expectedName) {
+        copy.createUI();
+        assertThat(copy)
+                .nameIs(expectedName)
+                .classIs(layer.getClass())
+                .uiIsVisible();
+
+        assertTrue(copy.hasMask() == withMask.isTrue());
     }
 
     @Test
@@ -179,10 +179,8 @@ public class LayerTest {
         assertThat(layer).opacityIs(oldValue);
 
         // change the opacity of the layer
-        layer.setOpacity(newValue, true, true, true);
-
+        layer.setOpacity(newValue, true);
         assertThat(layer).opacityIs(newValue);
-        History.assertNumEditsIs(1);
         var lastEdit = (LayerOpacityEdit) History.getLastEdit();
         assertSame(layer, lastEdit.getLayer());
 
@@ -192,6 +190,7 @@ public class LayerTest {
         History.redo("Layer Opacity Change");
         assertThat(layer).opacityIs(newValue);
 
+        History.assertNumEditsIs(1);
         iconUpdates.check(0, 0);
     }
 
@@ -199,10 +198,8 @@ public class LayerTest {
     public void changingTheBlendingMode() {
         assertThat(layer).blendingModeIs(NORMAL);
 
-        layer.setBlendingMode(DIFFERENCE, true, true, true);
-
+        layer.setBlendingMode(DIFFERENCE, true);
         assertThat(layer).blendingModeIs(DIFFERENCE);
-        History.assertNumEditsIs(1);
 
         History.undo("Blending Mode Change");
         assertThat(layer).blendingModeIs(NORMAL);
@@ -210,6 +207,7 @@ public class LayerTest {
         History.redo("Blending Mode Change");
         assertThat(layer).blendingModeIs(DIFFERENCE);
 
+        History.assertNumEditsIs(1);
         iconUpdates.check(0, 0);
     }
 
@@ -219,7 +217,6 @@ public class LayerTest {
 
         layer.setName("newName", true);
         assertThat(layer).nameIs("newName").uiNameIs("newName");
-        History.assertNumEditsIs(1);
 
         History.undo("Rename Layer to \"newName\"");
         assertThat(layer).nameIs("layer 1").uiNameIs("layer 1");
@@ -227,6 +224,7 @@ public class LayerTest {
         History.redo("Rename Layer to \"newName\"");
         assertThat(layer).nameIs("newName").uiNameIs("newName");
 
+        History.assertNumEditsIs(1);
         iconUpdates.check(0, 0);
     }
 
@@ -237,7 +235,6 @@ public class LayerTest {
 
         layer2.activate(true);
         assertThat(layer2).isActive();
-        History.assertNumEditsIs(1);
 
         History.undo("Layer Selection Change");
         assertThat(layer2).isNotActive();
@@ -245,13 +242,14 @@ public class LayerTest {
         History.redo("Layer Selection Change");
         assertThat(layer2).isActive();
 
+        History.assertNumEditsIs(1);
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void resizing() {
         Canvas canvas = layer.getComp().getCanvas();
-        Dimension origSize = canvas.getImSize();
+        Dimension origSize = canvas.getSize();
 
         // there is not much to assert, since normally
         // resizing is done at the Composition level
@@ -325,87 +323,86 @@ public class LayerTest {
     @Test
     public void maskEnablingAndDisabling() {
         if (withMask.isTrue()) {
-            assertThat(layer)
-                    .hasMask()
-                    .maskIsEnabled();
-
-            var enableAction = new EnableDisableMaskAction(layer);
-            assertThat(enableAction).nameIs("Disable");
+            var action = new EnableDisableMaskAction(layer);
+            checkMaskIsEnabled(action);
 
             // disable the layer mask
             layer.setMaskEnabled(false, true);
-
-            assertThat(layer).maskIsDisabled();
-            assertThat(enableAction).nameIs("Enable");
+            checkMaskIsDisabled(action);
             History.assertNumEditsIs(1);
             iconUpdates.check(0, 1);
 
             History.undo("Disable Layer Mask");
-            assertThat(layer).maskIsEnabled();
-            assertThat(enableAction).nameIs("Disable");
+            checkMaskIsEnabled(action);
             iconUpdates.check(0, 2);
 
             History.redo("Disable Layer Mask");
-            assertThat(layer).maskIsDisabled();
-            assertThat(enableAction).nameIs("Enable");
+            checkMaskIsDisabled(action);
             iconUpdates.check(0, 3);
 
             // now test enabling the layer mask
             layer.setMaskEnabled(true, true);
-            assertThat(layer).maskIsEnabled();
-            assertThat(enableAction).nameIs("Disable");
+            checkMaskIsEnabled(action);
             iconUpdates.check(0, 4);
 
             History.undo("Enable Layer Mask");
-            assertThat(layer).maskIsDisabled();
-            assertThat(enableAction).nameIs("Enable");
+            checkMaskIsDisabled(action);
             iconUpdates.check(0, 5);
 
             History.redo("Enable Layer Mask");
-            assertThat(layer).maskIsEnabled();
-            assertThat(enableAction).nameIs("Disable");
+            checkMaskIsEnabled(action);
             iconUpdates.check(0, 6);
         }
+    }
+
+    private void checkMaskIsEnabled(EnableDisableMaskAction action) {
+        assertThat(layer).hasMask().maskIsEnabled();
+        assertThat(action).nameIs("Disable");
+    }
+
+    private void checkMaskIsDisabled(EnableDisableMaskAction action) {
+        assertThat(layer).hasMask().maskIsDisabled();
+        assertThat(action).nameIs("Enable");
     }
 
     @Test
     public void maskLinking() {
         if (withMask.isTrue()) {
-            assertThat(layer)
-                    .hasMask()
-                    .maskIsLinked();
             var linkAction = new LinkUnlinkMaskAction(layer);
-            assertThat(linkAction).nameIs("Unlink");
+            checkMaskIsLinked(linkAction);
 
             // unlink the layer mask
             layer.getMask().setLinked(false, true);
-            assertThat(layer).maskIsNotLinked();
-            assertThat(linkAction).nameIs("Link");
-            History.assertNumEditsIs(1);
+            checkMaskIsNotLinked(linkAction);
 
             History.undo("Unlink Layer Mask");
-            assertThat(layer).maskIsLinked();
-            assertThat(linkAction).nameIs("Unlink");
+            checkMaskIsLinked(linkAction);
 
             History.redo("Unlink Layer Mask");
-            assertThat(layer).maskIsNotLinked();
-            assertThat(linkAction).nameIs("Link");
+            checkMaskIsNotLinked(linkAction);
 
             // now link back the layer mask
             layer.getMask().setLinked(true, true);
-            assertThat(layer).maskIsLinked();
-            assertThat(linkAction).nameIs("Unlink");
-            History.assertNumEditsIs(2);
+            checkMaskIsLinked(linkAction);
 
             History.undo("Link Layer Mask");
-            assertThat(layer).maskIsNotLinked();
-            assertThat(linkAction).nameIs("Link");
+            checkMaskIsNotLinked(linkAction);
 
             History.redo("Link Layer Mask");
-            assertThat(layer).maskIsLinked();
-            assertThat(linkAction).nameIs("Unlink");
+            checkMaskIsLinked(linkAction);
 
+            History.assertNumEditsIs(2);
             iconUpdates.check(0, 0);
         }
+    }
+
+    private void checkMaskIsLinked(LinkUnlinkMaskAction linkAction) {
+        assertThat(layer).maskIsLinked();
+        assertThat(linkAction).nameIs("Unlink");
+    }
+
+    private void checkMaskIsNotLinked(LinkUnlinkMaskAction linkAction) {
+        assertThat(layer).hasMask().maskIsNotLinked();
+        assertThat(linkAction).nameIs("Link");
     }
 }

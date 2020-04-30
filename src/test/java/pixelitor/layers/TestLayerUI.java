@@ -19,19 +19,20 @@ package pixelitor.layers;
 
 import pixelitor.Build;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 /**
  * The {@link LayerUI} implementation used in unit tests
  */
 public class TestLayerUI implements LayerUI {
+    private final Layer layer;
     private String name;
     private boolean showVisibility = true;
     private boolean hasMaskIconLabel = false;
-    private final Map<ImageLayer, Integer> iconImageUpdateCounter = new IdentityHashMap<>();
 
-    public TestLayerUI() {
+    private int numLayerIconUpdates;
+    private int numMaskIconUpdates;
+
+    public TestLayerUI(Layer layer) {
+        this.layer = layer;
         assert Build.isUnitTesting();
     }
 
@@ -41,7 +42,13 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
+    public boolean hasMaskIcon() {
+        return hasMaskIconLabel;
+    }
+
+    @Override
     public String getLayerName() {
+        assert layer.getName().equals(name);
         return name;
     }
 
@@ -52,16 +59,17 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public boolean isVisibilityChecked() {
+        assert layer.isVisible() == showVisibility;
         return showVisibility;
     }
 
     @Override
-    public void addMaskIconLabel() {
+    public void addMaskIcon() {
         hasMaskIconLabel = true;
     }
 
     @Override
-    public void deleteMaskIconLabel() {
+    public void removeMaskIcon() {
         if (!hasMaskIconLabel) {
             throw new IllegalStateException();
         }
@@ -70,11 +78,19 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public void updateLayerIconImageAsync(ImageLayer imageLayer) {
-        iconImageUpdateCounter.merge(imageLayer, 1, Integer::sum);
+        if(imageLayer instanceof LayerMask) {
+            numMaskIconUpdates++;
+        } else {
+            numLayerIconUpdates++;
+        }
     }
 
-    public int getNumIconImageUpdates(ImageLayer imageLayer) {
-        return iconImageUpdateCounter.getOrDefault(imageLayer, 0);
+    public int getNumLayerIconUpdates() {
+        return numLayerIconUpdates;
+    }
+
+    public int getNumMaskIconUpdates() {
+        return numMaskIconUpdates;
     }
 
     @Override

@@ -27,7 +27,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 /**
- * Zoom levels that are automatically calculated based on the available space
+ * Ways to calculate zoom levels automatically, based on the available space
  */
 public enum AutoZoom {
     SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
@@ -83,8 +83,8 @@ public enum AutoZoom {
             return ZoomLevel.Z100;
         }
 
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         Dimension desktopSize = ImageArea.getSize();
         double desktopWidth = desktopSize.getWidth();
@@ -103,7 +103,7 @@ public enum AutoZoom {
         ZoomLevel maximallyZoomedOut = zoomLevels[0];
 
         if (maximallyZoomedOut.getPercentValue() > idealZoomPercent) {
-            // the image is so big that it will have scroll bars even
+            // the image is so big that it will need scroll bars even
             // if it is maximally zoomed out
             return maximallyZoomedOut;
         }
@@ -123,7 +123,7 @@ public enum AutoZoom {
             lastOK = level;
         }
         // if we get here, the image is so small that even at maximal zoom
-        // it fits the available space: set it then to the maximal zoom
+        // it fits in the available space: set it then to the maximal zoom
         return lastOK;
     }
 }

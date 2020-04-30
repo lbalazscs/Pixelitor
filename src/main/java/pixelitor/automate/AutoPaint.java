@@ -21,14 +21,8 @@ import net.jafama.FastMath;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.colors.ColorUtils;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.RangeParam;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SliderSpinner;
-import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
+import pixelitor.gui.utils.*;
 import pixelitor.history.History;
 import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
@@ -50,14 +44,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
-import static pixelitor.colors.FgBgColors.getBGColor;
-import static pixelitor.colors.FgBgColors.getFGColor;
-import static pixelitor.colors.FgBgColors.setBGColor;
-import static pixelitor.colors.FgBgColors.setFGColor;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.SMUDGE;
+import static pixelitor.colors.FgBgColors.*;
+import static pixelitor.tools.Tools.*;
 
 /**
  * The "Auto Paint" functionality
@@ -83,8 +71,7 @@ public class AutoPaint {
     private static void paintStrokes(Drawable dr, Settings settings) {
         assert EventQueue.isDispatchThread() : "not on EDT";
 
-        origFg = getFGColor();
-        origBg = getBGColor();
+        saveOriginalFgBgColors();
 
         String msg = format("Auto Paint with %s Tool: ", settings.getTool());
 
@@ -105,11 +92,7 @@ public class AutoPaint {
             progressHandler.stopProgress();
             Messages.showInStatusBar(msg + "finished.");
 
-            // if colors were changed, restore the original
-            if (settings.changeColors()) {
-                setFGColor(origFg);
-                setBGColor(origBg);
-            }
+            restoreOriginalFgBgColors(settings);
         }
     }
 
@@ -143,7 +126,7 @@ public class AutoPaint {
 
     private static void setFgBgColors(Settings settings, Random rand) {
         if (settings.useRandomColors()) {
-            FgBgColors.randomize();
+            randomizeColors();
         } else if (settings.useInterpolatedColors()) {
             float interpolationRatio = rand.nextFloat();
             Color interpolated = ColorUtils.interpolateInRGB(
@@ -155,8 +138,8 @@ public class AutoPaint {
     private static PPoint calcStartPoint(Composition comp, Random rand) {
         Canvas canvas = comp.getCanvas();
         return PPoint.lazyFromIm(
-                rand.nextInt(canvas.getImWidth()),
-                rand.nextInt(canvas.getImHeight()),
+                rand.nextInt(canvas.getWidth()),
+                rand.nextInt(canvas.getHeight()),
                 comp.getView()
         );
     }
@@ -182,8 +165,7 @@ public class AutoPaint {
             ShapesTool st = (ShapesTool) tool;
             st.paintDrag(dr, new ImDrag(start, end));
         } else {
-            throw new IllegalStateException("tool = "
-                    + tool.getClass().getName());
+            throw new IllegalStateException("tool = " + tool.getClass().getName());
         }
     }
 
@@ -313,6 +295,19 @@ public class AutoPaint {
                 retVal = retVal.addError("\"Average Stroke Length\" must be an integer.");
             }
             return retVal;
+        }
+    }
+
+    private static void saveOriginalFgBgColors() {
+        origFg = getFGColor();
+        origBg = getBGColor();
+    }
+
+    private static void restoreOriginalFgBgColors(Settings settings) {
+        // if colors were changed, restore the original
+        if (settings.changeColors()) {
+            setFGColor(origFg);
+            setBGColor(origBg);
         }
     }
 

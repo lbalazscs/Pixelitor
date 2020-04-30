@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -299,14 +299,15 @@ public enum Symmetry {
         }
     };
 
+    // properties of the active composition in image space
     private static int compWidth;
     private static int compHeight;
     private static double compCenterX;
     private static double compCenterY;
 
-    public static void setCanvasImSize(Canvas canvas) {
-        compWidth = canvas.getImWidth();
-        compHeight = canvas.getImHeight();
+    public static void activeCanvasSizeChanged(Canvas canvas) {
+        compWidth = canvas.getWidth();
+        compHeight = canvas.getHeight();
         compCenterX = compWidth / 2.0;
         compCenterY = compHeight / 2.0;
     }

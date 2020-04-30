@@ -47,7 +47,7 @@ public class DeleteActiveLayerAction extends AbstractAction
     @Override
     public void actionPerformed(ActionEvent e) {
         var comp = OpenImages.getActiveComp();
-        comp.deleteActiveLayer(true, true);
+        comp.deleteActiveLayer(true);
     }
 
     @Override

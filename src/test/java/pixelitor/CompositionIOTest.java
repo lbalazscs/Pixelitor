@@ -17,19 +17,11 @@
 
 package pixelitor;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.io.IO;
 import pixelitor.io.OpenRaster;
 import pixelitor.io.PXCFormat;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.BlendingMode;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +37,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 public class CompositionIOTest {
     @BeforeAll
     static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @Test
@@ -154,7 +146,7 @@ public class CompositionIOTest {
         var comp = future.join();
         assertThat(comp)
                 .numLayersIs(1)
-                .canvasImSizeIs(10, 10)
+                .canvasSizeIs(10, 10)
                 .invariantIsOK();
     }
 
@@ -173,7 +165,7 @@ public class CompositionIOTest {
         var comp = future.join();
         assertThat(comp)
                 .numLayersIs(2)
-                .canvasImSizeIs(10, 10)
+                .canvasSizeIs(10, 10)
                 .invariantIsOK();
 
         var secondLayer = comp.getLayer(1);

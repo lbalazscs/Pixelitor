@@ -57,14 +57,14 @@ public class Resize implements CompAction {
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition comp) {
-        Canvas oldCanvas = comp.getCanvas();
-        int canvasCurrWidth = oldCanvas.getImWidth();
-        int canvasCurrHeight = oldCanvas.getImHeight();
+    public CompletableFuture<Composition> process(Composition oldComp) {
+        Canvas oldCanvas = oldComp.getCanvas();
+        int canvasCurrWidth = oldCanvas.getWidth();
+        int canvasCurrHeight = oldCanvas.getHeight();
 
         if (canvasCurrWidth == targetWidth && canvasCurrHeight == targetHeight) {
             // nothing to do
-            return CompletableFuture.completedFuture(comp);
+            return CompletableFuture.completedFuture(oldComp);
         }
 
         // it is important to use local copies of the final global
@@ -87,10 +87,10 @@ public class Resize implements CompAction {
         // can update and multiple resizing operations can run in parallel
         var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
-                .supplyAsync(() -> comp.createCopy(true, true),
+                .supplyAsync(() -> oldComp.createCopy(true, true),
                         ThreadPool.getExecutor())
                 .thenCompose(newComp -> resizeLayers(newComp, targetSize))
-                .thenApplyAsync(newComp -> afterResizeActions(comp, newComp, targetSize, progressHandler),
+                .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler),
                         EventQueue::invokeLater)
                 .handle((newComp, ex) -> {
                     if (ex != null) {
@@ -100,22 +100,15 @@ public class Resize implements CompAction {
                 });
     }
 
-    private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension targetSize, ProgressHandler progressHandler) {
+    private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension canvasTarget, ProgressHandler progressHandler) {
         assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
 
-        int canvasTargetWidth = targetSize.width;
-        int canvasTargetHeight = targetSize.height;
-
         Canvas newCanvas = newComp.getCanvas();
-        int canvasCurrWidth = newCanvas.getImWidth();
-        int canvasCurrHeight = newCanvas.getImHeight();
-        double sx = ((double) canvasTargetWidth) / canvasCurrWidth;
-        double sy = ((double) canvasTargetHeight) / canvasCurrHeight;
-        var canvasTransform = AffineTransform.getScaleInstance(sx, sy);
+        var canvasTransform = createCanvasTransform(canvasTarget, newCanvas);
         newComp.imCoordsChanged(canvasTransform, false);
 
         View view = newComp.getView();
-        newCanvas.changeImSize(canvasTargetWidth, canvasTargetHeight, view);
+        newCanvas.changeSize(canvasTarget.width, canvasTarget.height, view);
 
         History.add(new CompositionReplacedEdit("Resize",
                 false, view, comp, newComp, canvasTransform));
@@ -145,8 +138,14 @@ public class Resize implements CompAction {
 
         progressHandler.stopProgress();
         Messages.showInStatusBar(format("<html><b>%s</b> was resized to %dx%d pixels.",
-                newComp.getName(), canvasTargetWidth, canvasTargetHeight));
+                newComp.getName(), canvasTarget.width, canvasTarget.height));
         return newComp;
+    }
+
+    private static AffineTransform createCanvasTransform(Dimension targetSize, Canvas newCanvas) {
+        double sx = targetSize.width / (double) newCanvas.getWidth();
+        double sy = targetSize.height / (double) newCanvas.getHeight();
+        return AffineTransform.getScaleInstance(sx, sy);
     }
 
     private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {

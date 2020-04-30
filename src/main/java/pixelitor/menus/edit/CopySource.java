@@ -118,7 +118,7 @@ public enum CopySource {
                                                                        Rectangle selBounds) {
         // just to be sure that the bounds are inside the canvas
         selBounds = SwingUtilities.computeIntersection(
-                0, 0, canvas.getImWidth(), canvas.getImHeight(),
+                0, 0, canvas.getWidth(), canvas.getHeight(),
                 selBounds
         );
         if (selBounds.isEmpty()) {

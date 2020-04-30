@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.TestHelper;
@@ -42,9 +41,7 @@ import java.util.Collection;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.compactions.Rotate.SpecialAngle.*;
 
 @RunWith(Parameterized.class)
 public class CompActionTest {
@@ -96,7 +93,7 @@ public class CompActionTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
 
         Tools.setCurrentTool(Tools.CROP);
     }
@@ -130,9 +127,10 @@ public class CompActionTest {
 
     private void checkOriginalState() {
         assertThat(comp)
-                .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
                 .activeLayerTranslationIs(origTX, origTY)
+                .allLayerUIsAreOK()
                 .invariantIsOK();
 
         if (withSelection.isTrue()) {
@@ -174,7 +172,7 @@ public class CompActionTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasImSizeIs(newCanvasWidth, newCanvasHeight)
+                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerTranslationIs(
                         Math.min(0, origTX + west),
                         Math.min(0, origTY + north))
@@ -227,7 +225,7 @@ public class CompActionTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasImSizeIs(newCanvasWidth, newCanvasHeight)
+                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
                 .activeLayerAndMaskImageSizeIs(
                         newCanvasWidth - origTX / 2,
                         newCanvasHeight - origTY / 2)
@@ -287,13 +285,13 @@ public class CompActionTest {
 
         if (angle == ANGLE_180) {
             assertThat(newComp)
-                    .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                    .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                     .activeLayerAndMaskImageSizeIs(
                             origImageWidth,
                             origImageHeight);
         } else {
             assertThat(newComp)
-                    .canvasImSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
+                    .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
                     .activeLayerAndMaskImageSizeIs(
                             origImageHeight,
                             origImageWidth);
@@ -393,7 +391,7 @@ public class CompActionTest {
 
         assertThat(newComp)
                 .invariantIsOK()
-                .canvasImSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
                 .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 
         if (direction == HORIZONTAL) {

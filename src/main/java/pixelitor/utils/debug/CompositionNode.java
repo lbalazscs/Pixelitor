@@ -80,9 +80,9 @@ public class CompositionNode extends DebugNode {
             addBoolean("has selection", false);
         }
 
-        int canvasWidth = comp.getCanvasImWidth();
+        int canvasWidth = comp.getCanvasWidth();
         addInt("canvas im width", canvasWidth);
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasHeight = comp.getCanvasHeight();
         addInt("canvas im height", canvasHeight);
     }
 

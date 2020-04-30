@@ -17,20 +17,12 @@
 
 package pixelitor;
 
-import pixelitor.gui.AutoZoom;
-import pixelitor.gui.FramesUI;
-import pixelitor.gui.ImageArea;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.View;
+import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.io.IOThread;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.MaskViewMode;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
@@ -57,10 +49,7 @@ import java.util.function.Predicate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static javax.swing.JOptionPane.CANCEL_OPTION;
-import static javax.swing.JOptionPane.CLOSED_OPTION;
-import static javax.swing.JOptionPane.NO_OPTION;
-import static javax.swing.JOptionPane.YES_OPTION;
+import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 
 /**
@@ -146,7 +135,7 @@ public class OpenImages {
             if (view == null) {
                 throw new IllegalStateException("Can't activate null view");
             }
-            if(!view.isMock()) {
+            if (!view.isMock()) {
                 ImageArea.activateView(view);
             }
         }
@@ -192,7 +181,7 @@ public class OpenImages {
 
         ZoomMenu.zoomChanged(view.getZoomLevel());
 
-        Canvas.activeCanvasImSizeChanged(comp.getCanvas());
+        Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.getInstance().updateTitle(comp);
     }
 

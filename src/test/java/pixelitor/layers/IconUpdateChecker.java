@@ -48,18 +48,21 @@ public class IconUpdateChecker {
     }
 
     private void checkLayer(int num) {
+        var ui = (TestLayerUI) layer.getUI();
         if (layer instanceof ImageLayer) {
-            var ui = (TestLayerUI) layer.getUI();
-            assertThat(ui.getNumIconImageUpdates((ImageLayer) layer)).isEqualTo(layerIconUpdatesAtStart + num);
+            assertThat(ui.getNumLayerIconUpdates()).isEqualTo(layerIconUpdatesAtStart + num);
+        } else {
+            // only image layer icons are updated
+            assertThat(ui.getNumLayerIconUpdates()).isEqualTo(0);
         }
     }
 
     private void checkMask(int num) {
         if (mask == null) {
+            // this was a test without a mask
             return;
         }
-//        verify(ui, times(maskIconUpdatesAtStart + num)).updateLayerIconImage(mask);
         var ui = (TestLayerUI) mask.getUI();
-        assertThat(ui.getNumIconImageUpdates(mask)).isEqualTo(maskIconUpdatesAtStart + num);
+        assertThat(ui.getNumMaskIconUpdates()).isEqualTo(maskIconUpdatesAtStart + num);
     }
 }

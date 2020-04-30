@@ -20,13 +20,7 @@ package pixelitor.compactions;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TFValidationLayerUI;
-import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.Themes;
-import pixelitor.gui.utils.ValidatedPanel;
-import pixelitor.gui.utils.ValidationResult;
+import pixelitor.gui.utils.*;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -61,7 +55,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private double newHeightInPercent;
     private final int oldWidth;
     private final int oldHeight;
-    private static final int NR_OF_COLUMNS = 5;
+    private static final int NUM_TF_COLUMNS = 5;
 
     private final Validator widthValidator = new Validator("Width");
     private final Validator heightValidator = new Validator("Height");
@@ -69,8 +63,8 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
     private String arrowString;
 
     private ResizePanel(Canvas canvas) {
-        oldWidth = canvas.getImWidth();
-        oldHeight = canvas.getImHeight();
+        oldWidth = canvas.getWidth();
+        oldHeight = canvas.getHeight();
 
         origProportion = ((double) oldWidth) / oldHeight;
         newWidth = oldWidth;
@@ -85,7 +79,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
 
         var gbh = new GridBagHelper(p);
 
-        widthTF = new JTextField(NR_OF_COLUMNS);
+        widthTF = new JTextField(NUM_TF_COLUMNS);
         widthTF.setName("widthTF");
         widthTF.addKeyListener(this);
         updateWidthTextPixels();
@@ -94,7 +88,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
                 new TFValidationLayerUI(widthValidator));
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
-        heightTF = new JTextField(NR_OF_COLUMNS);
+        heightTF = new JTextField(NUM_TF_COLUMNS);
         heightTF.setName("heightTF");
         updateHeightTextPixels();
         heightTF.addKeyListener(this);
@@ -392,9 +386,9 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         @Override
         public ValidationResult check(JTextField textField) {
             if (pixels) {
-                return TextFieldValidator.hasValidPositiveInt(label, textField, false);
+                return TextFieldValidator.hasPositiveInt(textField, label, false);
             } else {
-                return TextFieldValidator.hasValidPositiveDouble(label, textField);
+                return TextFieldValidator.hasPositiveDouble(textField, label);
             }
         }
     }

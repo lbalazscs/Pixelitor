@@ -35,9 +35,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
-import static javax.swing.BorderFactory.createCompoundBorder;
-import static javax.swing.BorderFactory.createLineBorder;
-import static javax.swing.BorderFactory.createMatteBorder;
+import static javax.swing.BorderFactory.*;
 import static pixelitor.layers.LayerButtonLayout.thumbSize;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 
@@ -156,26 +154,26 @@ public class LayerButton extends JToggleButton implements LayerUI {
     private int staticY;
 
     public LayerButton(Layer layer) {
-        assert !Build.isUnitTesting() : "Swing component in unit test";
         assert EventQueue.isDispatchThread() : "not on EDT";
+        assert !Build.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
 
         setLayout(new LayerButtonLayout(layer));
 
-        initVisibilityControl(layer);
-        initLayerNameEditor(layer);
+        initVisibilityControl();
+        initLayerNameEditor();
 
-        configureLayerIcon(layer);
+        configureLayerIcon();
 
         if (layer.hasMask()) {
-            addMaskIconLabel();
+            addMaskIcon();
         }
 
-        wireSelectionWithLayerActivation(layer);
+        wireSelectionWithLayerActivation();
     }
 
-    private void configureLayerIcon(Layer layer) {
+    private void configureLayerIcon() {
         if (layer instanceof TextLayer) {
             Icon textLayerIcon = Icons.getTextLayerIcon();
             layerIconLabel = new JLabel(textLayerIcon);
@@ -190,7 +188,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         layerIconLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                layerIconClicked(e, layer);
+                layerIconClicked(e);
             }
 
             @Override
@@ -210,7 +208,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         add(layerIconLabel, LayerButtonLayout.LAYER);
     }
 
-    private static void layerIconClicked(MouseEvent e, Layer layer) {
+    private void layerIconClicked(MouseEvent e) {
         int clickCount = e.getClickCount();
         if (clickCount == 1) {
             MaskViewMode.NORMAL.activate(layer, "layer icon clicked");
@@ -250,7 +248,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         layerButton.setSelected(true);
     }
 
-    private void initVisibilityControl(Layer layer) {
+    private void initVisibilityControl() {
         visibilityCB = new JCheckBox(CLOSED_EYE_ICON);
         visibilityCB.setRolloverIcon(CLOSED_EYE_ICON);
 
@@ -265,22 +263,22 @@ public class LayerButton extends JToggleButton implements LayerUI {
                 layer.setVisible(visibilityCB.isSelected(), true));
     }
 
-    private void initLayerNameEditor(Layer layer) {
-        nameEditor = new LayerNameEditor(this, layer);
+    private void initLayerNameEditor() {
+        nameEditor = new LayerNameEditor(this);
         add(nameEditor, LayerButtonLayout.NAME_EDITOR);
         addPropertyChangeListener("name", evt -> nameEditor.setText(getName()));
     }
 
-    private void wireSelectionWithLayerActivation(Layer layer) {
+    private void wireSelectionWithLayerActivation() {
         addItemListener(e -> {
-            if(userInteraction) {
+            if (userInteraction) {
                 // invoke later, when isSelected() returns the correct value
-                EventQueue.invokeLater(() -> buttonActivationChanged(layer));
+                EventQueue.invokeLater(this::buttonActivationChanged);
             }
         });
     }
 
-    private void buttonActivationChanged(Layer layer) {
+    private void buttonActivationChanged() {
         if (isSelected()) {
             // the layer was just activated
             layer.activate(userInteraction);
@@ -327,7 +325,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
         }
     }
 
-    private boolean hasMaskIcon() {
+    @Override
+    public boolean hasMaskIcon() {
         return maskIconLabel != null;
     }
 
@@ -406,8 +405,8 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void addMaskIconLabel() {
-        assert !hasMaskIcon();
+    public void addMaskIcon() {
+        assert !hasMaskIcon() : "layer '" + layer.getName() + "' already has mask icon";
 
         maskIconLabel = new JLabel("", null, CENTER);
         maskIconLabel.setToolTipText("<html>" +
@@ -477,7 +476,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void deleteMaskIconLabel() {
+    public void removeMaskIcon() {
         // the two mouse listeners (left-click, right-click) could
         // also be removed, but it is not important, because the
         // the mask icon label is not going to be used again

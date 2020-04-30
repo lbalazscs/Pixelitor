@@ -127,9 +127,5 @@ public class FilterButtonModel implements FilterSetting {
                 adjustmentListener.paramAdjusted();
             });
         }
-
-        public int getNumGridBagCols() {
-            return 1;
-        }
     }
 }

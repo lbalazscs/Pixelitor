@@ -40,7 +40,8 @@ import static java.lang.String.format;
 public abstract class PPoint {
     View view;
 
-    // All the coordinates are initialized in subclasses
+    // All the coordinates are initialized in subclasses.
+
     // coordinates in image space
     protected double imX;
     protected double imY;

@@ -26,16 +26,7 @@ import pixelitor.gui.View;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -45,15 +36,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DirectColorModel;
-import java.awt.image.IndexColorModel;
-import java.awt.image.Raster;
-import java.awt.image.VolatileImage;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.NumberFormat;
@@ -261,9 +244,9 @@ public final class Utils {
     private static void replaceImageInDebugComp(Composition comp, BufferedImage copy) {
         Canvas canvas = comp.getCanvas();
         comp.getActiveDrawableOrThrow().setImage(copy);
-        if (canvas.getImWidth() != copy.getWidth()
-                || canvas.getImHeight() != copy.getHeight()) {
-            canvas.changeImSize(copy.getWidth(), copy.getHeight(), comp.getView());
+        if (canvas.getWidth() != copy.getWidth()
+                || canvas.getHeight() != copy.getHeight()) {
+            canvas.changeSize(copy.getWidth(), copy.getHeight(), comp.getView());
         }
 
         comp.repaint();
@@ -339,7 +322,6 @@ public final class Utils {
         }
     }
 
-    @VisibleForTesting
     public static void sleep(int duration, TimeUnit unit) {
         try {
             Thread.sleep(unit.toMillis(duration));

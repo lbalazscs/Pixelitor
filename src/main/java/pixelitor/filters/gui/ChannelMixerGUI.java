@@ -25,10 +25,7 @@ import pixelitor.layers.Drawable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.Y_AXIS;
 
@@ -41,23 +38,23 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     }
 
     @Override
-    protected void setupGUI(ParamSet params,
+    protected void setupGUI(ParamSet paramSet,
                             ShowOriginal addShowOriginal,
                             Object otherInfo) {
         var upperPanel = new JPanel(new BorderLayout());
-        var leftPanel = GUIUtils.arrangeVertically(params.getParams());
+        var leftPanel = GUIUtils.arrangeVertically(paramSet.getParams());
         var rightPanel = createPresetsPanel((Action[]) otherInfo);
         var monochromeCB = new JCheckBox("Convert to Black and White", false);
         monochromeCB.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         monochromeCB.addChangeListener(e ->
                 ((ChannelMixer) filter).setMonochrome(monochromeCB.isSelected()));
-        params.setBeforeResetAction(() -> monochromeCB.setSelected(false));
+        paramSet.setBeforeResetAction(() -> monochromeCB.setSelected(false));
         upperPanel.add(monochromeCB, NORTH);
         upperPanel.add(leftPanel, CENTER);
         upperPanel.add(rightPanel, EAST);
 
         var buttonsPanel = createFilterActionsPanel(
-                params.getActions(), addShowOriginal, 5);
+                paramSet.getActions(), addShowOriginal, 5);
 
         setLayout(new BorderLayout());
         add(upperPanel, CENTER);

@@ -25,15 +25,9 @@ import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.finder.JFileChooserFinder;
 import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
-import org.assertj.swing.fixture.ComponentContainerFixture;
-import org.assertj.swing.fixture.DialogFixture;
-import org.assertj.swing.fixture.FrameFixture;
-import org.assertj.swing.fixture.JButtonFixture;
-import org.assertj.swing.fixture.JFileChooserFixture;
-import org.assertj.swing.fixture.JMenuItemFixture;
-import org.assertj.swing.fixture.JOptionPaneFixture;
-import org.assertj.swing.fixture.JPopupMenuFixture;
+import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
+import pixelitor.Composition;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
@@ -52,8 +46,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * A utility class for running Pixelitor with assertj-swing based tests
@@ -70,6 +66,7 @@ public class AppRunner {
     private final Mouse mouse;
     private final Keyboard keyboard;
     private final FrameFixture pw;
+    private final LayersContainerFixture layersContainer;
 
     private static File startingOpenDir;
     private static File startingSaveDir;
@@ -94,6 +91,7 @@ public class AppRunner {
                 .using(robot);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
+        layersContainer = new LayersContainerFixture(robot);
 
         if (fileNames.length == 0) {
             return;
@@ -184,6 +182,26 @@ public class AppRunner {
         // say OK to the overwrite question
         var optionPane = findJOptionPane();
         optionPane.yesButton().click();
+    }
+
+    void openFileWithDialog(File dir, String fileName) {
+        JFileChooserFixture openDialog;
+        runMenuCommand("Open...");
+        openDialog = JFileChooserFinder.findFileChooser("open").using(robot);
+        openDialog.selectFile(new File(dir, fileName));
+        openDialog.approve();
+
+        // wait a bit to make sure that the async open completed
+        waitForIO();
+        Utils.sleep(1, SECONDS);
+        mouse.recalcCanvasBounds();
+
+        if (EDT.active(Composition::isDirty)) {
+            String compName = EDT.active(Composition::getName);
+            throw new AssertionError(
+                    format("New comp '%s', loaded from %s is dirty",
+                            compName, fileName));
+        }
     }
 
     void waitForProgressMonitorEnd() {
@@ -503,6 +521,16 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+    }
+
+    void checkNumLayersIs(int expected) {
+        EDT.assertNumLayersIs(expected);
+        layersContainer.requireNumLayerButtons(expected);
+    }
+
+    public void checkLayerNamesAre(String... expectedNames) {
+        assertThat(EDT.getComp()).layerNamesAre(expectedNames);
+        layersContainer.requireLayerNames(expectedNames);
     }
 
     private static void saveNormalSettings() {

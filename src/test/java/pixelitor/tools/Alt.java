@@ -34,5 +34,9 @@ public enum Alt implements EventMaskModifier {
         public int modify(int in) {
             return in;
         }
+    };
+
+    public boolean isDown() {
+        return this == YES;
     }
 }

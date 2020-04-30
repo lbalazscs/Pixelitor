@@ -19,8 +19,10 @@ package pixelitor;
 
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
+import pixelitor.layers.AddLayerMaskAction;
 import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
@@ -32,8 +34,7 @@ import java.util.Optional;
 import static java.lang.String.format;
 
 /**
- * Runtime assertions (a kind of "design by contract")
- * that run only in developer mode.
+ * Runtime assertions that run only in developer mode.
  */
 public final class ConsistencyChecks {
     private ConsistencyChecks() { // do not instantiate
@@ -52,6 +53,7 @@ public final class ConsistencyChecks {
             assert imageCoversCanvas(comp);
         }
         assert layerDeleteActionEnabled();
+        assert addMaskActionEnabled();
     }
 
     public static boolean fadeWouldWorkOn(Composition comp) {
@@ -113,7 +115,7 @@ public final class ConsistencyChecks {
         } else { // no selection
             if (SelectionActions.areEnabled()) {
                 String msg = comp.getName() + " has no selection, ";
-                if(comp.hasBuiltSelection()) {
+                if (comp.hasBuiltSelection()) {
                     msg += "(but has built selection) ";
                 } else {
                     msg += "(no built selection) ";
@@ -143,7 +145,7 @@ public final class ConsistencyChecks {
         if (selection == null) {
             return true;
         }
-        Rectangle canvasSize = comp.getCanvasImBounds();
+        Rectangle canvasSize = comp.getCanvasBounds();
         // increase the size because of rounding errors
         canvasSize.grow(1, 1);
         var selShapeBounds = selection.getShapeBounds2D();
@@ -178,12 +180,12 @@ public final class ConsistencyChecks {
         var image = dr.getImage();
 
         int txAbs = -dr.getTx();
-        if (image.getWidth() < txAbs + canvas.getImWidth()) {
+        if (image.getWidth() < txAbs + canvas.getWidth()) {
             return throwImageDoesNotCoverCanvasException(dr);
         }
 
         int tyAbs = -dr.getTy();
-        if (image.getHeight() < tyAbs + canvas.getImHeight()) {
+        if (image.getHeight() < tyAbs + canvas.getHeight()) {
             return throwImageDoesNotCoverCanvasException(dr);
         }
 
@@ -197,7 +199,7 @@ public final class ConsistencyChecks {
         String msg = format("canvas width = %d, canvas height = %d, " +
                         "image width = %d, image height = %d, " +
                         "tx = %d, ty = %d, class = %s",
-                canvas.getImWidth(), canvas.getImHeight(),
+                canvas.getWidth(), canvas.getHeight(),
                 img.getWidth(), img.getHeight(),
                 dr.getTx(), dr.getTy(), dr.getClass().getSimpleName());
 
@@ -231,6 +233,40 @@ public final class ConsistencyChecks {
                         + comp.getName() + ", but numLayers = " + numLayers);
             }
         }
+        return true;
+    }
+
+    @SuppressWarnings("SameReturnValue")
+    public static boolean addMaskActionEnabled() {
+        var action = AddLayerMaskAction.INSTANCE;
+        if (action == null) {
+            return true;
+        }
+
+        var comp = OpenImages.getActiveComp();
+        if (comp == null) {
+            return true;
+        }
+
+        boolean addMaskEnabled = action.isEnabled();
+        Layer layer = comp.getActiveLayer();
+
+        if (layer.hasMask()) {
+            if (addMaskEnabled) {
+                throw new IllegalStateException(layer.getName());
+            }
+            if (!layer.getUI().hasMaskIcon()) {
+                throw new IllegalStateException(layer.getName());
+            }
+        } else { // no mask
+            if (!addMaskEnabled) {
+                throw new IllegalStateException(layer.getName());
+            }
+            if (layer.getUI().hasMaskIcon()) {
+                throw new IllegalStateException(layer.getName());
+            }
+        }
+
         return true;
     }
 }

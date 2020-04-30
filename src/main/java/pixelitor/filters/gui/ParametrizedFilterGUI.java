@@ -33,14 +33,15 @@ import static java.awt.BorderLayout.SOUTH;
 
 
 /**
- * A GUI for parametrized filters
+ * An automatically built GUI for {@link ParametrizedFilter} filters.
  */
 public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentListener {
     /**
-     * Controls whether the params are reset to the default values when a new
-     * ParametrizedAdjustPanel is created
+     * Whether the params are reset to the default values when a new
+     * parametrized GUI is created
      */
     private static boolean resetParams = true;
+
     private ShowOriginalCB showOriginalCB;
 
     public ParametrizedFilterGUI(ParametrizedFilter filter,
@@ -55,24 +56,25 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
                                  Object otherInfo) {
         super(filter, dr);
 
-        ParamSet params = filter.getParamSet();
+        ParamSet paramSet = filter.getParamSet();
         if (resetParams) {
-            params.reset();
-            params.considerImageSize(dr.getComp().getCanvas().getImBounds());
+            paramSet.reset();
+            paramSet.considerImageSize(dr.getComp().getCanvas().getBounds());
         }
-        params.setAdjustmentListener(this);
 
-        setupGUI(params, addShowOriginal, otherInfo);
+        paramSet.setAdjustmentListener(this);
 
-        paramAdjusted();
+        setupGUI(paramSet, addShowOriginal, otherInfo);
+
+        paramAdjusted(); // force running the first filter preview
     }
 
-    protected void setupGUI(ParamSet params,
+    protected void setupGUI(ParamSet paramSet,
                             ShowOriginal addShowOriginal,
                             Object otherInfo) {
-        JPanel filterParamsPanel = createFilterParamsPanel(params.getParams());
+        JPanel filterParamsPanel = createFilterParamsPanel(paramSet);
         JPanel filterActionsPanel = createFilterActionsPanel(
-                params.getActions(), addShowOriginal, 3);
+                paramSet.getActions(), addShowOriginal, 3);
 
         setLayout(new BorderLayout());
         add(filterParamsPanel, CENTER);
@@ -82,8 +84,8 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
     /**
      * This can be overridden if a custom arrangement is necessary
      */
-    public JPanel createFilterParamsPanel(List<FilterParam> paramList) {
-        return GUIUtils.arrangeVertically(paramList);
+    public JPanel createFilterParamsPanel(ParamSet paramSet) {
+        return GUIUtils.arrangeVertically(paramSet);
     }
 
     protected JPanel createFilterActionsPanel(List<FilterButtonModel> actionList,
@@ -94,24 +96,24 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             numControls++;
             showOriginalCB = new ShowOriginalCB("Show Original");
         }
-        JPanel faPanel;
+        JPanel actionsPanel;
 
         if (numControls <= maxControlsInRow) {
-            faPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         } else {
             int cols = (numControls + 1) / 2;
-            faPanel = new JPanel(new GridLayout(2, cols));
+            actionsPanel = new JPanel(new GridLayout(2, cols));
         }
         if (addShowOriginal.isYes()) {
-            faPanel.add(showOriginalCB);
+            actionsPanel.add(showOriginalCB);
         }
         for (FilterButtonModel action : actionList) {
             // all the buttons go in one row
             JButton button = (JButton) action.createGUI();
-            faPanel.add(button);
+            actionsPanel.add(button);
         }
 
-        return faPanel;
+        return actionsPanel;
     }
 
     @Override

@@ -24,5 +24,10 @@ import java.util.concurrent.CompletableFuture;
  * An action that acts on all layers of a {@link Composition}
  */
 public interface CompAction {
-    CompletableFuture<Composition> process(Composition comp);
+    /**
+     * Processes the given {@link Composition}, possibly asynchronously.
+     * If there was any change, then the returned value is a different
+     * instance, and the original instance is used as backup for the undo.
+     */
+    CompletableFuture<Composition> process(Composition oldComp);
 }

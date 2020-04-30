@@ -26,24 +26,15 @@ import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
-import pixelitor.filters.painters.TranslatedTextPainter;
+import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.history.ContentLayerMoveEdit;
-import pixelitor.history.History;
-import pixelitor.history.NewLayerEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.TextLayerChangeEdit;
-import pixelitor.history.TextLayerRasterizeEdit;
+import pixelitor.history.*;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -61,7 +52,7 @@ import static pixelitor.utils.Keys.CTRL_T;
  */
 public class TextLayer extends ContentLayer {
     private static final long serialVersionUID = 2L;
-    private transient TranslatedTextPainter painter;
+    private transient TransformedTextPainter painter;
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
@@ -72,14 +63,14 @@ public class TextLayer extends ContentLayer {
         super(comp, name, null);
 
         settings = new TextSettings();
-        painter = new TranslatedTextPainter();
+        painter = new TransformedTextPainter();
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = settings.isWatermark();
 
-        painter = new TranslatedTextPainter();
+        painter = new TransformedTextPainter();
         settings.configurePainter(painter);
         painter.setTranslation(getTx(), getTy());
     }
@@ -115,7 +106,7 @@ public class TextLayer extends ContentLayer {
                     History.add(newLayerEdit);
                 })
                 .cancelAction(() -> comp.deleteLayer(textLayer,
-                        false, true))
+                        false))
                 .show();
     }
 
@@ -202,7 +193,7 @@ public class TextLayer extends ContentLayer {
     }
 
     public ImageLayer replaceWithRasterized() {
-        return replaceWithRasterized(true, true);
+        return replaceWithRasterized(true);
     }
 
     // TODO if a text layer has a mask, then this will apply the
@@ -210,29 +201,30 @@ public class TextLayer extends ContentLayer {
     // This probably should be considered a bug, and instead the mask
     // should be kept, and the rasterized pixels should not be affected
     // by the mask.
-    public ImageLayer replaceWithRasterized(boolean addHistory, boolean updateGUI) {
+    public ImageLayer replaceWithRasterized(boolean addHistory) {
         BufferedImage rasterizedImage = createRasterizedImage();
 
         ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
 
-        if(addHistory) {
+        if (addHistory) {
             TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
             History.add(edit);
         }
 
-        LayerAdder layerAdder = new LayerAdder(comp)
+        new LayerAdder(comp)
                 .noRefresh()
-                .atIndex(comp.getLayerIndex(this));
-        if(!updateGUI) {
-            layerAdder = layerAdder.compInitMode();
-        }
-        layerAdder.add(newImageLayer);
+                .atIndex(comp.getLayerIndex(this))
+                .add(newImageLayer);
 
-        comp.deleteLayer(this, false, updateGUI);
+        comp.deleteLayer(this, false);
+        newImageLayer.updateIconImage();
 
         return newImageLayer;
     }
 
+    /**
+     * Returns a canvas-sized image corresponding to the contents if this layer
+     */
     public BufferedImage createRasterizedImage() {
         BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
@@ -244,7 +236,7 @@ public class TextLayer extends ContentLayer {
     @Override
     public void paintLayerOnGraphics(Graphics2D g, boolean firstVisibleLayer) {
         painter.setFillPaint(settings.getColor());
-        painter.paint(g, null, comp.getCanvasImWidth(), comp.getCanvasImHeight());
+        painter.paint(g, null, comp.getCanvasWidth(), comp.getCanvasHeight());
     }
 
     @Override
@@ -357,8 +349,8 @@ public class TextLayer extends ContentLayer {
         // calculate the corresponding margins...
         int northMargin = (int) cropRect.getY();
         int westMargin = (int) cropRect.getX();
-        int southMargin = (int) (comp.getCanvasImHeight() - cropRect.getHeight() - cropRect.getY());
-        int eastMargin = (int) (comp.getCanvasImWidth() - cropRect.getWidth() - cropRect.getX());
+        int southMargin = (int) (comp.getCanvasHeight() - cropRect.getHeight() - cropRect.getY());
+        int eastMargin = (int) (comp.getCanvasWidth() - cropRect.getWidth() - cropRect.getX());
 
         // ...and do a negative enlargement
         enlargeCanvas(-northMargin, -eastMargin, -southMargin, -westMargin);

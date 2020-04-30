@@ -17,37 +17,20 @@
 
 package pixelitor.layers;
 
+import pixelitor.Canvas;
 import pixelitor.ChangeReason;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.history.ApplyLayerMaskEdit;
-import pixelitor.history.ContentLayerMoveEdit;
-import pixelitor.history.History;
-import pixelitor.history.ImageAndMaskEdit;
-import pixelitor.history.ImageEdit;
-import pixelitor.history.MultiEdit;
-import pixelitor.history.PixelitorEdit;
-import pixelitor.history.TranslationEdit;
+import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
-import pixelitor.utils.ImageTrimUtil;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.test.Assertions;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
@@ -65,9 +48,7 @@ import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
-import static pixelitor.layers.ImageLayer.State.NORMAL;
-import static pixelitor.layers.ImageLayer.State.PREVIEW;
-import static pixelitor.layers.ImageLayer.State.SHOW_ORIGINAL;
+import static pixelitor.layers.ImageLayer.State.*;
 import static pixelitor.utils.ImageUtils.copyImage;
 
 /**
@@ -150,7 +131,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         ImageLayer imageLayer = new ImageLayer(comp, name, null);
 
         BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
-                comp.getCanvasImWidth(), comp.getCanvasImHeight());
+                comp.getCanvasWidth(), comp.getCanvasHeight());
         imageLayer.setImage(emptyImage);
         imageLayer.checkConstructorPostConditions();
 
@@ -172,46 +153,50 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         layer.setTranslationForPasted(pastedImage);
 
-        layer.updateIconImage();
+//        layer.updateIconImage();
         layer.checkConstructorPostConditions();
 
         return layer;
     }
 
     private BufferedImage calcNewImageFromPasted(BufferedImage pastedImage) {
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        Canvas canvas = comp.getCanvas();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         int pastedWidth = pastedImage.getWidth();
         int pastedHeight = pastedImage.getHeight();
 
-        boolean pastedImageTooSmall = pastedWidth < canvasWidth
-                || pastedHeight < canvasHeight;
-
-        BufferedImage newImage = pastedImage;
-        if (pastedImageTooSmall) {
-            // a new image is created
-            int newWidth = Math.max(canvasWidth, pastedWidth);
-            int newHeight = Math.max(canvasHeight, pastedHeight);
-            newImage = createEmptyImageForLayer(newWidth, newHeight);
-            Graphics2D g = newImage.createGraphics();
-
-            int drawX = Math.max((canvasWidth - pastedWidth) / 2, 0);
-            int drawY = Math.max((canvasHeight - pastedHeight) / 2, 0);
-
-            g.drawImage(pastedImage, drawX, drawY, null);
-            g.dispose();
+        if (canvas.isFullyCoveredBy(pastedImage)) {
+            return pastedImage;
         }
+
+        // the pasted image is too small: a new image is created,
+        // and the pasted image is centered within it
+        int newWidth = Math.max(canvasWidth, pastedWidth);
+        int newHeight = Math.max(canvasHeight, pastedHeight);
+        BufferedImage newImage = createEmptyImageForLayer(newWidth, newHeight);
+        Graphics2D g = newImage.createGraphics();
+
+        // center the pasted image within the new image
+        int drawX = Math.max((canvasWidth - pastedWidth) / 2, 0);
+        int drawY = Math.max((canvasHeight - pastedHeight) / 2, 0);
+
+        g.drawImage(pastedImage, drawX, drawY, null);
+        g.dispose();
+
         return newImage;
     }
 
     private void setTranslationForPasted(BufferedImage pastedImage) {
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
 
         int pastedWidth = pastedImage.getWidth();
         int pastedHeight = pastedImage.getHeight();
 
+        // if the pasted image is bigger than the canvas, then add a
+        // translation to it in order to make it centered within the canvas
         boolean addXTranslation = pastedWidth > canvasWidth;
         boolean addYTranslation = pastedHeight > canvasHeight;
 
@@ -291,8 +276,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName,
                 null, translationX, translationY);
-        d.setOpacity(getOpacity(), false, false, true);
-        d.setBlendingMode(getBlendingMode(), false, false, false);
+        d.setOpacity(getOpacity(), false);
+        d.setBlendingMode(getBlendingMode(), false);
 
         duplicateMask(d, compCopy);
 
@@ -365,8 +350,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert x >= 0 : "x = " + x;
         assert y >= 0 : "y = " + y;
 
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
 
         assert ConsistencyChecks.imageCoversCanvas(this);
 
@@ -778,7 +763,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     private boolean checkImageDoesNotCoverCanvas() {
-        Rectangle canvasBounds = comp.getCanvasImBounds();
+        Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle imageBounds = getImageBounds();
         boolean needsEnlarging = !imageBounds.contains(canvasBounds);
         return needsEnlarging;
@@ -810,14 +795,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void flip(Flip.Direction direction) {
-        var imageTransform = direction.createImageTransform(this);
+        var imageTransform = direction.createImageTransform(image);
         int txAbs = -getTx();
         int tyAbs = -getTy();
         int newTxAbs;
         int newTyAbs;
 
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
@@ -853,8 +838,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
 
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
 
         int angleDegree = angle.getAngleDegree();
         if (angleDegree == 90) {
@@ -975,8 +960,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public boolean toCanvasSize() {
         int imageWidth = image.getWidth();
         int imageHeight = image.getHeight();
-        int canvasWidth = comp.getCanvasImWidth();
-        int canvasHeight = comp.getCanvasImHeight();
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
 
         if (imageWidth > canvasWidth || imageHeight > canvasHeight) {
             BufferedImage newImage = ImageUtils.crop(image,
@@ -1018,7 +1003,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         // all coordinates in this method are
         // relative to the previous state of the canvas
         Rectangle imageBounds = getImageBounds();
-        Rectangle canvasBounds = comp.getCanvasImBounds();
+        Rectangle canvasBounds = comp.getCanvasBounds();
 
         int newX = canvasBounds.x - west;
         int newY = canvasBounds.y - north;
@@ -1061,7 +1046,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         boolean needsEnlarging = checkImageDoesNotCoverCanvas();
         if (needsEnlarging) {
             BufferedImage backupImage = getImage();
-            enlargeImage(comp.getCanvasImBounds());
+            enlargeImage(comp.getCanvasBounds());
             edit = new ContentLayerMoveEdit(this, backupImage, oldTx, oldTy);
         } else {
             edit = new ContentLayerMoveEdit(this, null, oldTx, oldTy);
@@ -1087,8 +1072,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int newTx = 0, newTy = 0; // used only for big layers
 
         if (bigLayer) {
-            double horRatio = newSize.getWidth() / comp.getCanvasImWidth();
-            double verRatio = newSize.getHeight() / comp.getCanvasImHeight();
+            double horRatio = newSize.getWidth() / comp.getCanvasWidth();
+            double verRatio = newSize.getHeight() / comp.getCanvasHeight();
             imgTargetWidth = (int) (image.getWidth() * horRatio);
             imgTargetHeight = (int) (image.getHeight() * verRatio);
 
@@ -1107,10 +1092,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
                     ", tx = " + getTx() + ", ty = " + getTy()
                             + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
-                            + ", newSize.getWidth() = " + newSize.getWidth() + ", newSize.getHeight() = " + newSize
-                            .getHeight()
+                            + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
                             + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
-                            + ", canvasWidth = " + comp.getCanvasImWidth() + ", canvasHeight = " + comp.getCanvasImHeight()
+                            + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
                             + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
         }
 
@@ -1130,7 +1114,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Returns true if the layer image is bigger than the canvas
      */
     private boolean isBigLayer() {
-        Rectangle canvasBounds = comp.getCanvasImBounds();
+        Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle layerBounds = getImageBounds();
         return !canvasBounds.contains(layerBounds);
     }
@@ -1222,7 +1206,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void updateIconImage() {
-        getUI().updateLayerIconImageAsync(this);
+        if(ui != null) {
+            ui.updateLayerIconImageAsync(this);
+        }
     }
 
     /**
@@ -1259,8 +1245,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     public String toDebugCanvasString() {
-        return "{canvasWidth=" + comp.getCanvasImWidth()
-                + ", canvasHeight=" + comp.getCanvasImHeight()
+        return "{canvasWidth=" + comp.getCanvasWidth()
+                + ", canvasHeight=" + comp.getCanvasHeight()
                 + ", tx=" + translationX
                 + ", ty=" + translationY
                 + ", imgWidth=" + image.getWidth()

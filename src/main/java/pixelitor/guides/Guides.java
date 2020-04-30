@@ -39,9 +39,7 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.compactions.Rotate.SpecialAngle.*;
 
 /**
  * Represents a set of guides.
@@ -131,21 +129,20 @@ public class Guides implements Serializable {
         return copy;
     }
 
-    public Guides copyForEnlargedCanvas(int north, int east, int south, int west, View view) {
+    public Guides copyForEnlargedCanvas(int north, int east, int south, int west, View view, Canvas oldCanvas) {
         Guides copy = new Guides();
         copy.setName(format("enlarged : north = %d, east = %d, south = %d, west = %d%n",
                 north, east, south, west));
-        Canvas canvas = view.getCanvas();
 
-        copyVerticals(copy, east, west, canvas);
-        copyHorizontals(copy, north, south, canvas);
+        copyVerticals(copy, east, west, oldCanvas);
+        copyHorizontals(copy, north, south, oldCanvas);
 
         copy.regenerateLines(view);
         return copy;
     }
 
-    private void copyVerticals(Guides copy, int east, int west, Canvas canvas) {
-        int oldWidth = canvas.getImWidth();
+    private void copyVerticals(Guides copy, int east, int west, Canvas oldCanvas) {
+        int oldWidth = oldCanvas.getWidth();
         if (west != 0 || east != 0) {
             int newWidth = oldWidth + east + west;
             for (Double h : verticals) {
@@ -158,8 +155,8 @@ public class Guides implements Serializable {
         }
     }
 
-    private void copyHorizontals(Guides copy, int north, int south, Canvas canvas) {
-        int oldHeight = canvas.getImHeight();
+    private void copyHorizontals(Guides copy, int north, int south, Canvas oldCanvas) {
+        int oldHeight = oldCanvas.getHeight();
         if (north != 0 || south != 0) {
             int newHeight = oldHeight + north + south;
             for (Double v : horizontals) {
@@ -173,17 +170,17 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForCrop(Rectangle cropRect, View view) {
-        Canvas canvas = view.getCanvas();
+        Canvas oldCanvas = view.getCanvas();
         int northMargin = cropRect.y;
         int westMargin = cropRect.x;
-        int southMargin = canvas.getImHeight() - cropRect.height - cropRect.y;
-        int eastMargin = canvas.getImWidth() - cropRect.width - cropRect.x;
+        int southMargin = oldCanvas.getHeight() - cropRect.height - cropRect.y;
+        int eastMargin = oldCanvas.getWidth() - cropRect.width - cropRect.x;
 
         // a crop is a negative enlargement
         return copyForEnlargedCanvas(
                 -northMargin, -eastMargin,
                 -southMargin, -westMargin,
-                view);
+                view, oldCanvas);
     }
 
     public static void showAddGridDialog(View view) {
@@ -217,7 +214,7 @@ public class Guides implements Serializable {
     }
 
     public void addHorAbsolute(int pixels, Canvas canvas) {
-        double percent = pixels / (double) canvas.getImWidth();
+        double percent = pixels / (double) canvas.getWidth();
         horizontals.add(percent);
     }
 
@@ -226,7 +223,7 @@ public class Guides implements Serializable {
     }
 
     public void addVerAbsolute(int pixels, Canvas canvas) {
-        double percent = pixels / (double) canvas.getImHeight();
+        double percent = pixels / (double) canvas.getHeight();
         verticals.add(percent);
     }
 
@@ -254,7 +251,7 @@ public class Guides implements Serializable {
         Canvas canvas = view.getCanvas();
         // horizontal lines
         int distFromTop = 0;
-        int canvasHeight = canvas.getImHeight();
+        int canvasHeight = canvas.getHeight();
         for (int i = 0; i < horNumber; i++) {
             distFromTop += horDist;
             double lineY = distFromTop / (double) canvasHeight;
@@ -263,7 +260,7 @@ public class Guides implements Serializable {
 
         // vertical lines
         int distFromLeft = 0;
-        int canvasWidth = canvas.getImWidth();
+        int canvasWidth = canvas.getWidth();
         for (int i = 0; i < verNumber; i++) {
             distFromLeft += verDist;
             double lineX = distFromLeft / (double) canvasWidth;
@@ -283,8 +280,8 @@ public class Guides implements Serializable {
 
     private void regenerateLines(View view) {
         Canvas canvas = view.getCanvas();
-        int width = canvas.getImWidth();
-        int height = canvas.getImHeight();
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
         CanvasMargins margins = view.getCanvasMargins();
 
         lines = new ArrayList<>();
@@ -316,7 +313,6 @@ public class Guides implements Serializable {
         renderer.draw(g, lines);
     }
 
-    // the view parameter
     public void coCoordsChanged(View view) {
         regenerateLines(view);
     }

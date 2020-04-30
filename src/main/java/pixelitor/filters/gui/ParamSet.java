@@ -32,7 +32,7 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
 /**
  * A fixed set of filter parameter objects
  */
-public class ParamSet {
+public class ParamSet implements Iterable<FilterParam> {
     private List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
@@ -48,6 +48,31 @@ public class ParamSet {
 
     public ParamSet(List<FilterParam> params) {
         paramList.addAll(params);
+    }
+
+    /**
+     * Adds the given parameters after the existing ones
+     */
+    public void addParams(FilterParam[] params) {
+        Collections.addAll(paramList, params);
+    }
+
+    /**
+     * Adds the given parameters before the existing ones
+     */
+    public void addParamsToFront(FilterParam[] params) {
+        List<FilterParam> old = paramList;
+        paramList = new ArrayList<>(params.length + old.size());
+        Collections.addAll(paramList, params);
+        paramList.addAll(old);
+    }
+
+    public void insertParamAtIndex(FilterParam param, int index) {
+        paramList.add(index, param);
+    }
+
+    public void insertAction(FilterButtonModel action, int index) {
+        actionList.add(index, action);
     }
 
     public ParamSet withActions(FilterButtonModel... actions) {
@@ -107,12 +132,11 @@ public class ParamSet {
         actionList.add(resetAllAction);
     }
 
-    public void insertParam(FilterParam param, int index) {
-        paramList.add(index, param);
-    }
-
-    public void insertAction(FilterButtonModel action, int index) {
-        actionList.add(index, action);
+    /**
+     * Allows registering an action that will run before "reset all"
+     */
+    public void setBeforeResetAction(Runnable beforeResetAction) {
+        this.beforeResetAction = beforeResetAction;
     }
 
     /**
@@ -204,6 +228,11 @@ public class ParamSet {
     }
 
     @Override
+    public Iterator<FilterParam> iterator() {
+        return paramList.iterator();
+    }
+
+    @Override
     public String toString() {
         String s = "ParamSet[";
         for (FilterParam param : paramList) {
@@ -211,33 +240,5 @@ public class ParamSet {
         }
         s += "\n]";
         return s;
-    }
-
-    /**
-     * Adds the given parameters after the existing ones
-     */
-    public void addParams(FilterParam[] params) {
-        Collections.addAll(paramList, params);
-    }
-
-    /**
-     * Adds the given parameters before the existing ones
-     */
-    public void addParamsToFront(FilterParam[] params) {
-        List<FilterParam> old = paramList;
-        paramList = new ArrayList<>(params.length + old.size());
-        Collections.addAll(paramList, params);
-        paramList.addAll(old);
-    }
-
-    public void insertParamAtIndex(FilterParam param, int index) {
-        paramList.add(index, param);
-    }
-
-    /**
-     * Allows registering an action that will run before "reset all"
-     */
-    public void setBeforeResetAction(Runnable beforeResetAction) {
-        this.beforeResetAction = beforeResetAction;
     }
 }

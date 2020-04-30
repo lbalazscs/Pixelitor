@@ -28,11 +28,7 @@ import pixelitor.tools.move.MoveMode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -71,7 +67,8 @@ public class Selection {
     private Shape moveStartShape;
 
     public Selection(Shape shape, View view) {
-        // TODO should not allow selections with null shape
+        // the shape can be null, because this Selection
+        // object can be created after a mouse press
         assert view != null;
 
         this.shape = shape;
@@ -107,7 +104,7 @@ public class Selection {
 
         marchingAntsTimer = new Timer(100, null);
         marchingAntsTimer.addActionListener(evt -> {
-            if(!hidden) {
+            if (!hidden) {
                 dashPhase += 1.0f / (float) view.getScaling();
                 repaint();
             }
@@ -167,6 +164,9 @@ public class Selection {
     }
 
     public void die() {
+        if (dead) {
+            return;
+        }
         stopMarching();
         repaint();
         view = null;
@@ -278,10 +278,10 @@ public class Selection {
 
         hidden = hide;
 
-        if(hide) {
+        if (hide) {
             stopMarching();
         } else {
-            if(marchingAntsTimer == null) {
+            if (marchingAntsTimer == null) {
                 startMarching();
             }
         }
@@ -289,7 +289,7 @@ public class Selection {
         repaint();
 
         // if not called from the menu, update the menu name
-        if(!fromMenu) {
+        if (!fromMenu) {
             SelectionActions.getShowHide().updateTextFrom(this);
         }
     }

@@ -17,6 +17,7 @@
 
 package pixelitor.guitest;
 
+import org.assertj.core.util.DoubleComparator;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
@@ -31,6 +32,7 @@ import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.shapes.TwoPointPaintType;
 import pixelitor.utils.Utils;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -69,6 +71,7 @@ public class WorkflowTest {
         keyboard = app.getKeyboard();
 
         createNewImage();
+        addGuide();
         renderWood();
         addTextLayer();
         setTextSize();
@@ -87,6 +90,7 @@ public class WorkflowTest {
         createEllipseSelection();
         expandSelection();
         selectionToPath();
+        flipHorizontal();
         tracePath(BrushType.WOBBLE);
         pathToSelection();
         copySelection();
@@ -95,6 +99,10 @@ public class WorkflowTest {
         moveSelection(50);
         selectionToPath();
         tracePath(BrushType.SHAPE);
+        flipHorizontal();
+        clearGuides();
+        selectBrushTool();
+        loadReferenceImage();
     }
 
     private void createNewImage() {
@@ -105,6 +113,19 @@ public class WorkflowTest {
         dialog.button("ok").click();
         Utils.sleep(1, TimeUnit.SECONDS);
         mouse.recalcCanvasBounds();
+        app.checkNumLayersIs(1);
+    }
+
+    private void addGuide() {
+        app.runMenuCommand("Add Horizontal Guide...");
+        var dialog = app.findDialogByTitle("Add Horizontal Guide");
+        dialog.slider("Position (%)").slideTo(60);
+        dialog.button("ok").click();
+        dialog.requireNotVisible();
+        assertThat(EDT.getGuides().getHorizontals())
+                .usingComparatorForType(new DoubleComparator(0.001), Double.class)
+                .containsExactly(0.6);
+        assertThat(EDT.getGuides().getVerticals()).isEmpty();
     }
 
     private void renderWood() {
@@ -123,6 +144,7 @@ public class WorkflowTest {
         dialog.button("ok").click();
 
         keyboard.undoRedo("Add Text Layer");
+        app.checkNumLayersIs(2);
     }
 
     private void setTextSize() {
@@ -150,16 +172,16 @@ public class WorkflowTest {
     }
 
     private void deleteTextLayer() {
-        EDT.assertNumLayersIs(2);
+        app.checkNumLayersIs(2);
 
         pw.button("deleteLayer").click();
-        EDT.assertNumLayersIs(1);
+        app.checkNumLayersIs(1);
 
         keyboard.undo("Delete Layer");
-        EDT.assertNumLayersIs(2);
+        app.checkNumLayersIs(2);
 
         keyboard.redo("Delete Layer");
-        EDT.assertNumLayersIs(1);
+        app.checkNumLayersIs(1);
     }
 
     private void rotate90() {
@@ -217,13 +239,15 @@ public class WorkflowTest {
     }
 
     private void addLayerBellow() {
-        EDT.assertNumLayersIs(1);
+        app.checkNumLayersIs(1);
+        app.checkLayerNamesAre("layer 1");
 
         keyboard.pressCtrl();
         pw.button("addLayer").click();
         keyboard.releaseCtrl();
 
-        EDT.assertNumLayersIs(2);
+        app.checkNumLayersIs(2);
+        app.checkLayerNamesAre("layer 2", "layer 1");
     }
 
     private void renderCaustics() {
@@ -240,8 +264,16 @@ public class WorkflowTest {
     }
 
     private void mergeDown() {
+        app.checkNumLayersIs(2);
+
         app.runMenuCommand("Merge Down");
-        keyboard.undoRedo("Merge Down");
+        app.checkNumLayersIs(1);
+
+        keyboard.undo("Merge Down");
+        app.checkNumLayersIs(2);
+
+        keyboard.redo("Merge Down");
+        app.checkNumLayersIs(1);
     }
 
     private void createEllipseSelection() {
@@ -251,8 +283,8 @@ public class WorkflowTest {
 
         int canvasWidth = INITIAL_WIDTH + 2 * EXTRA_WIDTH;
         int canvasHeight = INITIAL_HEIGHT + 2 * EXTRA_HEIGHT;
-        assertThat(EDT.active(Composition::getCanvasImWidth)).isEqualTo(canvasWidth);
-        assertThat(EDT.active(Composition::getCanvasImHeight)).isEqualTo(canvasHeight);
+        assertThat(EDT.active(Composition::getCanvasWidth)).isEqualTo(canvasWidth);
+        assertThat(EDT.active(Composition::getCanvasHeight)).isEqualTo(canvasHeight);
 
         mouse.recalcCanvasBounds();
         int margin = 100;
@@ -312,5 +344,23 @@ public class WorkflowTest {
         app.runMenuCommand("Paste Selection");
         var dialog = app.findDialogByTitle("Existing Selection");
         AppRunner.findButtonByText(dialog, "Intersect").click();
+    }
+
+    private void flipHorizontal() {
+        app.runMenuCommand("Flip Horizontal");
+        keyboard.undoRedo("Flip Horizontal");
+    }
+
+    private void clearGuides() {
+        app.runMenuCommand("Clear Guides");
+    }
+
+    private void selectBrushTool() {
+        app.clickTool(Tools.BRUSH);
+    }
+
+    private void loadReferenceImage() {
+        File f = new File("C:\\pix_tests\\reference_images\\workflow1.png");
+        app.openFileWithDialog(f.getParentFile(), f.getName());
     }
 }

@@ -23,11 +23,7 @@ import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
@@ -75,10 +71,13 @@ public class LayerMask extends ImageLayer {
     public static final Composite RUBYLITH_COMPOSITE = AlphaComposite.SrcOver.derive(0.5f);
 
     public LayerMask(Composition comp, BufferedImage bwImage,
-                     Layer layer, int tx, int ty) {
-        super(comp, bwImage, layer.getName() + " MASK", layer, tx, ty);
+                     Layer owner, int tx, int ty) {
+        super(comp, bwImage, owner.getName() + " MASK", owner, tx, ty);
 
         assert bwImage.getType() == TYPE_BYTE_GRAY;
+
+        // layer masks use the button of their owner
+        ui = owner.getUI();
     }
 
     public void applyToImage(BufferedImage in) {
@@ -156,7 +155,7 @@ public class LayerMask extends ImageLayer {
 
     public void setLinked(boolean linked, boolean addToHistory) {
         this.linked = linked;
-        notifyLayerChangeListeners();
+        notifyChangeListeners();
         if (addToHistory) {
             History.add(new LinkLayerMaskEdit(comp, this));
         }

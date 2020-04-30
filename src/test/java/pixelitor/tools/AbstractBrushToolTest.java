@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
@@ -38,13 +37,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.SMUDGE;
+import static org.mockito.Mockito.*;
+import static pixelitor.tools.Tools.*;
 
 /**
  * Tests the functionality common to all AbstractBrush subclasses
@@ -79,7 +73,7 @@ public class AbstractBrushToolTest {
     @BeforeClass
     public static void beforeAllTests() {
         TestHelper.setupMockFgBgSelector();
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @Before

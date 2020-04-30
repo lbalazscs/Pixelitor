@@ -30,21 +30,8 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  * The navigator component that allows the user to pan a zoomed-in image.
@@ -61,23 +48,26 @@ public class Navigator extends JComponent
     // Null if all images are closed.
     private View view;
 
-    private boolean dragging = false;
-    private double imgScalingRatio;
-    private Rectangle viewBoxRect;
-    private Point dragStartPoint;
-    private Point origRectLoc; // the view box rectangle location before starting the drag
-    private int thumbWidth;
-    private int thumbHeight;
     private int viewWidth;
     private int viewHeight;
     private JScrollPane scrollPane;
-    private final AdjustmentListener adjListener;
-    private static JDialog dialog;
-    private JPopupMenu popup;
+
+    private Point dragStartPoint;
+    private Point origRectLoc; // the view box rectangle location before starting the drag
+    private Rectangle viewBoxRect;
     private static Color viewBoxColor = Color.RED;
+    private boolean dragging = false;
 
     private int preferredWidth;
     private int preferredHeight;
+
+    private double imgScalingRatio;
+    private int thumbWidth;
+    private int thumbHeight;
+
+    private final AdjustmentListener adjListener;
+    private static JDialog dialog;
+    private JPopupMenu popup;
 
     // if not null, the scaling factor is calculated based on this
     // explicitly given zoom level instead of the navigator size
@@ -130,8 +120,8 @@ public class Navigator extends JComponent
     private void setNavigatorSizeFromZoom(ZoomLevel zoom) {
         Canvas canvas = view.getCanvas();
         double scale = zoom.getViewScale();
-        preferredWidth = (int) (scale * canvas.getImWidth());
-        preferredHeight = (int) (scale * canvas.getImHeight());
+        preferredWidth = (int) (scale * canvas.getWidth());
+        preferredHeight = (int) (scale * canvas.getHeight());
 
         JDialog ancestor = GUIUtils.getDialogAncestor(this);
         ancestor.setTitle("Navigator - " + zoom);
@@ -382,8 +372,8 @@ public class Navigator extends JComponent
 
     private void recalculateScaling(View view, int width, int height) {
         Canvas canvas = view.getCanvas();
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         if (exactZoom != null) {
             imgScalingRatio = exactZoom.getViewScale();

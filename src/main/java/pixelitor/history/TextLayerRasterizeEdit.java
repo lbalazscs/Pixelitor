@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -55,8 +55,10 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
                 .atPosition(ABOVE_ACTIVE)
                 .noRefresh()
                 .add(before);
-        comp.deleteLayer(after, false, true);
+        comp.deleteLayer(after, false);
 
+        assert before.isActive();
+        assert before.hasUI();
         // restore the original mask view mode of the text layer
         if (before.hasMask()) {
             maskViewMode.activate(before, "rasterize undone");
@@ -71,7 +73,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
                 .atPosition(ABOVE_ACTIVE)
                 .noRefresh()
                 .add(after);
-        comp.deleteLayer(before, false, true);
+        comp.deleteLayer(before, false);
     }
 
     @Override

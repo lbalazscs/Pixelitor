@@ -17,13 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import pixelitor.Build;
+import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -37,11 +31,7 @@ import static pixelitor.TestHelper.assertHistoryEditsAre;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.BuildState.*;
 import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 @DisplayName("Pen Tool/PathBuilder tests")
@@ -55,7 +45,7 @@ public class PathBuilderTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
         Tools.setCurrentTool(Tools.PEN);
     }
 

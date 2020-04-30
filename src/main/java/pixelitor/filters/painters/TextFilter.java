@@ -60,7 +60,7 @@ public class TextFilter extends FilterWithGUI {
             return src;
         }
 
-        var textPainter = new TranslatedTextPainter();
+        var textPainter = new TransformedTextPainter();
         settings.configurePainter(textPainter);
 
         if (settings.isWatermark()) {

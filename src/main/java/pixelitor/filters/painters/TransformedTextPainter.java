@@ -21,25 +21,17 @@ import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.painter.effects.AreaEffect;
 import pixelitor.Canvas;
 
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
-import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
-import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
+import static java.awt.RenderingHints.*;
 
 /**
- * A TextPainter that can have an extra translation (so that text
+ * A {@link TextPainter} that can have an extra translation (so that text
  * layers can be moved with the move tool).
  * It also supports the rotation of the text.
  */
-public class TranslatedTextPainter extends TextPainter {
+public class TransformedTextPainter extends TextPainter {
     private static final long serialVersionUID = -2064757977654857961L;
 
     private int translationX = 0;
@@ -50,18 +42,18 @@ public class TranslatedTextPainter extends TextPainter {
     private Rectangle boundingBox = new Rectangle();
 
     /**
-     * Return last painted bounding box for rendered text
-     * Note that this is not pixel perfect rect
-     * If text was not rendered yet, returned rectangle is empty
+     * Return last painted bounding box for rendered text.
+     * Note that this is not pixel perfect rectangle.
+     * If text was not rendered yet, returned rectangle is empty.
      */
     public Rectangle getBoundingBox() {
         return rotatedRect != null ? rotatedRect.getBoundingBox() : boundingBox;
     }
 
     /**
-     * Return last painted bounding shape for rendered text (rect or rotated rect)
-     * Note that this is not pixel perfect shape
-     * If text was not rendered yet, returned shape is empty
+     * Return last painted bounding shape for rendered text (rect or rotated rect).
+     * Note that this is not pixel perfect shape.
+     * If text was not rendered yet, returned shape is empty.
      */
     public Shape getBoundingShape() {
         return rotatedRect != null ? rotatedRect.asShape() : boundingBox;
@@ -98,9 +90,6 @@ public class TranslatedTextPainter extends TextPainter {
         return layout;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doPaint(Graphics2D g, Object component, int canvasWidth, int canvasHeight) {
         var origTransform = g.getTransform();
@@ -167,8 +156,8 @@ public class TranslatedTextPainter extends TextPainter {
         Graphics2D g2 = tmp.createGraphics();
         var imgOrigTransform = g2.getTransform();
 
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
         setupGraphics(g2, canvasWidth, canvasHeight, getText());
         var at = g2.getTransform();
         g2.setTransform(imgOrigTransform); // provideShape must be called with untransformed Graphics

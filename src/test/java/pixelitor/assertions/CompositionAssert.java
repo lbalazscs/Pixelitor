@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerUI;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
@@ -178,10 +179,10 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return activeLayerIndexIs(2);
     }
 
-    public CompositionAssert hasCanvasImWidth(int canvasWidth) {
+    public CompositionAssert hasCanvasWidth(int canvasWidth) {
         isNotNull();
 
-        int actualCanvasWidth = actual.getCanvasImWidth();
+        int actualCanvasWidth = actual.getCanvasWidth();
         if (actualCanvasWidth != canvasWidth) {
             String msg = "\nExpecting canvasWidth of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
             failWithMessage(msg, actual, canvasWidth, actualCanvasWidth);
@@ -190,10 +191,10 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert hasCanvasImHeight(int canvasHeight) {
+    public CompositionAssert hasCanvasHeight(int canvasHeight) {
         isNotNull();
 
-        int actualCanvasHeight = actual.getCanvasImHeight();
+        int actualCanvasHeight = actual.getCanvasHeight();
         if (actualCanvasHeight != canvasHeight) {
             String msg = "\nExpecting canvasHeight of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
             failWithMessage(msg, actual, canvasHeight, actualCanvasHeight);
@@ -202,11 +203,11 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         return this;
     }
 
-    public CompositionAssert canvasImSizeIs(int w, int h) {
+    public CompositionAssert canvasSizeIs(int w, int h) {
         isNotNull();
 
-        hasCanvasImWidth(w);
-        hasCanvasImHeight(h);
+        hasCanvasWidth(w);
+        hasCanvasHeight(h);
 
         return this;
     }
@@ -304,5 +305,45 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         assertThat(actual.getSelectionShape()).isEqualTo(shape);
 
         return this;
+    }
+
+    public CompositionAssert allLayerUIsAreOK() {
+        isNotNull();
+
+        for (int i = 0; i < actual.getNumLayers(); i++) {
+            checkLayerUI(i);
+        }
+
+        return this;
+    }
+
+    private void checkLayerUI(int i) {
+        Layer layer = actual.getLayer(i);
+        String layerClassName = layer.getClass().getSimpleName();
+        LayerUI layerUI = layer.getUI();
+        if (layerUI == null) {
+            failWithMessage("%s #%d ('%s') has no UI",
+                    layerClassName, i, layer.getName());
+        }
+        if (layer.hasMask()) {
+            LayerUI maskUI = layer.getMask().getUI();
+            if (maskUI == null) {
+                failWithMessage("The mask of %s #%d ('%s') has no UI",
+                        layerClassName, i, layer.getName());
+            }
+            if (maskUI != layerUI) {
+                failWithMessage("The mask of the %s #%d ('%s') has a different UI than the layer",
+                        layerClassName, i, layer.getName());
+            }
+            if (!maskUI.hasMaskIcon()) {
+                failWithMessage("The mask UI of the %s #%d ('%s') has no mask icon",
+                        layerClassName, i, layer.getName());
+            }
+        } else { // the layer has no mask
+            if (layerUI.hasMaskIcon()) {
+                failWithMessage("The UI of the %s #%d ('%s') has an unexpected mask icon",
+                        layerClassName, i, layer.getName());
+            }
+        }
     }
 }

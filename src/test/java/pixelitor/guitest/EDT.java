@@ -44,6 +44,8 @@ import java.awt.Point;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
+
 /**
  * Utility methods to execute queries, actions and assertions
  * on the Event Dispatch Thread.
@@ -219,5 +221,11 @@ public class EDT {
 
     public static boolean activeLayerHasMask() {
         return activeLayer(Layer::hasMask);
+    }
+
+    public static void assertCanvasSizeIs(int expectedWidth, int expectedHeight) {
+        assertThat(active(Composition::getCanvas))
+                .hasWidth(expectedWidth)
+                .hasHeight(expectedHeight);
     }
 }

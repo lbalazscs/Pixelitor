@@ -27,27 +27,14 @@ import pixelitor.Composition;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.SubtaskProgressTracker;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -82,7 +69,7 @@ public class OpenRaster {
 
         String stackXML = format("<?xml version='1.0' encoding='UTF-8'?>\n" +
                 "<image w=\"%d\" h=\"%d\">\n" +
-                "<stack>\n", comp.getCanvasImWidth(), comp.getCanvasImHeight());
+                "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
         int numImageLayers = comp.getNumImageLayers();
@@ -225,12 +212,12 @@ public class OpenRaster {
             ImageLayer layer = new ImageLayer(comp, image, layerName,
                     null, tx, ty);
 
-            layer.setVisible(visibility, false, false);
+            layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
 
-            layer.setBlendingMode(blendingMode, false, false, false);
+            layer.setBlendingMode(blendingMode, false);
             float opacity = Utils.parseFloat(layerOpacity, 1.0f);
-            layer.setOpacity(opacity, false, false, false);
+            layer.setOpacity(opacity, false);
 
             comp.addLayerInInitMode(layer);
         }

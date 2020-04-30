@@ -18,24 +18,12 @@
 package pixelitor.gui;
 
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.Build;
 import pixelitor.Canvas;
-import pixelitor.CanvasMargins;
-import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
-import pixelitor.Layers;
-import pixelitor.OpenImages;
+import pixelitor.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerButton;
-import pixelitor.layers.LayerMask;
-import pixelitor.layers.LayerUI;
-import pixelitor.layers.LayersContainer;
-import pixelitor.layers.LayersPanel;
-import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.selection.SelectionActions;
@@ -51,13 +39,7 @@ import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -131,7 +113,7 @@ public class View extends JComponent
 
         // the view was active when the reload started, but since the
         // reload was asynchronous, this could have changed
-        if(isActive()) {
+        if (isActive()) {
             SelectionActions.setEnabled(false, newComp);
         }
 
@@ -146,21 +128,25 @@ public class View extends JComponent
         replaceComp(newComp, getMaskViewMode(), false);
     }
 
-    public void replaceComp(Composition newComp, MaskViewMode newMaskViewMode, boolean reloaded) {
+    public void replaceComp(Composition newComp,
+                            MaskViewMode newMaskViewMode,
+                            boolean reloaded) {
         assert newComp != null;
 
         Composition oldComp = comp;
         comp = newComp;
 
-        oldComp.setView(null);
         newComp.setView(this);
+        newComp.createLayerUIs();
         canvas = newComp.getCanvas();
 
-        // refresh the layer buttons
+        // recreate the layer buttons
         layersPanel = new LayersPanel();
         newComp.addAllLayersToGUI();
         LayersContainer.showLayersFor(this);
         Layers.activeLayerChanged(newComp.getActiveLayer(), false);
+
+        oldComp.setView(null);
 
         newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
         repaintNavigator(true);
@@ -227,12 +213,6 @@ public class View extends JComponent
 
     @Override
     public void mousePressed(MouseEvent e) {
-//        String msg = Utils.debugMouseModifiers(e);
-//        if(!msg.isEmpty()) {
-//            System.out
-//                    .println("CompositionView::mousePressed: " + msg + "press");
-//        }
-
         Tools.EventDispatcher.mousePressed(e, this);
     }
 
@@ -298,8 +278,8 @@ public class View extends JComponent
         return zoomLevel;
     }
 
-    public void deleteLayerUI(LayerUI ui) {
-        layersPanel.deleteLayerButton((LayerButton) ui);
+    public void removeLayerUI(LayerUI ui) {
+        layersPanel.removeLayerButton((LayerButton) ui);
     }
 
     public Composition getComp() {
@@ -605,6 +585,13 @@ public class View extends JComponent
         }
     }
 
+    private void setZoomLevel(ZoomLevel zoomLevel) {
+        this.zoomLevel = zoomLevel;
+        scaling = zoomLevel.getViewScale();
+        canvas.recalcCoSize(this);
+        updateTitle();
+    }
+
     private void moveScrollbarsAfterZoom(ZoomLevel oldZoom,
                                          ZoomLevel newZoom,
                                          Point mousePos) {
@@ -633,13 +620,6 @@ public class View extends JComponent
 
         scrollRectToVisible(areaThatShouldBeVisible);
         repaint();
-    }
-
-    private void setZoomLevel(ZoomLevel zoomLevel) {
-        this.zoomLevel = zoomLevel;
-        scaling = zoomLevel.getViewScale();
-        canvas.recalcCoSize(this);
-        updateTitle();
     }
 
     public void increaseZoom() {
@@ -795,7 +775,11 @@ public class View extends JComponent
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        LayerButton layerButton = (LayerButton) newLayer.getUI();
+        assert EventQueue.isDispatchThread() : "not on EDT";
+
+        // can be casted outside unit tests
+        LayerButton layerButton = (LayerButton) newLayer.createUI();
+
         try {
             // otherwise loading multi-layer files makes the comp dirty
             layerButton.setUserInteraction(false);

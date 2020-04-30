@@ -56,8 +56,7 @@ public class Crop implements CompAction {
     private final boolean addHidingMask;
 
     public Crop(Rectangle2D imCropRect,
-                boolean selectionCrop,
-                boolean allowGrowing,
+                boolean selectionCrop, boolean allowGrowing,
                 boolean deleteCroppedPixels, boolean addHidingMask) {
         this.imCropRect = imCropRect;
         this.selectionCrop = selectionCrop;
@@ -67,12 +66,12 @@ public class Crop implements CompAction {
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition comp) {
+    public CompletableFuture<Composition> process(Composition oldComp) {
         Rectangle roundedImCropRect = Shapes.roundCropRect(imCropRect);
-        Canvas oldCanvas = comp.getCanvas();
+        Canvas oldCanvas = oldComp.getCanvas();
 
         if (!allowGrowing) {
-            Rectangle canvasBounds = oldCanvas.getImBounds();
+            Rectangle canvasBounds = oldCanvas.getBounds();
             roundedImCropRect = roundedImCropRect.intersection(canvasBounds);
         }
 
@@ -82,16 +81,16 @@ public class Crop implements CompAction {
         if (cropRect.isEmpty()) {
             // we get here if the crop rectangle is
             // outside the canvas bounds in the crop tool
-            return CompletableFuture.completedFuture(comp);
+            return CompletableFuture.completedFuture(oldComp);
         }
 
-        var canvasTransform = createCanvasImTransform(cropRect);
+        var canvasTransform = createCanvasTransform(cropRect);
 
-        View view = comp.getView();
-        Composition newComp = comp.createCopy(true, !selectionCrop);
+        View view = oldComp.getView();
+        Composition newComp = oldComp.createCopy(true, !selectionCrop);
         Canvas newCanvas = newComp.getCanvas();
 
-        Guides guides = comp.getGuides();
+        Guides guides = oldComp.getGuides();
         if (guides != null) {
             Guides newGuides = guides.copyForCrop(cropRect, view);
             newComp.setGuides(newGuides);
@@ -110,9 +109,7 @@ public class Crop implements CompAction {
             }
         });
 
-        int newWidth = cropRect.width;
-        int newHeight = cropRect.height;
-        newCanvas.changeImSize(newWidth, newHeight, view);
+        newCanvas.changeSize(cropRect.width, cropRect.height, view);
 
         // The intersected selection, tool widgets etc. have to be moved
         // into the coordinate system of the new, cropped image.
@@ -122,32 +119,32 @@ public class Crop implements CompAction {
 
         if (addHidingMask) {
             assert selectionCrop;
-            assert comp.hasSelection();
+            assert oldComp.hasSelection();
 
-            Shape hidingShape = comp.getSelectionShape();
+            Shape hidingShape = oldComp.getSelectionShape();
             hidingShape = canvasTransform.createTransformedShape(hidingShape);
             addHidingMask(newComp, hidingShape, false);
         }
-
-        newComp.updateAllIconImages();
 
         // if before the crop the internal frame started
         // at large negative coordinates, after the crop it
         // could become unreachable, so move it
         view.ensurePositiveLocation();
 
-        assert comp != newComp;
+        assert oldComp != newComp;
         String editName = addHidingMask ? "Crop and Hide" : "Crop";
         History.add(new CompositionReplacedEdit(
-                editName, false, view, comp, newComp, canvasTransform));
+                editName, false, view, oldComp, newComp, canvasTransform));
         view.replaceComp(newComp);
+
+        newComp.updateAllIconImages();
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 
         newComp.imageChanged(FULL, true);
 
         Messages.showInStatusBar(format(
                 "Image cropped to %d x %d pixels.",
-                newWidth, newHeight));
+                cropRect.width, cropRect.height));
 
         return CompletableFuture.completedFuture(newComp);
     }
@@ -217,6 +214,7 @@ public class Crop implements CompAction {
         } else if (answer == 2) {
             // only hide
             addHidingMask(comp, sel.getShape(), true);
+            comp.imageChanged(FULL);
         } else {
             throw new IllegalStateException("answer = " + answer);
         }
@@ -240,10 +238,10 @@ public class Crop implements CompAction {
         for (int i = 0; i < numLayers; i++) {
             Layer layer = comp.getLayer(i);
             if (addToHistory) {
-                var edit = layer.addHidingMask(shape, true);
+                var edit = layer.hideWithMask(shape, true);
                 multiEdit.add(edit);
             } else {
-                layer.addHidingMask(shape, false);
+                layer.hideWithMask(shape, false);
             }
         }
 
@@ -259,7 +257,7 @@ public class Crop implements CompAction {
      * The returned transform describes how the image space
      * coordinates for a surviving pixel change after a crop
      */
-    public static AffineTransform createCanvasImTransform(Rectangle2D imCropRect) {
+    public static AffineTransform createCanvasTransform(Rectangle2D imCropRect) {
         double tx = -imCropRect.getX();
         double ty = -imCropRect.getY();
         return AffineTransform.getTranslateInstance(tx, ty);

@@ -28,28 +28,13 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
@@ -108,6 +93,9 @@ public final class GUIUtils {
         var gbh = new GridBagHelper(p);
         for (FilterParam param : params) {
             JComponent control = param.createGUI();
+
+            // so that assertj-swing can find it easily
+            control.setName(param.getName());
 
             int numColumns = ((ParamGUI) control).getNumLayoutColumns();
             if (numColumns == 1) {
@@ -351,5 +339,14 @@ public final class GUIUtils {
                 }
             }
         };
+    }
+
+    public static void showTaskbarProgress(int progressPercent) {
+        if (Taskbar.isTaskbarSupported()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            if (taskbar.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
+                taskbar.setWindowProgressValue(PixelitorWindow.getInstance(), progressPercent);
+            }
+        }
     }
 }

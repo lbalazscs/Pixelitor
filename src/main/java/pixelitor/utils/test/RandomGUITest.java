@@ -23,52 +23,25 @@ import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
-import pixelitor.colors.FgBgColors;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
-import pixelitor.filters.Fade;
-import pixelitor.filters.Filter;
-import pixelitor.filters.FilterAction;
-import pixelitor.filters.FilterUtils;
-import pixelitor.filters.Invert;
-import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.RandomFilter;
+import pixelitor.filters.*;
 import pixelitor.filters.animation.Interpolation;
 import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.gui.CompositeState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.gui.AutoZoom;
-import pixelitor.gui.GlobalEvents;
-import pixelitor.gui.ImageArea;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.View;
-import pixelitor.gui.WorkSpace;
+import pixelitor.gui.*;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
-import pixelitor.layers.AddLayerMaskAction;
-import pixelitor.layers.AddNewLayerAction;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.BlendingMode;
-import pixelitor.layers.ContentLayer;
-import pixelitor.layers.DeleteActiveLayerAction;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
-import pixelitor.layers.TextLayer;
+import pixelitor.layers.*;
 import pixelitor.menus.edit.CopyAction;
 import pixelitor.menus.edit.CopySource;
 import pixelitor.menus.edit.PasteAction;
 import pixelitor.menus.edit.PasteDestination;
-import pixelitor.menus.view.ShowHideAllAction;
-import pixelitor.menus.view.ShowHideHistogramsAction;
-import pixelitor.menus.view.ShowHideLayersAction;
-import pixelitor.menus.view.ShowHideStatusBarAction;
-import pixelitor.menus.view.ShowHideToolsAction;
-import pixelitor.menus.view.ZoomLevel;
+import pixelitor.menus.view.*;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
@@ -81,11 +54,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.AWTException;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -99,11 +68,10 @@ import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_180;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_270;
-import static pixelitor.compactions.Rotate.SpecialAngle.ANGLE_90;
+import static pixelitor.compactions.Rotate.SpecialAngle.*;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 
 /**
@@ -463,7 +431,7 @@ public class RandomGUITest {
 
     private static void randomColors() {
         log("randomize colors");
-        FgBgColors.randomize();
+        randomizeColors();
     }
 
     private static void randomFilter() {
@@ -903,10 +871,10 @@ public class RandomGUITest {
 
         if (rand.nextBoolean()) {
             log("layer merge down");
-            comp.mergeActiveLayerDown(true);
+            comp.mergeActiveLayerDown();
         } else {
             log("layer flatten image");
-            comp.flattenImage(true, true);
+            comp.flattenImage();
         }
     }
 
@@ -991,15 +959,15 @@ public class RandomGUITest {
             if (f > opacity) {
                 // always increase
                 log("increase opacity");
-                layer.setOpacity(f, true, true, true);
+                layer.setOpacity(f, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
                 log("decrease opacity");
-                layer.setOpacity(f, true, true, true);
+                layer.setOpacity(f, true);
             }
         } else {
             log("change layer blending mode");
             BlendingMode randomBM = Rnd.chooseFrom(BlendingMode.values());
-            layer.setBlendingMode(randomBM, true, true, true);
+            layer.setBlendingMode(randomBM, true);
         }
     }
 
@@ -1104,9 +1072,11 @@ public class RandomGUITest {
     private static void randomLayerMaskAction() {
         Layer layer = OpenImages.getActiveLayer();
         if (!layer.hasMask()) {
+            assert AddLayerMaskAction.INSTANCE.isEnabled();
             log("add layer mask");
             executeAction(AddLayerMaskAction.INSTANCE);
         } else {
+            assert !AddLayerMaskAction.INSTANCE.isEnabled();
             if (rand.nextFloat() < 0.2 && layer instanceof ContentLayer) {
                 LayerMask mask = layer.getMask();
                 if (mask.isLinked()) {

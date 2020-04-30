@@ -18,40 +18,35 @@
 package pixelitor.compactions;
 
 import pixelitor.Canvas;
-import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.guides.Guides;
-import pixelitor.history.CompositionReplacedEdit;
-import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMask;
-import pixelitor.selection.SelectionActions;
-import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
-import java.util.concurrent.CompletableFuture;
 
 import static javax.swing.BoxLayout.Y_AXIS;
-import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
 /**
  * Enlarges the canvas for all layers of a composition
  */
-public class EnlargeCanvas implements CompAction {
+public class EnlargeCanvas extends SimpleCompAction {
+    public static final String NAME = "Enlarge Canvas";
     private final int north;
     private final int east;
     private final int south;
     private final int west;
+    private int newCanvasWidth;
+    private int newCanvasHeight;
 
     public EnlargeCanvas(int north, int east, int south, int west) {
+        super(NAME, true);
         this.north = north;
         this.east = east;
         this.south = south;
@@ -59,55 +54,36 @@ public class EnlargeCanvas implements CompAction {
     }
 
     @Override
-    public CompletableFuture<Composition> process(Composition comp) {
-        View view = comp.getView();
-        Guides oldGuides = comp.getGuides();
-        Guides newGuides = null;
-        if (oldGuides != null) {
-            newGuides = oldGuides.copyForEnlargedCanvas(north, east, south, west, view);
-            comp.setGuides(newGuides);
-        }
-
-        Composition newComp = comp.createCopy(true, true);
-        Canvas newCanvas = newComp.getCanvas();
-
-        newComp.forEachLayer(this::processLayer);
-
-        AffineTransform canvasTransform = null;
-        if (north > 0 || west > 0) {
-            canvasTransform = AffineTransform.getTranslateInstance(west, north);
-            newComp.imCoordsChanged(canvasTransform, false);
-        }
-
-        int newCanvasWidth = newCanvas.getImWidth() + east + west;
-        int newCanvasHeight = newCanvas.getImHeight() + north + south;
-        newCanvas.changeImSize(newCanvasWidth, newCanvasHeight, view);
-
-        // update the icon images only after the shared canvas size was
-        // enlarged, because they are based on the canvas-sized subimage
-        comp.updateAllIconImages();
-
-        History.add(new CompositionReplacedEdit("Enlarge Canvas",
-                false, view, comp, newComp, canvasTransform));
-        view.replaceComp(newComp);
-        SelectionActions.setEnabled(newComp.hasSelection(), newComp);
-
-        comp.imageChanged(REPAINT, true);
-
-        Messages.showInStatusBar("Canvas enlarged to "
-                + newCanvasWidth + " x " + newCanvasHeight + " pixels.");
-        return CompletableFuture.completedFuture(newComp);
+    protected void changeCanvasSize(Canvas newCanvas, View view) {
+        newCanvasWidth = newCanvas.getWidth() + east + west;
+        newCanvasHeight = newCanvas.getHeight() + north + south;
+        newCanvas.changeSize(newCanvasWidth, newCanvasHeight, view);
     }
 
-    private void processLayer(Layer layer) {
-        if (layer instanceof ContentLayer) {
-            ContentLayer contentLayer = (ContentLayer) layer;
-            contentLayer.enlargeCanvas(north, east, south, west);
-        }
-        if (layer.hasMask()) {
-            LayerMask mask = layer.getMask();
-            mask.enlargeCanvas(north, east, south, west);
-        }
+    @Override
+    protected String getEditName() {
+        return NAME;
+    }
+
+    @Override
+    protected void transform(ContentLayer contentLayer) {
+        contentLayer.enlargeCanvas(north, east, south, west);
+    }
+
+    @Override
+    protected AffineTransform createCanvasTransform(Canvas canvas) {
+        return AffineTransform.getTranslateInstance(west, north);
+    }
+
+    @Override
+    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
+        return oldGuides.copyForEnlargedCanvas(north, east, south, west, view, oldCanvas);
+    }
+
+    @Override
+    protected String getStatusBarMessage() {
+        return "The canvas was enlarged to "
+                + newCanvasWidth + " x " + newCanvasHeight + " pixels.";
     }
 
     public static Action getAction() {

@@ -18,14 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
-import pixelitor.selection.Selection;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RadialGradientPaint;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
@@ -77,8 +71,8 @@ public enum LayerMaskAddType {
             Canvas canvas = layer.getComp().getCanvas();
             BufferedImage bi = createFilledImage(layer, Color.WHITE, null, null);
             Graphics2D g = bi.createGraphics();
-            int width = canvas.getImWidth();
-            int height = canvas.getImHeight();
+            int width = canvas.getWidth();
+            int height = canvas.getHeight();
             float cx = width / 2.0f;
             float cy = height / 2.0f;
             float radius = Math.min(cx, cy);
@@ -93,10 +87,12 @@ public enum LayerMaskAddType {
         }
     };
 
+    // Returns a canvas-sized image filled with the background color.
+    // If a foreground color is given, then fills the shape with it.
     private static BufferedImage createFilledImage(Layer layer, Color bg, Color fg, Shape selShape) {
         Canvas canvas = layer.getComp().getCanvas();
-        int width = canvas.getImWidth();
-        int height = canvas.getImHeight();
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
         BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
         Graphics2D g = bwImage.createGraphics();
 
@@ -105,52 +101,48 @@ public enum LayerMaskAddType {
         g.fillRect(0, 0, width, height);
 
         // fill foreground
-        if(fg != null) {
+        if (fg != null) {
             g.setColor(fg);
             if (selShape != null) {
                 g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
                 g.fill(selShape);
             } else {
-                g.fillRect(0, 0, width, height);
+                throw new IllegalArgumentException("fg fill is given, but no shape");
             }
         }
         g.dispose();
         return bwImage;
     }
 
+    // Returns a canvas-size grayscale image representing
+    // the visible contents of the layer
     private static BufferedImage createMaskFromLayer(Layer layer,
                                                      boolean onlyTransparency) {
-        Canvas canvas = layer.getComp().getCanvas();
         if (layer instanceof ImageLayer) {
             ImageLayer imageLayer = (ImageLayer) layer;
             BufferedImage image = imageLayer.getCanvasSizedSubImage();
-            return createMaskFromImage(image, onlyTransparency, canvas);
+            return createMaskFromImage(image, onlyTransparency);
         } else if (layer instanceof TextLayer) {
             TextLayer textLayer = (TextLayer) layer;
-            // the rasterized image is canvas-sized, exactly as we want it
+            // the rasterized image is canvas-sized
             BufferedImage rasterizedImage = textLayer.createRasterizedImage();
-            return createMaskFromImage(rasterizedImage, onlyTransparency, canvas);
+            return createMaskFromImage(rasterizedImage, onlyTransparency);
         } else {
             // there is nothing better
             return REVEAL_ALL.createBWImage(layer, null);
         }
     }
 
+    // creates a grayscale version of the given image
     private static BufferedImage createMaskFromImage(BufferedImage image,
-                                                     boolean onlyTransparency,
-                                                     Canvas canvas) {
-        int width = canvas.getImWidth();
-        int height = canvas.getImHeight();
-
-        assert width == image.getWidth();
-        assert height == image.getHeight();
-
-        BufferedImage bwImage = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+                                                     boolean onlyTransparency) {
+        BufferedImage bwImage = new BufferedImage(
+                image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
         Graphics2D g = bwImage.createGraphics();
 
         // fill the background with white so that transparent parts become white
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, image.getWidth(), image.getHeight());
 
         if (onlyTransparency) {
             // with DstOut only the source alpha will matter
@@ -175,17 +167,6 @@ public enum LayerMaskAddType {
     @Override
     public String toString() {
         return guiName;
-    }
-
-    /**
-     * Returns true if the action needs selection and there is no selection.
-     */
-    public boolean missingSelection(Selection selection) {
-        if(needsSelection) {
-            return selection == null;
-        } else {
-            return false;
-        }
     }
 
     public boolean needsSelection() {

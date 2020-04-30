@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
@@ -28,10 +29,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import static java.awt.event.ActionEvent.CTRL_MASK;
-import static pixelitor.layers.LayerMaskAddType.HIDE_ALL;
-import static pixelitor.layers.LayerMaskAddType.HIDE_SELECTION;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_ALL;
-import static pixelitor.layers.LayerMaskAddType.REVEAL_SELECTION;
+import static pixelitor.layers.LayerMaskAddType.*;
 
 /**
  * An Action that adds a new layer mask
@@ -112,5 +110,12 @@ public class AddLayerMaskAction extends AbstractAction
 
     @Override
     public void layerOrderChanged(Composition comp) {
+    }
+
+    @Override
+    public void setEnabled(boolean newValue) {
+        super.setEnabled(newValue);
+
+        assert ConsistencyChecks.addMaskActionEnabled();
     }
 }

@@ -37,12 +37,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -52,9 +47,7 @@ import java.awt.geom.Rectangle2D;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
-import static pixelitor.tools.crop.CropToolState.INITIAL;
-import static pixelitor.tools.crop.CropToolState.TRANSFORM;
-import static pixelitor.tools.crop.CropToolState.USER_DRAG;
+import static pixelitor.tools.crop.CropToolState.*;
 
 /**
  * The crop tool
@@ -338,7 +331,7 @@ public class CropTool extends DragTool {
         Shape origClip = g2.getClip();  // save for later use
 
         Canvas canvas = comp.getCanvas();
-        Rectangle canvasBounds = canvas.getImBounds();
+        Rectangle canvasBounds = canvas.getBounds();
 
         // Similar to ClipStrategy.FULL, but we need some intermediary variables
 

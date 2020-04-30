@@ -168,7 +168,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             pw.pressAndReleaseKeys(VK_R);
         } else {
-            GuiActionRunner.execute(FgBgColors::randomize);
+            GuiActionRunner.execute(FgBgColors::randomizeColors);
         }
     }
 

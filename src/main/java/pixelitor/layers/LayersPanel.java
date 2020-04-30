@@ -61,7 +61,7 @@ public class LayersPanel extends JLayeredPane {
         button.addDragReorderHandler(dragReorderHandler);
     }
 
-    public void deleteLayerButton(LayerButton button) {
+    public void removeLayerButton(LayerButton button) {
         buttonGroup.remove(button);
         layerButtons.remove(button);
         remove(button);

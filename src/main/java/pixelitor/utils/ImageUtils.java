@@ -31,35 +31,12 @@ import pixelitor.selection.Selection;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.color.ICC_ColorSpace;
 import java.awt.color.ICC_Profile;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.IndexColorModel;
-import java.awt.image.PixelGrabber;
-import java.awt.image.Raster;
-import java.awt.image.VolatileImage;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Random;
@@ -70,17 +47,9 @@ import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+import static java.awt.RenderingHints.*;
 import static java.awt.Transparency.TRANSLUCENT;
-import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static java.awt.image.BufferedImage.TYPE_BYTE_INDEXED;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
-import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
 import static pixelitor.colors.ColorUtils.rgbIntToString;
@@ -125,7 +94,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage createSysCompatibleImage(Canvas canvas) {
-        return createSysCompatibleImage(canvas.getImWidth(), canvas.getImHeight());
+        return createSysCompatibleImage(canvas.getWidth(), canvas.getHeight());
     }
 
     public static BufferedImage createSysCompatibleImage(int width, int height) {
@@ -135,7 +104,7 @@ public class ImageUtils {
     }
 
     public static VolatileImage createSysCompatibleVolatileImage(Canvas canvas) {
-        return createSysCompatibleVolatileImage(canvas.getImWidth(), canvas.getImHeight());
+        return createSysCompatibleVolatileImage(canvas.getWidth(), canvas.getHeight());
     }
 
     public static VolatileImage createSysCompatibleVolatileImage(int width, int height) {
@@ -553,7 +522,7 @@ public class ImageUtils {
     public static BufferedImage convertToIndexed(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        if(src.isAlphaPremultiplied()) {
+        if (src.isAlphaPremultiplied()) {
             // otherwise transparent parts will be black when
             // this is drawn on the transparent image
             src = convertToARGB(src, flushOld);

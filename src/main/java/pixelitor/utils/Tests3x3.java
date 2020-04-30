@@ -130,7 +130,7 @@ public class Tests3x3 {
             BufferedImage maskImg = getStandardMaskImage();
             Layer layer = comp.getLayer(0);
             LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
-            layer.addConfiguredMask(mask, true);
+            layer.addConfiguredMask(mask);
         }
         OpenImages.addAsNewComp(comp);
         comp.getView().setZoom(ZoomLevel.Z6400, null);

@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.Build;
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.TestHelper;
 import pixelitor.gui.GlobalEvents;
@@ -40,9 +40,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
+import static java.awt.event.MouseEvent.*;
 
 /**
  * Behavior that is common to all tools
@@ -96,14 +94,14 @@ public class ToolTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
         TestHelper.setupMockFgBgSelector();
     }
 
     @Before
     public void beforeEachTest() {
         PenTool.path = null;
-        var comp = TestHelper.create2LayerComp(true);
+        Composition comp = TestHelper.create2LayerComp(true);
         view = comp.getView();
         tool.toolStarted();
     }

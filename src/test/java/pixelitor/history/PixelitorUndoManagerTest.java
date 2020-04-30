@@ -17,23 +17,14 @@
 
 package pixelitor.history;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import pixelitor.Build;
+import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 
 import javax.swing.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @DisplayName("PixelitorUndoManager tests")
 @TestMethodOrder(MethodOrderer.Random.class)
@@ -45,7 +36,7 @@ public class PixelitorUndoManagerTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @BeforeEach

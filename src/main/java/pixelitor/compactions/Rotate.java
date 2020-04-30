@@ -38,8 +38,8 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected void changeCanvas(Canvas canvas, View view) {
-        angle.changeCanvas(canvas, view);
+    protected void changeCanvasSize(Canvas newCanvas, View view) {
+        angle.changeCanvasSize(newCanvas, view);
     }
 
     @Override
@@ -53,30 +53,35 @@ public class Rotate extends SimpleCompAction {
     }
 
     @Override
-    protected AffineTransform createCanvasImTransform(Canvas canvas) {
-        return angle.createCanvasImTransform(canvas);
+    protected AffineTransform createCanvasTransform(Canvas canvas) {
+        return angle.createCanvasTransform(canvas);
     }
 
     @Override
-    protected Guides createGuidesCopy(Guides guides, View view) {
-        return guides.copyForRotate(angle, view);
+    protected Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas) {
+        return oldGuides.copyForRotate(angle, view);
+    }
+
+    @Override
+    protected String getStatusBarMessage() {
+        return "The image was rotated by " + angle.getAngleAsString();
     }
 
     public enum SpecialAngle {
-        ANGLE_90(90, "Rotate 90\u00B0 CW") {
+        ANGLE_90(90, "90\u00B0 CW") {
             @Override
-            public void changeCanvas(Canvas canvas, View view) {
+            public void changeCanvasSize(Canvas canvas, View view) {
                 // switch width and height
-                int newWidth = canvas.getImHeight();
-                int newHeight = canvas.getImWidth();
-                canvas.changeImSize(newWidth, newHeight, view);
+                int newWidth = canvas.getHeight();
+                int newHeight = canvas.getWidth();
+                canvas.changeSize(newWidth, newHeight, view);
             }
 
             @Override
-            public AffineTransform createCanvasImTransform(Canvas canvas) {
+            public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        canvas.getImHeight(), 0);
+                        canvas.getHeight(), 0);
                 at.quadrantRotate(1);
                 return at;
             }
@@ -98,17 +103,17 @@ public class Rotate extends SimpleCompAction {
 
                 return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
-        }, ANGLE_180(180, "Rotate 180\u00B0") {
+        }, ANGLE_180(180, "180\u00B0") {
             @Override
-            public void changeCanvas(Canvas canvas, View view) {
+            public void changeCanvasSize(Canvas canvas, View view) {
                 // do nothing
             }
 
             @Override
-            public AffineTransform createCanvasImTransform(Canvas canvas) {
+            public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        canvas.getImWidth(), canvas.getImHeight());
+                        canvas.getWidth(), canvas.getHeight());
                 at.quadrantRotate(2);
                 return at;
             }
@@ -130,18 +135,18 @@ public class Rotate extends SimpleCompAction {
 
                 return ImageUtils.createImageWithSameCM(img, newWidth, newHeight);
             }
-        }, ANGLE_270(270, "Rotate 90\u00B0 CCW") {
+        }, ANGLE_270(270, "90\u00B0 CCW") {
             @Override
-            public void changeCanvas(Canvas canvas, View view) {
+            public void changeCanvasSize(Canvas canvas, View view) {
                 // same as for 90
-                ANGLE_90.changeCanvas(canvas, view);
+                ANGLE_90.changeCanvasSize(canvas, view);
             }
 
             @Override
-            public AffineTransform createCanvasImTransform(Canvas canvas) {
+            public AffineTransform createCanvasTransform(Canvas canvas) {
                 // rotate, then translate to compensate
                 var at = AffineTransform.getTranslateInstance(
-                        0, canvas.getImWidth());
+                        0, canvas.getWidth());
                 at.quadrantRotate(3);
                 return at;
             }
@@ -167,19 +172,25 @@ public class Rotate extends SimpleCompAction {
 
         protected final int angleDegree;
         private final String name;
+        private final String angleAsString;
 
-        SpecialAngle(int angleDegree, String name) {
+        SpecialAngle(int angleDegree, String angleAsString) {
             this.angleDegree = angleDegree;
-            this.name = name;
+            this.name = "Rotate " + angleAsString;
+            this.angleAsString = angleAsString;
         }
 
         public String getName() {
             return name;
         }
 
-        public abstract void changeCanvas(Canvas canvas, View view);
+        public abstract void changeCanvasSize(Canvas canvas, View view);
 
-        public abstract AffineTransform createCanvasImTransform(Canvas canvas);
+        /**
+         * Returns the rotation as a transform in
+         * image-space coordinates relative to the canvas
+         */
+        public abstract AffineTransform createCanvasTransform(Canvas canvas);
 
         /**
          * Returns the transformation of the image,
@@ -189,6 +200,10 @@ public class Rotate extends SimpleCompAction {
 
         public int getAngleDegree() {
             return angleDegree;
+        }
+
+        public String getAngleAsString() {
+            return angleAsString;
         }
 
         /**

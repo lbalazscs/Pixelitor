@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.setImage(oldImage);
-        layer.addConfiguredMask(oldMask, true);
+        layer.addConfiguredMask(oldMask);
         oldMode.activate(comp, layer, "apply mask undone");
         layer.updateIconImage();
     }
@@ -72,7 +72,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         layer = null;
         oldMask = null;
-        if(oldImage != null) {
+        if (oldImage != null) {
             oldImage.flush();
             oldImage = null;
         }

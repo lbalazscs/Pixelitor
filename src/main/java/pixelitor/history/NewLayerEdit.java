@@ -49,7 +49,7 @@ public class NewLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        comp.deleteLayer(newLayer, false, true);
+        comp.deleteLayer(newLayer, false);
         comp.setActiveLayer(activeLayerBefore);
 
         viewModeBefore.activate(comp, activeLayerBefore, getName() + " undone");

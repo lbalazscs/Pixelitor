@@ -48,27 +48,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static pixelitor.tools.Tools.BRUSH;
-import static pixelitor.tools.Tools.CLONE;
-import static pixelitor.tools.Tools.CROP;
-import static pixelitor.tools.Tools.ERASER;
-import static pixelitor.tools.Tools.HAND;
-import static pixelitor.tools.Tools.MOVE;
-import static pixelitor.tools.Tools.PEN;
-import static pixelitor.tools.Tools.SELECTION;
-import static pixelitor.tools.Tools.SMUDGE;
-import static pixelitor.tools.Tools.ZOOM;
+import static java.util.concurrent.TimeUnit.*;
+import static pixelitor.tools.Tools.*;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
@@ -424,8 +409,8 @@ public class RandomToolTest {
     // might be necessary because of the croppings
     private void setStandardSize() {
         var canvas = EDT.active(Composition::getCanvas);
-        int canvasWidth = canvas.getImWidth();
-        int canvasHeight = canvas.getImHeight();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
 
         boolean standardSize = canvasWidth == 770 && canvasHeight == 600;
         if (standardSize) {
@@ -597,7 +582,7 @@ public class RandomToolTest {
     private void cutBigLayersIfNecessary(Composition comp) {
         Rectangle imgSize = EDT.call(comp::getMaxImageSize);
         Dimension canvasSize = EDT.call(() ->
-                comp.getCanvas().getImSize());
+                comp.getCanvas().getSize());
 
         if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
             // needs to be cut, otherwise there is a risk that
@@ -693,7 +678,7 @@ public class RandomToolTest {
             return;
         }
         var canvas = EDT.getCanvas();
-        if (!canvas.getImBounds().contains(path.getImBounds())) {
+        if (!canvas.getBounds().contains(path.getImBounds())) {
             // if the path is outside, then it can potentially take a very long time
             return;
         }

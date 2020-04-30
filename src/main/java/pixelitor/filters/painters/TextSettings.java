@@ -38,7 +38,8 @@ import static java.awt.Color.WHITE;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 /**
- * Settings for the text filter and text layers
+ * Settings for the text filter and text layers.
+ * Edited by the {@link TextSettingsPanel}.
  */
 public class TextSettings implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -156,7 +157,7 @@ public class TextSettings implements Serializable {
         rotation = Rnd.nextDouble() * Math.PI * 2;
     }
 
-    public void configurePainter(TranslatedTextPainter painter) {
+    public void configurePainter(TransformedTextPainter painter) {
         painter.setAntialiasing(true);
         painter.setText(text);
         painter.setFont(font);
@@ -169,10 +170,15 @@ public class TextSettings implements Serializable {
     }
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
-        BufferedImage dest;
-        int width = src.getWidth();
-        int height = src.getHeight();
-        // the text is with white on black background on the bump map image
+        BufferedImage bumpImage = createBumpMapImage(
+                textPainter, src.getWidth(), src.getHeight());
+        BufferedImage dest = ImageUtils.bumpMap(src, bumpImage, "Watermarking");
+        return dest;
+    }
+
+    // the bump map image has white text on a black background
+    private BufferedImage createBumpMapImage(TextPainter textPainter,
+                                             int width, int height) {
         BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D g = bumpImage.createGraphics();
         g.setColor(BLACK);
@@ -181,8 +187,7 @@ public class TextSettings implements Serializable {
         textPainter.paint(g, this, width, height);
         g.dispose();
 
-        dest = ImageUtils.bumpMap(src, bumpImage, "Watermarking");
-        return dest;
+        return bumpImage;
     }
 
     private static Font calcDefaultFont() {
@@ -192,9 +197,9 @@ public class TextSettings implements Serializable {
 
     private static int calcDefaultFontSize() {
         Composition comp = OpenImages.getActiveComp();
-        if(comp != null) {
-           int canvasHeight = comp.getCanvasImHeight();
-           return (int) (canvasHeight * 0.2);
+        if (comp != null) {
+            int canvasHeight = comp.getCanvasHeight();
+            return (int) (canvasHeight * 0.2);
         } else {
             return 100;
         }

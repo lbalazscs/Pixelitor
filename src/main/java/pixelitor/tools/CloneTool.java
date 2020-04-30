@@ -24,18 +24,10 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.layers.Drawable;
-import pixelitor.tools.brushes.AffectedArea;
-import pixelitor.tools.brushes.AffectedAreaTracker;
-import pixelitor.tools.brushes.CloneBrush;
-import pixelitor.tools.brushes.CopyBrushType;
-import pixelitor.tools.brushes.LazyMouseBrush;
+import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.Cursors;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Mirror;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -46,9 +38,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
-import static pixelitor.tools.CloneTool.State.CLONING;
-import static pixelitor.tools.CloneTool.State.NO_SOURCE;
-import static pixelitor.tools.CloneTool.State.SOURCE_DEFINED_FIRST_STROKE;
+import static pixelitor.tools.CloneTool.State.*;
 
 /**
  * The Clone Stamp tool
@@ -247,7 +237,7 @@ public class CloneTool extends BlendingModeBrushTool {
     private void setupRandomSource(Drawable dr, PPoint start) {
         var comp = dr.getComp();
 
-        Rectangle canvasBounds = comp.getCanvasImBounds();
+        Rectangle canvasBounds = comp.getCanvasBounds();
         Point source = Rnd.nextPoint(canvasBounds);
 
         setCloningSource(PPoint.eagerFromIm(source, comp.getView()));

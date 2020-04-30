@@ -18,11 +18,12 @@
 package pixelitor.layers;
 
 /**
- * The purpose of this interface is to separate
- * the Swing components from the unit tests
+ * The user interface of a {@link Layer}
  */
 public interface LayerUI {
     void setLayerName(String newName);
+
+    boolean hasMaskIcon();
 
     String getLayerName();
 
@@ -30,9 +31,9 @@ public interface LayerUI {
 
     boolean isVisibilityChecked();
 
-    void addMaskIconLabel();
+    void addMaskIcon();
 
-    void deleteMaskIconLabel();
+    void removeMaskIcon();
 
     void updateLayerIconImageAsync(ImageLayer imageLayer);
 

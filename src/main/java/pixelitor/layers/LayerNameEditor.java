@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import java.awt.event.FocusEvent;
 public class LayerNameEditor extends JTextField {
     private final LayerButton layerButton;
 
-    public LayerNameEditor(LayerButton layerButton, Layer layer) {
-        super(layer.getName());
+    public LayerNameEditor(LayerButton layerButton) {
+        super(layerButton.getLayer().getName());
 
         // TODO setting up a tool tip would show an
         // annoying GRAY "disabled tooltip"
@@ -46,16 +46,17 @@ public class LayerNameEditor extends JTextField {
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                disableEditing();
-                layer.setName(getText(), true);
+                finishEditing();
             }
         });
 
         // disable if enter pressed
-        addActionListener(e -> {
-            disableEditing();
-            layer.setName(getText(), true);
-        });
+        addActionListener(e -> finishEditing());
+    }
+
+    private void finishEditing() {
+        disableEditing();
+        layerButton.getLayer().setName(getText(), true);
     }
 
     public void enableEditing() {

@@ -17,13 +17,7 @@
 
 package pixelitor.layers;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import pixelitor.Build;
+import org.junit.jupiter.api.*;
 import pixelitor.Composition;
 import pixelitor.TestHelper;
 import pixelitor.filters.Invert;
@@ -56,7 +50,7 @@ public class LayerBlendingModesTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @BeforeEach
@@ -64,17 +58,18 @@ public class LayerBlendingModesTest {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
         TestHelper.setupMockViewFor(comp);
 
-        upperLayer = new ImageLayer(comp, create1x1Image(upperColor), "Layer 2");
+        upperLayer = TestHelper.createImageLayer(comp, create1x1Image(upperColor), "Layer 2");
         comp.addLayerInInitMode(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
+        lowerLayer.createUI();
 
         assert lowerLayer.getComp().checkInvariant();
         assert lowerLayer.getComp() == upperLayer.getComp();
         assert upperLayer == comp.getActiveLayer();
 
-        invertAdjustment = new AdjustmentLayer(comp, "Invert", new Invert());
-        alwaysUpperColorAdjustment = new AdjustmentLayer(comp, "One Color", new OneColorFilter(upperColor));
+        invertAdjustment = TestHelper.createAdjustmentLayer(comp, "Invert", new Invert());
+        alwaysUpperColorAdjustment = TestHelper.createAdjustmentLayer(comp, "One Color", new OneColorFilter(upperColor));
         upperColorTextLayer = createTestTextLayerWithColor(upperColor);
     }
 
@@ -188,7 +183,7 @@ public class LayerBlendingModesTest {
 
     private void testBlendingMode(BlendingMode blendingMode, Color expectedColor) {
         // check that the blending mode is working as expected
-        upperLayer.setBlendingMode(blendingMode, false, true, true);
+        upperLayer.setBlendingMode(blendingMode, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // a white mask for the upper layer should change nothing
@@ -221,7 +216,7 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the invert adjustment with black mask should have no effect
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adding a no-op adjustment layer should change nothing
@@ -230,16 +225,16 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // merging down the no-op adjustment with black mask should have no effect
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // delete the upper layer
-        comp.deleteLayer(upperLayer, true, false);
+        comp.deleteLayer(upperLayer, true);
         assertThat(comp).numLayersIs(1);
 
         // test the blending mode with an OneColorFilter that outputs the upper color
         comp.addLayerInInitMode(alwaysUpperColorAdjustment);
-        alwaysUpperColorAdjustment.setBlendingMode(blendingMode, false, true, true);
+        alwaysUpperColorAdjustment.setBlendingMode(blendingMode, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // adjustment layer with with white mask
@@ -252,13 +247,13 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the adjustment with black mask should have no effect
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(lowerColor);
         assertThat(comp).numLayersIs(1);
 
         // test with text layer
         comp.addLayerInInitMode(upperColorTextLayer);
-        upperColorTextLayer.setBlendingMode(blendingMode, false, true, true);
+        upperColorTextLayer.setBlendingMode(blendingMode, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
 
         // text layer with white mask
@@ -271,22 +266,23 @@ public class LayerBlendingModesTest {
         assertThat(getResultingColor()).isEqualTo(lowerColor);
 
         // merging down the text layer with black mask should have no effect
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(lowerColor);
         assertThat(comp).numLayersIs(1);
 
         // merging down the upper layer should result in the expected color
         comp.addLayerInInitMode(upperLayer);
         assertThat(comp).numLayersIs(2);
-        upperLayer.setBlendingMode(blendingMode, false, true, true);
+        upperLayer.setBlendingMode(blendingMode, true);
         assertThat(getResultingColor()).isEqualTo(expectedColor);
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
         assertThat(getResultingColor()).isEqualTo(expectedColor);
         assertThat(comp).numLayersIs(1);
     }
 
     private TextLayer createTestTextLayerWithColor(Color color) {
         var layer = new TextLayer(comp);
+        layer.createUI();
         TextSettings settings = layer.getSettings();
         settings.setText("T"); // a huge T should cover everything
         settings.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 100));

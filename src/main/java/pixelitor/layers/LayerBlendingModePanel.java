@@ -60,14 +60,14 @@ public class LayerBlendingModePanel extends BlendingModePanel
     private void opacityChanged() {
         onActiveLayer(layer -> {
             float floatValue = getOpacity();
-            layer.setOpacity(floatValue, false, true, true);
+            layer.setOpacity(floatValue, true);
         });
     }
 
     private void blendingModeChanged() {
         onActiveLayer(layer -> {
             BlendingMode blendingMode = getBlendingMode();
-            layer.setBlendingMode(blendingMode, false, true, true);
+            layer.setBlendingMode(blendingMode, true);
         });
     }
 

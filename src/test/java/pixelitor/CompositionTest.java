@@ -17,16 +17,10 @@
 
 package pixelitor;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.compactions.Crop;
 import pixelitor.history.History;
-import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.tools.Tools;
 
@@ -36,6 +30,7 @@ import java.awt.geom.Rectangle2D;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
 import static pixelitor.Composition.LayerAdder.Position.BELLOW_ACTIVE;
 import static pixelitor.TestHelper.assertHistoryEditsAre;
+import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Composition tests")
@@ -45,7 +40,7 @@ public class CompositionTest {
 
     @BeforeAll
     static void beforeAllTests() {
-        Build.setUnitTestingMode();
+        TestHelper.setUnitTestingMode();
     }
 
     @BeforeEach
@@ -60,7 +55,8 @@ public class CompositionTest {
                 .activeLayerNameIs("layer 2")
                 .doesNotHaveSelection()
                 .firstLayerHasMask()
-                .secondLayerHasMask();
+                .secondLayerHasMask()
+                .allLayerUIsAreOK();
 
         History.clear();
     }
@@ -76,6 +72,7 @@ public class CompositionTest {
         // add new layer bellow the active layer
         comp.addNewEmptyLayer("newLayer 1", true);
 
+        comp.getActiveLayer().createUI();
         assertThat(comp)
                 .isDirty()
                 .numLayersIs(3)
@@ -85,10 +82,12 @@ public class CompositionTest {
         // add new layer above the active layer
         comp.addNewEmptyLayer("newLayer 2", false);
 
+        comp.getActiveLayer().createUI();
         assertThat(comp)
                 .numLayersIs(4)
                 .layerNamesAre("layer 1", "newLayer 1", "newLayer 2", "layer 2")
-                .thirdLayerIsActive();
+                .thirdLayerIsActive()
+                .allLayerUIsAreOK();
 
         assertHistoryEditsAre("New Empty Layer", "New Empty Layer");
 
@@ -126,7 +125,7 @@ public class CompositionTest {
                 .secondLayerIsActive();
 
         Layer firstLayer = comp.getLayer(0);
-        comp.setActiveLayer(firstLayer, true, true, null);
+        comp.setActiveLayer(firstLayer, true, null);
 
         assertThat(comp)
                 .isDirty()
@@ -147,7 +146,7 @@ public class CompositionTest {
                 .isNotDirty()
                 .numLayersIs(2);
 
-        comp.addLayerInInitMode(ImageLayer.createEmpty(comp, "layer 3"));
+        comp.addLayerInInitMode(createEmptyImageLayer(comp, "layer 3"));
 
         assertThat(comp)
                 .isNotDirty()  // still not dirty!
@@ -162,7 +161,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("bellow active")
                 .atPosition(BELLOW_ACTIVE)
-                .add(ImageLayer.createEmpty(comp, "layer A"));
+                .add(createEmptyImageLayer(comp, "layer A"));
 
         assertThat(comp)
                 .isDirty()
@@ -175,7 +174,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("above active")
                 .atPosition(ABOVE_ACTIVE)
-                .add(ImageLayer.createEmpty(comp, "layer B"));
+                .add(createEmptyImageLayer(comp, "layer B"));
 
         assertThat(comp)
                 .numLayersIs(4)
@@ -187,7 +186,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("position 0")
                 .atIndex(0)
-                .add(ImageLayer.createEmpty(comp, "layer C"));
+                .add(createEmptyImageLayer(comp, "layer C"));
 
         assertThat(comp)
                 .numLayersIs(5)
@@ -199,7 +198,7 @@ public class CompositionTest {
         new LayerAdder(comp)
                 .withHistory("position 2")
                 .atIndex(2)
-                .add(ImageLayer.createEmpty(comp, "layer D"));
+                .add(createEmptyImageLayer(comp, "layer D"));
 
         assertThat(comp)
                 .numLayersIs(6)
@@ -302,7 +301,7 @@ public class CompositionTest {
                 .isNotDirty()
                 .layerNamesAre("layer 1", "layer 2");
 
-        comp.flattenImage(false, true);
+        comp.flattenImage();
 
         assertThat(comp)
                 .isDirty()
@@ -319,7 +318,7 @@ public class CompositionTest {
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
-        comp.mergeActiveLayerDown(false);
+        comp.mergeActiveLayerDown();
 
         assertThat(comp)
                 .isDirty()
@@ -486,7 +485,7 @@ public class CompositionTest {
                 .layerNamesAre("layer 1", "layer 2")
                 .secondLayerIsActive();
 
-        comp.deleteActiveLayer(false, true);
+        comp.deleteActiveLayer(true);
         assertThat(comp)
                 .isDirty()
                 .layerNamesAre("layer 1")
@@ -512,7 +511,7 @@ public class CompositionTest {
                 .secondLayerIsActive();
 
         Layer layer2 = comp.getLayer(1);
-        comp.deleteLayer(layer2, true, false);
+        comp.deleteLayer(layer2, true);
 
         assertThat(comp)
                 .isDirty()
@@ -535,8 +534,8 @@ public class CompositionTest {
 
         // now delete layer 1
         Layer layer1 = comp.getLayer(0);
-        comp.setActiveLayer(layer1, true, true, null);
-        comp.deleteLayer(layer1, true, false);
+        comp.setActiveLayer(layer1, true, null);
+        comp.deleteLayer(layer1, true);
 
         assertThat(comp)
                 .layerNamesAre("layer 2");
@@ -613,7 +612,7 @@ public class CompositionTest {
 
         assertThat(comp.getSelection())
                 .isNotNull()
-                .hasShapeBounds(comp.getCanvasImBounds()); // the whole canvas!
+                .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
         History.assertNumEditsIs(1);
 
         History.undo("Invert Selection");
@@ -624,7 +623,7 @@ public class CompositionTest {
         History.redo("Invert Selection");
         assertThat(comp.getSelection())
                 .isNotNull()
-                .hasShapeBounds(comp.getCanvasImBounds()); // the whole canvas!
+                .hasShapeBounds(comp.getCanvasBounds()); // the whole canvas!
     }
 
     @Test
@@ -664,11 +663,12 @@ public class CompositionTest {
 
     private void testTranslation(boolean makeDuplicateLayer) {
         // delete one layer in order to simplify
-        comp.deleteLayer(comp.getActiveLayer(), true, false);
+        comp.deleteLayer(comp.getActiveLayer(), true);
 
         assertThat(comp)
                 .activeLayerTranslationIs(0, 0)
-                .activeLayerAndMaskImageSizeIs(20, 10);
+                .activeLayerAndMaskImageSizeIs(20, 10)
+                .allLayerUIsAreOK();
         History.assertNumEditsIs(1);
 
         // 1. direction south-east
@@ -677,6 +677,7 @@ public class CompositionTest {
         String[] expectedLayers = {"layer 1"};
         if (makeDuplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy"};
+//            comp.getLayer(1).setUI(new TestLayerUI());
         }
 
         assertThat(comp)
@@ -829,7 +830,7 @@ public class CompositionTest {
 
         Tools.setCurrentTool(Tools.BRUSH); // doesn't matter which tool, but a tool must be selected
 
-        var tx = Crop.createCanvasImTransform(cropRect);
+        var tx = Crop.createCanvasTransform(cropRect);
         comp.imCoordsChanged(tx, false);
 
         assertThat(comp)
