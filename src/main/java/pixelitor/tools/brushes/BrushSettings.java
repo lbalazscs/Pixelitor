@@ -18,34 +18,25 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.Tool;
-import pixelitor.utils.Lazy;
+import pixelitor.utils.Configurable;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The settings of a brush.
- * This must be a separate from the main brush class
- * because the settings are shared between different
- * symmetry-instances of the same brush type
+ * The settings of a {@link Brush}.
+ * Settings are shared between different symmetry-instances for
+ * a given tool.
  */
-public abstract class BrushSettings {
+public abstract class BrushSettings extends Configurable {
     protected Tool tool;
-    private final Lazy<JPanel> configPanel = Lazy.of(this::createConfigPanel);
     private final List<AbstractBrush> brushes = new ArrayList<>(4);
-
-    public JPanel getConfigPanel() {
-        return configPanel.get();
-    }
-
-    protected abstract JPanel createConfigPanel();
 
     public void setTool(Tool tool) {
         this.tool = tool;
     }
 
-    public void registerBrush(DabsBrush brush) {
+    public void registerBrush(AbstractBrush brush) {
         brushes.add(brush);
 
         assert brushes.size() <= 4;

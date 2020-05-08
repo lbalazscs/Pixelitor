@@ -69,7 +69,6 @@ import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -160,7 +159,7 @@ public class AssertJSwingTest {
             app.delayBetweenEvents(AppRunner.ROBOT_DELAY_SLOW);
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
-            testSelectionToolAndMenus();
+            testShapesTool();
         } else {
             MaskMode[] maskModes = decideMaskModes();
             TestTarget target = decideTarget();
@@ -187,9 +186,9 @@ public class AssertJSwingTest {
         int remainingSeconds = secondsToWait;
         do {
             System.out.print(remainingSeconds + "...");
-            GUIUtils.showTaskbarProgress((int) (100 * (5 - remainingSeconds) / (double)secondsToWait));
+            GUIUtils.showTaskbarProgress((int) (100 * (5 - remainingSeconds) / (double) secondsToWait));
             Utils.sleep(1, SECONDS);
-        } while(--remainingSeconds > 0);
+        } while (--remainingSeconds > 0);
 
         app.exit();
     }
@@ -1485,10 +1484,10 @@ public class AssertJSwingTest {
         runMenuCommand("Hide Histograms");
         assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
 
-        keyboard.press(KeyEvent.VK_F6);
+        keyboard.press(VK_F6);
         assert EDT.call(HistogramsPanel.INSTANCE::isShown);
 
-        keyboard.press(KeyEvent.VK_F6);
+        keyboard.press(VK_F6);
         assert !EDT.call(HistogramsPanel.INSTANCE::isShown);
 
         runMenuCommand("Hide Layers");
@@ -1497,10 +1496,10 @@ public class AssertJSwingTest {
         runMenuCommand("Show Layers");
         assert EDT.call(LayersContainer::areLayersShown);
 
-        keyboard.press(KeyEvent.VK_F7);
+        keyboard.press(VK_F7);
         assert !EDT.call(LayersContainer::areLayersShown);
 
-        keyboard.press(KeyEvent.VK_F7);
+        keyboard.press(VK_F7);
         assert EDT.call(LayersContainer::areLayersShown);
 
         runMenuCommand("Hide Tools");

@@ -108,7 +108,7 @@ public class GenericBlurredShape implements BlurredShape {
         double shapeEndY = 2 * outerRadiusY - shapeStartY;
 
         Shape shape = shapeType.createShape(
-                new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY));
+                new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY), null);
         g2.setClip(shape);
         g2.setColor(Color.BLACK);
         g2.fillRect(0, 0, imgWidth, imgHeight);

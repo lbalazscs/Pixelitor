@@ -17,9 +17,15 @@
 
 package pixelitor.tools.shapes;
 
+import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.filters.gui.EffectsParam;
+import pixelitor.filters.gui.StrokeParam;
+import pixelitor.filters.gui.StrokeSettings;
+import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.history.History;
@@ -37,33 +43,68 @@ import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.Lazy;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.util.EnumMap;
+import java.util.Map;
 
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
-import static pixelitor.tools.shapes.ShapesToolState.INITIAL_DRAG;
-import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
-import static pixelitor.tools.shapes.ShapesToolState.TRANSFORM;
+import static pixelitor.tools.shapes.ShapesToolState.*;
+import static pixelitor.tools.shapes.TwoPointPaintType.FOREGROUND;
+import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
 
 /**
  * The Shapes Tool
  */
 public class ShapesTool extends DragTool {
-    private final ShapeSettings settings = new ShapeSettings(this);
+    // history edit names for the shape editing
+    public static final String CHANGE_SHAPE_FILL = "Change Shape Fill";
+    public static final String CHANGE_SHAPE_STROKE = "Change Shape Stroke";
+    public static final String CHANGE_SHAPE_STROKE_SETTINGS = "Change Shape Stroke Settings";
+    public static final String CHANGE_SHAPE_EFFECTS = "Change Shape Effects";
+    public static final String CHANGE_SHAPE_TYPE = "Change Shape Type";
+    public static final String CHANGE_SHAPE_COLORS = "Change Shape Colors";
+
+    private final Map<ShapeType, ShapeTypeSettings> defaultShapeTypeSettings;
+
+    private boolean regenerateShape = true;
+
+    private final EnumComboBoxModel<ShapeType> typeModel
+            = new EnumComboBoxModel<>(ShapeType.class);
+    private final EnumComboBoxModel<TwoPointPaintType> fillPaintModel
+            = new EnumComboBoxModel<>(TwoPointPaintType.class);
+    private final EnumComboBoxModel<TwoPointPaintType> strokePaintModel
+            = new EnumComboBoxModel<>(TwoPointPaintType.class);
+
+    private final StrokeParam strokeParam = new StrokeParam("");
+
+    private final AbstractAction shapeSettingsAction = new AbstractAction("Settings...") {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            showShapeSettingsDialog();
+        }
+    };
+
+    // During a single mouse drag, only one stroke should be created
+    // This is particularly important for "random shape"
+    private final Lazy<Stroke> stroke = Lazy.of(strokeParam::createStroke);
+    private final EffectsParam effectsParam = new EffectsParam("");
 
     private final JComboBox<TwoPointPaintType> fillPaintCombo
-        = settings.createFillPaintCombo();
+            = createFillPaintCombo();
     private final JComboBox<TwoPointPaintType> strokePaintCombo
-        = settings.createStrokePaintCombo();
+            = createStrokePaintCombo();
 
     private JButton strokeSettingsButton;
     private JDialog strokeSettingsDialog;
@@ -84,40 +125,160 @@ public class ShapesTool extends DragTool {
 
     public ShapesTool() {
         super("Shapes", 'U', "shapes_tool_icon.png",
-            "<b>drag</b> to draw a shape. " +
-                "Hold <b>Alt</b> down to drag from the center. " +
-                "Hold <b>SPACE</b> down while drawing to move the shape. ",
-            Cursors.DEFAULT, true, true,
-            false, ClipStrategy.FULL);
+                "<b>drag</b> to draw a shape. " +
+                        "Hold <b>Alt</b> down to drag from the center. " +
+                        "Hold <b>SPACE</b> down while drawing to move the shape. ",
+                Cursors.DEFAULT, true, true,
+                false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
+        defaultShapeTypeSettings = new EnumMap<>(ShapeType.class);
     }
 
     @Override
     public void initSettingsPanel() {
-        JComboBox<ShapeType> shapeTypeCB = settings.createShapeTypeCombo();
+        strokeParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_STROKE_SETTINGS));
+        effectsParam.setAdjustmentListener(() -> guiChanged(CHANGE_SHAPE_EFFECTS));
+
+        JComboBox<ShapeType> shapeTypeCB = createShapeTypeCombo();
         settingsPanel.addComboBox("Shape:", shapeTypeCB, "shapeTypeCB");
+        settingsPanel.addButton(shapeSettingsAction);
 
-        fillPaintCombo.setFocusable(false);
+        settingsPanel.addSeparator();
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
-
-        strokePaintCombo.setFocusable(false);
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
-            e -> initAndShowStrokeSettingsDialog());
+                e -> initAndShowStrokeSettingsDialog());
 
         settingsPanel.addButton("Effects...",
-            e -> showEffectsDialog());
+                e -> showEffectsDialog());
 
         settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
-            "Convert the active shape to a selection");
+                "Convert the active shape to a selection");
 
+        fillPaintModel.setSelectedItem(FOREGROUND);
         updateStrokeEnabledState();
     }
 
+    private void guiChanged(String editName) {
+        if (regenerateShape) {
+            regenerateShape(editName);
+        }
+        updateStrokeEnabledState();
+        if (editName.equals(CHANGE_SHAPE_TYPE)) {
+            shapeSettingsAction.setEnabled(getSelectedType().hasSettings());
+        }
+    }
+
+    private JComboBox<TwoPointPaintType> createFillPaintCombo() {
+        @SuppressWarnings("unchecked")
+        var cb = new JComboBox<TwoPointPaintType>(fillPaintModel);
+
+        cb.setMaximumRowCount(fillPaintModel.getSize());
+        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_FILL));
+
+        return cb;
+    }
+
+    private JComboBox<TwoPointPaintType> createStrokePaintCombo() {
+        @SuppressWarnings("unchecked")
+        var cb = new JComboBox<TwoPointPaintType>(strokePaintModel);
+
+        cb.setMaximumRowCount(strokePaintModel.getSize());
+        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_STROKE));
+
+        return cb;
+    }
+
+    private JComboBox<ShapeType> createShapeTypeCombo() {
+        @SuppressWarnings("unchecked")
+        var shapeTypeCB = new JComboBox<ShapeType>(typeModel);
+
+        // make sure all values are visible without a scrollbar
+        shapeTypeCB.setMaximumRowCount(typeModel.getSize());
+        shapeTypeCB.addActionListener(e -> guiChanged(CHANGE_SHAPE_TYPE));
+
+        return shapeTypeCB;
+    }
+
+    public ShapeType getSelectedType() {
+        return typeModel.getSelectedItem();
+    }
+
+    public ShapeTypeSettings getDefaultSettingsFor(ShapeType shapeType) {
+        return defaultShapeTypeSettings.computeIfAbsent(shapeType,
+                ShapeType::createDefaultSettings);
+    }
+
+    public TwoPointPaintType getSelectedFillPaint() {
+        return fillPaintModel.getSelectedItem();
+    }
+
+    public TwoPointPaintType getSelectedStrokePaint() {
+        return strokePaintModel.getSelectedItem();
+    }
+
+    public AreaEffects getEffects() {
+        return effectsParam.getEffects();
+    }
+
+    public Stroke getStroke() {
+        return stroke.get();
+    }
+
+    public StrokeSettings getStrokeSettings() {
+        return strokeParam.copyState();
+    }
+
+    public void invalidateStroke() {
+        stroke.invalidate();
+    }
+
+    private JDialog createStrokeSettingsDialog() {
+        return strokeParam.createSettingsDialog();
+    }
+
+    public StrokeParam getStrokeParam() {
+        return strokeParam;
+    }
+
+    private void setGUIDefaultsFrom(StyledShape styledShape) {
+        // as this is used as part of undo/redo, don't regenerate the shape
+        regenerateShape = false;
+        try {
+            // the shape target can't change for a styled shape edit
+            typeModel.setSelectedItem(styledShape.getShapeType());
+            fillPaintModel.setSelectedItem(styledShape.getFillPaintType());
+            strokePaintModel.setSelectedItem(styledShape.getStrokePaintType());
+            strokeParam.setState(styledShape.getStrokeSettings());
+            effectsParam.setEffects(styledShape.getEffects());
+        } finally {
+            regenerateShape = true;
+        }
+    }
+
+    private void showShapeSettingsDialog() {
+        ShapeType selectedType = getSelectedType();
+        ShapeTypeSettings settings;
+        if (styledShape != null) {
+            // if there is an active shape, then configure it
+            settings = styledShape.getShapeTypeSettings();
+        } else {
+            // else configure and store the tool's default
+            settings = defaultShapeTypeSettings.computeIfAbsent(selectedType,
+                    ShapeType::createDefaultSettings);
+        }
+        JPanel configPanel = settings.getConfigPanel();
+        new DialogBuilder()
+                .title("Settings for " + selectedType)
+                .withScrollbars()
+                .content(configPanel)
+                .show();
+    }
+
     private void showEffectsDialog() {
-        effectsDialog = settings.buildEffectsDialog(null);
+        effectsDialog = effectsParam.buildDialog(null, false);
         GUIUtils.showDialog(effectsDialog);
     }
 
@@ -131,11 +292,11 @@ public class ShapesTool extends DragTool {
             }
             // if pressed outside the transform box,
             // finish the existing shape
-            finalizeShape(e.getComp());
+            rasterizeShape(e.getComp());
         }
 
         // if this method didn't return yet, start a new shape
-        styledShape = new StyledShape(settings);
+        styledShape = new StyledShape(this);
         setState(INITIAL_DRAG);
     }
 
@@ -192,7 +353,7 @@ public class ShapesTool extends DragTool {
         var comp = e.getComp();
 
         transformBox = styledShape.createBox(userDrag, e.getView());
-        if(transformBox == null) {
+        if (transformBox == null) {
             // The box could not be created.
             // Cancel just as for empty clicks.
             styledShape = null;
@@ -205,7 +366,7 @@ public class ShapesTool extends DragTool {
         setState(TRANSFORM);
         History.add(new CreateBoxedShapeEdit(comp, styledShape, transformBox));
 
-        settings.invalidateStroke();
+        invalidateStroke();
     }
 
     @Override
@@ -249,7 +410,7 @@ public class ShapesTool extends DragTool {
         // or to clicking outside the transform box:
         // the handles disappear, but the effect remains
         if (state == TRANSFORM) {
-            OpenImages.onActiveComp(this::finalizeShape);
+            OpenImages.onActiveComp(this::rasterizeShape);
         }
     }
 
@@ -274,33 +435,32 @@ public class ShapesTool extends DragTool {
      * After this method the shape becomes part of the {@link Drawable}'s
      * pixels (before it was only drawn above it).
      */
-    private void finalizeShape(Composition comp) {
+    private void rasterizeShape(Composition comp) {
         assert transformBox != null;
         assert styledShape != null;
 
-        styledShape.finalizeTo(comp, transformBox, settings);
+        styledShape.rasterizeTo(comp, transformBox, this);
 
         styledShape = null;
         transformBox = null;
         setState(NO_INTERACTION);
     }
 
-    public void regenerateShape(String editName) {
+    private void regenerateShape(String editName) {
         if (styledShape != null) {
             assert transformBox != null;
 
             DrawableAction.run(editName,
-                    dr -> styledShape.regenerate(transformBox, settings, editName));
+                    dr -> styledShape.regenerate(transformBox, this, editName));
         }
     }
 
-    // TODO this should be in ShapeSettings?
-    public void updateStrokeEnabledState() {
-        enableStrokeSettings(settings.hasStrokePaint());
+    private void updateStrokeEnabledState() {
+        enableStrokeSettings(getSelectedStrokePaint() != NONE);
     }
 
     private void initAndShowStrokeSettingsDialog() {
-        strokeSettingsDialog = settings.createStrokeSettingsDialog();
+        strokeSettingsDialog = createStrokeSettingsDialog();
 
         GUIUtils.showDialog(strokeSettingsDialog);
     }
@@ -349,7 +509,7 @@ public class ShapesTool extends DragTool {
     @Override
     public DragDisplayType getDragDisplayType() {
         assert state == INITIAL_DRAG : "state = " + state;
-        return settings.getSelectedType().getDragDisplayType();
+        return getSelectedType().getDragDisplayType();
     }
 
     /**
@@ -396,9 +556,7 @@ public class ShapesTool extends DragTool {
 
     @Override
     public void fgBgColorsChanged() {
-        if (styledShape != null) {
-            regenerateShape(ShapeSettings.CHANGE_SHAPE_COLORS);
-        }
+        regenerateShape(CHANGE_SHAPE_COLORS);
     }
 
     @Override
@@ -461,17 +619,21 @@ public class ShapesTool extends DragTool {
         return transformBox;
     }
 
+    public Map<ShapeType, ShapeTypeSettings> getDefaultShapeTypeSettings() {
+        return defaultShapeTypeSettings;
+    }
+
     // used only for undo/redo
     public void setStyledShape(StyledShape styledShape) {
         assert state == TRANSFORM : "state = " + state;
 
         this.styledShape = styledShape;
-        transformBox.replaceTransformListener(styledShape::transform);
+        transformBox.replaceTransformable(styledShape);
 
         setFGColor(styledShape.getFgColor(), false);
         setBGColor(styledShape.getBgColor(), false);
-        
-        settings.restoreFrom(styledShape);
+
+        setGUIDefaultsFrom(styledShape);
     }
 
     @Override
@@ -496,7 +658,7 @@ public class ShapesTool extends DragTool {
         if (transformBox != null) {
             assert styledShape != null;
             assert state == TRANSFORM : "state = " + state;
-            finalizeShape(comp);
+            rasterizeShape(comp);
         }
     }
 
@@ -507,9 +669,9 @@ public class ShapesTool extends DragTool {
 
     @Override
     public String getStateInfo() {
-        return settings.getSelectedType()
-                + ", fp=" + settings.getSelectedFillPaint()
-                + ", sp=" + settings.getSelectedStrokePaint()
+        return getSelectedType()
+                + ", fp=" + getSelectedFillPaint()
+                + ", sp=" + getSelectedStrokePaint()
                 + ", state=" + state;
     }
 
@@ -528,7 +690,10 @@ public class ShapesTool extends DragTool {
             node.add(styledShape.getDebugNode());
         }
 
-        settings.addToDebugNode(node);
+        node.addString("type", getSelectedType().toString());
+        node.addString("fill", getSelectedFillPaint().toString());
+        node.addString("stroke", getSelectedStrokePaint().toString());
+        strokeParam.addDebugNodeInfo(node);
 
         return node;
     }

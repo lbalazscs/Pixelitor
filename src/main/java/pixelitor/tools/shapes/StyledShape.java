@@ -28,20 +28,17 @@ import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
+import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.history.FinalizeShapeEdit;
 import pixelitor.tools.shapes.history.StyledShapeEdit;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.UserDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -59,10 +56,11 @@ import static pixelitor.tools.shapes.TwoPointPaintType.NONE;
  * that can paint itself on a given {@link Graphics2D},
  * and can be transformed by a {@link TransformBox}
  */
-public class StyledShape implements Cloneable {
+public class StyledShape implements Cloneable, Transformable {
     private static final BasicStroke STROKE_FOR_OPEN_SHAPES = new BasicStroke(1);
 
     private ShapeType shapeType;
+    private ShapeTypeSettings shapeTypeSettings;
 
     // The styled shape is initially defined by a user drag,
     // and then by a transform box
@@ -92,13 +90,14 @@ public class StyledShape implements Cloneable {
     private Color fgColor;
     private Color bgColor;
 
-    public StyledShape(ShapeSettings settings) {
-        setType(settings.getSelectedType());
-        setFillPaintType(settings.getSelectedFillPaint());
-        setStrokePaintType(settings.getSelectedStrokePaint());
-        setStroke(settings.getStroke());
-        setEffects(settings.getEffects());
-        strokeSettings = settings.getStrokeSettings();
+    public StyledShape(ShapesTool tool) {
+        setType(tool.getSelectedType(), tool);
+
+        setFillPaintType(tool.getSelectedFillPaint());
+        setStrokePaintType(tool.getSelectedStrokePaint());
+        setStroke(tool.getStroke());
+        setEffects(tool.getEffects());
+        strokeSettings = tool.getStrokeSettings();
         insideBox = false;
 
         fgColor = getFGColor();
@@ -206,15 +205,15 @@ public class StyledShape implements Cloneable {
         ImDrag imDrag = userDrag.toImDrag();
 
         origImDrag = imDrag;
-        unTransformedShape = shapeType.createShape(imDrag);
+        unTransformedShape = shapeType.createShape(imDrag, shapeTypeSettings);
 
         // since there is no transform box yet
         transformedImDrag = imDrag;
         shape = unTransformedShape;
     }
 
-    // called by the transform box manipulations
-    public void transform(AffineTransform at) {
+    @Override
+    public void transformWith(AffineTransform at) {
         shape = at.createTransformedShape(unTransformedShape);
         transformedImDrag = origImDrag.transform(at);
     }
@@ -235,24 +234,44 @@ public class StyledShape implements Cloneable {
         this.effects = effects;
     }
 
-    private void changeTypeInBox(ShapeType shapeType) {
+    private void changeTypeInBox(ShapesTool tool) {
         assert insideBox;
-        setType(shapeType);
+        ShapeType selectedType = tool.getSelectedType();
+        setType(selectedType, tool);
 
         if (shapeType.isDirectional()) {
             // make sure that the new directional shape is drawn
             // along the direction of the existing box
             // TODO this still ignores the height of the current box
-            unTransformedShape = shapeType.createShape(origImDrag.getCenterHorizontalDrag());
+            unTransformedShape = shapeType.createShape(origImDrag.getCenterHorizontalDrag(), shapeTypeSettings);
         } else {
-            unTransformedShape = shapeType.createShape(origImDrag);
+            unTransformedShape = shapeType.createShape(origImDrag, shapeTypeSettings);
         }
         // the new transformed shape will be calculated later,
         // after the other parameters have been set
     }
 
-    private void setType(ShapeType shapeType) {
+    private void setType(ShapeType shapeType, ShapesTool tool) {
+        boolean typeChanged = this.shapeType != shapeType;
         this.shapeType = shapeType;
+
+        if (typeChanged) {
+            if (shapeType.hasSettings()) {
+                // a copy is made so that each StyledShape can have independent settings
+                ShapeTypeSettings copyOfDefaults = tool.getDefaultSettingsFor(shapeType).copy();
+                setTypeSettings(copyOfDefaults);
+            } else {
+                setTypeSettings(null);
+            }
+        }
+    }
+
+    private void setTypeSettings(ShapeTypeSettings settings) {
+        shapeTypeSettings = settings;
+        if (settings != null) {
+            settings.setAdjustmentListener(() ->
+                    regenerate(Tools.SHAPES.getTransformBox(), Tools.SHAPES, ShapesTool.CHANGE_SHAPE_TYPE));
+        }
     }
 
     public TransformBox createBox(UserDrag userDrag, View view) {
@@ -264,12 +283,12 @@ public class StyledShape implements Cloneable {
             // for directional shapes, zero-width or zero-height drags are allowed
             box = createRotatedBox(userDrag, view);
         } else {
-            if(userDrag.hasZeroWidth() || userDrag.hasZeroHeight()) {
+            if (userDrag.hasZeroWidth() || userDrag.hasZeroHeight()) {
                 return null;
             }
             Rectangle origCoRect = userDrag.toPosCoRect();
             assert !origCoRect.isEmpty() : "userDrag = " + userDrag;
-            box = new TransformBox(origCoRect, view, this::transform);
+            box = new TransformBox(origCoRect, view, this);
         }
         return box;
     }
@@ -281,7 +300,7 @@ public class StyledShape implements Cloneable {
         // Set the original shape to the horizontal shape.
         // It could also be rotated backwards with an AffineTransform.
         ImDrag imDrag = userDrag.toImDrag();
-        unTransformedShape = shapeType.createHorizontalShape(imDrag);
+        unTransformedShape = shapeType.createHorizontalShape(imDrag, shapeTypeSettings);
 
         // Set the original drag to the diagonal of the back-rotated transform box,
         // so that after a shape-type change the new shape is created correctly
@@ -302,7 +321,7 @@ public class StyledShape implements Cloneable {
                 coDist,
                 coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
         assert !horizontalBoxBounds.isEmpty();
-        TransformBox box = new TransformBox(horizontalBoxBounds, view, this::transform);
+        TransformBox box = new TransformBox(horizontalBoxBounds, view, this);
 
         // rotate the horizontal box into place
         double angle = userDrag.calcAngle();
@@ -315,19 +334,14 @@ public class StyledShape implements Cloneable {
         return box;
     }
 
-    public void finalizeTo(Composition comp, TransformBox transformBox, ShapeSettings settings) {
-        if (shape == null) { // should not happen
-            if (Build.isDevelopment()) {
-                throw new IllegalStateException();
-            }
-            return;
-        }
+    public void rasterizeTo(Composition comp, TransformBox transformBox, ShapesTool tool) {
+        assert shape != null;
 
         PartialImageEdit imageEdit = null;
         Drawable dr = comp.getActiveDrawable();
         if (dr != null) { // a text layer could be active
             Rectangle shapeBounds = shape.getBounds();
-            int thickness = calcThickness(settings);
+            int thickness = calcThickness(tool);
             shapeBounds.grow(thickness, thickness);
 
             if (!shapeBounds.isEmpty()) {
@@ -350,6 +364,15 @@ public class StyledShape implements Cloneable {
             // a repaint is necessary even if the box is outside the canvas
             comp.repaint();
         }
+
+        saveShapeTypeSettingsAsDefault(tool);
+    }
+
+    private void saveShapeTypeSettingsAsDefault(ShapesTool tool) {
+        if (shapeTypeSettings != null) {
+            shapeTypeSettings.setAdjustmentListener(null);
+            tool.getDefaultShapeTypeSettings().put(shapeType, shapeTypeSettings);
+        }
     }
 
     private void paintOnDrawable(Drawable dr) {
@@ -370,11 +393,11 @@ public class StyledShape implements Cloneable {
     /**
      * Calculate the extra thickness around the shape for the undo area
      */
-    private int calcThickness(ShapeSettings settings) {
+    private int calcThickness(ShapesTool tool) {
         int thickness = 0;
         int extraStrokeThickness = 0;
         if (hasStroke()) {
-            StrokeParam strokeParam = settings.getStrokeParam();
+            StrokeParam strokeParam = tool.getStrokeParam();
 
             thickness = strokeParam.getStrokeWidth();
 
@@ -406,31 +429,31 @@ public class StyledShape implements Cloneable {
         }
     }
 
-    public void regenerate(TransformBox transformBox, ShapeSettings settings, String editName) {
+    public void regenerate(TransformBox box, ShapesTool tool, String editName) {
         StyledShape backup = clone();
 
         switch (editName) {
-            case ShapeSettings.CHANGE_SHAPE_TYPE:
-                changeTypeInBox(settings.getSelectedType());
+            case ShapesTool.CHANGE_SHAPE_TYPE:
+                changeTypeInBox(tool);
 
                 // calculate the new transformed shape
-                transformBox.applyTransformation();
+                box.applyTransform();
                 break;
-            case ShapeSettings.CHANGE_SHAPE_FILL:
-                setFillPaintType(settings.getSelectedFillPaint());
+            case ShapesTool.CHANGE_SHAPE_FILL:
+                setFillPaintType(tool.getSelectedFillPaint());
                 break;
-            case ShapeSettings.CHANGE_SHAPE_STROKE:
-                setStrokePaintType(settings.getSelectedStrokePaint());
+            case ShapesTool.CHANGE_SHAPE_STROKE:
+                setStrokePaintType(tool.getSelectedStrokePaint());
                 break;
-            case ShapeSettings.CHANGE_SHAPE_STROKE_SETTINGS:
-                setStroke(settings.getStroke());
-                strokeSettings = settings.getStrokeSettings();
-                settings.invalidateStroke();
+            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS:
+                setStroke(tool.getStroke());
+                strokeSettings = tool.getStrokeSettings();
+                tool.invalidateStroke();
                 break;
-            case ShapeSettings.CHANGE_SHAPE_EFFECTS:
-                setEffects(settings.getEffects());
+            case ShapesTool.CHANGE_SHAPE_EFFECTS:
+                setEffects(tool.getEffects());
                 break;
-            case ShapeSettings.CHANGE_SHAPE_COLORS:
+            case ShapesTool.CHANGE_SHAPE_COLORS:
                 setFgColor(getFGColor());
                 setBgColor(getBGColor());
                 break;
@@ -445,6 +468,10 @@ public class StyledShape implements Cloneable {
 
     public ShapeType getShapeType() {
         return shapeType;
+    }
+
+    public ShapeTypeSettings getShapeTypeSettings() {
+        return shapeTypeSettings;
     }
 
     public TwoPointPaintType getFillPaintType() {
@@ -467,7 +494,7 @@ public class StyledShape implements Cloneable {
         return fgColor;
     }
 
-    public void setFgColor(Color fgColor) {
+    private void setFgColor(Color fgColor) {
         this.fgColor = fgColor;
     }
 
@@ -475,7 +502,7 @@ public class StyledShape implements Cloneable {
         return bgColor;
     }
 
-    public void setBgColor(Color bgColor) {
+    private void setBgColor(Color bgColor) {
         this.bgColor = bgColor;
     }
 

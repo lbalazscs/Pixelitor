@@ -172,7 +172,7 @@ public enum BrushType {
         return settingsForTool.getConfigPanel();
     }
 
-    protected BrushSettings findSettings(Tool tool, Supplier<BrushSettings> settingsCreator) {
+    protected BrushSettings findSettings(Tool tool, Supplier<BrushSettings> settingsFactory) {
         BrushSettings settings = null;
         if (settingsByTool == null) {
             settingsByTool = new IdentityHashMap<>();
@@ -180,7 +180,7 @@ public enum BrushType {
             settings = settingsByTool.get(tool);
         }
         if (settings == null) {
-            settings = settingsCreator.get();
+            settings = settingsFactory.get();
             settings.setTool(tool);
             settingsByTool.put(tool, settings);
         }

@@ -36,13 +36,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Dimension2D;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.function.Consumer;
+import java.awt.geom.*;
 
 import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -52,7 +46,8 @@ import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Cursors.MOVE;
 
 /**
- * A widget that calculates an {@link AffineTransform}
+ * A widget that manipulates a {@link Transformable} by
+ * calculating an {@link AffineTransform}
  * based on the interactive movement of handles
  */
 public class TransformBox implements ToolWidget {
@@ -71,7 +66,7 @@ public class TransformBox implements ToolWidget {
     private final PositionHandle[] positions;
     private final EdgeHandle[] edges;
 
-    private Consumer<AffineTransform> transformListener;
+    private Transformable transformable;
 
     private final View view;
 
@@ -101,14 +96,14 @@ public class TransformBox implements ToolWidget {
     private Memento beforeMovement;
 
     public TransformBox(Rectangle2D origCoRect, View view,
-                        Consumer<AffineTransform> transformListener) {
+                        Transformable transformable) {
         // it must be transformed to positive rectangle before calling this
         assert !origCoRect.isEmpty();
 
         origImRect = view.componentToImageSpace(origCoRect);
         rotatedImSize = new DDimension(origImRect);
         this.view = view;
-        this.transformListener = transformListener;
+        this.transformable = transformable;
 
         double westX = origCoRect.getX();
         double eastX = westX + origCoRect.getWidth();
@@ -162,8 +157,8 @@ public class TransformBox implements ToolWidget {
         updateDirections(false);
     }
 
-    public void replaceTransformListener(Consumer<AffineTransform> transformListener) {
-        this.transformListener = transformListener;
+    public void replaceTransformable(Transformable transformable) {
+        this.transformable = transformable;
     }
 
     /**
@@ -262,7 +257,7 @@ public class TransformBox implements ToolWidget {
         updateRotatedDimensions();
         updateRotLocation();
         updateBoxShape();
-        applyTransformation();
+        applyTransform();
 
         boolean isInsideOut = rotatedImSize.isInsideOut();
         if (isInsideOut != wasInsideOut) {
@@ -277,8 +272,8 @@ public class TransformBox implements ToolWidget {
         }
     }
 
-    public void applyTransformation() {
-        transformListener.accept(calcImTransform());
+    public void applyTransform() {
+        transformable.transformWith(calcImTransform());
     }
 
     private void updateRotLocation() {
@@ -532,7 +527,7 @@ public class TransformBox implements ToolWidget {
         updateEdgePositions();
         updateRotatedDimensions();
         updateBoxShape();
-        applyTransformation();
+        applyTransform();
         updateDirections();
     }
 

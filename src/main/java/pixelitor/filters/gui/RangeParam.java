@@ -87,6 +87,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public JComponent createGUI() {
+//        assert paramGUI == null;
         var sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         setGUIEnabledState();
@@ -419,6 +420,10 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     @Override
     public Object getParamValue() {
         return value;
+    }
+
+    public RangeParam copy() {
+        return new RangeParam(getName(), minValue, value, maxValue, addDefaultButton, textPosition, randomizePolicy);
     }
 
     @Override

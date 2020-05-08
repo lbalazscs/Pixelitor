@@ -91,15 +91,12 @@ public class PathTest {
         sp.storeTransformRefPoints(); // the ref point for the first anchor is 10, 10
 
         var at = AffineTransform.getTranslateInstance(20, 10);
-        sp.refTransform(at);
+        sp.transformWith(at);
         assertThat(sp).firstAnchorIsAt(30, 20);
 
         at = AffineTransform.getTranslateInstance(10, 20);
-        sp.refTransform(at);
+        sp.transformWith(at);
         assertThat(sp).firstAnchorIsAt(20, 30);
-
-        sp.transform(at); // absolute transform
-        assertThat(sp).firstAnchorIsAt(30, 50);
     }
 
     private void testConversionsFor(Shape shape) {

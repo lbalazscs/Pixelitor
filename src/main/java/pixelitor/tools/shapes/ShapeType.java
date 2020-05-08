@@ -26,22 +26,24 @@ import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.Stroke;
+import java.awt.geom.*;
 
 /**
  * The shapes types in the shapes tool
  */
 public enum ShapeType {
-    RECTANGLE("Rectangle", true, false) {
+    RECTANGLE("Rectangle", true, false, true) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
+            var rs = (RectangleSettings) settings;
             setPositiveCoordinates(imDrag);
-            return new Rectangle2D.Double(x, y, width, height);
+            double radius = rs.getRadius();
+            if (radius == 0) {
+                return new Rectangle2D.Double(x, y, width, height);
+            } else {
+                return new RoundRectangle2D.Double(x, y, width, height, radius, radius);
+            }
         }
 
         @Override
@@ -53,9 +55,14 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, ELLIPSE("Ellipse", true, false) {
+
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public RectangleSettings createDefaultSettings() {
+            return new RectangleSettings();
+        }
+    }, ELLIPSE("Ellipse", true, false, false) {
+        @Override
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setPositiveCoordinates(imDrag);
             return new Ellipse2D.Double(x, y, width, height);
         }
@@ -69,9 +76,9 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, DIAMOND("Diamond", true, false) {
+    }, DIAMOND("Diamond", true, false, false) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return createDiamond(x, y, width, height);
         }
@@ -100,11 +107,12 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, LINE("Line", false, true) {
+    }, LINE("Line", true, true, true) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
-//            updateCoordinatesPositive(start, end);
-            return imDrag.asLine();
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
+            var lineSettings = (LineSettings) settings;
+            Stroke stroke = lineSettings.getStroke();
+            return stroke.createStrokedShape(imDrag.asLine());
         }
 
         @Override
@@ -113,18 +121,26 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createHorizontalShape(ImDrag imDrag) {
-            return new Line2D.Double(imDrag.getStartX(), imDrag.getStartY(),
+        public Shape createHorizontalShape(ImDrag imDrag, ShapeTypeSettings settings) {
+            var line = new Line2D.Double(imDrag.getStartX(), imDrag.getStartY(),
                     imDrag.getStartX() + imDrag.getDistance(), imDrag.getStartY());
+            var lineSettings = (LineSettings) settings;
+            Stroke stroke = lineSettings.getStroke();
+            return stroke.createStrokedShape(line);
         }
 
         @Override
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
-    }, HEART("Heart", true, false) {
+
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public LineSettings createDefaultSettings() {
+            return new LineSettings();
+        }
+    }, HEART("Heart", true, false, false) {
+        @Override
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return Shapes.createHeartShape(x, y, width, height);
         }
@@ -133,14 +149,15 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             return Shapes.createHeartShape(x, y, diameter, diameter);
         }
-    }, STAR("Star", true, false) {
+    }, STAR("Star", true, false, true) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
-            return createStar(x, y, width, height);
+            StarSettings starSettings = (StarSettings) settings;
+            return createStar(starSettings.getNumBranches(), x, y, width, height);
         }
 
-        protected Shape createStar(double x, double y, double width, double height) {
+        private Shape createStar(int numBranches, double x, double y, double width, double height) {
             double halfWidth = width / 2;
             double halfHeight = height / 2;
             double cx = x + halfWidth;
@@ -160,23 +177,28 @@ public enum ShapeType {
                 outerRadius = innerRadius + 0.01;
             }
 
-            return new Star2D(cx, cy, innerRadius, outerRadius, 7);
+            return new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return createStar(x, y, diameter, diameter / 3.0 + 1);
+            return createStar(7, x, y, diameter, diameter / 3.0 + 1);
         }
 
         @Override
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, RANDOM_STAR("Random Star", true, false) {
+
+        @Override
+        public StarSettings createDefaultSettings() {
+            return new StarSettings();
+        }
+    }, RANDOM_STAR("Random Star", true, false, false) {
         private ImDrag lastUserDrag;
 
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             if (imDrag != lastUserDrag) {
                 RandomStarShape.randomize();
             } else {
@@ -198,16 +220,16 @@ public enum ShapeType {
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.WIDTH_HEIGHT;
         }
-    }, ARROW("Arrow", true, true) {
+    }, ARROW("Arrow", true, true, false) {
         GeneralPath unitArrow = null;
 
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             return createArrowShape(imDrag, true);
         }
 
         @Override
-        public Shape createHorizontalShape(ImDrag imDrag) {
+        public Shape createHorizontalShape(ImDrag imDrag, ShapeTypeSettings settings) {
             return createArrowShape(imDrag, false);
         }
 
@@ -242,16 +264,16 @@ public enum ShapeType {
                     middleY,
                     x + diameter,
                     middleY);
-            return createShape(imDrag);
+            return createShape(imDrag, null);
         }
 
         @Override
         public DragDisplayType getDragDisplayType() {
             return DragDisplayType.ANGLE_DIST;
         }
-    }, CAT("Cat", true, false) {
+    }, CAT("Cat", true, false, false) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return Shapes.createCatShape(x, y, width, height);
         }
@@ -260,9 +282,9 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             return Shapes.createCatShape(x, y, diameter, diameter);
         }
-    }, KIWI("Kiwi", true, false) {
+    }, KIWI("Kiwi", true, false, false) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return Shapes.createKiwiShape(x, y, width, height);
         }
@@ -271,9 +293,9 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             return Shapes.createKiwiShape(x, y, diameter, diameter);
         }
-    }, BAT("Bat", true, false) {
+    }, BAT("Bat", true, false, false) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return Shapes.createBatShape(x, y, width, height);
         }
@@ -282,9 +304,9 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             return Shapes.createBatShape(x, y, diameter, diameter);
         }
-    }, RABBIT("Rabbit", true, false) {
+    }, RABBIT("Rabbit", true, false, false) {
         @Override
-        public Shape createShape(ImDrag imDrag) {
+        public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             setCoordinates(imDrag);
             return Shapes.createRabbitShape(x, y, width, height);
         }
@@ -385,17 +407,24 @@ public enum ShapeType {
     // if a shape is not closed, then it can't be filled directly
     private final boolean closed;
 
+    private final boolean hasSettings;
+
     // directional shapes are the arrow and line, where the
     // transform box is initialized at the angle of the shape
     private final boolean directional;
 
     protected double x, y, width, height;
 
-    ShapeType(String guiName, boolean closed, boolean directional) {
+    ShapeType(String guiName, boolean closed, boolean directional, boolean hasSettings) {
         this.guiName = guiName;
         this.closed = closed;
         this.directional = directional;
+        this.hasSettings = hasSettings;
     }
+
+    public abstract Shape createShape(ImDrag imDrag, ShapeTypeSettings settings);
+
+    public abstract Shape createShape(double x, double y, double diameter);
 
     /**
      * Set the x, y, width, height coordinates so that width and height are positive
@@ -420,16 +449,19 @@ public enum ShapeType {
         height = r.getHeight();
     }
 
-    public abstract Shape createShape(ImDrag imDrag);
-
     /**
      * Return the directional shape that would result
      * from the given drag if it was horizontal
      */
-    public Shape createHorizontalShape(ImDrag imDrag) {
+    public Shape createHorizontalShape(ImDrag imDrag, ShapeTypeSettings settings) {
         // overridden in directional types
         assert !directional;
         throw new UnsupportedOperationException("not directional");
+    }
+
+    public DragDisplayType getDragDisplayType() {
+        // overridden if necessary
+        return DragDisplayType.NONE;
     }
 
     public boolean isDirectional() {
@@ -440,7 +472,15 @@ public enum ShapeType {
         return closed;
     }
 
-    public abstract Shape createShape(double x, double y, double diameter);
+    public boolean hasSettings() {
+        return hasSettings;
+    }
+
+    public ShapeTypeSettings createDefaultSettings() {
+        assert hasSettings() : "no settings for " + this;
+        // should be overridden, if it has settings
+        throw new UnsupportedOperationException("no settings for " + this);
+    }
 
     public static EnumParam<ShapeType> asParam(ShapeType defaultValue) {
         EnumParam<ShapeType> param = asParam();
@@ -455,10 +495,5 @@ public enum ShapeType {
     @Override
     public String toString() {
         return guiName;
-    }
-
-    public DragDisplayType getDragDisplayType() {
-        // overridden if necessary
-        return DragDisplayType.NONE;
     }
 }

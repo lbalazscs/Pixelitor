@@ -27,6 +27,7 @@ import pixelitor.tools.pen.history.CloseSubPathEdit;
 import pixelitor.tools.pen.history.FinishSubPathEdit;
 import pixelitor.tools.pen.history.SubPathStartEdit;
 import pixelitor.tools.transform.TransformBox;
+import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
@@ -45,9 +46,7 @@ import java.util.function.ToDoubleFunction;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.BuildState.*;
 
 /**
  * A subpath within a {@link Path}
@@ -58,7 +57,7 @@ import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
  *
  * https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve
  */
-public class SubPath implements Serializable {
+public class SubPath implements Serializable, Transformable {
     private static final long serialVersionUID = 1L;
 
     private static long debugCounter = 0;
@@ -733,19 +732,14 @@ public class SubPath implements Serializable {
             return null;
         }
 
-        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this::refTransform);
+        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this);
         return box;
     }
 
-    public void refTransform(AffineTransform at) {
+    @Override
+    public void transformWith(AffineTransform at) {
         for (AnchorPoint point : anchorPoints) {
             point.imTransform(at, true);
-        }
-    }
-
-    public void transform(AffineTransform at) {
-        for (AnchorPoint point : anchorPoints) {
-            point.imTransform(at, false);
         }
     }
 
@@ -780,16 +774,14 @@ public class SubPath implements Serializable {
 
     @Override
     public String toString() {
-        return id + anchorPoints
-                .stream()
-            .map(AnchorPoint::getName)
+        return id + anchorPoints.stream()
+                .map(AnchorPoint::getName)
                 .collect(joining(",", " [", "]"));
     }
 
     // also includes the anchor point positions
     public String toDetailedString() {
-        return id + anchorPoints
-                .stream()
+        return id + anchorPoints.stream()
                 .map(AnchorPoint::toString)
                 .collect(joining(",", " [", "]"));
     }

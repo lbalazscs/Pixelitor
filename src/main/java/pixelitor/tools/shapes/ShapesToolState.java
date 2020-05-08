@@ -18,11 +18,11 @@
 package pixelitor.tools.shapes;
 
 /**
- * The current state of the shapes tool
+ * The possible states of the shapes tool
  */
 public enum ShapesToolState {
     /**
-     * The initial state and the state after finalizing the shape
+     * The initial state and the state after rasterizing a shape
      */
     NO_INTERACTION {
         @Override
@@ -31,7 +31,7 @@ public enum ShapesToolState {
         }
     },
     /**
-     * The state during the initial drag (no transform box)
+     * The state during the initial drag (no transform box yet)
      */
     INITIAL_DRAG {
         @Override
