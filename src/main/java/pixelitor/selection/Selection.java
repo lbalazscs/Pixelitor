@@ -17,8 +17,8 @@
 
 package pixelitor.selection;
 
-import pixelitor.Build;
 import pixelitor.Composition;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.DeselectEdit;
 import pixelitor.history.History;
@@ -75,7 +75,7 @@ public class Selection {
         this.view = view;
 
         // hack to prevent unit tests from starting the marching
-        if (Build.isUnitTesting()) {
+        if (RunContext.isUnitTesting()) {
             frozen = true;
         }
 
@@ -361,7 +361,7 @@ public class Selection {
     @Override
     public String toString() {
         return "Selection{" +
-            "composition=" + view.getComp().getName() +
+                "composition=" + view.getComp().getName() +
                 ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
                 ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
                 '}';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.Build;
+import pixelitor.RunContext;
 import pixelitor.gui.GUIMessageHandler;
 
 import java.io.File;
@@ -32,7 +32,7 @@ public class Messages {
 
     static {
         try {
-            if (Build.isUnitTesting()) {
+            if (RunContext.isUnitTesting()) {
                 msgHandler = new TestMessageHandler();
             } else {
                 msgHandler = new GUIMessageHandler();

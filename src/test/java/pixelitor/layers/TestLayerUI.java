@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
+import pixelitor.RunContext;
 
 /**
  * The {@link LayerUI} implementation used in unit tests
@@ -33,7 +33,7 @@ public class TestLayerUI implements LayerUI {
 
     public TestLayerUI(Layer layer) {
         this.layer = layer;
-        assert Build.isUnitTesting();
+        assert RunContext.isUnitTesting();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class TestLayerUI implements LayerUI {
 
     @Override
     public void updateLayerIconImageAsync(ImageLayer imageLayer) {
-        if(imageLayer instanceof LayerMask) {
+        if (imageLayer instanceof LayerMask) {
             numMaskIconUpdates++;
         } else {
             numLayerIconUpdates++;

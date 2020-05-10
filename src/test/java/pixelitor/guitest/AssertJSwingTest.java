@@ -29,10 +29,10 @@ import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.fest.util.Files;
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.automate.AutoPaint;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.ShowOriginal;
@@ -46,6 +46,7 @@ import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.history.History;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
+import pixelitor.io.FileUtils;
 import pixelitor.layers.*;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.menus.view.ZoomLevel;
@@ -336,7 +337,7 @@ public class AssertJSwingTest {
         testTextLayers();
         testMaskFromColorRange();
 
-        if (Build.enableAdjLayers) {
+        if (RunContext.enableAdjLayers) {
             testAdjLayers();
         }
 
@@ -1306,7 +1307,7 @@ public class AssertJSwingTest {
         Utils.sleep(5, SECONDS);
         checkConsistency();
 
-        for (File inputFile : inputDir.listFiles()) {
+        for (File inputFile : FileUtils.listSupportedInputFilesIn(inputDir)) {
             String fileName = inputFile.getName();
 
             File outFile = new File(batchResizeOutputDir, fileName);
@@ -1336,7 +1337,7 @@ public class AssertJSwingTest {
 
         checkConsistency();
 
-        for (File inputFile : inputDir.listFiles()) {
+        for (File inputFile : FileUtils.listSupportedInputFilesIn(inputDir)) {
             String fileName = inputFile.getName();
 
             File outFile = new File(batchFilterOutputDir, fileName);

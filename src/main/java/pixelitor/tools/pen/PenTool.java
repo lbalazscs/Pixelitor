@@ -17,9 +17,9 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
@@ -46,16 +46,14 @@ import java.awt.geom.AffineTransform;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static pixelitor.tools.pen.PenToolMode.BUILD;
-import static pixelitor.tools.pen.PenToolMode.EDIT;
-import static pixelitor.tools.pen.PenToolMode.TRANSFORM;
+import static pixelitor.tools.pen.PenToolMode.*;
 
 /**
  * The Pen Tool
  */
 public class PenTool extends Tool {
     private final ComboBoxModel<PenToolMode> modeModel =
-        new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
+            new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
     private final AbstractAction toSelectionAction;
     //    private final AbstractAction traceAction;
@@ -72,17 +70,17 @@ public class PenTool extends Tool {
     private boolean rubberBand = true;
 
     private static final Action traceWithBrush = new TraceAction(
-        "Stroke with Current Brush", Tools.BRUSH);
+            "Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction(
-        "Stroke with Current Eraser", Tools.ERASER);
+            "Stroke with Current Eraser", Tools.ERASER);
     private static final Action traceWithSmudge = new TraceAction(
-        "Stroke with Current Smudge", Tools.SMUDGE);
+            "Stroke with Current Smudge", Tools.SMUDGE);
 
     public PenTool() {
         super("Pen", 'P', "pen_tool_icon.png",
-            "", // getStatusBarMessage() is overridden
-            Cursors.DEFAULT, false, true,
-            ClipStrategy.FULL);
+                "", // getStatusBarMessage() is overridden
+                Cursors.DEFAULT, false, true,
+                ClipStrategy.FULL);
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -115,11 +113,11 @@ public class PenTool extends Tool {
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
         rubberBandCB.addActionListener(e ->
-            rubberBand = rubberBandCB.isSelected());
+                rubberBand = rubberBandCB.isSelected());
         rubberBandCB.setName("rubberBandCB");
 
         settingsPanel.addButton(toSelectionAction, "toSelectionButton",
-            "Convert the active path to a selection");
+                "Convert the active path to a selection");
 
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
@@ -128,7 +126,7 @@ public class PenTool extends Tool {
         settingsPanel.addButton(traceWithEraser);
         settingsPanel.addButton(traceWithSmudge);
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             settingsPanel.addButton(dumpPathAction);
         }
     }
@@ -169,7 +167,7 @@ public class PenTool extends Tool {
     // starts either the editing or the transforming mode
     public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null) {
-            if (Build.isUnitTesting()) {
+            if (RunContext.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
             EventQueue.invokeLater(() -> {
@@ -372,8 +370,8 @@ public class PenTool extends Tool {
         }
         if (hasPath() && path.getComp() != activeComp) {
             throw new IllegalStateException("foreign path " + path
-                + ", path comp = " + path.getComp().toPathDebugString()
-                + ", active comp = " + activeComp.toPathDebugString());
+                    + ", path comp = " + path.getComp().toPathDebugString()
+                    + ", active comp = " + activeComp.toPathDebugString());
         }
         if (hasPath()) {
             path.checkConsistency();

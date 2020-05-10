@@ -17,16 +17,15 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.layers.Layer;
 
 import java.awt.EventQueue;
 import java.awt.geom.Rectangle2D;
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import static java.lang.String.format;
 
@@ -36,19 +35,19 @@ import static java.lang.String.format;
  */
 public class PixelitorEvent {
     private final String message;
-    private final Date date;
+    private final LocalTime now;
     private final String threadName;
     private final Composition comp;
     private final Layer layer;
-    private static final Format dateFormatter = new SimpleDateFormat("HH:mm:ss:SSS");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
 
     public PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
-        if (!Build.isDevelopment()) {
+        if (!RunContext.isDevelopment()) {
             throw new IllegalStateException("should be used only for development");
         }
 
-        date = new Date();
+        now = LocalTime.now();
         if (EventQueue.isDispatchThread()) {
             threadName = "EDT";
         } else {
@@ -74,11 +73,10 @@ public class PixelitorEvent {
             }
         }
 
-        message = saveState(type);
+        message = stateAsString(type);
     }
 
-    // saves the actual state of the composition to a string
-    private String saveState(String type) {
+    private String stateAsString(String type) {
         if (comp == null) { // "all images are closed" is also an event
             return format("%s (%s) no composition", type, threadName);
         }
@@ -95,7 +93,7 @@ public class PixelitorEvent {
         }
 
         String layerType = layer.getClass().getSimpleName();
-        String formattedDate = dateFormatter.format(date);
+        String formattedDate = dateFormatter.format(now);
         return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
                 type, threadName, comp.getName(), layer.getName(),
                 layerType, selectionInfo, maskInfo, formattedDate);

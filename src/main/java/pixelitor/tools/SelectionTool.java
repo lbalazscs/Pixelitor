@@ -18,16 +18,12 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
-import pixelitor.selection.Selection;
-import pixelitor.selection.SelectionActions;
-import pixelitor.selection.SelectionBuilder;
-import pixelitor.selection.SelectionType;
-import pixelitor.selection.ShapeCombination;
+import pixelitor.selection.*;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
 import pixelitor.tools.util.PMouseEvent;
@@ -38,16 +34,14 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 
-import static pixelitor.selection.ShapeCombination.ADD;
-import static pixelitor.selection.ShapeCombination.INTERSECT;
-import static pixelitor.selection.ShapeCombination.SUBTRACT;
+import static pixelitor.selection.ShapeCombination.*;
 
 /**
  * The selection tool
  */
 public class SelectionTool extends DragTool {
     private static final String HELP_TEXT = "<b>click and drag</b> creates a selection, " +
-        "<b>Space-drag</b> moves it. " +
+            "<b>Space-drag</b> moves it. " +
             "<b>Shift-drag</b> adds to an existing selection, " +
             "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +
@@ -235,7 +229,7 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
     }

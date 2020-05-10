@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -31,11 +31,7 @@ import java.awt.geom.AffineTransform;
 
 import static pixelitor.tools.pen.AnchorPointType.CUSP;
 import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.BuildState.DRAG_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
-import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
+import static pixelitor.tools.pen.BuildState.*;
 import static pixelitor.tools.pen.PenTool.hasPath;
 import static pixelitor.tools.pen.PenTool.path;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
@@ -55,11 +51,11 @@ public class PathBuilder implements PenToolMode {
 
     private static final String BUILDER_HELP_MESSAGE =
             "<html>Pen Tool Build Mode: " +
-                "<b>click, drag</b> and repeat to create, " +
-                "<b>Ctrl-click</b> or close it to finish it. " +
+                    "<b>click, drag</b> and repeat to create, " +
+                    "<b>Ctrl-click</b> or close it to finish it. " +
                     "<b>Ctrl-drag</b> moves points, " +
                     "<b>Alt-drag</b> breaks handles, " +
-                "<b>Shift-drag</b> constrains angles.";
+                    "<b>Shift-drag</b> constrains angles.";
 
 
     private PathBuilder() {
@@ -133,11 +129,11 @@ public class PathBuilder implements PenToolMode {
                 }
             }
 
-            if (path.tryClosing(x, y, e.getComp())) {
+            if (path.tryClosing(x, y)) {
                 return;
             } else {
                 // fix the final position of the moved curve point
-                path.getMoving().mouseReleased(x, y, e.isShiftDown());
+                path.getMovingPoint().mouseReleased(x, y, e.isShiftDown());
                 AnchorPoint ap = path.addMovingPointAsAnchor();
                 if (altDownNothingHit) {
                     ap.setType(CUSP);
@@ -145,7 +141,7 @@ public class PathBuilder implements PenToolMode {
                 ap.ctrlOut.mousePressed(x, y);
             }
         }
-        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST, "mousePressed");
+        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
         assert path.checkConsistency();
     }
 
@@ -206,7 +202,7 @@ public class PathBuilder implements PenToolMode {
     private void startMovingPrevious(double x, double y, DraggablePoint point) {
         point.setActive(true);
         point.mousePressed(x, y);
-        path.setBuildState(DRAG_EDITING_PREVIOUS, "startMovingPrevious");
+        path.setBuildState(DRAG_EDITING_PREVIOUS);
     }
 
     @Override
@@ -236,7 +232,7 @@ public class PathBuilder implements PenToolMode {
 
         if (state == DRAG_EDITING_PREVIOUS) {
             activePoint.mouseDragged(x, y, e.isShiftDown());
-            path.setMovingLocation(x, y, true);
+            path.setMovingPointLocation(x, y, true);
             return;
         }
 
@@ -250,7 +246,7 @@ public class PathBuilder implements PenToolMode {
         ControlPoint ctrlOut = last.ctrlOut;
         ctrlOut.mouseDragged(x, y, e.isShiftDown());
 
-        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST, "mouseDragged");
+        path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
     }
 
     @Override
@@ -283,12 +279,12 @@ public class PathBuilder implements PenToolMode {
                     .ifPresent(History::add);
             // after the dragging is finished, determine the next state
             if (path.getPrevBuildState() == NO_INTERACTION) {
-                path.setBuildState(NO_INTERACTION, "mouseReleased in DRAG_EDITING_PREVIOUS");
+                path.setBuildState(NO_INTERACTION);
             } else {
                 if (e.isControlDown() || e.isAltDown()) {
-                    path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseReleased in DRAG_EDITING_PREVIOUS");
+                    path.setBuildState(MOVE_EDITING_PREVIOUS);
                 } else {
-                    path.setBuildState(MOVING_TO_NEXT_ANCHOR, "mouseReleased in DRAG_EDITING_PREVIOUS");
+                    path.setBuildState(MOVING_TO_NEXT_ANCHOR);
                 }
             }
 
@@ -306,13 +302,13 @@ public class PathBuilder implements PenToolMode {
             SubPath sp = path.getActiveSubpath();
             MovingPoint moving = new MovingPoint(x, y, last);
             moving.mousePressed(x, y);
-            sp.setMoving(moving);
+            sp.setMovingPoint(moving);
         }
 
         if (e.isControlDown() || e.isAltDown()) {
-            path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseReleased");
+            path.setBuildState(MOVE_EDITING_PREVIOUS);
         } else {
-            path.setBuildState(MOVING_TO_NEXT_ANCHOR, "mouseReleased");
+            path.setBuildState(MOVING_TO_NEXT_ANCHOR);
         }
 
         assert path.checkConsistency();
@@ -338,7 +334,7 @@ public class PathBuilder implements PenToolMode {
         boolean controlDown = e.isControlDown();
         if (controlDown || altDown) {
             if (state != NO_INTERACTION) {
-                path.setBuildState(MOVE_EDITING_PREVIOUS, "mouseMoved ctrl or alt");
+                path.setBuildState(MOVE_EDITING_PREVIOUS);
             }
 
             DraggablePoint hit = path.handleWasHit(x, y, altDown);
@@ -352,10 +348,10 @@ public class PathBuilder implements PenToolMode {
                 return false;
             }
 
-            path.setBuildState(MOVING_TO_NEXT_ANCHOR, "simple mouseMoved");
+            path.setBuildState(MOVING_TO_NEXT_ANCHOR);
 
             // when the mouse is moved, the moving point is conceptually dragged
-            path.getMoving().mouseDragged(x, y, e.isShiftDown());
+            path.getMovingPoint().mouseDragged(x, y, e.isShiftDown());
 
             AnchorPoint first = path.getFirst();
             if (first.handleContains(x, y)) {
@@ -371,19 +367,19 @@ public class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                     "where = '%s, active = %s'%n", where, view.isActive());
         }
 
-        path.setBuildState(MOVING_TO_NEXT_ANCHOR, "recovery");
+        path.setBuildState(MOVING_TO_NEXT_ANCHOR);
         return path.getBuildState();
     }
 
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                     "where = '%s, active = %s'%n", where, view.isActive());
         }
@@ -392,7 +388,7 @@ public class PathBuilder implements PenToolMode {
         if (state == MOVE_EDITING_PREVIOUS) {
             dragState = DRAG_EDITING_PREVIOUS;
         }
-        path.setBuildState(dragState, "recovery");
+        path.setBuildState(dragState);
         return path.getBuildState();
     }
 
@@ -483,7 +479,7 @@ public class PathBuilder implements PenToolMode {
         }
     }
 
-    public MovingPoint createMovingAtLastMouseLoc(SubPath sp) {
+    public MovingPoint createMovingPoint(SubPath sp) {
         return new MovingPoint(lastX, lastY, sp.getLast());
     }
 

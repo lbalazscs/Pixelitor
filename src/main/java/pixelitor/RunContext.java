@@ -17,8 +17,6 @@
 
 package pixelitor;
 
-import org.jdesktop.swingx.plaf.basic.BasicHyperlinkUI;
-import org.jdesktop.swingx.plaf.macosx.MacOSXErrorPaneUI;
 import pixelitor.history.History;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
@@ -26,38 +24,34 @@ import pixelitor.utils.Utils;
 import java.awt.EventQueue;
 
 /**
- * The type of the "build" - in development mode there are additional
- * menus and runtime checks.
+ * The context in which Pixelitor code is running.
  */
-public enum Build {
-    DEVELOPMENT() {
-    }, FINAL() {
+public enum RunContext {
+    /**
+     * The mode used by end-users.
+     */
+    FINAL_GUI() {
+    },
+    /**
+     * In this mode there are are additional menus and runtime checks.
+     */
+    DEVELOPMENT_GUI() {
+    },
+    /**
+     * In this mode there is no GUI, and some objects might be mocked.
+     */
+    UNIT_TESTS() {
     };
-
-    private static volatile boolean unitTesting = false;
 
     public static final boolean enableAdjLayers = false;
 
-    public static Build CURRENT = FINAL;
-
-    public static final String VERSION_NUMBER = "4.2.4";
-
-    // these references are here only in order to make sure that
-    // their dynamically loaded classes are included into the final jar
-    // after a  "minimizeJar" Maven Build. This can't be achieved with
-    // include filters in pom.xml because the maven-shade-plugin limitation
-    // "specifying an include filter for classes in an artifact implicitly
-    // excludes all non-specified classes in that artifact"
-    @SuppressWarnings("unused")
-    public MacOSXErrorPaneUI keepRef1; // used by JXErrorPane for exception reporting
-    @SuppressWarnings("unused")
-    public BasicHyperlinkUI keepRef2; // used by the metadata JXTreeTable
+    public static RunContext CURRENT = FINAL_GUI;
 
     // Lazy because it should be calculated after the CURRENT is set.
-    private static final Lazy<String> fixTitle = Lazy.of(Build::calcFixTitle);
+    private static final Lazy<String> fixTitle = Lazy.of(RunContext::calcFixTitle);
 
     public static boolean isDevelopment() {
-        return CURRENT == DEVELOPMENT;
+        return CURRENT == DEVELOPMENT_GUI;
     }
 
     public static boolean isFinal() {
@@ -65,8 +59,8 @@ public enum Build {
     }
 
     private static String calcFixTitle() {
-        String s = "Pixelitor " + VERSION_NUMBER;
-        if (CURRENT != FINAL) {
+        String s = "Pixelitor " + Pixelitor.VERSION_NUMBER;
+        if (CURRENT != FINAL_GUI) {
             s += " DEVELOPMENT " + System.getProperty("java.version");
         }
         return s;
@@ -79,11 +73,11 @@ public enum Build {
     }
 
     public static boolean isUnitTesting() {
-        return unitTesting;
+        return CURRENT == UNIT_TESTS;
     }
 
     public static void setUnitTestingMode() {
-        unitTesting = true;
+        CURRENT = UNIT_TESTS;
         History.setUndoLevels(15);
         Utils.makeSureAssertionsAreEnabled();
     }

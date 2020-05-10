@@ -17,12 +17,12 @@
 
 package pixelitor.history;
 
-import pixelitor.Build;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
-import pixelitor.menus.MenuAction.AllowedLayerType;
+import pixelitor.menus.MenuAction.AllowedOnLayerType;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
@@ -44,7 +44,7 @@ import java.util.Optional;
 import static java.lang.String.format;
 
 /**
- * Static methods for managing history and undo/redo
+ * Static methods for managing the editing history and undo/redo
  */
 public class History {
     private static final UndoableEditSupport undoableEditSupport = new UndoableEditSupport();
@@ -58,7 +58,7 @@ public class History {
 
     public static final Action UNDO_ACTION = new MenuAction(
             UIManager.getString("AbstractUndoableEdit.undoText"),
-            Icons.getUndoIcon(), AllowedLayerType.ANY) {
+            Icons.getUndoIcon(), AllowedOnLayerType.ANY) {
         @Override
         public void onClick() {
             undo();
@@ -67,7 +67,7 @@ public class History {
 
     public static final Action REDO_ACTION = new MenuAction(
             UIManager.getString("AbstractUndoableEdit.redoText"),
-            Icons.getRedoIcon(), AllowedLayerType.ANY) {
+            Icons.getRedoIcon(), AllowedOnLayerType.ANY) {
         @Override
         public void onClick() {
             redo();
@@ -105,7 +105,7 @@ public class History {
         numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
             ConsistencyChecks.checkAll(comp, false);
@@ -119,6 +119,7 @@ public class History {
                                                           String editName) {
         assert rect.width > 0 : "rectangle.width = " + rect.width;
         assert rect.height > 0 : "rectangle.height = " + rect.height;
+        assert origImage != null;
 
         if (!relativeToImage) {
             // if the coordinates are relative to the canvas,
@@ -133,7 +134,6 @@ public class History {
                 rect
         );
 
-        assert origImage != null;
         if (rect.isEmpty()) {
             return null;
         }
@@ -143,7 +143,7 @@ public class History {
         // we could also intersect with the selection bounds,
         // but typically the extra savings would be minimal
 
-        PartialImageEdit edit = new PartialImageEdit(editName, comp,
+        var edit = new PartialImageEdit(editName, comp,
                 dr, origImage, rect, false);
         return edit;
     }
@@ -157,7 +157,7 @@ public class History {
     }
 
     public static void undo() {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeUndone();
             Events.postUndoEvent(edit);
 //            Utils.debugCall(edit.getDebugName());
@@ -179,7 +179,7 @@ public class History {
     }
 
     public static void redo() {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeRedone();
             Events.postRedoEvent(edit);
 //            Utils.debugCall(edit.getDebugName());

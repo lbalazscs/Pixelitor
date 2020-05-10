@@ -18,10 +18,10 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.utils.debug.Ansi;
 
@@ -104,19 +104,19 @@ public final class Utils {
     }
 
     public static void throwTestException() {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             throw new IllegalStateException("Test");
         }
     }
 
     public static void throwTestIOException() throws IOException {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             throw new IOException("Test");
         }
     }
 
     public static void throwTestError() {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             throw new AssertionError("Test");
         }
     }
@@ -575,7 +575,7 @@ public final class Utils {
             String callerClassName = caller.getClassName();
             callerClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
 
-            System.out.printf("%s.%s(%s) on %s by %s.%s\n"
+            System.out.printf("%s.%s(%s) on %s by %s.%s%n"
                     , className
                     , me.getMethodName()
                     , Ansi.yellow(argsAsOneString)
@@ -583,7 +583,7 @@ public final class Utils {
                     , callerClassName
                     , caller.getMethodName());
         } else {
-            System.out.printf("%s.%s(%s) on %s\n"
+            System.out.printf("%s.%s(%s) on %s%n"
                     , className
                     , me.getMethodName()
                     , Ansi.yellow(argsAsOneString)

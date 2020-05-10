@@ -17,15 +17,15 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.menus.MenuAction;
-import pixelitor.menus.MenuAction.AllowedLayerType;
+import pixelitor.menus.MenuAction.AllowedOnLayerType;
 import pixelitor.menus.PMenu;
 import pixelitor.menus.edit.FadeMenuItem;
 import pixelitor.tools.Tools;
@@ -34,39 +34,37 @@ import pixelitor.utils.test.Events;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
-import static pixelitor.utils.Keys.CTRL_1;
-import static pixelitor.utils.Keys.CTRL_2;
-import static pixelitor.utils.Keys.CTRL_3;
-import static pixelitor.utils.Keys.CTRL_4;
+import static pixelitor.utils.Keys.*;
 
 /**
- * Determines whether the layer or its mask is visible/edited.
+ * Whether the layer or its mask is visible/edited,
+ * and whether the mask editing is done in "rubylith" mode.
  */
 public enum MaskViewMode {
     NORMAL("Show and Edit Layer", false, false, false,
-            AllowedLayerType.ANY, CTRL_1) {
+            AllowedOnLayerType.ANY, CTRL_1) {
     }, SHOW_MASK("Show and Edit Mask", true, true, false,
-            AllowedLayerType.HAS_LAYER_MASK, CTRL_2) {
+            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_2) {
     }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
-            AllowedLayerType.HAS_LAYER_MASK, CTRL_3) {
+            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_3) {
     }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
-            AllowedLayerType.HAS_LAYER_MASK, CTRL_4) {
+            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_4) {
     };
 
     private final String guiName;
     private final boolean showRuby;
-    private final AllowedLayerType allowedLayerType;
+    private final AllowedOnLayerType allowedOnLayerType;
     private final KeyStroke keyStroke;
     private final boolean showMask;
     private final boolean editMask;
 
     MaskViewMode(String guiName, boolean showMask, boolean editMask, boolean showRuby,
-                 AllowedLayerType allowedLayerType, KeyStroke keyStroke) {
+                 AllowedOnLayerType allowedOnLayerType, KeyStroke keyStroke) {
         this.guiName = guiName;
         this.showMask = showMask;
         this.editMask = editMask;
         this.showRuby = showRuby;
-        this.allowedLayerType = allowedLayerType;
+        this.allowedOnLayerType = allowedOnLayerType;
         this.keyStroke = keyStroke;
     }
 
@@ -74,7 +72,7 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the active layer of the active image
      */
     public void addToMainMenu(PMenu sub) {
-        Action action = new MenuAction(guiName, allowedLayerType) {
+        Action action = new MenuAction(guiName, allowedOnLayerType) {
             @Override
             public void onClick() {
                 OpenImages.onActiveView(view -> {
@@ -112,7 +110,7 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer, String reason) {
         assert view != null;
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer, reason);
         }
 
@@ -137,7 +135,7 @@ public enum MaskViewMode {
             }
             FadeMenuItem.INSTANCE.refresh(canFade);
 
-            if (Build.isDevelopment()) {
+            if (RunContext.isDevelopment()) {
                 assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
             }
         }

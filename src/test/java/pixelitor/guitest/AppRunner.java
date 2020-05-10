@@ -40,8 +40,8 @@ import pixelitor.utils.test.PixelitorEventListener;
 import javax.swing.*;
 import java.awt.EventQueue;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -57,10 +57,10 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
     public static final int ROBOT_DELAY_SLOW = 300; // millis
-    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_HM = ThreadLocal
-            .withInitial(() -> new SimpleDateFormat("HH:mm"));
-    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_HMS = ThreadLocal
-            .withInitial(() -> new SimpleDateFormat("HH:mm:ss"));
+    private static final DateTimeFormatter DATE_FORMAT_HM =
+            DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT_HMS =
+            DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final Robot robot;
     private final Mouse mouse;
@@ -329,11 +329,11 @@ public class AppRunner {
     }
 
     static String getCurrentTimeHM() {
-        return DATE_FORMAT_HM.get().format(new Date());
+        return DATE_FORMAT_HM.format(LocalTime.now());
     }
 
     static String getCurrentTimeHMS() {
-        return DATE_FORMAT_HMS.get().format(new Date());
+        return DATE_FORMAT_HMS.format(LocalTime.now());
     }
 
     JMenuItemFixture findMenuItemByText(String guiName) {
@@ -409,7 +409,7 @@ public class AppRunner {
 
     static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
         var menuItemFixture = popupMenu.menuItem(
-                new GenericTypeMatcher<>(JMenuItem.class) {
+                new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
                     @Override
                     protected boolean isMatching(JMenuItem menuItem) {
                         if (!menuItem.isShowing()) {

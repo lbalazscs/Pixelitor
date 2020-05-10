@@ -925,7 +925,7 @@ public class Composition implements Serializable {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
-        if (Build.isDevelopment() && isActive()) {
+        if (RunContext.isDevelopment() && isActive()) {
             ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
         return edit;
@@ -1237,7 +1237,7 @@ public class Composition implements Serializable {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariant() {
         if (layerList.isEmpty()) {
-            if (Build.isUnitTesting()) {
+            if (RunContext.isUnitTesting()) {
                 return true;
             }
             throw new IllegalStateException("no layer in " + getName());
@@ -1270,7 +1270,7 @@ public class Composition implements Serializable {
         FileFormat format = saveSettings.getFormat();
         File f = saveSettings.getFile();
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             System.out.println("Composition::saveAsync: saving " + f.getAbsolutePath());
         }
 
@@ -1496,7 +1496,7 @@ public class Composition implements Serializable {
                 comp.view.addLayerToGUI(newLayer, newLayerIndex);
 
                 // mocked views will not set a UI
-                assert Build.isUnitTesting() || newLayer.hasUI();
+                assert RunContext.isUnitTesting() || newLayer.hasUI();
             }
 
             comp.setActiveLayer(newLayer);

@@ -324,7 +324,7 @@ public class PathBuilderTest {
 
         undo("Close Subpath", MOVING_TO_NEXT_ANCHOR);
 
-        assertThat(sp.getMoving()).isAt(142, 42);
+        assertThat(sp.getMovingPoint()).isAt(142, 42);
     }
 
     @Test
@@ -409,14 +409,12 @@ public class PathBuilderTest {
         // relative to the first anchor point (and not relative to its
         // out control, where the mouse was released)
         shiftMove(316, 500, MOVING_TO_NEXT_ANCHOR);
-        assertThat(sp)
-                .hasMoving()
-                .movingIsAt(314, 500);
+        assertThat(sp).hasMovingPointAt(314, 500);
 
         // shift-press and check that the constraining is still OK
         shiftPress(316, 510, DRAGGING_THE_CONTROL_OF_LAST);
         assertThat(sp)
-                .hasNoMoving()
+                .hasNoMovingPoint()
                 .isNotFinished()
                 .numAnchorsIs(2);
         AnchorPoint secondAnchor = sp.getAnchor(1);

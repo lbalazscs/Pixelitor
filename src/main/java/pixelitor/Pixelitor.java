@@ -29,19 +29,11 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.Themes;
 import pixelitor.io.IO;
 import pixelitor.io.IOThread;
-import pixelitor.layers.AddLayerMaskAction;
-import pixelitor.layers.AddTextLayerAction;
-import pixelitor.layers.Layer;
-import pixelitor.layers.LayerMaskAddType;
-import pixelitor.layers.MaskViewMode;
+import pixelitor.layers.*;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.util.DragDisplay;
-import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.Texts;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
@@ -62,6 +54,7 @@ import static pixelitor.tools.pen.PenToolMode.EDIT;
  * The main class
  */
 public class Pixelitor {
+    public static final String VERSION_NUMBER = "4.2.4";
     public static Locale SYS_LOCALE;
 
     private Pixelitor() {
@@ -73,7 +66,7 @@ public class Pixelitor {
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.makeSureAssertionsAreEnabled();
-            Build.CURRENT = Build.DEVELOPMENT;
+            RunContext.CURRENT = RunContext.DEVELOPMENT_GUI;
         }
 
         // Force using English locale, because using the default system
@@ -222,7 +215,7 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions(PixelitorWindow pw) {
-        if (Build.isFinal()) {
+        if (RunContext.isFinal()) {
             // in the final builds nothing should run
             return;
         }

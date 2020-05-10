@@ -30,19 +30,10 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.CYAN;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static java.awt.Color.*;
+import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
-import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.*;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 
@@ -96,7 +87,7 @@ public class FilterParamTest {
     }
 
     @Test
-    public void createGUI() {
+    public void GUI_test() {
         JComponent gui = param.createGUI();
         assertThat(gui).isNotNull();
         assertThat(gui.isEnabled()).isTrue();

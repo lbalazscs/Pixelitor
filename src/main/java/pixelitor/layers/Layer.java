@@ -17,9 +17,9 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Layers;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
@@ -128,7 +128,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void activateUI() {
-        assert Build.isUnitTesting() || EventQueue.isDispatchThread();
+        assert RunContext.isUnitTesting() || EventQueue.isDispatchThread();
         ui.setSelected(true);
     }
 

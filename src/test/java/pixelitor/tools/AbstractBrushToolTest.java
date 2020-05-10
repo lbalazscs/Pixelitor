@@ -29,10 +29,10 @@ import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.brushes.Brush;
-import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.util.PPoint;
 
 import java.awt.Rectangle;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -55,11 +55,10 @@ public class AbstractBrushToolTest {
     private View view;
 
     @Parameters(name = "{index}: {0} Tool")
-    public static Collection<Object[]> instancesToTest() {
+    public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
         Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
         for (Tool tool : tools) {
-            tool.setSettingsPanel(new ToolSettingsPanel());
-            tool.initSettingsPanel();
+            TestHelper.initTool(tool);
         }
 
         return Arrays.asList(new Object[][]{
@@ -72,7 +71,6 @@ public class AbstractBrushToolTest {
 
     @BeforeClass
     public static void beforeAllTests() {
-        TestHelper.setupMockFgBgSelector();
         TestHelper.setUnitTestingMode();
     }
 

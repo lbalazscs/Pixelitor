@@ -40,9 +40,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.joining;
 import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.BuildState.DRAGGING_THE_CONTROL_OF_LAST;
-import static pixelitor.tools.pen.BuildState.MOVE_EDITING_PREVIOUS;
-import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
+import static pixelitor.tools.pen.BuildState.*;
 
 /**
  * A path contains the same information as a {@link PathIterator},
@@ -53,13 +51,14 @@ import static pixelitor.tools.pen.BuildState.MOVING_TO_NEXT_ANCHOR;
  */
 public class Path implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     private final List<SubPath> subPaths = new ArrayList<>();
     private final Composition comp;
     private SubPath activeSubPath;
 
-    private static long debugCounter = 0;
+    private static long nextId = 0;
     private final String id; // for debugging
+
     private BuildState buildState;
     private BuildState prevBuildState;
     private transient PenToolMode preferredPenToolMode;
@@ -69,8 +68,8 @@ public class Path implements Serializable {
         if (setAsActive) {
             comp.setActivePath(this);
         }
-        id = "P" + debugCounter++;
-        buildState = BuildState.NO_INTERACTION;
+        id = "P" + nextId++;
+        buildState = NO_INTERACTION;
     }
 
     public Path deepCopy(Composition newComp) {
@@ -79,7 +78,7 @@ public class Path implements Serializable {
             copy.subPaths.add(sp.deepCopy(copy, newComp));
         }
         int activeIndex = subPaths.indexOf(activeSubPath);
-        assert  activeIndex != -1 : "Index of " + activeSubPath + " is -1 in " + this;
+        assert activeIndex != -1 : "Index of " + activeSubPath + " is -1 in " + this;
         copy.activeSubPath = copy.subPaths.get(activeIndex);
         return copy;
     }
@@ -182,12 +181,12 @@ public class Path implements Serializable {
         return activeSubPath.addMovingPointAsAnchor();
     }
 
-    public MovingPoint getMoving() {
-        return activeSubPath.getMoving();
+    public MovingPoint getMovingPoint() {
+        return activeSubPath.getMovingPoint();
     }
 
-    public void setMovingLocation(double x, double y, boolean nullOK) {
-        activeSubPath.setMovingLocation(x, y, nullOK);
+    public void setMovingPointLocation(double x, double y, boolean nullOK) {
+        activeSubPath.setMovingPointLocation(x, y, nullOK);
     }
 
     public void dump() {
@@ -251,12 +250,6 @@ public class Path implements Serializable {
         AnchorPoint first = new AnchorPoint(PPoint.eagerFromIm(x, y, view), sp);
         first.setType(SMOOTH);
         sp.addFirstPoint(first, false);
-        return sp;
-    }
-
-    public SubPath startNewSubPath(AnchorPoint point, boolean addToHistory) {
-        SubPath sp = startNewSubpath();
-        sp.addFirstPoint(point, addToHistory);
         return sp;
     }
 
@@ -333,22 +326,17 @@ public class Path implements Serializable {
         return buildState;
     }
 
-    public void setBuildState(BuildState newState, String reason) {
+    public void setBuildState(BuildState newState) {
         if (buildState == newState) {
             return;
         }
-//        if (Build.isDevelopment()) {
-//            Messages.showInStatusBar("<html><font color=red>" + buildState
-//                    + "</font> \u21e8 <font color=#004E00>" + newState
-//                    + "</font> (" + reason + ")");
-//        }
 
         prevBuildState = buildState;
 
         if (newState == MOVING_TO_NEXT_ANCHOR) {
             if (!hasMovingPoint()) {
-                MovingPoint m = PenToolMode.BUILD.createMovingAtLastMouseLoc(activeSubPath);
-                activeSubPath.setMoving(m);
+                MovingPoint m = PenToolMode.BUILD.createMovingPoint(activeSubPath);
+                activeSubPath.setMovingPoint(m);
             }
         }
 
@@ -360,12 +348,12 @@ public class Path implements Serializable {
     }
 
     // called only by the undo/redo mechanism
-    public void setBuildingInProgressState(String reason) {
+    public void setBuildingInProgressState() {
         boolean mouseDown = Tools.EventDispatcher.isMouseDown();
         if (mouseDown) {
-            setBuildState(DRAGGING_THE_CONTROL_OF_LAST, reason);
+            setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
         } else {
-            setBuildState(MOVING_TO_NEXT_ANCHOR, reason);
+            setBuildState(MOVING_TO_NEXT_ANCHOR);
         }
     }
 
@@ -378,8 +366,8 @@ public class Path implements Serializable {
     }
 
     // return true if it could be closed
-    boolean tryClosing(double x, double y, Composition comp) {
-        return activeSubPath.tryClosing(x, y, comp);
+    boolean tryClosing(double x, double y) {
+        return activeSubPath.tryClosing(x, y);
     }
 
     @VisibleForTesting

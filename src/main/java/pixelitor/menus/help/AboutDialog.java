@@ -17,7 +17,7 @@
 
 package pixelitor.menus.help;
 
-import pixelitor.Build;
+import pixelitor.Pixelitor;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.utils.OpenInBrowserAction;
@@ -50,12 +50,12 @@ public class AboutDialog {
         tabbedPane.add("System Info", new SystemInfoPanel());
 
         new DialogBuilder()
-            .owner(pw)
-            .title("About Pixelitor")
-            .content(tabbedPane)
-            .withScrollbars()
-            .noCancelButton()
-            .show();
+                .owner(pw)
+                .title("About Pixelitor")
+                .content(tabbedPane)
+                .withScrollbars()
+                .noCancelButton()
+                .show();
     }
 
     private static JPanel createCreditsPanel() {
@@ -83,10 +83,10 @@ public class AboutDialog {
         addLabel(AboutDialog.class.getResource("/images/pixelitor_icon48.png"));
 
         addLabel("<html><b><font size=+1>Pixelitor</font></b></html>");
-        addLabel("Version " + Build.VERSION_NUMBER);
+        addLabel("Version " + Pixelitor.VERSION_NUMBER);
         box.add(Box.createRigidArea(new Dimension(10, 20)));
         addLabel("<html><center> Copyright \u00A9 2009-2019 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
-            "<br>and Contributors<br><br>");
+                "<br>and Contributors<br><br>");
         addLabel("lbalazscs\u0040gmail.com");
 
         box.add(createLinkButton());

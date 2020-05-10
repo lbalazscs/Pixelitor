@@ -26,8 +26,8 @@ import javax.swing.*;
 /**
  * A JRadioButtonMenuItem that becomes enabled only if there is an open image
  */
-public class OpenImageEnabledRadioButtonMenuItem extends JRadioButtonMenuItem implements ViewActivationListener {
-    public OpenImageEnabledRadioButtonMenuItem(String name) {
+public class OpenImageAwareRadioButtonMenuItem extends JRadioButtonMenuItem implements ViewActivationListener {
+    public OpenImageAwareRadioButtonMenuItem(String name) {
         super(name);
         setName(name);
         setEnabled(false);

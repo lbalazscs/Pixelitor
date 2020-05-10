@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.ArrowKey;
@@ -72,7 +72,7 @@ public interface PenToolMode {
             if (comp != null) {
                 Path path = PenTool.getPath();
                 if (path.getComp() != comp) {
-                    if(Build.isDevelopment()) {
+                    if (RunContext.isDevelopment()) {
                         throw new IllegalStateException(
                                 "path's comp is " + path.getComp().getName()
                                 + ", active comp is " + comp.getName());

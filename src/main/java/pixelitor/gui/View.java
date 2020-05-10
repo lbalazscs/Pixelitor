@@ -86,7 +86,7 @@ public class View extends JComponent
     private static boolean showPixelGrid = false;
 
     public View(Composition comp) {
-        assert !Build.isUnitTesting() : "Swing component in unit test";
+        assert !RunContext.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
         this.comp = comp;

@@ -17,8 +17,8 @@
 
 package pixelitor.utils.debug;
 
-import pixelitor.Build;
 import pixelitor.OpenImages;
+import pixelitor.Pixelitor;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -30,7 +30,7 @@ public class AppNode extends DebugNode {
     public AppNode() {
         super("Pixelitor", PixelitorWindow.getInstance());
 
-        addString("Pixelitor Version", Build.VERSION_NUMBER);
+        addString("Pixelitor Version", Pixelitor.VERSION_NUMBER);
         add(DebugNodes.createSystemNode());
         add(Tools.getCurrent().getDebugNode());
         add(History.getDebugNode());

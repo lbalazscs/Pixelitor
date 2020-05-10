@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
@@ -30,11 +30,7 @@ import pixelitor.tools.move.MoveTool;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesTool;
 import pixelitor.tools.util.PMouseEvent;
-import pixelitor.utils.AppPreferences;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -51,7 +47,6 @@ public class Tools {
     public static final SelectionTool SELECTION = new SelectionTool();
     public static final BrushTool BRUSH = new BrushTool();
     public static final CloneTool CLONE = new CloneTool();
-
     public static final EraserTool ERASER = new EraserTool();
     public static final SmudgeTool SMUDGE = new SmudgeTool();
     public static final GradientTool GRADIENT = new GradientTool();
@@ -124,7 +119,7 @@ public class Tools {
         }
         currentTool = newTool;
         newTool.toolStarted();
-        ToolSettingsPanelContainer.INSTANCE.showSettingsFor(newTool);
+        ToolSettingsPanelContainer.getInstance().showSettingsFor(newTool);
     }
 
     public static Tool[] getAll() {
@@ -175,7 +170,7 @@ public class Tools {
     }
 
     public static void editedObjectChanged(Layer layer) {
-        assert currentTool != null || Build.isUnitTesting();
+        assert currentTool != null || RunContext.isUnitTesting();
         if (currentTool != null) {
             currentTool.editedObjectChanged(layer);
         }

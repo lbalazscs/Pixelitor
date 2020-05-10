@@ -187,13 +187,13 @@ public class RandomToolTest {
             Tool selectedTool;
             if (preferredTools.isEmpty()) {
                 // there is no preferred tool, each tool gets equal chance
-                selectedTool = Tools.getRandomTool();
+                selectedTool = getRandomTool();
             } else {
                 // with 50% probability force using a preferred tool
                 if (Rnd.nextBoolean()) {
                     selectedTool = Rnd.chooseFrom(preferredTools);
                 } else {
-                    selectedTool = Tools.getRandomTool();
+                    selectedTool = getRandomTool();
                 }
             }
             long startTime = System.nanoTime();
@@ -218,7 +218,7 @@ public class RandomToolTest {
             exitInNewThread();
         } catch (TimeoutException e) {
             stopped = true;
-            System.err.printf("%s: task unexpectedly timed out, exiting.\n" +
+            System.err.printf("%s: task unexpectedly timed out, exiting.%n" +
                             "Active comp is: %s%n",
                     AppRunner.getCurrentTimeHMS(),
                     EDT.active(Composition::toString));
@@ -291,7 +291,7 @@ public class RandomToolTest {
 
     private void randomizeToolSettings(Tool tool) {
         log("randomize the settings of " + tool.getName());
-        EDT.run(ToolSettingsPanelContainer.INSTANCE::randomizeToolSettings);
+        EDT.run(ToolSettingsPanelContainer.getInstance()::randomizeToolSettings);
 
         if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
             // prevent paths getting too large

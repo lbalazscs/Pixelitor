@@ -18,7 +18,10 @@
 package pixelitor.menus;
 
 import com.bric.util.JVM;
-import pixelitor.*;
+import pixelitor.NewImage;
+import pixelitor.Pixelitor;
+import pixelitor.RunContext;
+import pixelitor.TipsOfTheDay;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
@@ -87,8 +90,8 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.layers.LayerMaskAddType.*;
 import static pixelitor.menus.EnabledIf.*;
-import static pixelitor.menus.MenuAction.AllowedLayerType.HAS_LAYER_MASK;
-import static pixelitor.menus.MenuAction.AllowedLayerType.IS_TEXT_LAYER;
+import static pixelitor.menus.MenuAction.AllowedOnLayerType.HAS_LAYER_MASK;
+import static pixelitor.menus.MenuAction.AllowedOnLayerType.IS_TEXT_LAYER;
 import static pixelitor.utils.Keys.*;
 import static pixelitor.utils.Utils.debugImage;
 import static pixelitor.utils.Utils.getJavaMainVersion;
@@ -110,7 +113,7 @@ public class MenuBar extends JMenuBar {
         add(createFilterMenu());
         add(createViewMenu(pw));
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
@@ -204,10 +207,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // close
-        fileMenu.addActionWithKey(OpenImages.CLOSE_ACTIVE_ACTION, CTRL_W);
+        fileMenu.addActionWithKey(CLOSE_ACTIVE_ACTION, CTRL_W);
 
         // close all
-        fileMenu.addActionWithKey(OpenImages.CLOSE_ALL_ACTION, CTRL_ALT_W);
+        fileMenu.addActionWithKey(CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
 
@@ -364,7 +367,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerMaskSubmenu());
         layersMenu.add(createTextLayerSubmenu(pw));
 
-        if (Build.enableAdjLayers) {
+        if (RunContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
         }
 
@@ -462,7 +465,7 @@ public class MenuBar extends JMenuBar {
         sub.addAction(new MenuAction("Delete", HAS_LAYER_MASK) {
             @Override
             public void onClick() {
-                OpenImages.onActiveLayer(layer ->
+                onActiveLayer(layer ->
                         layer.deleteMask(true));
             }
         });
@@ -1010,7 +1013,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        JCheckBoxMenuItem showPixelGridMI = new OpenImageEnabledCheckBoxMenuItem("Show Pixel Grid");
+        JCheckBoxMenuItem showPixelGridMI = new OpenImageAwareCheckBoxMenuItem("Show Pixel Grid");
         showPixelGridMI.addActionListener(e ->
                 View.setShowPixelGrid(showPixelGridMI.getState()));
         viewMenu.add(showPixelGridMI);

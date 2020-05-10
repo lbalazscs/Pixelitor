@@ -30,11 +30,9 @@ import pixelitor.OpenImages;
 import pixelitor.TestHelper;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
-import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.util.PMouseEvent;
 
-import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,9 +71,7 @@ public class ToolTest {
 
         List<Object[]> instances = new ArrayList<>();
         for (Tool tool : tools) {
-            tool.setSettingsPanel(new ToolSettingsPanel());
-//            tool.initSettingsPanel();
-            SwingUtilities.invokeAndWait(tool::initSettingsPanel);
+            TestHelper.initTool(tool);
 
             // for each combination create an independent test run
             for (Alt alt : Alt.values()) {
@@ -95,7 +91,6 @@ public class ToolTest {
     @BeforeClass
     public static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
-        TestHelper.setupMockFgBgSelector();
     }
 
     @Before

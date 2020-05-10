@@ -119,31 +119,25 @@ public class SubPathAssert extends AbstractAssert<SubPathAssert, SubPath> {
         return this;
     }
 
-    public SubPathAssert hasMoving() {
+    public SubPathAssert hasMovingPointAt(double x, double y) {
         isNotNull();
 
         if (!actual.hasMovingPoint()) {
-            throw new AssertionError("has no moving");
+            throw new AssertionError("has no moving point");
         }
+
+        DraggablePoint moving = actual.getMovingPoint();
+        assertThat(moving).isAt(x, y);
 
         return this;
     }
 
-    public SubPathAssert hasNoMoving() {
+    public SubPathAssert hasNoMovingPoint() {
         isNotNull();
 
         if (actual.hasMovingPoint()) {
             throw new AssertionError("has moving");
         }
-
-        return this;
-    }
-
-    public SubPathAssert movingIsAt(double x, double y) {
-        isNotNull();
-
-        DraggablePoint moving = actual.getMoving();
-        assertThat(moving).isAt(x, y);
 
         return this;
     }

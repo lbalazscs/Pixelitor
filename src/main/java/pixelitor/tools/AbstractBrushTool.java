@@ -18,25 +18,17 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.GUIUtils;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.SimpleCachedPainter;
-import pixelitor.gui.utils.SliderSpinner;
+import pixelitor.gui.utils.*;
 import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
-import pixelitor.tools.brushes.AffectedArea;
-import pixelitor.tools.brushes.Brush;
-import pixelitor.tools.brushes.ConnectBrushHistory;
-import pixelitor.tools.brushes.LazyMouseBrush;
-import pixelitor.tools.brushes.SymmetryBrush;
+import pixelitor.tools.brushes.*;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
@@ -44,19 +36,7 @@ import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.GridBagLayout;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -64,9 +44,7 @@ import java.awt.geom.FlatteningPathIterator;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
@@ -279,7 +257,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void mouseDragged(PMouseEvent e) {
         newMousePoint(e.getComp().getActiveDrawableOrThrow(), e, false);
 
-        if(lazyMouse) {
+        if (lazyMouse) {
             PPoint drawPoint = lazyMouseBrush.getDrawPoint();
             outlineCoX = (int) drawPoint.getCoX();
             outlineCoY = (int) drawPoint.getCoY();
@@ -354,11 +332,11 @@ public abstract class AbstractBrushTool extends Tool {
         Point mousePos = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mousePos, view);
         Rectangle visiblePart = view.getVisiblePart();
-        if(visiblePart != null) {
+        if (visiblePart != null) {
             if (visiblePart.contains(mousePos)) {
                 startOutlinePaintingAt(mousePos.x, mousePos.y, view);
             }
-        } else if(!Build.isUnitTesting()) {
+        } else if (!RunContext.isUnitTesting()) {
             throw new IllegalStateException();
         }
     }
@@ -447,10 +425,10 @@ public abstract class AbstractBrushTool extends Tool {
         // when editing masks, no tmp drawing layer should be used
         assert !(dr instanceof LayerMask)
                 || drawDestination == DrawDestination.DIRECT :
-            "dr is " + dr.getClass().getSimpleName()
-                    + ", comp = " + comp.getName()
-                    + ", tool = " + getClass().getSimpleName()
-                    + ", drawDestination = " + drawDestination;
+                        "dr is " + dr.getClass().getSimpleName()
+                        + ", comp = " + comp.getName()
+                        + ", tool = " + getClass().getSimpleName()
+                        + ", drawDestination = " + drawDestination;
 
         var g = drawDestination.createGraphics(dr, composite);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -544,7 +522,7 @@ public abstract class AbstractBrushTool extends Tool {
 
         // get rid of the outline on the old view
         // (important in "Internal Windows" mode)
-        if(oldCV != null) {
+        if (oldCV != null) {
             oldCV.repaint();
         }
 
@@ -568,7 +546,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void firstModalDialogShown() {
         // the outline has to be hidden, because there is no mouseExited event
         View view = OpenImages.getActiveView();
-        if(view != null) {
+        if (view != null) {
             stopOutlinePainting(view);
         }
     }
@@ -577,7 +555,7 @@ public abstract class AbstractBrushTool extends Tool {
     public void firstModalDialogHidden() {
         // the outline has to be shown again, because there is no mouseEntered event
         View view = OpenImages.getActiveView();
-        if(view != null) {
+        if (view != null) {
             startOutlinePainting(view);
         }
     }

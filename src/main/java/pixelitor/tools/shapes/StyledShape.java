@@ -18,9 +18,9 @@
 package pixelitor.tools.shapes;
 
 import com.jhlabs.awt.WobbleStroke;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
@@ -118,7 +118,7 @@ public class StyledShape implements Cloneable, Transformable {
             return;
         }
         if (shape == null) { // should not happen
-            if (Build.isDevelopment()) {
+            if (RunContext.isDevelopment()) {
                 throw new IllegalStateException();
             }
             return;

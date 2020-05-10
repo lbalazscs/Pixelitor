@@ -18,10 +18,10 @@
 package pixelitor.gui;
 
 import com.bric.util.JVM;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
+import pixelitor.RunContext;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
@@ -33,12 +33,7 @@ import pixelitor.tools.gui.ToolsPanel;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.Taskbar;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
@@ -47,14 +42,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
-import static java.awt.BorderLayout.WEST;
-import static java.awt.Desktop.Action.APP_ABOUT;
-import static java.awt.Desktop.Action.APP_PREFERENCES;
-import static java.awt.Desktop.Action.APP_QUIT_HANDLER;
+import static java.awt.BorderLayout.*;
+import static java.awt.Desktop.Action.*;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
 
 /**
@@ -69,7 +58,7 @@ public class PixelitorWindow extends JFrame {
     private Rectangle savedNormalBounds; // the saved one
 
     private PixelitorWindow() {
-        super(Build.getPixelitorWindowFixTitle());
+        super(RunContext.getPixelitorWindowFixTitle());
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
@@ -114,9 +103,7 @@ public class PixelitorWindow extends JFrame {
         MenuBar menuBar = new MenuBar(this);
         setJMenuBar(menuBar);
 
-        if (JVM.isMac) {
-            setupMacHandlers();
-        }
+        setupMacHandlers();
     }
 
     private void setupMacHandlers() {
@@ -158,7 +145,7 @@ public class PixelitorWindow extends JFrame {
         toolsPanel = new ToolsPanel(this, screenSize);
 
         if (WorkSpace.getToolsVisibility()) {
-            add(ToolSettingsPanelContainer.INSTANCE, NORTH);
+            add(ToolSettingsPanelContainer.getInstance(), NORTH);
             add(toolsPanel, WEST);
         }
     }
@@ -249,16 +236,17 @@ public class PixelitorWindow extends JFrame {
     }
 
     public void setToolsVisibility(boolean visible, boolean revalidate) {
+        var toolSettingsPanel = ToolSettingsPanelContainer.getInstance();
         if (visible) {
             assert toolsPanel.getParent() == null;
-            assert ToolSettingsPanelContainer.INSTANCE.getParent() == null;
+            assert toolSettingsPanel.getParent() == null;
             add(toolsPanel, WEST);
-            add(ToolSettingsPanelContainer.INSTANCE, NORTH);
+            add(toolSettingsPanel, NORTH);
         } else {
             assert toolsPanel.getParent() == getContentPane();
-            assert ToolSettingsPanelContainer.INSTANCE.getParent() == getContentPane();
+            assert toolSettingsPanel.getParent() == getContentPane();
             remove(toolsPanel);
-            remove(ToolSettingsPanelContainer.INSTANCE);
+            remove(toolSettingsPanel);
         }
 
         if (revalidate) {
@@ -276,9 +264,9 @@ public class PixelitorWindow extends JFrame {
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.getName() + " - " + Build.getPixelitorWindowFixTitle();
+            title = comp.getName() + " - " + RunContext.getPixelitorWindowFixTitle();
         } else {
-            title = Build.getPixelitorWindowFixTitle();
+            title = RunContext.getPixelitorWindowFixTitle();
         }
         setTitle(title);
     }

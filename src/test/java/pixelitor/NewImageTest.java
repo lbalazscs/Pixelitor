@@ -29,11 +29,11 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 class NewImageTest {
     @BeforeAll
     static void beforeAllTests() {
-        TestHelper.setupMockFgBgSelector();
+        TestHelper.setUnitTestingMode();
     }
 
     @DisplayName("create new comp")
-    @ParameterizedTest(name="filled with {0}")
+    @ParameterizedTest(name = "filled with {0}")
     @EnumSource(FillType.class)
     void createNewComposition(FillType fillType) {
         var comp = NewImage.createNewComposition(fillType, 20, 20, "New Image");

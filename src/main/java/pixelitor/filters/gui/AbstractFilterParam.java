@@ -33,6 +33,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     protected ParamGUI paramGUI;
     protected RandomizePolicy randomizePolicy;
 
+    // if this is not null, then it's the model of
     // an extra action button to the right of the normal GUI,
     // typically some randomization, which will be enabled
     // only for certain values of this filter parameter
@@ -63,7 +64,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public void considerImageSize(Rectangle bounds) {
-        // by default do nothing, most controls are unaffected
+        // by default does nothing, as most controls are unaffected
     }
 
     @Override
@@ -113,7 +114,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     /**
-     * Randomize the settings without checking the permission,
+     * Randomizes the settings without checking the permission,
      * and without triggering the filter
      */
     protected abstract void doRandomize();

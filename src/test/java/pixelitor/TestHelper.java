@@ -29,7 +29,10 @@ import pixelitor.selection.Selection;
 import pixelitor.testutils.WithTranslation;
 import pixelitor.tools.KeyModifiers;
 import pixelitor.tools.MouseButton;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.tools.gui.ToolSettingsPanel;
+import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.util.PMouseEvent;
 
 import javax.swing.*;
@@ -38,6 +41,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import static java.awt.event.MouseEvent.*;
@@ -57,13 +61,6 @@ public class TestHelper {
     private static Selection currentSel;
 
     private TestHelper() {
-    }
-
-    public static void setupMockFgBgSelector() {
-        var fgBgColorSelector = mock(FgBgColorSelector.class);
-        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
-        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
-        FgBgColors.setUI(fgBgColorSelector);
     }
 
     public static TextLayer createTextLayer(Composition comp, String name) {
@@ -382,8 +379,29 @@ public class TestHelper {
         assertThat(edits).containsExactly(values);
     }
 
+    public static void initTool(Tool tool) throws InvocationTargetException, InterruptedException {
+        if (!tool.hasSettingsPanel()) {
+            tool.setSettingsPanel(new ToolSettingsPanel());
+            SwingUtilities.invokeAndWait(tool::initSettingsPanel);
+        }
+    }
+
     public static void setUnitTestingMode() {
-        Build.setUnitTestingMode();
+        if (RunContext.isUnitTesting()) {
+            // unit testing mode is already set
+            return;
+        }
+
+        RunContext.setUnitTestingMode();
         Layer.uiFactory = TestLayerUI::new;
+        ToolSettingsPanelContainer.setInstance(mock(ToolSettingsPanelContainer.class));
+        setupMockFgBgSelector();
+    }
+
+    private static void setupMockFgBgSelector() {
+        var fgBgColorSelector = mock(FgBgColorSelector.class);
+        when(fgBgColorSelector.getFgColor()).thenReturn(Color.BLACK);
+        when(fgBgColorSelector.getBgColor()).thenReturn(Color.WHITE);
+        FgBgColors.setUI(fgBgColorSelector);
     }
 }

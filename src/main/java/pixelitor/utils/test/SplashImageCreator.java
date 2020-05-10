@@ -19,11 +19,11 @@ package pixelitor.utils.test;
 
 import org.jdesktop.swingx.painter.AbstractLayoutPainter;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.NewImage;
+import pixelitor.Pixelitor;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
@@ -181,7 +181,7 @@ public class SplashImageCreator {
                 WHITE, font, -70, BlendingMode.NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
-        addTextLayer(comp, "version " + Build.VERSION_NUMBER,
+        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER,
                 WHITE, font, 50, BlendingMode.NORMAL, 1.0f, true);
     }
 

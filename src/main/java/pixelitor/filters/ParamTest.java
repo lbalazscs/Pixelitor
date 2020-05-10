@@ -17,22 +17,9 @@
 
 package pixelitor.filters;
 
-import pixelitor.Build;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BlendingModeParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.RunContext;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.LogZoomParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.RangeWithColorsParam;
-import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.filters.gui.TextParam;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
@@ -40,14 +27,11 @@ import pixelitor.utils.test.RandomGUITest;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
+import static java.awt.Color.*;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
 /**
- * A test operation with all GUIParam objects
+ * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
  */
 public class ParamTest extends ParametrizedFilter {
     public ParamTest() {
@@ -58,7 +42,7 @@ public class ParamTest extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (Build.isDevelopment() && !RandomGUITest.isRunning()) {
+        if (RunContext.isDevelopment() && !RandomGUITest.isRunning()) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 
@@ -79,7 +63,7 @@ public class ParamTest extends ParametrizedFilter {
                         new Value("value 1", 1),
                         new Value("value 2", 2),
                 }),
-                new ColorParam("ColorParam:", WHITE, FREE_TRANSPARENCY),
+                new ColorParam("ColorParam", WHITE, FREE_TRANSPARENCY),
                 new AngleParam("AngleParam", 0),
                 new ElevationAngleParam("ElevationAngleParam", 0),
                 new BlendingModeParam(BlendingMode.values()),

@@ -26,13 +26,13 @@ import static java.lang.String.format;
  * when pushed, before triggering the filter
  */
 public class FilterButtonModel implements FilterSetting {
-    private final Runnable beforeTriggeringTask;
+    private final Runnable task;
     private final Icon icon;
     private final String toolTipText;
     private final String lookupName; // for AssertJSwing tests
     private final String text;
     private ParamAdjustmentListener adjustmentListener;
-    private OrderedExecutionButton button;
+    private JButton button;
 
     private boolean enabledByFilterLogic = true;
     private boolean enabledByAnimationSetting = true;
@@ -40,14 +40,14 @@ public class FilterButtonModel implements FilterSetting {
     // most actions should be available in the final animation settings
     private boolean ignoreFinalAnimationSettingMode = true;
 
-    public FilterButtonModel(String text, Runnable beforeTriggeringTask, String toolTipText) {
-        this(text, beforeTriggeringTask, null, toolTipText, null);
+    public FilterButtonModel(String text, Runnable task, String toolTipText) {
+        this(text, task, null, toolTipText, null);
     }
 
-    public FilterButtonModel(String text, Runnable beforeTriggeringTask, Icon icon,
+    public FilterButtonModel(String text, Runnable task, Icon icon,
                              String toolTipText, String lookupName) {
         this.text = text;
-        this.beforeTriggeringTask = beforeTriggeringTask;
+        this.task = task;
         this.icon = icon;
         this.toolTipText = toolTipText;
         this.lookupName = lookupName;
@@ -55,8 +55,14 @@ public class FilterButtonModel implements FilterSetting {
 
     @Override
     public JComponent createGUI() {
-        button = new OrderedExecutionButton(text, beforeTriggeringTask, adjustmentListener, icon);
-        if(toolTipText != null) {
+        button = new JButton(text, icon);
+        button.addActionListener(e -> {
+            // first run the given task...
+            task.run();
+            // ... and then trigger the filter preview
+            adjustmentListener.paramAdjusted();
+        });
+        if (toolTipText != null) {
             button.setToolTipText(toolTipText);
         }
         button.setEnabled(shouldBeEnabled());
@@ -105,27 +111,5 @@ public class FilterButtonModel implements FilterSetting {
     @Override
     public String toString() {
         return format("%s[name = '%s']", getClass().getSimpleName(), getName());
-    }
-
-    /**
-     * A button that runs first its ActionListener (to do its
-     * specific job), and after then its ParamAdjustmentListener
-     * (typically to trigger a filter preview)
-     */
-    private static class OrderedExecutionButton extends JButton {
-        private OrderedExecutionButton(String name, Runnable beforeTriggeringTask,
-                                       ParamAdjustmentListener adjustmentListener,
-                                       Icon icon) {
-            super(name);
-
-            if (icon != null) {
-                setIcon(icon);
-            }
-
-            addActionListener(e -> {
-                beforeTriggeringTask.run();
-                adjustmentListener.paramAdjusted();
-            });
-        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -88,18 +88,16 @@ public class LinearDabsStrategy implements DabsStrategy {
         int steps = 0;
 
         for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
-            if(steps++ > 1_000 && RandomGUITest.isRunning()) {
+            if (steps++ > 1_000 && RandomGUITest.isRunning()) {
                 // crazy big shapes can appear during
                 // random GUI testing, don't wait forever
-                System.out.printf("LinearDabsStrategy::onNewStrokePoint: breaking out, " +
-                        "spacing = %.5f, lineDist = %.2f%n", spacing, lineDist);
                 break;
             }
             x = prevX + t * dx;
             y = prevY + t * dy;
             PPoint p = PPoint.eagerFromIm(x, y, end.getView());
 
-            if(refreshBrushForEachDab) {
+            if (refreshBrushForEachDab) {
                 brush.setupBrushStamp(p);
             }
 
@@ -114,7 +112,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             drew = true;
         }
 
-        if(drew) {
+        if (drew) {
             double remainingDx = endX - x;
             double remainingDy = endY - y;
             distFromLastDab = Math.sqrt(remainingDx * remainingDx

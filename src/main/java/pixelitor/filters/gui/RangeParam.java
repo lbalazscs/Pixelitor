@@ -43,12 +43,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double defaultValue;
     private int decimalPlaces = 0;
 
-    /**
-     * This is not stored as an int in order to enable animation interpolations
-     * However setValue accepts only int as the argument
-     * because it implements BoundedRangeModel
-     * There is also a setValueAsDouble method, but this is only used programmatically
-     */
+     // Not stored as an int in order to enable animation interpolations
     private double value;
 
     private boolean adjusting;
@@ -87,7 +82,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public JComponent createGUI() {
-//        assert paramGUI == null;
         var sliderSpinner = new SliderSpinner(this, textPosition, addDefaultButton);
         paramGUI = sliderSpinner;
         setGUIEnabledState();
@@ -253,10 +247,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return getValue() == 0;
     }
 
-    public boolean isFloatingZero() {
-        return getValueAsDouble() == 0.0;
-    }
-
     public float getValueAsFloat() {
         return (float) value;
     }
@@ -265,6 +255,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return value;
     }
 
+    // accepts an int so that the class can implement BoundedRangeModel
     @Override
     public void setValue(int n) {
         setValue(n, true);

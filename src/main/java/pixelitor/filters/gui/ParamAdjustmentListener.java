@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,12 @@
 package pixelitor.filters.gui;
 
 /**
- * A listener for events that should trigger some UI update,
- * typically the calculation of a new filter preview
+ * A listener for events in the GUI of a {@link FilterSetting}
  */
 public interface ParamAdjustmentListener {
-    // a static listener instance that doesn't do anything
-    ParamAdjustmentListener EMPTY = () -> {};
-
+    /**
+     * The user modified the GUI, therefore some update should be
+     * triggered, typically the calculation of a new filter preview.
+     */
     void paramAdjusted();
 }

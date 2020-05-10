@@ -32,9 +32,9 @@ import static java.lang.String.format;
  */
 public abstract class MenuAction extends NamedAction {
     /**
-     * On what layer types is a {@link MenuAction} allowed to run
+     * On which layer types is a {@link MenuAction} allowed to run
      */
-    public enum AllowedLayerType {
+    public enum AllowedOnLayerType {
         ANY(null) {
             @Override
             boolean isAllowed(Layer layer) {
@@ -79,7 +79,7 @@ public abstract class MenuAction extends NamedAction {
 
         private final String errorDialogTitle;
 
-        AllowedLayerType(String errorDialogTitle) {
+        AllowedOnLayerType(String errorDialogTitle) {
             this.errorDialogTitle = errorDialogTitle;
         }
 
@@ -92,19 +92,19 @@ public abstract class MenuAction extends NamedAction {
         }
     }
 
-    private final AllowedLayerType layerType;
+    private final AllowedOnLayerType layerType;
 
     protected MenuAction(String name) {
         super(name);
-        layerType = AllowedLayerType.ANY;
+        layerType = AllowedOnLayerType.ANY;
     }
 
-    protected MenuAction(String name, AllowedLayerType layerType) {
+    protected MenuAction(String name, AllowedOnLayerType layerType) {
         super(name);
         this.layerType = layerType;
     }
 
-    protected MenuAction(String name, Icon icon, AllowedLayerType layerType) {
+    protected MenuAction(String name, Icon icon, AllowedOnLayerType layerType) {
         super(name, icon);
         this.layerType = layerType;
     }
@@ -112,7 +112,7 @@ public abstract class MenuAction extends NamedAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-            if (layerType == AllowedLayerType.ANY) {
+            if (layerType == AllowedOnLayerType.ANY) {
                 onClick();
             } else {
                 Layer activeLayer = OpenImages.getActiveLayer();

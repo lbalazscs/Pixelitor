@@ -17,10 +17,10 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.layers.GlobalLayerChangeListener;
 import pixelitor.layers.GlobalLayerMaskChangeListener;
@@ -37,7 +37,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
         GlobalLayerMaskChangeListener, ViewActivationListener {
 
     public PixelitorEventListener() {
-        if (Build.isFinal()) {
+        if (RunContext.isFinal()) {
             throw new IllegalStateException("this should be only used for debugging");
         }
     }

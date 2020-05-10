@@ -17,10 +17,10 @@
 
 package pixelitor.tools.crop;
 
-import pixelitor.Build;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.View;
@@ -113,7 +113,7 @@ public class CropTool extends DragTool {
 
         enableCropActions(false);
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             JButton b = new JButton("Dump State");
             b.addActionListener(e -> {
                 View view = OpenImages.getActiveView();

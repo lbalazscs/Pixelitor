@@ -19,12 +19,12 @@ package pixelitor.menus.view;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
-import pixelitor.menus.OpenImageEnabledRadioButtonMenuItem;
+import pixelitor.menus.OpenImageAwareRadioButtonMenuItem;
 
 /**
  * A menu item in the {@link ZoomMenu} that represents a zoom level
  */
-public class ZoomMenuItem extends OpenImageEnabledRadioButtonMenuItem {
+public class ZoomMenuItem extends OpenImageAwareRadioButtonMenuItem {
 
     public ZoomMenuItem(ZoomLevel zoomLevel) {
         super(zoomLevel.toString());

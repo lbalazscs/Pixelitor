@@ -18,11 +18,11 @@
 package pixelitor.utils.test;
 
 import com.bric.util.JVM;
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
@@ -58,8 +58,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -97,10 +97,9 @@ public class RandomGUITest {
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
-    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT
-            = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
-    private static volatile boolean keepRunning = true;
+    private static volatile boolean stopRunning = false;
 
     private static final WeightedCaller weightedCaller = new WeightedCaller();
     private static final boolean PRINT_MEMORY = false;
@@ -122,7 +121,7 @@ public class RandomGUITest {
     }
 
     public static void start() {
-        if (Build.isFinal()) {
+        if (RunContext.isFinal()) {
             Messages.showError("Error", "Build is FINAL");
             return;
         }
@@ -144,25 +143,25 @@ public class RandomGUITest {
         GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.err.printf("\nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
-                        keepRunning = false;
+                        System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
+                        stopRunning = true;
                     }
                 }
         );
-        keepRunning = true;
+        stopRunning = false;
 
         // This key not only stops the testing, but also exits the app
         GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.printf("\nRandomGUITest: exiting app because '%s' was pressed.%n",
+                System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
                         EXIT_KEY_CHAR);
                 System.exit(1);
             }
         });
 
         System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
-                DATE_FORMAT.get().format(new Date()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
+                DATE_FORMAT.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
 
         Robot r = null;
         try {
@@ -195,7 +194,7 @@ public class RandomGUITest {
     }
 
     public static void stop() {
-        keepRunning = false;
+        stopRunning = true;
         var pw = PixelitorWindow.getInstance();
         // the window can be null if an exception is thrown at startup,
         // and we get here from the uncaught exception handler
@@ -209,23 +208,13 @@ public class RandomGUITest {
         return new SwingWorker<>() {
             @Override
             public Void doInBackground() {
-                int numTests = 8000;
+                int numTests = 8000;  // must be > 100
                 int onePercent = numTests / 100;
 
                 int max = forever ? Integer.MAX_VALUE : numTests;
 
                 for (int i = 0; i < max; i++) {
-                    if (i % onePercent == 0) {
-                        int percent = 100 * i / numTests;
-                        System.out.print(percent + "% ");
-                        if (PRINT_MEMORY) {
-                            System.out.println(new MemoryInfo());
-                        } else {
-                            if ((percent + 1) % 20 == 0) {
-                                System.out.println();
-                            }
-                        }
-                    }
+                    printProgressPercentage(numTests, onePercent, i);
 
                     if (!GUIUtils.appHasFocus()) {
                         tryToRegainWindowFocus(3);
@@ -237,7 +226,7 @@ public class RandomGUITest {
                         }
                     }
 
-                    if (!keepRunning) {
+                    if (stopRunning) {
                         System.out.println("\nRandomGUITest stopped.");
                         finishRunning();
                         break;
@@ -259,13 +248,27 @@ public class RandomGUITest {
                     };
                     GUIUtils.invokeAndWait(runnable);
                 }
-                System.out.println("\nRandomGUITest.runTest FINISHED at " + new Date());
+                System.out.println("\nRandomGUITest.runTest FINISHED at " + LocalDateTime.now());
                 finishRunning();
                 Toolkit.getDefaultToolkit().beep();
 
                 return null;
             } // end of doInBackground()
         };
+    }
+
+    private static void printProgressPercentage(int numTests, int onePercent, int i) {
+        if (i % onePercent == 0) {
+            int percent = 100 * i / numTests;
+            System.out.print(percent + "% ");
+            if (PRINT_MEMORY) {
+                System.out.println(new MemoryInfo());
+            } else {
+                if ((percent + 1) % 20 == 0) {
+                    System.out.println();
+                }
+            }
+        }
     }
 
     private static void tryToRegainWindowFocus(int attempts) {
@@ -733,7 +736,7 @@ public class RandomGUITest {
 
     private static void randomizeToolSettings() {
         log("randomize tool settings");
-        ToolSettingsPanelContainer.INSTANCE.randomizeToolSettings();
+        ToolSettingsPanelContainer.getInstance().randomizeToolSettings();
     }
 
     private static void arrangeWindows() {
@@ -825,6 +828,8 @@ public class RandomGUITest {
                 log("flip vertical");
                 action = new Flip(VERTICAL);
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + r);
         }
 
         executeAction(action);
@@ -863,6 +868,8 @@ public class RandomGUITest {
                 log("layer order change: active down");
                 comp.moveActiveLayerDown();
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + r);
         }
     }
 
@@ -1218,7 +1225,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
         weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);
 
-        if (Build.enableAdjLayers) {
+        if (RunContext.enableAdjLayers) {
             weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
         }
 

@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package pixelitor.menus;
 
 import pixelitor.OpenImages;
@@ -24,23 +23,22 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 
 /**
- * A JCheckBoxMenuItem that becomes enabled only if there is an open image
+ * A menu item that is enabled only if there is an open image
  */
-public class OpenImageEnabledCheckBoxMenuItem extends JCheckBoxMenuItem implements ViewActivationListener {
-    public OpenImageEnabledCheckBoxMenuItem(String name) {
-        super(name);
-        setName(name);
+public class OpenImageAwareMenuItem extends JMenuItem implements ViewActivationListener {
+    public OpenImageAwareMenuItem(Action a) {
+        super(a);
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }
 
     @Override
-    public void viewActivated(View oldView, View newView) {
-        setEnabled(true);
+    public void allViewsClosed() {
+        setEnabled(false);
     }
 
     @Override
-    public void allViewsClosed() {
-        setEnabled(false);
+    public void viewActivated(View oldView, View newView) {
+        setEnabled(true);
     }
 }

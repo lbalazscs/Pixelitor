@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.Build;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.pen.history.AnchorPointChangeEdit;
@@ -35,9 +35,7 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 
-import static pixelitor.tools.pen.AnchorPointType.CUSP;
-import static pixelitor.tools.pen.AnchorPointType.SMOOTH;
-import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
+import static pixelitor.tools.pen.AnchorPointType.*;
 
 /**
  * A point on a {@link SubPath}
@@ -229,7 +227,7 @@ public class AnchorPoint extends DraggablePoint {
 
     public void showPopup(int x, int y) {
         var popup = new JPopupMenu();
-        AnchorPointType.addTypePopupItems(this, popup);
+        addTypePopupItems(this, popup);
 
         popup.addSeparator();
 
@@ -242,7 +240,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             popup.add(new AbstractAction("Dump") {
                 @Override
                 public void actionPerformed(ActionEvent e) {

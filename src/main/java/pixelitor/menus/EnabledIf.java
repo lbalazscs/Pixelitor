@@ -28,7 +28,7 @@ enum EnabledIf {
     THERE_IS_OPEN_IMAGE {
         @Override
         public JMenuItem createMenuItem(Action a) {
-            return new OpenImageEnabledMenuItem(a);
+            return new OpenImageAwareMenuItem(a);
         }
     }, CAN_REPEAT {
         @Override

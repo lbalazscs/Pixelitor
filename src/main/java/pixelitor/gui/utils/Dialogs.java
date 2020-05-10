@@ -19,7 +19,7 @@ package pixelitor.gui.utils;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
-import pixelitor.Build;
+import pixelitor.RunContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.utils.Utils;
@@ -31,11 +31,7 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 import javax.swing.*;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.io.File;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,15 +40,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
-import static javax.swing.JOptionPane.ERROR_MESSAGE;
-import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
-import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
-import static javax.swing.JOptionPane.OK_OPTION;
-import static javax.swing.JOptionPane.QUESTION_MESSAGE;
-import static javax.swing.JOptionPane.WARNING_MESSAGE;
-import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
-import static javax.swing.JOptionPane.YES_NO_OPTION;
-import static javax.swing.JOptionPane.YES_OPTION;
+import static javax.swing.JOptionPane.*;
 
 /**
  * Static utility methods related to dialogs
@@ -80,7 +68,7 @@ public class Dialogs {
 
     public static void showInfoDialog(Component parent, String title, String msg) {
         GlobalEvents.dialogOpened(title);
-        JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
+        showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -102,7 +90,7 @@ public class Dialogs {
                                             String question, Object[] options,
                                             int messageType) {
         GlobalEvents.dialogOpened(title);
-        int answer = JOptionPane.showOptionDialog(
+        int answer = showOptionDialog(
                 parent, new JLabel(question),
                 title, YES_NO_CANCEL_OPTION,
                 messageType, null, options, options[0]);
@@ -122,7 +110,7 @@ public class Dialogs {
     public static boolean showYesNoDialog(Component parent, String title,
                                           String msg, int messageType) {
         GlobalEvents.dialogOpened(title);
-        int reply = JOptionPane.showConfirmDialog(parent, msg, title,
+        int reply = showConfirmDialog(parent, msg, title,
                 YES_NO_OPTION, messageType);
         GlobalEvents.dialogClosed(title);
 
@@ -140,7 +128,7 @@ public class Dialogs {
                                              int initialOptionIndex,
                                              int messageType) {
         GlobalEvents.dialogOpened(title);
-        int userAnswer = JOptionPane.showOptionDialog(getParent(), msg, title,
+        int userAnswer = showOptionDialog(getParent(), msg, title,
                 OK_CANCEL_OPTION, messageType, null,
                 options, options[initialOptionIndex]);
         GlobalEvents.dialogClosed(title);
@@ -154,7 +142,7 @@ public class Dialogs {
 
     public static void showErrorDialog(Component parent, String title, String msg) {
         GlobalEvents.dialogOpened(title);
-        JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
+        showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -163,10 +151,11 @@ public class Dialogs {
     }
 
     public static void showFileNotWritableDialog(Component parent, File file) {
+        String msg = "<html>The file <b>%s</b> is not writable." +
+                "<br>To keep your changes, save the image " +
+                "with a new name or in another folder.";
         showErrorDialog(parent, "File not writable",
-            format("<html>The file <b>%s</b> is not writable." +
-                "<br>To keep your changes, save the image with a new name or in another folder.", file
-                .getAbsolutePath()));
+                format(msg, file.getAbsolutePath()));
     }
 
     public static void showWarningDialog(String title, String msg) {
@@ -180,7 +169,7 @@ public class Dialogs {
 
     public static void showWarningDialog(Component parent, String title, String msg) {
         GlobalEvents.dialogOpened(title);
-        JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
+        showMessageDialog(parent, msg, title, WARNING_MESSAGE);
         GlobalEvents.dialogClosed(title);
     }
 
@@ -214,7 +203,7 @@ public class Dialogs {
             return;
         }
 
-        System.err.printf("\nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
+        System.err.printf("%nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
         e.printStackTrace();
 
         RandomGUITest.stop();
@@ -245,7 +234,7 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (Build.isFinal()) {
+        if (RunContext.isFinal()) {
             return;
         }
 
@@ -298,14 +287,14 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (Build.isDevelopment()) {
+        if (RunContext.isDevelopment()) {
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +
                 "<li>decreasing the undo levels" +
                 "<li>decreasing the number of layers" +
-            "<li>working with smaller images" +
-            "<li>putting more RAM into your computer";
+                "<li>working with smaller images" +
+                "<li>putting more RAM into your computer";
         String title = "Out of memory error.";
         showErrorDialog(title, msg);
     }

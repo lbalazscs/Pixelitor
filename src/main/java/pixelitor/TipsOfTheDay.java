@@ -79,10 +79,11 @@ public class TipsOfTheDay {
 
     private static TipOfTheDayModel loadModel() throws IOException {
         var properties = new Properties();
-        var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream("/tips.properties");
-        properties.load(propertiesInputStream);
-        var model = TipLoader.load(properties);
-        propertiesInputStream.close();
+        TipOfTheDayModel model;
+        try (var propertiesInputStream = TipsOfTheDay.class.getResourceAsStream("/tips.properties")) {
+            properties.load(propertiesInputStream);
+            model = TipLoader.load(properties);
+        }
         return model;
     }
 

@@ -57,7 +57,7 @@ public class AddAnchorPointEdit extends PixelitorEdit {
         subPath.addPoint(anchorPoint);
 
         assert !subPath.isFinished();
-        subPath.getPath().setBuildingInProgressState("AddAnchorPointEdit.redo");
+        subPath.getPath().setBuildingInProgressState();
 
         comp.repaint();
     }

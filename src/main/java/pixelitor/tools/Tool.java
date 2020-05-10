@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
-import pixelitor.Build;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -31,6 +31,7 @@ import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
@@ -172,6 +173,11 @@ public abstract class Tool implements KeyListener {
         this.settingsPanel = settingsPanel;
     }
 
+    @VisibleForTesting
+    public boolean hasSettingsPanel() {
+        return settingsPanel != null;
+    }
+
     public void randomize() {
         GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
     }
@@ -214,7 +220,7 @@ public abstract class Tool implements KeyListener {
 
     @Override
     public void altReleased() {
-        if(doColorPickerForwarding()) {
+        if (doColorPickerForwarding()) {
             OpenImages.setCursorForAll(cursor);
         }
         altDown = false;
@@ -302,7 +308,7 @@ public abstract class Tool implements KeyListener {
         if (toolButton != null) {
             toolButton.doClick();
         } else {
-            assert Build.isUnitTesting();
+            assert RunContext.isUnitTesting();
             Tools.changeTo(this);
         }
     }

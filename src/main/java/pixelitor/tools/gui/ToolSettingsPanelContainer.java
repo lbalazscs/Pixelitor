@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools.gui;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
+import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import java.awt.CardLayout;
@@ -26,8 +27,8 @@ import java.awt.CardLayout;
 /**
  * The {@link ToolSettingsPanel}s for each tool in a CardLayout
  */
-public final class ToolSettingsPanelContainer extends JPanel {
-    public static final ToolSettingsPanelContainer INSTANCE = new ToolSettingsPanelContainer();
+public class ToolSettingsPanelContainer extends JPanel {
+    private static ToolSettingsPanelContainer instance;
 
     private ToolSettingsPanelContainer() {
         setLayout(new CardLayout());
@@ -39,6 +40,18 @@ public final class ToolSettingsPanelContainer extends JPanel {
             tool.initSettingsPanel();
             add(p, tool.getName());
         }
+    }
+
+    public static ToolSettingsPanelContainer getInstance() {
+        if (instance == null) {
+            instance = new ToolSettingsPanelContainer();
+        }
+        return instance;
+    }
+
+    @VisibleForTesting
+    public static void setInstance(ToolSettingsPanelContainer instance) {
+        ToolSettingsPanelContainer.instance = instance;
     }
 
     public void showSettingsFor(Tool tool) {
@@ -56,7 +69,7 @@ public final class ToolSettingsPanelContainer extends JPanel {
                 } catch (Throwable e) {
                     // assertj-swing sometimes loses the stack trace
                     // of Errors, this is a workaround
-                    if(e instanceof AssertionError) {
+                    if (e instanceof AssertionError) {
                         throw new RuntimeException(e);
                     } else {
                         throw e;

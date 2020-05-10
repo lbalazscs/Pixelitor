@@ -59,7 +59,7 @@ import static pixelitor.colors.ColorUtils.toPackedInt;
  * Static image-related utility methods
  */
 public class ImageUtils {
-    public static final double DEG_315_IN_RADIANS = 0.7853981634;
+    public static final double DEG_315_IN_RADIANS = Math.PI / 4;
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
     private static final GraphicsConfiguration graphicsConfiguration = GraphicsEnvironment

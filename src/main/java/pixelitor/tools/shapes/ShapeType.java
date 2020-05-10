@@ -36,9 +36,9 @@ public enum ShapeType {
     RECTANGLE("Rectangle", true, false, true) {
         @Override
         public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
-            var rs = (RectangleSettings) settings;
             setPositiveCoordinates(imDrag);
-            double radius = rs.getRadius();
+            var rs = (RectangleSettings) settings;
+            double radius = rs == null ? 0 : rs.getRadius();
             if (radius == 0) {
                 return new Rectangle2D.Double(x, y, width, height);
             } else {

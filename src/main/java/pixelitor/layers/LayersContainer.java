@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.Build;
 import pixelitor.OpenImages;
+import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.ViewActivationListener;
@@ -31,9 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.dnd.DropTarget;
 import java.util.List;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
@@ -75,7 +73,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         southPanel.add(new SouthButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
         southPanel.add(new SouthButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        if (Build.enableAdjLayers) {
+        if (RunContext.enableAdjLayers) {
             southPanel.add(new SouthButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 
@@ -98,10 +96,11 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         scrollPane.setViewportView(null);
     }
 
+    /**
+     * Not used. The layers panel of the View is set in {@link  View#activateUI}
+     */
     @Override
     public void viewActivated(View oldView, View newView) {
-        // the layers pane of the CompositionView is set in
-        // CompositionView.onActivation()
     }
 
     public static boolean areLayersShown() {

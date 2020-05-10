@@ -30,7 +30,9 @@ import javax.swing.undo.CannotUndoException;
 
 import static pixelitor.tools.pen.BuildState.NO_INTERACTION;
 
-// TODO perhaps it would be simpler to use the generic PathEdit instead of this
+/**
+ * Represents the starting of a new subpath within a path.
+ */
 public class SubPathStartEdit extends PixelitorEdit {
     private final Path path;
     private final boolean wasFirstSP;
@@ -55,7 +57,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         if (noMoreLeft) {
             Tools.PEN.removePath();
         }
-        path.setBuildState(NO_INTERACTION, "SubPathStartEdit.undo");
+        path.setBuildState(NO_INTERACTION);
         comp.repaint();
     }
 
@@ -64,8 +66,7 @@ public class SubPathStartEdit extends PixelitorEdit {
         super.redo();
 
         path.addSubPath(subPath);
-        path.setBuildingInProgressState("SubPathStartEdit.redo");
-//        subPath.undoFinishing("SubPathStartEdit.redo");
+        path.setBuildingInProgressState();
         if (wasFirstSP) {
             comp.setActivePath(path);
             if (comp.isActive()) {
