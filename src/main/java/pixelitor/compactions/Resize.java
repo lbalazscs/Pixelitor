@@ -19,7 +19,6 @@ package pixelitor.compactions;
 
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.ThreadPool;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
@@ -30,7 +29,6 @@ import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Utils;
 
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Resizes all content layers of a composition
@@ -81,37 +80,38 @@ public class Resize implements CompAction {
             canvasTargetWidth = (int) (scale * canvasCurrWidth);
             canvasTargetHeight = (int) (scale * canvasCurrHeight);
         }
-        Dimension targetSize = new Dimension(canvasTargetWidth, canvasTargetHeight);
+        var targetSize = new Dimension(canvasTargetWidth, canvasTargetHeight);
 
         // The resize runs outside the EDT so that the progress bar animation
         // can update and multiple resizing operations can run in parallel
         var progressHandler = Messages.startProgress("Resizing", -1);
         return CompletableFuture
-                .supplyAsync(() -> oldComp.createCopy(true, true),
-                        ThreadPool.getExecutor())
-                .thenCompose(newComp -> resizeLayers(newComp, targetSize))
-                .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler),
-                        EventQueue::invokeLater)
-                .handle((newComp, ex) -> {
-                    if (ex != null) {
-                        Messages.showExceptionOnEDT(ex);
-                    }
-                    return newComp;
-                });
+            .supplyAsync(() -> oldComp.copy(true, true), onPool)
+            .thenCompose(newComp -> resizeLayers(newComp, targetSize))
+            .thenApplyAsync(newComp -> afterResizeActions(oldComp, newComp, targetSize, progressHandler), onEDT)
+            .handle((newComp, ex) -> {
+                if (ex != null) {
+                    Messages.showExceptionOnEDT(ex);
+                }
+                return newComp;
+            });
     }
 
-    private static Composition afterResizeActions(Composition comp, Composition newComp, Dimension canvasTarget, ProgressHandler progressHandler) {
-        assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
+    private static Composition afterResizeActions(Composition oldComp,
+                                                  Composition newComp,
+                                                  Dimension newCanvasSize,
+                                                  ProgressHandler progressHandler) {
+        assert calledOnEDT() : threadInfo();
 
         Canvas newCanvas = newComp.getCanvas();
-        var canvasTransform = createCanvasTransform(canvasTarget, newCanvas);
+        var canvasTransform = createCanvasTransform(newCanvasSize, newCanvas);
         newComp.imCoordsChanged(canvasTransform, false);
 
         View view = newComp.getView();
-        newCanvas.changeSize(canvasTarget.width, canvasTarget.height, view);
+        newCanvas.changeSize(newCanvasSize.width, newCanvasSize.height, view);
 
         History.add(new CompositionReplacedEdit("Resize",
-                false, view, comp, newComp, canvasTransform));
+            view, oldComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
 
         // the view was active when the resize started, but since the
@@ -120,11 +120,11 @@ public class Resize implements CompAction {
             SelectionActions.setEnabled(newComp.hasSelection(), newComp);
         }
 
-        Guides guides = comp.getGuides();
-        if (guides != null) {
-            // in the case of resize the guides don't
-            // need transforming, just a correct canvas size
-            Guides newGuides = guides.copyForNewComp(view);
+        Guides oldGuides = oldComp.getGuides();
+        if (oldGuides != null) {
+            // the guides don't need transforming,
+            // just a correct canvas size
+            Guides newGuides = oldGuides.copyForNewComp(view);
             newComp.setGuides(newGuides);
         }
 
@@ -138,7 +138,8 @@ public class Resize implements CompAction {
 
         progressHandler.stopProgress();
         Messages.showInStatusBar(format("<html><b>%s</b> was resized to %dx%d pixels.",
-                newComp.getName(), canvasTarget.width, canvasTarget.height));
+            newComp.getName(), newCanvasSize.width, newCanvasSize.height));
+
         return newComp;
     }
 
@@ -159,6 +160,6 @@ public class Resize implements CompAction {
             }
         });
         return Utils.allOfList(futures)
-                .thenApply(v -> comp);
+            .thenApply(v -> comp);
     }
 }

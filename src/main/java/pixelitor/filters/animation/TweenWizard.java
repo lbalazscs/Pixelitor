@@ -20,20 +20,19 @@ package pixelitor.filters.animation;
 import pixelitor.automate.Wizard;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 
 import static pixelitor.filters.animation.TweenWizardPage.SELECT_FILTER;
 
 /**
- * Wizard for tweening animations
+ * The {@link Wizard} for tweening animations.
  */
 public class TweenWizard extends Wizard {
     private final TweenAnimation animation = new TweenAnimation();
 
     public TweenWizard(Drawable dr) {
         super(SELECT_FILTER, "Export Tweening Animation",
-                "Render", 450, 380, dr);
+            "Render", 450, 380, dr);
     }
 
     @Override
@@ -45,21 +44,13 @@ public class TweenWizard extends Wizard {
         }
     }
 
-    private void calculateAnimation() {
-        var progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Frames");
-
-        var task = new RenderTweenFramesTask(animation, dr);
-        task.addPropertyChangeListener(evt -> task.onPropertyChange(evt, progressMonitor));
-        task.execute();
-    }
-
     public TweenAnimation getAnimation() {
         return animation;
     }
 
     @Override
     protected void finalAction() {
-        calculateAnimation();
+        new RenderTweenFramesTask(animation, dr).execute();
     }
 }
 

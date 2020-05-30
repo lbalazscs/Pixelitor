@@ -20,8 +20,8 @@ package pixelitor.history;
 import pixelitor.Composition;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.debug.DebugUtils;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
@@ -47,7 +47,6 @@ public class PartialImageEdit extends FadeableEdit {
     public PartialImageEdit(String name, Composition comp, Drawable dr,
                             BufferedImage image, Rectangle saveRect, boolean canRepeat) {
         super(name, comp, dr);
-//        Utils.debugCall(saveRect.toString());
 
         this.canRepeat = canRepeat;
         this.dr = dr;
@@ -55,8 +54,6 @@ public class PartialImageEdit extends FadeableEdit {
 
         Raster backupRaster = image.getData(this.saveRect);
         backupRasterRef = new SoftReference<>(backupRaster);
-
-//        EventQueue.invokeLater(() -> Utils.debugRaster(backupRaster, "Partial Image"));
     }
 
     @Override
@@ -121,15 +118,15 @@ public class PartialImageEdit extends FadeableEdit {
         String className = raster.getClass().getSimpleName();
         DataBuffer dataBuffer = raster.getDataBuffer();
         int dataType = dataBuffer.getDataType();
-        String typeAsString = DebugUtils.dateBufferTypeAsString(dataType);
+        String typeAsString = Debug.dateBufferTypeAsString(dataType);
         int numBanks = dataBuffer.getNumBanks();
         int numBands = raster.getNumBands();
         int numDataElements = raster.getNumDataElements();
 
         String msg = format("className = %s, rasterBounds = %s, dataType = %d, " +
-                        "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
-                className, rasterBounds, dataType,
-                typeAsString, numBanks, numBands, numDataElements);
+                "typeAsString=%s, numBanks = %d, numBands = %d, numDataElements = %d",
+            className, rasterBounds, dataType,
+            typeAsString, numBanks, numBands, numDataElements);
 
         System.out.println("PartialImageEdit::debugRaster debugging raster: " + name + ": " + msg);
     }
@@ -167,7 +164,7 @@ public class PartialImageEdit extends FadeableEdit {
         if (selection != null) {
             // backupRaster is relative to the full image, but we need to return a selection-sized image
             previousImage = ImageUtils.getSelectionSizedPartFrom(
-                    previousImage, selection, dr.getTx(), dr.getTy());
+                previousImage, selection, dr.getTx(), dr.getTy());
         }
 
         return previousImage;

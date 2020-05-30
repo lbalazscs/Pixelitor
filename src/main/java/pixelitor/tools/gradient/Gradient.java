@@ -22,11 +22,13 @@ import pixelitor.gui.View;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.LayerMask;
-import pixelitor.layers.TmpDrawingLayer;
 import pixelitor.tools.util.ImDrag;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
+import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -90,8 +92,8 @@ public class Gradient {
             assert canvasHeight == subImage.getHeight();
             smallImage = false;
         } else {
-            Composite composite = blendingMode.getComposite(opacity);
-            TmpDrawingLayer tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
+            var composite = blendingMode.getComposite(opacity);
+            var tmpDrawingLayer = dr.createTmpDrawingLayer(composite, true);
             g = tmpDrawingLayer.getGraphics();
             smallImage = tmpDrawingLayer.hasSmallImage();
             imDrag = tmpDrawingLayer.translateDrag(imDrag);
@@ -101,7 +103,7 @@ public class Gradient {
         Paint paint = type.createPaint(imDrag, colors, cycleMethod);
         g.setPaint(paint);
         if (smallImage) {
-            Rectangle bounds = comp.getSelection().getShapeBounds(0);
+            Rectangle bounds = comp.getSelection().getShapeBounds();
             g.fillRect(0, 0, bounds.width, bounds.height);
         } else {
             g.fillRect(0, 0, canvasWidth, canvasHeight);
@@ -118,8 +120,8 @@ public class Gradient {
      */
     public boolean fullyCovers() {
         return colorType != GradientColorType.FG_TO_TRANSPARENT
-                && blendingMode == BlendingMode.NORMAL
-                && opacity == 1.0f;
+            && blendingMode == BlendingMode.NORMAL
+            && opacity == 1.0f;
     }
 
     public GradientType getType() {

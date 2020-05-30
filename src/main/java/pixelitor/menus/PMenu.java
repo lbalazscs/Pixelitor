@@ -51,18 +51,6 @@ public class PMenu extends JMenu {
     }
 
     // Simple add without a builder
-    // Practically the same as the self-controlled add,
-    // but the name better expresses the intent
-    public void addAlwaysEnabledAction(Action action) {
-        JMenuItem menuItem = EnabledIf.ACTION_ENABLED.createMenuItem(action);
-        add(menuItem);
-    }
-
-    public void addSelfControlledAction(Action action) {
-        add(new JMenuItem(action));
-    }
-
-    // Simple add without a builder
     public void addAlwaysEnabledAction(Action action, KeyStroke keyStroke) {
         JMenuItem menuItem = EnabledIf.ACTION_ENABLED.createMenuItem(action);
         menuItem.setAccelerator(keyStroke);
@@ -80,16 +68,14 @@ public class PMenu extends JMenu {
      * Simple add for filter actions, no builder is needed in the simplest case
      */
     public void addFilter(String name, Supplier<Filter> supplier) {
-        FilterAction fa = new FilterAction(name, supplier);
-        addFilter(fa);
+        addFilter(new FilterAction(name, supplier));
     }
 
     /**
      * Simple add for simple filters
      */
     public void addFilter(String name, AbstractBufferedImageOp op) {
-        FilterAction fa = new FilterAction(name, op);
-        addFilter(fa);
+        addFilter(new FilterAction(name, op));
     }
 
     public void addFilter(FilterAction fa) {

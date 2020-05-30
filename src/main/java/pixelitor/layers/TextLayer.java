@@ -62,8 +62,8 @@ public class TextLayer extends ContentLayer {
     public TextLayer(Composition comp, String name) {
         super(comp, name, null);
 
-        settings = new TextSettings();
         painter = new TransformedTextPainter();
+        setSettings(new TextSettings());
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -75,39 +75,39 @@ public class TextLayer extends ContentLayer {
         painter.setTranslation(getTx(), getTy());
     }
 
-    public static void createNew(PixelitorWindow pw) {
+    public static void createNew() {
         var comp = OpenImages.getActiveComp();
         if (comp == null) {
             // It is possible to arrive here with no open images
             // because the T hotkey is always active, see issue #77
             return;
         }
-        TextLayer textLayer = new TextLayer(comp);
 
-        Layer activeLayerBefore = comp.getActiveLayer();
-        MaskViewMode oldViewMode = comp.getView().getMaskViewMode();
-
+        var textLayer = new TextLayer(comp);
+        var activeLayerBefore = comp.getActiveLayer();
+        var oldViewMode = comp.getView().getMaskViewMode();
         // don't add it yet to history, only after the user chooses to press OK
         new LayerAdder(comp).add(textLayer);
 
-        TextSettingsPanel p = new TextSettingsPanel(textLayer);
+        var settingsPanel = new TextSettingsPanel(textLayer);
         new DialogBuilder()
-                .content(p)
-                .owner(pw)
-                .title("Create Text Layer")
-                .withScrollbars()
-                .okAction(() -> {
-                    textLayer.updateLayerName();
+            .content(settingsPanel)
+            .title("Create Text Layer")
+            .withScrollbars()
+            .okAction(() ->
+                textLayer.finalizeCreation(comp, activeLayerBefore, oldViewMode))
+            .cancelAction(() -> comp.deleteLayer(textLayer, false))
+            .show();
+    }
 
-                    // now it is safe to add it to the history
-                    NewLayerEdit newLayerEdit = new NewLayerEdit(
-                            "Add Text Layer", comp, textLayer,
-                            activeLayerBefore, oldViewMode);
-                    History.add(newLayerEdit);
-                })
-                .cancelAction(() -> comp.deleteLayer(textLayer,
-                        false))
-                .show();
+    private void finalizeCreation(Composition comp, Layer activeLayerBefore, MaskViewMode oldViewMode) {
+        updateLayerName();
+
+        // now it is safe to add it to the history
+        var newLayerEdit = new NewLayerEdit(
+            "Add Text Layer", comp, this,
+            activeLayerBefore, oldViewMode);
+        History.add(newLayerEdit);
     }
 
     public void edit(PixelitorWindow pw) {
@@ -116,25 +116,21 @@ public class TextLayer extends ContentLayer {
         }
 
         TextSettings oldSettings = getSettings();
-        TextSettingsPanel p = new TextSettingsPanel(this);
+        var settingsPanel = new TextSettingsPanel(this);
 
         new DialogBuilder()
-                .content(p)
-                .owner(pw)
-                .title("Edit Text Layer")
-                .withScrollbars()
-                .okAction(() -> commitSettings(oldSettings))
-                .cancelAction(() -> resetOldSettings(oldSettings))
-                .show();
+            .content(settingsPanel)
+            .owner(pw)
+            .title("Edit Text Layer")
+            .withScrollbars()
+            .okAction(() -> commitSettings(oldSettings))
+            .cancelAction(() -> resetOldSettings(oldSettings))
+            .show();
     }
 
     public void commitSettings(TextSettings oldSettings) {
         updateLayerName();
-        TextLayerChangeEdit edit = new TextLayerChangeEdit(
-                comp,
-                this,
-                oldSettings
-        );
+        var edit = new TextLayerChangeEdit(comp, this, oldSettings);
         History.add(edit);
     }
 
@@ -150,9 +146,7 @@ public class TextLayer extends ContentLayer {
 
         d.translationX = translationX;
         d.translationY = translationY;
-        d.painter.setTranslation(
-                painter.getTx(),
-                painter.getTy());
+        d.painter.setTranslation(painter.getTx(), painter.getTy());
 
         d.setSettings(new TextSettings(settings));
 
@@ -204,17 +198,17 @@ public class TextLayer extends ContentLayer {
     public ImageLayer replaceWithRasterized(boolean addHistory) {
         BufferedImage rasterizedImage = createRasterizedImage();
 
-        ImageLayer newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
+        var newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
 
         if (addHistory) {
-            TextLayerRasterizeEdit edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
+            var edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
             History.add(edit);
         }
 
         new LayerAdder(comp)
-                .noRefresh()
-                .atIndex(comp.getLayerIndex(this))
-                .add(newImageLayer);
+            .noRefresh()
+            .atIndex(comp.getLayerIndex(this))
+            .add(newImageLayer);
 
         comp.deleteLayer(this, false);
         newImageLayer.updateIconImage();
@@ -368,8 +362,8 @@ public class TextLayer extends ContentLayer {
             popup = new JPopupMenu();
         }
 
-        JMenuItem editMenuItem = new JMenuItem("Edit");
-        editMenuItem.addActionListener(e -> edit(PixelitorWindow.getInstance()));
+        var editMenuItem = new JMenuItem("Edit");
+        editMenuItem.addActionListener(e -> edit(PixelitorWindow.get()));
         editMenuItem.setAccelerator(CTRL_T);
         popup.add(editMenuItem);
 
@@ -401,7 +395,7 @@ public class TextLayer extends ContentLayer {
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{text=" + (settings == null ? "null settings" : settings.getText())
-                + ", super=" + super.toString() + '}';
+            + "{text=" + (settings == null ? "null settings" : settings.getText())
+            + ", super=" + super.toString() + '}';
     }
 }

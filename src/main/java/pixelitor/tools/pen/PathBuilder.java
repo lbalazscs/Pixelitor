@@ -460,7 +460,7 @@ public class PathBuilder implements PenToolMode {
     @Override
     public void modeEnded() {
         if (hasPath() && !path.getActiveSubpath().isFinished()) {
-            path.finishActiveSubpath("PB.modeEnded");
+            path.finishActiveSubpath();
         } else {
             assertStateIs(NO_INTERACTION);
         }

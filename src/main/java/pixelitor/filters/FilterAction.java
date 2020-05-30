@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
-import javax.swing.*;
 import java.util.function.Supplier;
 
 /**
@@ -101,7 +100,7 @@ public class FilterAction extends DrawableAction {
     public FilterAction withoutGUI() {
         hasDialog = false;
         menuName = name; // without the "..."
-        putValue(Action.NAME, menuName);
+        setText(menuName);
 
         return this;
     }

@@ -68,35 +68,35 @@ public class CompositionIOTest {
     void readWritePXC() {
         // read and test
         String[] fileNames = {
-                "src/test/resources/pxc_test_input.pxc",
-                "src/test/resources/pxc_file_w_layer_mask.pxc",
-                "src/test/resources/pxc_file_w_text_layer.pxc",
-                "src/test/resources/pxc_file_w_adj_layer.pxc",
+            "src/test/resources/pxc_test_input.pxc",
+            "src/test/resources/pxc_file_w_layer_mask.pxc",
+            "src/test/resources/pxc_file_w_text_layer.pxc",
+            "src/test/resources/pxc_file_w_adj_layer.pxc",
         };
 
         List<Consumer<Layer>> extraChecks = new ArrayList<>();
         // extra check for simple pxc file
         extraChecks.add(secondLayer -> assertThat(secondLayer)
-                .classIs(ImageLayer.class)
-                .blendingModeIs(BlendingMode.MULTIPLY)
-                .opacityIs(0.75f));
+            .classIs(ImageLayer.class)
+            .blendingModeIs(BlendingMode.MULTIPLY)
+            .opacityIs(0.75f));
         // extra check for pxc with layer mask
         extraChecks.add(secondLayer -> assertThat(secondLayer)
-                .classIs(ImageLayer.class)
-                .hasMask()
-                .maskIsLinked()
-                .maskIsEnabled());
+            .classIs(ImageLayer.class)
+            .hasMask()
+            .maskIsLinked()
+            .maskIsEnabled());
         // extra check for pxc with text layer
         extraChecks.add(secondLayer -> {
             assert secondLayer instanceof TextLayer;
             assertThat((TextLayer) secondLayer)
-                    .textIs("T")
-                    .hasNoMask();
+                .textIs("T")
+                .hasNoMask();
         });
         // extra check for pxc with adjustment layer
         extraChecks.add(secondLayer -> assertThat(secondLayer)
-                .classIs(AdjustmentLayer.class)
-                .hasNoMask());
+            .classIs(AdjustmentLayer.class)
+            .hasNoMask());
 
         for (int i = 0; i < fileNames.length; i++) {
             String fileName = fileNames[i];
@@ -111,7 +111,10 @@ public class CompositionIOTest {
                 // read back and test
                 checkMultiLayerRead(tmp, extraChecks.get(i));
 
-                tmp.delete();
+                boolean deleted = tmp.delete();
+                if (!deleted) {
+                    throw new IllegalStateException("could not delete " + tmp.getAbsolutePath());
+                }
             } catch (Exception e) {
                 throw new IllegalStateException("Error while testing " + fileName, e);
             }
@@ -121,10 +124,10 @@ public class CompositionIOTest {
     @Test
     void readWriteORA() throws IOException {
         Consumer<Layer> extraCheck = secondLayer ->
-                assertThat(secondLayer)
-                        .classIs(ImageLayer.class)
-                        .blendingModeIs(BlendingMode.MULTIPLY)
-                        .opacityIs(0.75f);
+            assertThat(secondLayer)
+                .classIs(ImageLayer.class)
+                .blendingModeIs(BlendingMode.MULTIPLY)
+                .opacityIs(0.75f);
 
         // read and test
         File f = new File("src/test/resources/gimp_ora_test_input.ora");
@@ -141,32 +144,32 @@ public class CompositionIOTest {
 
     private static void checkSingleLayerRead(File f) {
         var future = IO.loadCompAsync(f);
-        checkAsyncReadResult(future);
 
         var comp = future.join();
         assertThat(comp)
-                .numLayersIs(1)
-                .canvasSizeIs(10, 10)
-                .invariantIsOK();
+            .numLayersIs(1)
+            .canvasSizeIs(10, 10)
+            .invariantIsOK();
+
+        checkAsyncReadResult(future);
     }
 
     private static void checkAsyncReadResult(CompletableFuture<Composition> cf) {
         assertThat(cf)
-                .isNotCancelled()
-                .isNotCompletedExceptionally();
-        // usually isNotDone is also true, but since these are very
-        // small files, the reading could be finished by now
+            .isDone()
+            .isNotCancelled()
+            .isNotCompletedExceptionally();
     }
 
     private static Composition checkMultiLayerRead(File f, Consumer<Layer> secondLayerChecker) {
         var future = IO.loadCompAsync(f);
-        checkAsyncReadResult(future);
 
         var comp = future.join();
         assertThat(comp)
-                .numLayersIs(2)
-                .canvasSizeIs(10, 10)
-                .invariantIsOK();
+            .numLayersIs(2)
+            .canvasSizeIs(10, 10)
+            .invariantIsOK();
+        checkAsyncReadResult(future);
 
         var secondLayer = comp.getLayer(1);
         secondLayerChecker.accept(secondLayer);

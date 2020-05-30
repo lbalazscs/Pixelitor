@@ -19,6 +19,7 @@ package pixelitor.gui;
 
 import pixelitor.Canvas;
 import pixelitor.OpenImages;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 
@@ -68,13 +69,13 @@ public enum AutoZoom {
     public abstract double calcImageToDesktopRatio(double hor, double ver);
 
     private Action asAction() {
-        var action = new AbstractAction(guiName) {
+        var action = new NamedAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 OpenImages.fitActiveTo(AutoZoom.this);
             }
         };
-        action.putValue(Action.SHORT_DESCRIPTION, toolTip);
+        action.setToolTip(toolTip);
         return action;
     }
 

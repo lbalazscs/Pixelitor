@@ -265,8 +265,8 @@ public class Path implements Serializable {
         }
     }
 
-    public void finishActiveSubpath(String reason) {
-        activeSubPath.finish(comp, reason, true);
+    public void finishActiveSubpath() {
+        activeSubPath.finish(comp, true);
     }
 
     public boolean hasMovingPoint() {

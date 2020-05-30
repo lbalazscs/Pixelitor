@@ -17,39 +17,36 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.utils.VisibleForTesting;
+
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
 
-public class ColorIcon implements Icon {
-    private Color color;
-    private final int width;
-    private final int height;
-
-    public ColorIcon(Color color, int width, int height) {
-        this.color = color;
-        this.width = width;
-        this.height = height;
+/**
+ * An {@link AbstractAction} with convenience methods
+ * for renaming and setting the tooltip.
+ */
+public abstract class NamedAction extends AbstractAction {
+    protected NamedAction() {
     }
 
-    public void setColor(Color color) {
-        this.color = color;
+    protected NamedAction(String name) {
+        super(name);
     }
 
-    @Override
-    public int getIconWidth() {
-        return width;
+    protected NamedAction(String name, Icon icon) {
+        super(name, icon);
     }
 
-    @Override
-    public int getIconHeight() {
-        return height;
+    public void setText(String newName) {
+        putValue(Action.NAME, newName);
     }
 
-    @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
-        g.setColor(color);
-        g.fillRect(x, y, width, height);
+    @VisibleForTesting
+    public String getText() {
+        return (String) getValue(Action.NAME);
+    }
+
+    public void setToolTip(String toolTip) {
+        putValue(Action.SHORT_DESCRIPTION, toolTip);
     }
 }

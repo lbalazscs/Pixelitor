@@ -14,36 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
+package pixelitor.layers;
 
-package pixelitor.menus;
-
-import pixelitor.utils.VisibleForTesting;
-
-import javax.swing.*;
+import pixelitor.Composition;
 
 /**
- * An action that can be simply renamed.
- * Used for menus that need to change their name according
- * to some internal state.
+ * A listener for changes in layer number, selection and order.
+ * It does not observe a specific
+ * composition, but rather the active composition.
  */
-public abstract class NamedAction extends AbstractAction {
-    protected NamedAction() {
-    }
+public interface ActiveCompositionListener {
 
-    protected NamedAction(String name) {
-        super(name);
-    }
+    void numLayersChanged(Composition comp, int newLayerCount);
 
-    protected NamedAction(String name, Icon icon) {
-        super(name, icon);
-    }
+    void activeLayerChanged(Layer newActiveLayer);
 
-    public void setName(String newName) {
-        putValue(Action.NAME, newName);
-    }
-
-    @VisibleForTesting
-    public String getName() {
-        return (String) getValue(Action.NAME);
-    }
+    void layerOrderChanged(Composition comp);
 }

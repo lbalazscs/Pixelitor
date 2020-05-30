@@ -55,11 +55,11 @@ public class PenToolTest {
         PenTool.path = null;
         Tools.PEN.startBuilding(false);
         assertThat(Tools.PEN)
-                .isActive()
-                .hasNoPath()
-                .pathActionAreNotEnabled()
-                .modeIs(BUILD)
-                .isConsistent();
+            .isActive()
+            .hasNoPath()
+            .pathActionAreNotEnabled()
+            .modeIs(BUILD)
+            .isConsistent();
 
         History.clear();
     }
@@ -75,10 +75,10 @@ public class PenToolTest {
 
         undo("Convert Path to Selection");
         assertThat(Tools.PEN)
-                .isActive()
-                .modeIs(BUILD) // return to BUILD mode!
-                .hasPath()
-                .isConsistent();
+            .isActive()
+            .modeIs(BUILD) // return to BUILD mode!
+            .hasPath()
+            .isConsistent();
         assertThat(comp).doesNotHaveSelection();
 
         redo("Convert Path to Selection");
@@ -92,9 +92,9 @@ public class PenToolTest {
         createSimpleClosedPathInBuildMode();
         Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
-                .isActive()
-                .isConsistent()
-                .modeIs(EDIT);
+            .isActive()
+            .isConsistent()
+            .modeIs(EDIT);
 
         Tools.PEN.convertToSelection();
         assertThat(Tools.SELECTION).isActive();
@@ -102,10 +102,10 @@ public class PenToolTest {
 
         undo("Convert Path to Selection");
         assertThat(Tools.PEN)
-                .isActive()
-                .isConsistent()
-                .modeIs(EDIT) // return to EDIT mode!
-                .hasPath();
+            .isActive()
+            .isConsistent()
+            .modeIs(EDIT) // return to EDIT mode!
+            .hasPath();
         assertThat(comp).doesNotHaveSelection();
 
         redo("Convert Path to Selection");
@@ -118,9 +118,9 @@ public class PenToolTest {
     void convertSelectionToPath() {
         Tools.setCurrentTool(Tools.SELECTION);
         assertThat(Tools.SELECTION)
-                .isActive()
-                .selectionTypeIs(RECTANGLE)
-                .interactionIs(REPLACE);
+            .isActive()
+            .selectionTypeIs(RECTANGLE)
+            .interactionIs(REPLACE);
 
         // build a quick rectangular selection by dragging
         press(100, 100);
@@ -131,10 +131,10 @@ public class PenToolTest {
 
         SelectionActions.getConvertToPath().actionPerformed(null);
         assertThat(Tools.PEN)
-                .isActive()
-                .isConsistent()
-                .modeIs(EDIT)
-                .hasPath();
+            .isActive()
+            .isConsistent()
+            .modeIs(EDIT)
+            .hasPath();
         assertThat(comp).doesNotHaveSelection();
 
         undo("Convert Selection to Path");
@@ -143,10 +143,10 @@ public class PenToolTest {
 
         redo("Convert Selection to Path");
         assertThat(Tools.PEN)
-                .isActive()
-                .isConsistent()
-                .modeIs(EDIT)
-                .hasPath();
+            .isActive()
+            .isConsistent()
+            .modeIs(EDIT)
+            .hasPath();
         assertThat(comp).doesNotHaveSelection();
     }
 
@@ -167,9 +167,9 @@ public class PenToolTest {
         // switch to edit mode
         Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent()
-                .modeIs(EDIT);
+            .hasPath()
+            .isConsistent()
+            .modeIs(EDIT);
 
         // drag the first point downwards
         press(100, 100);
@@ -179,9 +179,9 @@ public class PenToolTest {
         // switch back to build mode
         Tools.PEN.startBuilding(false);
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent()
-                .modeIs(BUILD);
+            .hasPath()
+            .isConsistent()
+            .modeIs(BUILD);
 
         // undo
         assertThat(firstAnchor).isAt(100, 200);
@@ -201,9 +201,9 @@ public class PenToolTest {
         // switch to edit mode
         Tools.PEN.startRestrictedMode(EDIT, false);
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent()
-                .modeIs(EDIT);
+            .hasPath()
+            .isConsistent()
+            .modeIs(EDIT);
 
         // move the first point upwards
         AnchorPoint ap1 = sp.getAnchor(0);
@@ -213,11 +213,11 @@ public class PenToolTest {
         assertThat(ap1).isAt(100, 50);
 
         assertHistoryEditsAre(
-                "Subpath Start",
-                "Add Anchor Point",
-                "Add Anchor Point",
-                "Close Subpath",
-                "Move Anchor Point");
+            "Subpath Start",
+            "Add Anchor Point",
+            "Add Anchor Point",
+            "Close Subpath",
+            "Move Anchor Point");
 
         // undo everything
         undo("Move Anchor Point");
@@ -227,15 +227,15 @@ public class PenToolTest {
         undo("Subpath Start");
 
         assertThat(Tools.PEN)
-                .hasNoPath()
-                .isConsistent()
-                .modeIs(BUILD);
+            .hasNoPath()
+            .isConsistent()
+            .modeIs(BUILD);
 
         // redo everything
         redo("Subpath Start");
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent();
+            .hasPath()
+            .isConsistent();
 
         redo("Add Anchor Point");
         redo("Add Anchor Point");
@@ -257,11 +257,11 @@ public class PenToolTest {
         path.startNewSubpath(10, 20, view);
         SubPath sp1 = path.getActiveSubpath();
         sp1.addPoint(20, 10);
-        sp1.finish(comp, "test", false);
+        sp1.finish(comp, false);
         path.startNewSubpath(100, 20, view);
         SubPath sp2 = path.getActiveSubpath();
         sp2.addPoint(100, 120);
-        sp2.finish(comp, "test", false);
+        sp2.finish(comp, false);
 
         // there are no edits yet, because this was not created with the build API
         History.assertNumEditsIs(0);
@@ -270,21 +270,21 @@ public class PenToolTest {
         Tools.PEN.startRestrictedMode(EDIT, false);
 
         assertThat(Tools.PEN)
-                .pathIs(path)
-                .modeIs(EDIT)
-                .isConsistent();
+            .pathIs(path)
+            .modeIs(EDIT)
+            .isConsistent();
         assertThat(PenTool.path)
-                .numSubPathsIs(2)
-                .activeSubPathIs(sp2);
+            .numSubPathsIs(2)
+            .activeSubPathIs(sp2);
 
         sp2.delete();
         History.assertNumEditsIs(1);
         assertThat(PenTool.path)
-                .numSubPathsIs(1)
-                .activeSubPathIs(sp1);
+            .numSubPathsIs(1)
+            .activeSubPathIs(sp1);
         assertThat(Tools.PEN)
-                .modeIs(EDIT)
-                .isConsistent();
+            .modeIs(EDIT)
+            .isConsistent();
 
         // go to build mode and back to edit - should have no effect
         Tools.PEN.startBuilding(false);
@@ -295,38 +295,38 @@ public class PenToolTest {
 
         redo("Delete Subpath");
         assertThat(PenTool.path)
-                .numSubPathsIs(1)
-                .activeSubPathIs(sp1);
+            .numSubPathsIs(1)
+            .activeSubPathIs(sp1);
         assertThat(Tools.PEN)
-                .modeIs(EDIT)
-                .isConsistent();
+            .modeIs(EDIT)
+            .isConsistent();
 
         path = PenTool.path;
         PenTool.path.delete();
         History.assertNumEditsIs(2);
         assertThat(Tools.PEN)
-                .hasNoPath()
-                .isConsistent()
-                .modeIs(BUILD);
+            .hasNoPath()
+            .isConsistent()
+            .modeIs(BUILD);
 
         undo("Delete Path");
         assertThat(Tools.PEN)
-                .pathIs(path)
-                .isConsistent()
-                .modeIs(EDIT);
+            .pathIs(path)
+            .isConsistent()
+            .modeIs(EDIT);
 
         redo("Delete Path");
         assertThat(Tools.PEN)
-                .hasNoPath()
-                .isConsistent()
-                .modeIs(BUILD);
+            .hasNoPath()
+            .isConsistent()
+            .modeIs(BUILD);
     }
 
     private SubPath createSimpleClosedPathInBuildMode() {
         assertThat(Tools.PEN)
-                .hasNoPath()
-                .isConsistent()
-                .pathActionAreNotEnabled();
+            .hasNoPath()
+            .isConsistent()
+            .pathActionAreNotEnabled();
 
         Tools.PEN.startBuilding(false);
 
@@ -343,16 +343,16 @@ public class PenToolTest {
         click(100, 100);
 
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent()
-                .pathActionAreEnabled();
+            .hasPath()
+            .isConsistent()
+            .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
         SubPath sp = PenTool.path.getSubPath(0);
         assertThat(sp)
-                .isClosed()
-                .isFinished()
-                .numAnchorsIs(3);
+            .isClosed()
+            .isFinished()
+            .numAnchorsIs(3);
 
         // undo everything
         undo("Close Subpath");
@@ -361,9 +361,9 @@ public class PenToolTest {
         undo("Subpath Start");
 
         assertThat(Tools.PEN)
-                .hasNoPath()
-                .isConsistent()
-                .pathActionAreNotEnabled();
+            .hasNoPath()
+            .isConsistent()
+            .pathActionAreNotEnabled();
 
         // redo everything
         redo("Subpath Start");
@@ -372,16 +372,16 @@ public class PenToolTest {
         redo("Close Subpath");
 
         assertThat(Tools.PEN)
-                .hasPath()
-                .isConsistent()
-                .pathActionAreEnabled();
+            .hasPath()
+            .isConsistent()
+            .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
         Assertions.assertTrue(sp == PenTool.path.getSubPath(0));
         assertThat(sp)
-                .isClosed()
-                .isFinished()
-                .numAnchorsIs(3);
+            .isClosed()
+            .isFinished()
+            .numAnchorsIs(3);
 
         return sp;
     }

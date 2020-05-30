@@ -17,7 +17,7 @@
 
 package pixelitor.tools.brushes;
 
-import pixelitor.utils.Utils;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.debug.DebugNode;
 
 import java.awt.image.BufferedImage;
@@ -59,7 +59,7 @@ public abstract class CopyBrush extends DabsBrush {
 
     public void debugImage() {
         if (debugBrushImage) {
-            Utils.debugImage(brushImage, "Copy Brush");
+            Debug.image(brushImage, "Copy Brush");
         }
     }
 

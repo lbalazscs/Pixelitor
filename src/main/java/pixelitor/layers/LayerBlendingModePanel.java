@@ -30,17 +30,21 @@ import static pixelitor.OpenImages.onActiveLayer;
  * The GUI selector for the opacity and blending mode of the layers
  */
 public class LayerBlendingModePanel extends BlendingModePanel
-        implements ViewActivationListener, GlobalLayerChangeListener {
+    implements ViewActivationListener, ActiveCompositionListener {
 
     private boolean userInteractionChange = true;
 
-    public static final LayerBlendingModePanel INSTANCE = new LayerBlendingModePanel();
+    private static final LayerBlendingModePanel INSTANCE = new LayerBlendingModePanel();
+
+    public static LayerBlendingModePanel get() {
+        return INSTANCE;
+    }
 
     private LayerBlendingModePanel() {
         super(false);
 
         OpenImages.addActivationListener(this);
-        Layers.addLayerChangeListener(this);
+        Layers.addCompositionListener(this);
 
         opacityDDSlider.addActionListener(e -> {
             if (userInteractionChange) {
@@ -58,17 +62,13 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     private void opacityChanged() {
-        onActiveLayer(layer -> {
-            float floatValue = getOpacity();
-            layer.setOpacity(floatValue, true);
-        });
+        onActiveLayer(layer ->
+            layer.setOpacity(getOpacity(), true));
     }
 
     private void blendingModeChanged() {
-        onActiveLayer(layer -> {
-            BlendingMode blendingMode = getBlendingMode();
-            layer.setBlendingMode(blendingMode, true);
-        });
+        onActiveLayer(layer ->
+            layer.setBlendingMode(getBlendingMode(), true));
     }
 
     @Override
@@ -87,7 +87,6 @@ public class LayerBlendingModePanel extends BlendingModePanel
 
     @Override
     public void layerOrderChanged(Composition comp) {
-
     }
 
     @Override

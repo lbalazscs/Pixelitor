@@ -71,13 +71,13 @@ public enum MaskViewMode {
     /**
      * Adds a menu item that acts on the active layer of the active image
      */
-    public void addToMainMenu(PMenu sub) {
-        Action action = new MenuAction(guiName, allowedOnLayerType) {
+    public void addToMenuBar(PMenu sub) {
+        var action = new MenuAction(guiName, allowedOnLayerType) {
             @Override
             public void onClick() {
                 OpenImages.onActiveView(view -> {
                     Layer activeLayer = view.getComp().getActiveLayer();
-                    activate(view, activeLayer, "main menu");
+                    activate(view, activeLayer);
                 });
             }
         };
@@ -88,30 +88,30 @@ public enum MaskViewMode {
      * Adds a menu item that acts on the given layer and its image
      */
     public void addToPopupMenu(JMenu menu, Layer layer) {
-        AbstractAction action = new AbstractAction(guiName) {
+        var action = new AbstractAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                activate(layer, "popup menu");
+                activate(layer);
             }
         };
-        JMenuItem item = new JMenuItem(action);
-        item.setAccelerator(keyStroke);
-        menu.add(item);
+        var menuItem = new JMenuItem(action);
+        menuItem.setAccelerator(keyStroke);
+        menu.add(menuItem);
     }
 
-    public void activate(Layer activeLayer, String reason) {
+    public void activate(Layer activeLayer) {
         View view = activeLayer.getComp().getView();
-        activate(view, activeLayer, reason);
+        activate(view, activeLayer);
     }
 
-    public void activate(Composition comp, Layer activeLayer, String reason) {
-        activate(comp.getView(), activeLayer, reason);
+    public void activate(Composition comp, Layer activeLayer) {
+        activate(comp.getView(), activeLayer);
     }
 
-    public void activate(View view, Layer layer, String reason) {
+    public void activate(View view, Layer layer) {
         assert view != null;
         if (RunContext.isDevelopment()) {
-            Events.postMaskViewActivate(this, view, layer, reason);
+            Events.postMaskViewActivate(this, view, layer);
         }
 
         boolean change = view.setMaskViewMode(this);

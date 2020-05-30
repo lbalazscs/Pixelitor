@@ -46,7 +46,7 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.addConfiguredMask(oldMask);
-        oldMode.activate(comp, layer, "delete mask undone");
+        oldMode.activate(comp, layer);
     }
 
     @Override

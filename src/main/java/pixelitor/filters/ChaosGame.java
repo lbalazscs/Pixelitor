@@ -17,12 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ReseedActions;
-import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -172,7 +168,7 @@ public class ChaosGame extends ParametrizedFilter {
                 }
 
                 // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-                hue += 0.618033988749895f;
+                hue += 0.618034f;
             }
         }
 

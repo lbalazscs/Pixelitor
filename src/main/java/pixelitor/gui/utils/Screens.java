@@ -19,13 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.gui.PixelitorWindow;
 
-import java.awt.Dimension;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
@@ -41,8 +35,6 @@ public class Screens {
 
     public enum Align {SCREEN_CENTER, FRAME_RIGHT}
 
-    ;
-
     private Screens() {
     }
 
@@ -50,7 +42,7 @@ public class Screens {
      * Positions the given window in the screen in which Pixelitor is running.
      */
     public static void position(Window window, Align align) {
-        PixelitorWindow pw = PixelitorWindow.getInstance();
+        PixelitorWindow pw = PixelitorWindow.get();
         Rectangle screenBounds;
         if (multiMonitors) {
             screenBounds = pw.getGraphicsConfiguration().getBounds();

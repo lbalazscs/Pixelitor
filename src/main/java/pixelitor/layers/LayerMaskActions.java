@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.menus.NamedAction;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -45,6 +45,7 @@ public class LayerMaskActions {
             MaskViewMode.SHOW_MASK.addToPopupMenu(showMenu, layer);
             MaskViewMode.EDIT_MASK.addToPopupMenu(showMenu, layer);
             MaskViewMode.RUBYLITH.addToPopupMenu(showMenu, layer);
+
             menu.addSeparator();
 
             menu.add(new JMenuItem(new DeleteMaskAction(layer)));
@@ -110,7 +111,7 @@ public class LayerMaskActions {
             if (!(layer instanceof ImageLayer)) {
                 // actually we should never get here because the popup menu
                 // is enabled only for image layers
-                Messages.showNotImageLayerError();
+                Messages.showNotImageLayerError(layer);
                 return;
             }
 
@@ -120,62 +121,62 @@ public class LayerMaskActions {
         }
     }
 
-    static class EnableDisableMaskAction extends NamedAction implements LayerChangeListener {
+    static class EnableDisableMaskAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
         public EnableDisableMaskAction(Layer layer) {
-            super(calcName(layer));
+            super(calcText(layer));
             this.layer = layer;
-            layer.addChangeListener(this);
+            layer.addListener(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             layer.setMaskEnabled(!layer.isMaskEnabled(), true);
-            refreshName();
+            refreshText();
         }
 
-        private void refreshName() {
-            setName(calcName(layer));
+        private void refreshText() {
+            setText(calcText(layer));
         }
 
-        private static String calcName(Layer layer) {
+        private static String calcText(Layer layer) {
             return layer.isMaskEnabled() ? "Disable" : "Enable";
         }
 
         @Override
         public void layerStateChanged() {
-            refreshName();
+            refreshText();
         }
     }
 
-    static class LinkUnlinkMaskAction extends NamedAction implements LayerChangeListener {
+    static class LinkUnlinkMaskAction extends NamedAction implements LayerListener {
         private final Layer layer;
 
         public LinkUnlinkMaskAction(Layer layer) {
-            super(calcName(layer));
+            super(calcText(layer));
             this.layer = layer;
-            layer.getMask().addChangeListener(this);
+            layer.getMask().addListener(this);
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             LayerMask mask = layer.getMask();
             mask.setLinked(!mask.isLinked(), true);
-            refreshName();
+            refreshText();
         }
 
-        private void refreshName() {
-            setName(calcName(layer));
+        private void refreshText() {
+            setText(calcText(layer));
         }
 
-        private static String calcName(Layer layer) {
+        private static String calcText(Layer layer) {
             return layer.getMask().isLinked() ? "Unlink" : "Link";
         }
 
         @Override
         public void layerStateChanged() {
-            refreshName();
+            refreshText();
         }
     }
 }

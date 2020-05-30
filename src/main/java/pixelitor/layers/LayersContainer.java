@@ -43,12 +43,12 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     private LayersPanel layersPanel;
     private final JScrollPane scrollPane;
 
-    public static final LayersContainer INSTANCE = new LayersContainer();
+    private static final LayersContainer INSTANCE = new LayersContainer();
 
     private LayersContainer() {
         setLayout(new BorderLayout());
 
-        add(LayerBlendingModePanel.INSTANCE, NORTH);
+        add(LayerBlendingModePanel.get(), NORTH);
 
         scrollPane = new JScrollPane();
         add(scrollPane, CENTER);
@@ -119,6 +119,14 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
     @VisibleForTesting
     public List<String> getLayerNames() {
         return layersPanel.getLayerNames();
+    }
+
+    public static LayersContainer get() {
+        return INSTANCE;
+    }
+
+    public static boolean parentIs(JComponent parent) {
+        return INSTANCE.getParent() == parent;
     }
 
     static class SouthButton extends JButton {

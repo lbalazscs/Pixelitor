@@ -29,11 +29,7 @@ import pixelitor.utils.Utils;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.util.List;
 
 /**
@@ -46,8 +42,8 @@ public class DebugNodes {
 
     public static DebugNode createSystemNode() {
         var device = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice();
+            .getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice();
         var node = new DebugNode("System", device);
 
         node.addString("Java version", System.getProperty("java.version"));
@@ -63,7 +59,7 @@ public class DebugNodes {
         node.addInt("display height", height);
         node.addInt("display bit depth", bitDepth);
 
-        var pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.get();
         node.addInt("app window width", pw.getWidth());
         node.addInt("app window height", pw.getHeight());
 
@@ -122,7 +118,7 @@ public class DebugNodes {
 
         node.add(createColorModelNode("color model", image.getColorModel()));
         node.add(createRasterNode(image.getRaster()));
-        node.addString("type", DebugUtils.bufferedImageTypeAsString(image.getType()));
+        node.addString("type", Debug.bufferedImageTypeAsString(image.getType()));
         node.addInt("width", image.getWidth());
         node.addInt("height", image.getHeight());
         node.addBoolean("alpha premultiplied", image.isAlphaPremultiplied());
@@ -130,7 +126,7 @@ public class DebugNodes {
         return node;
     }
 
-    public static DebugNode createRasterNode(WritableRaster raster) {
+    private static DebugNode createRasterNode(WritableRaster raster) {
         var node = new DebugNode("writable raster", raster);
 
         node.addClass();
@@ -144,7 +140,7 @@ public class DebugNodes {
         return node;
     }
 
-    static DebugNode createSampleModelNode(SampleModel sampleModel) {
+    private static DebugNode createSampleModelNode(SampleModel sampleModel) {
         var node = new DebugNode("sample model", sampleModel);
 
         node.addClass();
@@ -156,13 +152,13 @@ public class DebugNodes {
         node.addInt("height", height);
 
         int dataType = sampleModel.getDataType();
-        node.addString("data type", DebugUtils.dateBufferTypeAsString(dataType));
+        node.addString("data type", Debug.dateBufferTypeAsString(dataType));
 
         int numBands = sampleModel.getNumBands();
         node.addInt("num bands", numBands);
 
         int transferType = sampleModel.getTransferType();
-        node.addString("transfer type", DebugUtils.dateBufferTypeAsString(transferType));
+        node.addString("transfer type", Debug.dateBufferTypeAsString(transferType));
 
         int numDataElements = sampleModel.getNumDataElements();
         node.addInt("num data elements", numDataElements);
@@ -170,7 +166,7 @@ public class DebugNodes {
         return node;
     }
 
-    static DebugNode createDataBufferNode(DataBuffer dataBuffer) {
+    private static DebugNode createDataBufferNode(DataBuffer dataBuffer) {
         var node = new DebugNode("data buffer", dataBuffer);
 
         node.addClass();
@@ -179,7 +175,7 @@ public class DebugNodes {
         node.addInt("num banks", numBanks);
 
         int type = dataBuffer.getDataType();
-        node.addString("type", DebugUtils.dateBufferTypeAsString(type));
+        node.addString("type", Debug.dateBufferTypeAsString(type));
 
         int size = dataBuffer.getSize();
         node.addInt("size", size);
@@ -187,7 +183,7 @@ public class DebugNodes {
         return node;
     }
 
-    public static DebugNode createColorModelNode(String name, ColorModel colorModel) {
+    private static DebugNode createColorModelNode(String name, ColorModel colorModel) {
         var node = new DebugNode(name, colorModel);
         node.addClass();
 
@@ -198,19 +194,19 @@ public class DebugNodes {
         node.addBoolean("has alpha", colorModel.hasAlpha());
         node.addInt("pixel size", colorModel.getPixelSize());
 
-        node.addString("transfer type", DebugUtils.dateBufferTypeAsString(
-                colorModel.getTransferType()));
+        node.addString("transfer type",
+            Debug.dateBufferTypeAsString(colorModel.getTransferType()));
 
-        node.addString("transparency", DebugUtils.transparencyAsString(
-                colorModel.getTransparency()));
+        node.addString("transparency",
+            Debug.transparencyAsString(colorModel.getTransparency()));
 
-        node.addBoolean("is RGB", DebugUtils.isRgbColorModel(colorModel));
-        node.addBoolean("is BGR", DebugUtils.isBgrColorModel(colorModel));
+        node.addBoolean("is RGB", Debug.isRgbColorModel(colorModel));
+        node.addBoolean("is BGR", Debug.isBgrColorModel(colorModel));
 
         return node;
     }
 
-    public static DebugNode createColorSpaceNode(ColorSpace colorSpace) {
+    private static DebugNode createColorSpaceNode(ColorSpace colorSpace) {
         var node = new DebugNode("color space", colorSpace);
 
         node.addClass();
@@ -219,10 +215,10 @@ public class DebugNodes {
         node.addInt("num components", numComponents);
 
         int type = colorSpace.getType();
-        node.addString("type", DebugUtils.colorSpaceTypeAsString(type));
+        node.addString("type", Debug.colorSpaceTypeAsString(type));
 
-        boolean is_sRGB = colorSpace.isCS_sRGB();
-        node.addBoolean("is sRGB", is_sRGB);
+        boolean sRGB = colorSpace.isCS_sRGB();
+        node.addBoolean("sRGB", sRGB);
 
         return node;
     }
@@ -267,8 +263,8 @@ public class DebugNodes {
             var subPath = path.getSubPath(i);
             if (subPath == activeSubpath) {
                 node.add(createSubpathNode(
-                        "active subpath " + subPath.getId(),
-                        subPath));
+                    "active subpath " + subPath.getId(),
+                    subPath));
             } else {
                 node.add(createSubpathNode(subPath));
             }
@@ -277,11 +273,11 @@ public class DebugNodes {
         return node;
     }
 
-    public static DebugNode createSubpathNode(SubPath subPath) {
+    private static DebugNode createSubpathNode(SubPath subPath) {
         return createSubpathNode("subpath " + subPath.getId(), subPath);
     }
 
-    public static DebugNode createSubpathNode(String name, SubPath subPath) {
+    private static DebugNode createSubpathNode(String name, SubPath subPath) {
         var node = new DebugNode(name, subPath);
 
         node.addString("name", subPath.getId());

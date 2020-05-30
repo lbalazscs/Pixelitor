@@ -25,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Window;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -37,8 +36,10 @@ import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
  * A fluent interface for building JDialogs
  */
 public class DialogBuilder {
-    private static final String DEFAULT_OK_TEXT = UIManager.getString("OptionPane.okButtonText");
-    private static final String DEFAULT_CANCEL_TEXT = UIManager.getString("OptionPane.cancelButtonText");
+    private static final String DEFAULT_OK_TEXT =
+        UIManager.getString("OptionPane.okButtonText");
+    private static final String DEFAULT_CANCEL_TEXT =
+        UIManager.getString("OptionPane.cancelButtonText");
 
     private String okText;
     private String cancelText;
@@ -65,7 +66,6 @@ public class DialogBuilder {
     // closing it without validating.
     private boolean validateWhenCanceled = false;
 
-    private Supplier<JDialog> dialogFactory;
     private String name;
 
     public DialogBuilder() {
@@ -83,8 +83,8 @@ public class DialogBuilder {
             dialogOwner = (JDialog) window;
         } else {
             throw new IllegalStateException(window == null
-                    ? "null window"
-                    : window.getClass().getName());
+                ? "null window"
+                : window.getClass().getName());
         }
         return this;
     }
@@ -201,11 +201,6 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder dialogFactory(Supplier<JDialog> dialogFactory) {
-        this.dialogFactory = dialogFactory;
-        return this;
-    }
-
     /**
      * Builds the dialog and also shows it.
      */
@@ -245,17 +240,13 @@ public class DialogBuilder {
 
     private JDialog createDialog() {
         JDialog d;
-        if (dialogFactory != null) {
-            d = dialogFactory.get();
+        if (frameOwner != null) {
+            d = new BuiltDialog(frameOwner, notifyGlobalEvents);
+        } else if (dialogOwner != null) {
+            d = new BuiltDialog(dialogOwner, notifyGlobalEvents);
         } else {
-            if (frameOwner != null) {
-                d = new BuiltDialog(frameOwner, notifyGlobalEvents);
-            } else if (dialogOwner != null) {
-                d = new BuiltDialog(dialogOwner, notifyGlobalEvents);
-            } else {
-                var pw = PixelitorWindow.getInstance();
-                d = new BuiltDialog(pw, notifyGlobalEvents);
-            }
+            var pw = PixelitorWindow.get();
+            d = new BuiltDialog(pw, notifyGlobalEvents);
         }
         return d;
     }
@@ -264,8 +255,8 @@ public class DialogBuilder {
         d.setLayout(new BorderLayout());
         if (addScrollBars) {
             JScrollPane scrollPane = new JScrollPane(content,
-                    VERTICAL_SCROLLBAR_AS_NEEDED,
-                    HORIZONTAL_SCROLLBAR_NEVER);
+                VERTICAL_SCROLLBAR_AS_NEEDED,
+                HORIZONTAL_SCROLLBAR_NEVER);
             d.add(scrollPane, CENTER);
         } else {
             d.add(content, CENTER);

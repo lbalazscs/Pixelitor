@@ -86,8 +86,8 @@ public class SubPath implements Serializable, Transformable {
         copy.finished = finished;
 
         for (AnchorPoint point : anchorPoints) {
-            AnchorPoint ap = new AnchorPoint(point, copy, true);
-            copy.anchorPoints.add(ap);
+            var anchorCopy = new AnchorPoint(point, copy, true);
+            copy.anchorPoints.add(anchorCopy);
         }
 
         return copy;
@@ -108,8 +108,7 @@ public class SubPath implements Serializable, Transformable {
 
     @VisibleForTesting
     public void addPoint(double x, double y) {
-        AnchorPoint ap = new AnchorPoint(x, y, comp.getView(), this);
-        addPoint(ap);
+        addPoint(new AnchorPoint(x, y, comp.getView(), this));
     }
 
     public void setMovingPoint(MovingPoint p) {
@@ -139,8 +138,7 @@ public class SubPath implements Serializable, Transformable {
         setMovingPoint(null);
 
         AnchorPoint last = getLast();
-        History.add(new AddAnchorPointEdit(
-                comp, this, last));
+        History.add(new AddAnchorPointEdit(comp, this, last));
         return last;
     }
 
@@ -185,31 +183,31 @@ public class SubPath implements Serializable, Transformable {
             ControlPoint currCtrlIn = curr.ctrlIn;
             if (prevCtrlOut.isRetracted() && currCtrlIn.isRetracted()) {
                 gp.lineTo(
-                        toX.applyAsDouble(curr),
-                        toY.applyAsDouble(curr)
-                );
+                    toX.applyAsDouble(curr),
+                    toY.applyAsDouble(curr));
             } else {
                 gp.curveTo(
-                        toX.applyAsDouble(prevCtrlOut),
-                        toY.applyAsDouble(prevCtrlOut),
-                        toX.applyAsDouble(currCtrlIn),
-                        toY.applyAsDouble(currCtrlIn),
-                        toX.applyAsDouble(curr),
-                        toY.applyAsDouble(curr));
+                    toX.applyAsDouble(prevCtrlOut),
+                    toY.applyAsDouble(prevCtrlOut),
+                    toX.applyAsDouble(currCtrlIn),
+                    toY.applyAsDouble(currCtrlIn),
+                    toX.applyAsDouble(curr),
+                    toY.applyAsDouble(curr));
             }
             prev = curr;
         }
+
         AnchorPoint last = getLast();
         if (moving != null && path.getBuildState() == MOVING_TO_NEXT_ANCHOR && Tools.PEN.showRubberBand()) {
             double movingX = toX.applyAsDouble(moving);
             double movingY = toY.applyAsDouble(moving);
             gp.curveTo(
-                    toX.applyAsDouble(last.ctrlOut),
-                    toY.applyAsDouble(last.ctrlOut),
-                    movingX, // the "ctrl in" of the moving is "retracted"
-                    movingY, // the "ctrl in" of the moving is "retracted"
-                    movingX,
-                    movingY);
+                toX.applyAsDouble(last.ctrlOut),
+                toY.applyAsDouble(last.ctrlOut),
+                movingX, // the "ctrl in" of the moving is "retracted"
+                movingY, // the "ctrl in" of the moving is "retracted"
+                movingX,
+                movingY);
         }
 
         if (closed) {
@@ -217,17 +215,16 @@ public class SubPath implements Serializable, Transformable {
             ControlPoint firstCtrlIn = first.ctrlIn;
             if (lastCtrlOut.isRetracted() && firstCtrlIn.isRetracted()) {
                 gp.lineTo(
-                        toX.applyAsDouble(first),
-                        toY.applyAsDouble(first)
-                );
+                    toX.applyAsDouble(first),
+                    toY.applyAsDouble(first));
             } else {
                 gp.curveTo(
-                        toX.applyAsDouble(lastCtrlOut),
-                        toY.applyAsDouble(lastCtrlOut),
-                        toX.applyAsDouble(firstCtrlIn),
-                        toY.applyAsDouble(firstCtrlIn),
-                        toX.applyAsDouble(first),
-                        toY.applyAsDouble(first));
+                    toX.applyAsDouble(lastCtrlOut),
+                    toY.applyAsDouble(lastCtrlOut),
+                    toX.applyAsDouble(firstCtrlIn),
+                    toY.applyAsDouble(firstCtrlIn),
+                    toX.applyAsDouble(first),
+                    toY.applyAsDouble(first));
             }
             // We reached the first point again,
             // however call this to add a clean SEG_CLOSE.
@@ -273,8 +270,7 @@ public class SubPath implements Serializable, Transformable {
         }
 
         // paint some extra handles if not finished
-        if (state == DRAGGING_THE_CONTROL_OF_LAST
-                || state == MOVING_TO_NEXT_ANCHOR) {
+        if (state == DRAGGING_THE_CONTROL_OF_LAST || state == MOVING_TO_NEXT_ANCHOR) {
             getLast().paintHandles(g, true, true);
 
             if (numPoints >= 2) {
@@ -346,9 +342,9 @@ public class SubPath implements Serializable, Transformable {
 
     private static boolean tryMerging(AnchorPoint ap1, AnchorPoint ap2) {
         if (ap1.samePositionAs(ap2, 1.0)
-                && ap1.ctrlOut.isRetracted()
-                && ap2.ctrlIn.isRetracted()) {
-            // we will keep the first, so copy the out ctrl of the second to the first
+            && ap1.ctrlOut.isRetracted()
+            && ap2.ctrlIn.isRetracted()) {
+            // the first will be kept, so copy the out ctrl of the second to the first
             ap1.ctrlOut.copyPositionFrom(ap2.ctrlOut);
             return true;
         }
@@ -358,29 +354,12 @@ public class SubPath implements Serializable, Transformable {
     public void close(boolean addToHistory) {
         assert !closed;
 
-//        int numPoints = anchorPoints.size();
-//        // this condition doesn't occur while building a path interactively,
-//        // only when converting from closed Shape objects
-//        boolean lastIsFirst = numPoints > 1 && last.samePositionAs(first);
-//        if (lastIsFirst) {
-//            assert last != first;
-//
-//            // the last added point is identical to the first, so remove it
-//            int indexOfLast = numPoints - 1;
-//            anchorPoints.remove(indexOfLast);
-//
-//            // copy the the useful info
-//            first.ctrlIn.copyPositionFrom(last.ctrlIn);
-//
-//            // make sure we have a valid last reference
-//            last = anchorPoints.get(indexOfLast - 1);
-//        }
         setMovingPoint(null);
         setClosed(true);
 
         // since a closing edit is added,
         // it is not necessary to also add a finish edit
-        finish(comp, "closing", false);
+        finish(comp, false);
 
         if (addToHistory) {
             History.add(new CloseSubPathEdit(comp, this));
@@ -408,7 +387,7 @@ public class SubPath implements Serializable, Transformable {
         setMovingPoint(PenToolMode.BUILD.createMovingPoint(this));
     }
 
-    public void undoFinishing(String reason) {
+    public void undoFinishing() {
         assert finished : "was not finished";
         setFinished(false);
         path.setBuildingInProgressState();
@@ -444,8 +423,8 @@ public class SubPath implements Serializable, Transformable {
             ControlPoint ctrlOut = point.ctrlOut;
             if (point.getSubPath() != this) {
                 throw new IllegalStateException("wrong subpath in point " + i
-                        + ": anchor subpath is " + point.getSubPath()
-                        + ", this is " + this);
+                    + ": anchor subpath is " + point.getSubPath()
+                    + ", this is " + this);
             }
             if (ctrlIn.getAnchor() != point) {
                 throw new IllegalStateException("ctrlIn problem in point " + i);
@@ -473,13 +452,13 @@ public class SubPath implements Serializable, Transformable {
         if (closed) {
             if (!finished) {
                 throw new IllegalStateException(
-                        "subpath " + this + " is closed but not finished");
+                    "subpath " + this + " is closed but not finished");
             }
         }
         if (finished) {
             if (moving != null) {
                 throw new IllegalStateException(
-                        "subpath " + this + " is finished, but moving");
+                    "subpath " + this + " is finished, but moving");
             }
         }
         return true;
@@ -521,7 +500,7 @@ public class SubPath implements Serializable, Transformable {
         }
         if (!replaced) {
             throw new IllegalStateException(
-                    "point " + before + " not found in " + this);
+                "point " + before + " not found in " + this);
         }
     }
 
@@ -592,8 +571,7 @@ public class SubPath implements Serializable, Transformable {
     }
 
     private boolean shouldBeClosed(double x, double y) {
-        return getFirst().handleContains(x, y)
-                && getNumAnchors() >= 2;
+        return getFirst().handleContains(x, y) && getNumAnchors() >= 2;
     }
 
     // return true if it could be closed
@@ -607,15 +585,12 @@ public class SubPath implements Serializable, Transformable {
     }
 
     void finishByCtrlClick(Composition comp) {
-        finish(comp, "ctrl-click", true);
+        finish(comp, true);
     }
 
     // A subpath can be finished either by closing it or by ctrl-clicking.
     // Either way, we end up in this method.
-    public void finish(Composition comp, String reason, boolean addToHistory) {
-//        assert comp == this.comp
-//                : "comp = " + comp.toPathDebugString()
-//                + ", this.comp = " + this.comp.toPathDebugString();
+    public void finish(Composition comp, boolean addToHistory) {
         if (comp != this.comp) {
             // shouldn't happen, but it did happen somehow
             // (only in Mac random gui tests)
@@ -769,14 +744,14 @@ public class SubPath implements Serializable, Transformable {
     @Override
     public String toString() {
         return id + anchorPoints.stream()
-                .map(AnchorPoint::getName)
-                .collect(joining(",", " [", "]"));
+            .map(AnchorPoint::getName)
+            .collect(joining(",", " [", "]"));
     }
 
     // also includes the anchor point positions
     public String toDetailedString() {
         return id + anchorPoints.stream()
-                .map(AnchorPoint::toString)
-                .collect(joining(",", " [", "]"));
+            .map(AnchorPoint::toString)
+            .collect(joining(",", " [", "]"));
     }
 }

@@ -24,8 +24,8 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * A palette that mixes the foreground color with the background color
- * using the RGB color space to interpolate between them
+ * A {@link Palette} that mixes the foreground color with the background color
+ * using the RGB color space to interpolate between them.
  */
 public class RGBColorMixPalette extends Palette {
     // static palette-specific variables so that they
@@ -33,7 +33,6 @@ public class RGBColorMixPalette extends Palette {
     private static int lastRows = 7;
     private static int lastCols = 10;
 
-    private static final float MAX_BRI_DEVIATION = 0.5f;
     private final int rgb;
     private final int otherRGB;
     private final boolean startWithFg;
@@ -127,7 +126,7 @@ public class RGBColorMixPalette extends Palette {
     @Override
     public String getDialogTitle() {
         return startWithFg ?
-                "RGB Mix with Background" :
-                "RGB Mix with Foreground";
+            "RGB Mix with Background" :
+            "RGB Mix with Foreground";
     }
 }

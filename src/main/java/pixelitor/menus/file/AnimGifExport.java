@@ -38,30 +38,29 @@ public class AnimGifExport {
     private AnimGifExport() {
     }
 
-    public static void start(JFrame dialogOwner) {
+    public static void start() {
         var comp = OpenImages.getActiveComp();
         if (comp.getNumLayers() < 2) {
             Messages.showInfo("Only one layer",
-                    "Animation frames are based on the layers of the image.\n" +
-                            comp.getName() + " has only one layer.");
+                "Animation frames are based on the layers of the image.\n" +
+                    comp.getName() + " has only one layer.");
             return;
         }
 
         var p = new ExportPanel(comp.getNumLayers());
         new DialogBuilder()
-                .title("Export Animated GIF")
-                .owner(dialogOwner)
-                .content(p)
-                .okText("Export")
-                .okAction(() -> export(comp, p.getDelayMillis(), p.isPingPong()))
-                .show();
+            .title("Export Animated GIF")
+            .content(p)
+            .okText("Export")
+            .okAction(() -> export(comp, p.getDelayMillis(), p.isPingPong()))
+            .show();
     }
 
     private static void export(Composition activeComp, int delayMillis, boolean pingPong) {
         File file = FileChoosers.selectSaveFileForSpecificFormat(gifFilter);
         if (file != null) {
             var animation = new LayerAnimation(activeComp,
-                    delayMillis, pingPong);
+                delayMillis, pingPong);
             animation.saveToFile(file);
             Messages.showFileSavedMessage(file);
         }

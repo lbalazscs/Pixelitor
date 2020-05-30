@@ -51,7 +51,7 @@ public class BatchResize {
         int maxHeight = p.getNewHeight();
 
         var resizeAction = new Resize(maxWidth, maxHeight, true);
-        Automate.processEachFile(resizeAction, "Batch Resize...");
+        Automate.processFiles(resizeAction, "Batch Resize...");
     }
 
     /**

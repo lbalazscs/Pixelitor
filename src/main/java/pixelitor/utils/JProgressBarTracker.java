@@ -21,14 +21,16 @@ import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.Container;
-import java.awt.EventQueue;
+
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A {@link ProgressTracker} that tracks the progress by using an
- * arbitrary {@link JProgressBar}
+ * arbitrary {@link JProgressBar}.
  * <p>
  * Not to be confused with the {@link StatusBarProgressTracker}
- * which uses a specific progress bar in the status bar
+ * which uses a specific progress bar in the status bar.
  */
 public class JProgressBarTracker extends ThresholdProgressTracker {
     private final ProgressPanel progressPanel;
@@ -41,14 +43,14 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
         progressPanel.setProgress(0);
 
         // can be a window, but if progressPanel is not
-        // added yet to a window, the highest available
+        // added yet to a window, the broadest available
         // GUI area will do
         topContainer = GUIUtils.getTopContainer(progressPanel);
     }
 
     @Override
     void startProgressTracking() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         topContainer.setCursor(Cursors.BUSY);
 
@@ -57,11 +59,10 @@ public class JProgressBarTracker extends ThresholdProgressTracker {
 
     @Override
     void updateProgressTracking(int percent) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         progressPanel.setProgress(percent);
-
-        progressPanel.repaintOnEDT();
+        progressPanel.paintImmediately();
     }
 
     @Override

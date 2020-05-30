@@ -17,18 +17,20 @@
 
 package pixelitor.gui;
 
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.menus.view.ZoomControl;
 import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEtchedBorder;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The status bar of the app.
@@ -37,7 +39,7 @@ public class StatusBar extends JPanel {
     private final JLabel statusBarLabel;
     private final JPanel leftPanel;
 
-    public static final StatusBar INSTANCE = new StatusBar();
+    private static final StatusBar INSTANCE = new StatusBar();
     private static int numProgressBars = 0;
 
     private StatusBar() {
@@ -48,7 +50,7 @@ public class StatusBar extends JPanel {
         leftPanel.add(statusBarLabel);
 
         add(leftPanel, CENTER);
-        add(ZoomControl.INSTANCE, EAST);
+        add(ZoomControl.get(), EAST);
 
         setBorder(createEtchedBorder());
     }
@@ -63,8 +65,8 @@ public class StatusBar extends JPanel {
     }
 
     public ProgressHandler startProgress(String msg, int max) {
+        assert calledOnEDT() : threadInfo();
         assert msg != null;
-        assert EventQueue.isDispatchThread() : "not on EDT";
 
         statusBarLabel.setText("");
 
@@ -72,18 +74,23 @@ public class StatusBar extends JPanel {
         return new StatusBarProgressHandler(leftPanel, msg, max);
     }
 
-    public boolean isShown() {
-        return getParent() != null;
+    public static StatusBar get() {
+        return INSTANCE;
+    }
+
+    public static boolean isShown() {
+        return INSTANCE.getParent() != null;
     }
 
     static class StatusBarProgressHandler implements ProgressHandler {
         private final JLabel msgLabel;
-        private final JPanel leftPanel;
+        private final JPanel container;
         private final JProgressBar progressBar;
         private final boolean determinate;
 
-        public StatusBarProgressHandler(JPanel leftPanel, String msg, int max) {
-            this.leftPanel = leftPanel;
+        public StatusBarProgressHandler(JPanel container, String msg, int max) {
+            assert calledOnEDT() : threadInfo();
+            this.container = container;
 
             determinate = max > 0;
 
@@ -95,40 +102,41 @@ public class StatusBar extends JPanel {
             }
             msgLabel = new JLabel(msg);
 
-            leftPanel.add(msgLabel);
-            leftPanel.add(progressBar);
+            container.add(msgLabel);
+            container.add(progressBar);
 
             // call these instead of revalidate()/repaint()
-            // because we want to stay on the EDT
-            leftPanel.validate(); // otherwise the panel width/height are 0
-            leftPanel.paintImmediately(0, 0, leftPanel.getWidth(), leftPanel.getHeight());
+            // because the EDT will be blocked
+            container.validate(); // otherwise the panel width/height are 0
+            GUIUtils.paintImmediately(container);
         }
 
         @Override
         public void updateProgress(int value) {
-            assert EventQueue.isDispatchThread() : "not on EDT";
+            assert calledOnEDT() : threadInfo();
             assert determinate;
 
             progressBar.setValue(value);
-            leftPanel.paintImmediately(progressBar.getBounds());
+            container.paintImmediately(progressBar.getBounds());
         }
 
         @Override
         public void stopProgress() {
-            assert EventQueue.isDispatchThread() : "not on EDT";
+            assert calledOnEDT() : threadInfo();
 
-            if (determinate) {
-                // not sure if this is necessary to stop the animation, but can't be bad
+            if (!determinate) {
+                // probably this is not necessary to stop
+                // the indeterminate animation, but can't be bad
                 progressBar.setValue(100);
                 progressBar.setIndeterminate(false);
             }
 
-            leftPanel.remove(progressBar);
-            leftPanel.remove(msgLabel);
+            container.remove(progressBar);
+            container.remove(msgLabel);
 
-            leftPanel.revalidate();
-            leftPanel.repaint();
+            container.revalidate();
+            container.repaint();
             numProgressBars--;
         }
-    } 
+    }
 }

@@ -19,23 +19,23 @@ package pixelitor.layers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
  * An Action that duplicates the active layer of the active composition
  */
-public class DuplicateLayerAction extends AbstractAction
-        implements ViewActivationListener {
+public class DuplicateLayerAction extends NamedAction
+    implements ViewActivationListener {
 
     public static final DuplicateLayerAction INSTANCE = new DuplicateLayerAction();
 
     private DuplicateLayerAction() {
         super("Duplicate Layer", Icons.load("duplicate_layer.png"));
-        putValue(SHORT_DESCRIPTION, "Duplicates the active layer.");
+        setToolTip("Duplicates the active layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }

@@ -59,9 +59,10 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
 
         assert before.isActive();
         assert before.hasUI();
+
         // restore the original mask view mode of the text layer
         if (before.hasMask()) {
-            maskViewMode.activate(before, "rasterize undone");
+            maskViewMode.activate(before);
         }
     }
 
@@ -73,6 +74,7 @@ public class TextLayerRasterizeEdit extends PixelitorEdit {
                 .atPosition(ABOVE_ACTIVE)
                 .noRefresh()
                 .add(after);
+
         comp.deleteLayer(before, false);
     }
 

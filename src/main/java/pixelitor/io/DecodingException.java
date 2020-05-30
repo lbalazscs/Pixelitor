@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,16 +15,19 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.automate.macro;
+package pixelitor.io;
 
-/**
- * Encapsulates a filter and its parameters
- *
- * The macro functionality is not finished!
- */
-public class FilterMacroStep implements MacroStep {
-    @Override
-    public void execute() {
+import java.io.File;
 
+public class DecodingException extends RuntimeException {
+    private final File file;
+
+    public DecodingException(File file) {
+        super("Could not decode " + file.getAbsolutePath());
+        this.file = file;
+    }
+
+    public File getFile() {
+        return file;
     }
 }

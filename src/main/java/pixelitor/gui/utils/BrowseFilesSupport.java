@@ -39,13 +39,16 @@ public class BrowseFilesSupport {
     private FileNameExtensionFilter fileFilter; // used for filtering when in file selection mode
 
     public enum SelectionMode {DIRECTORY, FILE}
+
     private SelectionMode mode;
 
     public BrowseFilesSupport(String initialPath) {
         init(initialPath);
     }
 
-    public BrowseFilesSupport(String initialPath, String fileChooserTitle, SelectionMode mode) {
+    public BrowseFilesSupport(String initialPath,
+                              String fileChooserTitle,
+                              SelectionMode mode) {
         this.fileChooserTitle = fileChooserTitle;
         this.mode = mode;
         init(initialPath);
@@ -64,20 +67,19 @@ public class BrowseFilesSupport {
     private void browseButtonClicked(String fileChooserTitle) {
         JFileChooser chooser;
 
-        if(mode == DIRECTORY) {
+        if (mode == DIRECTORY) {
             chooser = createChooserForDirectorySelection();
         } else {
             chooser = createChooserForFileSelection();
         }
 
         chooser.setDialogTitle(fileChooserTitle);
-        chooser.showOpenDialog(PixelitorWindow.getInstance());
+        chooser.showOpenDialog(PixelitorWindow.get());
         fillFileNameTextField(chooser.getSelectedFile());
     }
 
     private JFileChooser createChooserForDirectorySelection() {
-        JFileChooser chooser;
-        chooser = new JFileChooser(nameTF.getText());
+        var chooser = new JFileChooser(nameTF.getText());
         chooser.setApproveButtonText("Select Folder");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         return chooser;

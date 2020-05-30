@@ -17,11 +17,7 @@
 
 package pixelitor.io;
 
-import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.SubtaskProgressTracker;
-import pixelitor.utils.TrackerWriteProgressListener;
+import pixelitor.utils.*;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -36,9 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static javax.imageio.ImageWriteParam.MODE_DEFAULT;
-import static javax.imageio.ImageWriteParam.MODE_DISABLED;
-import static javax.imageio.ImageWriteParam.MODE_EXPLICIT;
+import static javax.imageio.ImageWriteParam.*;
 
 /**
  * Utility class with static methods related to writing JPEG images
@@ -47,35 +41,31 @@ public final class JpegOutput {
     private JpegOutput() {
     }
 
-    public static void save(BufferedImage image, JpegInfo config, File selectedFile) throws IOException {
-        write(image, selectedFile, config);
-    }
-
-    private static void write(BufferedImage image, File file, JpegInfo config) throws IOException {
+    public static void write(BufferedImage image, File file, JpegInfo config) throws IOException {
         ImageOutputStream ios = ImageIO.createImageOutputStream(file);
         if (ios == null) {
             TrackedIO.throwNoIOSErrorFor(file);
         }
-        ProgressTracker tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+        var tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
         writeJPGtoStream(image, ios, config, tracker);
     }
 
     public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegInfo config, ProgressTracker pt) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream(32768);
+        var bos = new ByteArrayOutputStream(32768);
         BufferedImage previewImage = null;
         byte[] bytes = null;
         try {
             // writes the JPEG format with the given settings to memory...
             // approximately 70% of the total time is spent here
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
-            ProgressTracker pt1 = new SubtaskProgressTracker(0.7, pt);
+            var pt1 = new SubtaskProgressTracker(0.7, pt);
             writeJPGtoStream(image, ios, config, pt1);
 
             // ...then reads it back into an image
             // approximately 30% of the total time is spent here
             bytes = bos.toByteArray();
-            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-            ProgressTracker pt2 = new SubtaskProgressTracker(0.3, pt);
+            var in = new ByteArrayInputStream(bytes);
+            var pt2 = new SubtaskProgressTracker(0.3, pt);
             try (ImageInputStream iis = ImageIO.createImageInputStream(in)) {
                 previewImage = TrackedIO.readFromIIS(iis, pt2);
             }

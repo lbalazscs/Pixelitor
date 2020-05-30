@@ -17,7 +17,8 @@
 
 package pixelitor.utils.test;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
+import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.Canvas;
 import pixelitor.Composition;
@@ -48,7 +49,6 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.font.TextAttribute;
@@ -64,6 +64,7 @@ import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.Composition.LayerAdder.Position.TOP;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Static methods for creating the splash images
@@ -77,14 +78,14 @@ public class SplashImageCreator {
     private SplashImageCreator() {
     }
 
-    public static void saveManySplashImages() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+    public static void saveManySplashImages(int numImages) {
+        assert calledOnEDT() : threadInfo();
 
         boolean okPressed = SingleDirChooser.selectOutputDir(FileFormat.PNG);
         if (!okPressed) {
             return;
         }
-        int numImages = 64;
+
         String msg = format("Save %d Splash Images: ", numImages);
         var progressHandler = Messages.startProgress(msg, numImages);
 
@@ -93,13 +94,12 @@ public class SplashImageCreator {
             int seqNo = i;
             cf = cf.thenCompose(v -> makeSplashAsync(progressHandler, seqNo));
         }
-        cf.thenRunAsync(() -> cleanupAfterManySplashes(numImages, progressHandler),
-                EventQueue::invokeLater);
+        cf.thenRunAsync(() -> cleanupAfterManySplashes(numImages, progressHandler), onEDT);
     }
 
     private static CompletableFuture<Void> makeSplashAsync(ProgressHandler ph, int seqNo) {
         return CompletableFuture
-            .supplyAsync(() -> makeOneSplashImage(ph, seqNo), EventQueue::invokeLater)
+            .supplyAsync(() -> makeOneSplashImage(ph, seqNo), onEDT)
             .thenCompose(SplashImageCreator::saveAndCloseOneSplash);
     }
 
@@ -118,7 +118,7 @@ public class SplashImageCreator {
     }
 
     public static Composition createSplashComp() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         FgBgColors.setFGColor(WHITE);
 //        FgBgColors.setBGColor(new Color(6, 83, 81));
@@ -131,10 +131,10 @@ public class SplashImageCreator {
             GradientType gradientType = Rnd.chooseFrom(GradientType.values());
             CycleMethod cycleMethod = REFLECT;
 
-            Gradient gradient = new Gradient(
-                    ImDrag.createRandom(SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2),
-                    gradientType, cycleMethod, FG_TO_BG,
-                    false, BlendingMode.MULTIPLY, 1.0f);
+            ImDrag randomDrag = ImDrag.createRandom(SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
+            Gradient gradient = new Gradient(randomDrag,
+                gradientType, cycleMethod, FG_TO_BG,
+                false, BlendingMode.MULTIPLY, 1.0f);
             gradient.drawOn(layer);
         }
 
@@ -144,7 +144,7 @@ public class SplashImageCreator {
     }
 
     public static Composition createOldSplashImage() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         ValueNoise.reseed();
         var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
@@ -154,7 +154,7 @@ public class SplashImageCreator {
         new ColorWheel().startOn(layer, FILTER_WITHOUT_DIALOG);
 
         layer = addNewLayer(comp, "Value Noise");
-        ValueNoise valueNoise = new ValueNoise();
+        var valueNoise = new ValueNoise();
         valueNoise.setDetails(7);
         valueNoise.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setOpacity(0.3f, true);
@@ -174,15 +174,15 @@ public class SplashImageCreator {
         FgBgColors.setFGColor(WHITE);
         Font font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, 48);
         addTextLayer(comp, "Pixelitor", WHITE,
-                font, -17, BlendingMode.NORMAL, 1.0f, true);
+            font, -17, BlendingMode.NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 22);
         addTextLayer(comp, "Loading...",
-                WHITE, font, -70, BlendingMode.NORMAL, 1.0f, true);
+            WHITE, font, -70, BlendingMode.NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
         addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER,
-                WHITE, font, 50, BlendingMode.NORMAL, 1.0f, true);
+            WHITE, font, 50, BlendingMode.NORMAL, 1.0f, true);
     }
 
     private static Font createSplashFont(String name, int style, int size) {
@@ -200,7 +200,7 @@ public class SplashImageCreator {
     }
 
     private static void addDropShadow(ImageLayer layer) {
-        JHDropShadow dropShadow = new JHDropShadow();
+        var dropShadow = new JHDropShadow();
         dropShadow.setDistance(5);
         dropShadow.setSoftness(5);
         dropShadow.setOpacity(0.7f);
@@ -214,29 +214,29 @@ public class SplashImageCreator {
     }
 
     private static TextLayer addNewTextLayer(Composition comp, String name) {
-        TextLayer textLayer = new TextLayer(comp, name);
+        var textLayer = new TextLayer(comp, name);
         new LayerAdder(comp).atPosition(TOP).add(textLayer);
         return textLayer;
     }
 
-    private static TextLayer addTextLayer(Composition comp, String text,
-                                          Color textColor, Font font,
-                                          int translationY, BlendingMode blendingMode,
-                                          float opacity, boolean dropShadow) {
+    private static void addTextLayer(Composition comp, String text,
+                                     Color textColor, Font font,
+                                     int translationY, BlendingMode blendingMode,
+                                     float opacity, boolean dropShadow) {
         TextLayer layer = addNewTextLayer(comp, text);
 
         AreaEffects effects = null;
         if (dropShadow) {
             effects = new AreaEffects();
-            ShadowPathEffect dropShadowEffect = new ShadowPathEffect(0.6f);
+            var dropShadowEffect = new ShadowPathEffect(0.6f);
             dropShadowEffect.setEffectWidth(3);
             dropShadowEffect.setOffset(Utils.offsetFromPolar(4, 0.7));
             effects.setDropShadow(dropShadowEffect);
         }
 
-        TextSettings settings = new TextSettings(text, font, textColor, effects,
-                AbstractLayoutPainter.HorizontalAlignment.CENTER,
-                AbstractLayoutPainter.VerticalAlignment.CENTER, false, 0);
+        var settings = new TextSettings(text, font, textColor, effects,
+            HorizontalAlignment.CENTER,
+            VerticalAlignment.CENTER, false, 0);
 
         layer.setSettings(settings);
 
@@ -246,8 +246,6 @@ public class SplashImageCreator {
 
         layer.setOpacity(opacity, true);
         layer.setBlendingMode(blendingMode, true);
-
-        return layer;
     }
 
     private static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
@@ -275,24 +273,26 @@ public class SplashImageCreator {
         }
 
         Gradient gradient = new Gradient(
-                new ImDrag(startX, startY, endX, endY),
-                gradientType, REFLECT, BLACK_TO_WHITE,
-                false,
-                BlendingMode.NORMAL, 1.0f);
+            new ImDrag(startX, startY, endX, endY),
+            gradientType, REFLECT, BLACK_TO_WHITE,
+            false,
+            BlendingMode.NORMAL, 1.0f);
         gradient.drawOn(dr);
     }
 
     private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp) {
-        SaveSettings saveSettings = new SaveSettings(
-                FileFormat.getLastOutput(), comp.getFile());
+        var saveSettings = new SaveSettings(
+            FileFormat.getLastOutput(), comp.getFile());
+
         return comp.saveAsync(saveSettings, false)
-                .thenAcceptAsync(v -> comp.getView().close(), EventQueue::invokeLater);
+            .thenAcceptAsync(v -> comp.getView().close(), onEDT);
     }
 
-    private static void cleanupAfterManySplashes(int numCreatedImages, ProgressHandler progressHandler) {
+    private static void cleanupAfterManySplashes(int numCreatedImages,
+                                                 ProgressHandler progressHandler) {
         progressHandler.stopProgress();
         Messages.showInStatusBar(format(
-                "Finished saving %d splash images to %s",
-                numCreatedImages, Dirs.getLastSave()));
+            "Finished saving %d splash images to %s",
+            numCreatedImages, Dirs.getLastSave()));
     }
 }

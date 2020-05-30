@@ -37,12 +37,12 @@ import java.awt.event.*;
  * The navigator component that allows the user to pan a zoomed-in image.
  */
 public class Navigator extends JComponent
-        implements MouseListener, MouseMotionListener, ViewActivationListener {
+    implements MouseListener, MouseMotionListener, ViewActivationListener {
 
     private static final int DEFAULT_NAVIGATOR_SIZE = 300;
     private static final BasicStroke VIEW_BOX_STROKE = new BasicStroke(3);
     private static final CheckerboardPainter checkerBoardPainter
-            = ImageUtils.createCheckerboardPainter();
+        = ImageUtils.createCheckerboardPainter();
 
     // The navigated active view.
     // Null if all images are closed.
@@ -75,7 +75,7 @@ public class Navigator extends JComponent
 
     private Navigator(View view) {
         adjListener = e ->
-                SwingUtilities.invokeLater(this::updateViewBoxPosition);
+            SwingUtilities.invokeLater(this::updateViewBoxPosition);
 
         recalculateSize(view, true, true, true);
 
@@ -106,8 +106,8 @@ public class Navigator extends JComponent
             @Override
             public void actionPerformed(ActionEvent e) {
                 ColorUtils.selectColorWithDialog(Navigator.this,
-                        "View Box Color", viewBoxColor, true,
-                        Navigator.this::setNewViewBoxColor);
+                    "View Box Color", viewBoxColor, true,
+                    Navigator.this::setNewViewBoxColor);
             }
         });
     }
@@ -168,25 +168,24 @@ public class Navigator extends JComponent
         });
     }
 
-    public static void showInDialog(PixelitorWindow pw) {
-        View view = OpenImages.getActiveView();
-        Navigator navigator = new Navigator(view);
-
+    public static void showInDialog() {
         if (dialog != null && dialog.isVisible()) {
             dialog.setVisible(false);
             dialog.dispose();
         }
 
+        View view = OpenImages.getActiveView();
+        var navigator = new Navigator(view);
+
         dialog = new DialogBuilder()
-                .title("Navigator")
-                .owner(pw)
-                .content(navigator)
-                .notModal()
-                .noOKButton()
-                .noCancelButton()
-                .noGlobalKeyChange()
-                .cancelAction(navigator::dispose) // when it is closed with X
-                .show();
+            .title("Navigator")
+            .content(navigator)
+            .notModal()
+            .noOKButton()
+            .noCancelButton()
+            .noGlobalKeyChange()
+            .cancelAction(navigator::dispose) // when it is closed with X
+            .show();
     }
 
     public void recalculateSize(View view,

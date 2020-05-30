@@ -17,11 +17,10 @@
 
 package pixelitor;
 
-import pixelitor.history.History;
 import pixelitor.utils.Lazy;
-import pixelitor.utils.Utils;
 
-import java.awt.EventQueue;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The context in which Pixelitor code is running.
@@ -67,7 +66,7 @@ public enum RunContext {
     }
 
     public static String getPixelitorWindowFixTitle() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         return fixTitle.get();
     }
@@ -78,7 +77,5 @@ public enum RunContext {
 
     public static void setUnitTestingMode() {
         CURRENT = UNIT_TESTS;
-        History.setUndoLevels(15);
-        Utils.makeSureAssertionsAreEnabled();
     }
 }

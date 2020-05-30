@@ -35,13 +35,13 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Rnd;
+import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -54,6 +54,7 @@ import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.*;
 import static pixelitor.tools.Tools.*;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
@@ -80,30 +81,30 @@ public class RandomToolTest {
     private final List<Double> testTimes = new ArrayList<>();
 
     private static final String[] simpleMultiLayerEdits = {
-            "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
-            "Flip Horizontal", "Flip Vertical"
+        "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
+        "Flip Horizontal", "Flip Vertical"
     };
 
     private static final int[] TOOL_HOTKEYS = {
-            VK_V,
-            VK_C,
-            VK_M,
-            VK_B,
-            VK_S,
-            VK_E,
-            VK_K,
-            VK_G,
-            VK_N,
-            VK_I,
-            VK_P,
-            VK_U,
-            VK_H,
-            VK_Z,
+        VK_V,
+        VK_C,
+        VK_M,
+        VK_B,
+        VK_S,
+        VK_E,
+        VK_K,
+        VK_G,
+        VK_N,
+        VK_I,
+        VK_P,
+        VK_U,
+        VK_H,
+        VK_Z,
     };
     private static final String[] ADD_MASK_MENU_COMMANDS = {
-            "Add White (Reveal All)", "Add Black (Hide All)", "Add from Layer"};
+        "Add White (Reveal All)", "Add Black (Hide All)", "Add from Layer"};
     private static final String[] REMOVE_MASK_MENU_COMMANDS = {
-            "Delete", "Apply"};
+        "Delete", "Apply"};
 
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
@@ -146,10 +147,10 @@ public class RandomToolTest {
                 System.out.println("\n" + RandomToolTest.class.getSimpleName() + " stopped.");
 
                 var stats = testTimes.stream()
-                        .mapToDouble(s -> s)
-                        .summaryStatistics();
+                    .mapToDouble(s -> s)
+                    .summaryStatistics();
                 System.out.printf("time stats: count = %d, min = %.2fs, max = %.2fs, avg = %.2fs%n",
-                        stats.getCount(), stats.getMin(), stats.getMax(), stats.getAverage());
+                    stats.getCount(), stats.getMin(), stats.getMax(), stats.getAverage());
 
                 return; // if stopped, then exit the main loop
             } catch (PausedException e) {
@@ -203,7 +204,7 @@ public class RandomToolTest {
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
             System.out.println(format("Test \u001B[31m%d\u001B[0m (%s) took %.2f s",
-                    testNr, selectedTool.getName(), estimatedSeconds));
+                testNr, selectedTool.getName(), estimatedSeconds));
             testTimes.add(estimatedSeconds);
         }
     }
@@ -219,9 +220,9 @@ public class RandomToolTest {
         } catch (TimeoutException e) {
             stopped = true;
             System.err.printf("%s: task unexpectedly timed out, exiting.%n" +
-                            "Active comp is: %s%n",
-                    AppRunner.getCurrentTimeHMS(),
-                    EDT.active(Composition::toString));
+                    "Active comp is: %s%n",
+                AppRunner.getCurrentTimeHMS(),
+                EDT.active(Composition::toString));
             exitInNewThread();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
@@ -279,7 +280,7 @@ public class RandomToolTest {
     }
 
     private void activate(Tool tool) {
-        boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+        boolean toolsShown = EDT.call(() -> PixelitorWindow.get().areToolsShown());
         if (toolsShown) {
             log("activating " + tool.getName() + " by clicking on the button");
             app.clickTool(tool);
@@ -291,7 +292,7 @@ public class RandomToolTest {
 
     private void randomizeToolSettings(Tool tool) {
         log("randomize the settings of " + tool.getName());
-        EDT.run(ToolSettingsPanelContainer.getInstance()::randomizeToolSettings);
+        EDT.run(ToolSettingsPanelContainer.get()::randomizeToolSettings);
 
         if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
             // prevent paths getting too large
@@ -423,7 +424,7 @@ public class RandomToolTest {
         }
 
         log(format("resizing from %dx%d to 770x600",
-                canvasWidth, canvasHeight));
+            canvasWidth, canvasHeight));
         app.resize(770, 600);
     }
 
@@ -582,7 +583,7 @@ public class RandomToolTest {
     private void cutBigLayersIfNecessary(Composition comp) {
         Rectangle imgSize = EDT.call(comp::getMaxImageSize);
         Dimension canvasSize = EDT.call(() ->
-                comp.getCanvas().getSize());
+            comp.getCanvas().getSize());
 
         if (imgSize.width > 3 * canvasSize.width || imgSize.height > 3 * canvasSize.height) {
             // needs to be cut, otherwise there is a risk that
@@ -598,12 +599,12 @@ public class RandomToolTest {
         Utils.sleep(200, MILLISECONDS);
 
         int numImageLayers = EDT.call(() -> OpenImages.fromActiveComp(
-                Composition::getNumImageLayers));
+            Composition::getNumImageLayers));
         if (numImageLayers == 1) {
             app.runMenuCommand("Layer to Canvas Size");
         } else if (numImageLayers > 1) {
             EDT.run(() -> OpenImages.onActiveComp(
-                    Composition::allImageLayersToCanvasSize));
+                Composition::allImageLayersToCanvasSize));
         }
     }
 
@@ -620,7 +621,7 @@ public class RandomToolTest {
     }
 
     private void pushToolButtons() {
-        boolean toolsShown = EDT.call(() -> PixelitorWindow.getInstance().areToolsShown());
+        boolean toolsShown = EDT.call(() -> PixelitorWindow.get().areToolsShown());
         if (!toolsShown) {
             return;
         }
@@ -684,20 +685,20 @@ public class RandomToolTest {
         }
 
         String[] texts = {
-                "Stroke with Current Brush",
-                "Stroke with Current Eraser",
-                "Stroke with Current Smudge",
-                "Convert to Selection"
+            "Stroke with Current Brush",
+            "Stroke with Current Eraser",
+            "Stroke with Current Smudge",
+            "Convert to Selection"
         };
         clickRandomToolButton(texts);
     }
 
     private void clickZoomOrHandToolButton() {
         String[] texts = {
-                "Actual Pixels",
-                "Fit Space",
-                "Fit Width",
-                "Fit Height"
+            "Actual Pixels",
+            "Fit Space",
+            "Fit Width",
+            "Fit Height"
         };
         clickRandomToolButton(texts);
     }
@@ -709,8 +710,8 @@ public class RandomToolTest {
 
     private void clickSelectionToolButton() {
         String[] texts = {
-                "Crop Selection",
-                "Convert to Path",
+            "Crop Selection",
+            "Convert to Path",
         };
         clickRandomToolButton(texts);
     }
@@ -732,16 +733,14 @@ public class RandomToolTest {
         int i = Rnd.nextInt(10);
         if (i == 0) {
             randomShowHide("Tools",
-                    () -> PixelitorWindow.getInstance().areToolsShown());
+                () -> PixelitorWindow.get().areToolsShown());
         } else if (i == 1) {
             randomShowHide("Layers",
-                    LayersContainer::areLayersShown);
+                LayersContainer::areLayersShown);
         } else if (i == 2) {
-            randomShowHide("Histograms",
-                    HistogramsPanel.INSTANCE::isShown);
+            randomShowHide("Histograms", HistogramsPanel::isShown);
         } else if (i == 3) {
-            randomShowHide("Status Bar",
-                    StatusBar.INSTANCE::isShown);
+            randomShowHide("Status Bar", StatusBar::isShown);
         } else {
             // do nothing, this doesn't have to be tested all the time
         }
@@ -841,9 +840,9 @@ public class RandomToolTest {
 
     private void exitGracefully() {
         // avoid blocking the EDT
-        assert !EventQueue.isDispatchThread();
+        assert calledOutsideEDT() : "on EDT";
         // this should also not be called from the main thread
-        assert !Thread.currentThread().getName().equals("main");
+        assert !Threads.threadName().equals("main");
 
         if (paused) {
             // if already paused, then we can exit immediately

@@ -38,12 +38,15 @@ import java.util.*;
 
 import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
+import static java.awt.Taskbar.Feature.PROGRESS_VALUE_WINDOW;
 import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
+import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 import static pixelitor.utils.Cursors.BUSY;
 import static pixelitor.utils.Cursors.DEFAULT;
 import static pixelitor.utils.Keys.ESC;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
  * Static GUI-related utility methods
@@ -67,16 +70,15 @@ public final class GUIUtils {
                                                      String text,
                                                      String title) {
         new DialogBuilder()
-                .okText("Copy as Text to the Clipboard")
-                .cancelText("Close")
-                .validator(d -> {
-                    Utils.copyStringToClipboard(text);
-                    return false; // prevents the dialog from closing
-                })
-                .title(title)
-                .content(content)
-                .owner(PixelitorWindow.getInstance())
-                .show();
+            .okText("Copy as Text to the Clipboard")
+            .cancelText("Close")
+            .validator(d -> {
+                Utils.copyStringToClipboard(text);
+                return false; // prevents the dialog from closing
+            })
+            .title(title)
+            .content(content)
+            .show();
     }
 
     public static JPanel arrangeVertically(Iterable<FilterParam> params) {
@@ -103,6 +105,8 @@ public final class GUIUtils {
             } else if (numColumns == 2) {
                 gbh.addLabel(param.getName() + ':', 0, row);
                 gbh.addLastControl(control);
+            } else {
+                throw new IllegalStateException("numColumns = " + numColumns);
             }
 
             row++;
@@ -151,7 +155,7 @@ public final class GUIUtils {
         }
     }
 
-    public static void randomizeGUIWidgetsOn(JPanel panel) {
+    public static void randomizeWidgetsOn(JPanel panel) {
         int count = panel.getComponentCount();
         Random rand = new Random();
 
@@ -178,7 +182,7 @@ public final class GUIUtils {
     }
 
     public static void invokeAndWait(Runnable task) {
-        assert !EventQueue.isDispatchThread() : "on EDT";
+        assert calledOutsideEDT() : "on EDT";
         try {
             EventQueue.invokeAndWait(task);
         } catch (InterruptedException | InvocationTargetException e) {
@@ -187,18 +191,8 @@ public final class GUIUtils {
     }
 
     public static ProgressMonitor createPercentageProgressMonitor(String msg) {
-        return new ProgressMonitor(PixelitorWindow.getInstance(),
-                msg, "", 0, 100);
-    }
-
-    public static ProgressMonitor createPercentageProgressMonitor(String msg,
-                                                                  String cancelButtonText) {
-        String oldText = UIManager.getString("OptionPane.cancelButtonText");
-        UIManager.put("OptionPane.cancelButtonText", cancelButtonText);
-        ProgressMonitor pm = new ProgressMonitor(PixelitorWindow.getInstance(),
-                msg, "", 0, 100);
-        UIManager.put("OptionPane.cancelButtonText", oldText);
-        return pm;
+        return new ProgressMonitor(PixelitorWindow.get(),
+            msg, "", 0, 100);
     }
 
     public static void addOKCancelButtons(JPanel panel,
@@ -228,16 +222,16 @@ public final class GUIUtils {
     public static void setupCancelWhenEscIsPressed(JDialog d, Runnable cancelAction) {
         JComponent contentPane = (JComponent) d.getContentPane();
         contentPane.registerKeyboardAction(e -> cancelAction.run(),
-                ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            ESC, WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     public static void runWithBusyCursor(Runnable task) {
-        runWithBusyCursor(PixelitorWindow.getInstance(), task);
+        runWithBusyCursor(PixelitorWindow.get(), task);
     }
 
     public static void runWithBusyCursor(Component parent, Runnable task) {
         java.util.Timer timer = new Timer();
-        TimerTask startBusyCursorTask = new TimerTask() {
+        var startBusyCursorTask = new TimerTask() {
             @Override
             public void run() {
                 parent.setCursor(BUSY);
@@ -256,11 +250,12 @@ public final class GUIUtils {
         }
     }
 
-    public static void setupSharedScrollModels(JScrollPane from, JScrollPane to) {
-        to.getVerticalScrollBar().setModel(
-                from.getVerticalScrollBar().getModel());
-        to.getHorizontalScrollBar().setModel(
-                from.getHorizontalScrollBar().getModel());
+    public static void shareScrollModels(JScrollPane from, JScrollPane to) {
+        var sharedVerticalModel = from.getVerticalScrollBar().getModel();
+        to.getVerticalScrollBar().setModel(sharedVerticalModel);
+
+        var sharedHorizontalModel = from.getHorizontalScrollBar().getModel();
+        to.getHorizontalScrollBar().setModel(sharedHorizontalModel);
     }
 
     public static void addColorDialogListener(JComponent colorSwatch, Runnable showDialogAction) {
@@ -270,8 +265,9 @@ public final class GUIUtils {
                 // on Linux/Mac the popup trigger check is not enough
                 // probably because the popups are started by mousePressed
                 boolean showDialog = colorSwatch.isEnabled()
-                        && !e.isPopupTrigger()
-                        && SwingUtilities.isLeftMouseButton(e);
+                    && !e.isPopupTrigger()
+                    && SwingUtilities.isLeftMouseButton(e);
+
                 if (showDialog) {
                     showDialogAction.run();
                 }
@@ -322,14 +318,17 @@ public final class GUIUtils {
             public void actionPerformed(ActionEvent e) {
                 if (comp.isDirty()) {
                     String msg = "<html>The file <i>" + file.getName() +
-                            "</i> contains unsaved changes.<br>" +
-                            "Only the saved changes can be printed.<br>" +
-                            "Do you want to save your changes now?";
-                    boolean saveAndPrint = Dialogs.showOKCancelDialog(msg, "Unsaved Changes",
-                            new String[]{"Save and Print", "Cancel"}, 0, JOptionPane.QUESTION_MESSAGE);
+                        "</i> contains unsaved changes.<br>" +
+                        "Only the saved changes can be printed.<br>" +
+                        "Do you want to save your changes now?";
+
+                    String[] options = {"Save and Print", "Cancel"};
+                    boolean saveAndPrint = Dialogs.showOKCancelDialog(msg,
+                        "Unsaved Changes", options, 0, QUESTION_MESSAGE);
                     if (!saveAndPrint) {
                         return;
                     }
+
                     IO.save(comp, false);
                 }
                 try {
@@ -344,9 +343,13 @@ public final class GUIUtils {
     public static void showTaskbarProgress(int progressPercent) {
         if (Taskbar.isTaskbarSupported()) {
             Taskbar taskbar = Taskbar.getTaskbar();
-            if (taskbar.isSupported(Taskbar.Feature.PROGRESS_VALUE_WINDOW)) {
-                taskbar.setWindowProgressValue(PixelitorWindow.getInstance(), progressPercent);
+            if (taskbar.isSupported(PROGRESS_VALUE_WINDOW)) {
+                taskbar.setWindowProgressValue(PixelitorWindow.get(), progressPercent);
             }
         }
+    }
+
+    public static void paintImmediately(JComponent c) {
+        c.paintImmediately(0, 0, c.getWidth(), c.getHeight());
     }
 }

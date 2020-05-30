@@ -18,8 +18,8 @@
 package pixelitor.layers;
 
 import pixelitor.OpenImages;
-import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 import pixelitor.utils.test.RandomGUITest;
@@ -28,24 +28,23 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that adds a new text layer to the active composition.
+ * An {@link Action} that adds a new text layer to the active composition.
  */
-public class AddTextLayerAction extends AbstractAction
-        implements ViewActivationListener {
+public class AddTextLayerAction extends NamedAction implements ViewActivationListener {
 
     public static final AddTextLayerAction INSTANCE = new AddTextLayerAction();
 
     private AddTextLayerAction() {
         super("Add Text Layer", Icons.load("add_text_layer.png"));
-        putValue(SHORT_DESCRIPTION, "Adds a new text layer.");
+        setToolTip("Adds a new text layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(!RandomGUITest.isRunning()) {
-            TextLayer.createNew(PixelitorWindow.getInstance());
+        if (!RandomGUITest.isRunning()) {
+            TextLayer.createNew();
         }
     }
 

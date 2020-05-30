@@ -21,12 +21,7 @@ import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.colors.ColorPickerDialog;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.gui.utils.TextFieldValidator;
-import pixelitor.gui.utils.Theme;
-import pixelitor.gui.utils.Themes;
+import pixelitor.gui.utils.*;
 import pixelitor.guides.GuideStrokeType;
 import pixelitor.guides.GuideStyle;
 import pixelitor.history.History;
@@ -54,9 +49,9 @@ public class PreferencesPanel extends JPanel {
     private JComboBox<IntChoiceParam.Value> thumbSizeCB;
 
     private PreferencesPanel() {
-        JTabbedPane tabbedPane = new JTabbedPane(LEFT);
-        JPanel generalPanel = createGeneralPanel();
-        JPanel guidesPanel = createGuidesPanel();
+        var tabbedPane = new JTabbedPane(LEFT);
+        var generalPanel = createGeneralPanel();
+        var guidesPanel = createGuidesPanel();
 
         tabbedPane.add("General", generalPanel);
         tabbedPane.add("Guides", guidesPanel);
@@ -64,8 +59,7 @@ public class PreferencesPanel extends JPanel {
     }
 
     private JPanel createGeneralPanel() {
-        JPanel generalPanel = new JPanel(new GridBagLayout());
-
+        var generalPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(generalPanel);
 
         addLanguageChooser(gbh);
@@ -79,7 +73,7 @@ public class PreferencesPanel extends JPanel {
     }
 
     private void addLanguageChooser(GridBagHelper gbh) {
-        var languages = new EnumComboBoxModel<Language>(Language.class);
+        var languages = new EnumComboBoxModel<>(Language.class);
         languages.setSelectedItem(Texts.getCurrentLanguage());
 
         @SuppressWarnings("unchecked")
@@ -92,8 +86,8 @@ public class PreferencesPanel extends JPanel {
             if (language != Texts.getCurrentLanguage()) {
                 Texts.setCurrentLang(language);
                 EventQueue.invokeLater(() -> Dialogs.showInfoDialog(this,
-                        "Needs Restart",
-                        "Changing the display language will take effect after restarting Pixelitor."));
+                    "Needs Restart",
+                    "Changing the display language will take effect after restarting Pixelitor."));
             }
         });
     }
@@ -134,16 +128,16 @@ public class PreferencesPanel extends JPanel {
         undoLevelsTF.setName("undoLevelsTF");
         undoLevelsTF.setText(String.valueOf(History.getUndoLevels()));
         gbh.addLabelAndControl("Undo/Redo Levels: ",
-                TextFieldValidator.createPositiveIntLayer("Undo/Redo Levels",
-                        undoLevelsTF, true));
+            TextFieldValidator.createPositiveIntLayer("Undo/Redo Levels",
+                undoLevelsTF, true));
     }
 
     private void addThumbSizeChooser(GridBagHelper gbh) {
         IntChoiceParam.Value[] thumbSizes = {
-                new IntChoiceParam.Value("24x24 pixels", 24),
-                new IntChoiceParam.Value("48x48 pixels", 48),
-                new IntChoiceParam.Value("72x72 pixels", 72),
-                new IntChoiceParam.Value("96x96 pixels", 96),
+            new IntChoiceParam.Value("24x24 pixels", 24),
+            new IntChoiceParam.Value("48x48 pixels", 48),
+            new IntChoiceParam.Value("72x72 pixels", 72),
+            new IntChoiceParam.Value("96x96 pixels", 96),
         };
         thumbSizeCB = new JComboBox<>(thumbSizes);
         thumbSizeCB.setName("thumbSizeCB");
@@ -156,7 +150,7 @@ public class PreferencesPanel extends JPanel {
     }
 
     private static JPanel createGuidesPanel() {
-        JPanel guidesPanel = new JPanel(new GridBagLayout());
+        var guidesPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(guidesPanel);
         configureGuidesSettings(gbh);
         configureCropGuidesSettings(gbh);
@@ -167,8 +161,8 @@ public class PreferencesPanel extends JPanel {
     private static void configureGuidesSettings(GridBagHelper gbh) {
         GuideStyle guideStyle = AppPreferences.getGuideStyle();
 
-        ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        var guideStyleCB = new JComboBox<GuideStrokeType>(GuideStrokeType.values());
+        var guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
+        var guideStyleCB = new JComboBox<>(GuideStrokeType.values());
         guideStyleCB.setName("guideStyleCB");
         guideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
@@ -189,8 +183,8 @@ public class PreferencesPanel extends JPanel {
     private static void configureCropGuidesSettings(GridBagHelper gbh) {
         GuideStyle guideStyle = AppPreferences.getCropGuideStyle();
 
-        ColorSwatch guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
-        var cropGuideStyleCB = new JComboBox<GuideStrokeType>(GuideStrokeType.values());
+        var guideColorSwatch = new ColorSwatch(guideStyle.getColorA(), 20);
+        var cropGuideStyleCB = new JComboBox<>(GuideStrokeType.values());
         cropGuideStyleCB.setName("cropGuideStyleCB");
         cropGuideStyleCB.setSelectedItem(guideStyle.getStrokeType());
 
@@ -243,15 +237,15 @@ public class PreferencesPanel extends JPanel {
     }
 
     public static void showInDialog() {
-        PreferencesPanel prefPanel = new PreferencesPanel();
+        var prefPanel = new PreferencesPanel();
 
         new DialogBuilder()
-                .content(prefPanel)
-                .noCancelButton()
-                .title("Preferences")
-                .okText("Close")
-                .validator(prefPanel::validate)
-                .validateWhenCanceled()
-                .show();
+            .content(prefPanel)
+            .noCancelButton()
+            .title("Preferences")
+            .okText("Close")
+            .validator(prefPanel::validate)
+            .validateWhenCanceled()
+            .show();
     }
 }

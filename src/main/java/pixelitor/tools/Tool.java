@@ -80,7 +80,7 @@ public abstract class Tool implements KeyListener {
         this.clipStrategy = clipStrategy;
 
         handlerChain = new ToolHandlerChain(this, cursor,
-                allowOnlyDrawables, handToolForwarding);
+            allowOnlyDrawables, handToolForwarding);
     }
 
     public boolean doColorPickerForwarding() {
@@ -92,6 +92,7 @@ public abstract class Tool implements KeyListener {
     }
 
     public void mouseClicked(PMouseEvent e) {
+        // empty by default
     }
 
     public void setButton(ToolButton toolButton) {
@@ -132,6 +133,7 @@ public abstract class Tool implements KeyListener {
     }
 
     protected void closeToolDialogs() {
+        // empty by default
     }
 
     public Cursor getStartingCursor() {
@@ -142,7 +144,8 @@ public abstract class Tool implements KeyListener {
      * Paint over the active layer, used only by the shapes tool.
      * The transform of the given Graphics2D is in image space.
      */
-    public void paintOverActiveLayer(Graphics2D g, Composition comp) {
+    public void paintOverActiveLayer(Graphics2D g) {
+        // empty by default
     }
 
     /**
@@ -151,16 +154,19 @@ public abstract class Tool implements KeyListener {
      */
     public void paintOverImage(Graphics2D g2, Composition comp,
                                AffineTransform imageTransform) {
-
+        // empty by default
     }
 
     public void mouseMoved(MouseEvent e, View view) {
+        // empty by default
     }
 
     public void mouseEntered(MouseEvent e, View view) {
+        // empty by default
     }
 
     public void mouseExited(MouseEvent e, View view) {
+        // empty by default
     }
 
     public abstract void mousePressed(PMouseEvent e);
@@ -179,7 +185,7 @@ public abstract class Tool implements KeyListener {
     }
 
     public void randomize() {
-        GUIUtils.randomizeGUIWidgetsOn(settingsPanel);
+        GUIUtils.randomizeWidgetsOn(settingsPanel);
     }
 
     public void setClipFor(Graphics2D g, View view) {
@@ -213,7 +219,7 @@ public abstract class Tool implements KeyListener {
     public void altPressed() {
         if (!altDown && doColorPickerForwarding()) {
             OpenImages.setCursorForAll(
-                    Tools.COLOR_PICKER.getStartingCursor());
+                Tools.COLOR_PICKER.getStartingCursor());
         }
         altDown = true;
     }
@@ -228,29 +234,14 @@ public abstract class Tool implements KeyListener {
 
     @Override
     public void otherKeyPressed(KeyEvent e) {
+        // empty by default
     }
 
-    @Override
-    public String toString() {
-        return name; // so that they can be easily selected from a JComboBox
-    }
-
-    // used for debugging
-    public String getStateInfo() {
-        return null;
-    }
-
-    public DebugNode getDebugNode() {
-        DebugNode toolNode = new DebugNode("active tool", this);
-        toolNode.addString("name", getName());
-        return toolNode;
-    }
-
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         resetInitialState();
     }
 
-    public void compActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldCV, View newCV) {
         assert Tools.currentTool == this;
         if (oldCV != null) {
             oldCV.repaint();
@@ -259,6 +250,7 @@ public abstract class Tool implements KeyListener {
     }
 
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
+        // empty by default
     }
 
     /**
@@ -266,21 +258,30 @@ public abstract class Tool implements KeyListener {
      * (2) the active layer changes, or (3) the mask editing changes
      */
     public void editedObjectChanged(Layer layer) {
+        // empty by default
     }
 
     public void firstModalDialogShown() {
+        // empty by default
     }
 
     public void firstModalDialogHidden() {
+        // empty by default
     }
 
     public void resetInitialState() {
+        // empty by default
     }
 
     public void fgBgColorsChanged() {
+        // empty by default
     }
 
+    /**
+     * Called when a layer mask is activated or deactivated
+     */
     public void setupMaskEditing(boolean maskEditing) {
+        // empty by default
     }
 
     /**
@@ -291,6 +292,7 @@ public abstract class Tool implements KeyListener {
      * from their image coordinates
      */
     public void coCoordsChanged(View view) {
+        // empty by default
     }
 
     /**
@@ -302,6 +304,7 @@ public abstract class Tool implements KeyListener {
      * therefore the component space coordinates also have to be recalculated.
      */
     public void imCoordsChanged(Composition comp, AffineTransform at) {
+        // empty by default
     }
 
     public void activate() {
@@ -315,5 +318,21 @@ public abstract class Tool implements KeyListener {
 
     public boolean isActive() {
         return Tools.currentIs(this);
+    }
+
+    // used for debugging
+    public String getStateInfo() {
+        return null;
+    }
+
+    public DebugNode getDebugNode() {
+        DebugNode toolNode = new DebugNode("active tool", this);
+        toolNode.addString("name", getName());
+        return toolNode;
+    }
+
+    @Override
+    public String toString() {
+        return name; // so that they can be easily selected from a JComboBox
     }
 }

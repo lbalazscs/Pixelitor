@@ -22,17 +22,12 @@ import pixelitor.tools.gui.ToolButton;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.KeyListener;
 import pixelitor.utils.Keys;
-import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Events;
 
 import javax.swing.*;
-import java.awt.AWTEvent;
-import java.awt.AWTKeyStroke;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.KeyboardFocusManager;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -45,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A global listener for AWT/Swing events
@@ -52,7 +49,9 @@ import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
 public class GlobalEvents {
     private static boolean spaceDown = false;
 
-    // dialogs can be inside dialogs, and this keeps track of the nesting
+    // Dialogs can be inside dialogs, and this keeps track of the nesting
+    // so that in a dialog the Tab key can be used for navigating the UI,
+    // and not for "Hide All".
     private static int numNestedDialogs = 0;
 
     private static KeyListener keyListener;
@@ -94,7 +93,7 @@ public class GlobalEvents {
     }
 
     private GlobalEvents() {
-        // do not instantiate: only static utility methods
+        // only static utility methods
     }
 
     public static void addHotKey(char key, Action action) {
@@ -132,14 +131,14 @@ public class GlobalEvents {
         // so that they can be used to switch between tabs/internal frames.
         // Also remove Tab so that is works as Show/Hide All
         Set<AWTKeyStroke> forwardKeys = keyboardFocusManager
-                .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
+            .getDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS);
         forwardKeys = new HashSet<>(forwardKeys); // make modifiable
         forwardKeys.remove(Keys.CTRL_TAB);
         forwardKeys.remove(Keys.TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(FORWARD_TRAVERSAL_KEYS, forwardKeys);
 
         Set<AWTKeyStroke> backwardKeys = keyboardFocusManager
-                .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
+            .getDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS);
         backwardKeys = new HashSet<>(backwardKeys); // make modifiable
         backwardKeys.remove(Keys.CTRL_SHIFT_TAB);
         keyboardFocusManager.setDefaultFocusTraversalKeys(BACKWARD_TRAVERSAL_KEYS, backwardKeys);
@@ -163,9 +162,6 @@ public class GlobalEvents {
                 break;
             case KeyEvent.VK_RIGHT:
             case KeyEvent.VK_KP_RIGHT:
-                // checking for VK_KP_RIGHT and other KP keys does not seem to be necessary
-                // because at least on windows actually VK_RIGHT is sent by the keypad keys
-                // but let's check them in order to be on the safe side
                 if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.right(e.isShiftDown()))) {
                     e.consume();
                 }
@@ -227,25 +223,23 @@ public class GlobalEvents {
         GlobalEvents.spaceDown = spaceDown;
     }
 
-    /**
-     * The idea is that when we are in a dialog, we want to use the Tab
-     * key for navigating the UI, and not for "Hide All".
-     */
+    // keeps track of dialog nesting
     public static void dialogOpened(String title) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         numNestedDialogs++;
-        if(numNestedDialogs == 1) {
+        if (numNestedDialogs == 1) {
             Tools.firstModalDialogShown();
         }
     }
 
+    // keeps track of dialog nesting
     public static void dialogClosed(String title) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         numNestedDialogs--;
         assert numNestedDialogs >= 0;
-        if(numNestedDialogs == 0) {
+        if (numNestedDialogs == 0) {
             Tools.firstModalDialogHidden();
         }
     }
@@ -254,7 +248,7 @@ public class GlobalEvents {
     public static void assertDialogNestingIs(int expected) {
         if (numNestedDialogs != expected) {
             throw new AssertionError("numNestedDialogs = " + numNestedDialogs
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
@@ -271,34 +265,22 @@ public class GlobalEvents {
     public static void registerDebugMouseWatching(boolean postEvents) {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             MouseEvent e = (MouseEvent) event;
-            String componentDescr = getComponentDescription(e);
             String msg = null;
             if (e.getID() == MouseEvent.MOUSE_CLICKED) {
-                msg = "CLICKED"
-                        + " at (" + e.getX() + ", " + e.getY()
-                        + "), click count = " + e.getClickCount()
-                        + ", comp = " + componentDescr;
+                msg = "CLICKED" + describe(e);
             } else if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
-                msg = "DRAGGED"
-                        + " at (" + e.getX() + ", " + e.getY()
-                        + "), comp = " + componentDescr;
+                msg = "DRAGGED" + describe(e);
             } else if (e.getID() == MouseEvent.MOUSE_PRESSED) {
-                msg = "PRESSED"
-                        + " at (" + e.getX() + ", " + e.getY()
-                        + "), comp = " + componentDescr;
+                msg = "PRESSED" + describe(e);
             } else if (e.getID() == MouseEvent.MOUSE_RELEASED) {
-                msg = "RELEASED"
-                        + " at (" + e.getX() + ", " + e.getY()
-                        + "), comp = " + componentDescr;
+                msg = "RELEASED" + describe(e);
             } else if (e.getID() == MouseEvent.MOUSE_WHEEL) {
-                msg = "WHEEL"
-                        + " at (" + e.getX() + ", " + e.getY()
-                        + "), comp = " + componentDescr;
+                msg = "WHEEL" + describe(e);
             }
             if (msg != null) {
                 msg = Tools.getCurrent().getName() + " Tool: "
-                        + Utils.debugMouseModifiers(e)
-                        + msg;
+                    + Debug.mouseModifiers(e)
+                    + msg;
                 if (postEvents) {
                     Events.postMouseEvent(msg);
                 } else {
@@ -306,8 +288,14 @@ public class GlobalEvents {
                 }
             }
         }, AWTEvent.MOUSE_EVENT_MASK
-                | AWTEvent.MOUSE_MOTION_EVENT_MASK
-                | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+            | AWTEvent.MOUSE_MOTION_EVENT_MASK
+            | AWTEvent.MOUSE_WHEEL_EVENT_MASK);
+    }
+
+    private static String describe(MouseEvent e) {
+        return String.format(" at (%d, %d), click count = %d, c = %s",
+            e.getX(), e.getY(), e.getClickCount(),
+            getComponentDescription(e));
     }
 
     private static String getComponentDescription(MouseEvent e) {

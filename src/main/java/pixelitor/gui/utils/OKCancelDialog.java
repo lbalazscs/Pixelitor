@@ -22,16 +22,15 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Frame;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A dialog with OK and Cancel buttons at the bottom.
@@ -47,29 +46,31 @@ public abstract class OKCancelDialog extends JDialog {
     protected OKCancelDialog(JComponent form, Frame owner,
                              String title, String okText, String cancelText) {
         super(owner, title, true);
-        init(form, okText, cancelText, true);
-    }
-
-    private void init(JComponent form,
-                      String okText, String cancelText, boolean addScrollBars) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         formPanel = form;
 
         setLayout(new BorderLayout());
-        addForm(form, addScrollBars);
+        addForm(form, true);
+
         JPanel southPanel = new JPanel();
         okButton = new JButton(okText);
-        okButton.setName("ok");
         JButton cancelButton = new JButton(cancelText);
         cancelButton.setName("cancel");
 
         GlobalEvents.dialogOpened(getTitle());
 
         GUIUtils.addOKCancelButtons(southPanel, okButton, cancelButton);
-
         add(southPanel, SOUTH);
+        setupOKButton();
+        setupCancelButton(cancelButton);
 
+        pack();
+        Screens.position(this, SCREEN_CENTER);
+    }
+
+    private void setupOKButton() {
+        okButton.setName("ok");
         getRootPane().setDefaultButton(okButton);
         okButton.addActionListener(e -> {
             try {
@@ -78,7 +79,9 @@ public abstract class OKCancelDialog extends JDialog {
                 Messages.showException(ex);
             }
         });
+    }
 
+    private void setupCancelButton(JButton cancelButton) {
         cancelButton.addActionListener(e -> {
             try {
                 cancelAction();
@@ -89,9 +92,6 @@ public abstract class OKCancelDialog extends JDialog {
 
         GUIUtils.setupCancelWhenTheDialogIsClosed(this, this::cancelAction);
         GUIUtils.setupCancelWhenEscIsPressed(this, this::cancelAction);
-
-        pack();
-        Screens.position(this, SCREEN_CENTER);
     }
 
     public void setOKButtonText(String text) {
@@ -125,7 +125,7 @@ public abstract class OKCancelDialog extends JDialog {
     }
 
     public void changeForm(JComponent form) {
-        if(scrollPane != null) {
+        if (scrollPane != null) {
             remove(scrollPane);
         } else {
             remove(formPanel);
@@ -138,8 +138,8 @@ public abstract class OKCancelDialog extends JDialog {
     private void addForm(JComponent form, boolean addScrollBars) {
         if (addScrollBars) {
             scrollPane = new JScrollPane(form,
-                    VERTICAL_SCROLLBAR_AS_NEEDED,
-                    HORIZONTAL_SCROLLBAR_NEVER);
+                VERTICAL_SCROLLBAR_AS_NEEDED,
+                HORIZONTAL_SCROLLBAR_NEVER);
             add(scrollPane, CENTER);
         } else {
             add(form, CENTER);

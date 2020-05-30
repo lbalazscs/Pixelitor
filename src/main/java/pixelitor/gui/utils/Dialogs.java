@@ -22,6 +22,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import pixelitor.RunContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.layers.Layer;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.Events;
 import pixelitor.utils.test.RandomGUITest;
@@ -41,6 +42,8 @@ import java.util.logging.Level;
 
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.*;
+import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.threadName;
 
 /**
  * Static utility methods related to dialogs
@@ -57,7 +60,7 @@ public class Dialogs {
 
     private static Frame getParent() {
         if (mainWindowInitialized) {
-            return PixelitorWindow.getInstance();
+            return PixelitorWindow.get();
         }
         return null;
     }
@@ -90,10 +93,9 @@ public class Dialogs {
                                             String question, Object[] options,
                                             int messageType) {
         GlobalEvents.dialogOpened(title);
-        int answer = showOptionDialog(
-                parent, new JLabel(question),
-                title, YES_NO_CANCEL_OPTION,
-                messageType, null, options, options[0]);
+        int answer = showOptionDialog(parent, new JLabel(question),
+            title, YES_NO_CANCEL_OPTION,
+            messageType, null, options, options[0]);
         GlobalEvents.dialogClosed(title);
         return answer;
     }
@@ -110,8 +112,7 @@ public class Dialogs {
     public static boolean showYesNoDialog(Component parent, String title,
                                           String msg, int messageType) {
         GlobalEvents.dialogOpened(title);
-        int reply = showConfirmDialog(parent, msg, title,
-                YES_NO_OPTION, messageType);
+        int reply = showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
         GlobalEvents.dialogClosed(title);
 
         return reply == YES_OPTION;
@@ -129,8 +130,8 @@ public class Dialogs {
                                              int messageType) {
         GlobalEvents.dialogOpened(title);
         int userAnswer = showOptionDialog(getParent(), msg, title,
-                OK_CANCEL_OPTION, messageType, null,
-                options, options[initialOptionIndex]);
+            OK_CANCEL_OPTION, messageType, null,
+            options, options[initialOptionIndex]);
         GlobalEvents.dialogClosed(title);
 
         return userAnswer == OK_OPTION;
@@ -151,11 +152,10 @@ public class Dialogs {
     }
 
     public static void showFileNotWritableDialog(Component parent, File file) {
-        String msg = "<html>The file <b>%s</b> is not writable." +
-                "<br>To keep your changes, save the image " +
-                "with a new name or in another folder.";
-        showErrorDialog(parent, "File not writable",
-                format(msg, file.getAbsolutePath()));
+        String msg = format("<html>The file <b>%s</b> is not writable." +
+            "<br>To keep your changes, save the image " +
+            "with a new name or in another folder.", file.getAbsolutePath());
+        showErrorDialog(parent, "File not writable", msg);
     }
 
     public static void showWarningDialog(String title, String msg) {
@@ -164,7 +164,7 @@ public class Dialogs {
 
     public static void showNotAColorOnClipboardDialog(Window parent) {
         showWarningDialog(parent, "Not a Color",
-                "The clipboard contents could not be interpreted as a color");
+            "The clipboard contents could not be interpreted as a color");
     }
 
     public static void showWarningDialog(Component parent, String title, String msg) {
@@ -173,17 +173,19 @@ public class Dialogs {
         GlobalEvents.dialogClosed(title);
     }
 
-    public static void showNotImageLayerDialog() {
+    public static void showNotImageLayerDialog(Layer layer) {
         if (!RandomGUITest.isRunning()) {
-            showErrorDialog("Not an image layer",
-                    "The active layer is not an image layer.");
+            String msg = format("The active layer \"%s\" is not an image layer.",
+                layer.getName());
+            showErrorDialog("Not an image layer", msg);
         }
     }
 
-    public static void showNotDrawableDialog() {
+    public static void showNotDrawableDialog(Layer layer) {
         if (!RandomGUITest.isRunning()) {
-            showErrorDialog("Not an image layer or mask",
-                    "The active layer is not an image layer or mask.");
+            String msg = format("The active layer \"%s\" is not an image layer or mask.",
+                layer.getName());
+            showErrorDialog("Not an image layer or mask", msg);
         }
     }
 
@@ -192,18 +194,18 @@ public class Dialogs {
         showExceptionDialog(e, currentThread);
     }
 
-    public static void showExceptionDialog(Throwable e, Thread thread) {
-        if (!EventQueue.isDispatchThread()) {
-            System.err.printf("ERROR: Dialogs.showExceptionDialog called in %s%n",
-                    Thread.currentThread());
+    public static void showExceptionDialog(Throwable e, Thread srcThread) {
+        if (calledOutsideEDT()) {
+            System.err.printf("ERROR: Dialogs.showExceptionDialog called on %s%n", threadName());
 
             // call this method on the EDT
             Throwable finalE = e;
-            EventQueue.invokeLater(() -> showExceptionDialog(finalE, thread));
+            EventQueue.invokeLater(() -> showExceptionDialog(finalE, srcThread));
             return;
         }
 
-        System.err.printf("%nDialogs.showExceptionDialog: Exception in the thread '%s'%n", thread.getName());
+        System.err.printf("%nDialogs.showExceptionDialog: Exception in the thread '%s'%n",
+            srcThread.getName());
         e.printStackTrace();
 
         RandomGUITest.stop();
@@ -227,10 +229,10 @@ public class Dialogs {
 
         Frame parent = getParent();
         String basicErrorMessage = "An exception occurred: " + e.getMessage();
-        ErrorInfo ii = new ErrorInfo("Program error",
-                basicErrorMessage, null, null, e,
-                Level.SEVERE, null);
-        JXErrorPane.showDialog(parent, ii);
+        var errorInfo = new ErrorInfo("Program error",
+            basicErrorMessage, null, null, e,
+            Level.SEVERE, null);
+        JXErrorPane.showDialog(parent, errorInfo);
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
@@ -291,10 +293,10 @@ public class Dialogs {
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +
-                "<li>decreasing the undo levels" +
-                "<li>decreasing the number of layers" +
-                "<li>working with smaller images" +
-                "<li>putting more RAM into your computer";
+            "<li>decreasing the undo levels" +
+            "<li>decreasing the number of layers" +
+            "<li>working with smaller images" +
+            "<li>putting more RAM into your computer";
         String title = "Out of memory error.";
         showErrorDialog(title, msg);
     }
@@ -302,11 +304,11 @@ public class Dialogs {
     public static int showCloseWarningDialog(String compName) {
         Object[] options = {"Save", "Don't Save", "Cancel"};
         String question = format(
-                "<html><b>Do you want to save the changes made to %s?</b>" +
-                        "<br>Your changes will be lost if you don't save them.</html>",
-                compName);
+            "<html><b>Do you want to save the changes made to %s?</b>" +
+                "<br>Your changes will be lost if you don't save them.</html>",
+            compName);
 
         return showYesNoCancelDialog("Unsaved changes",
-                question, options, WARNING_MESSAGE);
+            question, options, WARNING_MESSAGE);
     }
 }

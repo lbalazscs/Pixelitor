@@ -24,17 +24,11 @@ import pixelitor.gui.utils.ImagePanel;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.io.JpegOutput.ImageWithSize;
 import pixelitor.tools.HandToolSupport;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.JProgressBarTracker;
-import pixelitor.utils.Messages;
-import pixelitor.utils.ProgressPanel;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
@@ -45,6 +39,8 @@ import static java.awt.BorderLayout.SOUTH;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onPool;
 
 /**
  * The panel shown in the "Export Optimized JPEG..." dialog
@@ -76,7 +72,7 @@ public class OptimizedJpegSavePanel extends JPanel {
     private JPanel createComparePanel(BufferedImage image) {
         JPanel comparePanel = new JPanel();
         comparePanel.setLayout(new GridLayout(1, 2, GRID_HOR_GAP, GRID_VER_GAP));
-        Dimension imageSize = new Dimension(image.getWidth(), image.getHeight());
+        var imageSize = new Dimension(image.getWidth(), image.getHeight());
 
         original = createViewPanel(imageSize);
         original.setImage(image);
@@ -95,24 +91,24 @@ public class OptimizedJpegSavePanel extends JPanel {
         comparePanel.add(originalSP);
         comparePanel.add(optimizedSP);
 
-        GUIUtils.setupSharedScrollModels(originalSP, optimizedSP);
+        GUIUtils.shareScrollModels(originalSP, optimizedSP);
     }
 
     private static JScrollPane createScrollPane(ImagePanel original, String borderTitle) {
-        JScrollPane sp = new JScrollPane(original);
-        HandToolSupport.addBehavior(sp);
-        sp.setBorder(createTitledBorder(borderTitle));
+        var scrollPane = new JScrollPane(original);
+        HandToolSupport.addBehavior(scrollPane);
+        scrollPane.setBorder(createTitledBorder(borderTitle));
 
-        return sp;
+        return scrollPane;
     }
 
     private static ImagePanel createViewPanel(Dimension imageSize) {
-        // no checkerboard, because here it is a black image
-        ImagePanel view = new ImagePanel(false);
+        // no checkerboard, because here transparency is shown as black
+        var viewPanel = new ImagePanel(false);
 
-        view.setPreferredSize(imageSize);
+        viewPanel.setPreferredSize(imageSize);
 
-        return view;
+        return viewPanel;
     }
 
     private JPanel createControlsPanel() {
@@ -139,21 +135,15 @@ public class OptimizedJpegSavePanel extends JPanel {
     }
 
     private void updatePreviewAsync() {
-        JpegInfo config = getSelectedConfig();
-
         CompletableFuture
-            .supplyAsync(
-                () -> createPreview(config),
-                IOThread.getExecutor())
-            .thenAcceptAsync(
-                this::setPreview,
-                EventQueue::invokeLater)
+            .supplyAsync(() -> createPreview(getSettings()), onPool)
+            .thenAcceptAsync(this::setPreview, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 
     private ImageWithSize createPreview(JpegInfo config) {
-        ProgressTracker pt = new JProgressBarTracker(progressPanel);
-        return JpegOutput.writeJPGtoPreviewImage(image, config, pt);
+        var tracker = new JProgressBarTracker(progressPanel);
+        return JpegOutput.writeJPGtoPreviewImage(image, config, tracker);
     }
 
     private void setPreview(ImageWithSize imageWithSize) {
@@ -164,24 +154,20 @@ public class OptimizedJpegSavePanel extends JPanel {
         sizeLabel.setText("  Size: " + Utils.bytesToString(numBytes));
     }
 
-    private JpegInfo getSelectedConfig() {
+    private JpegInfo getSettings() {
         return new JpegInfo(qualityParam.getPercentageValF(),
-                progressiveCB.isSelected());
+            progressiveCB.isSelected());
     }
 
-    public static void showInDialog(BufferedImage image, JFrame frame) {
-        BufferedImage rgbImage = ImageUtils.convertToRGB(image, false);
-        OptimizedJpegSavePanel p = new OptimizedJpegSavePanel(rgbImage);
+    public static void showInDialog(BufferedImage image) {
+        var rgbImage = ImageUtils.convertToRGB(image, false);
+        var savePanel = new OptimizedJpegSavePanel(rgbImage);
 
         new DialogBuilder()
-            .content(p)
-            .owner(frame)
+            .content(savePanel)
             .title("Save Optimized JPEG")
             .okText("Save")
-            .okAction(() -> {
-                JpegInfo config = p.getSelectedConfig();
-                IO.saveJpegWithQuality(config);
-            })
+            .okAction(() -> IO.saveJpegWithQuality(savePanel.getSettings()))
             .show();
     }
 }

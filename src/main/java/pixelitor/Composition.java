@@ -25,7 +25,7 @@ import pixelitor.guides.Guides;
 import pixelitor.guides.GuidesChangeEdit;
 import pixelitor.history.*;
 import pixelitor.io.FileFormat;
-import pixelitor.io.IOThread;
+import pixelitor.io.IOTasks;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.*;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -64,6 +64,7 @@ import static java.util.stream.Collectors.toList;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.LayerAdder.Position.*;
 import static pixelitor.io.FileUtils.stripExtension;
+import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.Utils.createCopyName;
 
 /**
@@ -73,19 +74,20 @@ public class Composition implements Serializable {
     // serialization is used for saving in the pxc format
     private static final long serialVersionUID = 1L;
 
-    // a counter for the names of new layers
-    private int newLayerCount = 1;
+    private String name;
 
     private final List<Layer> layerList = new ArrayList<>();
     private Layer activeLayer;
-    private String name; // the file name or something like "Untitled 1"
+
+    // a counter for the names of new layers
+    private int newLayerCount = 1;
 
     private final Canvas canvas;
     private Paths paths;
     private Guides guides;
 
     //
-    // the following variables are all transient, their state is not saved in PXC!
+    // transient variables from here
     //
     private transient File file;
     private transient boolean dirty = false;
@@ -114,11 +116,7 @@ public class Composition implements Serializable {
      * Creates a single-layered composition from the given image
      */
     public static Composition fromImage(BufferedImage img, File file, String name) {
-        if (img == null) {
-            // a null image here means a decoding error,
-            // but not a program error
-            return null;
-        }
+        assert img != null;
 
         img = ImageUtils.toSysCompatibleImage(img);
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
@@ -148,7 +146,7 @@ public class Composition implements Serializable {
     /**
      * Creates and returns a deep copy of this composition.
      */
-    public Composition createCopy(boolean forUndo, boolean copySelection) {
+    public Composition copy(boolean forUndo, boolean copySelection) {
         var canvasCopy = new Canvas(canvas);
         var compCopy = new Composition(canvasCopy);
 
@@ -234,10 +232,6 @@ public class Composition implements Serializable {
         }
     }
 
-    public boolean isEmpty() {
-        return layerList.isEmpty();
-    }
-
     public Canvas getCanvas() {
         return canvas;
     }
@@ -274,14 +268,12 @@ public class Composition implements Serializable {
         this.name = name;
         if (view != null) {
             view.updateTitle();
-            PixelitorWindow.getInstance().updateTitle(this);
+            PixelitorWindow.get().updateTitle(this);
         }
     }
 
     public String generateNewLayerName() {
-        String retVal = "layer " + newLayerCount;
-        newLayerCount++;
-        return retVal;
+        return "layer " + newLayerCount++;
     }
 
     public File getFile() {
@@ -293,9 +285,25 @@ public class Composition implements Serializable {
         setName(file.getName());
     }
 
+    public boolean hasSameFileAs(Composition other, boolean allowNull) {
+        if (file == null) {
+            if (allowNull) {
+                return other.file == null;
+            } else {
+                return false;
+            }
+        } else {
+            return file.equals(other.file);
+        }
+    }
+
+    public boolean isEmpty() {
+        return layerList.isEmpty();
+    }
+
     private void addBaseLayer(BufferedImage baseLayerImage) {
         var newLayer = new ImageLayer(this,
-                baseLayerImage, generateNewLayerName());
+            baseLayerImage, generateNewLayerName());
 
         addLayerInInitMode(newLayer);
     }
@@ -311,10 +319,10 @@ public class Composition implements Serializable {
     public ImageLayer addNewEmptyLayer(String name, boolean bellowActive) {
         var newLayer = ImageLayer.createEmpty(this, name);
         new LayerAdder(this)
-                .withHistory("New Empty Layer")
-                .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
-                .noRefresh()
-                .add(newLayer);
+            .withHistory("New Empty Layer")
+            .atPosition(bellowActive ? BELLOW_ACTIVE : ABOVE_ACTIVE)
+            .noRefresh()
+            .add(newLayer);
 
 //        newLayer.updateIconImage();
         return newLayer;
@@ -323,19 +331,19 @@ public class Composition implements Serializable {
     public void addExternalImageAsNewLayer(BufferedImage image, String layerName, String historyName) {
         var newLayer = ImageLayer.fromExternalImage(image, this, layerName);
         new LayerAdder(this)
-                .withHistory(historyName)
-                .add(newLayer);
+            .withHistory(historyName)
+            .add(newLayer);
     }
 
     public void addNewLayerFromComposite() {
-        ImageLayer newLayer = new ImageLayer(this,
-                getCompositeImage(), "Composite");
+        var newLayer = new ImageLayer(this,
+            getCompositeImage(), "Composite");
 
         new LayerAdder(this)
-                .withHistory("New Layer from Composite")
-                .noRefresh()
-                .atIndex(layerList.size())
-                .add(newLayer);
+            .withHistory("New Layer from Composite")
+            .noRefresh()
+            .atIndex(layerList.size())
+            .add(newLayer);
     }
 
     public void duplicateActiveLayer() {
@@ -345,8 +353,8 @@ public class Composition implements Serializable {
             return;
         }
         new LayerAdder(this)
-                .withHistory("Duplicate Layer")
-                .add(duplicate);
+            .withHistory("Duplicate Layer")
+            .add(duplicate);
         assert checkInvariant();
     }
 
@@ -362,9 +370,9 @@ public class Composition implements Serializable {
 
         Layer flattened = new ImageLayer(this, bi, "flattened");
         new LayerAdder(this)
-                .atIndex(numLayers) // add to the top
-                .noRefresh()
-                .add(flattened);
+            .atIndex(numLayers) // add to the top
+            .noRefresh()
+            .add(flattened);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
             deleteLayer(i, false);
@@ -433,7 +441,7 @@ public class Composition implements Serializable {
         deleteLayer(layer, false);
 
         History.add(new MergeDownEdit(this, layer,
-                bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
+            bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
     }
 
     private void deleteLayer(int layerIndex, boolean addToHistory) {
@@ -487,8 +495,8 @@ public class Composition implements Serializable {
             return;
         }
         assert layerList.contains(newActiveLayer)
-                : format("new active layer '%s' (%s) not in the layer list of '%s'",
-                newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
+            : format("new active layer '%s' (%s) not in the layer list of '%s'",
+            newActiveLayer.getName(), System.identityHashCode(newActiveLayer), getName());
 
         Layer oldLayer = activeLayer;
         activeLayer = newActiveLayer;
@@ -500,7 +508,7 @@ public class Composition implements Serializable {
 
         if (addToHistory) {
             History.add(new LayerSelectionChangeEdit(
-                    editName, this, oldLayer, newActiveLayer));
+                editName, this, oldLayer, newActiveLayer));
         }
 
         if (view != null) {  // shouldn't run while loading the composition
@@ -540,8 +548,8 @@ public class Composition implements Serializable {
 
     public int getNumLayers(Predicate<Layer> condition) {
         return (int) layerList.stream()
-                .filter(condition)
-                .count();
+            .filter(condition)
+            .count();
     }
 
     public int getNumImageLayers() {
@@ -586,9 +594,9 @@ public class Composition implements Serializable {
         // create a separate copy to avoid modification
         // of the original list while iterating
         List<TextLayer> textLayers = layerList.stream()
-                .filter(layer -> layer instanceof TextLayer)
-                .map(layer -> (TextLayer) layer)
-                .collect(toList());
+            .filter(layer -> layer instanceof TextLayer)
+            .map(layer -> (TextLayer) layer)
+            .collect(toList());
 
         for (TextLayer textLayer : textLayers) {
             textLayer.replaceWithRasterized(false);
@@ -611,13 +619,6 @@ public class Composition implements Serializable {
             return activeLayer.getMask();
         }
         return activeLayer;
-    }
-
-    public ContentLayer getAnyContentLayer() {
-        return (ContentLayer) layerList.stream()
-                .filter(layer -> layer instanceof ContentLayer)
-                .findFirst()
-                .orElse(null);
     }
 
     /**
@@ -646,7 +647,7 @@ public class Composition implements Serializable {
         Drawable dr = getActiveDrawable();
         if (dr == null) {
             throw new IllegalStateException("The active layer is not an image layer or a mask, it is "
-                    + activeLayer.getClass().getSimpleName());
+                + activeLayer.getClass().getSimpleName());
         }
         return dr;
     }
@@ -698,7 +699,7 @@ public class Composition implements Serializable {
         }
 
         var combinedEdit = MultiEdit.combine(
-                layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
+            layerEdit, selectionEdit, MoveMode.MOVE_BOTH.getEditName());
         if (combinedEdit != null) {
             History.add(combinedEdit);
             imageChanged();
@@ -710,7 +711,7 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex + 1,
-                true, LayerMoveAction.RAISE_LAYER);
+            true, LayerMoveAction.RAISE_LAYER);
     }
 
     public void moveActiveLayerDown() {
@@ -718,7 +719,7 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, oldIndex - 1,
-                true, LayerMoveAction.LOWER_LAYER);
+            true, LayerMoveAction.LOWER_LAYER);
     }
 
     public void moveActiveLayerToTop() {
@@ -727,7 +728,7 @@ public class Composition implements Serializable {
         int oldIndex = layerList.indexOf(activeLayer);
         int newIndex = layerList.size() - 1;
         changeLayerOrder(oldIndex, newIndex,
-                true, LayerMoveAction.LAYER_TO_TOP);
+            true, LayerMoveAction.LAYER_TO_TOP);
     }
 
     public void moveActiveLayerToBottom() {
@@ -735,7 +736,7 @@ public class Composition implements Serializable {
 
         int oldIndex = layerList.indexOf(activeLayer);
         changeLayerOrder(oldIndex, 0,
-                true, LayerMoveAction.LAYER_TO_BOTTOM);
+            true, LayerMoveAction.LAYER_TO_BOTTOM);
     }
 
     public void changeLayerOrder(int oldIndex, int newIndex) {
@@ -805,8 +806,8 @@ public class Composition implements Serializable {
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
-        BufferedImage imageSoFar = new BufferedImage(
-                canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
+        var imageSoFar = new BufferedImage(
+            canvas.getWidth(), canvas.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = imageSoFar.createGraphics();
 
         boolean firstVisibleLayer = true;
@@ -885,7 +886,7 @@ public class Composition implements Serializable {
                 totalShape = selection.getShape();
             } else {
                 totalShape = ShapeCombination.ADD.combine(
-                        totalShape, selection.getShape());
+                    totalShape, selection.getShape());
             }
         }
         return totalShape;
@@ -979,10 +980,10 @@ public class Composition implements Serializable {
 
         if (selection != null) {
             int answer = Dialogs.showYesNoCancelDialog("Existing Selection",
-                    "<html>There is already a selection on " + getName() +
-                            ".<br>How do you want to combine new selection with the existing one?",
-                    new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
-                    JOptionPane.QUESTION_MESSAGE);
+                "<html>There is already a selection on " + getName() +
+                    ".<br>How do you want to combine new selection with the existing one?",
+                new String[]{"Replace", "Add", "Subtract", "Intersect", "Cancel"},
+                JOptionPane.QUESTION_MESSAGE);
             if (answer == JOptionPane.CLOSED_OPTION || answer == 4) {
                 // canceled
                 return null;
@@ -1079,7 +1080,7 @@ public class Composition implements Serializable {
             } else {
                 selection.setShape(inverted);
                 History.add(new SelectionShapeChangeEdit(
-                        "Invert Selection", this, backupShape));
+                    "Invert Selection", this, backupShape));
             }
         }
     }
@@ -1173,7 +1174,7 @@ public class Composition implements Serializable {
         }
 
         if (actions.histogramChanged()) {
-            HistogramsPanel.INSTANCE.updateFrom(this);
+            HistogramsPanel.updateFrom(this);
         }
     }
 
@@ -1217,7 +1218,7 @@ public class Composition implements Serializable {
 
     public void activeLayerToCanvasSize() {
         if (!(activeLayer instanceof ImageLayer)) {
-            Messages.showNotImageLayerError();
+            Messages.showNotImageLayerError(activeLayer);
             return;
         }
 
@@ -1246,8 +1247,9 @@ public class Composition implements Serializable {
             throw new IllegalStateException("no active layer in " + getName());
         }
         if (!layerList.contains(activeLayer)) {
-            throw new IllegalStateException("active layer (" + activeLayer
-                    .getName() + ") not in list (" + layerList + ")");
+            throw new IllegalStateException(format(
+                "active layer (%s) not in list (%s)",
+                activeLayer.getName(), layerList));
         }
         return true;
     }
@@ -1276,21 +1278,22 @@ public class Composition implements Serializable {
 
         Runnable saveTask = format.getSaveTask(this, saveSettings);
         FileFormat.setLastOutput(format);
+
         return saveAsync(saveTask, f, addToRecentMenus);
     }
 
     public CompletableFuture<Void> saveAsync(Runnable saveTask,
                                              File file,
                                              boolean addToRecentMenus) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         // prevents starting a new save on the EDT while an asynchronous
         // save is already scheduled or running on the IO thread
         String path = file.getAbsolutePath();
-        if (IOThread.isProcessing(path)) {
+        if (IOTasks.isProcessing(path)) {
             return CompletableFuture.completedFuture(null);
         }
-        IOThread.markWriteProcessing(path);
+        IOTasks.markWriteProcessing(path);
 
         // set to not dirty already at the beginning of the saving process,
         // so that subsequent closing does not trigger another, parallel save
@@ -1298,21 +1301,21 @@ public class Composition implements Serializable {
         setDirty(false);
 
         return CompletableFuture
-            .runAsync(saveTask, IOThread.getExecutor())
-            .handle((v, e) -> {
+            .runAsync(saveTask, onIOThread)
+            .handleAsync((v, e) -> {
                 if (e != null) {
-                    Messages.showExceptionOnEDT(e);
+                    Messages.showException(e);
                     setDirty(wasDirty);
                 } else {
-                    EventQueue.invokeLater(() -> afterSuccessfulSaveActions(file, addToRecentMenus));
+                    afterSuccessfulSaveActions(file, addToRecentMenus);
                 }
-                EventQueue.invokeLater(() -> IOThread.writingFinishedFor(path));
+                IOTasks.writingFinishedFor(path);
                 return null;
-            });
+            }, onEDT);
     }
 
     private void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         setFile(file);
         if (addToRecentMenus) {
@@ -1335,8 +1338,8 @@ public class Composition implements Serializable {
     public void setActivePath(Path path) {
         if (path != null && path.getComp() != this) {
             throw new IllegalArgumentException(
-                    "path belongs to other comp, this = " + toPathDebugString() +
-                            ", path.comp = " + path.getComp().toPathDebugString());
+                "path belongs to other comp, this = " + toPathDebugString() +
+                    ", path.comp = " + path.getComp().toPathDebugString());
         }
 
         if (paths == null) {
@@ -1395,22 +1398,22 @@ public class Composition implements Serializable {
 
     public String toPathDebugString() {
         return "Composition{name='" + name + '\''
-                + ", active = " + isActive()
-                + ", path = " + getActivePath()
-                + '}';
+            + ", active = " + isActive()
+            + ", path = " + getActivePath()
+            + '}';
     }
 
     @Override
     public String toString() {
         return "Composition{name='" + name + '\''
-                + ", active = " + isActive()
-                + ", path = " + getActivePath()
-                + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
-                + ", layerList=" + layerList
-                + ", canvas=" + canvas
-                + ", selection=" + selection
-                + ", dirty=" + dirty
-                + '}';
+            + ", active = " + isActive()
+            + ", path = " + getActivePath()
+            + ", activeLayer=" + (activeLayer == null ? "null" : activeLayer.getName())
+            + ", layerList=" + layerList
+            + ", canvas=" + canvas
+            + ", selection=" + selection
+            + ", dirty=" + dirty
+            + '}';
     }
 
     public static class LayerAdder {
@@ -1509,7 +1512,7 @@ public class Composition implements Serializable {
             }
             if (needsHistory()) {
                 History.add(new NewLayerEdit(editName,
-                        comp, newLayer, activeLayerBefore, oldViewMode));
+                    comp, newLayer, activeLayerBefore, oldViewMode));
             }
             assert comp.checkInvariant();
         }

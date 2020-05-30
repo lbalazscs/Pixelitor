@@ -22,8 +22,8 @@ import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.RunContext;
 import pixelitor.gui.View;
-import pixelitor.layers.GlobalLayerChangeListener;
-import pixelitor.layers.GlobalLayerMaskChangeListener;
+import pixelitor.layers.ActiveCompositionListener;
+import pixelitor.layers.ActiveMaskListener;
 import pixelitor.layers.Layer;
 import pixelitor.utils.ViewActivationListener;
 
@@ -33,31 +33,31 @@ import static java.lang.String.format;
  * Used for tracking what happens in long-running automatic tests.
  * Listens to changes and generates events.
  */
-public class PixelitorEventListener implements GlobalLayerChangeListener,
-        GlobalLayerMaskChangeListener, ViewActivationListener {
+public class PixelitorEventListener implements ActiveCompositionListener,
+    ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
         if (RunContext.isFinal()) {
-            throw new IllegalStateException("this should be only used for debugging");
+            throw new IllegalStateException("should be used only for debugging");
         }
     }
 
     public void register() {
-        Layers.addLayerChangeListener(this);
-        Layers.addLayerMaskChangeListener(this);
+        Layers.addCompositionListener(this);
+        Layers.addMaskListener(this);
         OpenImages.addActivationListener(this);
     }
 
     @Override
     public void numLayersChanged(Composition comp, int newLayerCount) {
-        Events.postListenerEvent("activeCompLayerCountChanged, newCount = " + newLayerCount, comp, null);
+        String type = "activeCompLayerCountChanged, newCount = " + newLayerCount;
+        Events.postListenerEvent(type, comp, null);
     }
 
     @Override
     public void activeLayerChanged(Layer newActiveLayer) {
-        Events.postListenerEvent("activeLayerChanged to "
-                        + newActiveLayer.getName(),
-                newActiveLayer.getComp(), newActiveLayer);
+        String type = "activeLayerChanged to " + newActiveLayer.getName();
+        Events.postListenerEvent(type, newActiveLayer.getComp(), newActiveLayer);
     }
 
     @Override
@@ -83,8 +83,7 @@ public class PixelitorEventListener implements GlobalLayerChangeListener,
     @Override
     public void viewActivated(View oldView, View newView) {
         String oldCVName = oldView == null ? "null" : oldView.getName();
-        Events.postListenerEvent(format("compActivated %s => %s",
-                oldCVName, newView.getName()),
-                newView.getComp(), null);
+        String type = format("compActivated %s => %s", oldCVName, newView.getName());
+        Events.postListenerEvent(type, newView.getComp(), null);
     }
 }

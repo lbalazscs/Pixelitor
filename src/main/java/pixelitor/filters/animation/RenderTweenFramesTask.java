@@ -31,6 +31,7 @@ import java.beans.PropertyChangeEvent;
 
 import static java.lang.String.format;
 import static pixelitor.ChangeReason.TWEEN_PREVIEW;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
  * A SwingWorker for rendering the frames of a tween animation
@@ -38,29 +39,29 @@ import static pixelitor.ChangeReason.TWEEN_PREVIEW;
 class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     private final TweenAnimation animation;
     private final Drawable dr;
+    private final ProgressMonitor progressMonitor;
 
-    public RenderTweenFramesTask(TweenAnimation tweenAnimation, Drawable dr) {
-        animation = tweenAnimation;
+    public RenderTweenFramesTask(TweenAnimation animation, Drawable dr) {
+        this.animation = animation;
         this.dr = dr;
+        progressMonitor = GUIUtils.createPercentageProgressMonitor("Rendering Frames");
+        addPropertyChangeListener(this::onPropertyChange);
     }
 
-    void onPropertyChange(PropertyChangeEvent evt,
-                          ProgressMonitor progressMonitor) {
+    private void onPropertyChange(PropertyChangeEvent evt) {
         if ("progress".equals(evt.getPropertyName())) {
             int progress = (Integer) evt.getNewValue();
 
-            onProgress(progress, progressMonitor);
+            onProgress(progress);
         }
     }
 
-    private void onProgress(int progress,
-                            ProgressMonitor progressMonitor) {
+    private void onProgress(int progress) {
         progressMonitor.setProgress(progress);
-        progressMonitor.setNote(format("Completed %d%%.\n", progress));
+        progressMonitor.setNote(format("Completed %d%%.%n", progress));
         if (progressMonitor.isCanceled()) {
             // Probably nothing bad happens if the current frame rendering is
-            // interrupted, but to be on the safe side, let the current frame
-            // finish by passing false to cancel
+            // interrupted, but to be on the safe side, let the current frame finish
             cancel(false);
         }
     }
@@ -77,13 +78,13 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
     }
 
     private void renderFrames() {
+        assert calledOutsideEDT() : "on EDT";
+
         int numFrames = animation.getNumFrames();
         ParametrizedFilter filter = animation.getFilter();
 
         AnimationWriter animationWriter = animation.createAnimationWriter();
         boolean canceled = false;
-
-        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
 
         dr.tweenCalculatingStarted();
 
@@ -105,18 +106,18 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
             if (frameNr < numFrames) { // ping: normal animation forwards
                 time = ((double) frameNr) / numFrames;
             } else { // pong: animating backwards
-                // TODO we are calculating the same frames again
-                // they could be cached somewhere
-                // perhaps in an array of soft references with the
-                // calculated frames or in the case of file sequence
-                // output one could simply make copies of the files.
+                // Here the same frames are calculated again.
+                // They could be cached in an array of soft references
+                // or in the case of the file sequence output,
+                // the output files could be copied.
+                // However, "ping-pong" animations are probably uncommon.
                 int effectiveFrame = 2 * (numFrames - 1) - frameNr;
                 time = ((double) effectiveFrame) / numFrames;
             }
 
             try {
                 // first render the frame...
-                BufferedImage image = renderFrame(filter, time, busyCursorParent);
+                BufferedImage image = renderFrame(filter, time);
 
                 // ...then write the file
                 // TODO ideally while writing out the frame,
@@ -133,19 +134,11 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         setProgress(100);
 
         boolean finalCanceled = canceled;
-        SwingUtilities.invokeLater(() -> {
-            dr.tweenCalculatingEnded();
-            if (finalCanceled) {
-                animationWriter.cancel();
-            } else {
-                animationWriter.finish();
-            }
-        });
+        SwingUtilities.invokeLater(() -> finishOnEDT(animationWriter, finalCanceled));
     }
 
     private BufferedImage renderFrame(ParametrizedFilter filter,
-                                      double time,
-                                      PixelitorWindow busyCursorParent) {
+                                      double time) {
 
         long runCountBefore = Filter.runCount;
 
@@ -154,6 +147,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         // all sorts of problems can happen
         // if filters run outside of EDT
+        var busyCursorParent = PixelitorWindow.get();
         Runnable filterRunTask = () -> filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
         GUIUtils.invokeAndWait(filterRunTask);
 
@@ -166,7 +160,12 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         return comp.getCompositeImage();
     }
 
-    @Override
-    protected void done() {
+    private void finishOnEDT(AnimationWriter animationWriter, boolean canceled) {
+        dr.tweenCalculatingEnded();
+        if (canceled) {
+            animationWriter.cancel();
+        } else {
+            animationWriter.finish();
+        }
     }
 }

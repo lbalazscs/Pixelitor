@@ -24,6 +24,7 @@ import pixelitor.tools.pen.ControlPoint;
 import pixelitor.tools.util.DraggablePoint;
 
 import static java.lang.String.format;
+import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 /**
  * Custom AssertJ assertions for {@link DraggablePoint} objects.
@@ -108,6 +109,21 @@ public class DraggablePointAssert extends AbstractAssert<DraggablePointAssert, D
         if (cp.isRetracted()) {
             throw new AssertionError("retracted");
         }
+
+        return this;
+    }
+
+    // can be called only on an AnchorPoint
+    public DraggablePointAssert bothControlsAreRetracted() {
+        isNotNull();
+
+        if (!(actual instanceof AnchorPoint)) {
+            throw new AssertionError("This is not an AnchorPoint");
+        }
+
+        AnchorPoint ap = (AnchorPoint) actual;
+        assertThat(ap.ctrlIn).isRetracted();
+        assertThat(ap.ctrlOut).isRetracted();
 
         return this;
     }

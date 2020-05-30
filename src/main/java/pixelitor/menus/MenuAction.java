@@ -18,6 +18,7 @@
 package pixelitor.menus;
 
 import pixelitor.OpenImages;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.layers.Layer;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
@@ -96,6 +97,11 @@ public abstract class MenuAction extends NamedAction {
 
     protected MenuAction(String name) {
         super(name);
+        layerType = AllowedOnLayerType.ANY;
+    }
+
+    protected MenuAction(String name, Icon icon) {
+        super(name, icon);
         layerType = AllowedOnLayerType.ANY;
     }
 

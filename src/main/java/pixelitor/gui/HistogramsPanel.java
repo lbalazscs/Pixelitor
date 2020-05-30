@@ -32,9 +32,7 @@ import java.util.Objects;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.NORTH;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
+import static java.awt.Color.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 
@@ -42,17 +40,19 @@ import static javax.swing.BorderFactory.createTitledBorder;
  * The panel that shows the histograms
  */
 public class HistogramsPanel extends JPanel implements ViewActivationListener {
-    public static final HistogramsPanel INSTANCE = new HistogramsPanel();
+    private static final HistogramsPanel INSTANCE = new HistogramsPanel();
+
+    public static final int HISTOGRAM_RESOLUTION = 256;
+
     private static final String TYPE_LOGARITHMIC = "Logarithmic";
     private static final String TYPE_LINEAR = "Linear";
+    private final JComboBox<String> typeChooser;
 
     private final HistogramPainter red;
     private final HistogramPainter green;
     private final HistogramPainter blue;
-    private static final int HISTOGRAM_RESOLUTION = 256;
 
     private boolean logarithmic;
-    private final JComboBox<String> typeChooser;
 
     private HistogramsPanel() {
         setLayout(new BorderLayout());
@@ -64,7 +64,9 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         JPanel painters = new JPanel();
         painters.setLayout(new GridLayout(3, 1, 0, 0));
 
-        Dimension size = new Dimension(258, 306);
+        var size = new Dimension(
+            HISTOGRAM_RESOLUTION + 2,
+            3 * HistogramPainter.PREFERRED_HEIGHT);
         painters.setPreferredSize(size);
         painters.setMinimumSize(size);
 
@@ -72,16 +74,16 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         painters.add(green);
         painters.add(blue);
 
-        typeChooser = new JComboBox<>(
-                new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
+        typeChooser = new JComboBox<>(new String[]{TYPE_LINEAR, TYPE_LOGARITHMIC});
+        typeChooser.addActionListener(e -> typeChanged());
+
         JPanel northPanel = new JPanel(new FlowLayout(LEFT));
         northPanel.add(new JLabel("Type:"));
         northPanel.add(typeChooser);
         add(northPanel, NORTH);
-        typeChooser.addActionListener(e -> typeChanged());
 
         setBorder(createTitledBorder("Histograms"));
-        JScrollPane scrollPane = new JScrollPane(painters);
+        var scrollPane = new JScrollPane(painters);
         add(scrollPane, CENTER);
     }
 
@@ -90,12 +92,8 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         boolean isLogarithmicNow = newType.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            OpenImages.onActiveComp(this::updateFrom);
+            OpenImages.onActiveComp(this::instUpdateFrom);
         }
-    }
-
-    public boolean isShown() {
-        return getParent() != null;
     }
 
     @Override
@@ -108,10 +106,18 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        updateFrom(newView.getComp());
+        instUpdateFrom(newView.getComp());
     }
 
-    public void updateFrom(Composition comp) {
+    public static void updateFromActiveComp() {
+        OpenImages.onActiveComp(INSTANCE::instUpdateFrom);
+    }
+
+    public static void updateFrom(Composition comp) {
+        INSTANCE.instUpdateFrom(comp);
+    }
+
+    private void instUpdateFrom(Composition comp) {
         Objects.requireNonNull(comp);
         if (!isShown()) {
             return;
@@ -151,5 +157,13 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         green.updateData(greens);
         blue.updateData(blues);
         repaint();
+    }
+
+    public static HistogramsPanel get() {
+        return INSTANCE;
+    }
+
+    public static boolean isShown() {
+        return INSTANCE.getParent() != null;
     }
 }

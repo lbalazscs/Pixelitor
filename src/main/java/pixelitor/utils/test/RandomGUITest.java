@@ -91,13 +91,15 @@ public class RandomGUITest {
 
     // set to null to select random filters
 //    private static final Filter preferredFilter = new Magnify();
-//    private static final ParametrizedFilter preferredTweenFilter = (ParametrizedFilter) preferredFilter;
+//    private static final ParametrizedFilter preferredTweenFilter
+//      = (ParametrizedFilter) preferredFilter;
     private static final Filter preferredFilter = null;
     private static final ParametrizedFilter preferredTweenFilter = null;
 
     private static final boolean singleImageTest = false;
     private static final boolean noHideShow = true; // no view operations if set to true
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT
+        = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
 
     private static volatile boolean stopRunning = false;
 
@@ -132,7 +134,7 @@ public class RandomGUITest {
         running = true;
         startBounds = getWindowBounds();
 
-        PixelitorWindow.getInstance().setAlwaysOnTop(true);
+        PixelitorWindow.get().setAlwaysOnTop(true);
 
         new PixelitorEventListener().register();
         GlobalEvents.registerDebugMouseWatching(true);
@@ -141,12 +143,12 @@ public class RandomGUITest {
 
         // make sure it can be stopped by pressing a key
         GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
-                        stopRunning = true;
-                    }
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
+                    stopRunning = true;
                 }
+            }
         );
         stopRunning = false;
 
@@ -155,13 +157,13 @@ public class RandomGUITest {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
-                        EXIT_KEY_CHAR);
+                    EXIT_KEY_CHAR);
                 System.exit(1);
             }
         });
 
         System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
-                DATE_FORMAT.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
+            DATE_FORMAT.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
 
         Robot r = null;
         try {
@@ -180,7 +182,7 @@ public class RandomGUITest {
             randomCopy(); // ensure an image is on the clipboard
         }
 
-        SwingWorker<Void, Void> worker = createOneRoundSwingWorker(r, true);
+        SwingWorker<Void, Void> worker = createSwingWorker(r, true);
         worker.execute();
     }
 
@@ -195,7 +197,7 @@ public class RandomGUITest {
 
     public static void stop() {
         stopRunning = true;
-        var pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.get();
         // the window can be null if an exception is thrown at startup,
         // and we get here from the uncaught exception handler
         if (pw != null) {
@@ -203,63 +205,64 @@ public class RandomGUITest {
         }
     }
 
-    private static SwingWorker<Void, Void> createOneRoundSwingWorker(Robot r,
-                                                                     boolean forever) {
+    private static SwingWorker<Void, Void> createSwingWorker(Robot r,
+                                                             boolean forever) {
         return new SwingWorker<>() {
             @Override
             public Void doInBackground() {
-                int numTests = 8000;  // must be > 100
-                int onePercent = numTests / 100;
-
-                int max = forever ? Integer.MAX_VALUE : numTests;
-
-                for (int i = 0; i < max; i++) {
-                    printProgressPercentage(numTests, onePercent, i);
-
-                    if (!GUIUtils.appHasFocus()) {
-                        tryToRegainWindowFocus(3);
-
-                        if (!GUIUtils.appHasFocus()) {
-                            System.out.println("\nRandomGUITest app focus lost.");
-                            finishRunning();
-                            break;
-                        }
-                    }
-
-                    if (stopRunning) {
-                        System.out.println("\nRandomGUITest stopped.");
-                        finishRunning();
-                        break;
-                    }
-
-                    r.delay(Rnd.intInRange(100, 500));
-
-                    Runnable runnable = () -> {
-                        try {
-                            weightedCaller.callRandomAction();
-                            var comp = OpenImages.getActiveCompOpt().orElseThrow(() ->
-                                    new IllegalStateException("no active composition"));
-                            ConsistencyChecks.checkAll(
-                                    comp,
-                                    true);
-                        } catch (Throwable e) {
-                            Messages.showException(e);
-                        }
-                    };
-                    GUIUtils.invokeAndWait(runnable);
-                }
-                System.out.println("\nRandomGUITest.runTest FINISHED at " + LocalDateTime.now());
-                finishRunning();
-                Toolkit.getDefaultToolkit().beep();
-
-                return null;
-            } // end of doInBackground()
+                return backgroundRunner(forever, r);
+            }
         };
     }
 
-    private static void printProgressPercentage(int numTests, int onePercent, int i) {
-        if (i % onePercent == 0) {
-            int percent = 100 * i / numTests;
+    private static Void backgroundRunner(boolean forever, Robot r) {
+        int numTests = 8000;  // must be > 100
+        int onePercent = numTests / 100;
+
+        int max = forever ? Integer.MAX_VALUE : numTests;
+
+        for (int roundNr = 0; roundNr < max; roundNr++) {
+            printProgressPercentage(numTests, onePercent, roundNr);
+
+            if (!GUIUtils.appHasFocus()) {
+                tryToRegainWindowFocus(3);
+
+                if (!GUIUtils.appHasFocus()) {
+                    System.out.println("\nRandomGUITest app focus lost.");
+                    finishRunning();
+                    break;
+                }
+            }
+
+            if (stopRunning) {
+                System.out.println("\nRandomGUITest stopped.");
+                finishRunning();
+                break;
+            }
+
+            r.delay(Rnd.intInRange(100, 500));
+
+            GUIUtils.invokeAndWait(() -> {
+                try {
+                    weightedCaller.callRandomAction();
+                    var comp = OpenImages.getActiveCompOpt().orElseThrow(() ->
+                        new IllegalStateException("no active composition"));
+                    ConsistencyChecks.checkAll(comp, true);
+                } catch (Throwable e) {
+                    Messages.showException(e);
+                }
+            });
+        }
+        System.out.println("\nRandomGUITest.runTest FINISHED at " + LocalDateTime.now());
+        finishRunning();
+        Toolkit.getDefaultToolkit().beep();
+
+        return null;
+    }
+
+    private static void printProgressPercentage(int numTests, int onePercent, int roundNr) {
+        if (roundNr % onePercent == 0) {
+            int percent = 100 * roundNr / numTests;
             System.out.print(percent + "% ");
             if (PRINT_MEMORY) {
                 System.out.println(new MemoryInfo());
@@ -278,7 +281,7 @@ public class RandomGUITest {
 
         System.out.println("RandomGUITest: trying to regain window focus");
         GUIUtils.invokeAndWait(() -> {
-            var pw = PixelitorWindow.getInstance();
+            var pw = PixelitorWindow.get();
             pw.toFront();
             pw.repaint();
         });
@@ -290,7 +293,7 @@ public class RandomGUITest {
     }
 
     private static Rectangle getWindowBounds() {
-        return PixelitorWindow.getInstance().getBounds();
+        return PixelitorWindow.get().getBounds();
     }
 
     // generates a random point within the main window relative to the screen
@@ -300,7 +303,7 @@ public class RandomGUITest {
             // Window moved. Shouldn't happen, but as a workaround
             // restore it to the starting state
             System.out.println("Restoring the original window bounds " + startBounds);
-            PixelitorWindow.getInstance().setBounds(startBounds);
+            PixelitorWindow.get().setBounds(startBounds);
         }
 
         int safetyGapLeft = 10;
@@ -316,23 +319,23 @@ public class RandomGUITest {
         if (maxX <= 0 || maxY <= 0) {
             // probably the mouse was moved, and the window is too small
             System.out.printf("RandomGUITest::generateRandomPoint: " +
-                            "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
-                            "windowBounds = %s%n",
-                    minX, minY, maxX, maxY,
-                    windowBounds);
+                    "minX = %d, minY = %d, maxX = %d, maxY = %d, " +
+                    "windowBounds = %s%n",
+                minX, minY, maxX, maxY,
+                windowBounds);
             stop();
             throw new IllegalStateException("small window");
         }
 
         Point randomPoint = new Point(
-                Rnd.intInRange(minX, maxX),
-                Rnd.intInRange(minY, maxY));
+            Rnd.intInRange(minX, maxX),
+            Rnd.intInRange(minY, maxY));
         return randomPoint;
     }
 
     private static void finishRunning() {
-        WorkSpace.resetDefaults(PixelitorWindow.getInstance());
-        PixelitorWindow.getInstance().setAlwaysOnTop(false);
+        WorkSpace.resetDefaults(PixelitorWindow.get());
+        PixelitorWindow.get().setAlwaysOnTop(false);
         running = false;
     }
 
@@ -364,7 +367,7 @@ public class RandomGUITest {
         }
         String modifiers = doWithModifiers(r, () -> r.mouseMove(x, y));
         log(tool.getName() + " Tool" + stateInfo + " " + modifiers
-                + "drag to (" + x + ", " + y + ')');
+            + "drag to (" + x + ", " + y + ')');
     }
 
     private static void randomClick(Robot r) {
@@ -446,8 +449,8 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                    !(filter instanceof Fade) &&
-                            !(filter instanceof RandomFilter));
+                !(filter instanceof Fade) &&
+                    !(filter instanceof RandomFilter));
         } else {
             f = preferredFilter;
         }
@@ -471,14 +474,14 @@ public class RandomGUITest {
                 if (f instanceof ParametrizedFilter) {
                     ParamSet paramSet = ((ParametrizedFilter) f).getParamSet();
                     System.out.println(format(
-                            "RandomGUITest::randomFilter: filterName = %s, " +
-                                    "src.width = %d, src.height = %d, params = %s",
-                            filterName, src.getWidth(), src.getHeight(), paramSet));
+                        "RandomGUITest::randomFilter: filterName = %s, " +
+                            "src.width = %d, src.height = %d, params = %s",
+                        filterName, src.getWidth(), src.getHeight(), paramSet));
                 } else {
                     System.out.println(format(
-                            "RandomGUITest::randomFilter: filterName = %s, " +
-                                    "src.width = %d, src.height = %d",
-                            filterName, src.getWidth(), src.getHeight()));
+                        "RandomGUITest::randomFilter: filterName = %s, " +
+                            "src.width = %d, src.height = %d",
+                        filterName, src.getWidth(), src.getHeight()));
                 }
                 throw e;
             }
@@ -494,16 +497,16 @@ public class RandomGUITest {
                 f.startOn(dr, FILTER_WITHOUT_DIALOG);
             } catch (Throwable e) {
                 System.out.println(format(
-                        "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
-                        filterName, src.getWidth(), src.getHeight()));
+                    "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
+                    filterName, src.getWidth(), src.getHeight()));
                 throw e;
             }
         }
         long runCountAfter = Filter.runCount;
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
-                    "runCountBefore = " + runCountBefore
-                            + ", runCountAfter = " + runCountAfter);
+                "runCountBefore = " + runCountBefore
+                    + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -520,11 +523,9 @@ public class RandomGUITest {
 
         log("tween: " + filterName);
 
-        TweenAnimation animation = new TweenAnimation();
+        var animation = new TweenAnimation();
         animation.setFilter(filter);
-
-        Interpolation randomInterpolation = Rnd.chooseFrom(Interpolation.values());
-        animation.setInterpolation(randomInterpolation);
+        animation.setInterpolation(Rnd.chooseFrom(Interpolation.values()));
 
         ParamSet paramSet = filter.getParamSet();
         paramSet.randomize();
@@ -540,18 +541,18 @@ public class RandomGUITest {
         // run everything without showing a modal dialog
         dr.tweenCalculatingStarted();
 
-        PixelitorWindow busyCursorParent = PixelitorWindow.getInstance();
+        PixelitorWindow busyCursorParent = PixelitorWindow.get();
 
         try {
             filter.run(dr, PREVIEWING, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
-                    "Exception in random tween: filter name = %s, " +
-                            "srcWidth = %d, srcHeight = %d, " +
-                            "isMaskEditing = %b, params = %s",
-                    filterName, src.getWidth(), src.getHeight(),
-                    dr.isMaskEditing(), paramSet);
+                "Exception in random tween: filter name = %s, " +
+                    "srcWidth = %d, srcHeight = %d, " +
+                    "isMaskEditing = %b, params = %s",
+                filterName, src.getWidth(), src.getHeight(),
+                dr.isMaskEditing(), paramSet);
             throw new IllegalStateException(msg, e);
         }
 
@@ -560,8 +561,8 @@ public class RandomGUITest {
         long runCountAfter = Filter.runCount;
         if (runCountAfter != runCountBefore + 1) {
             throw new IllegalStateException(
-                    "runCountBefore = " + runCountBefore
-                            + ", runCountAfter = " + runCountAfter);
+                "runCountBefore = " + runCountBefore
+                    + ", runCountAfter = " + runCountAfter);
         }
     }
 
@@ -583,26 +584,26 @@ public class RandomGUITest {
     }
 
     private static final int[] keyEvents = {VK_1,
-            VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
-            // skip A, because it is the stop keystroke
-            VK_B, VK_C,
-            VK_D, VK_E, VK_F,
-            VK_G, VK_H, VK_I,
-            // skip J, because it is the exit keystroke
-            VK_K, VK_L,
-            VK_M, VK_N, VK_O,
-            VK_P, VK_Q, VK_R,
-            VK_S,
-            // skip T, because it brings up the text layer dialog
-            VK_U,
-            // skip V, because too much Move Tool consumes all the memory
-            VK_W,
-            VK_Z,
-            VK_X,
-            VK_Y,
-            VK_TAB,
-            VK_COMMA, VK_HOME,
-            VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN
+        VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
+        // skip A, because it is the stop keystroke
+        VK_B, VK_C,
+        VK_D, VK_E, VK_F,
+        VK_G, VK_H, VK_I,
+        // skip J, because it is the exit keystroke
+        VK_K, VK_L,
+        VK_M, VK_N, VK_O,
+        VK_P, VK_Q, VK_R,
+        VK_S,
+        // skip T, because it brings up the text layer dialog
+        VK_U,
+        // skip V, because too much Move Tool consumes all the memory
+        VK_W,
+        VK_Z,
+        VK_X,
+        VK_Y,
+        VK_TAB,
+        VK_COMMA, VK_HOME,
+        VK_RIGHT, VK_LEFT, VK_UP, VK_DOWN
     };
 
     private static void randomKey(Robot r) {
@@ -736,7 +737,7 @@ public class RandomGUITest {
 
     private static void randomizeToolSettings() {
         log("randomize tool settings");
-        ToolSettingsPanelContainer.getInstance().randomizeToolSettings();
+        ToolSettingsPanelContainer.get().randomizeToolSettings();
     }
 
     private static void arrangeWindows() {
@@ -805,7 +806,7 @@ public class RandomGUITest {
 
     private static void randomRotateFlip() {
         int r = rand.nextInt(5);
-        Action action = null;
+        Action action;
 
         switch (r) {
             case 0:
@@ -1025,9 +1026,9 @@ public class RandomGUITest {
         TextLayer textLayer = new TextLayer(comp);
         textLayer.randomizeSettings();
         new LayerAdder(comp)
-                .withHistory("New Random Text Layer")
-                .atPosition(ABOVE_ACTIVE)
-                .add(textLayer);
+            .withHistory("New Random Text Layer")
+            .atPosition(ABOVE_ACTIVE)
+            .add(textLayer);
         textLayer.setName(textLayer.getSettings().getText(), true);
     }
 
@@ -1043,11 +1044,11 @@ public class RandomGUITest {
     private static void randomNewAdjustmentLayer() {
         log("new adj layer");
         var comp = OpenImages.getActiveComp();
-        AdjustmentLayer adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
+        var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
         new LayerAdder(comp)
-                .withHistory("New Random Adj Layer")
-                .atPosition(ABOVE_ACTIVE)
-                .add(adjustmentLayer);
+            .withHistory("New Random Adj Layer")
+            .atPosition(ABOVE_ACTIVE)
+            .add(adjustmentLayer);
     }
 
     private static void randomSetLayerMaskEditMode() {
@@ -1126,7 +1127,7 @@ public class RandomGUITest {
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
         log(format("enlargeCanvas north = %d, east = %d, south = %d, west = %d",
-                north, east, south, west));
+            north, east, south, west));
         var comp = OpenImages.getActiveComp();
         new EnlargeCanvas(north, east, south, west).process(comp);
     }
@@ -1139,15 +1140,18 @@ public class RandomGUITest {
             comp.clearGuides();
             return;
         }
-        new Guides.Builder(comp.getView(), false).build(false, guides -> {
-            if (rand.nextBoolean()) {
-                log("add relative horizontal guide");
-                guides.addHorRelative(rand.nextFloat());
-            } else {
-                log("add relative vertical guide");
-                guides.addVerRelative(rand.nextFloat());
-            }
-        });
+        new Guides.Builder(comp.getView(), false)
+            .build(false, RandomGUITest::randomGuidesSetup);
+    }
+
+    private static void randomGuidesSetup(Guides guides) {
+        if (rand.nextBoolean()) {
+            log("add relative horizontal guide");
+            guides.addHorRelative(rand.nextFloat());
+        } else {
+            log("add relative vertical guide");
+            guides.addVerRelative(rand.nextFloat());
+        }
     }
 
     private static void reload(Robot r) {
@@ -1174,9 +1178,9 @@ public class RandomGUITest {
     }
 
     private static void dispatchKey(int keyCode, char keyChar, int mask) {
-        var pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.get();
         pw.dispatchEvent(new KeyEvent(pw, KEY_PRESSED,
-                System.currentTimeMillis(), mask, keyCode, keyChar));
+            System.currentTimeMillis(), mask, keyCode, keyChar));
     }
 
     private static void setupWeightedCaller(Robot r) {

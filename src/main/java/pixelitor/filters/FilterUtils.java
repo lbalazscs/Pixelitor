@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,11 +21,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static java.lang.String.format;
@@ -54,15 +50,15 @@ public class FilterUtils {
 
     public static FilterAction[] getAnimationFilters() {
         return allFilters.stream()
-                .filter(FilterAction::isAnimationFilter)
-                .toArray(FilterAction[]::new);
+            .filter(FilterAction::isAnimationFilter)
+            .toArray(FilterAction[]::new);
     }
 
     public static FilterAction[] getAnimationFiltersSorted() {
         return allFilters.stream()
-                .filter(FilterAction::isAnimationFilter)
-                .sorted(comparing(FilterAction::getListName))
-                .toArray(FilterAction[]::new);
+            .filter(FilterAction::isAnimationFilter)
+            .sorted(comparing(FilterAction::getListName))
+            .toArray(FilterAction[]::new);
     }
 
     public static Filter getRandomFilter(Predicate<Filter> conditions) {
@@ -79,8 +75,8 @@ public class FilterUtils {
     public static Filter[] getFiltersShuffled(Predicate<Filter> predicate) {
         // used only in test code, no problem if all filters are instantiated
         Filter[] filters = allFilters.stream()
-                .map(FilterAction::getFilter)
-                .filter(predicate).toArray(Filter[]::new);
+            .map(FilterAction::getFilter)
+            .filter(predicate).toArray(Filter[]::new);
 
         Collections.shuffle(Arrays.asList(filters));
         return filters;
@@ -91,7 +87,7 @@ public class FilterUtils {
             return;
         }
         FilterUtils.lastFilter = lastFilter;
-        RepeatLast.INSTANCE.setActionName("Repeat " + lastFilter.getName());
+        RepeatLast.INSTANCE.setText("Repeat " + lastFilter.getName());
     }
 
     public static Optional<Filter> getLastFilter() {

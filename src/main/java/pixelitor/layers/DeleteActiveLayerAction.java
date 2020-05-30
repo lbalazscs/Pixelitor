@@ -22,6 +22,7 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
@@ -29,19 +30,19 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that deletes the active layer from the active composition.
+ * An {@link Action} that deletes the active layer from the active composition.
  */
-public class DeleteActiveLayerAction extends AbstractAction
-        implements ViewActivationListener, GlobalLayerChangeListener {
+public class DeleteActiveLayerAction extends NamedAction
+    implements ViewActivationListener, ActiveCompositionListener {
 
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
         super("Delete Layer", Icons.load("delete_layer.gif"));
-        putValue(SHORT_DESCRIPTION, "Deletes the active layer.");
+        setToolTip("Deletes the active layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
-        Layers.addLayerChangeListener(this);
+        Layers.addCompositionListener(this);
     }
 
     @Override

@@ -50,13 +50,13 @@ import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
 import static java.lang.String.format;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The GUI component that shows a {@link Composition}
  */
-public class View extends JComponent
-        implements MouseListener, MouseMotionListener {
-
+public class View extends JComponent implements MouseListener, MouseMotionListener {
     private double scaling = 1.0f;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
@@ -64,7 +64,7 @@ public class View extends JComponent
     private ViewContainer viewContainer = null;
 
     private static final CheckerboardPainter checkerBoardPainter
-            = ImageUtils.createCheckerboardPainter();
+        = ImageUtils.createCheckerboardPainter();
 
     private LayersPanel layersPanel;
 
@@ -102,13 +102,13 @@ public class View extends JComponent
     }
 
     public void replaceJustReloadedComp(Composition newComp) {
-        assert EventQueue.isDispatchThread() : "called on " + Thread.currentThread().getName();
+        assert calledOnEDT() : threadInfo();
         assert newComp != comp;
 
         // do this before actually replacing so that the old comp is
         // deselected before its view is set to null
         History.add(new CompositionReplacedEdit(
-                "Reload", true, this, comp, newComp, null));
+            "Reload", this, comp, newComp, null, true));
         replaceComp(newComp, MaskViewMode.NORMAL, true);
 
         // the view was active when the reload started, but since the
@@ -118,8 +118,8 @@ public class View extends JComponent
         }
 
         String msg = format(
-                "<html>The image <b>%s</b> was reloaded from the file <b>%s</b>.",
-                newComp.getName(), newComp.getFile().getAbsolutePath());
+            "<html>The image <b>%s</b> was reloaded from the file <b>%s</b>.",
+            newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
     }
 
@@ -148,7 +148,7 @@ public class View extends JComponent
 
         oldComp.setView(null);
 
-        newMaskViewMode.activate(this, newComp.getActiveLayer(), "comp replaced");
+        newMaskViewMode.activate(this, newComp.getActiveLayer());
         repaintNavigator(true);
 
         Tools.currentTool.compReplaced(oldComp, newComp, reloaded);
@@ -156,7 +156,7 @@ public class View extends JComponent
         revalidate(); // make sure the scrollbars are OK if the new comp has a different size
         canvasCoSizeChanged();
         repaint();
-        HistogramsPanel.INSTANCE.updateFrom(newComp);
+        HistogramsPanel.updateFrom(newComp);
     }
 
     private void addListeners() {
@@ -244,7 +244,7 @@ public class View extends JComponent
         if (viewContainer != null) {
             // this will also cause the calling of ImageComponents.imageClosed via
             // ImageFrame.internalFrameClosed
-            viewContainer.dispose();
+            viewContainer.close();
         }
         comp.dispose();
     }
@@ -320,8 +320,8 @@ public class View extends JComponent
         int canvasCoHeight = canvas.getCoHeight();
 
         Rectangle canvasClip = setVisibleCanvasClip(g,
-                canvasStartX, canvasStartY,
-                canvasCoWidth, canvasCoHeight);
+            canvasStartX, canvasStartY,
+            canvasCoWidth, canvasCoHeight);
 
         // make a copy of the transform object
         var componentTransform = g2.getTransform();
@@ -345,7 +345,7 @@ public class View extends JComponent
             mask.paintLayerOnGraphics(g2, true);
         } else {
             BufferedImage compositeImage = comp.getCompositeImage();
-            ImageUtils.drawImageWithClipping(g2, compositeImage);
+            g2.drawImage(compositeImage, 0, 0, null);
 
             if (maskViewMode.showRuby()) {
                 LayerMask mask = comp.getActiveLayer().getMask();
@@ -440,8 +440,9 @@ public class View extends JComponent
         // if there are scollbars, this is the visible area
         Rectangle clipBounds = g.getClipBounds();
 
-        Rectangle imageRect = new Rectangle((int) canvasStartX, (int) canvasStartY,
-                maxWidth, maxHeight);
+        Rectangle imageRect = new Rectangle(
+            (int) canvasStartX, (int) canvasStartY,
+            maxWidth, maxHeight);
 
         // now we are definitely not drawing neither outside
         // the canvas nor outside the scrollbars visible area
@@ -484,8 +485,7 @@ public class View extends JComponent
         double repWidth = endX - startX;
         double repHeight = endY - startY;
 
-        repaint((int) startX, (int) startY,
-                (int) repWidth, (int) repHeight);
+        repaint((int) startX, (int) startY, (int) repWidth, (int) repHeight);
     }
 
     /**
@@ -580,7 +580,7 @@ public class View extends JComponent
         }
 
         if (isActive()) {
-            ZoomControl.INSTANCE.setToNewZoom(zoomLevel);
+            ZoomControl.get().changeZoom(zoomLevel);
             zoomLevel.getMenuItem().setSelected(true);
         }
     }
@@ -612,10 +612,10 @@ public class View extends JComponent
         zoomOrigin = fromImageToComponentSpace(imOrigin, newZoom);
 
         Rectangle areaThatShouldBeVisible = new Rectangle(
-                zoomOrigin.x - visiblePart.width / 2,
-                zoomOrigin.y - visiblePart.height / 2,
-                visiblePart.width,
-                visiblePart.height
+            zoomOrigin.x - visiblePart.width / 2,
+            zoomOrigin.y - visiblePart.height / 2,
+            visiblePart.width,
+            visiblePart.height
         );
 
         scrollRectToVisible(areaThatShouldBeVisible);
@@ -659,7 +659,7 @@ public class View extends JComponent
         // ensure this component is at least as big as the canvas
         if (myWidth < canvasCoWidth || myHeight < canvasCoHeight) {
             setSize(Math.max(myWidth, canvasCoWidth),
-                    Math.max(myHeight, canvasCoHeight));
+                Math.max(myHeight, canvasCoHeight));
 
             // setSize will call this method again after setting the size
             return;
@@ -698,47 +698,47 @@ public class View extends JComponent
 
     public Point2D componentToImageSpace(Point2D co) {
         return new Point2D.Double(
-                componentXToImageSpace(co.getX()),
-                componentYToImageSpace(co.getY()));
+            componentXToImageSpace(co.getX()),
+            componentYToImageSpace(co.getY()));
     }
 
     public Point2D imageToComponentSpace(Point2D im) {
         return new Point2D.Double(
-                imageXToComponentSpace(im.getX()),
-                imageYToComponentSpace(im.getY()));
+            imageXToComponentSpace(im.getX()),
+            imageYToComponentSpace(im.getY()));
     }
 
     private Point fromComponentToImageSpace(Point co, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
-                (int) ((co.x - canvasStartX) / zoomViewScale),
-                (int) ((co.y - canvasStartY) / zoomViewScale)
+            (int) ((co.x - canvasStartX) / zoomViewScale),
+            (int) ((co.y - canvasStartY) / zoomViewScale)
         );
     }
 
     private Point fromImageToComponentSpace(Point im, ZoomLevel zoom) {
         double zoomViewScale = zoom.getViewScale();
         return new Point(
-                (int) (canvasStartX + im.x * zoomViewScale),
-                (int) (canvasStartY + im.y * zoomViewScale)
+            (int) (canvasStartX + im.x * zoomViewScale),
+            (int) (canvasStartY + im.y * zoomViewScale)
         );
     }
 
     public Rectangle2D componentToImageSpace(Rectangle2D co) {
         return new Rectangle.Double(
-                componentXToImageSpace(co.getX()),
-                componentYToImageSpace(co.getY()),
-                co.getWidth() / scaling,
-                co.getHeight() / scaling
+            componentXToImageSpace(co.getX()),
+            componentYToImageSpace(co.getY()),
+            co.getWidth() / scaling,
+            co.getHeight() / scaling
         );
     }
 
     public Rectangle imageToComponentSpace(Rectangle2D im) {
         return new Rectangle(
-                (int) imageXToComponentSpace(im.getX()),
-                (int) imageYToComponentSpace(im.getY()),
-                (int) (im.getWidth() * scaling),
-                (int) (im.getHeight() * scaling)
+            (int) imageXToComponentSpace(im.getX()),
+            (int) imageYToComponentSpace(im.getY()),
+            (int) (im.getWidth() * scaling),
+            (int) (im.getHeight() * scaling)
         );
     }
 
@@ -775,7 +775,7 @@ public class View extends JComponent
     }
 
     public void addLayerToGUI(Layer newLayer, int newLayerIndex) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         // can be casted outside unit tests
         LayerButton layerButton = (LayerButton) newLayer.createUI();
@@ -823,7 +823,7 @@ public class View extends JComponent
     }
 
     public void repaintNavigator(boolean viewSizeChanged) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         if (navigator != null) {
             if (viewSizeChanged) {
@@ -833,7 +833,7 @@ public class View extends JComponent
                     if (navigator != null) { // check again for safety
                         // will also repaint
                         navigator.recalculateSize(this, false,
-                                true, false);
+                            true, false);
                     }
                 });
             } else {
@@ -850,8 +850,8 @@ public class View extends JComponent
     @VisibleForTesting
     public Rectangle getVisibleCanvasBoundsOnScreen() {
         Rectangle canvasRelativeToView = new Rectangle(
-                (int) canvasStartX, (int) canvasStartY,
-                canvas.getCoWidth(), canvas.getCoHeight());
+            (int) canvasStartX, (int) canvasStartY,
+            canvas.getCoWidth(), canvas.getCoHeight());
 
         // take scrollbars into account
         Rectangle retVal = canvasRelativeToView.intersection(getVisiblePart());

@@ -19,10 +19,10 @@ package pixelitor.layers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import static java.awt.event.ActionEvent.CTRL_MASK;
@@ -30,14 +30,13 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 /**
  * An Action that adds a new layer to the active composition
  */
-public class AddNewLayerAction extends AbstractAction implements ViewActivationListener {
+public class AddNewLayerAction extends NamedAction implements ViewActivationListener {
     public static final AddNewLayerAction INSTANCE = new AddNewLayerAction();
 
     private AddNewLayerAction() {
         super("Add New Layer", Icons.load("add_layer.gif"));
-        putValue(SHORT_DESCRIPTION,
-                "<html>Adds a new transparent image layer." +
-                        "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
+        setToolTip("<html>Adds a new transparent image layer." +
+            "<br><b>Ctrl-click</b> to add the new layer bellow the active one.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }

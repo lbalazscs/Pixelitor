@@ -19,30 +19,17 @@ package pixelitor.io;
 
 import pd.GifDecoder;
 import pixelitor.gui.utils.ThumbInfo;
-import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
-import pixelitor.utils.TrackerReadProgressListener;
-import pixelitor.utils.TrackerWriteProgressListener;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriter;
+import javax.imageio.*;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.Iterator;
 
 import static pixelitor.utils.ImageUtils.createThumbnail;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
  * Utility methods like in ImageIO, but with progress tracking
@@ -55,10 +42,11 @@ public class TrackedIO {
     public static void write(BufferedImage img,
                              String formatName,
                              File file) throws IOException {
-        ProgressTracker pt = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+        var tracker = new StatusBarProgressTracker(
+            "Writing " + file.getName(), 100);
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
             if (ios != null) {
-                writeToIOS(img, ios, formatName, pt);
+                writeToIOS(img, ios, formatName, tracker);
             } else {
                 throwNoIOSErrorFor(file);
             }
@@ -66,19 +54,19 @@ public class TrackedIO {
     }
 
     public static void throwNoIOSErrorFor(File file) throws IOException {
-        // sadly createImageOutputStream swallows the original IO exception
+        // createImageOutputStream swallows the original IO exception
         // for IO errors like "Access is denied" and returns null,
-        // so we can only throw a generic exception
+        // therefore throw a generic exception
         throw new IOException("Could not save to " + file.getPath());
     }
 
     public static void writeToStream(BufferedImage img,
                                      OutputStream os,
                                      String formatName,
-                                     ProgressTracker pt) throws IOException {
+                                     ProgressTracker tracker) throws IOException {
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
             if (ios != null) {
-                writeToIOS(img, ios, formatName, pt);
+                writeToIOS(img, ios, formatName, tracker);
             } else {
                 throw new IOException("could not open ImageOutputStream");
             }
@@ -88,8 +76,8 @@ public class TrackedIO {
     private static void writeToIOS(BufferedImage img,
                                    ImageOutputStream ios,
                                    String formatName,
-                                   ProgressTracker pt) throws IOException {
-        assert !EventQueue.isDispatchThread();
+                                   ProgressTracker tracker) throws IOException {
+        assert calledOutsideEDT() : "on EDT";
         assert ios != null;
 
         ImageTypeSpecifier type =
@@ -102,16 +90,26 @@ public class TrackedIO {
         ImageWriter writer = writers.next();
         try {
             writer.setOutput(ios);
-            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(pt));
+            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
             writer.write(img);
         } finally {
             writer.dispose();
         }
     }
 
+    /**
+     * Reads an image from a file, and throws only runtime exceptions
+     */
     public static BufferedImage uncheckedRead(File file) {
         try {
-            return read(file);
+            BufferedImage image = read(file);
+            // For some decoding problems (ImageIO bugs?) we get an
+            // exception here, for others we get a null image.
+            // In both cases, throw a runtime exception
+            if (image == null) {
+                throw new DecodingException(file);
+            }
+            return image;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -130,10 +128,10 @@ public class TrackedIO {
     // Apache Imaging also has a fix, but they have not released yet a version with it
     // see https://issues.apache.org/jira/browse/IMAGING-130
     private static BufferedImage alternativeGifRead(File file) {
-        BufferedImage img = null;
+        BufferedImage img;
         try {
-            FileInputStream data = new FileInputStream(file);
-            GifDecoder.GifImage gif = GifDecoder.read(data);
+            var dataStream = new FileInputStream(file);
+            GifDecoder.GifImage gif = GifDecoder.read(dataStream);
             img = gif.getFrame(0);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -143,28 +141,28 @@ public class TrackedIO {
     }
 
     public static BufferedImage read(File file) throws IOException {
-        ProgressTracker pt = new StatusBarProgressTracker(
+        var tracker = new StatusBarProgressTracker(
             "Reading " + file.getName(), 100);
 
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
-            image = readFromIIS(iis, pt);
+            image = readFromIIS(iis, tracker);
         }
         return image;
     }
 
     public static BufferedImage readFromStream(InputStream is,
-                                               ProgressTracker pt) throws IOException {
+                                               ProgressTracker tracker) throws IOException {
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(is)) {
-            image = readFromIIS(iis, pt);
+            image = readFromIIS(iis, tracker);
         }
         return image;
     }
 
     public static BufferedImage readFromIIS(ImageInputStream iis,
-                                            ProgressTracker pt) throws IOException {
-        assert !EventQueue.isDispatchThread();
+                                            ProgressTracker tracker) throws IOException {
+        assert calledOutsideEDT() : "on EDT";
 
         BufferedImage image;
         Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
@@ -178,7 +176,7 @@ public class TrackedIO {
         try {
             reader.setInput(iis);
 
-            reader.addIIOReadProgressListener(new TrackerReadProgressListener(pt));
+            reader.addIIOReadProgressListener(new TrackerReadProgressListener(tracker));
 
             ImageReadParam param = reader.getDefaultReadParam();
             image = reader.read(0, param);
@@ -199,7 +197,7 @@ public class TrackedIO {
     public static ThumbInfo readSubsampledThumb(File file,
                                                 int thumbMaxWidth,
                                                 int thumbMaxHeight,
-                                                ProgressTracker pt) throws IOException {
+                                                ProgressTracker tracker) throws IOException {
         ThumbInfo thumbInfo;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
@@ -213,9 +211,10 @@ public class TrackedIO {
             try {
                 reader.setInput(iis, true);
 
-                if (pt != null) {
+                if (tracker != null) {
                     // register the progress tracking
-                    reader.addIIOReadProgressListener(new TrackerReadProgressListener(pt));
+                    reader.addIIOReadProgressListener(
+                        new TrackerReadProgressListener(tracker));
                 }
 
                 // Once the reader has its input source set,

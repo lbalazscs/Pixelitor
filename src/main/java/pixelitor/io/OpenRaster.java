@@ -29,7 +29,6 @@ import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.utils.*;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.image.BufferedImage;
@@ -62,14 +61,14 @@ public class OpenRaster {
     }
 
     public static void write(Composition comp, File outFile, boolean addMergedImage) throws IOException {
-        ProgressTracker pt = new StatusBarProgressTracker("Writing " + outFile.getName(), 100);
+        var mainTracker = new StatusBarProgressTracker("Writing " + outFile.getName(), 100);
 
-        FileOutputStream fos = new FileOutputStream(outFile);
-        ZipOutputStream zos = new ZipOutputStream(fos);
+        var fos = new FileOutputStream(outFile);
+        var zos = new ZipOutputStream(fos);
 
         String stackXML = format("<?xml version='1.0' encoding='UTF-8'?>\n" +
-                "<image w=\"%d\" h=\"%d\">\n" +
-                "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
+            "<image w=\"%d\" h=\"%d\">\n" +
+            "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
         int numImageLayers = comp.getNumImageLayers();
@@ -83,15 +82,15 @@ public class OpenRaster {
             Layer layer = comp.getLayer(i);
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
-                stackXML += writeLayer(imageLayer, i, zos, spt);
+                var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+                stackXML += writeLayer(imageLayer, i, zos, subTracker);
             }
         }
 
         if (addMergedImage) {
             zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
-            ProgressTracker subTaskTracker = new SubtaskProgressTracker(workRatio, pt);
-            BufferedImage img = comp.getCompositeImage();
+            var subTaskTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+            var img = comp.getCompositeImage();
             TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
             zos.closeEntry();
         }
@@ -109,7 +108,7 @@ public class OpenRaster {
         zos.closeEntry();
         zos.close();
 
-        pt.finished();
+        mainTracker.finished();
     }
 
     private static String writeLayer(ImageLayer layer,
@@ -117,16 +116,17 @@ public class OpenRaster {
                                      ZipOutputStream zos,
                                      ProgressTracker pt) throws IOException {
         String stackXML = format(Locale.ENGLISH,
-                "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
-                        "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
-                layer.getName(),
-                layer.getVisibilityAsORAString(),
-                layer.getBlendingMode().toSVGName(),
-                layer.getOpacity(),
-                layerIndex,
-                layer.getTx(),
-                layer.getTy());
-        ZipEntry entry = new ZipEntry(format("data/%d.png", layerIndex));
+            "<layer name=\"%s\" visibility=\"%s\" composite-op=\"%s\" " +
+                "opacity=\"%f\" src=\"data/%d.png\" x=\"%d\" y=\"%d\"/>\n",
+            layer.getName(),
+            layer.getVisibilityAsORAString(),
+            layer.getBlendingMode().toSVGName(),
+            layer.getOpacity(),
+            layerIndex,
+            layer.getTx(),
+            layer.getTy());
+
+        var entry = new ZipEntry(format("data/%d.png", layerIndex));
         zos.putNextEntry(entry);
         BufferedImage image = layer.getImage();
 
@@ -138,7 +138,7 @@ public class OpenRaster {
 
     public static Composition read(File file) throws IOException, ParserConfigurationException, SAXException {
         String stackXML = null;
-        ProgressTracker pt = new StatusBarProgressTracker("Reading " + file.getName(), 100);
+        var mainTracker = new StatusBarProgressTracker("Reading " + file.getName(), 100);
         Map<String, BufferedImage> images = new HashMap<>();
         try (ZipFile zipFile = new ZipFile(file)) {
             // first iterate to count the image files...
@@ -146,7 +146,7 @@ public class OpenRaster {
             double workRatio = 1.0 / numImageFiles;
 
             // ...then iterate again to actually read the files
-            Enumeration<? extends ZipEntry> fileEntries = zipFile.entries();
+            var fileEntries = zipFile.entries();
             while (fileEntries.hasMoreElements()) {
                 ZipEntry entry = fileEntries.nextElement();
                 String name = entry.getName();
@@ -156,9 +156,9 @@ public class OpenRaster {
                 } else if (name.equalsIgnoreCase(MERGED_IMAGE_NAME)) {
                     // no need for that
                 } else if (FileUtils.hasPNGExtension(name)) {
-                    ProgressTracker spt = new SubtaskProgressTracker(workRatio, pt);
-                    InputStream stream = zipFile.getInputStream(entry);
-                    BufferedImage image = TrackedIO.readFromStream(stream, spt);
+                    var subTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+                    var stream = zipFile.getInputStream(entry);
+                    var image = TrackedIO.readFromStream(stream, subTracker);
                     images.put(name, image);
                 }
             }
@@ -210,7 +210,7 @@ public class OpenRaster {
             int ty = Utils.parseInt(layerY, 0);
             // TODO assuming that there is no layer mask
             ImageLayer layer = new ImageLayer(comp, image, layerName,
-                    null, tx, ty);
+                null, tx, ty);
 
             layer.setVisible(visibility, false);
             BlendingMode blendingMode = BlendingMode.fromSVGName(layerBlendingMode);
@@ -222,7 +222,7 @@ public class OpenRaster {
             comp.addLayerInInitMode(layer);
         }
 
-        pt.finished();
+        mainTracker.finished();
 
         return comp;
     }
@@ -241,7 +241,7 @@ public class OpenRaster {
     }
 
     private static Document loadXMLFromString(String xml)
-            throws ParserConfigurationException, IOException, SAXException {
+        throws ParserConfigurationException, IOException, SAXException {
 
         if (xml.startsWith("\uFEFF")) { // starts with UTF BOM character
             // paint.net exported xml files start with this
@@ -249,10 +249,10 @@ public class OpenRaster {
             xml = xml.substring(1);
         }
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xml));
-        return builder.parse(is);
+        var factory = DocumentBuilderFactory.newInstance();
+        var builder = factory.newDocumentBuilder();
+        var inputSource = new InputSource(new StringReader(xml));
+        return builder.parse(inputSource);
     }
 
     private static String extractString(InputStream is) {

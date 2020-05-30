@@ -31,25 +31,23 @@ import pixelitor.Composition;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
-import pixelitor.io.IOThread;
+import pixelitor.io.IOTasks;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
 
 import javax.swing.*;
-import java.awt.EventQueue;
 import java.io.File;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
  * A utility class for running Pixelitor with assertj-swing based tests
@@ -58,9 +56,9 @@ public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
     public static final int ROBOT_DELAY_SLOW = 300; // millis
     private static final DateTimeFormatter DATE_FORMAT_HM =
-            DateTimeFormatter.ofPattern("HH:mm");
+        DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMAT_HMS =
-            DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final Robot robot;
     private final Mouse mouse;
@@ -75,20 +73,20 @@ public class AppRunner {
         robot = BasicRobot.robotWithNewAwtHierarchy();
 
         String[] paths = Stream.of(fileNames)
-                .map(fileName -> new File(inputDir, fileName).getPath())
-                .toArray(String[]::new);
+            .map(fileName -> new File(inputDir, fileName).getPath())
+            .toArray(String[]::new);
 
         ApplicationLauncher
-                .application("pixelitor.Pixelitor")
-                .withArgs(paths)
-                .start();
+            .application("pixelitor.Pixelitor")
+            .withArgs(paths)
+            .start();
 
         new PixelitorEventListener().register();
         saveNormalSettings();
 
         pw = WindowFinder.findFrame(PixelitorWindow.class)
-                .withTimeout(30, SECONDS)
-                .using(robot);
+            .withTimeout(30, SECONDS)
+            .using(robot);
         mouse = new Mouse(pw, robot);
         keyboard = new Keyboard(pw, robot, this);
         layersContainer = new LayersContainerFixture(robot);
@@ -124,7 +122,7 @@ public class AppRunner {
     }
 
     public void runTests(Runnable tests) {
-        assert !EventQueue.isDispatchThread();
+        assert calledOutsideEDT() : "on EDT";
 
         try {
             tests.run();
@@ -192,15 +190,15 @@ public class AppRunner {
         openDialog.approve();
 
         // wait a bit to make sure that the async open completed
-        waitForIO();
+        IOTasks.waitForIdle();
         Utils.sleep(1, SECONDS);
         mouse.recalcCanvasBounds();
 
         if (EDT.active(Composition::isDirty)) {
             String compName = EDT.active(Composition::getName);
             throw new AssertionError(
-                    format("New comp '%s', loaded from %s is dirty",
-                            compName, fileName));
+                format("New comp '%s', loaded from %s is dirty",
+                    compName, fileName));
         }
     }
 
@@ -219,11 +217,11 @@ public class AppRunner {
 
         // even if the dialog is not visible, the
         // async saving of the last file might be still running
-        boolean stillWriting = EDT.call(IOThread::isBusyWriting);
+        boolean stillWriting = EDT.call(IOTasks::isBusyWriting);
         while (stillWriting) {
             System.out.println("waiting 1s for the IO thread...");
             Utils.sleep(1, SECONDS);
-            stillWriting = EDT.call(IOThread::isBusyWriting);
+            stillWriting = EDT.call(IOTasks::isBusyWriting);
         }
     }
 
@@ -255,8 +253,8 @@ public class AppRunner {
         var dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
-                .deleteText()
-                .enterText(String.valueOf(targetWidth));
+            .deleteText()
+            .enterText(String.valueOf(targetWidth));
 
         // no need to also set the height, because
         // constrain proportions is checked by default
@@ -272,15 +270,15 @@ public class AppRunner {
         var dialog = findDialogByTitle("Resize");
 
         dialog.textBox("widthTF")
-                .deleteText()
-                .enterText(String.valueOf(targetWidth));
+            .deleteText()
+            .enterText(String.valueOf(targetWidth));
 
         // disable constrain proportions
         dialog.checkBox().uncheck();
 
         dialog.textBox("heightTF")
-                .deleteText()
-                .enterText(String.valueOf(targetHeight));
+            .deleteText()
+            .enterText(String.valueOf(targetHeight));
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -318,8 +316,8 @@ public class AppRunner {
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
         findPopupMenuFixtureByText(popupMenu, text)
-                .requireEnabled()
-                .click();
+            .requireEnabled()
+            .click();
     }
 
     void expectAndCloseErrorDialog() {
@@ -409,89 +407,73 @@ public class AppRunner {
 
     static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
         var menuItemFixture = popupMenu.menuItem(
-                new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
-                    @Override
-                    protected boolean isMatching(JMenuItem menuItem) {
-                        if (!menuItem.isShowing()) {
-                            return false; // not interested in menuItems that are not currently displayed
-                        }
-                        String menuItemText = menuItem.getText();
-                        if (menuItemText == null) {
-                            menuItemText = "";
-                        }
-                        return menuItemText.equals(text);
+            new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
+                @Override
+                protected boolean isMatching(JMenuItem menuItem) {
+                    if (!menuItem.isShowing()) {
+                        return false; // not interested in menuItems that are not currently displayed
                     }
+                    String menuItemText = menuItem.getText();
+                    if (menuItemText == null) {
+                        menuItemText = "";
+                    }
+                    return menuItemText.equals(text);
+                }
 
-                    @Override
-                    public String toString() {
-                        return "[Popup menu item Matcher, text = " + text + "]";
-                    }
-                });
+                @Override
+                public String toString() {
+                    return "[Popup menu item Matcher, text = " + text + "]";
+                }
+            });
 
         return menuItemFixture;
     }
 
     static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
         return container.button(
-                new GenericTypeMatcher<>(JButton.class) {
-                    @Override
-                    protected boolean isMatching(JButton button) {
-                        if (!button.isShowing()) {
-                            return false; // not interested in buttons that are not currently displayed
-                        }
-                        Action action = button.getAction();
-                        if (action == null) {
-                            return false;
-                        }
-                        String buttonActionName = (String) action.getValue(Action.NAME);
-                        return actionName.equals(buttonActionName);
+            new GenericTypeMatcher<>(JButton.class) {
+                @Override
+                protected boolean isMatching(JButton button) {
+                    if (!button.isShowing()) {
+                        return false; // not interested in buttons that are not currently displayed
                     }
+                    Action action = button.getAction();
+                    if (action == null) {
+                        return false;
+                    }
+                    String buttonActionName = (String) action.getValue(Action.NAME);
+                    return actionName.equals(buttonActionName);
+                }
 
-                    @Override
-                    public String toString() {
-                        return "[Button Action Name Matcher, action name = " + actionName + "]";
-                    }
-                });
+                @Override
+                public String toString() {
+                    return "[Button Action Name Matcher, action name = " + actionName + "]";
+                }
+            });
     }
 
     static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
         var buttonFixture = container.button(
-                new GenericTypeMatcher<>(JButton.class) {
-                    @Override
-                    protected boolean isMatching(JButton button) {
-                        if (!button.isShowing()) {
-                            return false; // not interested in buttons that are not currently displayed
-                        }
-                        String buttonToolTip = button.getToolTipText();
-                        if (buttonToolTip == null) {
-                            buttonToolTip = "";
-                        }
-                        return buttonToolTip.equals(toolTip);
+            new GenericTypeMatcher<>(JButton.class) {
+                @Override
+                protected boolean isMatching(JButton button) {
+                    if (!button.isShowing()) {
+                        return false; // not interested in buttons that are not currently displayed
                     }
+                    String buttonToolTip = button.getToolTipText();
+                    if (buttonToolTip == null) {
+                        buttonToolTip = "";
+                    }
+                    return buttonToolTip.equals(toolTip);
+                }
 
-                    @Override
-                    public String toString() {
-                        return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
-                    }
-                });
+                @Override
+                public String toString() {
+                    return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
+                }
+            });
 
         return buttonFixture;
-    }
-
-    // waits until the IO thread not busy
-    public static void waitForIO() {
-        // make sure that the task started executing
-        Utils.sleep(500, MILLISECONDS);
-
-        // waiting until an empty task finishes works
-        // because the IO thread pool has a single thread
-        var executor = (ExecutorService) IOThread.getExecutor();
-        var future = executor.submit(() -> {});
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
@@ -500,8 +482,8 @@ public class AppRunner {
 
         for (String buttonText : extraButtonsToClick) {
             findButtonByText(dialog, buttonText)
-                    .requireEnabled()
-                    .click();
+                .requireEnabled()
+                .click();
         }
 
         if (randomize == Randomize.YES) {

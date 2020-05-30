@@ -23,23 +23,7 @@ import pixelitor.utils.Lazy;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicButtonUI;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createEtchedBorder;
 
 /**
  * A user interface ({@link ImageAreaUI} implementation)
@@ -64,20 +48,20 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         }
         int selectedIndex = getSelectedIndex();
         if (selectedIndex != -1) { // it is -1 if all tabs have been closed
-            ImageTab tab = (ImageTab) getComponentAt(selectedIndex);
+            TabViewContainer tab = (TabViewContainer) getComponentAt(selectedIndex);
             tab.activated();
         }
     }
 
     @Override
     public void activateView(View view) {
-        ImageTab tab = (ImageTab) view.getViewContainer();
+        TabViewContainer tab = (TabViewContainer) view.getViewContainer();
         setSelectedIndex(indexOfComponent(tab));
     }
 
     @Override
     public void addNewView(View view) {
-        ImageTab tab = new ImageTab(view, this);
+        TabViewContainer tab = new TabViewContainer(view, this);
         view.setViewContainer(tab);
 
         int myIndex = getTabCount();
@@ -94,20 +78,20 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         tab.activated();
     }
 
-    private static void warnAndCloseTab(ImageTab tab) {
+    public static void warnAndCloseTab(TabViewContainer tab) {
         if (!RandomGUITest.isRunning()) {
             // this will call closeTab
             OpenImages.warnAndClose(tab.getView());
         }
     }
 
-    public void closeTab(ImageTab tab) {
+    public void closeTab(TabViewContainer tab) {
         remove(indexOfComponent(tab));
         View view = tab.getView();
         OpenImages.imageClosed(view);
     }
 
-    public void selectTab(ImageTab tab) {
+    public void selectTab(TabViewContainer tab) {
         setSelectedIndex(indexOfComponent(tab));
     }
 
@@ -157,105 +141,4 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         return tabPlacementMenu.get();
     }
 
-    static class TabTitleRenderer extends JPanel {
-        private final JLabel titleLabel;
-
-        TabTitleRenderer(String title, ImageTab tab) {
-            super(new GridBagLayout());
-            setOpaque(false);
-            titleLabel = new JLabel(title);
-            titleLabel.setBorder(createEmptyBorder(0, 0, 0, 5));
-
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            gbc.weightx = 1;
-            add(titleLabel, gbc);
-
-            gbc.gridx++;
-            gbc.weightx = 0;
-            add(new CloseTabButton(tab), gbc);
-
-            addRightClickTabPopup(tab);
-        }
-
-        private void addRightClickTabPopup(ImageTab tab) {
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        tab.showPopup(e);
-                    } else {
-                        // TODO why is this necessary, why adding a mouse listener
-                        // stops the tab selection from working???
-                        tab.select();
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        tab.showPopup(e);
-                    }
-                }
-            });
-        }
-
-        public void setTitle(String newTitle) {
-            if (!titleLabel.getText().equals(newTitle)) {
-                titleLabel.setText(newTitle);
-            }
-        }
-    }
-
-    static class CloseTabButton extends JButton {
-        private static final MouseListener buttonMouseListener = new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                CloseTabButton button = (CloseTabButton) e.getComponent();
-                button.setBorderPainted(true);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                CloseTabButton button = (CloseTabButton) e.getComponent();
-                button.setBorderPainted(false);
-            }
-        };
-        static final int MARGIN = 5;
-        static final int SIZE = 17;
-
-        CloseTabButton(ImageTab tab) {
-            setPreferredSize(new Dimension(SIZE, SIZE));
-            setToolTipText("Close this tab");
-            setUI(new BasicButtonUI());
-            setContentAreaFilled(false);
-            setFocusable(false);
-            setBorder(createEtchedBorder());
-            setBorderPainted(false);
-            addMouseListener(buttonMouseListener);
-            setRolloverEnabled(true);
-            addActionListener(e -> warnAndCloseTab(tab));
-        }
-
-        @Override
-        public void updateUI() {
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-            g2.setStroke(new BasicStroke(2));
-            if (getModel().isRollover()) {
-                g2.setColor(Color.RED);
-            } else {
-                g2.setColor(Color.BLACK);
-            }
-            g2.drawLine(MARGIN, MARGIN, SIZE - MARGIN - 1, SIZE - MARGIN - 1);
-            g2.drawLine(SIZE - MARGIN - 1, MARGIN, MARGIN, SIZE - MARGIN - 1);
-            g2.dispose();
-        }
-    }
 }

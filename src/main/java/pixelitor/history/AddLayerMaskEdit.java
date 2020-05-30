@@ -58,7 +58,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         layer.addConfiguredMask(layerMask);
 
         assert newMode != null;
-        newMode.activate(comp, layer, "add mask redone");
+        newMode.activate(comp, layer);
     }
 
     @Override

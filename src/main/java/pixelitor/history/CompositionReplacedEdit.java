@@ -44,20 +44,16 @@ public class CompositionReplacedEdit extends PixelitorEdit {
     private AffineTransform inverseCanvasTransform;
     private final boolean reload;
 
-    public CompositionReplacedEdit(String name, boolean reload, View view,
-                                   Composition oldComp,
-                                   Composition newComp,
-                                   AffineTransform canvasTransform) {
+    public CompositionReplacedEdit(String name, View view,
+                                   Composition oldComp, Composition newComp,
+                                   AffineTransform canvasTransform, boolean reload) {
         super(name, newComp);
         this.reload = reload;
 
         assert oldComp != null;
         assert newComp != null;
-        assert oldComp.getFile() == null ?
-                newComp.getFile() == null :
-                oldComp.getFile().equals(newComp.getFile())
-                : "old file = " + oldComp.getFile()
-                + ", new file = " + newComp.getFile();
+        assert oldComp.hasSameFileAs(newComp, !reload) :
+            "old = " + oldComp.getFile() + ", new = " + newComp.getFile();
 
         if (oldComp.hasSelection()) {
             // saved compositions should never have a live selection,

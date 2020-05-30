@@ -44,7 +44,7 @@ public class Events {
 
     private static final Queue<PixelitorEvent> events = new ArrayDeque<>();
 
-    public static void post(PixelitorEvent event) {
+    private static void post(PixelitorEvent event) {
         if (VERBOSE) {
             System.out.println(event);
         }
@@ -80,19 +80,18 @@ public class Events {
         String editName = editToBeUndone.getDebugName();
         post(new PixelitorEvent("  ["
             + Ansi.red("UNDO ")
-                + editName + "]", null, null));
+            + editName + "]", null, null));
     }
 
     public static void postRedoEvent(PixelitorEdit editToBeRedone) {
         String editName = editToBeRedone.getDebugName();
         post(new PixelitorEvent("    ["
             + Ansi.green("  REDO ")
-                + editName + "]", null, null));
+            + editName + "]", null, null));
     }
 
-    public static void postMaskViewActivate(MaskViewMode mode, View view, Layer layer, String reason) {
-        post(new PixelitorEvent("[MASK VIEW " + mode
-                + " (" + reason + ")]", view.getComp(), layer));
+    public static void postMaskViewActivate(MaskViewMode mode, View view, Layer layer) {
+        post(new PixelitorEvent("[MASK VIEW " + mode + "]", view.getComp(), layer));
     }
 
     /**
@@ -103,7 +102,7 @@ public class Events {
     }
 
     public static void postProgramError(String s, Composition comp, Layer layer) {
-        post(new PixelitorEvent("[PROGRAM ERROR: " + s + "]", null, null));
+        post(new PixelitorEvent("[PROGRAM ERROR: " + s + "]", comp, layer));
     }
 
     /**
@@ -112,14 +111,14 @@ public class Events {
     public static void dumpForActiveComp() {
         var comp = OpenImages.getActiveComp();
         events.stream()
-                .filter(e -> e.isComp(comp))
-                .forEach(System.out::println);
+            .filter(e -> e.isComp(comp))
+            .forEach(System.out::println);
     }
 
     public static void dumpMouse() {
         events.stream()
-                .filter(e -> e.toString().startsWith("[MOUSE]"))
-                .forEach(System.out::println);
+            .filter(e -> e.toString().startsWith("[MOUSE]"))
+            .forEach(System.out::println);
     }
 
     /**

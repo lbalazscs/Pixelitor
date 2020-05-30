@@ -23,21 +23,17 @@ import pixelitor.compactions.CompAction;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.io.Dirs;
-import pixelitor.io.FileFormat;
-import pixelitor.io.FileUtils;
-import pixelitor.io.IO;
-import pixelitor.io.SaveSettings;
+import pixelitor.io.*;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.EventQueue;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static java.lang.String.format;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Utility class with static methods for batch processing
@@ -58,9 +54,9 @@ public class Automate {
      * Processes each file in the input directory
      * with the given {@link CompAction}
      */
-    public static void processEachFile(CompAction action,
-                                       String dialogTitle) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+    public static void processFiles(CompAction action,
+                                    String dialogTitle) {
+        assert calledOnEDT() : threadInfo();
 
         File openDir = Dirs.getLastOpen();
         File saveDir = Dirs.getLastSave();
@@ -72,65 +68,61 @@ public class Automate {
         }
 
         stopProcessing = false;
-        var progressMonitor = GUIUtils.createPercentageProgressMonitor(
-                dialogTitle);
+        var pm = GUIUtils.createPercentageProgressMonitor(dialogTitle);
         var worker = new SwingWorker<Void, Void>() {
             @Override
             public Void doInBackground() {
-                return processEachFileOutsideTheEDT(inputFiles, action, saveDir, progressMonitor);
+                return processFilesOutsideTheEDT(inputFiles, action, saveDir, pm);
             } // end of doInBackground
         };
         worker.execute();
     }
 
-    private static Void processEachFileOutsideTheEDT(List<File> inputFiles,
-                                                     CompAction action,
-                                                     File saveDir,
-                                                     ProgressMonitor progressMonitor) {
-        assert !EventQueue.isDispatchThread() : "on EDT";
+    private static Void processFilesOutsideTheEDT(List<File> inputFiles,
+                                                  CompAction action,
+                                                  File saveDir,
+                                                  ProgressMonitor monitor) {
+        assert calledOutsideEDT() : "on EDT";
+
         overwriteAll = false;
 
         for (int i = 0, numFiles = inputFiles.size(); i < numFiles; i++) {
-            if (progressMonitor.isCanceled() || stopProcessing) {
+            if (monitor.isCanceled() || stopProcessing) {
                 break;
             }
 
             File file = inputFiles.get(i);
-            progressMonitor.setProgress((int) ((float) i * 100 / numFiles));
+            monitor.setProgress((int) ((float) i * 100 / numFiles));
 
             String msg = "Processing " + (i + 1) + " of " + numFiles;
-            progressMonitor.setNote(msg);
+            monitor.setNote(msg);
             System.out.println(msg);
 
             processFile(file, action, saveDir);
         }
-        progressMonitor.close();
+        monitor.close();
         return null;
     }
 
     private static void processFile(File file, CompAction action, File saveDir) {
-        assert !EventQueue.isDispatchThread() : "on EDT";
+        assert calledOutsideEDT() : "on EDT";
         IO.openFileAsync(file)
-                .thenComposeAsync(
-                        comp -> process(comp, action),
-                        EventQueue::invokeLater)
-                .thenComposeAsync(
-                        comp -> saveAndClose(comp, saveDir),
-                        EventQueue::invokeLater)
-                .exceptionally(Messages::showExceptionOnEDT)
-                .join();
+            .thenComposeAsync(comp -> process(comp, action), onEDT)
+            .thenComposeAsync(comp -> saveAndClose(comp, saveDir), onEDT)
+            .exceptionally(Messages::showExceptionOnEDT)
+            .join();
     }
 
     private static CompletableFuture<Composition> process(Composition comp,
                                                           CompAction action) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
         assert comp.getView() != null : "no view for " + comp.getName();
 
         return action.process(comp);
     }
 
     private static CompletableFuture<Void> saveAndClose(Composition comp, File lastSaveDir) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         View view = comp.getView();
         assert view != null : "no view for " + comp.getName();
@@ -182,16 +174,14 @@ public class Automate {
     }
 
     private static String showOverwriteWarningDialog(File outputFile) {
-        var optionPane = new JOptionPane(
-                format("File %s already exists. Overwrite?", outputFile),
-                WARNING_MESSAGE);
+        String msg = format("File %s already exists. Overwrite?", outputFile);
+        var optionPane = new JOptionPane(msg, WARNING_MESSAGE);
 
         optionPane.setOptions(new String[]{
-                OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
+            OVERWRITE_YES, OVERWRITE_YES_ALL, OVERWRITE_NO, OVERWRITE_CANCEL});
         optionPane.setInitialValue(OVERWRITE_NO);
 
-        JDialog dialog = optionPane.createDialog(
-                PixelitorWindow.getInstance(), "Warning");
+        JDialog dialog = optionPane.createDialog(PixelitorWindow.get(), "Warning");
         dialog.setVisible(true);
         String value = (String) optionPane.getValue();
         String answer;

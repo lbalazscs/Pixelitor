@@ -81,11 +81,11 @@ public class ShapesTool extends DragTool {
     private boolean regenerateShape = true;
 
     private final EnumComboBoxModel<ShapeType> typeModel
-            = new EnumComboBoxModel<>(ShapeType.class);
+        = new EnumComboBoxModel<>(ShapeType.class);
     private final EnumComboBoxModel<TwoPointPaintType> fillPaintModel
-            = new EnumComboBoxModel<>(TwoPointPaintType.class);
+        = new EnumComboBoxModel<>(TwoPointPaintType.class);
     private final EnumComboBoxModel<TwoPointPaintType> strokePaintModel
-            = new EnumComboBoxModel<>(TwoPointPaintType.class);
+        = new EnumComboBoxModel<>(TwoPointPaintType.class);
 
     private final StrokeParam strokeParam = new StrokeParam("");
 
@@ -102,9 +102,9 @@ public class ShapesTool extends DragTool {
     private final EffectsParam effectsParam = new EffectsParam("");
 
     private final JComboBox<TwoPointPaintType> fillPaintCombo
-            = createFillPaintCombo();
+        = createFillPaintCombo();
     private final JComboBox<TwoPointPaintType> strokePaintCombo
-            = createStrokePaintCombo();
+        = createStrokePaintCombo();
 
     private JButton strokeSettingsButton;
     private JDialog strokeSettingsDialog;
@@ -125,11 +125,11 @@ public class ShapesTool extends DragTool {
 
     public ShapesTool() {
         super("Shapes", 'U', "shapes_tool_icon.png",
-                "<b>drag</b> to draw a shape. " +
-                        "Hold <b>Alt</b> down to drag from the center. " +
-                        "Hold <b>SPACE</b> down while drawing to move the shape. ",
-                Cursors.DEFAULT, true, true,
-                false, ClipStrategy.FULL);
+            "<b>drag</b> to draw a shape. " +
+                "Hold <b>Alt</b> down to drag from the center. " +
+                "Hold <b>SPACE</b> down while drawing to move the shape. ",
+            Cursors.DEFAULT, true, true,
+            false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
         convertToSelectionAction.setEnabled(false);
         defaultShapeTypeSettings = new EnumMap<>(ShapeType.class);
@@ -149,13 +149,13 @@ public class ShapesTool extends DragTool {
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
-                e -> initAndShowStrokeSettingsDialog());
+            e -> initAndShowStrokeSettingsDialog());
 
         settingsPanel.addButton("Effects...",
-                e -> showEffectsDialog());
+            e -> showEffectsDialog());
 
         settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
-                "Convert the active shape to a selection");
+            "Convert the active shape to a selection");
 
         fillPaintModel.setSelectedItem(FOREGROUND);
         updateStrokeEnabledState();
@@ -208,7 +208,7 @@ public class ShapesTool extends DragTool {
 
     public ShapeTypeSettings getDefaultSettingsFor(ShapeType shapeType) {
         return defaultShapeTypeSettings.computeIfAbsent(shapeType,
-                ShapeType::createDefaultSettings);
+            ShapeType::createDefaultSettings);
     }
 
     public TwoPointPaintType getSelectedFillPaint() {
@@ -266,15 +266,14 @@ public class ShapesTool extends DragTool {
             settings = styledShape.getShapeTypeSettings();
         } else {
             // else configure and store the tool's default
-            settings = defaultShapeTypeSettings.computeIfAbsent(selectedType,
-                    ShapeType::createDefaultSettings);
+            settings = getDefaultSettingsFor(selectedType);
         }
         JPanel configPanel = settings.getConfigPanel();
         new DialogBuilder()
-                .title("Settings for " + selectedType)
-                .withScrollbars()
-                .content(configPanel)
-                .show();
+            .title("Settings for " + selectedType)
+            .withScrollbars()
+            .content(configPanel)
+            .show();
     }
 
     private void showEffectsDialog() {
@@ -451,7 +450,7 @@ public class ShapesTool extends DragTool {
             assert transformBox != null;
 
             DrawableAction.run(editName,
-                    dr -> styledShape.regenerate(transformBox, this, editName));
+                dr -> styledShape.regenerate(transformBox, this, editName));
         }
     }
 
@@ -480,7 +479,7 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverActiveLayer(Graphics2D g, Composition comp) {
+    public void paintOverActiveLayer(Graphics2D g) {
         // updates the shape continuously while drawing
         if (state == INITIAL_DRAG) {
             if (userDrag.isClick()) {
@@ -543,12 +542,12 @@ public class ShapesTool extends DragTool {
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
             Dialogs.showInfoDialog("No Selection",
-                    "No selection was created because the shape is outside the canvas.");
+                "No selection was created because the shape is outside the canvas.");
             return;
         }
 
         History.add(new ConvertShapeToSelectionEdit(
-                comp, transformBox, styledShape, selectionEdit));
+            comp, transformBox, styledShape, selectionEdit));
 
         resetInitialState();
         Tools.SELECTION.activate();
@@ -646,12 +645,12 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void compActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldCV, View newCV) {
         if (oldCV != null) {
             finalizeBoxIfExists(oldCV.getComp());
         }
 
-        super.compActivated(oldCV, newCV);
+        super.viewActivated(oldCV, newCV);
     }
 
     private void finalizeBoxIfExists(Composition comp) {
@@ -670,9 +669,9 @@ public class ShapesTool extends DragTool {
     @Override
     public String getStateInfo() {
         return getSelectedType()
-                + ", fp=" + getSelectedFillPaint()
-                + ", sp=" + getSelectedStrokePaint()
-                + ", state=" + state;
+            + ", fp=" + getSelectedFillPaint()
+            + ", sp=" + getSelectedStrokePaint()
+            + ", state=" + state;
     }
 
     @Override

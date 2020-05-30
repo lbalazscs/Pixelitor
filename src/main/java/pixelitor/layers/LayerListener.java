@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,16 +15,11 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.automate.macro;
+package pixelitor.layers;
 
 /**
- * Encapsulates a tool stroke
- *
- * The macro functionality is not finished!
+ * A listener for the state changes in a layer.
  */
-public class ToolStrokeMacroStep implements MacroStep {
-    @Override
-    public void execute() {
-
-    }
+public interface LayerListener {
+    void layerStateChanged();
 }

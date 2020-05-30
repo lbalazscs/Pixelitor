@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,7 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import pixelitor.menus.NamedAction;
+import pixelitor.gui.utils.NamedAction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,9 +30,9 @@ public class NamedActionAssert extends AbstractAssert<NamedActionAssert, NamedAc
         super(actual, NamedActionAssert.class);
     }
 
-    public NamedActionAssert nameIs(String expected) {
+    public NamedActionAssert textIs(String expected) {
         isNotNull();
-        assertThat(actual.getName()).isEqualTo(expected);
+        assertThat(actual.getText()).isEqualTo(expected);
         return this;
     }
 }

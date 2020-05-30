@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,13 @@
 
 package pixelitor.menus.view;
 
-import pixelitor.menus.NamedAction;
+import pixelitor.gui.utils.NamedAction;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An abstract action that either shows or hides something,
+ * An abstract {@link Action} that either shows or hides something,
  * depending on the current visibility
  */
 public abstract class ShowHideAction extends NamedAction {
@@ -38,11 +39,11 @@ public abstract class ShowHideAction extends NamedAction {
     }
 
     public void setHideText() {
-        setName(hideText);
+        setText(hideText);
     }
 
     public void setShowText() {
-        setName(showText);
+        setText(showText);
     }
 
     @Override

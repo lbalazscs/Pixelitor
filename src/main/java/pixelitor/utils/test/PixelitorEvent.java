@@ -21,8 +21,8 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.RunContext;
 import pixelitor.layers.Layer;
+import pixelitor.utils.Threads;
 
-import java.awt.EventQueue;
 import java.awt.geom.Rectangle2D;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -48,10 +48,10 @@ public class PixelitorEvent {
         }
 
         now = LocalTime.now();
-        if (EventQueue.isDispatchThread()) {
+        if (Threads.calledOnEDT()) {
             threadName = "EDT";
         } else {
-            threadName = Thread.currentThread().getName();
+            threadName = Threads.threadName();
         }
 
         if (comp == null) {
@@ -81,22 +81,29 @@ public class PixelitorEvent {
             return format("%s (%s) no composition", type, threadName);
         }
 
+        String layerType = layer.getClass().getSimpleName();
+        String formattedDate = dateFormatter.format(now);
+        return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
+            type, threadName, comp.getName(), layer.getName(),
+            layerType, getSelectionInfo(), getMaskInfo(), formattedDate);
+    }
+
+    private String getSelectionInfo() {
         String selectionInfo = "no selection";
         if (comp.hasSelection()) {
             Rectangle2D rect = comp.getSelection().getShapeBounds2D();
             selectionInfo = format("sel. bounds = '%s'", rect);
         }
+        return selectionInfo;
+    }
+
+    private String getMaskInfo() {
         String maskInfo = "no mask";
         if (layer.hasMask()) {
             maskInfo = format("has mask (enabled = %s, editing = %s, linked = %s)",
-                    layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
+                layer.isMaskEnabled(), layer.isMaskEditing(), layer.getMask().isLinked());
         }
-
-        String layerType = layer.getClass().getSimpleName();
-        String formattedDate = dateFormatter.format(now);
-        return format("%s (%s) on \"%s/%s\" (%s, %s, %s) at %s",
-                type, threadName, comp.getName(), layer.getName(),
-                layerType, selectionInfo, maskInfo, formattedDate);
+        return maskInfo;
     }
 
     public boolean isComp(Composition c) {

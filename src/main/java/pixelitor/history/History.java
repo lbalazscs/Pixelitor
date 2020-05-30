@@ -22,7 +22,6 @@ import pixelitor.OpenImages;
 import pixelitor.RunContext;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
-import pixelitor.menus.MenuAction.AllowedOnLayerType;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
@@ -56,18 +55,16 @@ public class History {
         setUndoLevels(AppPreferences.loadUndoLevels());
     }
 
-    public static final Action UNDO_ACTION = new MenuAction(
-            UIManager.getString("AbstractUndoableEdit.undoText"),
-            Icons.getUndoIcon(), AllowedOnLayerType.ANY) {
+    private static final String UNDO_TEXT = UIManager.getString("AbstractUndoableEdit.undoText");
+    public static final Action UNDO_ACTION = new MenuAction(UNDO_TEXT, Icons.getUndoIcon()) {
         @Override
         public void onClick() {
             undo();
         }
     };
 
-    public static final Action REDO_ACTION = new MenuAction(
-            UIManager.getString("AbstractUndoableEdit.redoText"),
-            Icons.getRedoIcon(), AllowedOnLayerType.ANY) {
+    private static final String REDO_TEXT = UIManager.getString("AbstractUndoableEdit.redoText");
+    public static final Action REDO_ACTION = new MenuAction(REDO_TEXT, Icons.getRedoIcon()) {
         @Override
         public void onClick() {
             redo();
@@ -82,7 +79,7 @@ public class History {
     }
 
     public static void add(PixelitorEdit edit) {
-//        Utils.debugCall(edit.getDebugName());
+//        Debug.call(edit.getDebugName());
 
         assert edit != null;
         if (ignoreEdits) {
@@ -130,8 +127,8 @@ public class History {
         }
 
         rect = SwingUtilities.computeIntersection(0, 0,
-                origImage.getWidth(), origImage.getHeight(), // full image bounds
-                rect
+            origImage.getWidth(), origImage.getHeight(), // full image bounds
+            rect
         );
 
         if (rect.isEmpty()) {
@@ -144,7 +141,7 @@ public class History {
         // but typically the extra savings would be minimal
 
         var edit = new PartialImageEdit(editName, comp,
-                dr, origImage, rect, false);
+            dr, origImage, rect, false);
         return edit;
     }
 
@@ -160,7 +157,7 @@ public class History {
         if (RunContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeUndone();
             Events.postUndoEvent(edit);
-//            Utils.debugCall(edit.getDebugName());
+//            Debug.call(edit.getDebugName());
         }
 
         try {
@@ -173,7 +170,7 @@ public class History {
                 throw new RuntimeException("No undo available", e);
             } else {
                 Messages.showInfo("No undo available",
-                        "No undo available, probably because the undo image was discarded in order to save memory");
+                    "No undo available, probably because the undo image was discarded in order to save memory");
             }
         }
     }
@@ -182,7 +179,7 @@ public class History {
         if (RunContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeRedone();
             Events.postRedoEvent(edit);
-//            Utils.debugCall(edit.getDebugName());
+//            Debug.call(edit.getDebugName());
         }
 
         try {
@@ -308,7 +305,7 @@ public class History {
         int numEdits = undoManager.getSize();
         if (numEdits != expected) {
             throw new AssertionError(format(
-                    "Expected %d edits, but found %d", expected, numEdits));
+                "Expected %d edits, but found %d", expected, numEdits));
         }
     }
 
@@ -317,8 +314,8 @@ public class History {
         String lastEditName = undoManager.getLastEdit().getName();
         if (!lastEditName.equals(expected)) {
             throw new AssertionError(format(
-                    "Expected '%s' as the last edit name, but found '%s'",
-                    expected, lastEditName));
+                "Expected '%s' as the last edit name, but found '%s'",
+                expected, lastEditName));
         }
     }
 
@@ -327,7 +324,7 @@ public class History {
         String name = getEditToBeUndoneName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
-                    "Expected '%s', found '%s'", expected, name));
+                "Expected '%s', found '%s'", expected, name));
         }
     }
 
@@ -345,7 +342,7 @@ public class History {
         String name = getEditToBeRedoneName();
         if (!name.equals(expected)) {
             throw new AssertionError(format(
-                    "Expected '%s', found '%s'", expected, name));
+                "Expected '%s', found '%s'", expected, name));
         }
     }
 

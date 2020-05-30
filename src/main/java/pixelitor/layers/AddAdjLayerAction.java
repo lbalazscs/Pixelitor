@@ -21,24 +21,24 @@ import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
 import pixelitor.filters.Invert;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
  * An Action that adds a new adjustment layer to the active composition.
  */
-public class AddAdjLayerAction extends AbstractAction
-        implements ViewActivationListener {
+public class AddAdjLayerAction extends NamedAction
+    implements ViewActivationListener {
 
     public static final AddAdjLayerAction INSTANCE = new AddAdjLayerAction();
 
     private AddAdjLayerAction() {
         super("Add Adjustment Layer",
-                Icons.load("add_adj_layer.png"));
-        putValue(Action.SHORT_DESCRIPTION, "Adds a new adjustment layer.");
+            Icons.load("add_adj_layer.png"));
+        setToolTip("Adds a new adjustment layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
     }

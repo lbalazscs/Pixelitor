@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.utils;
+
+import pixelitor.layers.Layer;
 
 /**
  * A non-GUI message handler for tests
@@ -40,12 +42,12 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showNotImageLayerError() {
+    public void showNotImageLayerError(Layer layer) {
         throw new AssertionError("not image layer");
     }
 
     @Override
-    public void showNotDrawableError() {
+    public void showNotDrawableError(Layer layer) {
         throw new AssertionError("not image layer or mask");
     }
 
@@ -55,8 +57,8 @@ public class TestMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showException(Throwable e, Thread t) {
-        throw new AssertionError(e);
+    public void showException(Throwable e, Thread srcThread) {
+        throw new AssertionError("exception in " + srcThread.getName() + ", e = " + e);
     }
 
     @Override

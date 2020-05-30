@@ -36,7 +36,6 @@ import pixelitor.utils.ProgressHandler;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
 import java.util.Random;
@@ -45,14 +44,16 @@ import java.util.concurrent.ThreadLocalRandom;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.*;
+import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 import static pixelitor.tools.Tools.*;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The "Auto Paint" functionality
  */
 public class AutoPaint {
-    public static final Tool[] ALLOWED_TOOLS = {
-            SMUDGE, BRUSH, CLONE, ERASER};
+    public static final Tool[] ALLOWED_TOOLS = {SMUDGE, BRUSH, CLONE, ERASER};
     private static Color origFg;
     private static Color origBg;
 
@@ -62,14 +63,14 @@ public class AutoPaint {
     public static void showDialog(Drawable dr) {
         var configPanel = new ConfigPanel();
         new DialogBuilder()
-                .validatedContent(configPanel)
-                .title("Auto Paint")
-                .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
-                .show();
+            .validatedContent(configPanel)
+            .title("Auto Paint")
+            .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
+            .show();
     }
 
     private static void paintStrokes(Drawable dr, Settings settings) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         saveOriginalFgBgColors();
 
@@ -87,7 +88,7 @@ public class AutoPaint {
         } finally {
             History.setIgnoreEdits(false);
             History.add(new ImageEdit("Auto Paint", dr.getComp(),
-                    dr, backupImage, false, false));
+                dr, backupImage, false, false));
 
             progressHandler.stopProgress();
             Messages.showInStatusBar(msg + "finished.");
@@ -99,16 +100,17 @@ public class AutoPaint {
     private static void runStrokes(Settings settings,
                                    Drawable dr,
                                    ProgressHandler progressHandler) {
+        assert calledOnEDT() : threadInfo();
+
         var random = new Random();
         var comp = dr.getComp();
-        var view = comp.getView();
 
         int numStrokes = settings.getNumStrokes();
         for (int i = 0; i < numStrokes; i++) {
             progressHandler.updateProgress(i);
 
             paintSingleStroke(dr, settings, comp, random);
-            view.paintImmediately();
+            comp.getView().paintImmediately();
         }
     }
 
@@ -116,10 +118,12 @@ public class AutoPaint {
                                           Settings settings,
                                           Composition comp,
                                           Random rand) {
+        assert calledOnEDT() : threadInfo();
+
         setFgBgColors(settings, rand);
 
-        PPoint start = calcStartPoint(comp, rand);
-        PPoint end = calcEndPoint(start, comp, settings, rand);
+        PPoint start = calcRandomStartPoint(comp, rand);
+        PPoint end = calcRandomEndPoint(start, comp, settings, rand);
 
         drawBrushStroke(dr, start, end, settings);
     }
@@ -128,24 +132,23 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            float interpolationRatio = rand.nextFloat();
             Color interpolated = ColorUtils.interpolateInRGB(
-                    origFg, origBg, interpolationRatio);
+                origFg, origBg, rand.nextFloat());
             setFGColor(interpolated);
         }
     }
 
-    private static PPoint calcStartPoint(Composition comp, Random rand) {
+    private static PPoint calcRandomStartPoint(Composition comp, Random rand) {
         Canvas canvas = comp.getCanvas();
         return PPoint.lazyFromIm(
-                rand.nextInt(canvas.getWidth()),
-                rand.nextInt(canvas.getHeight()),
-                comp.getView()
+            rand.nextInt(canvas.getWidth()),
+            rand.nextInt(canvas.getHeight()),
+            comp.getView()
         );
     }
 
-    private static PPoint calcEndPoint(PPoint start, Composition comp,
-                                       Settings settings, Random rand) {
+    private static PPoint calcRandomEndPoint(PPoint start, Composition comp,
+                                             Settings settings, Random rand) {
         int strokeLength = settings.genStrokeLength();
         double angle = rand.nextDouble() * 2 * Math.PI;
         double endX = start.getImX() + strokeLength * FastMath.cos(angle);
@@ -177,8 +180,8 @@ public class AutoPaint {
         private static final String COL_FOREGROUND = "Foreground";
         private static final String COL_INTERPOLATED = "Foreground-Background Mix";
         private static final String COL_RANDOM = "Random";
-        public static final String[] COLOR_SETTINGS = {
-                COL_FOREGROUND, COL_INTERPOLATED, COL_RANDOM};
+        public static final String[] COLOR_SETTINGS =
+            {COL_FOREGROUND, COL_INTERPOLATED, COL_RANDOM};
 
         private final JComboBox<Tool> toolSelector;
         private static Tool defaultTool = SMUDGE;
@@ -194,7 +197,7 @@ public class AutoPaint {
 
         private static int defaultLengthVariability = 50;
         private final RangeParam lengthVariability =
-                new RangeParam("", 0, defaultLengthVariability, 100);
+            new RangeParam("", 0, defaultLengthVariability, 100);
 
         private static String defaultColors = COL_INTERPOLATED;
 
@@ -210,17 +213,17 @@ public class AutoPaint {
             numStrokesTF = new JTextField(String.valueOf(defaultNumStrokes));
             numStrokesTF.setName("numStrokesTF");
             gbh.addLabelAndControl("Number of Strokes:",
-                    TextFieldValidator.createPositiveIntLayer(
-                            "Number of Strokes", numStrokesTF, false));
+                createPositiveIntLayer(
+                    "Number of Strokes", numStrokesTF, false));
 
             lengthTF = new JTextField(String.valueOf(defaultLength));
             gbh.addLabelAndControl("Average Stroke Length:",
-                    TextFieldValidator.createPositiveIntLayer(
-                            "Average Stroke Length", lengthTF, false));
+                createPositiveIntLayer(
+                    "Average Stroke Length", lengthTF, false));
 
             lengthVariability.setValueNoTrigger(defaultLengthVariability);
             gbh.addLabelAndControl("Stroke Length Variability (%):",
-                    SliderSpinner.from(lengthVariability));
+                SliderSpinner.from(lengthVariability));
 
 
             colorsLabel = new JLabel("Random Colors:");
@@ -255,18 +258,16 @@ public class AutoPaint {
             defaultTool = tool;
 
             boolean colorsEnabled = colorsCB.isEnabled();
-            String colorsSelected = (String) colorsCB.getSelectedItem();
-            boolean randomColors = colorsEnabled
-                    && colorsSelected.equals(COL_RANDOM);
-            boolean interpolatedColors = colorsEnabled
-                    && colorsSelected.equals(COL_INTERPOLATED);
-            defaultColors = colorsSelected;
+            String colors = (String) colorsCB.getSelectedItem();
+            boolean randomColors = colorsEnabled && colors.equals(COL_RANDOM);
+            boolean interpolatedColors = colorsEnabled && colors.equals(COL_INTERPOLATED);
+            defaultColors = colors;
 
             float lengthRandomnessPercentage = lengthVariability.getPercentageValF();
             defaultLengthVariability = lengthVariability.getValue();
 
             return new Settings(tool, numStrokes, strokeLength,
-                    randomColors, lengthRandomnessPercentage, interpolatedColors);
+                randomColors, lengthRandomnessPercentage, interpolatedColors);
         }
 
         private int getNumStrokes() {
@@ -353,7 +354,7 @@ public class AutoPaint {
                 return minStrokeLength;
             } else {
                 return ThreadLocalRandom.current()
-                        .nextInt(minStrokeLength, maxStrokeLength + 1);
+                    .nextInt(minStrokeLength, maxStrokeLength + 1);
             }
         }
 

@@ -22,8 +22,10 @@ import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.EventQueue;
 import java.io.File;
+
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The "File/Recent Files" menu
@@ -41,25 +43,23 @@ public final class RecentFilesMenu extends JMenu {
         super("Recent Files");
 
         clearMenuItem = new JMenuItem("Clear Recent Files");
-        clearMenuItem.addActionListener(e -> {
-            try {
-                clear();
-            } catch (Exception ex) {
-                Messages.showException(ex);
-            }
-        });
+        clearMenuItem.addActionListener(e -> clear());
         load();
         rebuildGUI();
     }
 
     private void clear() {
-        AppPreferences.removeRecentFiles();
-        recentFiles.clear();
-        clearGUI();
+        try {
+            AppPreferences.removeRecentFiles();
+            recentFiles.clear();
+            clearGUI();
+        } catch (Exception ex) {
+            Messages.showException(ex);
+        }
     }
 
     public static RecentFilesMenu getInstance() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         if (singleInstance == null) {
             //noinspection NonThreadSafeLazyInitialization
@@ -70,8 +70,7 @@ public final class RecentFilesMenu extends JMenu {
 
     public void addFile(File f) {
         if (f.exists()) {
-            RecentFile recentFile = new RecentFile(f);
-            recentFiles.addToFront(recentFile);
+            recentFiles.addToFront(new RecentFile(f));
             rebuildGUI();
         }
     }
@@ -90,12 +89,14 @@ public final class RecentFilesMenu extends JMenu {
 
     private void rebuildGUI() {
         clearGUI();
+
         for (int i = 0; i < recentFiles.size(); i++) {
             RecentFile recentFile = recentFiles.get(i);
             recentFile.setNr(i + 1);
             RecentFilesMenuItem item = new RecentFilesMenuItem(recentFile);
             add(item);
         }
+
         if (!recentFiles.isEmpty()) {
             addSeparator();
             add(clearMenuItem);

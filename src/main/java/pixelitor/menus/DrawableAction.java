@@ -19,11 +19,8 @@ package pixelitor.menus;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.layers.AdjustmentLayer;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.ImageLayer;
-import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
+import pixelitor.gui.utils.NamedAction;
+import pixelitor.layers.*;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
@@ -38,7 +35,7 @@ import static java.lang.String.format;
  * An {@link Action} that can be done with {@link Drawable}
  * objects (image layers or masks)
  */
-public abstract class DrawableAction extends AbstractAction {
+public abstract class DrawableAction extends NamedAction {
     protected final String name;
     protected String menuName;
     protected boolean hasDialog;
@@ -59,7 +56,7 @@ public abstract class DrawableAction extends AbstractAction {
 
         this.name = name;
         menuName = hasDialog ? name + "..." : name;
-        setActionName(menuName);
+        setText(menuName);
 
         this.allowMasks = allowMasks;
     }
@@ -68,7 +65,7 @@ public abstract class DrawableAction extends AbstractAction {
      * Runs the given task if the active layer is drawable
      */
     public static void run(String taskName, Consumer<Drawable> task) {
-        DrawableAction action = new DrawableAction(taskName) {
+        var action = new DrawableAction(taskName) {
             @Override
             protected void process(Drawable dr) {
                 task.accept(dr);
@@ -104,7 +101,7 @@ public abstract class DrawableAction extends AbstractAction {
             } else {
                 if (!RandomGUITest.isRunning()) {
                     Dialogs.showErrorDialog("Mask is active",
-                            name + " cannot be applied to masks.");
+                        name + " cannot be applied to masks.");
                 }
             }
         } else if (layer instanceof ImageLayer) {
@@ -115,14 +112,14 @@ public abstract class DrawableAction extends AbstractAction {
             }
 
             boolean isNoun = name.contains("Tool");
-            String firstName = isNoun ? "The " + name  : name;
-            String secondName = isNoun ? "the " + name  : name;
+            String firstName = isNoun ? "The " + name : name;
+            String secondName = isNoun ? "the " + name : name;
 
             String msg = format("<html>The active layer <i>\"%s\"</i> is a text layer.<br><br>" +
-                            "%s needs pixels and cannot be used on text layers.<br>" +
-                            "If you rasterize this text layer, you can use %s,<br>" +
-                                "but the text will no longer be editable.",
-                        layer.getName(), firstName, secondName);
+                    "%s needs pixels and cannot be used on text layers.<br>" +
+                    "If you rasterize this text layer, you can use %s,<br>" +
+                    "but the text will no longer be editable.",
+                layer.getName(), firstName, secondName);
 
             String[] options = {"Rasterize", "Cancel"};
 
@@ -132,7 +129,7 @@ public abstract class DrawableAction extends AbstractAction {
             }
         } else if (layer instanceof AdjustmentLayer) {
             Dialogs.showErrorDialog("Adjustment Layer",
-                    name + " cannot be applied to adjustment layers.");
+                name + " cannot be applied to adjustment layers.");
         } else {
             throw new IllegalStateException("layer is " + layer.getClass().getSimpleName());
         }
@@ -144,9 +141,5 @@ public abstract class DrawableAction extends AbstractAction {
 
     public String getName() {
         return name;
-    }
-
-    public void setActionName(String newName) {
-        putValue(Action.NAME, newName);
     }
 }

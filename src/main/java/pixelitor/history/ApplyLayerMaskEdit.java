@@ -54,7 +54,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         layer.setImage(oldImage);
         layer.addConfiguredMask(oldMask);
-        oldMode.activate(comp, layer, "apply mask undone");
+        oldMode.activate(comp, layer);
         layer.updateIconImage();
     }
 

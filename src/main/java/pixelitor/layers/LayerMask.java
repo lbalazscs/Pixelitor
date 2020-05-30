@@ -103,8 +103,8 @@ public class LayerMask extends ImageLayer {
     public void paintAsRubylith(Graphics2D g) {
         Composite oldComposite = g.getComposite();
         WritableRaster raster = getVisibleImage().getRaster();
-        BufferedImage rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
-                raster, false, null);
+        var rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
+            raster, false, null);
         g.setComposite(RUBYLITH_COMPOSITE);
         g.drawImage(rubylithImage, 0, 0, null);
         g.setComposite(oldComposite);
@@ -112,7 +112,7 @@ public class LayerMask extends ImageLayer {
 
     @Override
     protected BufferedImage createEmptyImageForLayer(int width, int height) {
-        BufferedImage empty = new BufferedImage(width, height, TYPE_BYTE_GRAY);
+        var empty = new BufferedImage(width, height, TYPE_BYTE_GRAY);
 
         // when enlarging a layer mask, the new areas need to be white
         Graphics2D g = empty.createGraphics();
@@ -155,7 +155,7 @@ public class LayerMask extends ImageLayer {
 
     public void setLinked(boolean linked, boolean addToHistory) {
         this.linked = linked;
-        notifyChangeListeners();
+        notifyListeners();
         if (addToHistory) {
             History.add(new LinkLayerMaskEdit(comp, this));
         }
@@ -182,7 +182,7 @@ public class LayerMask extends ImageLayer {
                                                      BufferedImage visibleImage,
                                                      boolean firstVisibleLayer) {
         g.drawImage(visibleImage, getTx(), getTy(), null);
-        Tools.SHAPES.paintOverActiveLayer(g, comp);
+        Tools.SHAPES.paintOverActiveLayer(g);
     }
 
     public BufferedImage getTransparencyImage() {
@@ -193,17 +193,17 @@ public class LayerMask extends ImageLayer {
 
             // Create a temporary image that shows how the image would look like
             // if the shapes tool would draw directly into the mask image
-            BufferedImage tmp = new BufferedImage(
-                    image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
-            Graphics2D tmpG = tmp.createGraphics();
+            var tmpImg = new BufferedImage(
+                image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
+            Graphics2D tmpG = tmpImg.createGraphics();
             tmpG.drawImage(image, 0, 0, null);
-            Tools.SHAPES.paintOverActiveLayer(tmpG, comp);
+            Tools.SHAPES.paintOverActiveLayer(tmpG);
             tmpG.dispose();
 
             // ... and return a transparency image based on it
-            WritableRaster raster = tmp.getRaster();
-            BufferedImage tmpTransparency = new BufferedImage(
-                    TRANSPARENCY_COLOR_MODEL, raster, false, null);
+            WritableRaster raster = tmpImg.getRaster();
+            var tmpTransparency = new BufferedImage(
+                TRANSPARENCY_COLOR_MODEL, raster, false, null);
             return tmpTransparency;
         }
     }

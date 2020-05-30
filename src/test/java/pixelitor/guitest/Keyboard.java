@@ -20,13 +20,13 @@ package pixelitor.guitest;
 import com.bric.util.JVM;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.driver.WindowDriver;
-import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.tools.util.ArrowKey;
+import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
 
 import java.awt.EventQueue;
@@ -38,6 +38,7 @@ import java.awt.event.KeyEvent;
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.guitest.AppRunner.ROBOT_DELAY_DEFAULT;
+import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
  * Keyboard input for AssertJ-Swing based tests
@@ -62,14 +63,11 @@ public class Keyboard {
     }
 
     void undo(String edit) {
-//        Utils.debugCall(edit);
-
+        EDT.assertEditToBeUndoneNameIs(edit);
         if (osLevelKeyEvents) {
-            EDT.assertEditToBeUndoneNameIs(edit);
-
             // press Ctrl-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_Z)
-                    .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
 
 //        KeyPressInfo info = KeyPressInfo.keyCode(VK_Z).modifiers(ctrlOrCommand);
 //        pw.pressAndReleaseKey(info);
@@ -86,21 +84,18 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             // press Ctrl-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_Z)
-                    .releaseKey(VK_Z).releaseKey(VK_CONTROL);
+                .releaseKey(VK_Z).releaseKey(VK_CONTROL);
         } else {
             EDT.undo();
         }
     }
 
     void redo(String edit) {
-//        Utils.debugCall(edit);
-
+        EDT.assertEditToBeRedoneNameIs(edit);
         if (osLevelKeyEvents) {
-            EDT.assertEditToBeRedoneNameIs(edit);
-
             // press Ctrl-Shift-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
-                    .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
 
 //        KeyPressInfo info = KeyPressInfo.keyCode(VK_Z).modifiers(VK_CONTROL, VK_SHIFT);
 //        pw.pressAndReleaseKey(info);
@@ -117,7 +112,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             // press Ctrl-Shift-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
-                    .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
+                .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
         } else {
             EDT.redo();
         }
@@ -150,8 +145,7 @@ public class Keyboard {
             robot.waitForIdle();
         } else {
             // runMenuCommand("Deselect");
-            GuiActionRunner.execute(() ->
-                    OpenImages.getActiveComp().deselect(true));
+            EDT.run(() -> OpenImages.getActiveComp().deselect(true));
         }
     }
 
@@ -160,7 +154,7 @@ public class Keyboard {
             // press D
             pw.pressKey(VK_D).releaseKey(VK_D);
         } else {
-            GuiActionRunner.execute(FgBgColors::setDefaultColors);
+            EDT.run(FgBgColors::setDefaultColors);
         }
     }
 
@@ -168,7 +162,7 @@ public class Keyboard {
         if (osLevelKeyEvents) {
             pw.pressAndReleaseKeys(VK_R);
         } else {
-            GuiActionRunner.execute(FgBgColors::randomizeColors);
+            EDT.run(FgBgColors::randomizeColors);
         }
     }
 
@@ -192,7 +186,7 @@ public class Keyboard {
             if (key.isShiftDown()) {
                 // TODO for some reason the shift is not detected
                 pw.pressKey(VK_SHIFT).pressKey(keyCode)
-                        .releaseKey(keyCode).releaseKey(VK_SHIFT);
+                    .releaseKey(keyCode).releaseKey(VK_SHIFT);
             } else {
                 pw.pressKey(VK_RIGHT).releaseKey(VK_RIGHT);
             }
@@ -257,7 +251,7 @@ public class Keyboard {
     void ctrlPress(int keyCode) {
         if (osLevelKeyEvents) {
             pw.pressKey(VK_CONTROL).pressKey(keyCode)
-                    .releaseKey(keyCode).releaseKey(VK_CONTROL);
+                .releaseKey(keyCode).releaseKey(VK_CONTROL);
         } else {
             postKeyEventToEventQueue(CTRL_DOWN_MASK, keyCode);
         }
@@ -292,11 +286,11 @@ public class Keyboard {
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
         Frame eventSource = pw.target();
         queue.postEvent(new KeyEvent(eventSource, KEY_PRESSED,
-                System.currentTimeMillis(), modifiers,
-                keyCode, Character.MIN_VALUE));
+            System.currentTimeMillis(), modifiers,
+            keyCode, Character.MIN_VALUE));
         queue.postEvent(new KeyEvent(eventSource, KEY_RELEASED,
-                System.currentTimeMillis(), modifiers,
-                keyCode, Character.MIN_VALUE));
+            System.currentTimeMillis(), modifiers,
+            keyCode, Character.MIN_VALUE));
     }
 
     public void pressCtrl() {
@@ -338,7 +332,7 @@ public class Keyboard {
     // make sure that the modifier keys don't remain
     // pressed after an exception or a forced pause/exit
     public void releaseModifierKeys() {
-        assert !EventQueue.isDispatchThread();
+        assert calledOutsideEDT() : "on EDT";
 
         // TODO it can release them only on the main window
         if (EDT.call(() -> GlobalEvents.getNumNestedDialogs() == 0)) {
@@ -349,7 +343,7 @@ public class Keyboard {
     }
 
     public void releaseModifierKeysFromAnyThread() {
-        if (EventQueue.isDispatchThread()) {
+        if (Threads.calledOnEDT()) {
             Thread thread = new Thread(this::releaseModifierKeys);
             thread.start();
         } else {

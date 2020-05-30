@@ -18,7 +18,6 @@
 package pixelitor.guitest;
 
 import org.assertj.swing.core.Robot;
-import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.layers.LayersContainer;
 
 import java.util.List;
@@ -35,27 +34,26 @@ public class LayersContainerFixture {
 
     public LayersContainerFixture(Robot robot) {
         this.robot = robot;
-        layersContainer = LayersContainer.INSTANCE;
+        layersContainer = LayersContainer.get();
     }
 
-    public LayersContainerFixture requireNumLayerButtons(int n) {
+    public LayersContainerFixture requireNumLayerButtons(int expected) {
         robot.waitForIdle();
-        int numLayers = GuiActionRunner.execute(
-                layersContainer::getNumLayerButtons);
-        if (n != numLayers) {
-            throw new AssertionError("Expected " + n
-                    + ", found " + numLayers);
+
+        int numLayers = EDT.call(layersContainer::getNumLayerButtons);
+        if (expected != numLayers) {
+            throw new AssertionError("Expected " + expected + ", found " + numLayers);
         }
+
         return this;
     }
 
     public LayersContainerFixture requireLayerNames(String... expected) {
         robot.waitForIdle();
 
-        List<String> actual = GuiActionRunner.execute(
-                layersContainer::getLayerNames);
+        List<String> actualNames = EDT.call(layersContainer::getLayerNames);
+        assertThat(actualNames).containsExactly(expected);
 
-        assertThat(actual).containsExactly(expected);
         return this;
     }
 }

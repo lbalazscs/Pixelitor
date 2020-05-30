@@ -35,14 +35,14 @@ public class ToolSettingsPanelContainer extends JPanel {
 
         Tool[] tools = Tools.getAll();
         for (Tool tool : tools) {
-            ToolSettingsPanel p = new ToolSettingsPanel();
+            var p = new ToolSettingsPanel();
             tool.setSettingsPanel(p);
             tool.initSettingsPanel();
             add(p, tool.getName());
         }
     }
 
-    public static ToolSettingsPanelContainer getInstance() {
+    public static ToolSettingsPanelContainer get() {
         if (instance == null) {
             instance = new ToolSettingsPanelContainer();
         }
@@ -65,7 +65,7 @@ public class ToolSettingsPanelContainer extends JPanel {
             ToolSettingsPanel tsp = (ToolSettingsPanel) getComponent(i);
             if (tsp.isVisible()) {
                 try {
-                    GUIUtils.randomizeGUIWidgetsOn(tsp);
+                    GUIUtils.randomizeWidgetsOn(tsp);
                 } catch (Throwable e) {
                     // assertj-swing sometimes loses the stack trace
                     // of Errors, this is a workaround

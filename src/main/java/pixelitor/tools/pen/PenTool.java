@@ -53,7 +53,7 @@ import static pixelitor.tools.pen.PenToolMode.*;
  */
 public class PenTool extends Tool {
     private final ComboBoxModel<PenToolMode> modeModel =
-            new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
+        new DefaultComboBoxModel<>(new PenToolMode[]{BUILD, EDIT, TRANSFORM});
 
     private final AbstractAction toSelectionAction;
     //    private final AbstractAction traceAction;
@@ -70,17 +70,18 @@ public class PenTool extends Tool {
     private boolean rubberBand = true;
 
     private static final Action traceWithBrush = new TraceAction(
-            "Stroke with Current Brush", Tools.BRUSH);
+        "Stroke with Current Brush", Tools.BRUSH);
     private static final Action traceWithEraser = new TraceAction(
-            "Stroke with Current Eraser", Tools.ERASER);
+        "Stroke with Current Eraser", Tools.ERASER);
     private static final Action traceWithSmudge = new TraceAction(
-            "Stroke with Current Smudge", Tools.SMUDGE);
+        "Stroke with Current Smudge", Tools.SMUDGE);
 
     public PenTool() {
         super("Pen", 'P', "pen_tool_icon.png",
-                "", // getStatusBarMessage() is overridden
-                Cursors.DEFAULT, false, true,
-                ClipStrategy.FULL);
+            "", // getStatusBarMessage() is overridden
+            Cursors.DEFAULT, false, true,
+            ClipStrategy.FULL);
+
         toSelectionAction = new AbstractAction("Convert to Selection") {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,11 +114,11 @@ public class PenTool extends Tool {
         settingsPanel.add(rubberBandLabel);
         settingsPanel.add(rubberBandCB);
         rubberBandCB.addActionListener(e ->
-                rubberBand = rubberBandCB.isSelected());
+            rubberBand = rubberBandCB.isSelected());
         rubberBandCB.setName("rubberBandCB");
 
         settingsPanel.addButton(toSelectionAction, "toSelectionButton",
-                "Convert the active path to a selection");
+            "Convert the active path to a selection");
 
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
@@ -141,7 +142,7 @@ public class PenTool extends Tool {
         }
 
         assert OpenImages.activePathIs(path) :
-                "path = " + path + ", active path = " + OpenImages.getActivePath();
+            "path = " + path + ", active path = " + OpenImages.getActivePath();
 
         PenToolMode selectedMode = (PenToolMode) modeModel.getSelectedItem();
         if (selectedMode == BUILD) {
@@ -174,11 +175,11 @@ public class PenTool extends Tool {
                 if (!RandomGUITest.isRunning()) {
                     String requestedAction = mode == EDIT ? "edit" : "transform";
                     Dialogs.showInfoDialog("No Path",
-                            "<html>There is no path to " + requestedAction + ". " +
-                                    "You can create a path<ul>" +
-                                    "<li>in build mode</li>" +
-                                    "<li>by converting a selection into a path</li>" +
-                                    "</ul>");
+                        "<html>There is no path to " + requestedAction + ". " +
+                            "You can create a path<ul>" +
+                            "<li>in build mode</li>" +
+                            "<li>by converting a selection into a path</li>" +
+                            "</ul>");
                 }
                 setModeChooserCombo(BUILD);
             });
@@ -235,7 +236,7 @@ public class PenTool extends Tool {
         if (selectionEdit == null) {
             if (!RandomGUITest.isRunning()) {
                 Dialogs.showInfoDialog("No Selection",
-                        "No selection was created because the path is outside the canvas.");
+                    "No selection was created because the path is outside the canvas.");
             }
             return;
         }
@@ -243,7 +244,7 @@ public class PenTool extends Tool {
         PenToolMode oldMode = mode;
         removePath();
         History.add(new ConvertPathToSelectionEdit(
-                comp, oldPath, selectionEdit, oldMode));
+            comp, oldPath, selectionEdit, oldMode));
         assert checkPathConsistency();
 
         Tools.SELECTION.activate();
@@ -309,7 +310,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void compActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldCV, View newCV) {
         if (oldCV != null) { // is null if the first image is opened with active pen tool
             Composition oldComp = oldCV.getComp();
             Path oldPath = oldComp.getActivePath();
@@ -318,7 +319,7 @@ public class PenTool extends Tool {
             }
         }
 
-        super.compActivated(oldCV, newCV);
+        super.viewActivated(oldCV, newCV);
         path = newCV.getComp().getActivePath();
 
         assert OpenImages.getActiveView() == newCV;
@@ -362,7 +363,7 @@ public class PenTool extends Tool {
     @SuppressWarnings("SameReturnValue")
     public static boolean checkPathConsistency() {
         assert OpenImages.activePathIs(path) :
-                "path = " + path + ", active path = " + OpenImages.getActivePath();
+            "path = " + path + ", active path = " + OpenImages.getActivePath();
 
         Composition activeComp = OpenImages.getActiveComp();
         if (activeComp == null) {
@@ -370,8 +371,8 @@ public class PenTool extends Tool {
         }
         if (hasPath() && path.getComp() != activeComp) {
             throw new IllegalStateException("foreign path " + path
-                    + ", path comp = " + path.getComp().toPathDebugString()
-                    + ", active comp = " + activeComp.toPathDebugString());
+                + ", path comp = " + path.getComp().toPathDebugString()
+                + ", active comp = " + activeComp.toPathDebugString());
         }
         if (hasPath()) {
             path.checkConsistency();

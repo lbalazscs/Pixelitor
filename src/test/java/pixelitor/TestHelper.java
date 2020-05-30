@@ -34,6 +34,9 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.Messages;
+import pixelitor.utils.TestMessageHandler;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,7 +91,7 @@ public class TestHelper {
 
         when(comp.getCanvas()).thenReturn(canvas);
         when(comp.getCanvasBounds()).thenReturn(
-                new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
+            new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
         when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
         when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
 
@@ -127,7 +130,7 @@ public class TestHelper {
             layer2.addMask(REVEAL_ALL);
         }
 
-        NORMAL.activate(layer2, "test");
+        NORMAL.activate(layer2);
 
         assert layer2 == comp.getActiveLayer();
         assert layer1 == comp.getLayer(0);
@@ -202,15 +205,8 @@ public class TestHelper {
             popupTrigger = true;
         }
         //noinspection MagicConstant
-        return new MouseEvent(view,
-                id,
-                System.currentTimeMillis(),
-                modifiers,
-                x,
-                y,
-                1, // click count
-                popupTrigger
-        );
+        return new MouseEvent(view, id, System.currentTimeMillis(),
+            modifiers, x, y, 1, popupTrigger);
     }
 
     public static View setupMockViewFor(Composition comp) {
@@ -234,7 +230,7 @@ public class TestHelper {
         when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
 
         when(view.activeIsDrawable()).thenAnswer(
-                invocation -> comp.activeIsDrawable());
+            invocation -> comp.activeIsDrawable());
 
         comp.setView(view);
 
@@ -259,8 +255,8 @@ public class TestHelper {
         when(view.imageToComponentSpace(any(Rectangle2D.class))).thenAnswer(invocation -> {
             Rectangle2D in = invocation.getArgument(0);
             return new Rectangle(
-                    (int) in.getX(), (int) in.getY(),
-                    (int) in.getWidth(), (int) in.getHeight());
+                (int) in.getX(), (int) in.getY(),
+                (int) in.getWidth(), (int) in.getHeight());
         });
 
         when(view.componentXToImageSpace(anyDouble())).then(returnsFirstArg());
@@ -337,7 +333,7 @@ public class TestHelper {
     public static void press(int x, int y,
                              KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_PRESSED,
-                keys, MouseButton.LEFT, view);
+            keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mousePressed(e, view);
     }
 
@@ -348,7 +344,7 @@ public class TestHelper {
     public static void drag(int x, int y,
                             KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_DRAGGED,
-                keys, MouseButton.LEFT, view);
+            keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseDragged(e, view);
     }
 
@@ -359,7 +355,7 @@ public class TestHelper {
     public static void release(int x, int y,
                                KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_RELEASED,
-                keys, MouseButton.LEFT, view);
+            keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseReleased(e, view);
     }
 
@@ -370,7 +366,7 @@ public class TestHelper {
     public static void move(int x, int y,
                             KeyModifiers keys, View view) {
         MouseEvent e = createEvent(x, y, MOUSE_MOVED,
-                keys, MouseButton.LEFT, view);
+            keys, MouseButton.LEFT, view);
         Tools.EventDispatcher.mouseMoved(e, view);
     }
 
@@ -393,6 +389,11 @@ public class TestHelper {
         }
 
         RunContext.setUnitTestingMode();
+        Messages.setMsgHandler(new TestMessageHandler());
+
+        History.setUndoLevels(15);
+        Utils.makeSureAssertionsAreEnabled();
+
         Layer.uiFactory = TestLayerUI::new;
         ToolSettingsPanelContainer.setInstance(mock(ToolSettingsPanelContainer.class));
         setupMockFgBgSelector();

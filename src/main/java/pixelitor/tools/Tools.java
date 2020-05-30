@@ -57,26 +57,26 @@ public class Tools {
     public static final HandTool HAND = new HandTool();
     public static final ZoomTool ZOOM = new ZoomTool();
 
+    private static final Tool[] allTools = {
+        MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
+        SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
+        PEN, SHAPES, HAND, ZOOM};
+
     public static Tool currentTool;
 
     static {
         OpenImages.addActivationListener(new ViewActivationListener() {
             @Override
             public void viewActivated(View oldView, View newView) {
-                currentTool.compActivated(oldView, newView);
+                currentTool.viewActivated(oldView, newView);
             }
 
             @Override
             public void allViewsClosed() {
-                currentTool.allCompsClosed();
+                currentTool.allViewsClosed();
             }
         });
     }
-
-    private static final Tool[] allTools = {
-            MOVE, CROP, SELECTION, BRUSH, CLONE, ERASER,
-            SMUDGE, GRADIENT, PAINT_BUCKET, COLOR_PICKER,
-            PEN, SHAPES, HAND, ZOOM};
 
     public static void setDefaultTool() {
         String lastToolName = AppPreferences.loadLastToolName();
@@ -113,13 +113,15 @@ public class Tools {
         if (previousTool == newTool) {
             return;
         }
+
         if (previousTool != null) {
             previousTool.toolEnded();
             EventDispatcher.toolChanged(previousTool, newTool);
         }
+
         currentTool = newTool;
         newTool.toolStarted();
-        ToolSettingsPanelContainer.getInstance().showSettingsFor(newTool);
+        ToolSettingsPanelContainer.get().showSettingsFor(newTool);
     }
 
     public static Tool[] getAll() {

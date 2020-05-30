@@ -28,11 +28,11 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 /**
- * An Action that moves the active layer of the active composition
+ * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
 public class LayerMoveAction extends AbstractAction
-        implements ViewActivationListener, GlobalLayerChangeListener {
+    implements ViewActivationListener, ActiveCompositionListener {
 
     public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
     public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
@@ -52,13 +52,13 @@ public class LayerMoveAction extends AbstractAction
         this.up = up;
         setEnabled(false);
         OpenImages.addActivationListener(this);
-        Layers.addLayerChangeListener(this);
+        Layers.addCompositionListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         var comp = OpenImages.getActiveComp();
-        if(up) {
+        if (up) {
             comp.moveActiveLayerUp();
         } else {
             comp.moveActiveLayerDown();

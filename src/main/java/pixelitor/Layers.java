@@ -18,8 +18,8 @@
 package pixelitor;
 
 import pixelitor.gui.View;
-import pixelitor.layers.GlobalLayerChangeListener;
-import pixelitor.layers.GlobalLayerMaskChangeListener;
+import pixelitor.layers.ActiveCompositionListener;
+import pixelitor.layers.ActiveMaskListener;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
@@ -30,45 +30,43 @@ import java.util.List;
  * Static methods related to layer listeners
  */
 public class Layers {
-    /**
-     * Global listeners which always act on the active layer of the active composition
-     */
-    private static final List<GlobalLayerChangeListener> layerChangeListeners = new ArrayList<>();
-    private static final List<GlobalLayerMaskChangeListener> layerMaskChangeListeners = new ArrayList<>();
+    // Listeners observing (the active layer of) the active composition
+    private static final List<ActiveCompositionListener> compListeners = new ArrayList<>();
+    private static final List<ActiveMaskListener> maskListeners = new ArrayList<>();
 
     private Layers() {
     }
 
-    public static void addLayerChangeListener(GlobalLayerChangeListener listener) {
-        layerChangeListeners.add(listener);
+    public static void addCompositionListener(ActiveCompositionListener listener) {
+        compListeners.add(listener);
     }
 
-    public static void addLayerMaskChangeListener(GlobalLayerMaskChangeListener listener) {
-        layerMaskChangeListeners.add(listener);
+    public static void addMaskListener(ActiveMaskListener listener) {
+        maskListeners.add(listener);
     }
 
     public static void maskAddedTo(Layer layer) {
-        for (var listener : layerMaskChangeListeners) {
+        for (var listener : maskListeners) {
             listener.maskAddedTo(layer);
         }
     }
 
     public static void maskDeletedFrom(Layer layer) {
-        for (var listener : layerMaskChangeListeners) {
+        for (var listener : maskListeners) {
             listener.maskDeletedFrom(layer);
         }
     }
 
     // used for GUI updates
     public static void numLayersChanged(Composition comp, int newLayerCount) {
-        for (var listener : layerChangeListeners) {
+        for (var listener : compListeners) {
             listener.numLayersChanged(comp, newLayerCount);
         }
     }
 
     public static void activeLayerChanged(Layer newActiveLayer, boolean viewChanged) {
         assert newActiveLayer != null;
-        for (var listener : layerChangeListeners) {
+        for (var listener : compListeners) {
             listener.activeLayerChanged(newActiveLayer);
         }
 
@@ -78,15 +76,15 @@ public class Layers {
             // the active layer changes, but there is no view yet
             return;
         }
-        if(!viewChanged) {
+        if (!viewChanged) {
             // go to normal mask-viewing mode on the activated layer,
             // except if we got here because of a view change
-            MaskViewMode.NORMAL.activate(view, newActiveLayer, "active layer changed");
+            MaskViewMode.NORMAL.activate(view, newActiveLayer);
         }
     }
 
     public static void layerOrderChanged(Composition comp) {
-        for (var listener : layerChangeListeners) {
+        for (var listener : compListeners) {
             listener.layerOrderChanged(comp);
         }
     }

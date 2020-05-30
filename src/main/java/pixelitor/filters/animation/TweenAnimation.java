@@ -21,10 +21,11 @@ import pixelitor.filters.gui.CompositeState;
 import pixelitor.gui.utils.Dialogs;
 
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.io.File;
 
 import static java.nio.file.Files.isWritable;
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 public class TweenAnimation {
     private ParametrizedFilter filter;
@@ -82,8 +83,7 @@ public class TweenAnimation {
     }
 
     public AnimationWriter createAnimationWriter() {
-        return outputType.createAnimationWriter(
-                output, millisBetweenFrames);
+        return outputType.createAnimationWriter(output, millisBetweenFrames);
     }
 
     public CompositeState tween(double time) {
@@ -98,7 +98,7 @@ public class TweenAnimation {
      * @return true if the rendering can proceed
      */
     public boolean checkOverwrite(Component dialogParent) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         if (outputType.needsDirectory()) {
             if (output.list().length == 0) {
@@ -127,14 +127,14 @@ public class TweenAnimation {
 
     private boolean showFolderNotEmptyDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "Folder not empty",
-                String.format("<html>The folder <b>%s</b> is not empty. " +
-                                "<br>Some files might be overwritten. Are sure you want to continue?",
-                        output.getAbsolutePath()));
+            String.format("<html>The folder <b>%s</b> is not empty. " +
+                    "<br>Some files might be overwritten. Are sure you want to continue?",
+                output.getAbsolutePath()));
     }
 
     private boolean showFileExistsDialog(Component dialogParent) {
         return Dialogs.showYesNoWarningDialog(dialogParent, "File exists",
-                output.getAbsolutePath() + " exists already. Overwrite?");
+            output.getAbsolutePath() + " exists already. Overwrite?");
     }
 
     public void setPingPong(boolean pingPong) {

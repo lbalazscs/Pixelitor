@@ -58,9 +58,6 @@ public class ImageArea {
 
     private static Mode mode;
     private static final List<Consumer<Mode>> uiChangeListeners = new ArrayList<>();
-
-//    public static final ImageArea INSTANCE = new ImageArea();
-
     private static ImageAreaUI ui;
 
     // the tab placement used for creating new
@@ -119,7 +116,7 @@ public class ImageArea {
         }
         ImageArea.mode = mode;
 
-        var pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.get();
         pw.removeImagesArea(getUI());
         setUI();
         pw.addImagesArea();
@@ -210,9 +207,9 @@ public class ImageArea {
 
     private static void showNoPixelGridMsg() {
         Messages.showInfo("Pixel Grid",
-                "The pixel grid consists of lines between the pixels,\n" +
-                        "and is shown only if the zoom is at least 1600%\n" +
-                        "and there is no selection.");
+            "The pixel grid consists of lines between the pixels,\n" +
+                "and is shown only if the zoom is at least 1600%\n" +
+                "and there is no selection.");
     }
 
     public static class SavedInfo {

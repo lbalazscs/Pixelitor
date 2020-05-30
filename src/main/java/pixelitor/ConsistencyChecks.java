@@ -24,7 +24,8 @@ import pixelitor.layers.DeleteActiveLayerAction;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.Layer;
 import pixelitor.selection.SelectionActions;
-import pixelitor.utils.Utils;
+import pixelitor.utils.Threads;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Events;
 
 import java.awt.Rectangle;
@@ -83,23 +84,26 @@ public final class ConsistencyChecks {
 
             if (isSizeDifferent(currentImg, previousImg)) {
                 var comp = dr.getComp();
-                Events.postProgramError("fadeWouldWorkOn problem", comp, null);
-
-                Utils.debugImage(currentImg, "current");
-                Utils.debugImage(previousImg, "previous");
-
-                String lastFadeableOp = History.getLastEditName();
-                throw new IllegalStateException("'Fade " + lastFadeableOp
-                        + "' would not work now");
+                differentSizeForFade(currentImg, previousImg, comp);
+                return false;
             }
 
         }
         return true;
     }
 
-    private static boolean isSizeDifferent(BufferedImage imgA, BufferedImage imgB) {
-        return imgA.getWidth() != imgB.getWidth()
-                || imgA.getHeight() != imgB.getHeight();
+    private static boolean isSizeDifferent(BufferedImage a, BufferedImage b) {
+        return a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight();
+    }
+
+    private static void differentSizeForFade(BufferedImage currentImg, BufferedImage previousImg, Composition comp) {
+        Events.postProgramError("fade would not work", comp, null);
+
+        Debug.image(currentImg, "current");
+        Debug.image(previousImg, "previous");
+
+        String lastFadeableOp = History.getLastEditName();
+        throw new IllegalStateException("'Fade " + lastFadeableOp + "' would not work now");
     }
 
     public static void selectionActionsEnabledCheck(Composition comp) {
@@ -108,24 +112,30 @@ public final class ConsistencyChecks {
         }
         if (comp.hasSelection()) {
             if (!SelectionActions.areEnabled()) {
-                throw new IllegalStateException(comp.getName()
-                        + " has selection, but selection actions are disabled, thread is "
-                        + Thread.currentThread().getName());
+                selectionActionsInconsistency(comp);
+                return;
             }
         } else { // no selection
             if (SelectionActions.areEnabled()) {
-                String msg = comp.getName() + " has no selection, ";
-                if (comp.hasBuiltSelection()) {
-                    msg += "(but has built selection) ";
-                } else {
-                    msg += "(no built selection) ";
-                }
-
-                throw new IllegalStateException(msg
-                        + ", but selection actions are enabled, thread is "
-                        + Thread.currentThread().getName());
+                selectionActionsInconsistency(comp);
             }
         }
+    }
+
+    private static void selectionActionsInconsistency(Composition comp) {
+        String msg = comp.getName();
+        if (comp.hasSelection()) {
+            msg += "(has selection) ";
+        } else {
+            msg += "(no selection) ";
+        }
+        if (comp.hasBuiltSelection()) {
+            msg += "(has built selection) ";
+        } else {
+            msg += "(no built selection) ";
+        }
+
+        throw new IllegalStateException(msg + " on " + Threads.threadName());
     }
 
     public static boolean selectionShapeIsNotEmpty(Composition comp) {
@@ -158,8 +168,8 @@ public final class ConsistencyChecks {
         boolean ok = !canvasSize.createIntersection(selShapeBounds).isEmpty();
         if (!ok) {
             System.out.println("\nConsistencyChecks::selectionIsInsideCanvas: no intersection: "
-                    + "canvasSize = " + canvasSize
-                    + ", shapeBounds = " + selShapeBounds);
+                + "canvasSize = " + canvasSize
+                + ", shapeBounds = " + selShapeBounds);
         }
         return ok;
     }
@@ -181,27 +191,27 @@ public final class ConsistencyChecks {
 
         int txAbs = -dr.getTx();
         if (image.getWidth() < txAbs + canvas.getWidth()) {
-            return throwImageDoesNotCoverCanvasException(dr);
+            return imageDoesNotCoverCanvas(dr);
         }
 
         int tyAbs = -dr.getTy();
         if (image.getHeight() < tyAbs + canvas.getHeight()) {
-            return throwImageDoesNotCoverCanvasException(dr);
+            return imageDoesNotCoverCanvas(dr);
         }
 
         return true;
     }
 
-    private static boolean throwImageDoesNotCoverCanvasException(Drawable dr) {
+    private static boolean imageDoesNotCoverCanvas(Drawable dr) {
         var canvas = dr.getComp().getCanvas();
         var img = dr.getImage();
 
         String msg = format("canvas width = %d, canvas height = %d, " +
-                        "image width = %d, image height = %d, " +
-                        "tx = %d, ty = %d, class = %s",
-                canvas.getWidth(), canvas.getHeight(),
-                img.getWidth(), img.getHeight(),
-                dr.getTx(), dr.getTy(), dr.getClass().getSimpleName());
+                "image width = %d, image height = %d, " +
+                "tx = %d, ty = %d, class = %s",
+            canvas.getWidth(), canvas.getHeight(),
+            img.getWidth(), img.getHeight(),
+            dr.getTx(), dr.getTy(), dr.getClass().getSimpleName());
 
         throw new IllegalStateException(msg);
     }
@@ -225,12 +235,12 @@ public final class ConsistencyChecks {
         if (enabled) {
             if (numLayers <= 1) {
                 throw new IllegalStateException("delete layer enabled for "
-                        + comp.getName() + ", but numLayers = " + numLayers);
+                    + comp.getName() + ", but numLayers = " + numLayers);
             }
         } else { // disabled
             if (numLayers >= 2) {
                 throw new IllegalStateException("delete layer disabled for "
-                        + comp.getName() + ", but numLayers = " + numLayers);
+                    + comp.getName() + ", but numLayers = " + numLayers);
             }
         }
         return true;

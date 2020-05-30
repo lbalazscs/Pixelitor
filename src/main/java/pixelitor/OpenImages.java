@@ -21,7 +21,7 @@ import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
 import pixelitor.io.IO;
-import pixelitor.io.IOThread;
+import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
 import pixelitor.menus.MenuAction;
 import pixelitor.menus.file.RecentFilesMenu;
@@ -36,7 +36,6 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.ViewActivationListener;
 
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -51,6 +50,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.utils.Threads.onEDT;
 
 /**
  * Static methods related to the list of opened images
@@ -59,7 +59,7 @@ public class OpenImages {
     private static final List<View> views = new ArrayList<>();
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
-            = new ArrayList<>();
+        = new ArrayList<>();
 
     public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
         @Override
@@ -111,14 +111,14 @@ public class OpenImages {
         History.onAllImagesClosed();
         SelectionActions.setEnabled(false, null);
 
-        PixelitorWindow.getInstance().updateTitle(null);
+        PixelitorWindow.get().updateTitle(null);
         FramesUI.resetCascadeIndex();
     }
 
     private static void activateAViewIfNoneIs() {
         if (!views.isEmpty()) {
             boolean activeFound = views.stream()
-                    .anyMatch(view -> view == activeView);
+                .anyMatch(view -> view == activeView);
 
             if (!activeFound) {
                 setActiveView(views.get(0), true);
@@ -182,7 +182,7 @@ public class OpenImages {
         ZoomMenu.zoomChanged(view.getZoomLevel());
 
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
-        PixelitorWindow.getInstance().updateTitle(comp);
+        PixelitorWindow.get().updateTitle(comp);
     }
 
     public static void repaintActive() {
@@ -220,8 +220,8 @@ public class OpenImages {
         File file = comp.getFile();
         if (file == null) {
             String msg = format(
-                    "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
-                    comp.getName());
+                "<html>The image <b>%s</b> can't be reloaded because it wasn't yet saved.",
+                comp.getName());
             Messages.showError("No file", msg);
             return;
         }
@@ -229,26 +229,25 @@ public class OpenImages {
         String path = file.getAbsolutePath();
         if (!file.exists()) {
             String msg = format(
-                    "<html>The image <b>%s</b> can't be reloaded because the file" +
-                            "<br><b>%s</b>" +
-                            "<br>doesn't exist anymore.",
-                    comp.getName(), path);
+                "<html>The image <b>%s</b> can't be reloaded because the file" +
+                    "<br><b>%s</b>" +
+                    "<br>doesn't exist anymore.",
+                comp.getName(), path);
             Messages.showError("File not found", msg);
             return;
         }
 
         // prevent starting a new reload on the EDT while an asynchronous
         // reload is already scheduled or running on the IO thread
-        if (IOThread.isProcessing(path)) {
+        if (IOTasks.isProcessing(path)) {
             return;
         }
-        IOThread.markReadProcessing(path);
+        IOTasks.markReadProcessing(path);
 
         IO.loadCompAsync(file)
-                .thenAcceptAsync(view::replaceJustReloadedComp,
-                        EventQueue::invokeLater)
-                .whenComplete((v, e) -> IOThread.readingFinishedFor(path))
-                .exceptionally(Messages::showExceptionOnEDT);
+            .thenAcceptAsync(view::replaceJustReloadedComp, onEDT)
+            .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
+            .whenComplete((v, e) -> IO.checkForIOProblems(e));
     }
 
     public static void onActiveView(Consumer<View> action) {
@@ -277,8 +276,8 @@ public class OpenImages {
         }
 
         throw new AssertionError(format(
-                "Expected %d images, found %d (%s)",
-                expected, numOpenImages, getOpenImageNamesAsString()));
+            "Expected %d images, found %d (%s)",
+            expected, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertNumOpenImagesIsAtLeast(int minimum) {
@@ -287,8 +286,8 @@ public class OpenImages {
             return;
         }
         throw new AssertionError(format(
-                "Expected at least %d images, found %d (%s)",
-                minimum, numOpenImages, getOpenImageNamesAsString()));
+            "Expected at least %d images, found %d (%s)",
+            minimum, numOpenImages, getOpenImageNamesAsString()));
     }
 
     public static void assertZoomOfActiveIs(ZoomLevel expected) {
@@ -298,14 +297,14 @@ public class OpenImages {
         ZoomLevel actual = activeView.getZoomLevel();
         if (actual != expected) {
             throw new AssertionError("expected = " + expected +
-                    ", found = " + actual);
+                ", found = " + actual);
         }
     }
 
     private static String getOpenImageNamesAsString() {
         return views.stream()
-                .map(View::getName)
-                .collect(joining(", ", "[", "]"));
+            .map(View::getName)
+            .collect(joining(", ", "[", "]"));
     }
 
     private static void warnAndCloseActive() {
@@ -414,34 +413,36 @@ public class OpenImages {
 
     public static Optional<Composition> findCompByName(String name) {
         return views.stream()
-                .map(View::getComp)
-                .filter(c -> c.getName().equals(name))
-                .findFirst();
+            .map(View::getComp)
+            .filter(c -> c.getName().equals(name))
+            .findFirst();
     }
 
     public static List<Composition> getUnsavedComps() {
         return views.stream()
-                .map(View::getComp)
-                .filter(Composition::isDirty)
-                .collect(toList());
+            .map(View::getComp)
+            .filter(Composition::isDirty)
+            .collect(toList());
     }
 
     public static void duplicateActiveComp() {
         assert activeView != null;
 
         Composition activeComp = activeView.getComp();
-        Composition newComp = activeComp.createCopy(false, true);
+        Composition newComp = activeComp.copy(false, true);
 
         addAsNewComp(newComp);
     }
 
     public static Composition addJustLoadedComp(Composition comp) {
-        if (comp != null) { // there was no decoding problem
-            addAsNewComp(comp);
-            File file = comp.getFile();
-            RecentFilesMenu.getInstance().addFile(file);
-            Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
-        }
+        assert comp != null;
+
+        addAsNewComp(comp);
+
+        File file = comp.getFile();
+        RecentFilesMenu.getInstance().addFile(file);
+        Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
+
         return comp;
     }
 
@@ -458,7 +459,7 @@ public class OpenImages {
             comp.addAllLayersToGUI();
             view.setCursor(Tools.getCurrent().getStartingCursor());
             views.add(view);
-            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer(), "image added");
+            MaskViewMode.NORMAL.activate(view, comp.getActiveLayer());
             ImageArea.addNewView(view);
             setActiveView(view, false);
         } catch (Exception e) {

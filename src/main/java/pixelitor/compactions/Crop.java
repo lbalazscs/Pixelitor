@@ -87,7 +87,7 @@ public class Crop implements CompAction {
         var canvasTransform = createCanvasTransform(cropRect);
 
         View view = oldComp.getView();
-        Composition newComp = oldComp.createCopy(true, !selectionCrop);
+        Composition newComp = oldComp.copy(true, !selectionCrop);
         Canvas newCanvas = newComp.getCanvas();
 
         Guides guides = oldComp.getGuides();
@@ -134,7 +134,7 @@ public class Crop implements CompAction {
         assert oldComp != newComp;
         String editName = addHidingMask ? "Crop and Hide" : "Crop";
         History.add(new CompositionReplacedEdit(
-                editName, false, view, oldComp, newComp, canvasTransform));
+            editName, view, oldComp, newComp, canvasTransform, false));
         view.replaceComp(newComp);
 
         newComp.updateAllIconImages();
@@ -143,8 +143,8 @@ public class Crop implements CompAction {
         newComp.imageChanged(FULL, true);
 
         Messages.showInStatusBar(format(
-                "Image cropped to %d x %d pixels.",
-                cropRect.width, cropRect.height));
+            "Image cropped to %d x %d pixels.",
+            cropRect.width, cropRect.height));
 
         return CompletableFuture.completedFuture(newComp);
     }
@@ -157,9 +157,8 @@ public class Crop implements CompAction {
                                            boolean deleteCroppedPixels) {
         try {
             OpenImages.onActiveComp(comp ->
-                    new Crop(cropRect, false, allowGrowing,
-                            deleteCroppedPixels, false)
-                            .process(comp));
+                new Crop(cropRect, false, allowGrowing,
+                    deleteCroppedPixels, false).process(comp));
         } catch (Exception ex) {
             Messages.showException(ex);
         }
@@ -197,12 +196,12 @@ public class Crop implements CompAction {
 
     private static void selectionCropWithQuestion(Composition comp, Selection sel) {
         String question = "<html>You have a nonrectangular selection, but every image has to be rectangular." +
-                "<br>Pixelitor can crop to the rectangular bounds of the selection." +
-                "<br>It can also hide parts of the image using layer masks.";
+            "<br>Pixelitor can crop to the rectangular bounds of the selection." +
+            "<br>It can also hide parts of the image using layer masks.";
         // the yes-no-cancel dialog can actually show more than 3 options
         int answer = Dialogs.showYesNoCancelDialog("Selection Crop Type", question,
-                new String[]{"Crop and Hide", "Only Crop", "Only Hide", "Cancel"},
-                JOptionPane.QUESTION_MESSAGE);
+            new String[]{"Crop and Hide", "Only Crop", "Only Hide", "Cancel"},
+            JOptionPane.QUESTION_MESSAGE);
         if (answer == JOptionPane.CLOSED_OPTION || answer == 3) {
             // canceled, do nothing
         } else if (answer == 0) {
@@ -224,8 +223,7 @@ public class Crop implements CompAction {
                                         Selection sel,
                                         boolean addHidingMask) {
         new Crop(sel.getShapeBounds2D(), true,
-                true, true, addHidingMask)
-                .process(comp);
+            true, true, addHidingMask).process(comp);
     }
 
     private static void addHidingMask(Composition comp, Shape shape, boolean addToHistory) {

@@ -19,11 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
-import pixelitor.tools.shapes.BasicStrokeCap;
-import pixelitor.tools.shapes.BasicStrokeJoin;
-import pixelitor.tools.shapes.ShapeType;
-import pixelitor.tools.shapes.StrokeSettingsPanel;
-import pixelitor.tools.shapes.StrokeType;
+import pixelitor.tools.shapes.*;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
@@ -42,7 +38,6 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  */
 public class StrokeParam extends AbstractFilterParam {
     private final RangeParam strokeWidthParam = new RangeParam("Stroke Width", 1, 5, 100);
-    // controls in the Stroke Settings dialog
     private final EnumParam<BasicStrokeCap> strokeCapParam = BasicStrokeCap.asParam();
     private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam();
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
@@ -51,10 +46,9 @@ public class StrokeParam extends AbstractFilterParam {
     private DefaultButton defaultButton;
     private JComponent previewer;
 
-    private final FilterParam[] allParams = {strokeWidthParam,
-            strokeCapParam, strokeJoinParam,
-            strokeTypeParam, shapeTypeParam, dashedParam
-    };
+    private final FilterParam[] allParams = {
+        strokeWidthParam, strokeCapParam, strokeJoinParam,
+        strokeTypeParam, shapeTypeParam, dashedParam};
 
     public StrokeParam(String name) {
         super(name, ALLOW_RANDOMIZE);
@@ -64,8 +58,8 @@ public class StrokeParam extends AbstractFilterParam {
     public JComponent createGUI() {
         defaultButton = new DefaultButton(this);
         paramGUI = new ConfigureParamGUI(
-                owner -> createSettingsDialog(this, owner)
-                , defaultButton);
+            owner -> createSettingsDialog(this, owner),
+            defaultButton);
 
         setGUIEnabledState();
         return (JComponent) paramGUI;
@@ -108,23 +102,23 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     public JDialog createSettingsDialog() {
-        return createSettingsDialog(this, PixelitorWindow.getInstance());
+        return createSettingsDialog(this, PixelitorWindow.get());
     }
 
     public static JDialog createSettingsDialog(StrokeParam param, Window owner) {
         return new DialogBuilder()
-                .owner(owner)
-                .title("Stroke Settings")
-                .notModal()
-                .content(new StrokeSettingsPanel(param))
-                .withScrollbars()
-                .noCancelButton()
-                .okText("Close")
-                .build();
+            .owner(owner)
+            .title("Stroke Settings")
+            .notModal()
+            .content(new StrokeSettingsPanel(param))
+            .withScrollbars()
+            .noCancelButton()
+            .okText("Close")
+            .build();
     }
 
     public Stroke createStroke() {
-        int strokeWidth = strokeWidthParam.getValue();
+        float strokeWidth = strokeWidthParam.getValueAsFloat();
 
         float[] dashFloats = null;
         if (dashedParam.isChecked()) {
@@ -132,10 +126,10 @@ public class StrokeParam extends AbstractFilterParam {
         }
 
         return getStrokeType().createStroke(
-                strokeWidth,
-                strokeCapParam.getSelected().getValue(),
-                strokeJoinParam.getSelected().getValue(),
-                dashFloats
+            strokeWidth,
+            strokeCapParam.getSelected().getValue(),
+            strokeJoinParam.getSelected().getValue(),
+            dashFloats
         );
     }
 
@@ -159,12 +153,12 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public StrokeSettings copyState() {
         return new StrokeSettings(
-                strokeWidthParam.getValueAsDouble(),
-                strokeCapParam.getSelected(),
-                strokeJoinParam.getSelected(),
-                strokeTypeParam.getSelected(),
-                shapeTypeParam.getSelected(),
-                dashedParam.isChecked());
+            strokeWidthParam.getValueAsDouble(),
+            strokeCapParam.getSelected(),
+            strokeJoinParam.getSelected(),
+            strokeTypeParam.getSelected(),
+            shapeTypeParam.getSelected(),
+            dashedParam.isChecked());
     }
 
     @Override
@@ -197,7 +191,7 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public boolean isSetToDefault() {
         return Arrays.stream(allParams)
-                .allMatch(Resettable::isSetToDefault);
+            .allMatch(Resettable::isSetToDefault);
     }
 
     @Override
@@ -265,8 +259,8 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public Object getParamValue() {
         List<Object> childValues = Stream.of(allParams)
-                .map(FilterParam::getParamValue)
-                .collect(toList());
+            .map(FilterParam::getParamValue)
+            .collect(toList());
         return childValues;
     }
 }

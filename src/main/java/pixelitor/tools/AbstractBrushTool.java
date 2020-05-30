@@ -511,12 +511,12 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
 
     }
 
     @Override
-    public void compActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldCV, View newCV) {
         resetInitialState();
         outlinePainter.setView(newCV);
 

@@ -41,18 +41,18 @@ import static pixelitor.selection.ShapeCombination.*;
  */
 public class SelectionTool extends DragTool {
     private static final String HELP_TEXT = "<b>click and drag</b> creates a selection, " +
-            "<b>Space-drag</b> moves it. " +
-            "<b>Shift-drag</b> adds to an existing selection, " +
-            "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+        "<b>Space-drag</b> moves it. " +
+        "<b>Shift-drag</b> adds to an existing selection, " +
+        "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
     private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +
-            "<b>click</b> to add points, " +
-            "<b>double-click</b> (or <b>right-click</b>) to close the selection." +
-            "<b>Shift</b> adds to an existing selection, " +
-            "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.";
+        "<b>click</b> to add points, " +
+        "<b>double-click</b> (or <b>right-click</b>) to close the selection." +
+        "<b>Shift</b> adds to an existing selection, " +
+        "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.";
     private static final String FREEHAND_HELP_TEXT = "<html>Freehand selection: " +
-            "simply drag around the area that you want to select. " +
-            "<b>Shift-drag</b> adds to an existing selection, " +
-            "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
+        "simply drag around the area that you want to select. " +
+        "<b>Shift-drag</b> adds to an existing selection, " +
+        "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
 
     private boolean altMeansSubtract = false;
     private ShapeCombination originalShapeCombination;
@@ -62,14 +62,14 @@ public class SelectionTool extends DragTool {
     private boolean displayWidthHeight = true;
 
     private final EnumComboBoxModel<SelectionType> typeModel
-            = new EnumComboBoxModel<>(SelectionType.class);
+        = new EnumComboBoxModel<>(SelectionType.class);
     private final EnumComboBoxModel<ShapeCombination> interactionModel
-            = new EnumComboBoxModel<>(ShapeCombination.class);
+        = new EnumComboBoxModel<>(ShapeCombination.class);
 
     SelectionTool() {
         super("Selection", 'M', "selection_tool_icon.png",
-                HELP_TEXT, Cursors.DEFAULT, false,
-                true, false, ClipStrategy.FULL);
+            HELP_TEXT, Cursors.DEFAULT, false,
+            true, false, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 
@@ -84,14 +84,14 @@ public class SelectionTool extends DragTool {
 
         var interactionCB = new JComboBox<ShapeCombination>(interactionModel);
         settingsPanel.addComboBox("New Selection:",
-                interactionCB, "interactionCB");
+            interactionCB, "interactionCB");
 
         settingsPanel.addSeparator();
 
         settingsPanel.addButton(SelectionActions.getCrop());
 
         settingsPanel.addButton(SelectionActions.getConvertToPath(),
-                "toPathButton", "Convert the selection to a path");
+            "toPathButton", "Convert the selection to a path");
     }
 
     private void selectionTypeChanged() {
@@ -119,7 +119,7 @@ public class SelectionTool extends DragTool {
         setupInteractionWithKeyModifiers(e);
 
         selectionBuilder = new SelectionBuilder(getSelectionType(),
-                getCurrentInteraction(), e.getComp());
+            getCurrentInteraction(), e.getComp());
     }
 
     @Override
@@ -132,7 +132,7 @@ public class SelectionTool extends DragTool {
             dragStarted(e);
         }
 
-        boolean altDown = e.isAltDown();
+        altDown = e.isAltDown();
         boolean startFromCenter = !altMeansSubtract && altDown;
         if (!altDown) {
             altMeansSubtract = false;
@@ -166,9 +166,9 @@ public class SelectionTool extends DragTool {
         altMeansSubtract = false;
 
         assert ConsistencyChecks.selectionShapeIsNotEmpty(comp) :
-                "selection is empty";
+            "selection is empty";
         assert ConsistencyChecks.selectionIsInsideCanvas(comp) :
-                "selection is outside";
+            "selection is outside";
     }
 
     private void polygonalDragFinished(PMouseEvent e) {
@@ -176,7 +176,7 @@ public class SelectionTool extends DragTool {
         if (selectionBuilder == null) {
             setupInteractionWithKeyModifiers(e);
             selectionBuilder = new SelectionBuilder(getSelectionType(),
-                    getCurrentInteraction(), comp);
+                getCurrentInteraction(), comp);
             selectionBuilder.updateBuiltSelection(e, comp);
             restoreInteraction();
         } else {
@@ -290,7 +290,7 @@ public class SelectionTool extends DragTool {
 
     private void setupInteractionWithKeyModifiers(PMouseEvent e) {
         boolean shiftDown = e.isShiftDown();
-        boolean altDown = e.isAltDown();
+        altDown = e.isAltDown();
 
         altMeansSubtract = altDown;
 
@@ -316,12 +316,12 @@ public class SelectionTool extends DragTool {
     }
 
     @Override
-    public void allCompsClosed() {
+    public void allViewsClosed() {
         // ignore
     }
 
     @Override
-    public void compActivated(View oldCV, View newCV) {
+    public void viewActivated(View oldCV, View newCV) {
         stopBuildingSelection();
     }
 
@@ -358,10 +358,7 @@ public class SelectionTool extends DragTool {
 
     @Override
     public String getStateInfo() {
-        SelectionType type = getSelectionType();
-        ShapeCombination interaction = getCurrentInteraction();
-
-        return type + ", " + interaction;
+        return getSelectionType() + ", " + getCurrentInteraction();
     }
 
     @Override

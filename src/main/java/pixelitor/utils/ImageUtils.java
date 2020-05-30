@@ -24,7 +24,6 @@ import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
-import pixelitor.ThreadPool;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
@@ -54,6 +53,7 @@ import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
 import static pixelitor.colors.ColorUtils.rgbIntToString;
 import static pixelitor.colors.ColorUtils.toPackedInt;
+import static pixelitor.utils.Threads.onPool;
 
 /**
  * Static image-related utility methods
@@ -62,11 +62,11 @@ public class ImageUtils {
     public static final double DEG_315_IN_RADIANS = Math.PI / 4;
     private static final Color CHECKERBOARD_GRAY = new Color(200, 200, 200);
 
-    private static final GraphicsConfiguration graphicsConfiguration = GraphicsEnvironment
-            .getLocalGraphicsEnvironment()
-            .getDefaultScreenDevice()
-            .getDefaultConfiguration();
-    private static final ColorModel defaultColorModel = graphicsConfiguration.getColorModel();
+    private static final GraphicsConfiguration graphicsConfig = GraphicsEnvironment
+        .getLocalGraphicsEnvironment()
+        .getDefaultScreenDevice()
+        .getDefaultConfiguration();
+    private static final ColorModel defaultColorModel = graphicsConfig.getColorModel();
 
     private ImageUtils() {
     }
@@ -78,14 +78,13 @@ public class ImageUtils {
     public static BufferedImage toSysCompatibleImage(BufferedImage input) {
         assert input != null;
 
-        if (input.getColorModel()
-                .equals(defaultColorModel)) {
+        if (input.getColorModel().equals(defaultColorModel)) {
             // already compatible
             return input;
         }
 
-        BufferedImage output = graphicsConfiguration
-                .createCompatibleImage(input.getWidth(), input.getHeight(), TRANSLUCENT);
+        BufferedImage output = graphicsConfig.createCompatibleImage(
+            input.getWidth(), input.getHeight(), TRANSLUCENT);
         Graphics2D g = output.createGraphics();
         g.drawImage(input, 0, 0, null);
         g.dispose();
@@ -100,7 +99,7 @@ public class ImageUtils {
     public static BufferedImage createSysCompatibleImage(int width, int height) {
         assert width > 0 && height > 0;
 
-        return graphicsConfiguration.createCompatibleImage(width, height, TRANSLUCENT);
+        return graphicsConfig.createCompatibleImage(width, height, TRANSLUCENT);
     }
 
     public static VolatileImage createSysCompatibleVolatileImage(Canvas canvas) {
@@ -110,22 +109,23 @@ public class ImageUtils {
     public static VolatileImage createSysCompatibleVolatileImage(int width, int height) {
         assert width > 0 && height > 0;
 
-        return graphicsConfiguration.createCompatibleVolatileImage(width, height, TRANSLUCENT);
+        return graphicsConfig.createCompatibleVolatileImage(width, height, TRANSLUCENT);
     }
 
     public static BufferedImage createImageWithSameCM(BufferedImage src) {
         ColorModel dstCM = src.getColorModel();
         return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(
-                src.getWidth(), src.getHeight()),
-                dstCM.isAlphaPremultiplied(), null);
+            src.getWidth(), src.getHeight()),
+            dstCM.isAlphaPremultiplied(), null);
     }
 
     // like the above but instead of src width and height, it uses the arguments
     public static BufferedImage createImageWithSameCM(BufferedImage src,
                                                       int width, int height) {
-        ColorModel dstCM = src.getColorModel();
-        return new BufferedImage(dstCM, dstCM.createCompatibleWritableRaster(width, height),
-                dstCM.isAlphaPremultiplied(), null);
+        ColorModel cm = src.getColorModel();
+        return new BufferedImage(cm,
+            cm.createCompatibleWritableRaster(width, height),
+            cm.isAlphaPremultiplied(), null);
     }
 
 
@@ -134,15 +134,14 @@ public class ImageUtils {
                                                                int targetHeight) {
         boolean progressiveBilinear = false;
         if (targetWidth < img.getWidth() / 2
-                || targetHeight < img.getHeight() / 2) {
+            || targetHeight < img.getHeight() / 2) {
             progressiveBilinear = true;
         }
 
         boolean finalProgressive = progressiveBilinear;
-        return CompletableFuture.supplyAsync(
-                () -> getFasterScaledInstance(img, targetWidth, targetHeight,
-                        VALUE_INTERPOLATION_BICUBIC, finalProgressive),
-                ThreadPool.getExecutor());
+        return CompletableFuture.supplyAsync(() ->
+            getFasterScaledInstance(img, targetWidth, targetHeight,
+                VALUE_INTERPOLATION_BICUBIC, finalProgressive), onPool);
     }
 
     // From the Filthy Rich Clients book
@@ -318,64 +317,6 @@ public class ImageUtils {
         return retVal;
     }
 
-    private static BufferedImage simpleResize(BufferedImage img,
-                                              int targetWidth, int targetHeight,
-                                              Object hint) {
-        assert img != null;
-
-        BufferedImage ret = new BufferedImage(targetWidth, targetHeight, img.getType());
-        Graphics2D g2 = ret.createGraphics();
-        g2.setRenderingHint(KEY_INTERPOLATION, hint);
-        g2.drawImage(img, 0, 0, targetWidth, targetHeight, null);
-        g2.dispose();
-        return ret;
-    }
-
-    /**
-     * Samples 9 pixels at and around the given pixel coordinates
-     *
-     * @param src
-     * @param x
-     * @param y
-     * @return the average color
-     */
-    public static Color sample9Points(BufferedImage src, int x, int y) {
-        int averageRed = 0;
-        int averageGreen = 0;
-        int averageBlue = 0;
-        int width = src.getWidth();
-        int height = src.getHeight();
-
-        for (int i = x - 1; i < x + 2; i++) {
-            for (int j = y - 1; j < y + 2; j++) {
-                int limitedX = limitSamplingIndex(i, width - 1);
-                int limitedY = limitSamplingIndex(j, height - 1);
-
-                int rgb = src.getRGB(limitedX, limitedY);
-//                int a = (rgb >>> 24) & 0xFF;
-                int r = (rgb >>> 16) & 0xFF;
-                int g = (rgb >>> 8) & 0xFF;
-                int b = rgb & 0xFF;
-                averageRed += r;
-                averageGreen += g;
-                averageBlue += b;
-            }
-        }
-
-        return new Color(averageRed / 9, averageGreen / 9, averageBlue / 9);
-    }
-
-    private static int limitSamplingIndex(int x, int max) {
-        int r = x;
-        if (r < 0) {
-            r = 0;
-        }
-        if (r > max) {
-            r = max;
-        }
-        return r;
-    }
-
     public static boolean hasPackedIntArray(BufferedImage image) {
         assert image != null;
 
@@ -409,10 +350,10 @@ public class ImageUtils {
             int width = src.getWidth();
             int height = src.getHeight();
             pixels = new int[width * height];
-            PixelGrabber pg = new PixelGrabber(src, 0, 0, width, height, pixels, 0, width);
+            var grabber = new PixelGrabber(src, 0, 0, width, height, pixels, 0, width);
 
             try {
-                pg.grabPixels();
+                grabber.grabPixels();
             } catch (InterruptedException e) {
                 Messages.showException(e);
             }
@@ -433,14 +374,13 @@ public class ImageUtils {
         assert pixels.length == width * height;
 
         DataBuffer data = new DataBufferByte(pixels, 1);
-        WritableRaster raster = Raster.createInterleavedRaster(
-                data,
-                width, height, width, 1, new int[]{0}, new Point(0, 0));
+        WritableRaster raster = Raster.createInterleavedRaster(data,
+            width, height, width, 1, new int[]{0}, new Point(0, 0));
 
         ColorSpace cs = new ICC_ColorSpace(ICC_Profile.getInstance(ColorSpace.CS_GRAY));
-        ComponentColorModel cm = new ComponentColorModel(cs,
-                false, false,
-                Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        ColorModel cm = new ComponentColorModel(cs,
+            false, false,
+            Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
         return new BufferedImage(cm, raster, false, null);
     }
 
@@ -475,7 +415,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB_PRE);
+        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB_PRE);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -490,7 +430,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB);
+        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -505,7 +445,7 @@ public class ImageUtils {
     public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_RGB);
+        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_RGB);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
@@ -529,8 +469,8 @@ public class ImageUtils {
             flushOld = true;
         }
 
-        BufferedImage dest = new BufferedImage(
-                src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
+        var dest = new BufferedImage(
+            src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
 
         Graphics2D g = dest.createGraphics();
         // this hideous color will be transparent
@@ -567,28 +507,9 @@ public class ImageUtils {
         icm.getBlues(blues);
 
         int pixel = raster.getSample(x, y, 0);
-        IndexColorModel icm2 = new IndexColorModel(8, size, reds, greens, blues, pixel);
+        var icm2 = new IndexColorModel(8, size, reds, greens, blues, pixel);
 
         return new BufferedImage(icm2, raster, image.isAlphaPremultiplied(), null);
-    }
-
-
-    // without this the drawing on large images would be very slow
-    // TODO is this faster? the simple g.drawImage also respects the clipping
-
-    public static void drawImageWithClipping(Graphics g, BufferedImage img) {
-        assert img != null;
-
-        Rectangle clipBounds = g.getClipBounds();
-        int clipX = (int) clipBounds.getX();
-        int clipY = (int) clipBounds.getY();
-        int clipWidth = (int) clipBounds.getWidth();
-        int clipHeight = (int) clipBounds.getHeight();
-        int clipX2 = clipX + clipWidth;
-        int clipY2 = clipY + clipHeight;
-        g.drawImage(img, clipX, clipY, clipX2, clipY2, clipX, clipY, clipX2, clipY2, null);
-
-//        g.drawImage(img, 0, 0, null);
     }
 
     public static BufferedImage createThumbnail(BufferedImage src, int size, CheckerboardPainter painter) {
@@ -649,8 +570,7 @@ public class ImageUtils {
             painter.paint(g, null, thumbWidth, thumbHeight);
         }
 
-        g.setRenderingHint(KEY_INTERPOLATION,
-                VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
         g.dispose();
         return thumb;
@@ -700,22 +620,25 @@ public class ImageUtils {
         assert bounds != null;
 
         Rectangle intersection = SwingUtilities.computeIntersection(
-                0, 0, src.getWidth(), src.getHeight(), // image bounds
-                bounds
+            0, 0, src.getWidth(), src.getHeight(), // image bounds
+            bounds
         );
 
         if (intersection.width <= 0 || intersection.height <= 0) {
             throw new IllegalStateException("empty intersection: bounds = " + bounds
-                    + ", src width = " + src.getWidth()
-                    + ", src height = " + src.getHeight()
-                    + ", intersection = " + intersection);
+                + ", src width = " + src.getWidth()
+                + ", src height = " + src.getHeight()
+                + ", intersection = " + intersection);
         }
 
         Raster copyRaster = src.getData(intersection);  // a copy
-        Raster startingFrom00 = copyRaster
-                .createChild(intersection.x, intersection.y, intersection.width, intersection.height, 0, 0, null);
-        return new BufferedImage(src.getColorModel(), (WritableRaster) startingFrom00, src
-                .isAlphaPremultiplied(), null);
+        Raster startingFrom00 = copyRaster.createChild(
+            intersection.x, intersection.y,
+            intersection.width, intersection.height,
+            0, 0, null);
+        return new BufferedImage(src.getColorModel(),
+            (WritableRaster) startingFrom00,
+            src.isAlphaPremultiplied(), null);
     }
 
     /**
@@ -748,9 +671,7 @@ public class ImageUtils {
         if (height <= 0) {
             throw new IllegalArgumentException("height = " + height);
         }
-        BufferedImage output = new BufferedImage(width
-                , height
-                , input.getType());
+        BufferedImage output = new BufferedImage(width, height, input.getType());
         Graphics2D g = output.createGraphics();
         g.transform(AffineTransform.getTranslateInstance(-x, -y));
         g.drawImage(input, null, 0, 0);
@@ -862,7 +783,7 @@ public class ImageUtils {
         g.fillOval(softness, softness, size - 2 * softness, size - 2 * softness);
         g.dispose();
 
-        BoxBlurFilter blur = new BoxBlurFilter(softness, softness, 1, "Blur");
+        var blur = new BoxBlurFilter(softness, softness, 1, "Blur");
         blur.setProgressTracker(ProgressTracker.NULL_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
 
@@ -961,7 +882,7 @@ public class ImageUtils {
                                         BufferedImage bumpMapSource,
                                         String filterName) {
         return bumpMap(src, bumpMapSource,
-                (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
+            (float) DEG_315_IN_RADIANS, 0.53f, 2.0f, filterName);
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
@@ -977,7 +898,7 @@ public class ImageUtils {
         // TODO optimize it so that the bumpMapSource can be smaller, and an offset is given - useful for text effects
         // tiling could be also an option
 
-        EmbossFilter embossFilter = new EmbossFilter(filterName);
+        var embossFilter = new EmbossFilter(filterName);
         embossFilter.setAzimuth(azimuth);
         embossFilter.setElevation(elevation);
         embossFilter.setBumpHeight(bumpHeight);
@@ -1034,9 +955,8 @@ public class ImageUtils {
     }
 
     public static BufferedImage convertToGrayScaleImage(BufferedImage src) {
-        BufferedImage dest = new BufferedImage(src.getWidth(),
-                src.getHeight(),
-                TYPE_BYTE_GRAY);
+        BufferedImage dest = new BufferedImage(
+            src.getWidth(), src.getHeight(), TYPE_BYTE_GRAY);
         Graphics2D g2 = dest.createGraphics();
         g2.drawImage(src, 0, 0, null);
         g2.dispose();
@@ -1086,7 +1006,7 @@ public class ImageUtils {
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
                     String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                            x, y, rgbIntToString(rgb1), rgbIntToString(rgb2));
+                        x, y, rgbIntToString(rgb1), rgbIntToString(rgb2));
                     System.out.println("ImageUtils::compareSmallImages: " + msg);
                     return false;
                 }
@@ -1141,20 +1061,20 @@ public class ImageUtils {
                                                           int tx, int ty) {
         assert selection != null;
 
-        Rectangle bounds = selection.getShapeBounds(1); // relative to the canvas
+        Rectangle bounds = selection.getShapeBounds(); // relative to the canvas
 
         bounds.translate(-tx, -ty); // now relative to the image
 
         // the intersection of the selection with the image
         bounds = SwingUtilities.computeIntersection(
-                0, 0, src.getWidth(), src.getHeight(), // image bounds
-                bounds);
+            0, 0, src.getWidth(), src.getHeight(), // image bounds
+            bounds);
 
         if (bounds.isEmpty()) { // the selection is outside the image
             // this should not happen, because the selection should be
             // always within the canvas
             throw new IllegalStateException(format("tx = %d, ty = %d, bounds = %s",
-                    tx, ty, selection.getShapeBounds(1)));
+                tx, ty, selection.getShapeBounds()));
         }
 
         return getCopyOfSubimage(src, bounds);
@@ -1189,5 +1109,23 @@ public class ImageUtils {
         tmpG.translate(selStartX, selStartY);
 
         return tmpG;
+    }
+
+    public static BufferedImage copyToBufferedImage(Image img) {
+        BufferedImage copy;
+        if (img instanceof BufferedImage) {
+            BufferedImage bufferedImage = (BufferedImage) img;
+            if (bufferedImage.getColorModel() instanceof IndexColorModel) {
+                copy = convertToARGB(bufferedImage, false);
+            } else {
+                copy = copyImage(bufferedImage);
+            }
+        } else if (img instanceof VolatileImage) {
+            VolatileImage volatileImage = (VolatileImage) img;
+            copy = volatileImage.getSnapshot();
+        } else {
+            throw new UnsupportedOperationException("img class is " + img.getClass().getName());
+        }
+        return copy;
     }
 }

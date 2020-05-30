@@ -18,30 +18,22 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
-import pixelitor.Canvas;
-import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.RunContext;
-import pixelitor.gui.View;
-import pixelitor.utils.debug.Ansi;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.color.ColorSpace;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.awt.image.*;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -50,10 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR_PRE;
 import static java.lang.String.format;
-import static pixelitor.OpenImages.addAsNewComp;
-import static pixelitor.OpenImages.findCompByName;
 
 /**
  * Utility class with static methods
@@ -197,120 +186,6 @@ public final class Utils {
             }
         }
         return defaultValue;
-    }
-
-    public static void debugImage(Image img) {
-        debugImage(img, "Debug");
-    }
-
-    public static void debugImage(Image img, String name) {
-        // make sure the this is called on the EDT
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(() -> debugImage(img, name));
-            return;
-        }
-
-        BufferedImage copy = copyToBufferedImage(img);
-
-        View previousView = OpenImages.getActiveView();
-
-        findCompByName(name).ifPresentOrElse(
-                comp -> replaceImageInDebugComp(comp, copy),
-                () -> addAsNewComp(copy, null, name));
-
-        if (previousView != null) {
-            OpenImages.setActiveView(previousView, true);
-        }
-    }
-
-    private static BufferedImage copyToBufferedImage(Image img) {
-        BufferedImage copy;
-        if (img instanceof BufferedImage) {
-            BufferedImage bufferedImage = (BufferedImage) img;
-            if (bufferedImage.getColorModel() instanceof IndexColorModel) {
-                copy = ImageUtils.convertToARGB(bufferedImage, false);
-            } else {
-                copy = ImageUtils.copyImage(bufferedImage);
-            }
-        } else if (img instanceof VolatileImage) {
-            VolatileImage volatileImage = (VolatileImage) img;
-            copy = volatileImage.getSnapshot();
-        } else {
-            throw new UnsupportedOperationException("img class is " + img.getClass().getName());
-        }
-        return copy;
-    }
-
-    private static void replaceImageInDebugComp(Composition comp, BufferedImage copy) {
-        Canvas canvas = comp.getCanvas();
-        comp.getActiveDrawableOrThrow().setImage(copy);
-        if (canvas.getWidth() != copy.getWidth()
-                || canvas.getHeight() != copy.getHeight()) {
-            canvas.changeSize(copy.getWidth(), copy.getHeight(), comp.getView());
-        }
-
-        comp.repaint();
-    }
-
-    public static void debugShape(Shape shape, String name) {
-        // create a copy
-        Path2D shapeCopy = new Path2D.Double(shape);
-
-        Rectangle shapeBounds = shape.getBounds();
-        int imgWidth = shapeBounds.x + shapeBounds.width + 50;
-        int imgHeight = shapeBounds.y + shapeBounds.height + 50;
-        BufferedImage img = ImageUtils.createSysCompatibleImage(imgWidth, imgHeight);
-        Drawer.on(img)
-                .fillWith(Color.WHITE)
-                .useAA()
-                .draw(g -> {
-                    g.setColor(Color.BLACK);
-                    g.setStroke(new BasicStroke(3));
-                    g.draw(shapeCopy);
-                });
-        debugImage(img, name);
-    }
-
-    public static void debugRaster(Raster raster, String name) {
-        ColorModel colorModel;
-        int numBands = raster.getNumBands();
-
-        if (numBands == 4) { // normal color image
-            colorModel = new DirectColorModel(
-                    ColorSpace.getInstance(ColorSpace.CS_sRGB),
-                    32,
-                    0x00ff0000,// Red
-                    0x0000ff00,// Green
-                    0x000000ff,// Blue
-                    0xff000000,// Alpha
-                    true,       // Alpha Premultiplied
-                    DataBuffer.TYPE_INT
-            );
-        } else if (numBands == 1) { // grayscale image
-            ColorSpace cs = ColorSpace.getInstance(ColorSpace.CS_GRAY);
-            int[] nBits = {8};
-            colorModel = new ComponentColorModel(cs, nBits, false, true,
-                    Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
-        } else {
-            throw new IllegalStateException("numBands = " + numBands);
-        }
-
-        Raster correctlyTranslated = raster.createChild(
-                raster.getMinX(), raster.getMinY(),
-                raster.getWidth(), raster.getHeight(),
-                0, 0, null);
-        BufferedImage debugImage = new BufferedImage(colorModel,
-                (WritableRaster) correctlyTranslated, true, null);
-        debugImage(debugImage, name);
-    }
-
-    public static void debugRasterWithEmptySpace(Raster raster) {
-        BufferedImage debugImage = new BufferedImage(
-                raster.getMinX() + raster.getWidth(),
-                raster.getMinY() + raster.getHeight(),
-                TYPE_4BYTE_ABGR_PRE);
-        debugImage.setData(raster);
-        debugImage(debugImage);
     }
 
     public static void makeSureAssertionsAreEnabled() {
@@ -502,107 +377,16 @@ public final class Utils {
 
     public static String[] getAvailableFontNames() {
         return GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames();
+            .getLocalGraphicsEnvironment()
+            .getAvailableFontFamilyNames();
     }
 
     /**
      * Returns a new CompletableFuture that is completed when all of the
      * CompletableFutures in the given list complete
      */
-    public static <T> CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
+    public static CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
-    }
-
-    public static String debugMouseModifiers(MouseEvent e) {
-        boolean altDown = e.isAltDown();
-        boolean controlDown = e.isControlDown();
-        boolean shiftDown = e.isShiftDown();
-        boolean rightMouse = SwingUtilities.isRightMouseButton(e);
-        StringBuilder msg = new StringBuilder(25);
-        if (controlDown) {
-            msg.append(Ansi.red("ctrl-"));
-        }
-        if (altDown) {
-            msg.append(Ansi.green("alt-"));
-        }
-        if (shiftDown) {
-            msg.append(Ansi.blue("shift-"));
-        }
-        if (rightMouse) {
-            msg.append(Ansi.yellow("right-"));
-        }
-        if (e.isPopupTrigger()) {
-            msg.append(Ansi.cyan("popup-"));
-        }
-        return msg.toString();
-    }
-
-    public static void debugCall(String... args) {
-        debugCall(false, args);
-    }
-
-    public static void debugCallAndCaller(String... args) {
-        debugCall(true, args);
-    }
-
-    private static void debugCall(boolean printCaller, String... args) {
-        StackTraceElement[] fullTrace = new Throwable().getStackTrace();
-        StackTraceElement me = fullTrace[2];
-
-        String threadName;
-        if (EventQueue.isDispatchThread()) {
-            threadName = "EDT";
-        } else {
-            threadName = Thread.currentThread().getName();
-        }
-
-        String argsAsOneString;
-        if (args.length == 0) {
-            argsAsOneString = "";
-        } else if (args.length == 1) {
-            argsAsOneString = args[0];
-        } else {
-            argsAsOneString = Arrays.toString(args);
-        }
-
-        String className = me.getClassName();
-        // strip the package name
-        className = className.substring(className.lastIndexOf('.') + 1);
-
-        if (printCaller) {
-            StackTraceElement caller = fullTrace[3];
-            String callerClassName = caller.getClassName();
-            callerClassName = callerClassName.substring(callerClassName.lastIndexOf('.') + 1);
-
-            System.out.printf("%s.%s(%s) on %s by %s.%s%n"
-                    , className
-                    , me.getMethodName()
-                    , Ansi.yellow(argsAsOneString)
-                    , threadName
-                    , callerClassName
-                    , caller.getMethodName());
-        } else {
-            System.out.printf("%s.%s(%s) on %s%n"
-                    , className
-                    , me.getMethodName()
-                    , Ansi.yellow(argsAsOneString)
-                    , threadName);
-        }
-
-    }
-
-    public static String debugKeyEvent(KeyEvent e) {
-        String keyText = KeyEvent.getKeyText(e.getKeyCode());
-        int modifiers = e.getModifiersEx();
-        if (modifiers != 0) {
-            String modifiersText = InputEvent.getModifiersExText(modifiers);
-            if (keyText.equals(modifiersText)) { // the key itself is the modifier
-                return modifiersText;
-            }
-            return modifiersText + "+" + keyText;
-        }
-        return keyText;
     }
 
     public static double parseDouble(String s) throws NumberFormatException {

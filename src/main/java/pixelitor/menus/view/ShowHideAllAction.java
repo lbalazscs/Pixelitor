@@ -25,7 +25,7 @@ import pixelitor.layers.LayersContainer;
 import javax.swing.*;
 
 /**
- * An either "Show Hidden" or "Hide All" action,
+ * An either "Show Hidden" or "Hide All" {@link Action},
  * depending on the current visibility
  */
 public class ShowHideAllAction extends ShowHideAction {
@@ -54,14 +54,14 @@ public class ShowHideAllAction extends ShowHideAction {
 
     @Override
     public void setVisibility(boolean show) {
-        var pw = PixelitorWindow.getInstance();
-        boolean histogramsAreShown = HistogramsPanel.INSTANCE.isShown();
+        var pw = PixelitorWindow.get();
+        boolean histogramsAreShown = HistogramsPanel.isShown();
         boolean layersAreShown = LayersContainer.areLayersShown();
-        boolean statusBarIsShown = StatusBar.INSTANCE.isShown();
+        boolean statusBarIsShown = StatusBar.isShown();
         boolean toolsAreShown = pw.areToolsShown();
 
         // remember the current visibility, but only when hiding
-        if(!show) {
+        if (!show) {
             histogramsWereShown = histogramsAreShown;
             layersWereShown = layersAreShown;
             statusBarWasShown = statusBarIsShown;

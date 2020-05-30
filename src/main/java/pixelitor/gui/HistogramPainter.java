@@ -28,7 +28,8 @@ import static java.awt.Color.BLACK;
  * This component calculates and paints a histogram.
  */
 public class HistogramPainter extends JComponent {
-    private static final int PREFERRED_HEIGHT = 100;
+    private static final int MAX_LINE_HEIGHT = 100;
+    public static final int PREFERRED_HEIGHT = MAX_LINE_HEIGHT + 2;
 
     private int[] values = null;
     private int maxValue = 0;
@@ -37,7 +38,7 @@ public class HistogramPainter extends JComponent {
     public HistogramPainter(Color color) {
         this.color = color;
 
-        setPreferredSize(new Dimension(257, PREFERRED_HEIGHT + 2));
+        setPreferredSize(new Dimension(257, PREFERRED_HEIGHT));
     }
 
     /**
@@ -62,7 +63,12 @@ public class HistogramPainter extends JComponent {
         super.paintComponent(g);
 
         g.setColor(BLACK);
-        g.drawRect(0, 0, 257, 102);
+
+        int rectWidth = HistogramsPanel.HISTOGRAM_RESOLUTION + 1;
+        int rectHeight = PREFERRED_HEIGHT;
+        int rectX = (getWidth() - rectWidth) / 2;
+        int rectY = (getHeight() - rectHeight) / 2;
+        g.drawRect(rectX, rectY, rectWidth, rectHeight);
 
         if (maxValue == 0) { // no image
             return;
@@ -71,16 +77,16 @@ public class HistogramPainter extends JComponent {
             return;
         }
 
-        int x = 0;
-
+        int maxY = 1 + MAX_LINE_HEIGHT + rectY;
+        int x = rectX;
         g.setColor(color);
         for (int i = 0; i < 256; i++) {
             x++;
             int value = values[i];
             if (value > 0) {
-                int lineHeight = (int) (PREFERRED_HEIGHT * ((double) value / maxValue));
-                int yTop = 1 + PREFERRED_HEIGHT - lineHeight;
-                int yBottom = PREFERRED_HEIGHT + 1;
+                int lineHeight = (int) (MAX_LINE_HEIGHT * ((double) value / maxValue));
+                int yTop = maxY - lineHeight;
+                int yBottom = maxY;
                 g.drawLine(x, yTop, x, yBottom);
             }
         }

@@ -40,11 +40,12 @@ public class WorkSpace {
     private static final boolean DEFAULT_LAYERS_VISIBILITY = true;
     private static final boolean DEFAULT_STATUS_BAR_VISIBILITY = true;
 
-    private static boolean loaded = false;
     private static boolean histogramsVisibility;
     private static boolean toolsVisibility;
     private static boolean layersVisibility;
     private static boolean statusBarVisibility;
+
+    private static boolean loaded = false;
 
     private WorkSpace() {
     }
@@ -72,7 +73,7 @@ public class WorkSpace {
     }
 
     private static void resetDefaultHistogramsVisibility() {
-        if (HistogramsPanel.INSTANCE.isShown() != DEFAULT_HISTOGRAMS_VISIBILITY) {
+        if (HistogramsPanel.isShown() != DEFAULT_HISTOGRAMS_VISIBILITY) {
             setHistogramsVisibility(DEFAULT_HISTOGRAMS_VISIBILITY, false);
             ShowHideHistogramsAction.INSTANCE.updateText(DEFAULT_HISTOGRAMS_VISIBILITY);
         }
@@ -93,7 +94,7 @@ public class WorkSpace {
     }
 
     private static void resetDefaultStatusBarVisibility() {
-        if (StatusBar.INSTANCE.isShown() != DEFAULT_STATUS_BAR_VISIBILITY) {
+        if (StatusBar.isShown() != DEFAULT_STATUS_BAR_VISIBILITY) {
             setStatusBarVisibility(DEFAULT_STATUS_BAR_VISIBILITY, false);
             ShowHideStatusBarAction.INSTANCE.updateText(DEFAULT_STATUS_BAR_VISIBILITY);
         }
@@ -128,21 +129,21 @@ public class WorkSpace {
 
     public static void setLayersVisibility(boolean v, boolean revalidate) {
         layersVisibility = v;
-        PixelitorWindow.getInstance().setLayersVisibility(v, revalidate);
+        PixelitorWindow.get().setLayersVisibility(v, revalidate);
     }
 
     public static void setHistogramsVisibility(boolean v, boolean revalidate) {
         histogramsVisibility = v;
-        PixelitorWindow.getInstance().setHistogramsVisibility(v, revalidate);
+        PixelitorWindow.get().setHistogramsVisibility(v, revalidate);
     }
 
     public static void setToolsVisibility(boolean v, boolean revalidate) {
         toolsVisibility = v;
-        PixelitorWindow.getInstance().setToolsVisibility(v, revalidate);
+        PixelitorWindow.get().setToolsVisibility(v, revalidate);
     }
 
     public static void setStatusBarVisibility(boolean v, boolean revalidate) {
         statusBarVisibility = v;
-        PixelitorWindow.getInstance().setStatusBarVisibility(v, revalidate);
+        PixelitorWindow.get().setStatusBarVisibility(v, revalidate);
     }
 }

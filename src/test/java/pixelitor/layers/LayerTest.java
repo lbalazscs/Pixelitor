@@ -357,12 +357,12 @@ public class LayerTest {
 
     private void checkMaskIsEnabled(EnableDisableMaskAction action) {
         assertThat(layer).hasMask().maskIsEnabled();
-        assertThat(action).nameIs("Disable");
+        assertThat(action).textIs("Disable");
     }
 
     private void checkMaskIsDisabled(EnableDisableMaskAction action) {
         assertThat(layer).hasMask().maskIsDisabled();
-        assertThat(action).nameIs("Enable");
+        assertThat(action).textIs("Enable");
     }
 
     @Test
@@ -398,11 +398,11 @@ public class LayerTest {
 
     private void checkMaskIsLinked(LinkUnlinkMaskAction linkAction) {
         assertThat(layer).maskIsLinked();
-        assertThat(linkAction).nameIs("Unlink");
+        assertThat(linkAction).textIs("Unlink");
     }
 
     private void checkMaskIsNotLinked(LinkUnlinkMaskAction linkAction) {
         assertThat(layer).hasMask().maskIsNotLinked();
-        assertThat(linkAction).nameIs("Link");
+        assertThat(linkAction).textIs("Link");
     }
 }

@@ -27,12 +27,7 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
-import java.awt.AWTException;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
- * The screen capture.
+ * The {@link Action} for creating a screen capture.
  */
 public class ScreenCaptureAction extends AbstractAction {
     private JCheckBox hidePixelitorCB;
@@ -96,12 +91,12 @@ public class ScreenCaptureAction extends AbstractAction {
     }
 
     private static void hideApp() {
-        PixelitorWindow.getInstance().iconify();
+        PixelitorWindow.get().iconify();
         Utils.sleep(500, TimeUnit.MILLISECONDS);
     }
 
     private static void unHideApp() {
-        PixelitorWindow.getInstance().deiconify();
+        PixelitorWindow.get().deiconify();
     }
 
     private boolean hidePixelitor() {

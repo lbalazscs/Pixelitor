@@ -21,6 +21,7 @@ import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
@@ -30,7 +31,6 @@ import pixelitor.layers.LayerMask;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.concurrent.CompletableFuture;
@@ -41,13 +41,13 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
  * A {@link CompAction} where the processing can be simplified
  * by using the template method pattern.
  */
-public abstract class SimpleCompAction extends AbstractAction implements CompAction {
+public abstract class SimpleCompAction extends NamedAction implements CompAction {
     private final boolean affectsCanvasSize;
 
     SimpleCompAction(String name, boolean affectsCanvasSize) {
         this.affectsCanvasSize = affectsCanvasSize;
         assert name != null;
-        putValue(Action.NAME, name);
+        setText(name);
     }
 
     @Override
@@ -58,7 +58,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
     @Override
     public CompletableFuture<Composition> process(Composition oldComp) {
         View view = oldComp.getView();
-        Composition newComp = oldComp.createCopy(true, true);
+        Composition newComp = oldComp.copy(true, true);
         Canvas newCanvas = newComp.getCanvas();
         Canvas oldCanvas = oldComp.getCanvas();
 
@@ -72,7 +72,7 @@ public abstract class SimpleCompAction extends AbstractAction implements CompAct
         }
 
         History.add(new CompositionReplacedEdit(
-                getEditName(), false, view, oldComp, newComp, canvasAT));
+            getEditName(), view, oldComp, newComp, canvasAT, false));
         view.replaceComp(newComp);
         SelectionActions.setEnabled(newComp.hasSelection(), newComp);
 

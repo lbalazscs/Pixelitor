@@ -20,8 +20,10 @@ package pixelitor.menus.view;
 import pixelitor.gui.StatusBar;
 import pixelitor.gui.WorkSpace;
 
+import javax.swing.*;
+
 /**
- * The action that either shows or hides the status bar,
+ * The {@link Action} that either shows or hides the status bar,
  * depending on the current visibility
  */
 public class ShowHideStatusBarAction extends ShowHideAction {
@@ -33,7 +35,7 @@ public class ShowHideStatusBarAction extends ShowHideAction {
 
     @Override
     public boolean getCurrentVisibility() {
-        return StatusBar.INSTANCE.isShown();
+        return StatusBar.isShown();
     }
 
     @Override

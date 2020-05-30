@@ -28,6 +28,7 @@ import pixelitor.history.*;
 import pixelitor.io.PXCFormat;
 import pixelitor.tools.Tools;
 import pixelitor.utils.*;
+import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Assertions;
 
 import java.awt.*;
@@ -50,6 +51,7 @@ import static pixelitor.Composition.ImageChangeActions.REPAINT;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.*;
 import static pixelitor.utils.ImageUtils.copyImage;
+import static pixelitor.utils.Threads.onEDT;
 
 /**
  * An image layer.
@@ -131,7 +133,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         ImageLayer imageLayer = new ImageLayer(comp, name, null);
 
         BufferedImage emptyImage = imageLayer.createEmptyImageForLayer(
-                comp.getCanvasWidth(), comp.getCanvasHeight());
+            comp.getCanvasWidth(), comp.getCanvasHeight());
         imageLayer.setImage(emptyImage);
         imageLayer.checkConstructorPostConditions();
 
@@ -275,7 +277,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         String duplicateName = compCopy ? name : Utils.createCopyName(name);
 
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName,
-                null, translationX, translationY);
+            null, translationX, translationY);
         d.setOpacity(getOpacity(), false);
         d.setBlendingMode(getBlendingMode(), false);
 
@@ -313,7 +315,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         // there is selection
         return ImageUtils.getSelectionSizedPartFrom(image,
-                selection, getTx(), getTy());
+            selection, getTx(), getTy());
     }
 
     /**
@@ -327,15 +329,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
             return image;
         }
 
-        Rectangle selBounds = selection.getShapeBounds(1);
+        Rectangle selBounds = selection.getShapeBounds();
 
         assert image.getRaster().getBounds().contains(selBounds) :
-                "image bounds = " + image.getRaster().getBounds()
-                        + ", selection bounds = " + selBounds;
+            "image bounds = " + image.getRaster().getBounds()
+                + ", selection bounds = " + selBounds;
 
         return image.getSubimage(
-                selBounds.x, selBounds.y,
-                selBounds.width, selBounds.height);
+            selBounds.x, selBounds.y,
+            selBounds.width, selBounds.height);
     }
 
     @Override
@@ -360,16 +362,16 @@ public class ImageLayer extends ContentLayer implements Drawable {
             subImage = image.getSubimage(x, y, canvasWidth, canvasHeight);
         } catch (RasterFormatException e) {
             System.out.printf("ImageLayer.getCanvasSizedSubImage x = %d, y = %d, " +
-                            "canvasWidth = %d, canvasHeight = %d, " +
-                            "imageWidth = %d, imageHeight = %d%n",
-                    x, y, canvasWidth, canvasHeight,
-                    image.getWidth(), image.getHeight());
+                    "canvasWidth = %d, canvasHeight = %d, " +
+                    "imageWidth = %d, imageHeight = %d%n",
+                x, y, canvasWidth, canvasHeight,
+                image.getWidth(), image.getHeight());
             WritableRaster raster = image.getRaster();
 
             System.out.printf("ImageLayer.getCanvasSizedSubImage " +
-                            "minX = %d, minY = %d, width = %d, height=%d %n",
-                    raster.getMinX(), raster.getMinY(),
-                    raster.getWidth(), raster.getHeight());
+                    "minX = %d, minY = %d, width = %d, height=%d %n",
+                raster.getMinX(), raster.getMinY(),
+                raster.getWidth(), raster.getHeight());
 
             throw e;
         }
@@ -461,7 +463,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // new image should be copied onto the old one, and the exact
             // selection shape should not be considered because of AA effects
             Graphics2D g = src.createGraphics();
-            Rectangle selBounds = selection.getShapeBounds(1);
+            Rectangle selBounds = selection.getShapeBounds();
             g.drawImage(newImg, selBounds.x, selBounds.y, null);
             g.dispose();
             return src;
@@ -474,12 +476,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
             Shape shape = selection.getShape();
             g.setClip(shape);
             // add 1 for consistency with other code
-            Rectangle bounds = selection.getShapeBounds(1);
+            Rectangle bounds = selection.getShapeBounds();
             g.drawImage(newImg, bounds.x, bounds.y, null);
             g.dispose();
             return src;
         } else {
-            Rectangle bounds = selection.getShapeBounds(1);
+            Rectangle bounds = selection.getShapeBounds();
             BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(bounds.width, bounds.height);
             Graphics2D g2 = ImageUtils.setupForSoftSelection(tmpImg, selection.getShape(), bounds.x, bounds.y);
 
@@ -568,8 +570,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageContentChanged) {
             var edit = new ImageEdit(filterName, comp, this,
-                    getSelectedSubImage(true),
-                    false, true);
+                getSelectedSubImage(true),
+                false, true);
             History.add(edit);
         }
 
@@ -615,13 +617,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException(format(
-                    "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
-                    filterName, cr, getClass().getSimpleName()));
+                "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
+                filterName, cr, getClass().getSimpleName()));
         }
 
         assert previewImage != null :
-                format("previewImage was null with %s, changeReason = %s, class = %s",
-                        filterName, cr, getClass().getSimpleName());
+            format("previewImage was null with %s, changeReason = %s, class = %s",
+                filterName, cr, getClass().getSimpleName());
         assert img != null;
 
         if (img == image) {
@@ -659,7 +661,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // without a dialog
             if (cr != REPEAT_LAST) {
                 throw new IllegalStateException(filterName
-                        + " returned the original image, changeReason = " + cr);
+                    + " returned the original image, changeReason = " + cr);
             } else {
                 return;
             }
@@ -682,7 +684,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         assert imageForUndo != null;
         var edit = new ImageEdit(filterName, comp, this,
-                imageForUndo, false, true);
+            imageForUndo, false, true);
         History.add(edit);
 
         // otherwise the next filter run will take the old image source,
@@ -712,8 +714,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     public Rectangle getImageBounds() {
         return new Rectangle(
-                translationX, translationY,
-                image.getWidth(), image.getHeight());
+            translationX, translationY,
+            image.getWidth(), image.getHeight());
     }
 
     private void invalidateTrimCache() {
@@ -728,10 +730,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         return new Rectangle(
-                translationX + trimmedBoundingBox.x,
-                translationY + trimmedBoundingBox.y,
-                trimmedBoundingBox.width,
-                trimmedBoundingBox.height
+            translationX + trimmedBoundingBox.x,
+            translationY + trimmedBoundingBox.y,
+            trimmedBoundingBox.width,
+            trimmedBoundingBox.height
         );
     }
 
@@ -858,14 +860,11 @@ public class ImageLayer extends ContentLayer implements Drawable {
         Graphics2D g2 = dest.createGraphics();
         // nearest neighbor should be ok for 90, 180, 270 degrees
         g2.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-
         g2.setTransform(angle.createImageTransform(image));
-
         g2.drawImage(image, 0, 0, imageWidth, imageHeight, null);
         g2.dispose();
 
         setTranslation(-newTxAbs, -newTyAbs);
-
         setImage(dest);
     }
 
@@ -904,29 +903,27 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (!deleteCroppedPixels) {
             assert allowGrowing;
 
-            boolean imageCoversNewCanvas =
-                    cropX >= 0
-                            && cropY >= 0
-                            && cropX + cropWidth <= image.getWidth()
-                            && cropY + cropHeight <= image.getHeight();
+            boolean imageCoversNewCanvas = cropX >= 0 && cropY >= 0
+                && cropX + cropWidth <= image.getWidth()
+                && cropY + cropHeight <= image.getHeight();
             if (imageCoversNewCanvas) {
                 // no need to change the image, just set the translation
                 super.crop(cropRect, false, allowGrowing);
             } else {
                 // the image still has to be enlarged, but the translation will not be zero
                 int westEnlargement = Math.max(0, -cropX);
-                int newWidth = westEnlargement + Math.max(image.getWidth(), cropX + cropWidth);
+                int newWidth = westEnlargement + Math.max(
+                    image.getWidth(), cropX + cropWidth);
                 int northEnlargement = Math.max(0, -cropY);
-                int newHeight = northEnlargement + Math.max(image.getHeight(), cropY + cropHeight);
+                int newHeight = northEnlargement + Math.max(
+                    image.getHeight(), cropY + cropHeight);
 
                 BufferedImage newImage = ImageUtils.crop(image,
-                        -westEnlargement, -northEnlargement,
-                        newWidth, newHeight);
+                    -westEnlargement, -northEnlargement, newWidth, newHeight);
                 setImage(newImage);
                 setTranslation(
-                        Math.min(-cropX, 0),
-                        Math.min(-cropY, 0)
-                );
+                    Math.min(-cropX, 0),
+                    Math.min(-cropY, 0));
             }
             return;
         }
@@ -965,7 +962,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageWidth > canvasWidth || imageHeight > canvasHeight) {
             BufferedImage newImage = ImageUtils.crop(image,
-                    -getTx(), -getTy(), canvasWidth, canvasHeight);
+                -getTx(), -getTy(), canvasWidth, canvasHeight);
 
             BufferedImage tmp = image;
             setImage(newImage);
@@ -1090,24 +1087,24 @@ public class ImageLayer extends ContentLayer implements Drawable {
             }
 
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
-                    ", tx = " + getTx() + ", ty = " + getTy()
-                            + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
-                            + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
-                            + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
-                            + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
-                            + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
+                ", tx = " + getTx() + ", ty = " + getTy()
+                    + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
+                    + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
+                    + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
+                    + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
+                    + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
         }
 
         int finalTx = newTx;
         int finalTy = newTy;
         return ImageUtils
-                .resizeAsync(image, imgTargetWidth, imgTargetHeight)
-                .thenAcceptAsync(resizedImg -> {
-                    setImage(resizedImg);
-                    if (bigLayer) {
-                        setTranslation(finalTx, finalTy);
-                    }
-                }, EventQueue::invokeLater);
+            .resizeAsync(image, imgTargetWidth, imgTargetHeight)
+            .thenAcceptAsync(resizedImg -> {
+                setImage(resizedImg);
+                if (bigLayer) {
+                    setTranslation(finalTx, finalTy);
+                }
+            }, onEDT);
     }
 
     /**
@@ -1165,7 +1162,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             Graphics2D gCopy = (Graphics2D) g.create();
             gCopy.drawImage(visibleImage, getTx(), getTy(), null);
             comp.applySelectionClipping(gCopy);
-            Tools.SHAPES.paintOverActiveLayer(gCopy, comp);
+            Tools.SHAPES.paintOverActiveLayer(gCopy);
             gCopy.dispose();
         } else {
             // We need to draw inside the layer, but only temporarily.
@@ -1180,7 +1177,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             tmpG.drawImage(visibleImage, getTx(), getTy(), null);
 
             comp.applySelectionClipping(tmpG);
-            Tools.SHAPES.paintOverActiveLayer(tmpG, comp);
+            Tools.SHAPES.paintOverActiveLayer(tmpG);
             tmpG.dispose();
 
             g.drawImage(tmp, 0, 0, null);
@@ -1190,9 +1187,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void debugImages() {
-        Utils.debugImage(image, "image");
+        Debug.image(image, "image");
         if (previewImage != null) {
-            Utils.debugImage(previewImage, "previewImage");
+            Debug.image(previewImage, "previewImage");
         } else {
             Messages.showInfo("null", "previewImage is null");
         }
@@ -1206,7 +1203,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     @Override
     public void updateIconImage() {
-        if(ui != null) {
+        if (ui != null) {
             ui.updateLayerIconImageAsync(this);
         }
     }
@@ -1227,7 +1224,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (addToHistory) {
             History.add(new ApplyLayerMaskEdit(
-                    comp, this, oldMask, oldImage, oldMode));
+                comp, this, oldMask, oldImage, oldMode));
         }
 
         updateIconImage();
@@ -1246,20 +1243,20 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     public String toDebugCanvasString() {
         return "{canvasWidth=" + comp.getCanvasWidth()
-                + ", canvasHeight=" + comp.getCanvasHeight()
-                + ", tx=" + translationX
-                + ", ty=" + translationY
-                + ", imgWidth=" + image.getWidth()
-                + ", imgHeight=" + image.getHeight()
-                + '}';
+            + ", canvasHeight=" + comp.getCanvasHeight()
+            + ", tx=" + translationX
+            + ", ty=" + translationY
+            + ", imgWidth=" + image.getWidth()
+            + ", imgHeight=" + image.getHeight()
+            + '}';
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
-                + "{img=" + image.getWidth() + "x" + image.getHeight()
-                + ", state=" + state
-                + ", super=" + super.toString()
-                + '}';
+            + "{img=" + image.getWidth() + "x" + image.getHeight()
+            + ", state=" + state
+            + ", super=" + super.toString()
+            + '}';
     }
 }

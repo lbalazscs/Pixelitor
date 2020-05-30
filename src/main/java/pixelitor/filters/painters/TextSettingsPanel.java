@@ -20,12 +20,7 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
 import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ColorParamGUI;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.filters.gui.RangeParam;
+import pixelitor.filters.gui.*;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
@@ -54,7 +49,7 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
  * Customization panel for the text filter and for text layers
  */
 public class TextSettingsPanel extends FilterGUI
-        implements ParamAdjustmentListener, ActionListener {
+    implements ParamAdjustmentListener, ActionListener {
     private TextLayer textLayer;
     private Map<TextAttribute, Object> map;
 
@@ -80,7 +75,7 @@ public class TextSettingsPanel extends FilterGUI
         super(textFilter, dr);
         createGUI(textFilter.getSettings());
 
-        if(!textTF.getText().isEmpty()) {
+        if (!textTF.getText().isEmpty()) {
             // a "last text" was set
             paramAdjusted();
         }
@@ -94,11 +89,7 @@ public class TextSettingsPanel extends FilterGUI
         this.textLayer = textLayer;
         createGUI(textLayer.getSettings());
 
-        // make sure that the text layer has a settings object
-        // even if the user presses OK without making any adjustments
-        paramAdjusted();
-
-        if(textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
+        if (textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
             textTF.selectAll();
         }
     }
@@ -238,15 +229,15 @@ public class TextSettingsPanel extends FilterGUI
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
-                    this, map);
+                this, map);
             JDialog owner = GUIUtils.getDialogAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
-                    .owner(owner)
-                    .content(advancedSettingsPanel)
-                    .title("Advanced Text Settings")
-                    .noCancelButton()
-                    .okText("Close")
-                    .build();
+                .owner(owner)
+                .content(advancedSettingsPanel)
+                .title("Advanced Text Settings")
+                .noCancelButton()
+                .okText("Close")
+                .build();
         }
         GUIUtils.showDialog(advancedSettingsDialog);
     }
@@ -284,11 +275,11 @@ public class TextSettingsPanel extends FilterGUI
         } else if (oldMap != null) {
             // no dialog, copy manually the advanced settings
             TextAttribute[] advancedSettings = {
-                    TextAttribute.STRIKETHROUGH,
-                    TextAttribute.UNDERLINE,
-                    TextAttribute.KERNING,
-                    TextAttribute.LIGATURES,
-                    TextAttribute.TRACKING
+                TextAttribute.STRIKETHROUGH,
+                TextAttribute.UNDERLINE,
+                TextAttribute.KERNING,
+                TextAttribute.LIGATURES,
+                TextAttribute.TRACKING
             };
 
             for (TextAttribute setting : advancedSettings) {
@@ -307,7 +298,7 @@ public class TextSettingsPanel extends FilterGUI
 
     private JPanel createWatermarkPanel(TextSettings settings) {
         watermarkCB = new JCheckBox("Use Text for Watermarking",
-                settings.isWatermark());
+            settings.isWatermark());
         watermarkCB.addActionListener(this);
 
         var p = new JPanel(new FlowLayout(LEFT));
@@ -333,10 +324,10 @@ public class TextSettingsPanel extends FilterGUI
         Font selectedFont = getSelectedFont();
 
         var settings = new TextSettings(
-                text, selectedFont, color.getColor(), areaEffects,
-                (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
-                (VerticalAlignment) vAlignmentCB.getSelectedItem(),
-                watermarkCB.isSelected(), textRotationAngle);
+            text, selectedFont, color.getColor(), areaEffects,
+            (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
+            (VerticalAlignment) vAlignmentCB.getSelectedItem(),
+            watermarkCB.isSelected(), textRotationAngle);
 
         if (isInFilterMode()) {
             ((TextFilter) filter).setSettings(settings);

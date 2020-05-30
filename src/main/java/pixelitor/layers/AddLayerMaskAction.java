@@ -22,6 +22,7 @@ import pixelitor.ConsistencyChecks;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
@@ -32,23 +33,22 @@ import static java.awt.event.ActionEvent.CTRL_MASK;
 import static pixelitor.layers.LayerMaskAddType.*;
 
 /**
- * An Action that adds a new layer mask
+ * An {@link Action} that adds a new layer mask
  * to the active layer of the active composition.
  */
-public class AddLayerMaskAction extends AbstractAction
-        implements ViewActivationListener, GlobalLayerMaskChangeListener, GlobalLayerChangeListener {
+public class AddLayerMaskAction extends NamedAction
+    implements ViewActivationListener, ActiveMaskListener, ActiveCompositionListener {
 
     public static final AddLayerMaskAction INSTANCE = new AddLayerMaskAction();
 
     private AddLayerMaskAction() {
         super("Add Layer Mask", Icons.load("add_layer_mask.png"));
-        putValue(Action.SHORT_DESCRIPTION,
-                "<html>Adds a layer mask to the active layer. " +
-                        "<br><b>Ctrl-click</b> to add an inverted layer mask.");
+        setToolTip("<html>Adds a layer mask to the active layer. " +
+            "<br><b>Ctrl-click</b> to add an inverted layer mask.");
         setEnabled(false);
         OpenImages.addActivationListener(this);
-        Layers.addLayerChangeListener(this);
-        Layers.addLayerMaskChangeListener(this);
+        Layers.addCompositionListener(this);
+        Layers.addMaskListener(this);
     }
 
     @Override
@@ -56,6 +56,7 @@ public class AddLayerMaskAction extends AbstractAction
         var comp = OpenImages.getActiveComp();
         var layer = comp.getActiveLayer();
         assert !layer.hasMask();
+
         boolean ctrlPressed = false;
         if (e != null) { // could be null in tests
             ctrlPressed = (e.getModifiers() & CTRL_MASK) == CTRL_MASK;

@@ -150,15 +150,14 @@ public class Selection {
 
         g2.setPaint(WHITE);
         Stroke stroke = new BasicStroke(lineWidth, CAP_BUTT,
-                JOIN_ROUND, 0.0f, dash,
-                phase);
+            JOIN_ROUND, 0.0f, dash, phase);
         g2.setStroke(stroke);
         g2.draw(shape);
 
         g2.setPaint(BLACK);
         Stroke stroke2 = new BasicStroke(lineWidth, CAP_BUTT,
-                JOIN_ROUND, 0.0f, dash,
-                (float) (phase + DASH_LENGTH / viewScale));
+            JOIN_ROUND, 0.0f, dash,
+            (float) (phase + DASH_LENGTH / viewScale));
         g2.setStroke(stroke2);
         g2.draw(shape);
     }
@@ -218,13 +217,8 @@ public class Selection {
      * Like everything else in this class, this is in image coordinates
      * (but relative to the canvas, not to the image)
      */
-    public Rectangle getShapeBounds(int grow) {
-        Rectangle bounds = shape.getBounds();
-
-        // add a small extra space to avoid problems from anti-aliasing
-//        bounds.grow(grow, grow);
-
-        return bounds;
+    public Rectangle getShapeBounds() {
+        return shape.getBounds();
     }
 
     public Rectangle2D getShapeBounds2D() {
@@ -232,7 +226,7 @@ public class Selection {
     }
 
     public void modify(SelectionModifyType type, float amount) {
-        BasicStroke outlineStroke = new BasicStroke(amount);
+        Stroke outlineStroke = new BasicStroke(amount);
         Shape outlineShape = outlineStroke.createStrokedShape(shape);
 
         Area oldArea = new Area(shape);
@@ -244,8 +238,8 @@ public class Selection {
         var comp = view.getComp();
         boolean notEmpty = clipToCanvasSize(comp);
         if (notEmpty) {
-            SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit(
-                    "Modify Selection", comp, backupShape);
+            var edit = new SelectionShapeChangeEdit(
+                "Modify Selection", comp, backupShape);
             History.add(edit);
         } else {
             comp.deselect(true);
@@ -261,7 +255,7 @@ public class Selection {
     public void nudge(AffineTransform at) {
         Shape backupShape = transform(at);
         History.add(new SelectionShapeChangeEdit(
-                "Nudge Selection", view.getComp(), backupShape));
+            "Nudge Selection", view.getComp(), backupShape));
     }
 
     public boolean isHidden() {
@@ -332,13 +326,13 @@ public class Selection {
 
         shape = comp.clipToCanvasBounds(shape);
         if (shape.getBounds().isEmpty()) { // moved outside the canvas
-            DeselectEdit deselectEdit = new DeselectEdit(comp, moveStartShape);
+            var deselectEdit = new DeselectEdit(comp, moveStartShape);
             comp.deselect(false);
             return deselectEdit;
         }
 
-        SelectionShapeChangeEdit edit = new SelectionShapeChangeEdit(
-                MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, moveStartShape);
+        var edit = new SelectionShapeChangeEdit(
+            MoveMode.MOVE_SELECTION_ONLY.getEditName(), comp, moveStartShape);
         moveStartShape = null;
         return edit;
     }
@@ -352,7 +346,7 @@ public class Selection {
         node.addBoolean("marching", isMarching());
 
         node.addString("shape class", shape.getClass().getName());
-        node.addString("bounds", getShapeBounds(0).toString());
+        node.addString("bounds", getShapeBounds().toString());
         node.addString("bounds 2D", getShapeBounds2D().toString());
 
         return node;
@@ -361,9 +355,9 @@ public class Selection {
     @Override
     public String toString() {
         return "Selection{" +
-                "composition=" + view.getComp().getName() +
-                ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
-                ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
-                '}';
+            "composition=" + view.getComp().getName() +
+            ", shape-class=" + (shape == null ? "null" : shape.getClass().getName()) +
+            ", shapeBounds=" + (shape == null ? "null" : shape.getBounds()) +
+            '}';
     }
 }

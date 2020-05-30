@@ -17,13 +17,17 @@
 
 package pixelitor.utils;
 
+import pixelitor.gui.utils.GUIUtils;
+
 import javax.swing.*;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
+
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * A panel that can show or hide a {@link JProgressBar}
+ * A panel that can show or hide a {@link JProgressBar}.
  * The setVisibility method wouldn't work because of layout problems.
  */
 public class ProgressPanel extends JPanel {
@@ -33,6 +37,7 @@ public class ProgressPanel extends JPanel {
     public ProgressPanel() {
         cardLayout = new CardLayout();
         setLayout(cardLayout);
+
         progressBar = new JProgressBar();
         int ph = progressBar.getPreferredSize().height;
         add(Box.createRigidArea(new Dimension(ph, ph)));
@@ -51,13 +56,9 @@ public class ProgressPanel extends JPanel {
         progressBar.setValue(p);
     }
 
-    public void repaintOnEDT() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+    public void paintImmediately() {
+        assert calledOnEDT() : threadInfo();
 
-        // this code, together with the tracked code,
-        // is supposed to run on the EDT, therefore
-        // paintImmediately() instead of repaint()
-        progressBar.paintImmediately(0, 0,
-                progressBar.getWidth(), progressBar.getHeight());
+        GUIUtils.paintImmediately(progressBar);
     }
 }

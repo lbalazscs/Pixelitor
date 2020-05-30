@@ -37,7 +37,7 @@ public class Canvas implements Serializable {
     public static final int MAX_WIDTH = 9_999;
     public static final int MAX_HEIGHT = 9_999;
 
-    // implementation note: some non-transient field names are inconsistent
+    // some non-transient field names are inconsistent
     // with their getters, but they can't be renamed without breaking
     // serialization compatibility with old pxc files
 
@@ -89,6 +89,16 @@ public class Canvas implements Serializable {
     }
 
     /**
+     * Either a new composition (therefore a new canvas)
+     * was activated or the active canvas size changed
+     */
+    public static void activeCanvasSizeChanged(Canvas canvas) {
+        // as long as only Symmetry must be notified,
+        // a listener mechanism is not necessary
+        Symmetry.activeCanvasSizeChanged(canvas);
+    }
+
+    /**
      * Returns the bounds in image space
      */
     public Rectangle getBounds() {
@@ -103,6 +113,13 @@ public class Canvas implements Serializable {
     }
 
     /**
+     * Returns the (zoomed) size in component space
+     */
+    public Dimension getCoSize() {
+        return new Dimension(zoomedWidth, zoomedHeight);
+    }
+
+    /**
      * Returns the width in image space
      */
     public int getWidth() {
@@ -114,13 +131,6 @@ public class Canvas implements Serializable {
      */
     public int getHeight() {
         return height;
-    }
-
-    /**
-     * Returns the (zoomed) size in component space
-     */
-    public Dimension getCoSize() {
-        return new Dimension(zoomedWidth, zoomedHeight);
     }
 
     /**
@@ -163,16 +173,6 @@ public class Canvas implements Serializable {
     }
 
     /**
-     * Either a new composition (therefore a new canvas)
-     * was activated or the active canvas size changed
-     */
-    public static void activeCanvasSizeChanged(Canvas canvas) {
-        // as long as only Symmetry must be notified,
-        // a listener mechanism is not necessary
-        Symmetry.activeCanvasSizeChanged(canvas);
-    }
-
-    /**
      * Create a temporary image with the size of this canvas
      */
     public BufferedImage createTmpImage() {
@@ -185,9 +185,13 @@ public class Canvas implements Serializable {
         return img.getWidth() >= width && img.getHeight() >= height;
     }
 
+    public boolean hasDifferentSizeThan(BufferedImage img) {
+        return width != img.getWidth() || height != img.getHeight();
+    }
+
     @Override
     public String toString() {
         return "Canvas{width=" + width
-                + ", height=" + height + '}';
+            + ", height=" + height + '}';
     }
 }

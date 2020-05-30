@@ -24,7 +24,6 @@ import pixelitor.gui.utils.GridBagHelper;
 import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.util.Arrays;
 import java.util.Objects;
@@ -131,27 +130,26 @@ public class FilterCreator extends JPanel {
 
     private ParameterInfo[] getParameterInfoArray() {
         return Arrays.stream(paramPanels)
-                .map(ParamPanel::getParameterInfo)
-                .filter(Objects::nonNull)
-                .toArray(ParameterInfo[]::new);
+            .map(ParamPanel::getParameterInfo)
+            .filter(Objects::nonNull)
+            .toArray(ParameterInfo[]::new);
     }
 
-    public static void showInDialog(Frame owner) {
+    public static void showInDialog() {
         FilterCreator filterCreator = new FilterCreator();
 
         new DialogBuilder()
-                .content(filterCreator)
-                .owner(owner)
-                .title("Filter Creator")
-                .okText("Show Source")
-                .validator(d -> {
-                    showFilterSource(filterCreator.createSource());
+            .content(filterCreator)
+            .title("Filter Creator")
+            .okText("Show Source")
+            .validator(d -> {
+                showFilterSource(filterCreator.createSource());
 
-                    // the OK button should never close it,
-                    // and the okAction will never be executed
-                    return false;
-                })
-                .show();
+                // the OK button should never close it,
+                // and the okAction will never be executed
+                return false;
+            })
+            .show();
     }
 
     private static void showFilterSource(String sourceCode) {
@@ -161,7 +159,7 @@ public class FilterCreator extends JPanel {
         GUIUtils.showCopyTextToClipboardDialog(sp, sourceCode, "Source");
     }
 
-    public static class ParamPanel extends JPanel {
+    private static class ParamPanel extends JPanel {
         private final JTextField nameTextField;
         private final JTextField minTextField;
         private final JTextField maxTextField;
@@ -215,8 +213,8 @@ public class FilterCreator extends JPanel {
         ParameterInfo[] params = getParameterInfoArray();
 
         return getCode(new FilterDescription(parametrizedGui, gui,
-                copySrc, name, pixelLoop, proxy, proxyName, angleParam, center,
-                edge, color, gradient, interpolation, params));
+            copySrc, name, pixelLoop, proxy, proxyName, angleParam, center,
+            edge, color, gradient, interpolation, params));
     }
 
     private static String getCode(FilterDescription desc) {
@@ -227,7 +225,7 @@ public class FilterCreator extends JPanel {
         retVal += addSuperClass(desc);
 
         retVal += format("    public static final String NAME = \"%s\";\n\n",
-                desc.getName());
+            desc.getName());
 
         if (desc.isGui() && desc.isParametrizedGui()) {
             retVal += addParamsDeclaration(desc);
@@ -366,7 +364,7 @@ public class FilterCreator extends JPanel {
         String retVal = "";
         if (desc.getParams().length == 1) {
             retVal += "        setParamSet(new ParamSet("
-                    + desc.getParams()[0].getVariableName() + "));\n";
+                + desc.getParams()[0].getVariableName() + "));\n";
         } else {
             retVal += "        setParamSet(new ParamSet(\n";
             for (int i = 0; i < desc.getParams().length; i++) {
@@ -395,9 +393,9 @@ public class FilterCreator extends JPanel {
         for (ParameterInfo param : desc.getParams()) {
 
             String paramLine = format(
-                    "    private final RangeParam %s = new RangeParam(\"%s\", %d, %d, %d);",
-                    param.getVariableName(), param.getName(),
-                    param.getMin(), param.getDefaultValue(), param.getMax());
+                "    private final RangeParam %s = new RangeParam(\"%s\", %d, %d, %d);",
+                param.getVariableName(), param.getName(),
+                param.getMin(), param.getDefaultValue(), param.getMax());
 
             retVal += paramLine;
             retVal += '\n';

@@ -46,10 +46,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-import static javax.swing.SwingConstants.BOTTOM;
-import static javax.swing.SwingConstants.LEFT;
-import static javax.swing.SwingConstants.RIGHT;
-import static javax.swing.SwingConstants.TOP;
+import static javax.swing.SwingConstants.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.gui.ImageArea.Mode.TABS;
 import static pixelitor.menus.file.RecentFilesMenu.MAX_RECENT_FILES;
@@ -74,11 +71,11 @@ public final class AppPreferences {
     private static final String RECENT_FILE_PREFS_KEY = "recent_file_";
 
     public static final Preferences mainNode
-            = Preferences.userNodeForPackage(Pixelitor.class);
+        = Preferences.userNodeForPackage(Pixelitor.class);
     private static final Preferences recentFilesNode
-            = Preferences.userNodeForPackage(RecentFilesMenu.class);
+        = Preferences.userNodeForPackage(RecentFilesMenu.class);
     private static final Preferences toolsNode
-            = Preferences.userNodeForPackage(Tool.class);
+        = Preferences.userNodeForPackage(Tool.class);
 
     private static final String FG_COLOR_KEY = "fg_color";
     private static final String BG_COLOR_KEY = "bg_color";
@@ -87,9 +84,7 @@ public final class AppPreferences {
     private static final String LAST_SAVE_DIR_KEY = "last_save_dir";
 
     private static final String UNDO_LEVELS_KEY = "undo_levels";
-
     private static final String THUMB_SIZE_KEY = "thumb_size";
-
     private static final String LAST_TOOL_KEY = "last_tool";
     private static final String THEME_KEY = "theme";
     private static final String LANG_KEY = "lang";
@@ -352,7 +347,7 @@ public final class AppPreferences {
     private static void savePreferences() {
         saveDesktopMode();
         saveRecentFiles(RecentFilesMenu.getInstance().getRecentFileInfosForSaving());
-        saveFramePosition(PixelitorWindow.getInstance());
+        saveFramePosition(PixelitorWindow.get());
         saveLastOpenDir();
         saveLastSaveDir();
         saveFgBgColors();

@@ -20,26 +20,20 @@ package pixelitor;
 import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
-import pixelitor.colors.FillType;
-import pixelitor.filters.Filter;
+import pixelitor.gui.GUIMessageHandler;
 import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.Themes;
 import pixelitor.io.IO;
-import pixelitor.io.IOThread;
-import pixelitor.layers.*;
-import pixelitor.tools.Tools;
-import pixelitor.tools.pen.Path;
+import pixelitor.io.IOTasks;
 import pixelitor.tools.util.DragDisplay;
-import pixelitor.utils.*;
+import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Texts;
+import pixelitor.utils.Utils;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
-import static pixelitor.tools.pen.PenToolMode.EDIT;
+import static pixelitor.utils.Threads.*;
 
 /**
  * The main class
@@ -112,14 +106,16 @@ public class Pixelitor {
     }
 
     private static void createAndShowGUI(String[] args) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
+
+        Messages.setMsgHandler(new GUIMessageHandler());
 
 //        GlobalKeyboardWatch.showEventsSlowerThan(100, TimeUnit.MILLISECONDS);
 
         Themes.install(AppPreferences.getDefaultTheme(),
-                false, true);
+            false, true);
 
-        var pw = PixelitorWindow.getInstance();
+        var pw = PixelitorWindow.get();
         Dialogs.setMainWindowInitialized(true);
 
         // Just to make 100% sure that at the end of GUI
@@ -133,10 +129,10 @@ public class Pixelitor {
         // to run after all the files have been opened,
         // and on the same IO thread
         openCLFilesAsync(args)
-                .thenAcceptAsync(v -> afterStartTestActions(pw), EventQueue::invokeLater)
-                .thenRunAsync(Utils::preloadFontNames,
-                        IOThread.getExecutor())
-                .exceptionally(Messages::showExceptionOnEDT);
+            .exceptionally(throwable -> null) // recover
+            .thenAcceptAsync(v -> afterStartTestActions(), onEDT)
+            .thenRunAsync(Utils::preloadFontNames, onIOThread)
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     /**
@@ -155,7 +151,7 @@ public class Pixelitor {
                 openedFiles.add(IO.openFileAsync(f));
             } else {
                 Messages.showError("File not found",
-                        format("The file \"%s\" does not exist", f.getAbsolutePath()));
+                    format("The file \"%s\" does not exist", f.getAbsolutePath()));
             }
         }
 
@@ -163,18 +159,20 @@ public class Pixelitor {
     }
 
     public static void exitApp(PixelitorWindow pw) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
-        var paths = IOThread.getCurrentWritePaths();
+        assert calledOnEDT() : threadInfo();
+
+        var paths = IOTasks.getCurrentWritePaths();
         if (!paths.isEmpty()) {
             String msg = "<html>The writing of the following files is not finished yet. Exit anyway?<br><ul>";
             for (String path : paths) {
                 msg += "<li>" + path;
             }
+
+            String[] options = {"Wait 10 seconds", "Exit now"};
             boolean wait = Dialogs.showOKCancelWarningDialog(
-                    msg,
-                    "Warning", new String[]{"Wait 10 seconds", "Exit now"},
-                    0);
-            if (wait && IOThread.isBusyWriting()) {
+                msg, "Warning", options, 0);
+
+            if (wait && IOTasks.isBusyWriting()) {
                 // wait on another thread so that the status bar
                 // can be updated while waiting
                 new Thread(() -> {
@@ -191,11 +189,11 @@ public class Pixelitor {
             String msg;
             if (unsavedComps.size() == 1) {
                 msg = format("<html>There are unsaved changes in <b>%s</b>." +
-                                "<br>Are you sure you want to exit?",
-                        unsavedComps.get(0).getName());
+                        "<br>Are you sure you want to exit?",
+                    unsavedComps.get(0).getName());
             } else {
                 msg = "<html>There are unsaved changes. Are you sure you want to exit?" +
-                        "<br>Unsaved images:<ul>";
+                    "<br>Unsaved images:<ul>";
                 for (Composition comp : unsavedComps) {
                     msg += "<li>" + comp.getName();
                 }
@@ -214,7 +212,7 @@ public class Pixelitor {
     /**
      * A possibility for automatic debugging or testing
      */
-    private static void afterStartTestActions(PixelitorWindow pw) {
+    private static void afterStartTestActions() {
         if (RunContext.isFinal()) {
             // in the final builds nothing should run
             return;
@@ -222,17 +220,17 @@ public class Pixelitor {
 
 //        SplashImageCreator.saveManySplashImages();
 
-//        addTestPath();
+//        Debug.addTestPath();
 
-//        keepSwitchingToolsRandomly();
-//        startFilter(new Marble());
+//        Debug.keepSwitchingToolsRandomly();
+//        Debug.startFilter(new Marble());
 
 //        Navigator.showInDialog(pw);
 
 //        Tools.PEN.activate();
-        //        addMaskAndShowIt();
+//        Debug.addMaskAndShowIt();
 
-//        showAddTextLayerDialog();
+//        Debug.showAddTextLayerDialog();
 
 //        AutoPaint.showDialog();
 
@@ -244,62 +242,8 @@ public class Pixelitor {
 
 //        new TweenWizard().start(pw);
 
-//        dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
-    }
+//        Debug.dispatchKeyPress(pw, true, KeyEvent.VK_T, 'T');
 
-    private static void dispatchKeyPress(PixelitorWindow pw, boolean ctrl, int keyCode, char keyChar) {
-        int modifiers;
-        if (ctrl) {
-            modifiers = InputEvent.CTRL_DOWN_MASK;
-        } else {
-            modifiers = 0;
-        }
-        pw.dispatchEvent(new KeyEvent(pw, KeyEvent.KEY_PRESSED,
-                System.currentTimeMillis(), modifiers, keyCode, keyChar));
-    }
-
-    private static void addTestPath() {
-        var shape = new Rectangle2D.Double(100, 100, 300, 100);
-
-        Path path = Shapes.shapeToPath(shape, OpenImages.getActiveView());
-
-        Tools.PEN.setPath(path);
-        Tools.PEN.startRestrictedMode(EDIT, false);
-        Tools.PEN.activate();
-    }
-
-    private static void showAddTextLayerDialog() {
-        AddTextLayerAction.INSTANCE.actionPerformed(null);
-    }
-
-    private static void addMaskAndShowIt() {
-        AddLayerMaskAction.INSTANCE.actionPerformed(null);
-        View view = OpenImages.getActiveView();
-        Layer layer = view.getComp()
-                .getActiveLayer();
-        MaskViewMode.SHOW_MASK.activate(view, layer, "after-start test");
-    }
-
-    private static void startFilter(Filter filter) {
-        filter.startOn(OpenImages.getActiveDrawableOrThrow());
-    }
-
-    private static void addNewImage() {
-        NewImage.addNewImage(FillType.WHITE, 600, 400, "Test");
-        OpenImages.getActiveLayer()
-                .addMask(LayerMaskAddType.PATTERN);
-    }
-
-    private static void keepSwitchingToolsRandomly() {
-        Runnable backgroundTask = () -> {
-            //noinspection InfiniteLoopStatement
-            while (true) {
-                Utils.sleep(1, TimeUnit.SECONDS);
-
-                Runnable changeToolOnEDTTask = () -> Tools.getRandomTool().activate();
-                GUIUtils.invokeAndWait(changeToolOnEDTTask);
-            }
-        };
-        new Thread(backgroundTask).start();
+//        Debug.addNewImageWithMask();
     }
 }

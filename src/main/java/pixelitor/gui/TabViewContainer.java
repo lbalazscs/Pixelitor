@@ -32,12 +32,12 @@ import static java.awt.BorderLayout.CENTER;
 /**
  * A {@link ViewContainer} used in the tabs UI.
  */
-public class ImageTab extends JComponent implements ViewContainer {
+public class TabViewContainer extends JComponent implements ViewContainer {
     private final View view;
     private final JScrollPane scrollPane;
     private final TabsUI tabsUI;
 
-    public ImageTab(View view, TabsUI tabsUI) {
+    public TabViewContainer(View view, TabsUI tabsUI) {
         this.view = view;
         this.tabsUI = tabsUI;
         scrollPane = new JScrollPane(this.view);
@@ -51,7 +51,7 @@ public class ImageTab extends JComponent implements ViewContainer {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         tabsUI.closeTab(this);
     }
 
@@ -64,7 +64,7 @@ public class ImageTab extends JComponent implements ViewContainer {
     public void updateTitle(View view) {
         int myIndex = tabsUI.indexOfComponent(this);
         if (myIndex != -1) {
-            TabsUI.TabTitleRenderer tabComponent = (TabsUI.TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
+            var tabComponent = (TabTitleRenderer) tabsUI.getTabComponentAt(myIndex);
             tabComponent.setTitle(view.getName());
         }
     }
@@ -82,7 +82,24 @@ public class ImageTab extends JComponent implements ViewContainer {
         return view;
     }
 
-    public void showPopup(MouseEvent mouse) {
+    void mousePressedOnTab(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            showPopup(e);
+        } else {
+            // for some reason adding a mouse listener
+            // to a tab stops the normal tab selection
+            // from working, so select it manually
+            select();
+        }
+    }
+
+    void mouseReleasedOnTab(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+            showPopup(e);
+        }
+    }
+
+    private void showPopup(MouseEvent mouse) {
         JPopupMenu popup = new JPopupMenu();
 
         // close the clicked one, even if it is not the active!
@@ -108,10 +125,7 @@ public class ImageTab extends JComponent implements ViewContainer {
                 popup.addSeparator();
                 popup.add(GUIUtils.createShowInFolderAction(file));
 
-                String fileName = file.getName();
-                if (!fileName.endsWith("pxc")
-                        && !fileName.endsWith("ora")
-                        && Desktop.getDesktop().isSupported(Desktop.Action.PRINT)) {
+                if (canBePrintedByOS(file)) {
                     popup.add(GUIUtils.createPrintFileAction(comp, file));
                 }
             }
@@ -121,5 +135,19 @@ public class ImageTab extends JComponent implements ViewContainer {
         popup.add(tabsUI.getTabPlacementMenu());
 
         popup.show(mouse.getComponent(), mouse.getX(), mouse.getY());
+    }
+
+    private static boolean canBePrintedByOS(File file) {
+        String fileName = file.getName().toLowerCase();
+
+        if (fileName.endsWith("pxc")) {
+            return false;
+        }
+
+        if (fileName.endsWith("ora")) {
+            return false;
+        }
+
+        return Desktop.getDesktop().isSupported(Desktop.Action.PRINT);
     }
 }

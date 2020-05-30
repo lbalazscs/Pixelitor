@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.utils;
+
+import pixelitor.layers.Layer;
 
 /**
  * Abstracts away messages sent through the GUI
@@ -34,13 +36,13 @@ public interface MessageHandler {
 
     void showError(String title, String msg);
 
-    void showNotImageLayerError();
+    void showNotImageLayerError(Layer layer);
 
-    void showNotDrawableError();
+    void showNotDrawableError(Layer layer);
 
     void showException(Throwable e);
 
-    void showException(Throwable e, Thread t);
+    void showException(Throwable e, Thread srcThread);
 
     void showExceptionOnEDT(Throwable e);
 }

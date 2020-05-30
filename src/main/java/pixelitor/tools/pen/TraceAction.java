@@ -45,7 +45,7 @@ public class TraceAction extends MenuAction {
 
     private void trace(Composition comp) {
         if (!comp.activeIsDrawable()) {
-            Messages.showNotDrawableError();
+            Messages.showNotDrawableError(comp.getActiveLayer());
             return;
         }
 
@@ -53,15 +53,13 @@ public class TraceAction extends MenuAction {
         if (path == null) {
             if (!RandomGUITest.isRunning()) {
                 Messages.showInfo("No path",
-                        "There is no path in the composition");
+                    "There is no path in the composition");
             }
             return;
         }
 
         Shape shape = path.toImageSpaceShape();
-        if (shape != null) {
-            Drawable dr = comp.getActiveDrawableOrThrow();
-            brushTool.trace(dr, shape);
-        }
+        Drawable dr = comp.getActiveDrawableOrThrow();
+        brushTool.trace(dr, shape);
     }
 }

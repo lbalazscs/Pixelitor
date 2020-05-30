@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,6 @@ package pixelitor.utils;
  * status bar update if it takes a long time.
  */
 public class StatusBarProgressTracker extends ThresholdProgressTracker {
-    private static final MessageHandler messageHandler = Messages.getMessageHandler();
-
-    static {
-        if (messageHandler == null) {
-            throw new IllegalStateException("this class should not be used before Messages initialization");
-        }
-    }
-
     private final String name;
     private ProgressHandler progressHandler;
 
@@ -42,7 +34,7 @@ public class StatusBarProgressTracker extends ThresholdProgressTracker {
 
     @Override
     void startProgressTracking() {
-        progressHandler = messageHandler.startProgress(name, 100);
+        progressHandler = Messages.startProgress(name, 100);
     }
 
     @Override

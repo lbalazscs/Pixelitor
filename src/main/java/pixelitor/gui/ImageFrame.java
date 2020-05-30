@@ -43,7 +43,7 @@ public class ImageFrame extends JInternalFrame
 
     public ImageFrame(View view, int locX, int locY) {
         super(view.createTitleWithZoom(),
-                true, true, true, true);
+            true, true, true, true);
         addInternalFrameListener(this);
         setFrameIcon(null);
         this.view = view;
@@ -96,6 +96,11 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
+    public void close() {
+        dispose();
+    }
+
+    @Override
     public void select() {
         try {
             setSelected(true);
@@ -136,7 +141,7 @@ public class ImageFrame extends JInternalFrame
         }
 
         super.setSize(width + NIMBUS_HORIZONTAL_ADJUSTMENT,
-                height + NIMBUS_VERTICAL_ADJUSTMENT);
+            height + NIMBUS_VERTICAL_ADJUSTMENT);
     }
 
     @Override

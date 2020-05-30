@@ -28,7 +28,7 @@ import pixelitor.tools.Tools;
  */
 public class AppNode extends DebugNode {
     public AppNode() {
-        super("Pixelitor", PixelitorWindow.getInstance());
+        super("Pixelitor", PixelitorWindow.get());
 
         addString("Pixelitor Version", Pixelitor.VERSION_NUMBER);
         add(DebugNodes.createSystemNode());

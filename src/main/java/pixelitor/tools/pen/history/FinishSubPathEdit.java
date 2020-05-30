@@ -41,14 +41,14 @@ public class FinishSubPathEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        subPath.undoFinishing("FinishSubPathEdit.undo");
+        subPath.undoFinishing();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        subPath.finish(comp, "FinishSubPathEdit.redo", false);
+        subPath.finish(comp, false);
     }
 
     @Override

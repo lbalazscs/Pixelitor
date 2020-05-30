@@ -35,19 +35,19 @@ public class BatchFilterWizard extends Wizard {
 
     public BatchFilterWizard(Drawable dr) {
         super(SELECT_FILTER_AND_DIRS, "Batch Filter",
-                "Start Processing", 490, 380, dr);
+            "Start Processing", 490, 380, dr);
     }
 
     @Override
     protected void finalAction() {
-        var busyCursorParent = PixelitorWindow.getInstance();
+        var busyCursorParent = PixelitorWindow.get();
         var dialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
             filter.run(comp.getActiveDrawableOrThrow(), BATCH_AUTOMATE, busyCursorParent);
             return CompletableFuture.completedFuture(comp);
         };
-        Automate.processEachFile(batchFilterAction, dialogTitle);
+        Automate.processFiles(batchFilterAction, dialogTitle);
     }
 
     @Override

@@ -119,8 +119,7 @@ public class EDT {
     public static void assertActiveToolIs(Tool expected) {
         Tool actual = call(Tools::getCurrent);
         if (actual != expected) {
-            throw new AssertionError("Expected " + expected
-                    + ", found " + actual);
+            throw new AssertionError("Expected " + expected + ", found " + actual);
         }
     }
 
@@ -225,7 +224,7 @@ public class EDT {
 
     public static void assertCanvasSizeIs(int expectedWidth, int expectedHeight) {
         assertThat(active(Composition::getCanvas))
-                .hasWidth(expectedWidth)
-                .hasHeight(expectedHeight);
+            .hasWidth(expectedWidth)
+            .hasHeight(expectedHeight);
     }
 }

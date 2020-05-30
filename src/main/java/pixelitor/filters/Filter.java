@@ -60,7 +60,6 @@ public abstract class Filter implements Serializable {
      * running the filter. If this returns false,
      * null will be passed and the filter will take care of that
      */
-    @SuppressWarnings("WeakerAccess")
     protected boolean createDefaultDestImg() {
         return true;
     }
@@ -76,7 +75,7 @@ public abstract class Filter implements Serializable {
     }
 
     public void startOn(Drawable dr, ChangeReason cr) {
-        run(dr, cr, PixelitorWindow.getInstance());
+        run(dr, cr, PixelitorWindow.get());
     }
 
     public void run(Drawable dr, ChangeReason cr, Component busyCursorParent) {
@@ -116,20 +115,17 @@ public abstract class Filter implements Serializable {
             if (layer instanceof LayerMask) {
                 layer = layer.getOwner();
             }
-            String msg = String.format(
-                    "Error while running the filter '%s'\n" +
-                            "composition = '%s'\n" +
-                            "layer = '%s' (%s)\n" +
-                            "hasMask = '%s'\n" +
-                            "mask editing = '%b'",
-                    getName(), layer.getComp()
-                            .getName(),
-                    layer.getName(), layer.getClass()
-                            .getSimpleName(),
-                    layer.hasMask(), layer.isMaskEditing());
+            String errorDetails = String.format(
+                "Error while running the filter '%s'%n" +
+                    "composition = '%s'%n" +
+                    "layer = '%s' (%s)%n" +
+                    "hasMask = '%s'%n" +
+                    "mask editing = '%b'",
+                getName(), layer.getComp().getName(),
+                layer.getName(), layer.getClass().getSimpleName(),
+                layer.hasMask(), layer.isMaskEditing());
 
-
-            var ise = new IllegalStateException(msg, e);
+            var ise = new IllegalStateException(errorDetails, e);
             if (RandomGUITest.isRunning()) {
                 throw ise; // we can debug the exact filter parameters only in RandomGUITest
             }

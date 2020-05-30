@@ -19,8 +19,10 @@ package pixelitor.menus.view;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.WorkSpace;
 
+import javax.swing.*;
+
 /**
- * The action that either shows or hides the histogram,
+ * The {@link Action} that either shows or hides the histogram,
  * depending on the current visibility
  */
 public class ShowHideHistogramsAction extends ShowHideAction {
@@ -32,7 +34,7 @@ public class ShowHideHistogramsAction extends ShowHideAction {
 
     @Override
     public boolean getCurrentVisibility() {
-        return HistogramsPanel.INSTANCE.isShown();
+        return HistogramsPanel.isShown();
     }
 
     @Override

@@ -52,7 +52,7 @@ public class NewLayerEdit extends PixelitorEdit {
         comp.deleteLayer(newLayer, false);
         comp.setActiveLayer(activeLayerBefore);
 
-        viewModeBefore.activate(comp, activeLayerBefore, getName() + " undone");
+        viewModeBefore.activate(comp, activeLayerBefore);
     }
 
     @Override

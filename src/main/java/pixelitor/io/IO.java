@@ -37,9 +37,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
+import static pixelitor.utils.Threads.*;
 
 /**
  * Utility class with static methods related to opening and saving files.
@@ -49,10 +51,9 @@ public class IO {
     }
 
     public static CompletableFuture<Composition> openFileAsync(File file) {
-        return loadCompAsync(file).
-                thenApplyAsync(OpenImages::addJustLoadedComp,
-                        EventQueue::invokeLater)
-                .exceptionally(Messages::showExceptionOnEDT);
+        return loadCompAsync(file)
+            .thenApplyAsync(OpenImages::addJustLoadedComp, onEDT)
+            .whenComplete((comp, e) -> checkForIOProblems(e));
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
@@ -62,42 +63,49 @@ public class IO {
         return format.readFrom(file);
     }
 
-    public static BufferedImage handleDecodingError(File file,
-                                                     BufferedImage img,
-                                                     Throwable e) {
-        // For some decoding problems (ImageIO bugs?) we get an
-        // exception here, for others we get a null img
-        if (e != null) {
-            assert img == null;
+    public static CompletableFuture<Void> loadToNewImageLayerAsync(File file,
+                                                                   Composition comp) {
+        return CompletableFuture
+            .supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
+            .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
+                img, file.getName(), "Dropped Layer"),
+                onEDT)
+            .whenComplete((v, e) -> checkForIOProblems(e));
+    }
+
+    /**
+     * Utility method designed to be used with CompletableFuture.
+     * Can be called on any thread.
+     */
+    public static void checkForIOProblems(Throwable e) {
+        if (e == null) {
+            // do nothing if the stage didn't complete exceptionally
+            return;
+        }
+        if (e instanceof CompletionException) {
+            // if the exception was thrown in a previous
+            // stage, handle it the same way
+            checkForIOProblems(e.getCause());
+            return;
+        }
+        if (e instanceof DecodingException) {
+            // decoding exceptions have an extra file field
+            // that can be used for better error reporting
+            DecodingException de = (DecodingException) e;
+            File file = de.getFile();
+            if (calledOnEDT()) {
+                showDecodingError(file);
+            } else {
+                EventQueue.invokeLater(() -> showDecodingError(file));
+            }
+        } else {
             Messages.showExceptionOnEDT(e);
-            return img;
         }
-
-        if (img != null) { // everything went well
-            return img;
-        }
-
-        // if we have a null image here, it means a decoding error,
-        // even if no exception was thrown
-        EventQueue.invokeLater(() -> showDecodingError(file));
-        return null;
     }
 
     private static void showDecodingError(File file) {
-        String msg = format("Could not load \"%s\" as an image file.",
-                file.getName());
-
+        String msg = format("Could not load \"%s\" as an image file.", file.getName());
         Messages.showError("Error", msg);
-    }
-
-    public static CompletableFuture<Void> loadToNewImageLayerAsync(File file,
-                                                                   Composition comp) {
-        return CompletableFuture.supplyAsync(
-                () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
-                .handle((img, e) -> handleDecodingError(file, img, e))
-                .thenAcceptAsync(image -> comp.addExternalImageAsNewLayer(
-                        image, file.getName(), "Dropped Layer"),
-                        EventQueue::invokeLater);
     }
 
     public static void save(boolean saveAs) {
@@ -122,8 +130,8 @@ public class IO {
                 }
             }
             Optional<FileFormat> fileFormat = FileFormat.fromFile(file);
-            if(fileFormat.isPresent()) {
-                SaveSettings saveSettings = new SaveSettings(fileFormat.get(), file);
+            if (fileFormat.isPresent()) {
+                var saveSettings = new SaveSettings(fileFormat.get(), file);
                 comp.saveAsync(saveSettings, true);
                 return true;
             } else {
@@ -142,12 +150,12 @@ public class IO {
         Objects.requireNonNull(format);
         Objects.requireNonNull(selectedFile);
         Objects.requireNonNull(image);
-        assert !EventQueue.isDispatchThread() : "on EDT";
+        assert calledOutsideEDT() : "on EDT";
 
         try {
             if (format == FileFormat.JPG) {
                 JpegSettings settings = JpegSettings.from(saveSettings);
-                JpegOutput.save(image, settings.getJpegInfo(), selectedFile);
+                JpegOutput.write(image, selectedFile, settings.getJpegInfo());
             } else {
                 TrackedIO.write(image, format.toString(), selectedFile);
             }
@@ -163,8 +171,8 @@ public class IO {
 
     private static void showAnotherProcessErrorMsg(File file) {
         String msg = format(
-                "Can't save to\n%s\nbecause this file is being used by another program.",
-                file.getAbsolutePath());
+            "Can't save to%n%s%nbecause this file is being used by another program.",
+            file.getAbsolutePath());
 
         EventQueue.invokeLater(() -> Messages.showError("Can't save", msg));
     }
@@ -177,9 +185,8 @@ public class IO {
             openFileAsync(file);
         }
         if (!found) {
-            Messages.showInfo("No files found",
-                    format("<html>No supported image files found in <b>%s</b>.",
-                            dir.getName()));
+            String msg = format("<html>No supported image files found in <b>%s</b>.", dir.getName());
+            Messages.showInfo("No files found", msg);
         }
     }
 
@@ -191,7 +198,7 @@ public class IO {
     }
 
     public static void exportLayersToPNGAsync() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         boolean okPressed = SingleDirChooser.selectOutputDir();
         if (!okPressed) {
@@ -201,15 +208,15 @@ public class IO {
         var comp = OpenImages.getActiveComp();
 
         CompletableFuture
-                .supplyAsync(() -> exportLayersToPNG(comp), IOThread.getExecutor())
-                .thenAcceptAsync(numImg -> Messages.showInStatusBar(
-                    "<html>Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
-                        , EventQueue::invokeLater)
-                .exceptionally(Messages::showExceptionOnEDT);
+            .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
+            .thenAcceptAsync(numImg -> Messages.showInStatusBar(
+                "<html>Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
+                , onEDT)
+            .exceptionally(Messages::showExceptionOnEDT);
     }
 
     private static int exportLayersToPNG(Composition comp) {
-        assert !EventQueue.isDispatchThread() : "on EDT";
+        assert calledOutsideEDT() : "on EDT";
 
         int numSavedImages = 0;
         for (int layerIndex = 0; layerIndex < comp.getNumLayers(); layerIndex++) {
@@ -230,6 +237,7 @@ public class IO {
             if (layer.hasMask()) {
                 LayerMask mask = layer.getMask();
                 BufferedImage image = mask.getImage();
+
                 saveLayerImage(image, layer.getName() + "_mask", layerIndex);
                 numSavedImages++;
             }
@@ -240,28 +248,27 @@ public class IO {
     private static void saveLayerImage(BufferedImage image,
                                        String layerName,
                                        int layerIndex) {
-        assert !EventQueue.isDispatchThread() : "on EDT";
+        assert calledOutsideEDT() : "on EDT";
 
         File outputDir = Dirs.getLastSave();
-        String fileName = format("%03d_%s.%s", layerIndex,
-                Utils.toFileName(layerName), "png");
+        String fileName = format("%03d_%s.png", layerIndex, Utils.toFileName(layerName));
         File file = new File(outputDir, fileName);
+
         saveImageToFile(image, new SaveSettings(FileFormat.PNG, file));
     }
 
     public static void saveCurrentImageInAllFormats() {
-        var comp = OpenImages.getActiveComp();
-
         boolean canceled = !SingleDirChooser.selectOutputDir();
         if (canceled) {
             return;
         }
         File saveDir = Dirs.getLastSave();
         if (saveDir != null) {
+            var comp = OpenImages.getActiveComp();
             FileFormat[] fileFormats = FileFormat.values();
             for (FileFormat format : fileFormats) {
                 File f = new File(saveDir, "all_formats." + format);
-                SaveSettings saveSettings = new SaveSettings(format, f);
+                var saveSettings = new SaveSettings(format, f);
                 comp.saveAsync(saveSettings, false).join();
             }
         }
@@ -278,5 +285,23 @@ public class IO {
             FileChoosers.setDefaultSaveExtensions();
         }
     }
-}
 
+    static void saveToChosenFile(Composition comp, File file,
+                                 Object extraInfo, String extension) {
+        Dirs.setLastSave(file.getParentFile());
+
+        FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
+
+        SaveSettings settings;
+        if (extraInfo != null) {
+            // currently the only type of extra information
+            assert format == FileFormat.JPG : "format = " + format + ", extraInfo = " + extraInfo;
+            JpegInfo jpegInfo = (JpegInfo) extraInfo;
+            settings = new JpegSettings(jpegInfo, file);
+        } else {
+            settings = new SaveSettings(format, file);
+        }
+
+        comp.saveAsync(settings, true);
+    }
+}

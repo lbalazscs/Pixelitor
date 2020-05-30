@@ -20,11 +20,13 @@ import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
-import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static pixelitor.utils.Threads.onEDT;
+import static pixelitor.utils.Threads.onIOThread;
 
 /**
  * The input and output file formats
@@ -44,8 +46,7 @@ public enum FileFormat {
         @Override
         public CompletableFuture<Composition> readFrom(File file) {
             return CompletableFuture.supplyAsync(
-                    Utils.toSupplier(() -> PXCFormat.read(file)),
-                    IOThread.getExecutor());
+                Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
         }
     }, ORA(true, true) {
         @Override
@@ -56,8 +57,7 @@ public enum FileFormat {
         @Override
         public CompletableFuture<Composition> readFrom(File file) {
             return CompletableFuture.supplyAsync(
-                    Utils.toSupplier(() -> OpenRaster.read(file)),
-                    IOThread.getExecutor());
+                Utils.toSupplier(() -> OpenRaster.read(file)), onIOThread);
         }
     };
 
@@ -84,11 +84,8 @@ public enum FileFormat {
      * Loads a composition from a file with a single-layer image format
      */
     private static CompletableFuture<Composition> readSimpleFrom(File file) {
-        return CompletableFuture.supplyAsync(
-                () -> TrackedIO.uncheckedRead(file), IOThread.getExecutor())
-                .handle((img, e) -> IO.handleDecodingError(file, img, e))
-                .thenApplyAsync(img -> Composition.fromImage(img, file, null),
-                        EventQueue::invokeLater);
+        return CompletableFuture.supplyAsync(() -> TrackedIO.uncheckedRead(file), onIOThread)
+            .thenApplyAsync(img -> Composition.fromImage(img, file, null), onEDT);
     }
 
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
@@ -96,7 +93,7 @@ public enum FileFormat {
         if (!supportsAlpha) {
             // no alpha support, convert first to RGB
             img = ImageUtils.convertToRGB(img, false);
-        } else if(this == GIF) {
+        } else if (this == GIF) {
             img = ImageUtils.convertToIndexed(img, false);
         }
         IO.saveImageToFile(img, settings);

@@ -43,6 +43,7 @@ import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
+import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * The abstract superclass of all layer classes
@@ -80,7 +81,7 @@ public abstract class Layer implements Serializable {
     // A mask uses the UI of its owner.
     protected transient LayerUI ui;
 
-    private transient List<LayerChangeListener> changeListeners;
+    private transient List<LayerListener> listeners;
 
     // unit tests use a different LayerUI implementation
     // by assigning a different UI factory
@@ -96,19 +97,17 @@ public abstract class Layer implements Serializable {
         this.owner = owner;
         opacity = 1.0f;
 
-        changeListeners = new ArrayList<>();
+        listeners = new ArrayList<>();
     }
 
     // can be called on any thread
-    private void readObject(ObjectInputStream in)
-            throws IOException, ClassNotFoundException {
-
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
         maskEditing = false;
         ui = null;
 
         in.defaultReadObject();
-        changeListeners = new ArrayList<>();
+        listeners = new ArrayList<>();
     }
 
     public LayerUI createUI() {
@@ -128,7 +127,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void activateUI() {
-        assert RunContext.isUnitTesting() || EventQueue.isDispatchThread();
+        assert RunContext.isUnitTesting() || calledOnEDT();
         ui.setSelected(true);
     }
 
@@ -193,7 +192,7 @@ public abstract class Layer implements Serializable {
         opacity = newOpacity;
 
         if (hasUI()) {
-            LayerBlendingModePanel.INSTANCE.setOpacityFromModel(newOpacity);
+            LayerBlendingModePanel.get().setOpacityFromModel(newOpacity);
             comp.imageChanged();
         }
     }
@@ -210,7 +209,7 @@ public abstract class Layer implements Serializable {
         blendingMode = mode;
 
         if (hasUI()) {
-            LayerBlendingModePanel.INSTANCE.setBlendingModeFromModel(mode);
+            LayerBlendingModePanel.get().setBlendingModeFromModel(mode);
             comp.imageChanged();
         }
     }
@@ -264,13 +263,13 @@ public abstract class Layer implements Serializable {
 
     public void addMask(LayerMaskAddType addType) {
         if (hasMask()) {
-            Messages.showInfo("Has layer mask",
-                    format("The layer \"%s\" already has a layer mask.", getName()));
+            String msg = format("The layer \"%s\" already has a layer mask.", getName());
+            Messages.showInfo("Has layer mask", msg);
             return;
         }
         if (addType.needsSelection() && !comp.hasSelection()) {
-            Messages.showInfo("No selection",
-                    format("The composition \"%s\" has no selection.", comp.getName()));
+            String msg = format("The composition \"%s\" has no selection.", comp.getName());
+            Messages.showInfo("No selection", msg);
             return;
         }
 
@@ -286,10 +285,14 @@ public abstract class Layer implements Serializable {
             editName = "Layer Mask from Selection";
         }
 
-        addImageAsMask(bwMask, false, true, true, editName, deselect);
+        addImageAsMask(bwMask, false, true, true,
+            editName, deselect);
     }
 
-    public PixelitorEdit addImageAsMask(BufferedImage bwMask, boolean inheritTranslation, boolean createEdit, boolean addEdit, String editName, boolean deselect) {
+    public PixelitorEdit addImageAsMask(BufferedImage bwMask,
+                                        boolean inheritTranslation,
+                                        boolean createEdit, boolean addEdit,
+                                        String editName, boolean deselect) {
         assert mask == null;
 
         int maskTx = 0;
@@ -332,7 +335,7 @@ public abstract class Layer implements Serializable {
 
         if (addEdit) {
             History.add(edit);
-            MaskViewMode.EDIT_MASK.activate(comp, this, "mask added");
+            MaskViewMode.EDIT_MASK.activate(comp, this);
             return null;
         } else {
             return edit;
@@ -343,7 +346,8 @@ public abstract class Layer implements Serializable {
         if (hasMask()) {
             mask.replaceImage(bwMask, editName);
         } else {
-            addImageAsMask(bwMask, true, true, true, editName, false);
+            addImageAsMask(bwMask, true, true, true,
+                editName, false);
         }
     }
 
@@ -378,7 +382,7 @@ public abstract class Layer implements Serializable {
             History.add(new DeleteLayerMaskEdit(comp, this, oldMask, oldMode));
         }
 
-        MaskViewMode.NORMAL.activate(view, this, "mask deleted");
+        MaskViewMode.NORMAL.activate(view, this);
         comp.imageChanged();
     }
 
@@ -410,7 +414,8 @@ public abstract class Layer implements Serializable {
             return modifyMaskToHide(shape, createEdit);
         } else {
             var maskImage = LayerMaskAddType.REVEAL_SELECTION.createBWImage(this, shape);
-            return addImageAsMask(maskImage, false, createEdit, false, "Add Layer Mask", false);
+            return addImageAsMask(maskImage, false, createEdit, false,
+                "Add Layer Mask", false);
         }
     }
 
@@ -433,7 +438,7 @@ public abstract class Layer implements Serializable {
 
         if (createEdit) {
             return new ImageEdit("Modify Mask", comp, mask, maskImageBackup,
-                    true, false);
+                true, false);
         } else {
             return null;
         }
@@ -449,7 +454,7 @@ public abstract class Layer implements Serializable {
 
         comp.imageChanged();
         mask.updateIconImage();
-        notifyChangeListeners();
+        notifyListeners();
 
         if (addToHistory) {
             History.add(new EnableLayerMaskEdit(comp, this));
@@ -497,13 +502,13 @@ public abstract class Layer implements Serializable {
     private void paintLayerOnGraphicsWithMask(Graphics2D g, boolean firstVisibleLayer) {
         // 1. create the masked image
         // TODO the masked image should be cached
-        BufferedImage maskedImage = new BufferedImage(
-                comp.getCanvasWidth(), comp.getCanvasHeight(), TYPE_INT_ARGB);
+        var maskedImage = new BufferedImage(
+            comp.getCanvasWidth(), comp.getCanvasHeight(), TYPE_INT_ARGB);
         Graphics2D mig = maskedImage.createGraphics();
         paintLayerOnGraphics(mig, firstVisibleLayer);
         mig.setComposite(DstIn);
         mig.drawImage(mask.getTransparencyImage(),
-                mask.getTx(), mask.getTy(), null);
+            mask.getTx(), mask.getTy(), null);
         mig.dispose();
 
         // 2. paint the masked image onto the graphics
@@ -645,12 +650,12 @@ public abstract class Layer implements Serializable {
         return owner;
     }
 
-    public void addChangeListener(LayerChangeListener listener) {
-        changeListeners.add(listener);
+    public void addListener(LayerListener listener) {
+        listeners.add(listener);
     }
 
-    protected void notifyChangeListeners() {
-        for (LayerChangeListener listener : changeListeners) {
+    protected void notifyListeners() {
+        for (LayerListener listener : listeners) {
             listener.layerStateChanged();
         }
     }
@@ -672,10 +677,10 @@ public abstract class Layer implements Serializable {
     @Override
     public String toString() {
         return "{name='" + name + '\''
-                + ", visible=" + visible
-                + ", mask=" + mask
-                + ", maskEditing=" + maskEditing
-                + ", maskEnabled=" + maskEnabled
-                + ", isAdjustment=" + isAdjustment + '}';
+            + ", visible=" + visible
+            + ", mask=" + mask
+            + ", maskEditing=" + maskEditing
+            + ", maskEnabled=" + maskEnabled
+            + ", isAdjustment=" + isAdjustment + '}';
     }
 }

@@ -17,11 +17,7 @@
 
 package pixelitor.utils;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 import pixelitor.testutils.ShapeChecker;
@@ -88,28 +84,28 @@ public class ShapesTest {
 
     private static void checkRectanglePath(SubPath sp) {
         assertThat(sp)
-                .numAnchorsIs(4)
-                .isClosed();
+            .numAnchorsIs(4)
+            .isClosed();
 
         var p1 = sp.getAnchor(0);
-        assertThat(p1).isAt(2, 2);
-        assertThat(p1.ctrlOut).isRetracted();
-        assertThat(p1.ctrlIn).isRetracted();
+        assertThat(p1)
+            .isAt(2, 2)
+            .bothControlsAreRetracted();
 
         var p2 = sp.getAnchor(1);
-        assertThat(p2).isAt(12, 2);
-        assertThat(p2.ctrlOut).isRetracted();
-        assertThat(p2.ctrlIn).isRetracted();
+        assertThat(p2)
+            .isAt(12, 2)
+            .bothControlsAreRetracted();
 
         var p3 = sp.getAnchor(2);
-        assertThat(p3).isAt(12, 12);
-        assertThat(p3.ctrlOut).isRetracted();
-        assertThat(p3.ctrlIn).isRetracted();
+        assertThat(p3)
+            .isAt(12, 12)
+            .bothControlsAreRetracted();
 
         var p4 = sp.getAnchor(3);
-        assertThat(p4).isAt(2, 12);
-        assertThat(p4.ctrlOut).isRetracted();
-        assertThat(p4.ctrlIn).isRetracted();
+        assertThat(p4)
+            .isAt(2, 12)
+            .bothControlsAreRetracted();
     }
 
     private static void checkEllipseShape(Shape s) {
@@ -123,13 +119,13 @@ public class ShapesTest {
 
     private static void checkEllipsePath(SubPath sp) {
         assertThat(sp)
-                .numAnchorsIs(4)
-                .isClosed();
+            .numAnchorsIs(4)
+            .isClosed();
 
         var p1 = sp.getAnchor(0);
         assertThat(p1)
-                .isAt(12, 7)
-                .anchorPointTypeIs(SYMMETRIC);
+            .isAt(12, 7)
+            .anchorPointTypeIs(SYMMETRIC);
         assertThat(p1.ctrlOut).isAt(12, 9.76);
         assertThat(p1.ctrlIn).isAt(12, 4.24);
 

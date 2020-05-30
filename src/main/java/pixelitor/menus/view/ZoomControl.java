@@ -36,8 +36,7 @@ import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
  * The zoom widget in the status bar
  */
 public class ZoomControl extends JPanel implements ViewActivationListener {
-
-    public static final ZoomControl INSTANCE = new ZoomControl();
+    private static final ZoomControl INSTANCE = new ZoomControl();
 
     private static final int PREFERRED_HEIGHT = 17;
     private final JSlider zoomSlider;
@@ -64,8 +63,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomDisplay.setPreferredSize(preferredSize);
 
         zoomSlider.addChangeListener(e ->
-                OpenImages.onActiveView(
-                        this::zoomAccordingToTheSlider));
+            OpenImages.onActiveView(this::zoomAccordingToTheSlider));
 
         zoomLabel = new JLabel("  Zoom: ");
 
@@ -75,9 +73,9 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
 
         Dimension buttonSize = new Dimension(60, PREFERRED_HEIGHT);
         fitButton = addZoomButton(buttonSize, "Fit",
-                FIT_SPACE_ACTION, FIT_SPACE_TOOLTIP);
+            FIT_SPACE_ACTION, FIT_SPACE_TOOLTIP);
         actualPixelsButton = addZoomButton(buttonSize, "100%",
-                ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
+            ACTUAL_PIXELS_ACTION, ACTUAL_PIXELS_TOOLTIP);
 
         setLookIfNoImage();
         OpenImages.addActivationListener(this);
@@ -87,7 +85,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         int sliderValue = zoomSlider.getValue();
         ZoomLevel zoomLevel = zoomLevels[sliderValue];
         view.setZoomAtCenter(zoomLevel);
-        setNewZoomText(zoomLevel);
+        setZoomText(zoomLevel);
     }
 
     private JButton addZoomButton(Dimension buttonSize, String text,
@@ -127,14 +125,14 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomDisplay.setText("");
     }
 
-    public void setToNewZoom(ZoomLevel newZoom) {
+    public void changeZoom(ZoomLevel newZoom) {
         setEnabled(true);
 
         zoomSlider.setValue(newZoom.ordinal());
-        setNewZoomText(newZoom);
+        setZoomText(newZoom);
     }
 
-    private void setNewZoomText(ZoomLevel zoomLevel) {
+    private void setZoomText(ZoomLevel zoomLevel) {
         zoomDisplay.setText(" " + zoomLevel);
     }
 
@@ -145,7 +143,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        setToNewZoom(newView.getZoomLevel());
+        changeZoom(newView.getZoomLevel());
     }
 
     @Override
@@ -157,5 +155,9 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
             actualPixelsButton.setEnabled(enabled);
         }
         this.enabled = enabled;
+    }
+
+    public static ZoomControl get() {
+        return INSTANCE;
     }
 }

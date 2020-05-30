@@ -17,40 +17,24 @@
 
 package pixelitor.filters.painters;
 
-import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 /**
- * Adds a centered text to the current layer
+ * A filter which adds a text to the current image layer.
+ * It has the same GUI as a {@link TextLayer}.
  */
 public class TextFilter extends FilterWithGUI {
     private TextSettings settings;
-    private static TextFilter instance;
 
-    private TextFilter() {
+    public TextFilter() {
         settings = new TextSettings();
-    }
-
-    @SuppressWarnings("NonThreadSafeLazyInitialization")
-    public static TextFilter getInstance() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
-
-        if (instance == null) {
-            instance = new TextFilter();
-        }
-
-        return instance;
-    }
-
-    public static FilterAction createFilterAction() {
-        return new FilterAction("Text", TextFilter::getInstance);
     }
 
     @Override

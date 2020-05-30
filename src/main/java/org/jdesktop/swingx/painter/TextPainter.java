@@ -25,12 +25,7 @@ import org.jdesktop.swingx.painter.effects.AreaEffect;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.font.LineMetrics;
@@ -39,10 +34,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
-import static java.awt.RenderingHints.KEY_FRACTIONALMETRICS;
-import static java.awt.RenderingHints.KEY_TEXT_ANTIALIASING;
-import static java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON;
-import static java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_GASP;
+import static java.awt.RenderingHints.*;
+import static java.awt.font.TextAttribute.*;
 import static org.jdesktop.swingx.painter.PainterUtils.getComponentFont;
 import static org.jdesktop.swingx.painter.PainterUtils.getForegroundPaint;
 
@@ -69,6 +62,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text
+     *
      * @param text the text to paint
      */
     public TextPainter(String text) {
@@ -77,6 +71,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified font.
+     *
      * @param text the text to paint
      * @param font the font to paint the text with
      */
@@ -86,7 +81,8 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified paint.
-     * @param text the text to paint
+     *
+     * @param text  the text to paint
      * @param paint the paint to paint with
      */
     public TextPainter(String text, Paint paint) {
@@ -95,8 +91,9 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Create a new TextPainter which will paint the specified text with the specified font and paint.
-     * @param text the text to paint
-     * @param font the font to paint the text with
+     *
+     * @param text  the text to paint
+     * @param font  the font to paint the text with
      * @param paint the paint to paint with
      */
     public TextPainter(String text, Font font, Paint paint) {
@@ -107,9 +104,12 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Set the font (and font size and style) to be used when drawing the text
+     *
      * @param f the new font
      */
     public void setFont(Font f) {
+        assert f != null;
+
         Font old = getFont();
         this.font = f;
         setDirty(true);
@@ -118,6 +118,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * gets the font (and font size and style) to be used when drawing the text
+     *
      * @return the current font
      */
     public Font getFont() {
@@ -126,6 +127,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * Sets the text to draw
+     *
      * @param text the text to draw
      */
     public void setText(String text) {
@@ -137,6 +139,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
 
     /**
      * gets the text currently used to draw
+     *
      * @return the text to be drawn
      */
     public String getText() {
@@ -184,7 +187,7 @@ public class TextPainter extends AbstractAreaPainter<Object> {
                 ef.apply(g, shape, width, height);
             }
         }
-        g.translate(-res.x,-res.y);
+        g.translate(-res.x, -res.y);
     }
 
     protected String calculateText(Object component) {
@@ -228,10 +231,8 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         FontRenderContext frc = g2.getFontRenderContext();
 
         Map<TextAttribute, ?> attributes = font.getAttributes();
-        boolean hasKerning = TextAttribute.KERNING_ON.equals(
-                attributes.get(TextAttribute.KERNING));
-        boolean hasLigatures = TextAttribute.LIGATURES_ON.equals(
-                attributes.get(TextAttribute.LIGATURES));
+        boolean hasKerning = KERNING_ON.equals(attributes.get(KERNING));
+        boolean hasLigatures = LIGATURES_ON.equals(attributes.get(LIGATURES));
 
         GlyphVector vect;
         if (!hasKerning && !hasLigatures && font.getSize() <= 100) {
@@ -244,15 +245,13 @@ public class TextPainter extends AbstractAreaPainter<Object> {
             // also see https://community.oracle.com/thread/1289266
             char[] chars = text.toCharArray();
             vect = font.layoutGlyphVector(frc, chars, 0,
-                    chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
+                chars.length, Font.LAYOUT_LEFT_TO_RIGHT);
         }
 
         Shape glyphsOutline = vect.getOutline(0.0f, metrics.getAscent());
 
-        boolean hasUnderline = TextAttribute.UNDERLINE_ON.equals(
-                attributes.get(TextAttribute.UNDERLINE));
-        boolean hasStrikeThrough = TextAttribute.STRIKETHROUGH_ON.equals(
-                attributes.get(TextAttribute.STRIKETHROUGH));
+        boolean hasUnderline = UNDERLINE_ON.equals(attributes.get(UNDERLINE));
+        boolean hasStrikeThrough = STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH));
 
         if (!hasUnderline && !hasStrikeThrough) {
             // simple case: the glyphs contain all of the shape
@@ -264,25 +263,37 @@ public class TextPainter extends AbstractAreaPainter<Object> {
         Area combinedOutline = new Area(glyphsOutline);
 
         if (hasUnderline) {
-            float underlineOffset = lineMetrics.getUnderlineOffset();
-            float underlineThickness = lineMetrics.getUnderlineThickness();
-            Shape underLineShape = new Rectangle2D.Float(
-                    0.0f,
-                    ascent + underlineOffset - underlineThickness / 2.0f,
-                    metrics.stringWidth(text),
-                    underlineThickness);
-            combinedOutline.add(new Area(underLineShape));
+            combinedOutline.add(
+                createUnderlineShape(metrics, lineMetrics, ascent));
         }
+
         if (hasStrikeThrough) {
-            float strikethroughOffset = lineMetrics.getStrikethroughOffset();
-            float strikethroughThickness = lineMetrics.getStrikethroughThickness();
-            Shape strikethroughShape = new Rectangle2D.Float(
-                    0.0f,
-                    ascent + strikethroughOffset - strikethroughThickness / 2.0f,
-                    metrics.stringWidth(text),
-                    strikethroughThickness);
-            combinedOutline.add(new Area(strikethroughShape));
+            combinedOutline.add(
+                createStrikeThroughShape(metrics, lineMetrics, ascent));
         }
+
         return combinedOutline;
+    }
+
+    private Area createUnderlineShape(FontMetrics metrics, LineMetrics lineMetrics, float ascent) {
+        float underlineOffset = lineMetrics.getUnderlineOffset();
+        float underlineThickness = lineMetrics.getUnderlineThickness();
+        Shape underLineShape = new Rectangle2D.Float(
+            0.0f,
+            ascent + underlineOffset - underlineThickness / 2.0f,
+            metrics.stringWidth(text),
+            underlineThickness);
+        return new Area(underLineShape);
+    }
+
+    private Area createStrikeThroughShape(FontMetrics metrics, LineMetrics lineMetrics, float ascent) {
+        float strikethroughOffset = lineMetrics.getStrikethroughOffset();
+        float strikethroughThickness = lineMetrics.getStrikethroughThickness();
+        Shape strikethroughShape = new Rectangle2D.Float(
+            0.0f,
+            ascent + strikethroughOffset - strikethroughThickness / 2.0f,
+            metrics.stringWidth(text),
+            strikethroughThickness);
+        return new Area(strikethroughShape);
     }
 }

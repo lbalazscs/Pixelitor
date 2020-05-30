@@ -17,8 +17,7 @@
 
 package pixelitor.utils;
 
-import pixelitor.RunContext;
-import pixelitor.gui.GUIMessageHandler;
+import pixelitor.layers.Layer;
 
 import java.io.File;
 
@@ -30,19 +29,11 @@ import static java.lang.String.format;
 public class Messages {
     private static MessageHandler msgHandler;
 
-    static {
-        try {
-            if (RunContext.isUnitTesting()) {
-                msgHandler = new TestMessageHandler();
-            } else {
-                msgHandler = new GUIMessageHandler();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private Messages() { // should not be instantiated
     }
 
-    private Messages() { // should not be instantiated
+    public static void setMsgHandler(MessageHandler msgHandler) {
+        Messages.msgHandler = msgHandler;
     }
 
     public static void showInfo(String title, String message) {
@@ -56,7 +47,7 @@ public class Messages {
     @SuppressWarnings("SameReturnValue")
     public static <T> T showExceptionOnEDT(Throwable e) {
         msgHandler.showExceptionOnEDT(e);
-        // returns a null which can be a null of the desired type...:
+        // returns a null of the desired type...:
         // this way it fits into CompletableFuture.exceptionally
         return null;
     }
@@ -65,8 +56,8 @@ public class Messages {
         msgHandler.showException(e);
     }
 
-    public static void showException(Throwable e, Thread t) {
-        msgHandler.showException(e, t);
+    public static void showException(Throwable e, Thread srcThread) {
+        msgHandler.showException(e, srcThread);
     }
 
     public static void showFileSavedMessage(File file) {
@@ -88,12 +79,12 @@ public class Messages {
         return msgHandler.startProgress(msg, max);
     }
 
-    public static void showNotImageLayerError() {
-        msgHandler.showNotImageLayerError();
+    public static void showNotImageLayerError(Layer layer) {
+        msgHandler.showNotImageLayerError(layer);
     }
 
-    public static void showNotDrawableError() {
-        msgHandler.showNotDrawableError();
+    public static void showNotDrawableError(Layer layer) {
+        msgHandler.showNotDrawableError(layer);
     }
 
     public static MessageHandler getMessageHandler() {

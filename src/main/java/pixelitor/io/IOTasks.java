@@ -18,23 +18,22 @@
 package pixelitor.io;
 
 import pixelitor.ThreadPool;
+import pixelitor.utils.SerialExecutor;
 
-import java.awt.EventQueue;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * Makes sure that only one IO task runs at a time
  */
-public class IOThread {
-    private static final ThreadFactory threadFactory
-            = r -> new Thread(r, "[IO thread]");
-    private static final ExecutorService executor
-            = Executors.newSingleThreadExecutor(threadFactory);
+public class IOTasks {
+    private static final Executor executor
+        = new SerialExecutor(ThreadPool.getExecutor());
 
     private static final Set<String> currentReadPaths = new HashSet<>();
     private static final Set<String> currentWritePaths = new HashSet<>();
@@ -43,7 +42,7 @@ public class IOThread {
     // multiple progress bars, but normally this is false
     private static final boolean ALLOW_MULTIPLE_IO_THREADS = false;
 
-    private IOThread() {
+    private IOTasks() {
         // should not be instantiated
     }
 
@@ -55,7 +54,7 @@ public class IOThread {
     }
 
     public static synchronized boolean isProcessing(String absolutePath) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         if (currentReadPaths.contains(absolutePath)) {
             return true;
@@ -75,7 +74,7 @@ public class IOThread {
     }
 
     private static void mark(Set<String> trackingSet, String path) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         trackingSet.add(path);
     }
@@ -89,21 +88,36 @@ public class IOThread {
     }
 
     private static void unMark(Set<String> trackingSet, String path) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         boolean contained = trackingSet.remove(path);
         assert contained;
     }
 
     public static boolean isBusyWriting() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         return !currentWritePaths.isEmpty();
     }
 
     public static Set<String> getCurrentWritePaths() {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
         return currentWritePaths;
+    }
+
+    /**
+     * Waits until all IO operations have finished
+     */
+    public static void waitForIdle() {
+        // waiting until an empty task finishes works
+        // because the IO executor is serialized
+        var latch = new CountDownLatch(1);
+        getExecutor().execute(latch::countDown);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

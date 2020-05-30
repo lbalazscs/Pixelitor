@@ -18,10 +18,14 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.layers.Layer;
 import pixelitor.utils.MessageHandler;
 import pixelitor.utils.ProgressHandler;
 
 import java.awt.EventQueue;
+
+import static pixelitor.utils.Threads.calledOnEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * The MessageHandler that is normally used (except in unit-testing code)
@@ -32,16 +36,16 @@ public class GUIMessageHandler implements MessageHandler {
 
     @Override
     public void showInStatusBar(String msg) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
-        StatusBar.INSTANCE.setMessage(msg);
+        StatusBar.get().setMessage(msg);
     }
 
     @Override
     public ProgressHandler startProgress(String msg, int max) {
-        assert EventQueue.isDispatchThread() : "not on EDT";
+        assert calledOnEDT() : threadInfo();
 
-        return StatusBar.INSTANCE.startProgress(msg, max);
+        return StatusBar.get().startProgress(msg, max);
     }
 
     @Override
@@ -55,13 +59,13 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showNotImageLayerError() {
-        Dialogs.showNotImageLayerDialog();
+    public void showNotImageLayerError(Layer layer) {
+        Dialogs.showNotImageLayerDialog(layer);
     }
 
     @Override
-    public void showNotDrawableError() {
-        Dialogs.showNotDrawableDialog();
+    public void showNotDrawableError(Layer layer) {
+        Dialogs.showNotDrawableDialog(layer);
     }
 
     @Override
@@ -75,7 +79,7 @@ public class GUIMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void showException(Throwable e, Thread t) {
-        Dialogs.showExceptionDialog(e, t);
+    public void showException(Throwable e, Thread srcThread) {
+        Dialogs.showExceptionDialog(e, srcThread);
     }
 }
