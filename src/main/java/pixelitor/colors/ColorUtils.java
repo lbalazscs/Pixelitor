@@ -26,6 +26,7 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.Utils;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -233,10 +234,14 @@ public class ColorUtils {
     public static void selectColorWithDialog(Window owner, String title,
                                              Color selectedColor, boolean allowTransparency,
                                              Consumer<Color> colorChangeListener) {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
         Color prevColor = selectedColor;
         GlobalEvents.dialogOpened(title);
         Color color = ColorPicker.showDialog(owner, title, selectedColor,
-                allowTransparency, colorChangeListener);
+            allowTransparency, colorChangeListener);
         GlobalEvents.dialogClosed(title);
 
         if (color == null) {  // Cancel was pressed, reset the old color

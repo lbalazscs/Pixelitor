@@ -22,7 +22,6 @@ import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -43,9 +42,7 @@ public class AddTextLayerAction extends NamedAction implements ViewActivationLis
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (!RandomGUITest.isRunning()) {
-            TextLayer.createNew();
-        }
+        TextLayer.createNew();
     }
 
     @Override

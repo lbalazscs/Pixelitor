@@ -1335,6 +1335,10 @@ public class Composition implements Serializable {
         return null;
     }
 
+    public boolean hasActivePath() {
+        return getActivePath() != null;
+    }
+
     public void setActivePath(Path path) {
         if (path != null && path.getComp() != this) {
             throw new IllegalArgumentException(

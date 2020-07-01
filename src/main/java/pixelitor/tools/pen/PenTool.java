@@ -171,16 +171,18 @@ public class PenTool extends Tool {
             if (RunContext.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
+            if (RandomGUITest.isRunning()) {
+                // can happen when randomizing the tool settings
+                return;
+            }
             EventQueue.invokeLater(() -> {
-                if (!RandomGUITest.isRunning()) {
-                    String requestedAction = mode == EDIT ? "edit" : "transform";
-                    Dialogs.showInfoDialog("No Path",
-                        "<html>There is no path to " + requestedAction + ". " +
-                            "You can create a path<ul>" +
-                            "<li>in build mode</li>" +
-                            "<li>by converting a selection into a path</li>" +
-                            "</ul>");
-                }
+                String requestedAction = mode == EDIT ? "edit" : "transform";
+                Dialogs.showInfoDialog("No Path",
+                    "<html>There is no path to " + requestedAction + ". " +
+                        "You can create a path<ul>" +
+                        "<li>in build mode</li>" +
+                        "<li>by converting a selection into a path</li>" +
+                        "</ul>");
                 setModeChooserCombo(BUILD);
             });
             return;
@@ -234,10 +236,8 @@ public class PenTool extends Tool {
 
         PixelitorEdit selectionEdit = comp.changeSelection(shape);
         if (selectionEdit == null) {
-            if (!RandomGUITest.isRunning()) {
-                Dialogs.showInfoDialog("No Selection",
-                    "No selection was created because the path is outside the canvas.");
-            }
+            Dialogs.showInfoDialog("No Selection",
+                "No selection was created because the path is outside the canvas.");
             return;
         }
 

@@ -61,17 +61,27 @@ public class Messages {
     }
 
     public static void showFileSavedMessage(File file) {
-        String msg = "<html><b>" + file.getAbsolutePath() + "</b> was saved.";
-        showInStatusBar(msg);
+        showInStatusBar("<b>" + file.getAbsolutePath() + "</b> was saved.");
     }
 
     public static void showFilesSavedMessage(int numFiles, File dir) {
         assert dir.isDirectory();
-        String msg = "<html>" + numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>";
-        showInStatusBar(msg);
+        showInStatusBar(numFiles + " files saved to <b>" + dir.getAbsolutePath() + "</b>");
     }
 
+    /**
+     * Shows a HTML text message in the status bar.
+     */
     public static void showInStatusBar(String msg) {
+        assert !msg.startsWith("<html>");
+        msgHandler.showInStatusBar("<html>" + msg);
+    }
+
+    /**
+     * Shows a non-HTML text message in the status bar.
+     */
+    public static void showPlainInStatusBar(String msg) {
+        assert !msg.startsWith("<html>");
         msgHandler.showInStatusBar(msg);
     }
 
@@ -99,6 +109,6 @@ public class Messages {
             float seconds = totalTime / 1000.0f;
             msg = format("%s took %.1f s", filterName, seconds);
         }
-        showInStatusBar(msg);
+        showPlainInStatusBar(msg);
     }
 }

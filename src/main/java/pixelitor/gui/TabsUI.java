@@ -18,12 +18,13 @@
 package pixelitor.gui;
 
 import pixelitor.OpenImages;
-import pixelitor.utils.Keys;
 import pixelitor.utils.Lazy;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+
+import static pixelitor.utils.Keys.CTRL_SHIFT_TAB;
+import static pixelitor.utils.Keys.CTRL_TAB;
 
 /**
  * A user interface ({@link ImageAreaUI} implementation)
@@ -38,14 +39,15 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         addChangeListener(e -> tabsChanged());
 
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(Keys.CTRL_TAB, "navigateNext");
-        inputMap.put(Keys.CTRL_SHIFT_TAB, "navigatePrevious");
+        inputMap.put(CTRL_TAB, "navigateNext");
+        inputMap.put(CTRL_SHIFT_TAB, "navigatePrevious");
     }
 
     private void tabsChanged() {
         if (!userInitiated) {
             return;
         }
+
         int selectedIndex = getSelectedIndex();
         if (selectedIndex != -1) { // it is -1 if all tabs have been closed
             TabViewContainer tab = (TabViewContainer) getComponentAt(selectedIndex);
@@ -79,10 +81,8 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
     }
 
     public static void warnAndCloseTab(TabViewContainer tab) {
-        if (!RandomGUITest.isRunning()) {
-            // this will call closeTab
-            OpenImages.warnAndClose(tab.getView());
-        }
+        // this will call closeTab
+        OpenImages.warnAndClose(tab.getView());
     }
 
     public void closeTab(TabViewContainer tab) {

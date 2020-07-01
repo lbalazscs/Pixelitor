@@ -25,11 +25,6 @@ import javax.swing.*;
  * Some of the methods make sense only for internal frames, not for tabs.
  */
 public interface ViewContainer {
-    /**
-     * Sets the size of the internal frame.
-     */
-    void setSize(int width, int height);
-
     JScrollPane getScrollPane();
 
     void close();

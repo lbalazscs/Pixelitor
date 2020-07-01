@@ -42,11 +42,11 @@ import static pixelitor.tools.util.DraggablePoint.lastActive;
 public class PathEditor implements PenToolMode {
     public static final PathEditor INSTANCE = new PathEditor();
     private static final String EDIT_HELP_MESSAGE =
-            "<html>Pen Tool Edit Mode: " +
-                    "<b>drag</b> the anchor and control points. " +
-                    "<b>Right-click</b> the anchor points for options. " +
-                    "<b>Alt-drag</b> pulls out or breaks handles, " +
-                    "<b>Shift</b> constrains angles.";
+        "Pen Tool Edit Mode: " +
+            "<b>drag</b> the anchor and control points. " +
+            "<b>Right-click</b> the anchor points for options. " +
+            "<b>Alt-drag</b> pulls out or breaks handles, " +
+            "<b>Shift</b> constrains angles.";
 
     private PathEditor() {
     }
@@ -137,9 +137,7 @@ public class PathEditor implements PenToolMode {
                 ap.showPopup((int) x, (int) y);
             } else {
                 activePoint.mouseReleased(x, y, e.isShiftDown());
-                activePoint
-                        .createMovedEdit(e.getComp())
-                        .ifPresent(History::add);
+                activePoint.createMovedEdit(e.getComp()).ifPresent(History::add);
             }
         }
     }
@@ -154,9 +152,8 @@ public class PathEditor implements PenToolMode {
             }
             return false;
         }
-        int x = e.getX();
-        int y = e.getY();
-        DraggablePoint hit = path.handleWasHit(x, y, e.isAltDown());
+
+        DraggablePoint hit = path.handleWasHit(e.getX(), e.getY(), e.isAltDown());
         if (hit != null) {
             hit.setActive(true);
             return true;
@@ -166,6 +163,7 @@ public class PathEditor implements PenToolMode {
                 return true;
             }
         }
+
         return false;
     }
 

@@ -42,15 +42,13 @@ import static pixelitor.utils.Cursors.MOVE;
  */
 public class PathTransformer implements PenToolMode {
     public static final PathTransformer INSTANCE = new PathTransformer();
-    private static final String HELP_MESSAGE =
-            "<html>Pen Tool Transform Mode.";
+    private static final String HELP_MESSAGE = "Pen Tool Transform Mode.";
 
     private List<TransformBox> boxes;
     private TransformBox draggedBox;
     private TransformBox lastActiveBox;
 
     private PathTransformer() {
-
     }
 
     @Override
@@ -108,6 +106,7 @@ public class PathTransformer implements PenToolMode {
             return;
         }
         activePoint = null;
+
         // if no handle was hit, then look for whole-box movements
         for (TransformBox box : boxes) {
             if (box.contains(x, y)) {

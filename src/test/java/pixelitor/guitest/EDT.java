@@ -37,7 +37,6 @@ import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.shapes.ShapesToolState;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.DraggablePoint;
-import pixelitor.utils.test.Assertions;
 import pixelitor.utils.test.Events;
 
 import java.awt.Point;
@@ -189,7 +188,7 @@ public class EDT {
     }
 
     public static void assertNumLayersIs(int expected) {
-        run(() -> Assertions.numLayersIs(expected));
+        run(() -> OpenImages.assertNumLayersIs(expected));
     }
 
     public static void assertShapesToolStateIs(ShapesToolState expected) {

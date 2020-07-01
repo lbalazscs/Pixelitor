@@ -649,7 +649,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public boolean doColorPickerForwarding() {
+    public boolean hasColorPickerForwarding() {
         return true;
     }
 

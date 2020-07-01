@@ -91,7 +91,7 @@ public class AutoPaint {
                 dr, backupImage, false, false));
 
             progressHandler.stopProgress();
-            Messages.showInStatusBar(msg + "finished.");
+            Messages.showPlainInStatusBar(msg + "finished.");
 
             restoreOriginalFgBgColors(settings);
         }

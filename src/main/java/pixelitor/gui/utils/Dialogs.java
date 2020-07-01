@@ -70,6 +70,14 @@ public class Dialogs {
     }
 
     public static void showInfoDialog(Component parent, String title, String msg) {
+        if (RandomGUITest.isRunning()) { // avoid dialogs
+            if (!msg.startsWith("As a result of")) {
+                System.out.println("\nInfo: " + msg);
+                Thread.dumpStack();
+            }
+            return;
+        }
+
         GlobalEvents.dialogOpened(title);
         showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
         GlobalEvents.dialogClosed(title);
@@ -142,6 +150,12 @@ public class Dialogs {
     }
 
     public static void showErrorDialog(Component parent, String title, String msg) {
+        if (RandomGUITest.isRunning()) {
+            System.err.println("\nError: " + msg); // avoid dialogs
+            Thread.dumpStack();
+            return;
+        }
+
         GlobalEvents.dialogOpened(title);
         showMessageDialog(parent, msg, title, ERROR_MESSAGE);
         GlobalEvents.dialogClosed(title);
@@ -182,11 +196,9 @@ public class Dialogs {
     }
 
     public static void showNotDrawableDialog(Layer layer) {
-        if (!RandomGUITest.isRunning()) {
-            String msg = format("The active layer \"%s\" is not an image layer or mask.",
-                layer.getName());
-            showErrorDialog("Not an image layer or mask", msg);
-        }
+        String msg = format("The active layer \"%s\" is not an image layer or mask.",
+            layer.getName());
+        showErrorDialog("Not an image layer or mask", msg);
     }
 
     public static void showExceptionDialog(Throwable e) {

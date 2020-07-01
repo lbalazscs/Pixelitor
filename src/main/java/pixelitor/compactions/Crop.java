@@ -143,8 +143,8 @@ public class Crop implements CompAction {
         newComp.imageChanged(FULL, true);
 
         Messages.showInStatusBar(format(
-            "Image cropped to %d x %d pixels.",
-            cropRect.width, cropRect.height));
+            "<b>%s</b> was cropped to %d x %d pixels.",
+            newComp.getName(), cropRect.width, cropRect.height));
 
         return CompletableFuture.completedFuture(newComp);
     }

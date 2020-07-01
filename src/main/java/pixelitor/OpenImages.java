@@ -34,6 +34,8 @@ import pixelitor.tools.pen.Path;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.ViewActivationListener;
+import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Cursor;
 import java.awt.image.BufferedImage;
@@ -312,6 +314,10 @@ public class OpenImages {
     }
 
     public static void warnAndClose(View view) {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
         try {
             var comp = view.getComp();
             if (comp.isDirty()) {
@@ -441,7 +447,7 @@ public class OpenImages {
 
         File file = comp.getFile();
         RecentFilesMenu.getInstance().addFile(file);
-        Messages.showInStatusBar("<html><b>" + file.getName() + "</b> was opened.");
+        Messages.showInStatusBar("<b>" + file.getName() + "</b> was opened.");
 
         return comp;
     }
@@ -464,6 +470,19 @@ public class OpenImages {
             setActiveView(view, false);
         } catch (Exception e) {
             Messages.showException(e);
+        }
+    }
+
+    @VisibleForTesting
+    public static void assertNumLayersIs(int expected) {
+        var comp = getActiveComp();
+        if (comp == null) {
+            throw new AssertionError("no open images");
+        }
+
+        int found = comp.getNumLayers();
+        if (found != expected) {
+            throw new AssertionError("expected " + expected + ", found = " + found);
         }
     }
 

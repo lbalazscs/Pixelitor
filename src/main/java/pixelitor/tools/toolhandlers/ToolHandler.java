@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,8 @@ package pixelitor.tools.toolhandlers;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * Can be used to handle the mouse events instead of the current tool.
- *
- * The tool event handler objects follow the "Chain of responsibility" design pattern.
- * The last event handler is always the current tool.
- * This is the abstract superclass of all the chained handlers.
+ * The abstract superclass of all chained handlers in a {@link ToolHandlerChain}.
+ * Each tool handler can handle the mouse events instead of the selected tool.
  */
 public abstract class ToolHandler {
     private ToolHandler successor;

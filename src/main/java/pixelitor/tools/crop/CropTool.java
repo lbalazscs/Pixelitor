@@ -494,7 +494,7 @@ public class CropTool extends DragTool {
         }
 
         resetInitialState();
-        Messages.showInStatusBar("Crop canceled.");
+        Messages.showPlainInStatusBar("Crop canceled.");
     }
 
     @Override

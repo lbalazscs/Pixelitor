@@ -86,7 +86,7 @@ public class FramesUI extends JDesktopPane implements ImageAreaUI {
         for (View view : views) {
             ImageFrame frame = (ImageFrame) view.getViewContainer();
             frame.setLocation(locX, locY);
-            frame.setToNaturalSize();
+            frame.setToCanvasSize();
             try {
                 frame.setIcon(false);
                 frame.setMaximum(false);

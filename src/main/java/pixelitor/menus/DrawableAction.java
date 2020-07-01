@@ -99,10 +99,8 @@ public abstract class DrawableAction extends NamedAction {
             if (allowMasks) {
                 process(layer.getMask());
             } else {
-                if (!RandomGUITest.isRunning()) {
-                    Dialogs.showErrorDialog("Mask is active",
-                        name + " cannot be applied to masks.");
-                }
+                Dialogs.showErrorDialog("Mask is active",
+                    name + " cannot be applied to masks.");
             }
         } else if (layer instanceof ImageLayer) {
             process((ImageLayer) layer);

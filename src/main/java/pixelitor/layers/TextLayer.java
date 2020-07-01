@@ -30,8 +30,8 @@ import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.*;
+import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -111,10 +111,6 @@ public class TextLayer extends ContentLayer {
     }
 
     public void edit(PixelitorWindow pw) {
-        if (RandomGUITest.isRunning()) {
-            return; // avoid dialogs
-        }
-
         TextSettings oldSettings = getSettings();
         var settingsPanel = new TextSettingsPanel(this);
 
@@ -212,6 +208,9 @@ public class TextLayer extends ContentLayer {
 
         comp.deleteLayer(this, false);
         newImageLayer.updateIconImage();
+
+        Messages.showInStatusBar(String.format(
+            "The layer <b>\"%s\"</b> was rasterized.", getName()));
 
         return newImageLayer;
     }

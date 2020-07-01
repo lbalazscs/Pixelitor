@@ -24,7 +24,6 @@ import pixelitor.utils.Messages;
 import pixelitor.utils.Result;
 import pixelitor.utils.Texts;
 import pixelitor.utils.debug.DebugNodes;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -61,11 +60,7 @@ public class CopyAction extends AbstractAction {
         Result<BufferedImage, String> result = source.getImage(comp);
         if (!result.isOK()) {
             String msg = "Could not copy because " + result.getError();
-            if (RandomGUITest.isRunning()) {
-                System.err.println("Error:" + msg);
-            } else {
-                Dialogs.showErrorDialog("Error", msg);
-            }
+            Dialogs.showErrorDialog("Error", msg);
             return;
         }
         BufferedImage activeImage = result.get();

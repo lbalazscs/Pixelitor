@@ -38,13 +38,13 @@ import static javax.swing.BorderFactory.createEmptyBorder;
 public class ColorHistory {
     private final Type type;
 
-    enum Type {
+    private enum Type {
         FG("Foreground Color History") {
         }, BG("Background Color History") {
         }, FLT("Filter Color History") {
             @Override
             public String getHelpText() {
-                return createFilterColorHistoryHelp();
+                return "Filter Color History: " + ColorSwatchClickHandler.FILTER_HTML_HELP;
             }
         };
 
@@ -59,15 +59,7 @@ public class ColorHistory {
         }
 
         public String getHelpText() {
-            return createStandardHelp();
-        }
-
-        private String createStandardHelp() {
-            return "<html>" + title + ": " + ColorSwatchClickHandler.STANDARD_HTML_HELP;
-        }
-
-        private static String createFilterColorHistoryHelp() {
-            return "<html>Filter Color History: " + ColorSwatchClickHandler.FILTER_HTML_HELP;
+            return title + ": " + ColorSwatchClickHandler.STANDARD_HTML_HELP;
         }
     }
 
@@ -104,19 +96,18 @@ public class ColorHistory {
         var panel = new JPanel(new GridLayout(rows, cols, 2, 2));
         panel.setBorder(createEmptyBorder(2, 2, 2, 2));
         for (Color color : colors) {
-            panel.add(new ColorSwatchButton(
-                    color, clickHandler, 0, 0));
+            panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));
         }
 
         Messages.showInStatusBar(type.getHelpText());
 
         new DialogBuilder()
-                .title(dialogTitle)
-                .owner(window)
-                .content(panel)
-                .notModal()
-                .noOKButton()
-                .noCancelButton()
-                .show();
+            .title(dialogTitle)
+            .owner(window)
+            .content(panel)
+            .notModal()
+            .noOKButton()
+            .noCancelButton()
+            .show();
     }
 }

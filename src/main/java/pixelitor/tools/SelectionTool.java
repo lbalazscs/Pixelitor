@@ -44,12 +44,12 @@ public class SelectionTool extends DragTool {
         "<b>Space-drag</b> moves it. " +
         "<b>Shift-drag</b> adds to an existing selection, " +
         "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
-    private static final String POLY_HELP_TEXT = "<html>Polygonal selection: " +
+    private static final String POLY_HELP_TEXT = "Polygonal selection: " +
         "<b>click</b> to add points, " +
         "<b>double-click</b> (or <b>right-click</b>) to close the selection." +
         "<b>Shift</b> adds to an existing selection, " +
         "<b>Alt</b> removes from it, <b>Shift+Alt</b> intersects.";
-    private static final String FREEHAND_HELP_TEXT = "<html>Freehand selection: " +
+    private static final String FREEHAND_HELP_TEXT = "Freehand selection: " +
         "simply drag around the area that you want to select. " +
         "<b>Shift-drag</b> adds to an existing selection, " +
         "<b>Alt-drag</b> removes from it, <b>Shift-Alt-drag</b> intersects.";
@@ -106,7 +106,7 @@ public class SelectionTool extends DragTool {
         } else if (type == SelectionType.LASSO) {
             Messages.showInStatusBar(FREEHAND_HELP_TEXT);
         } else {
-            Messages.showInStatusBar("<html>Selection Tool: " + HELP_TEXT);
+            Messages.showInStatusBar("Selection Tool: " + HELP_TEXT);
         }
     }
 

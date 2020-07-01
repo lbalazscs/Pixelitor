@@ -17,24 +17,14 @@
 
 package pixelitor.utils.test;
 
-import pixelitor.OpenImages;
-
 import java.awt.image.BufferedImage;
 
 /**
  * Static, boolean-returning methods that
- * can be conveniently used after the assert keyword
+ * can be conveniently used after the assert keyword.
  */
 public class Assertions {
     private Assertions() {
-    }
-
-    public static boolean numLayersIs(int expected) {
-        var comp = OpenImages.getActiveComp();
-        if (comp == null) {
-            throw new IllegalStateException();
-        }
-        return comp.getNumLayers() == expected;
     }
 
     public static boolean callingClassIs(String name) {
@@ -45,14 +35,11 @@ public class Assertions {
 
     @SuppressWarnings("SameReturnValue")
     public static boolean checkRasterMinimum(BufferedImage newImage) {
-        if (RandomGUITest.isRunning()) {
-            var raster = newImage.getRaster();
-            if (raster.getMinX() != 0 || raster.getMinY() != 0) {
-                throw new
-                        IllegalArgumentException("Raster " + raster +
-                        " has minX or minY not equal to zero: "
-                        + raster.getMinX() + ' ' + raster.getMinY());
-            }
+        var raster = newImage.getRaster();
+        if (raster.getMinX() != 0 || raster.getMinY() != 0) {
+            throw new IllegalArgumentException("Raster " + raster +
+                " has minX or minY not equal to zero: "
+                + raster.getMinX() + ' ' + raster.getMinY());
         }
         return true;
     }

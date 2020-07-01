@@ -19,6 +19,7 @@ package pixelitor.gui.utils;
 
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -205,6 +206,10 @@ public class DialogBuilder {
      * Builds the dialog and also shows it.
      */
     public JDialog show() {
+        if (RandomGUITest.isRunning()) {
+            return null; // avoid dialogs
+        }
+
         JDialog d = build();
         GUIUtils.showDialog(d, align);
         return d;

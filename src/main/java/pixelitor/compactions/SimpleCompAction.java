@@ -91,7 +91,7 @@ public abstract class SimpleCompAction extends NamedAction implements CompAction
             view.revalidate(); // make sure the scrollbars are OK
         }
 
-        Messages.showInStatusBar(getStatusBarMessage());
+        Messages.showPlainInStatusBar(getStatusBarMessage());
 
         return CompletableFuture.completedFuture(newComp);
     }
@@ -123,7 +123,8 @@ public abstract class SimpleCompAction extends NamedAction implements CompAction
     protected abstract AffineTransform createCanvasTransform(Canvas canvas);
 
     // the oldCanvas is used by "Enlarge Canvas"
-    protected abstract Guides createGuidesCopy(Guides oldGuides, View view, Canvas oldCanvas);
+    protected abstract Guides createGuidesCopy(
+        Guides oldGuides, View view, Canvas oldCanvas);
 
     protected abstract String getStatusBarMessage();
 }

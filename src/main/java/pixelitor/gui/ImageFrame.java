@@ -20,7 +20,6 @@ package pixelitor.gui;
 import pixelitor.Canvas;
 import pixelitor.OpenImages;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import javax.swing.event.InternalFrameEvent;
@@ -31,10 +30,11 @@ import java.awt.Rectangle;
 import java.beans.PropertyVetoException;
 
 /**
- * A {@link ViewContainer} used in the "internal frames" UI.
+ * A {@link ViewContainer} used in the {@link FramesUI}.
  */
 public class ImageFrame extends JInternalFrame
     implements ViewContainer, InternalFrameListener {
+
     private static final int NIMBUS_HORIZONTAL_ADJUSTMENT = 18;
     private static final int NIMBUS_VERTICAL_ADJUSTMENT = 37;
 
@@ -53,8 +53,12 @@ public class ImageFrame extends JInternalFrame
         add(scrollPane);
 
         setLocation(locX, locY);
-        setToNaturalSize();
+        setToCanvasSize();
         setVisible(true);
+    }
+
+    @Override
+    public void internalFrameOpened(InternalFrameEvent e) {
     }
 
     @Override
@@ -66,24 +70,17 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void internalFrameClosed(InternalFrameEvent e) {
-        OpenImages.imageClosed(view);
-    }
-
-    @Override
-    public void internalFrameClosing(InternalFrameEvent e) {
-        if (!RandomGUITest.isRunning()) {
-            OpenImages.warnAndClose(view);
-        }
-    }
-
-    @Override
     public void internalFrameDeactivated(InternalFrameEvent e) {
     }
 
     @Override
-    public void internalFrameDeiconified(InternalFrameEvent e) {
-        view.repaintNavigator(true);
+    public void internalFrameClosing(InternalFrameEvent e) {
+        OpenImages.warnAndClose(view);
+    }
+
+    @Override
+    public void internalFrameClosed(InternalFrameEvent e) {
+        OpenImages.imageClosed(view);
     }
 
     @Override
@@ -92,7 +89,8 @@ public class ImageFrame extends JInternalFrame
     }
 
     @Override
-    public void internalFrameOpened(InternalFrameEvent e) {
+    public void internalFrameDeiconified(InternalFrameEvent e) {
+        view.repaintNavigator(true);
     }
 
     @Override
@@ -109,7 +107,7 @@ public class ImageFrame extends JInternalFrame
         }
     }
 
-    public void setToNaturalSize() {
+    public void setToCanvasSize() {
         Canvas canvas = view.getCanvas();
         int zoomedWidth = canvas.getCoWidth();
         int zoomedHeight = canvas.getCoHeight();

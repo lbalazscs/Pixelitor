@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,10 +27,15 @@ import pixelitor.tools.util.PMouseEvent;
  * a Drawable (image layer or mask)
  */
 public class DrawableCheckHandler extends ToolHandler {
-    private final Tool currentTool;
+    private final DrawableAction drawableAction;
 
     public DrawableCheckHandler(Tool currentTool) {
-        this.currentTool = currentTool;
+        drawableAction = new DrawableAction(currentTool.getName() + " Tool") {
+            @Override
+            protected void process(Drawable dr) {
+                // do nothing
+            }
+        };
     }
 
     @Override
@@ -40,15 +45,9 @@ public class DrawableCheckHandler extends ToolHandler {
             return false;
         }
 
-        DrawableAction action = new DrawableAction(currentTool.getName() + " Tool") {
-            @Override
-            protected void process(Drawable dr) {
-                // do nothing
-            }
-        };
         // as the action doesn't do anything, the only effects
         // here are the dialogs and auto-rasterization
-        action.actionPerformed(null);
+        drawableAction.actionPerformed(null);
 
         // whatever happened, do not forward this event,
         // the user should click again in order to use the tool

@@ -31,7 +31,6 @@ import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
-import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
@@ -685,16 +684,16 @@ public class SubPath implements Serializable, Transformable {
 //        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
         Rectangle2D coBoundingBox = gp.getBounds2D();
 
-        boolean badX = Double.isNaN(coBoundingBox.getX());
-        boolean badY = Double.isNaN(coBoundingBox.getY());
-        boolean badWidth = Double.isNaN(coBoundingBox.getWidth());
-        boolean badHeight = Double.isNaN(coBoundingBox.getHeight());
-        if (badX || badY || badWidth || badHeight) {
-            if (RandomGUITest.isRunning()) {
-                throw new IllegalStateException("bad coordinates for " + toDetailedString());
-            }
-            return null;
-        }
+//        boolean badX = Double.isNaN(coBoundingBox.getX());
+//        boolean badY = Double.isNaN(coBoundingBox.getY());
+//        boolean badWidth = Double.isNaN(coBoundingBox.getWidth());
+//        boolean badHeight = Double.isNaN(coBoundingBox.getHeight());
+//        if (badX || badY || badWidth || badHeight) {
+//            if (RandomGUITest.isRunning()) {
+//                throw new IllegalStateException("bad coordinates for " + toDetailedString());
+//            }
+//            return null;
+//        }
 
         if (coBoundingBox.isEmpty()) {
             // it can happen that a subpath consists of a single point

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,9 +21,8 @@ import pixelitor.tools.Tool;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * At the end of a {@link ToolHandler} chain there is always a
- * {@link CurrentToolHandler}, which forwards the events to the
- * current tool in order to do the real job of the tool.
+ * Forwards the events to the current tool in order to do the real job of the tool.
+ * This is always the last {@link ToolHandler} in the {@link ToolHandlerChain}.
  */
 public class CurrentToolHandler extends ToolHandler {
     private final Tool tool;

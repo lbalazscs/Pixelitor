@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,67 +23,77 @@ import pixelitor.tools.util.PMouseEvent;
 import java.awt.Cursor;
 
 /**
- * The chain of tool handlers. Most events are sent
- * to this, and not directly to the tool.
+ * The chain of {@link ToolHandler}s, following the "Chain of Responsibility"
+ * design pattern. The last handler is always the current tool.
+ *
+ * Most mouse events are sent to this, and not directly to the tool.
  */
 public class ToolHandlerChain {
-    private ToolHandler handlerChainStart;
+    private ToolHandler firstHandler;
+    private ToolHandler lastHandler;
+
     private HandToolHandler handToolHandler;
 
-    public ToolHandlerChain(Tool tool, Cursor cursor, boolean allowOnlyDrawables, boolean handToolForwarding) {
-        ToolHandler lastHandler = null;
+    public ToolHandlerChain(Tool tool, Cursor cursor,
+                            boolean allowOnlyDrawables,
+                            boolean handToolForwarding) {
+        lastHandler = null;
         if (handToolForwarding) {
             // most tools behave like the hand tool if the space is pressed
-            handToolHandler = new HandToolHandler(cursor);
-            lastHandler = addHandlerToChain(handToolHandler, lastHandler);
+            handToolHandler = new HandToolHandler(cursor, tool);
+            lastHandler = appendNext(handToolHandler);
         }
+
         if (allowOnlyDrawables) {
-            lastHandler = addHandlerToChain(
-                    new DrawableCheckHandler(tool), lastHandler);
+            lastHandler = appendNext(new DrawableCheckHandler(tool));
         }
-        if (tool.doColorPickerForwarding()) {
+
+        if (tool.hasColorPickerForwarding()) {
             // brush tools behave like the color picker if Alt is pressed
-            ColorPickerToolHandler colorPickerHandler = new ColorPickerToolHandler();
-            lastHandler = addHandlerToChain(colorPickerHandler, lastHandler);
+            lastHandler = appendNext(new ColorPickerToolHandler());
         }
+
         // if there was no special case, the current tool should handle the events
-        addHandlerToChain(new CurrentToolHandler(tool), lastHandler);
+        lastHandler = appendNext(new CurrentToolHandler(tool));
     }
 
     /**
-     * Adds the new handler to the end of the chain and returns the new end of the chain
+     * Appends the new handler to the end of the chain and also returns it
      */
-    private ToolHandler addHandlerToChain(ToolHandler newHandler, ToolHandler lastOne) {
-        if (lastOne == null) {
-            handlerChainStart = newHandler;
-            return handlerChainStart;
+    private ToolHandler appendNext(ToolHandler newHandler) {
+        if (lastHandler == null) {
+            firstHandler = newHandler;
         } else {
-            lastOne.setSuccessor(newHandler);
-            return newHandler;
+            lastHandler.setSuccessor(newHandler);
         }
+        return newHandler;
     }
 
     public void spacePressed() {
-        if (handToolHandler != null) { // there is hand tool forwarding
+        if (hasHandToolForwarding()) {
             handToolHandler.spacePressed();
         }
     }
 
     public void spaceReleased() {
-        if (handToolHandler != null) { // there is hand tool forwarding
+        if (hasHandToolForwarding()) {
             handToolHandler.spaceReleased();
         }
     }
 
+    private boolean hasHandToolForwarding() {
+        return handToolHandler != null;
+    }
+
     public void handleMousePressed(PMouseEvent e) {
-        handlerChainStart.handleMousePressed(e);
+        firstHandler.handleMousePressed(e);
     }
 
     public void handleMouseReleased(PMouseEvent e) {
-        handlerChainStart.handleMouseReleased(e);
+        firstHandler.handleMouseReleased(e);
     }
 
     public void handleMouseDragged(PMouseEvent e) {
-        handlerChainStart.handleMouseDragged(e);
+        firstHandler.handleMouseDragged(e);
     }
 }

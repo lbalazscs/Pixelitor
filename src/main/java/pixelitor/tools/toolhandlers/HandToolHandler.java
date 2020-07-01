@@ -19,6 +19,7 @@ package pixelitor.tools.toolhandlers;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.GlobalEvents;
+import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
@@ -30,23 +31,26 @@ import java.awt.Cursor;
  */
 public class HandToolHandler extends ToolHandler {
     private boolean handToolForwarding = false;
-    private boolean currentToolUsage = false;
     private boolean spaceDown = false;
 
     private final Cursor cursor;
+    private final Tool tool;
 
-    public HandToolHandler(Cursor cursor) {
+    public HandToolHandler(Cursor cursor, Tool tool) {
         this.cursor = cursor;
+        this.tool = tool;
     }
 
     @Override
     boolean mousePressed(PMouseEvent e) {
         if (GlobalEvents.isSpaceDown()) {
+            spaceDown = true; // necessary in unit tests
+
             Tools.HAND.mousePressed(e);
             handToolForwarding = true;
             return true;
         }
-        currentToolUsage = true;
+        spaceDown = false;
         handToolForwarding = false;
 
         // forwards the mouse event to the next handler
@@ -56,19 +60,21 @@ public class HandToolHandler extends ToolHandler {
     @Override
     boolean mouseDragged(PMouseEvent e) {
         if (handToolForwarding) {
-            Tools.HAND.mouseDragged(e);
+            if (!spaceDown) { // space was released in the meantime
+                handToolForwarding = false;
+                tool.mousePressed(e); // initialize the real tool's drag
+                return false;
+            } else {
+                Tools.HAND.mouseDragged(e);
+            }
             return true;
         }
-
-        currentToolUsage = true;
 
         return false;
     }
 
     @Override
     boolean mouseReleased(PMouseEvent e) {
-        currentToolUsage = false;
-
         if (handToolForwarding) {
             Tools.HAND.mouseReleased(e);
             handToolForwarding = false;
@@ -81,7 +87,7 @@ public class HandToolHandler extends ToolHandler {
 
     public void spacePressed() {
         if (!spaceDown) { // this is called all the time while the space is held down
-            if (!currentToolUsage) {
+            if (handToolForwarding) {
                 OpenImages.setCursorForAll(Tools.HAND.getStartingCursor());
             }
         }

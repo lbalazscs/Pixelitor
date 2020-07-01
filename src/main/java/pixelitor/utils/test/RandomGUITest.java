@@ -784,24 +784,32 @@ public class RandomGUITest {
     }
 
     private static void traceWithCurrentBrush() {
-        if (PenTool.hasPath()) {
+        if (canTrace()) {
             log("trace with current brush");
             executeAction(PenTool.getTraceWithBrush());
         }
     }
 
     private static void traceWithCurrentEraser() {
-        if (SelectionActions.areEnabled()) {
+        if (canTrace()) {
             log("trace with current eraser");
             executeAction(PenTool.getTraceWithEraser());
         }
     }
 
     private static void traceWithCurrentSmudge() {
-        if (SelectionActions.areEnabled()) {
+        if (canTrace()) {
             log("trace with current smudge");
             executeAction(PenTool.getTraceWithSmudge());
         }
+    }
+
+    private static boolean canTrace() {
+        Composition comp = OpenImages.getActiveComp();
+        if (comp == null) {
+            return false;
+        }
+        return comp.hasActivePath() && comp.activeIsDrawable();
     }
 
     private static void randomRotateFlip() {

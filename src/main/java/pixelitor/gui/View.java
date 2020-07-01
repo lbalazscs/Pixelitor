@@ -54,7 +54,7 @@ import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
 /**
- * The GUI component that shows a {@link Composition}
+ * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
  */
 public class View extends JComponent implements MouseListener, MouseMotionListener {
     private double scaling = 1.0f;
@@ -118,7 +118,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
 
         String msg = format(
-            "<html>The image <b>%s</b> was reloaded from the file <b>%s</b>.",
+            "The image <b>%s</b> was reloaded from the file <b>%s</b>.",
             newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
     }
@@ -231,9 +231,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         Tools.EventDispatcher.mouseMoved(e, this);
     }
 
-    public void setViewContainer(ViewContainer window) {
-        viewContainer = window;
-        setImageWindowSize();
+    public void setViewContainer(ViewContainer container) {
+        viewContainer = container;
+        updateContainerSize();
     }
 
     public ViewContainer getViewContainer() {
@@ -535,15 +535,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     public void canvasCoSizeChanged() {
         assert ConsistencyChecks.imageCoversCanvas(comp);
 
-        setImageWindowSize();
+        updateContainerSize();
         updateCanvasLocation();
     }
 
-    private void setImageWindowSize() {
+    private void updateContainerSize() {
         if (viewContainer instanceof ImageFrame) {
-            int windowWidth = canvas.getCoWidth();
-            int windowHeight = canvas.getCoHeight();
-            viewContainer.setSize(windowWidth, windowHeight);
+            ImageFrame frame = (ImageFrame) viewContainer;
+            frame.setToCanvasSize();
         }
     }
 

@@ -59,9 +59,11 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.awt.Color.WHITE;
 import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
+import static java.awt.font.TextAttribute.*;
 import static java.lang.String.format;
 import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
 import static pixelitor.Composition.LayerAdder.Position.TOP;
+import static pixelitor.layers.BlendingMode.*;
 import static pixelitor.tools.gradient.GradientColorType.BLACK_TO_WHITE;
 import static pixelitor.tools.gradient.GradientColorType.FG_TO_BG;
 import static pixelitor.utils.Threads.*;
@@ -111,8 +113,7 @@ public class SplashImageCreator {
 
         FileFormat format = FileFormat.getLastOutput();
         String fileName = format("splash%04d.%s", seqNo, format);
-        File f = new File(Dirs.getLastSave(), fileName);
-        comp.setFile(f);
+        comp.setFile(new File(Dirs.getLastSave(), fileName));
 
         return comp;
     }
@@ -121,20 +122,21 @@ public class SplashImageCreator {
         assert calledOnEDT() : threadInfo();
 
         FgBgColors.setFGColor(WHITE);
-//        FgBgColors.setBGColor(new Color(6, 83, 81));
         FgBgColors.setBGColor(Rnd.createRandomColor().darker().darker().darker());
 
-        var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+        var comp = NewImage.addNewImage(FillType.WHITE,
+            SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         for (int i = 0; i < 3; i++) {
             GradientType gradientType = Rnd.chooseFrom(GradientType.values());
             CycleMethod cycleMethod = REFLECT;
 
-            ImDrag randomDrag = ImDrag.createRandom(SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
+            ImDrag randomDrag = ImDrag.createRandom(
+                SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
             Gradient gradient = new Gradient(randomDrag,
                 gradientType, cycleMethod, FG_TO_BG,
-                false, BlendingMode.MULTIPLY, 1.0f);
+                false, MULTIPLY, 1.0f);
             gradient.drawOn(layer);
         }
 
@@ -147,7 +149,8 @@ public class SplashImageCreator {
         assert calledOnEDT() : threadInfo();
 
         ValueNoise.reseed();
-        var comp = NewImage.addNewImage(FillType.WHITE, SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
+        var comp = NewImage.addNewImage(FillType.WHITE,
+            SPLASH_WIDTH, SPLASH_HEIGHT, "Splash");
         ImageLayer layer = (ImageLayer) comp.getLayer(0);
 
         layer.setName("Color Wheel", true);
@@ -158,12 +161,12 @@ public class SplashImageCreator {
         valueNoise.setDetails(7);
         valueNoise.startOn(layer, FILTER_WITHOUT_DIALOG);
         layer.setOpacity(0.3f, true);
-        layer.setBlendingMode(BlendingMode.SCREEN, true);
+        layer.setBlendingMode(SCREEN, true);
 
         layer = addNewLayer(comp, "Gradient");
-        addRadialBWGradientToActiveDrawable(layer, true);
+        addBWGradientTo(layer, GradientType.RADIAL);
         layer.setOpacity(0.4f, true);
-        layer.setBlendingMode(BlendingMode.LUMINOSITY, true);
+        layer.setBlendingMode(LUMINOSITY, true);
 
         addTextLayers(comp);
 
@@ -174,15 +177,15 @@ public class SplashImageCreator {
         FgBgColors.setFGColor(WHITE);
         Font font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, 48);
         addTextLayer(comp, "Pixelitor", WHITE,
-            font, -17, BlendingMode.NORMAL, 1.0f, true);
+            font, -17, NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 22);
-        addTextLayer(comp, "Loading...",
-            WHITE, font, -70, BlendingMode.NORMAL, 1.0f, true);
+        addTextLayer(comp, "Loading...", WHITE,
+            font, -70, NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
-        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER,
-            WHITE, font, 50, BlendingMode.NORMAL, 1.0f, true);
+        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, WHITE,
+            font, 50, NORMAL, 1.0f, true);
     }
 
     private static Font createSplashFont(String name, int style, int size) {
@@ -192,8 +195,8 @@ public class SplashImageCreator {
         assert font.getName().equals(name) : font.getName();
 
         Map<TextAttribute, Object> attr = new HashMap<>();
-        attr.put(TextAttribute.KERNING, TextAttribute.KERNING_ON);
-        attr.put(TextAttribute.LIGATURES, TextAttribute.LIGATURES_ON);
+        attr.put(KERNING, KERNING_ON);
+        attr.put(LIGATURES, LIGATURES_ON);
         font = font.deriveFont(attr);
 
         return font;
@@ -227,11 +230,7 @@ public class SplashImageCreator {
 
         AreaEffects effects = null;
         if (dropShadow) {
-            effects = new AreaEffects();
-            var dropShadowEffect = new ShadowPathEffect(0.6f);
-            dropShadowEffect.setEffectWidth(3);
-            dropShadowEffect.setOffset(Utils.offsetFromPolar(4, 0.7));
-            effects.setDropShadow(dropShadowEffect);
+            effects = createDropShadowEffect();
         }
 
         var settings = new TextSettings(text, font, textColor, effects,
@@ -248,7 +247,16 @@ public class SplashImageCreator {
         layer.setBlendingMode(blendingMode, true);
     }
 
-    private static void addRadialBWGradientToActiveDrawable(Drawable dr, boolean radial) {
+    private static AreaEffects createDropShadowEffect() {
+        var effects = new AreaEffects();
+        var dropShadowEffect = new ShadowPathEffect(0.6f);
+        dropShadowEffect.setEffectWidth(3);
+        dropShadowEffect.setOffset(Utils.offsetFromPolar(4, 0.7));
+        effects.setDropShadow(dropShadowEffect);
+        return effects;
+    }
+
+    private static void addBWGradientTo(Drawable dr, GradientType gradientType) {
         Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -264,25 +272,15 @@ public class SplashImageCreator {
             endY = startY;
         }
 
-        GradientType gradientType;
-
-        if (radial) {
-            gradientType = GradientType.RADIAL;
-        } else {
-            gradientType = GradientType.SPIRAL_CW;
-        }
-
         Gradient gradient = new Gradient(
             new ImDrag(startX, startY, endX, endY),
             gradientType, REFLECT, BLACK_TO_WHITE,
-            false,
-            BlendingMode.NORMAL, 1.0f);
+            false, NORMAL, 1.0f);
         gradient.drawOn(dr);
     }
 
     private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp) {
-        var saveSettings = new SaveSettings(
-            FileFormat.getLastOutput(), comp.getFile());
+        var saveSettings = new SaveSettings(FileFormat.getLastOutput(), comp.getFile());
 
         return comp.saveAsync(saveSettings, false)
             .thenAcceptAsync(v -> comp.getView().close(), onEDT);
@@ -291,7 +289,7 @@ public class SplashImageCreator {
     private static void cleanupAfterManySplashes(int numCreatedImages,
                                                  ProgressHandler progressHandler) {
         progressHandler.stopProgress();
-        Messages.showInStatusBar(format(
+        Messages.showPlainInStatusBar(format(
             "Finished saving %d splash images to %s",
             numCreatedImages, Dirs.getLastSave()));
     }

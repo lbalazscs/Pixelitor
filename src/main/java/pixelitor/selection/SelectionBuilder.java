@@ -23,7 +23,6 @@ import pixelitor.history.NewSelectionEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.history.SelectionShapeChangeEdit;
 import pixelitor.utils.Messages;
-import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -120,10 +119,8 @@ public class SelectionBuilder {
                 comp.promoteSelection();
                 comp.deselect(true);
 
-                if (!RandomGUITest.isRunning()) {
-                    Messages.showInfo("Nothing selected", "As a result of the "
-                            + interaction.toString().toLowerCase() + " operation, nothing is selected now.");
-                }
+                Messages.showInfo("Nothing selected", "As a result of the "
+                    + interaction.toString().toLowerCase() + " operation, nothing is selected now.");
             } else {
                 oldSelection.die();
                 builtSelection.setShape(combinedShape);
@@ -156,7 +153,7 @@ public class SelectionBuilder {
     }
 
     public void cancelIfNotFinished(Composition comp) {
-        if(!finished) {
+        if (!finished) {
             Selection builtSelection = comp.getBuiltSelection();
             if (builtSelection != null) {
                 builtSelection.die();

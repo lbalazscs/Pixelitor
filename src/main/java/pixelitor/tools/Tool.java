@@ -83,12 +83,12 @@ public abstract class Tool implements KeyListener {
             allowOnlyDrawables, handToolForwarding);
     }
 
-    public boolean doColorPickerForwarding() {
+    public boolean hasColorPickerForwarding() {
         return false;
     }
 
     public String getStatusBarMessage() {
-        return "<html>" + name + " Tool: " + toolMessage;
+        return name + " Tool: " + toolMessage;
     }
 
     public void mouseClicked(PMouseEvent e) {
@@ -217,7 +217,7 @@ public abstract class Tool implements KeyListener {
 
     @Override
     public void altPressed() {
-        if (!altDown && doColorPickerForwarding()) {
+        if (!altDown && hasColorPickerForwarding()) {
             OpenImages.setCursorForAll(
                 Tools.COLOR_PICKER.getStartingCursor());
         }
@@ -226,7 +226,7 @@ public abstract class Tool implements KeyListener {
 
     @Override
     public void altReleased() {
-        if (doColorPickerForwarding()) {
+        if (hasColorPickerForwarding()) {
             OpenImages.setCursorForAll(cursor);
         }
         altDown = false;

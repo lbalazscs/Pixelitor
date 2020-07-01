@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,8 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
 
 /**
- * If Alt is pressed, the color picker will handle
- * the events instead of the current tool
+ * A {@link ToolHandler} which ensures that the color picker handles
+ * the events instead of the current tool when Alt is pressed
  */
 public class ColorPickerToolHandler extends ToolHandler {
     @Override

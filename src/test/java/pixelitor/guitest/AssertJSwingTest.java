@@ -2887,8 +2887,8 @@ public class AssertJSwingTest {
         log(1, "color selector");
 
         pw.button(FgBgColorSelector.RESET_DEF_COLORS_BUTTON_NAME).click();
-        pw.button(FgBgColorSelector.SWAP_COLORS_BUTTON_NAME).click();
-        pw.button(FgBgColorSelector.RANDOMIZE_COLORS_BUTTON_NAME).click();
+        pw.button(FgBgColorSelector.SWAP_BUTTON_NAME).click();
+        pw.button(FgBgColorSelector.RANDOMIZE_BUTTON_NAME).click();
 
         var fgButton = pw.button(FgBgColorSelector.FG_BUTTON_NAME);
         fgButton.click();

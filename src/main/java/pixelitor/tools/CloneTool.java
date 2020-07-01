@@ -78,12 +78,10 @@ public class CloneTool extends BlendingModeBrushTool {
         addBlendingModePanel();
 
         settingsPanel.addSeparator();
-
         settingsPanel.addCheckBox("Aligned", true, "alignedCB",
                 cloneBrush::setAligned);
 
         settingsPanel.addSeparator();
-
         settingsPanel.addCheckBox("Sample All Layers", false,
                 "sampleAllLayersCB", selected -> sampleAllLayers = selected);
 
@@ -94,22 +92,23 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     private void transformButtonPressed() {
-        if (RandomGUITest.isRunning()) {
-            return;
-        }
+        JPanel transformPanel = createTransformPanel();
+        transformDialog = new DialogBuilder()
+            .title("Clone Transform")
+            .content(transformPanel)
+            .notModal()
+            .okText("Close")
+            .noCancelButton()
+            .show();
+    }
 
-        var p = new JPanel(new GridBagLayout());
-        var gbh = new GridBagHelper(p);
+    private JPanel createTransformPanel() {
+        var transformPanel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(transformPanel);
         gbh.addLabelAndControl("Scale (%):", scaleParam.createGUI());
         gbh.addLabelAndControl("Rotate (Degrees):", rotationParam.createGUI());
         gbh.addLabelAndControl("Mirror:", mirrorParam.createGUI());
-        transformDialog = new DialogBuilder()
-                .title("Clone Transform")
-                .content(p)
-                .notModal()
-                .okText("Close")
-                .noCancelButton()
-                .show();
+        return transformPanel;
     }
 
     @Override
@@ -123,9 +122,7 @@ public class CloneTool extends BlendingModeBrushTool {
     protected void setLazyBrush() {
         if (lazyMouseCB.isSelected()) {
             lazyMouseBrush = new LazyMouseBrush(cloneBrush);
-            brush = new AffectedAreaTracker(
-                    lazyMouseBrush,
-                    affectedArea);
+            brush = new AffectedAreaTracker(lazyMouseBrush, affectedArea);
             lazyMouse = true;
         } else {
             brush = new AffectedAreaTracker(cloneBrush, affectedArea);
@@ -213,7 +210,7 @@ public class CloneTool extends BlendingModeBrushTool {
     }
 
     @Override
-    public boolean doColorPickerForwarding() {
+    public boolean hasColorPickerForwarding() {
         return false; // this tool uses Alt-click for source selection
     }
 

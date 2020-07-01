@@ -50,12 +50,12 @@ public class PathBuilder implements PenToolMode {
     public static final PathBuilder INSTANCE = new PathBuilder();
 
     private static final String BUILDER_HELP_MESSAGE =
-            "<html>Pen Tool Build Mode: " +
-                    "<b>click, drag</b> and repeat to create, " +
-                    "<b>Ctrl-click</b> or close it to finish it. " +
-                    "<b>Ctrl-drag</b> moves points, " +
-                    "<b>Alt-drag</b> breaks handles, " +
-                    "<b>Shift-drag</b> constrains angles.";
+        "Pen Tool Build Mode: " +
+            "<b>click, drag</b> and repeat to create, " +
+            "<b>Ctrl-click</b> or close it to finish it. " +
+            "<b>Ctrl-drag</b> moves points, " +
+            "<b>Alt-drag</b> breaks handles, " +
+            "<b>Shift-drag</b> constrains angles.";
 
 
     private PathBuilder() {
@@ -274,9 +274,7 @@ public class PathBuilder implements PenToolMode {
 
         if (state == DRAG_EDITING_PREVIOUS) {
             activePoint.mouseReleased(x, y, e.isShiftDown());
-            activePoint
-                    .createMovedEdit(e.getComp())
-                    .ifPresent(History::add);
+            activePoint.createMovedEdit(e.getComp()).ifPresent(History::add);
             // after the dragging is finished, determine the next state
             if (path.getPrevBuildState() == NO_INTERACTION) {
                 path.setBuildState(NO_INTERACTION);

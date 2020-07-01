@@ -210,7 +210,7 @@ public class IO {
         CompletableFuture
             .supplyAsync(() -> exportLayersToPNG(comp), onIOThread)
             .thenAcceptAsync(numImg -> Messages.showInStatusBar(
-                "<html>Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
+                "Saved " + numImg + " images to <b>" + Dirs.getLastSave() + "</b>")
                 , onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
     }

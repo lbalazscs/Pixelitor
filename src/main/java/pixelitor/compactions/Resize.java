@@ -137,7 +137,7 @@ public class Resize implements CompAction {
         newComp.getView().revalidate(); // make sure the scrollbars are OK
 
         progressHandler.stopProgress();
-        Messages.showInStatusBar(format("<html><b>%s</b> was resized to %dx%d pixels.",
+        Messages.showInStatusBar(format("<b>%s</b> was resized to %dx%d pixels.",
             newComp.getName(), newCanvasSize.width, newCanvasSize.height));
 
         return newComp;

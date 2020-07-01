@@ -27,7 +27,6 @@ import pixelitor.menus.MenuAction;
 import pixelitor.tools.Tools;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Rnd;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -44,11 +43,11 @@ import static pixelitor.colors.ColorUtils.selectColorWithDialog;
  * the foreground and background colors
  */
 public class FgBgColorSelector extends JLayeredPane {
-    public static final String RANDOMIZE_COLORS_BUTTON_NAME = "randomizeColorsButton";
+    public static final String RANDOMIZE_BUTTON_NAME = "randomizeColorsButton";
     public static final String FG_BUTTON_NAME = "fgButton";
     public static final String BG_BUTTON_NAME = "bgButton";
     public static final String RESET_DEF_COLORS_BUTTON_NAME = "resetDefColorsButton";
-    public static final String SWAP_COLORS_BUTTON_NAME = "swapColorsButton";
+    public static final String SWAP_BUTTON_NAME = "swapColorsButton";
     private final PixelitorWindow pw;
     private JButton fgButton;
     private JButton bgButton;
@@ -105,7 +104,7 @@ public class FgBgColorSelector extends JLayeredPane {
             fgButton = new JButton(fgColorIcon);
         }
         initButton(fgButton, "Set Foreground Color",
-                BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> fgButtonPressed());
+            BIG_BUTTON_SIZE, 2, FG_BUTTON_NAME, e -> fgButtonPressed());
         fgButton.setLocation(0, SMALL_BUTTON_VERTICAL_SPACE);
 
         fgButton.setComponentPopupMenu(createPopupMenu(true));
@@ -118,19 +117,19 @@ public class FgBgColorSelector extends JLayeredPane {
             bgButton = new JButton(bgColorIcon);
         }
         initButton(bgButton, "Set Background Color",
-                BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> bgButtonPressed());
-        bgButton.setLocation(BIG_BUTTON_SIZE / 2, SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
+            BIG_BUTTON_SIZE, 1, BG_BUTTON_NAME, e -> bgButtonPressed());
+        bgButton.setLocation(BIG_BUTTON_SIZE / 2,
+            SMALL_BUTTON_VERTICAL_SPACE + BIG_BUTTON_SIZE / 2);
 
         bgButton.setComponentPopupMenu(createPopupMenu(false));
     }
 
     private JPopupMenu createPopupMenu(boolean fg) {
         JPopupMenu popup = new JPopupMenu();
+        String selectorName = fg ? "Foreground" : "Background";
+        String otherName = fg ? "Background" : "Foreground";
 
-        String variationsTitle = fg
-                ? "Foreground Color Variations..."
-                : "Background Color Variations...";
-        popup.add(new MenuAction(variationsTitle) {
+        popup.add(new MenuAction(selectorName + " Color Variations...") {
             @Override
             public void onClick() {
                 if (fg) {
@@ -141,46 +140,32 @@ public class FgBgColorSelector extends JLayeredPane {
             }
         });
 
-        String mixTitle = fg
-                ? "HSB Mix with Background..."
-                : "HSB Mix with Foreground...";
-        popup.add(new MenuAction(mixTitle) {
+        popup.add(new MenuAction("HSB Mix with " + otherName + "...") {
             @Override
             public void onClick() {
                 PalettePanel.showHSBMixDialog(pw, fg);
             }
         });
 
-        String rgbMixTitle = fg
-                ? "RGB Mix with Background..."
-                : "RGB Mix with Foreground...";
-        popup.add(new MenuAction(rgbMixTitle) {
+        popup.add(new MenuAction("RGB Mix with " + otherName + "...") {
             @Override
             public void onClick() {
                 PalettePanel.showRGBMixDialog(pw, fg);
             }
         });
 
-        String historyTitle = fg
-                ? "Foreground Color History..."
-                : "Background Color History...";
-        popup.add(new MenuAction(historyTitle) {
+        ColorHistory history = fg ? ColorHistory.FOREGROUND : ColorHistory.BACKGROUND;
+        popup.add(new MenuAction(selectorName + " Color History...") {
             @Override
             public void onClick() {
-                if (fg) {
-                    ColorHistory.FOREGROUND.showDialog(pw,
-                            ColorSwatchClickHandler.STANDARD);
-                } else {
-                    ColorHistory.BACKGROUND.showDialog(pw,
-                            ColorSwatchClickHandler.STANDARD);
-                }
+                history.showDialog(pw, ColorSwatchClickHandler.STANDARD);
             }
         });
 
         popup.addSeparator();
 
         ColorUtils.setupCopyColorPopupMenu(popup,
-                () -> fg ? getFgColor() : getBgColor());
+            () -> fg ? getFgColor() : getBgColor());
 
         ColorUtils.setupPasteColorPopupMenu(popup, pw, color -> {
             if (fg) {
@@ -202,8 +187,8 @@ public class FgBgColorSelector extends JLayeredPane {
         };
         JButton defaultsButton = new JButton();
         initButton(defaultsButton, "Reset Default Colors (D)",
-                SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME,
-                resetToDefaultAction);
+            SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME,
+            resetToDefaultAction);
         defaultsButton.setLocation(0, 0);
     }
 
@@ -221,8 +206,7 @@ public class FgBgColorSelector extends JLayeredPane {
         };
         JButton swapButton = new JButton();
         initButton(swapButton, "Swap Colors (X)",
-                SMALL_BUTTON_SIZE, 1, SWAP_COLORS_BUTTON_NAME,
-                swapColorsAction);
+            SMALL_BUTTON_SIZE, 1, SWAP_BUTTON_NAME, swapColorsAction);
         swapButton.setLocation(SMALL_BUTTON_SIZE, 0);
     }
 
@@ -249,8 +233,7 @@ public class FgBgColorSelector extends JLayeredPane {
 
         JButton randomizeButton = new JButton();
         initButton(randomizeButton, "Randomize Colors (R)",
-                SMALL_BUTTON_SIZE, 1, RANDOMIZE_COLORS_BUTTON_NAME,
-                randomizeColorsAction);
+            SMALL_BUTTON_SIZE, 1, RANDOMIZE_BUTTON_NAME, randomizeColorsAction);
         randomizeButton.setLocation(2 * SMALL_BUTTON_SIZE, 0);
     }
 
@@ -264,8 +247,8 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void initButton(JButton button, String toolTip,
-                               int size, int layer,
-                               String name, ActionListener action) {
+                            int size, int layer,
+                            String name, ActionListener action) {
         button.setSize(size, size);
         button.addActionListener(action);
 //        button.setContentAreaFilled(false);
@@ -279,25 +262,17 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     private void fgButtonPressed() {
-        if (RandomGUITest.isRunning()) {
-            return;
-        }
-
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
         selectColorWithDialog(pw, "Foreground Color",
-                selectedColor, false,
-                color -> setFgColor(color, true));
+            selectedColor, false,
+            color -> setFgColor(color, true));
     }
 
     private void bgButtonPressed() {
-        if (RandomGUITest.isRunning()) {
-            return;
-        }
-
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
         selectColorWithDialog(pw, "Background Color",
-                selectedColor, false,
-                color -> setBgColor(color, true));
+            selectedColor, false,
+            color -> setBgColor(color, true));
     }
 
     /**

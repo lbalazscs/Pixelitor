@@ -38,14 +38,16 @@ import static pixelitor.colors.FgBgColors.setFGColor;
  */
 public class ColorPickerTool extends Tool {
     private static final String SAMPLE_LABEL_TEXT = "Sample Only the Active Layer/Mask";
+    private static final String HELP_TEXT =
+        "<b>click</b> to pick the foreground color, " +
+            "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.";
+
     private final JCheckBox sampleLayerOnly = new JCheckBox(SAMPLE_LABEL_TEXT);
 
     public ColorPickerTool() {
         super("Color Picker", 'I', "color_picker_tool_icon.png",
-                "<b>click</b> to pick the foreground color, " +
-                        "<b>Alt-click</b> (or <b>right-click</b>) to pick the background color.",
-                Cursors.CROSSHAIR, false,
-                true, ClipStrategy.CANVAS);
+            HELP_TEXT, Cursors.CROSSHAIR, false,
+            true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -53,12 +55,10 @@ public class ColorPickerTool extends Tool {
         settingsPanel.add(sampleLayerOnly);
     }
 
-
     @Override
     public void mousePressed(PMouseEvent e) {
         sampleColor(e, e.isAltDown() || e.isRight());
     }
-
 
     @Override
     public void mouseDragged(PMouseEvent e) {
@@ -80,8 +80,7 @@ public class ColorPickerTool extends Tool {
             if (!view.activeIsDrawable()) {
                 return;
             }
-
-            Drawable dr = view.getComp().getActiveDrawableOrThrow();
+            Drawable dr = view.getComp().getActiveDrawable();
             img = dr.getImage();
             isGray = img.getType() == TYPE_BYTE_GRAY;
 
@@ -121,10 +120,10 @@ public class ColorPickerTool extends Tool {
 
             msg += format(", alpha = %d, red = %d, green = %d, blue = %d, " +
                     "hue = %.2f, saturation = %.2f, brightness = %.2f",
-                    a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
+                a, r, g, b, hsbValues[0], hsbValues[1], hsbValues[2]);
         }
 
-        Messages.showInStatusBar(msg);
+        Messages.showPlainInStatusBar(msg);
     }
 
     @Override
