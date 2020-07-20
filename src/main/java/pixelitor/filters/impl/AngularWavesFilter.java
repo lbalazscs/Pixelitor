@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,24 +45,13 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double angle = FastMath.atan2(dy, dx);
 
         double na = r / radialWL - phase;
-        double fa;
-
-        switch (waveType) {
-            case WaveType.SINE:
-                fa = FastMath.sin(na);
-                break;
-            case WaveType.SAWTOOTH:
-                fa = ImageMath.sinLikeSawtooth(na);
-                break;
-            case WaveType.TRIANGLE:
-                fa = ImageMath.sinLikeTriangle(na);
-                break;
-            case WaveType.NOISE:
-                fa = Noise.sinLikeNoise1((float)na);
-                break;
-            default:
-                throw new IllegalStateException("waveType = " + waveType);
-        }
+        double fa = switch (waveType) {
+            case WaveType.SINE -> FastMath.sin(na);
+            case WaveType.SAWTOOTH -> ImageMath.sinLikeSawtooth(na);
+            case WaveType.TRIANGLE -> ImageMath.sinLikeTriangle(na);
+            case WaveType.NOISE -> Noise.sinLikeNoise1((float) na);
+            default -> throw new IllegalStateException("waveType = " + waveType);
+        };
 
         angle += fa * amount;
 

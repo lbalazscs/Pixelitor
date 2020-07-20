@@ -119,23 +119,13 @@ public class PaintBucketTool extends Tool {
 
         String fill = (String) fillCB.getSelectedItem();
         int rgbAtMouse = workingImage.getRGB(x, y);
-        int fillRGB;
-        switch (fill) {
-            case FILL_FOREGROUND:
-                fillRGB = getFGColor().getRGB();
-                break;
-            case FILL_BACKGROUND:
-                fillRGB = getBGColor().getRGB();
-                break;
-            case FILL_TRANSPARENT:
-                fillRGB = 0x00000000;
-                break;
-            case FILL_CLICKED:
-                fillRGB = rgbAtMouse;
-                break;
-            default:
-                throw new IllegalStateException("fill = " + fill);
-        }
+        int fillRGB = switch (fill) {
+            case FILL_FOREGROUND -> getFGColor().getRGB();
+            case FILL_BACKGROUND -> getBGColor().getRGB();
+            case FILL_TRANSPARENT -> 0x00000000;
+            case FILL_CLICKED -> rgbAtMouse;
+            default -> throw new IllegalStateException("fill = " + fill);
+        };
 
         Rectangle replacedArea;
         String action = (String) actionCB.getSelectedItem();

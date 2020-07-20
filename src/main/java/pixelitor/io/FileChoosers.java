@@ -199,23 +199,15 @@ public class FileChoosers {
 
     private static FileFilter getFileFilterForExtension(String ext) {
         ext = ext.toLowerCase();
-        switch (ext) {
-            case "jpg":
-            case "jpeg":
-                return jpegFilter;
-            case "png":
-                return pngFilter;
-            case "bmp":
-                return bmpFilter;
-            case "gif":
-                return gifFilter;
-            case "pxc":
-                return pxcFilter;
-            case "tif":
-            case "tiff":
-                return tiffFilter;
-        }
-        return jpegFilter; // default
+        return switch (ext) {
+            case "jpg", "jpeg" -> jpegFilter;
+            case "png" -> pngFilter;
+            case "bmp" -> bmpFilter;
+            case "gif" -> gifFilter;
+            case "pxc" -> pxcFilter;
+            case "tif", "tiff" -> tiffFilter;
+            default -> jpegFilter;
+        };
     }
 
     private static void setDefaultOpenExtensions() {

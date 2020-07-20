@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -82,44 +82,22 @@ public class JHConvolutionEdge extends ParametrizedFilter {
 
         int horizontal = horizontalMethod.getValue();
         switch (horizontal) {
-            case METHOD_SOBEL:
-                filter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
-                break;
-            case METHOD_PREWITT:
-                filter.setHEdgeMatrix(EdgeFilter.PREWITT_H);
-                break;
-            case METHOD_ROBERTS:
-                filter.setHEdgeMatrix(EdgeFilter.ROBERTS_H);
-                break;
-            case METHOD_FREI_CHEN:
-                filter.setHEdgeMatrix(EdgeFilter.FREI_CHEN_H);
-                break;
-            case METHOD_NONE:
-                filter.setHEdgeMatrix(NONE_MATRIX);
-                break;
-            default:
-                throw new IllegalStateException("horizontal = " + horizontal);
+            case METHOD_SOBEL -> filter.setHEdgeMatrix(EdgeFilter.SOBEL_H);
+            case METHOD_PREWITT -> filter.setHEdgeMatrix(EdgeFilter.PREWITT_H);
+            case METHOD_ROBERTS -> filter.setHEdgeMatrix(EdgeFilter.ROBERTS_H);
+            case METHOD_FREI_CHEN -> filter.setHEdgeMatrix(EdgeFilter.FREI_CHEN_H);
+            case METHOD_NONE -> filter.setHEdgeMatrix(NONE_MATRIX);
+            default -> throw new IllegalStateException("horizontal = " + horizontal);
         }
 
         int vertical = verticalMethod.getValue();
         switch (vertical) {
-            case METHOD_SOBEL:
-                filter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
-                break;
-            case METHOD_PREWITT:
-                filter.setVEdgeMatrix(EdgeFilter.PREWITT_V);
-                break;
-            case METHOD_ROBERTS:
-                filter.setVEdgeMatrix(EdgeFilter.ROBERTS_V);
-                break;
-            case METHOD_FREI_CHEN:
-                filter.setVEdgeMatrix(EdgeFilter.FREI_CHEN_V);
-                break;
-            case METHOD_NONE:
-                filter.setVEdgeMatrix(NONE_MATRIX);
-                break;
-            default:
-                throw new IllegalStateException("vertical = " + vertical);
+            case METHOD_SOBEL -> filter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
+            case METHOD_PREWITT -> filter.setVEdgeMatrix(EdgeFilter.PREWITT_V);
+            case METHOD_ROBERTS -> filter.setVEdgeMatrix(EdgeFilter.ROBERTS_V);
+            case METHOD_FREI_CHEN -> filter.setVEdgeMatrix(EdgeFilter.FREI_CHEN_V);
+            case METHOD_NONE -> filter.setVEdgeMatrix(NONE_MATRIX);
+            default -> throw new IllegalStateException("vertical = " + vertical);
         }
 
         dest = filter.filter(src, dest);

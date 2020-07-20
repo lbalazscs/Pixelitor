@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -103,29 +103,13 @@ public class ChannelInvert extends ParametrizedFilter {
                 destData[i] = srcPixel;
             } else {
                 switch (invertType) {
-                    case RED_ONLY:
-                        destData[i] = srcPixel ^ 0x00FF0000;
-                        break;
-                    case GREEN_ONLY:
-                        destData[i] = srcPixel ^ 0x0000FF00;
-                        break;
-                    case BLUE_ONLY:
-                        destData[i] = srcPixel ^ 0x000000FF;
-                        break;
-
-                    case RED_GREEN:
-                        destData[i] = srcPixel ^ 0x00FFFF00;
-                        break;
-                    case RED_BLUE:
-                        destData[i] = srcPixel ^ 0x00FF00FF;
-                        break;
-                    case GREEN_BLUE:
-                        destData[i] = srcPixel ^ 0x0000FFFF;
-                        break;
-
-                    case RED_GREEN_BLUE:
-                        destData[i] = srcPixel ^ 0x00FFFFFF;
-                        break;
+                    case RED_ONLY -> destData[i] = srcPixel ^ 0x00FF0000;
+                    case GREEN_ONLY -> destData[i] = srcPixel ^ 0x0000FF00;
+                    case BLUE_ONLY -> destData[i] = srcPixel ^ 0x000000FF;
+                    case RED_GREEN -> destData[i] = srcPixel ^ 0x00FFFF00;
+                    case RED_BLUE -> destData[i] = srcPixel ^ 0x00FF00FF;
+                    case GREEN_BLUE -> destData[i] = srcPixel ^ 0x0000FFFF;
+                    case RED_GREEN_BLUE -> destData[i] = srcPixel ^ 0x00FFFFFF;
                 }
             }
         }
@@ -150,31 +134,16 @@ public class ChannelInvert extends ParametrizedFilter {
             int g = (srcPixel >>> 8) & 0xFF;
             int b = srcPixel & 0xFF;
             hsb = Color.RGBtoHSB(r, g, b, hsb);
-            int newRGB = 0;
-
-            switch (invertType) {
-                case HUE_ONLY:
-                    newRGB = Color.HSBtoRGB(0.5f + hsb[0], hsb[1], hsb[2]);
-                    break;
-                case BRI_ONLY:
-                    newRGB = Color.HSBtoRGB(hsb[0], hsb[1], 1.0f - hsb[2]);
-                    break;
-                case SATURATION_ONLY:
-                    newRGB = Color.HSBtoRGB(hsb[0], 1.0f - hsb[1], hsb[2]);
-                    break;
-                case HUE_BRI:
-                    newRGB = Color.HSBtoRGB(0.5f + hsb[0], hsb[1], 1.0f - hsb[2]);
-                    break;
-                case HUE_SAT:
-                    newRGB = Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], hsb[2]);
-                    break;
-                case SAT_BRI:
-                    newRGB = Color.HSBtoRGB(hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
-                    break;
-                case HUE_SAT_BRI:
-                    newRGB = Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
-                    break;
-            }
+            int newRGB = switch (invertType) {
+                case HUE_ONLY -> Color.HSBtoRGB(0.5f + hsb[0], hsb[1], hsb[2]);
+                case BRI_ONLY -> Color.HSBtoRGB(hsb[0], hsb[1], 1.0f - hsb[2]);
+                case SATURATION_ONLY -> Color.HSBtoRGB(hsb[0], 1.0f - hsb[1], hsb[2]);
+                case HUE_BRI -> Color.HSBtoRGB(0.5f + hsb[0], hsb[1], 1.0f - hsb[2]);
+                case HUE_SAT -> Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], hsb[2]);
+                case SAT_BRI -> Color.HSBtoRGB(hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
+                case HUE_SAT_BRI -> Color.HSBtoRGB(0.5f + hsb[0], 1.0f - hsb[1], 1.0f - hsb[2]);
+                default -> 0;
+            };
 
             //  alpha is 255 here
             newRGB &= 0x00FFFFFF;  // set alpha to 0

@@ -30,11 +30,7 @@ import pixelitor.tools.DragTool;
 import pixelitor.tools.gradient.history.GradientChangeEdit;
 import pixelitor.tools.gradient.history.GradientHandlesHiddenEdit;
 import pixelitor.tools.gradient.history.NewGradientEdit;
-import pixelitor.tools.util.ArrowKey;
-import pixelitor.tools.util.DragDisplayType;
-import pixelitor.tools.util.DraggablePoint;
-import pixelitor.tools.util.ImDrag;
-import pixelitor.tools.util.PMouseEvent;
+import pixelitor.tools.util.*;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.debug.DebugNode;
 
@@ -45,9 +41,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 
-import static java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE;
-import static java.awt.MultipleGradientPaint.CycleMethod.REFLECT;
-import static java.awt.MultipleGradientPaint.CycleMethod.REPEAT;
+import static java.awt.MultipleGradientPaint.CycleMethod.*;
 import static pixelitor.colors.FgBgColors.setBGColor;
 import static pixelitor.colors.FgBgColors.setFGColor;
 import static pixelitor.tools.util.DraggablePoint.activePoint;
@@ -439,15 +433,11 @@ public class GradientTool extends DragTool {
     }
 
     private static String cycleMethodAsString(CycleMethod cm) {
-        switch (cm) {
-            case NO_CYCLE:
-                return NO_CYCLE_AS_STRING;
-            case REFLECT:
-                return REFLECT_AS_STRING;
-            case REPEAT:
-                return REPEAT_AS_STRING;
-        }
-        throw new IllegalStateException("should not get here");
+        return switch (cm) {
+            case NO_CYCLE -> NO_CYCLE_AS_STRING;
+            case REFLECT -> REFLECT_AS_STRING;
+            case REPEAT -> REPEAT_AS_STRING;
+        };
     }
 
     @Override

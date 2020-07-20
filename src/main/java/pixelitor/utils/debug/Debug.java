@@ -60,129 +60,76 @@ public class Debug {
     }
 
     public static String dateBufferTypeAsString(int type) {
-        switch (type) {
-            case DataBuffer.TYPE_BYTE:
-                return "BYTE";
-            case DataBuffer.TYPE_USHORT:
-                return "USHORT";
-            case DataBuffer.TYPE_SHORT:
-                return "SHORT";
-            case DataBuffer.TYPE_INT:
-                return "INT";
-            case DataBuffer.TYPE_FLOAT:
-                return "FLOAT";
-            case DataBuffer.TYPE_DOUBLE:
-                return "DOUBLE";
-            case DataBuffer.TYPE_UNDEFINED:
-                return "UNDEFINED";
-            default:
-                return "unrecognized (" + type + ")";
-        }
+        return switch (type) {
+            case DataBuffer.TYPE_BYTE -> "BYTE";
+            case DataBuffer.TYPE_USHORT -> "USHORT";
+            case DataBuffer.TYPE_SHORT -> "SHORT";
+            case DataBuffer.TYPE_INT -> "INT";
+            case DataBuffer.TYPE_FLOAT -> "FLOAT";
+            case DataBuffer.TYPE_DOUBLE -> "DOUBLE";
+            case DataBuffer.TYPE_UNDEFINED -> "UNDEFINED";
+            default -> "unrecognized (" + type + ")";
+        };
     }
 
     static String transparencyAsString(int transparency) {
-        switch (transparency) {
-            case Transparency.OPAQUE:
-                return "OPAQUE";
-            case Transparency.BITMASK:
-                return "BITMASK";
-            case Transparency.TRANSLUCENT:
-                return "TRANSLUCENT";
-            default:
-                return "unrecognized (" + transparency + ")";
-        }
+        return switch (transparency) {
+            case Transparency.OPAQUE -> "OPAQUE";
+            case Transparency.BITMASK -> "BITMASK";
+            case Transparency.TRANSLUCENT -> "TRANSLUCENT";
+            default -> "unrecognized (" + transparency + ")";
+        };
     }
 
     public static String bufferedImageTypeAsString(int type) {
-        switch (type) {
-            case BufferedImage.TYPE_3BYTE_BGR:
-                return "3BYTE_BGR";
-            case BufferedImage.TYPE_4BYTE_ABGR:
-                return "4BYTE_ABGR";
-            case BufferedImage.TYPE_4BYTE_ABGR_PRE:
-                return "4BYTE_ABGR_PRE";
-            case BufferedImage.TYPE_BYTE_BINARY:
-                return "BYTE_BINARY";
-            case BufferedImage.TYPE_BYTE_GRAY:
-                return "BYTE_GRAY";
-            case BufferedImage.TYPE_BYTE_INDEXED:
-                return "BYTE_INDEXED";
-            case BufferedImage.TYPE_CUSTOM:
-                return "CUSTOM";
-            case BufferedImage.TYPE_INT_ARGB:
-                return "INT_ARGB";
-            case BufferedImage.TYPE_INT_ARGB_PRE:
-                return "INT_ARGB_PRE";
-            case BufferedImage.TYPE_INT_BGR:
-                return "INT_BGR";
-            case BufferedImage.TYPE_INT_RGB:
-                return "INT_RGB";
-            case BufferedImage.TYPE_USHORT_555_RGB:
-                return "USHORT_555_RGB";
-            case BufferedImage.TYPE_USHORT_565_RGB:
-                return "USHORT_565_RGB";
-            case BufferedImage.TYPE_USHORT_GRAY:
-                return "USHORT_GRAY";
-            default:
-                return "unrecognized (" + type + ")";
-        }
+        return switch (type) {
+            case BufferedImage.TYPE_3BYTE_BGR -> "3BYTE_BGR";
+            case BufferedImage.TYPE_4BYTE_ABGR -> "4BYTE_ABGR";
+            case BufferedImage.TYPE_4BYTE_ABGR_PRE -> "4BYTE_ABGR_PRE";
+            case BufferedImage.TYPE_BYTE_BINARY -> "BYTE_BINARY";
+            case BufferedImage.TYPE_BYTE_GRAY -> "BYTE_GRAY";
+            case BufferedImage.TYPE_BYTE_INDEXED -> "BYTE_INDEXED";
+            case BufferedImage.TYPE_CUSTOM -> "CUSTOM";
+            case BufferedImage.TYPE_INT_ARGB -> "INT_ARGB";
+            case BufferedImage.TYPE_INT_ARGB_PRE -> "INT_ARGB_PRE";
+            case BufferedImage.TYPE_INT_BGR -> "INT_BGR";
+            case BufferedImage.TYPE_INT_RGB -> "INT_RGB";
+            case BufferedImage.TYPE_USHORT_555_RGB -> "USHORT_555_RGB";
+            case BufferedImage.TYPE_USHORT_565_RGB -> "USHORT_565_RGB";
+            case BufferedImage.TYPE_USHORT_GRAY -> "USHORT_GRAY";
+            default -> "unrecognized (" + type + ")";
+        };
     }
 
     static String colorSpaceTypeAsString(int type) {
-        switch (type) {
-            case ColorSpace.TYPE_2CLR:
-                return "2CLR";
-            case ColorSpace.TYPE_3CLR:
-                return "3CLR";
-            case ColorSpace.TYPE_4CLR:
-                return "4CLR";
-            case ColorSpace.TYPE_5CLR:
-                return "5CLR";
-            case ColorSpace.TYPE_6CLR:
-                return "6CLR";
-            case ColorSpace.TYPE_7CLR:
-                return "7CLR";
-            case ColorSpace.TYPE_8CLR:
-                return "8CLR";
-            case ColorSpace.TYPE_9CLR:
-                return "9CLR";
-            case ColorSpace.TYPE_ACLR:
-                return "ACLR";
-            case ColorSpace.TYPE_BCLR:
-                return "BCLR";
-            case ColorSpace.TYPE_CCLR:
-                return "CCLR";
-            case ColorSpace.TYPE_CMY:
-                return "CMY";
-            case ColorSpace.TYPE_CMYK:
-                return "CMYK";
-            case ColorSpace.TYPE_DCLR:
-                return "DCLR";
-            case ColorSpace.TYPE_ECLR:
-                return "ECLR";
-            case ColorSpace.TYPE_FCLR:
-                return "FCLR";
-            case ColorSpace.TYPE_GRAY:
-                return "GRAY";
-            case ColorSpace.TYPE_HLS:
-                return "HLS";
-            case ColorSpace.TYPE_HSV:
-                return "HSV";
-            case ColorSpace.TYPE_Lab:
-                return "Lab";
-            case ColorSpace.TYPE_Luv:
-                return "Luv";
-            case ColorSpace.TYPE_RGB:
-                return "RGB";
-            case ColorSpace.TYPE_XYZ:
-                return "XYZ";
-            case ColorSpace.TYPE_YCbCr:
-                return "YCbCr";
-            case ColorSpace.TYPE_Yxy:
-                return "Yxy";
-            default:
-                return "unrecognized (" + type + ")";
-        }
+        return switch (type) {
+            case ColorSpace.TYPE_2CLR -> "2CLR";
+            case ColorSpace.TYPE_3CLR -> "3CLR";
+            case ColorSpace.TYPE_4CLR -> "4CLR";
+            case ColorSpace.TYPE_5CLR -> "5CLR";
+            case ColorSpace.TYPE_6CLR -> "6CLR";
+            case ColorSpace.TYPE_7CLR -> "7CLR";
+            case ColorSpace.TYPE_8CLR -> "8CLR";
+            case ColorSpace.TYPE_9CLR -> "9CLR";
+            case ColorSpace.TYPE_ACLR -> "ACLR";
+            case ColorSpace.TYPE_BCLR -> "BCLR";
+            case ColorSpace.TYPE_CCLR -> "CCLR";
+            case ColorSpace.TYPE_CMY -> "CMY";
+            case ColorSpace.TYPE_CMYK -> "CMYK";
+            case ColorSpace.TYPE_DCLR -> "DCLR";
+            case ColorSpace.TYPE_ECLR -> "ECLR";
+            case ColorSpace.TYPE_FCLR -> "FCLR";
+            case ColorSpace.TYPE_GRAY -> "GRAY";
+            case ColorSpace.TYPE_HLS -> "HLS";
+            case ColorSpace.TYPE_HSV -> "HSV";
+            case ColorSpace.TYPE_Lab -> "Lab";
+            case ColorSpace.TYPE_Luv -> "Luv";
+            case ColorSpace.TYPE_RGB -> "RGB";
+            case ColorSpace.TYPE_XYZ -> "XYZ";
+            case ColorSpace.TYPE_YCbCr -> "YCbCr";
+            case ColorSpace.TYPE_Yxy -> "Yxy";
+            default -> "unrecognized (" + type + ")";
+        };
     }
 
     public static boolean isRgbColorModel(ColorModel cm) {

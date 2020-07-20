@@ -112,26 +112,16 @@ public enum FileFormat {
 
     public static Optional<FileFormat> fromExtension(String extension) {
         String extLC = extension.toLowerCase();
-        switch (extLC) {
-            case "jpg":
-            case "jpeg":
-                return Optional.of(JPG);
-            case "png":
-                return Optional.of(PNG);
-            case "bmp":
-                return Optional.of(BMP);
-            case "gif":
-                return Optional.of(GIF);
-            case "pxc":
-                return Optional.of(PXC);
-            case "ora":
-                return Optional.of(ORA);
-            case "tif":
-            case "tiff":
-                return Optional.of(TIFF);
-            default:
-                return Optional.empty();
-        }
+        return switch (extLC) {
+            case "jpg", "jpeg" -> Optional.of(JPG);
+            case "png" -> Optional.of(PNG);
+            case "bmp" -> Optional.of(BMP);
+            case "gif" -> Optional.of(GIF);
+            case "pxc" -> Optional.of(PXC);
+            case "ora" -> Optional.of(ORA);
+            case "tif", "tiff" -> Optional.of(TIFF);
+            default -> Optional.empty();
+        };
     }
 
     private static volatile FileFormat lastOutput = JPG;

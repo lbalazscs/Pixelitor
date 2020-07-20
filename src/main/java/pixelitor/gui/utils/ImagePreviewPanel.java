@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -102,15 +102,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
 
     private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
         File file;
-        String propertyName = e.getPropertyName();
-        switch (propertyName) {
-            case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY:
-                file = (File) e.getNewValue();
-                break;
-            case JFileChooser.DIRECTORY_CHANGED_PROPERTY:
-            default:
-                file = null;
-        }
+        file = switch (e.getPropertyName()) {
+            case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY -> (File) e.getNewValue();
+            default -> null;
+        };
         return file;
     }
 

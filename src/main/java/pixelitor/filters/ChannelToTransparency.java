@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,45 +62,36 @@ public class ChannelToTransparency extends ParametrizedFilter {
         boolean invert = invertParam.isChecked();
         boolean keep = keepParam.isChecked();
 
-        switch (channel.getValue()) {
-            case LUMINOSITY:
-                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
-                    @Override
-                    int getChannelValue(int rgb) {
-                        return (int) LuminanceLookup.from(rgb);
-                    }
-                };
-                break;
-            case RED:
-                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
-                    @Override
-                    int getChannelValue(int rgb) {
-                        int r = (rgb >>> 16) & 0xFF;
-                        return r;
-                    }
-                };
-                break;
-            case GREEN:
-                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
-                    @Override
-                    int getChannelValue(int rgb) {
-                        int g = (rgb >>> 8) & 0xFF;
-                        return g;
-                    }
-                };
-                break;
-            case BLUE:
-                filter = new ChannelToTransparencyFilter(NAME, invert, keep) {
-                    @Override
-                    int getChannelValue(int rgb) {
-                        int b = rgb & 0xFF;
-                        return b;
-                    }
-                };
-                break;
-            default:
-                throw new IllegalStateException("unexpected value " + channel.getValue());
-        }
+        filter = switch (channel.getValue()) {
+            case LUMINOSITY -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+                @Override
+                int getChannelValue(int rgb) {
+                    return (int) LuminanceLookup.from(rgb);
+                }
+            };
+            case RED -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+                @Override
+                int getChannelValue(int rgb) {
+                    int r = (rgb >>> 16) & 0xFF;
+                    return r;
+                }
+            };
+            case GREEN -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+                @Override
+                int getChannelValue(int rgb) {
+                    int g = (rgb >>> 8) & 0xFF;
+                    return g;
+                }
+            };
+            case BLUE -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+                @Override
+                int getChannelValue(int rgb) {
+                    int b = rgb & 0xFF;
+                    return b;
+                }
+            };
+            default -> throw new IllegalStateException("unexpected value " + channel.getValue());
+        };
 
         return filter.filter(src, dest);
     }

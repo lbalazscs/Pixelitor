@@ -271,20 +271,11 @@ public class MaskFromColorRangePanel extends JPanel {
         String previewMode = (String) previewModeCB.getSelectedItem();
 
         switch (previewMode) {
-            case PREVIEW_MODE_MASK:
-                previewPanel.changeImage(rgbMask);
-                break;
-            case PREVIEW_MODE_RUBYLITH:
-                updateRubyPreview(rgbMask);
-                break;
-            case PREVIEW_MODE_BLACK_MATTE:
-                updateMattePreview(rgbMask, Color.BLACK);
-                break;
-            case PREVIEW_MODE_WHITE_MATTE:
-                updateMattePreview(rgbMask, Color.WHITE);
-                break;
-            default:
-                throw new IllegalStateException("previewMode = " + previewMode);
+            case PREVIEW_MODE_MASK -> previewPanel.changeImage(rgbMask);
+            case PREVIEW_MODE_RUBYLITH -> updateRubyPreview(rgbMask);
+            case PREVIEW_MODE_BLACK_MATTE -> updateMattePreview(rgbMask, Color.BLACK);
+            case PREVIEW_MODE_WHITE_MATTE -> updateMattePreview(rgbMask, Color.WHITE);
+            default -> throw new IllegalStateException("previewMode = " + previewMode);
         }
     }
 

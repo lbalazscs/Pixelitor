@@ -1,6 +1,6 @@
 # Building Pixelitor from the source code
 
-Pixelitor requires Java 11+ to compile. 
+Pixelitor requires Java 14+ to compile. 
 
 ## Starting Pixelitor in an IDE
 

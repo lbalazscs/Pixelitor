@@ -22,29 +22,14 @@ import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenToolMode;
 import pixelitor.tools.pen.SubPath;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
+import java.awt.geom.*;
 import java.util.Arrays;
 import java.util.List;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 /**
  * Static shape-related utility methods
@@ -80,23 +65,12 @@ public class Shapes {
             double yyy = coords[5];
 
             switch (type) {
-                case SEG_MOVETO:
-                    lastSubPath = path.startNewSubpath(x, y, view);
-                    break;
-                case SEG_LINETO:
-                    lastSubPath.addLine(x, y, view);
-                    break;
-                case SEG_QUADTO:
-                    lastSubPath.addQuadCurve(x, y, xx, yy, view);
-                    break;
-                case SEG_CUBICTO:
-                    lastSubPath.addCubicCurve(x, y, xx, yy, xxx, yyy, view);
-                    break;
-                case SEG_CLOSE:
-                    lastSubPath.close(false);
-                    break;
-                default:
-                    throw new IllegalArgumentException("type = " + type);
+                case SEG_MOVETO -> lastSubPath = path.startNewSubpath(x, y, view);
+                case SEG_LINETO -> lastSubPath.addLine(x, y, view);
+                case SEG_QUADTO -> lastSubPath.addQuadCurve(x, y, xx, yy, view);
+                case SEG_CUBICTO -> lastSubPath.addCubicCurve(x, y, xx, yy, xxx, yyy, view);
+                case SEG_CLOSE -> lastSubPath.close(false);
+                default -> throw new IllegalArgumentException("type = " + type);
             }
 
             it.next();

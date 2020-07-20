@@ -252,18 +252,10 @@ public class CompositionGuide {
         double arcHeight = rect.getHeight();
 
         switch (orientation % 4) {
-            case 0:
-                drawSpiral0(rect, arc2D, arcWidth, arcHeight);
-                break;
-            case 1:
-                drawSpiral1(rect, arc2D, arcWidth, arcHeight);
-                break;
-            case 2:
-                drawSpiral2(rect, arc2D, arcWidth, arcHeight);
-                break;
-            case 3:
-                drawSpiral3(rect, arc2D, arcWidth, arcHeight);
-                break;
+            case 0 -> drawSpiral0(rect, arc2D, arcWidth, arcHeight);
+            case 1 -> drawSpiral1(rect, arc2D, arcWidth, arcHeight);
+            case 2 -> drawSpiral2(rect, arc2D, arcWidth, arcHeight);
+            case 3 -> drawSpiral3(rect, arc2D, arcWidth, arcHeight);
         }
 
         drawShapes(arc2D);

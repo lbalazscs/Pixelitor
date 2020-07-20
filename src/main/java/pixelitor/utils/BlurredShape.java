@@ -54,32 +54,26 @@ public interface BlurredShape {
     static BlurredShape create(int type, Point2D center,
                                double innerRadiusX, double innerRadiusY,
                                double outerRadiusX, double outerRadiusY) {
-        switch (type) {
-            case TYPE_ELLIPSE:
-                return new BlurredEllipse(center,
-                        innerRadiusX, innerRadiusY,
-                        outerRadiusX, outerRadiusY);
-            case TYPE_RECTANGLE:
-                return new BlurredRectangle(center,
-                        innerRadiusX, innerRadiusY,
-                        outerRadiusX, outerRadiusY);
-            case TYPE_RECTANGLE2:
-                return GenericBlurredShape.of(
-                        ShapeType.RECTANGLE, center,
-                        innerRadiusX, innerRadiusY,
-                        outerRadiusX, outerRadiusY);
-            case TYPE_HEART:
-                return GenericBlurredShape.of(
-                        ShapeType.HEART, center,
-                        innerRadiusX, innerRadiusY,
-                        outerRadiusX, outerRadiusY);
-            case TYPE_DIAMOND:
-                return GenericBlurredShape.of(
-                        ShapeType.DIAMOND, center,
-                        innerRadiusX, innerRadiusY,
-                        outerRadiusX, outerRadiusY);
-            default:
-                throw new IllegalStateException();
-        }
+        return switch (type) {
+            case TYPE_ELLIPSE -> new BlurredEllipse(center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_RECTANGLE -> new BlurredRectangle(center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_RECTANGLE2 -> GenericBlurredShape.of(
+                ShapeType.RECTANGLE, center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_HEART -> GenericBlurredShape.of(
+                ShapeType.HEART, center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            case TYPE_DIAMOND -> GenericBlurredShape.of(
+                ShapeType.DIAMOND, center,
+                innerRadiusX, innerRadiusY,
+                outerRadiusX, outerRadiusY);
+            default -> throw new IllegalStateException();
+        };
     }
 }

@@ -74,78 +74,49 @@ public class ExtractChannel extends ParametrizedFilter {
     }
 
     private static BufferedImage bwExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
-        RGBPixelOp rgbOp;
-        switch (channel) {
-            case RED_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    g = r;
-                    b = r;
-                    return a << 24 | r << 16 | g << 8 | b;
-                };
-                break;
-            case REMOVE_RED_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    int val = (g + b) / 2;
-                    return a << 24 | val << 16 | val << 8 | val;
-                };
-                break;
-            case GREEN_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    r = g;
-                    b = g;
-                    return a << 24 | r << 16 | g << 8 | b;
-                };
-                break;
-            case REMOVE_GREEN_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    int val = (r + b) / 2;
-                    return a << 24 | val << 16 | val << 8 | val;
-                };
-                break;
-            case BLUE_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    r = b;
-                    g = b;
-                    return a << 24 | r << 16 | g << 8 | b;
-                };
-                break;
-            case REMOVE_BLUE_CHANNEL:
-                rgbOp = (a, r, g, b) -> {
-                    int val = (r + g) / 2;
-                    return a << 24 | val << 16 | val << 8 | val;
-                };
-                break;
-            default:
-                throw new IllegalStateException("should not het here");
-        }
+        RGBPixelOp rgbOp = switch (channel) {
+            case RED_CHANNEL -> (a, r, g, b) -> {
+                g = r;
+                b = r;
+                return a << 24 | r << 16 | g << 8 | b;
+            };
+            case REMOVE_RED_CHANNEL -> (a, r, g, b) -> {
+                int val = (g + b) / 2;
+                return a << 24 | val << 16 | val << 8 | val;
+            };
+            case GREEN_CHANNEL -> (a, r, g, b) -> {
+                r = g;
+                b = g;
+                return a << 24 | r << 16 | g << 8 | b;
+            };
+            case REMOVE_GREEN_CHANNEL -> (a, r, g, b) -> {
+                int val = (r + b) / 2;
+                return a << 24 | val << 16 | val << 8 | val;
+            };
+            case BLUE_CHANNEL -> (a, r, g, b) -> {
+                r = b;
+                g = b;
+                return a << 24 | r << 16 | g << 8 | b;
+            };
+            case REMOVE_BLUE_CHANNEL -> (a, r, g, b) -> {
+                int val = (r + g) / 2;
+                return a << 24 | val << 16 | val << 8 | val;
+            };
+            default -> throw new IllegalStateException("should not het here");
+        };
         return FilterUtils.runRGBPixelOp(rgbOp, src, dest);
     }
 
     private static BufferedImage colorExtractChannel(BufferedImage src, BufferedImage dest, int channel) {
-        LookupTable lookupTable;
-
-        switch (channel) {
-            case RED_CHANNEL:
-                lookupTable = LookupFactory.createLookupForOnlyRed();
-                break;
-            case REMOVE_RED_CHANNEL:
-                lookupTable = LookupFactory.createLookupForRemoveRed();
-                break;
-            case GREEN_CHANNEL:
-                lookupTable = LookupFactory.createLookupForOnlyGreen();
-                break;
-            case REMOVE_GREEN_CHANNEL:
-                lookupTable = LookupFactory.createLookupForRemoveGreen();
-                break;
-            case BLUE_CHANNEL:
-                lookupTable = LookupFactory.createLookupForOnlyBlue();
-                break;
-            case REMOVE_BLUE_CHANNEL:
-                lookupTable = LookupFactory.createLookupForRemoveBlue();
-                break;
-            default:
-                throw new IllegalStateException("should not het here");
-        }
+        LookupTable lookupTable = switch (channel) {
+            case RED_CHANNEL -> LookupFactory.createLookupForOnlyRed();
+            case REMOVE_RED_CHANNEL -> LookupFactory.createLookupForRemoveRed();
+            case GREEN_CHANNEL -> LookupFactory.createLookupForOnlyGreen();
+            case REMOVE_GREEN_CHANNEL -> LookupFactory.createLookupForRemoveGreen();
+            case BLUE_CHANNEL -> LookupFactory.createLookupForOnlyBlue();
+            case REMOVE_BLUE_CHANNEL -> LookupFactory.createLookupForRemoveBlue();
+            default -> throw new IllegalStateException("should not het here");
+        };
 
         BufferedImageOp filterOp = new FastLookupOp((ShortLookupTable) lookupTable);
         filterOp.filter(src, dest);

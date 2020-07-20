@@ -2,7 +2,6 @@ language: java
 dist: trusty
 
 jdk:
-  - openjdk11
   - openjdk14
 
 before_script:

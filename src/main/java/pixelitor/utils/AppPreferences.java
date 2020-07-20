@@ -409,21 +409,12 @@ public final class AppPreferences {
     }
 
     private static ImageArea.SavedInfo loadSavedTabsInfo(String value) {
-        int tabPlacement;
-        switch (value) {
-            case "TabsL":
-                tabPlacement = LEFT;
-                break;
-            case "TabsR":
-                tabPlacement = RIGHT;
-                break;
-            case "TabsB":
-                tabPlacement = BOTTOM;
-                break;
-            default:
-                tabPlacement = TOP;
-                break;
-        }
+        int tabPlacement = switch (value) {
+            case "TabsL" -> LEFT;
+            case "TabsR" -> RIGHT;
+            case "TabsB" -> BOTTOM;
+            default -> TOP;
+        };
         return new ImageArea.SavedInfo(TABS, tabPlacement);
     }
 
@@ -434,22 +425,13 @@ public final class AppPreferences {
             savedString = "Frames";
         } else {
             int tabPlacement = ImageArea.getTabPlacement();
-            switch (tabPlacement) {
-                case TOP:
-                    savedString = "TabsT";
-                    break;
-                case LEFT:
-                    savedString = "TabsL";
-                    break;
-                case RIGHT:
-                    savedString = "TabsR";
-                    break;
-                case BOTTOM:
-                    savedString = "TabsB";
-                    break;
-                default:
-                    throw new IllegalStateException("tabPlacement = " + tabPlacement);
-            }
+            savedString = switch (tabPlacement) {
+                case TOP -> "TabsT";
+                case LEFT -> "TabsL";
+                case RIGHT -> "TabsR";
+                case BOTTOM -> "TabsB";
+                default -> throw new IllegalStateException("tabPlacement = " + tabPlacement);
+            };
         }
         mainNode.put(UI_KEY, savedString);
     }

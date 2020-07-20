@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,24 +56,13 @@ public class RadialWavesFilter extends CenteredTransformFilter {
 
 //        double angularWL = 1.0 / angularDivision;
         double nr = angle * angularDivision - phase;
-        double fr;
-
-        switch (waveType) {
-            case WaveType.SINE:
-                fr = FastMath.sin(nr);
-                break;
-            case WaveType.SAWTOOTH:
-                fr = ImageMath.sinLikeSawtooth(nr);
-                break;
-            case WaveType.TRIANGLE:
-                fr = ImageMath.sinLikeTriangle(nr);
-                break;
-            case WaveType.NOISE:
-                fr = Noise.sinLikeNoise1((float)nr);
-                break;
-            default:
-                throw new IllegalStateException("waveType = " + waveType);
-        }
+        double fr = switch (waveType) {
+            case WaveType.SINE -> FastMath.sin(nr);
+            case WaveType.SAWTOOTH -> ImageMath.sinLikeSawtooth(nr);
+            case WaveType.TRIANGLE -> ImageMath.sinLikeTriangle(nr);
+            case WaveType.NOISE -> Noise.sinLikeNoise1((float) nr);
+            default -> throw new IllegalStateException("waveType = " + waveType);
+        };
 
         r += fr * radialAmplitude * r / maxSize;
 
