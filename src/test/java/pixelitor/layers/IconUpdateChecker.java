@@ -53,7 +53,7 @@ public class IconUpdateChecker {
             assertThat(ui.getNumLayerIconUpdates()).isEqualTo(layerIconUpdatesAtStart + num);
         } else {
             // only image layer icons are updated
-            assertThat(ui.getNumLayerIconUpdates()).isEqualTo(0);
+            assertThat(ui.getNumLayerIconUpdates()).isZero();
         }
     }
 

@@ -32,10 +32,7 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.WEST;
+import static java.awt.BorderLayout.*;
 import static java.awt.Color.GRAY;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -240,7 +237,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     private void setupZoomTicks(int max) {
-        @SuppressWarnings("unchecked")
         Hashtable<Integer, JComponent> labels = slider.createStandardLabels(max + 1);
 
         // so far the labels table contains only the minimum value
@@ -294,17 +290,21 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         }
 
         if (defaultButton != null) {
+            if (colorsUsed) {
+                setBgColorOfDefaultButton();
+            }
             defaultButton.updateIcon();
         }
-        if (colorsUsed) {
-            if (model.isSetToDefault()) {
-                defaultButton.setBackground(GRAY);
+    }
+
+    private void setBgColorOfDefaultButton() {
+        if (model.isSetToDefault()) {
+            defaultButton.setBackground(GRAY);
+        } else {
+            if (model.getValue() > model.getDefaultValue()) {
+                defaultButton.setBackground(rightColor);
             } else {
-                if (model.getValue() > model.getDefaultValue()) {
-                    defaultButton.setBackground(rightColor);
-                } else {
-                    defaultButton.setBackground(leftColor);
-                }
+                defaultButton.setBackground(leftColor);
             }
         }
     }

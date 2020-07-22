@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.colors.ColorHistory;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -135,8 +135,8 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
-            return new ColorParamState(ColorUtils.interpolateInRGB(
-                    color, endState.color, (float) progress));
+            return new ColorParamState(Colors.interpolateInRGB(
+                color, endState.color, (float) progress));
         }
 
         @Override

@@ -21,17 +21,14 @@ import com.jhlabs.image.PlasmaFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.ORANGE;
-import static java.awt.Color.RED;
-import static java.awt.Color.YELLOW;
+import static java.awt.Color.*;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
@@ -47,10 +44,10 @@ public class JHPlasma extends ParametrizedFilter {
     private static final int MORE_COLORS = 1;
     private static final int GRADIENT_COLORS = 2;
 
-    private final IntChoiceParam type = new IntChoiceParam("Colors", new Value[]{
-            new Value("Less", LESS_COLORS),
-            new Value("More", MORE_COLORS),
-            new Value("Use Gradient", GRADIENT_COLORS),
+    private final IntChoiceParam type = new IntChoiceParam("Colors", new Item[]{
+        new Item("Less", LESS_COLORS),
+        new Item("More", MORE_COLORS),
+        new Item("Use Gradient", GRADIENT_COLORS),
     }, IGNORE_RANDOMIZE);
 
     private PlasmaFilter filter;

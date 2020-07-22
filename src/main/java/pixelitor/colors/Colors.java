@@ -30,6 +30,7 @@ import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
@@ -46,10 +47,10 @@ import static java.lang.String.format;
 /**
  * Color-related static utility methods.
  */
-public class ColorUtils {
+public class Colors {
     public static final Color TRANSPARENT_COLOR = new Color(0, true);
 
-    private ColorUtils() {
+    private Colors() {
     }
 
     public static Color interpolateInRGB(Color startColor, Color endColor, float progress) {
@@ -126,7 +127,8 @@ public class ColorUtils {
         } else if (diff <= 0.5f) { // hue2 is bigger
             return hue2 + (1.0f - hue2 + hue1) / 2.0f;
         } else {
-            throw new IllegalStateException("should not get here");
+            throw new IllegalStateException(
+                format("hue1 = %.2f, hue2 = %.2f", hue1, hue2));
         }
     }
 
@@ -153,7 +155,8 @@ public class ColorUtils {
             }
             return mix;
         } else {
-            throw new IllegalStateException("should not get here");
+            throw new IllegalStateException(
+                format("hue1 = %.2f, hue2 = %.2f, mixFactor = %.2f", hue1, hue2, mixFactor));
         }
     }
 
@@ -180,11 +183,12 @@ public class ColorUtils {
             }
             return mix;
         } else {
-            throw new IllegalStateException("should not get here");
+            throw new IllegalStateException(
+                format("hue1 = %.2f, hue2 = %.2f, mixFactor = %.2f", hue1, hue2, mixFactor));
         }
     }
 
-    public static String rgbIntToString(int rgb) {
+    public static String packedIntToString(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
@@ -287,9 +291,9 @@ public class ColorUtils {
         // try HTML hex format
         if (text.length() == 6) {
             return new Color(
-                    parseInt(text.substring(0, 2), 16),
-                    parseInt(text.substring(2, 4), 16),
-                    parseInt(text.substring(4, 6), 16));
+                parseInt(text.substring(0, 2), 16),
+                parseInt(text.substring(2, 4), 16),
+                parseInt(text.substring(4, 6), 16));
         }
 
         // try rgb(163, 69, 151) format
@@ -298,9 +302,9 @@ public class ColorUtils {
             String[] strings = text.split("\\s*,\\s*");
             if (strings.length == 3) {
                 return new Color(
-                        parseInt(strings[0]),
-                        parseInt(strings[1]),
-                        parseInt(strings[2]));
+                    parseInt(strings[0]),
+                    parseInt(strings[1]),
+                    parseInt(strings[2]));
             }
         }
 
@@ -382,5 +386,10 @@ public class ColorUtils {
                 }
             }
         });
+    }
+
+    public static void fillWith(Color color, Graphics2D g2, int width, int height) {
+        g2.setColor(color);
+        g2.fillRect(0, 0, width, height);
     }
 }

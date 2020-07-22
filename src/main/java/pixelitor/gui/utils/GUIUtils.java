@@ -21,10 +21,13 @@ import com.bric.util.JVM;
 import pixelitor.Composition;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.ParamGUI;
+import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.IO;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -33,8 +36,10 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
-import java.util.*;
+import java.util.TimerTask;
 
 import static java.awt.FlowLayout.CENTER;
 import static java.awt.FlowLayout.RIGHT;
@@ -157,7 +162,6 @@ public final class GUIUtils {
 
     public static void randomizeWidgetsOn(JPanel panel) {
         int count = panel.getComponentCount();
-        Random rand = new Random();
 
         for (int i = 0; i < count; i++) {
             Component child = panel.getComponent(i);
@@ -167,10 +171,10 @@ public final class GUIUtils {
                 JComboBox box = (JComboBox) child;
 
                 int itemCount = box.getItemCount();
-                box.setSelectedIndex(rand.nextInt(itemCount));
+                box.setSelectedIndex(Rnd.nextInt(itemCount));
             } else if (child instanceof JCheckBox) {
                 JCheckBox box = (JCheckBox) child;
-                box.setSelected(rand.nextBoolean());
+                box.setSelected(Rnd.nextBoolean());
             } else if (child instanceof SliderSpinner) {
                 SliderSpinner spinner = (SliderSpinner) child;
                 spinner.getModel().randomize();
@@ -185,7 +189,10 @@ public final class GUIUtils {
         assert calledOutsideEDT() : "on EDT";
         try {
             EventQueue.invokeAndWait(task);
-        } catch (InterruptedException | InvocationTargetException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Messages.showExceptionOnEDT(e);
+        } catch (InvocationTargetException e) {
             Messages.showExceptionOnEDT(e);
         }
     }
@@ -351,5 +358,12 @@ public final class GUIUtils {
 
     public static void paintImmediately(JComponent c) {
         c.paintImmediately(0, 0, c.getWidth(), c.getHeight());
+    }
+
+    public static JButton createResetAllButton(ActionListener action) {
+        JButton button = new JButton("Reset all", Icons.getWestArrowIcon());
+        button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
+        button.addActionListener(action);
+        return button;
     }
 }

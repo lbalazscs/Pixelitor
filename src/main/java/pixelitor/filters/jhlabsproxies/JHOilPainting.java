@@ -22,7 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.ResizingFilterHelper;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ProgressTracker;
@@ -43,14 +43,14 @@ public class JHOilPainting extends ParametrizedFilter {
     private static final int BETTER = 1;
 
     private final GroupedRangeParam brushSize = new GroupedRangeParam(
-            "Brush Size", 0, 1, 10, false);
+        "Brush Size", 0, 1, 10, false);
     private final RangeParam coarseness = new RangeParam(
-            "Coarseness", 0, 25, 200);
+        "Coarseness", 0, 25, 200);
     private final IntChoiceParam detailQuality = new IntChoiceParam("Detail Quality",
-            new Value[]{
-                    new Value("Faster", FASTER),
-                    new Value("Better", BETTER),
-            }, IGNORE_RANDOMIZE);
+        new Item[]{
+            new Item("Faster", FASTER),
+            new Item("Better", BETTER),
+        }, IGNORE_RANDOMIZE);
 
     public JHOilPainting() {
         super(ShowOriginal.YES);

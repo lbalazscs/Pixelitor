@@ -17,7 +17,7 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 
 import java.awt.Color;
 
@@ -57,8 +57,8 @@ public class HSBColorMixPalette extends Palette {
             otherColor = getFGColor();
         }
 
-        float[] hsb = ColorUtils.toHSB(color);
-        float[] hsb2 = ColorUtils.toHSB(otherColor);
+        float[] hsb = Colors.toHSB(color);
+        float[] hsb2 = Colors.toHSB(otherColor);
 
         hue = hsb[0];
         sat = hsb[1];
@@ -142,7 +142,7 @@ public class HSBColorMixPalette extends Palette {
 
     private float calcHue(float mixFactor) {
         float hueShift = ((HueSatPaletteConfig) config).getHueShift();
-        float h = hueShift + ColorUtils.lerpHue(mixFactor, hue, otherHue);
+        float h = hueShift + Colors.lerpHue(mixFactor, hue, otherHue);
         if (h > 1.0f) {
             h = h - 1.0f;
         }

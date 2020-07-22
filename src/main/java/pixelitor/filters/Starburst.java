@@ -17,14 +17,9 @@
 
 package pixelitor.filters;
 
+import pixelitor.colors.Colors;
 import pixelitor.colors.FgBgColors;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Rnd;
@@ -55,11 +50,11 @@ public class Starburst extends ParametrizedFilter {
     private final RangeParam numberOfRaysParam = new RangeParam("Number of Rays", 2, 10, 100);
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final IntChoiceParam background = new IntChoiceParam("Background", new IntChoiceParam.Value[]{
-            new IntChoiceParam.Value("Black", BG_BLACK),
-            new IntChoiceParam.Value("Original Image", BG_ORIGINAL),
-            new IntChoiceParam.Value("Transparent", BG_TRANSPARENT),
-            new IntChoiceParam.Value("Tool Background", BG_TOOL),
+    private final IntChoiceParam background = new IntChoiceParam("Background", new IntChoiceParam.Item[]{
+        new IntChoiceParam.Item("Black", BG_BLACK),
+        new IntChoiceParam.Item("Original Image", BG_ORIGINAL),
+        new IntChoiceParam.Item("Transparent", BG_TRANSPARENT),
+        new IntChoiceParam.Item("Tool Background", BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
     private final ColorParam raysColor = new ColorParam("Ray Color", WHITE, NO_TRANSPARENCY);
@@ -107,11 +102,9 @@ public class Starburst extends ParametrizedFilter {
         Graphics2D g = dest.createGraphics();
         if (bg != BG_ORIGINAL) {
             if (bg == BG_BLACK) {
-                g.setColor(Color.BLACK);
-                g.fillRect(0, 0, width, height);
+                Colors.fillWith(Color.BLACK, g, width, height);
             } else if (bg == BG_TOOL) {
-                g.setColor(FgBgColors.getBGColor());
-                g.fillRect(0, 0, width, height);
+                Colors.fillWith(FgBgColors.getBGColor(), g, width, height);
             }
         }
 

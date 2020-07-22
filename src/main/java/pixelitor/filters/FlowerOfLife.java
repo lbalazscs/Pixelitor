@@ -18,17 +18,13 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * "Flower of Life" shape filter
@@ -42,17 +38,17 @@ public class FlowerOfLife extends ShapeFilter {
 
     private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);
-    private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new Value[]{
-            new Value("Triangular", GRID_TYPE_TRIANGULAR),
-            new Value("Square", GRID_TYPE_SQUARE),
-            new Value("Square 2", GRID_TYPE_SQUARE_2)
+    private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new Item[]{
+        new Item("Triangular", GRID_TYPE_TRIANGULAR),
+        new Item("Square", GRID_TYPE_SQUARE),
+        new Item("Square 2", GRID_TYPE_SQUARE_2)
     });
 
     public FlowerOfLife() {
         addParamsToFront(
-                radius.withAdjustedRange(0.2),
-                iterations,
-                grid);
+            radius.withAdjustedRange(0.2),
+            iterations,
+            grid);
     }
 
     @Override

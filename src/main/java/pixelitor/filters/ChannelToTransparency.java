@@ -20,7 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 
@@ -37,11 +37,11 @@ public class ChannelToTransparency extends ParametrizedFilter {
     private static final int GREEN = 3;
     private static final int BLUE = 4;
 
-    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Value[]{
-            new Value("Luminosity", LUMINOSITY),
-            new Value("Red", RED),
-            new Value("Green", GREEN),
-            new Value("Blue", BLUE)
+    private final IntChoiceParam channel = new IntChoiceParam("Channel", new Item[]{
+        new Item("Luminosity", LUMINOSITY),
+        new Item("Red", RED),
+        new Item("Green", GREEN),
+        new Item("Blue", BLUE)
     });
     private final BooleanParam invertParam = new BooleanParam("Invert", false);
     private final BooleanParam keepParam = new BooleanParam("Keep Existing Transparency", true);
@@ -50,9 +50,9 @@ public class ChannelToTransparency extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                channel,
-                invertParam,
-                keepParam
+            channel,
+            invertParam,
+            keepParam
         );
     }
 

@@ -37,19 +37,19 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 /**
  * A filter parameter for selecting a choice from a list of values
  */
-public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Value> {
-    private final List<Value> choicesList = new ArrayList<>();
+public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.Item> {
+    private final List<Item> choicesList = new ArrayList<>();
 
-    private Value defaultChoice;
-    private Value currentChoice;
+    private Item defaultChoice;
+    private Item currentChoice;
 
     private final EventListenerList listenerList = new EventListenerList();
 
-    public IntChoiceParam(String name, Value[] choices) {
+    public IntChoiceParam(String name, Item[] choices) {
         this(name, choices, ALLOW_RANDOMIZE);
     }
 
-    public IntChoiceParam(String name, Value[] choices, RandomizePolicy randomizePolicy) {
+    public IntChoiceParam(String name, Item[] choices, RandomizePolicy randomizePolicy) {
         super(name, randomizePolicy);
 
         choicesList.addAll(List.of(choices));
@@ -70,7 +70,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     @Override
     protected void doRandomize() {
-        Value choice = Rnd.chooseFrom(choicesList);
+        Item choice = Rnd.chooseFrom(choicesList);
         setCurrentChoice(choice, false);
     }
 
@@ -78,11 +78,11 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
         return currentChoice.getValue();
     }
 
-    private void setCurrentChoice(Value currentChoice, boolean trigger) {
+    private void setCurrentChoice(Item currentChoice, boolean trigger) {
         setSelectedItem(currentChoice, trigger);
     }
 
-    public IntChoiceParam withDefaultChoice(Value defaultChoice) {
+    public IntChoiceParam withDefaultChoice(Item defaultChoice) {
         this.defaultChoice = defaultChoice;
         return this;
     }
@@ -94,7 +94,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
 
     public void setSelectedItem(Object item, boolean trigger) {
         if (!currentChoice.equals(item)) {
-            currentChoice = (Value) item;
+            currentChoice = (Item) item;
             fireContentsChanged(this, -1, -1);
             if (trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null
@@ -105,7 +105,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     }
 
     @Override
-    public Value getSelectedItem() {
+    public Item getSelectedItem() {
         return currentChoice;
     }
 
@@ -115,7 +115,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     }
 
     @Override
-    public Value getElementAt(int index) {
+    public Item getElementAt(int index) {
         return choicesList.get(index);
     }
 
@@ -132,11 +132,11 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
     /**
      * Represents an integer value with a string description
      */
-    public static class Value {
+    public static class Item {
         private final int value;
         private final String name;
 
-        public Value(String name, int value) {
+        public Item(String name, int value) {
             this.name = name;
             this.value = value;
         }
@@ -154,7 +154,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
                 return false;
             }
 
-            Value other = (Value) o;
+            Item other = (Item) o;
 
             if (value != other.value) {
                 return false;
@@ -176,14 +176,14 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
         }
     }
 
-    public static final Value EDGE_REPEAT_PIXELS = new Value("Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
-    public static final Value EDGE_REFLECT = new Value("Reflect Image", TransformFilter.REFLECT);
+    public static final Item EDGE_REPEAT_PIXELS = new Item("Repeat Edge Pixels", TransformFilter.REPEAT_EDGE_PIXELS);
+    public static final Item EDGE_REFLECT = new Item("Reflect Image", TransformFilter.REFLECT);
 
-    private static final IntChoiceParam.Value[] edgeActions = {
-            new Value("Repeat Image", TransformFilter.WRAP_AROUND),
-            EDGE_REFLECT,
-            EDGE_REPEAT_PIXELS,
-            new Value("Transparent", TransformFilter.TRANSPARENT),
+    private static final Item[] edgeActions = {
+        new Item("Repeat Image", TransformFilter.WRAP_AROUND),
+        EDGE_REFLECT,
+        EDGE_REPEAT_PIXELS,
+        new Item("Transparent", TransformFilter.TRANSPARENT),
     };
 
     public static IntChoiceParam forEdgeAction() {
@@ -198,9 +198,9 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
         return choice;
     }
 
-    private static final IntChoiceParam.Value[] interpolationChoices = {
-            new Value("Bilinear (Better)", TransformFilter.BILINEAR),
-            new Value("Nearest Neighbour (Faster)", TransformFilter.NEAREST_NEIGHBOUR),
+    private static final Item[] interpolationChoices = {
+        new Item("Bilinear (Better)", TransformFilter.BILINEAR),
+        new Item("Nearest Neighbour (Faster)", TransformFilter.NEAREST_NEIGHBOUR),
 //            new Value("Nearest Neighbour (OLD)", TransformFilter.NEAREST_NEIGHBOUR_OLD),
 //            new Value("Bilinear (OLD)", TransformFilter.BILINEAR_OLD),
     };
@@ -209,24 +209,24 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.V
         return new IntChoiceParam("Interpolation", interpolationChoices, IGNORE_RANDOMIZE);
     }
 
-    private static final IntChoiceParam.Value[] gridTypeChoices = {
-            new Value("Random", CellularFilter.GR_RANDOM),
-            new Value("Squares", CellularFilter.GR_SQUARE),
-            new Value("Hexagons", CellularFilter.GR_HEXAGONAL),
-            new Value("Octagons & Squares", CellularFilter.GR_OCTAGONAL),
-            new Value("Triangles", CellularFilter.GR_TRIANGULAR),
+    private static final Item[] gridTypeChoices = {
+        new Item("Random", CellularFilter.GR_RANDOM),
+        new Item("Squares", CellularFilter.GR_SQUARE),
+        new Item("Hexagons", CellularFilter.GR_HEXAGONAL),
+        new Item("Octagons & Squares", CellularFilter.GR_OCTAGONAL),
+        new Item("Triangles", CellularFilter.GR_TRIANGULAR),
     };
 
-    public static final IntChoiceParam.Value[] waveTypeChoices = {
-            new Value("Sine", WaveType.SINE),
-            new Value("Triangle", WaveType.TRIANGLE),
-            new Value("Sawtooth", WaveType.SAWTOOTH),
-            new Value("Noise", WaveType.NOISE),
+    public static final Item[] waveTypeChoices = {
+        new Item("Sine", WaveType.SINE),
+        new Item("Triangle", WaveType.TRIANGLE),
+        new Item("Sawtooth", WaveType.SAWTOOTH),
+        new Item("Noise", WaveType.NOISE),
     };
 
     public static IntChoiceParam forWaveType() {
         var reseedNoise = reseedNoise("Reseed Noise",
-                "Reinitialize the randomness of the noise.");
+            "Reinitialize the randomness of the noise.");
         var icp = new IntChoiceParam("Wave Type", waveTypeChoices);
         icp.withAction(reseedNoise);
 

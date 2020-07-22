@@ -19,7 +19,8 @@ package pixelitor.layers;
 
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.colors.Colors;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.Cursors;
@@ -63,7 +64,7 @@ public class MaskFromColorRangePanel extends JPanel {
     private final JComboBox<String> imageSourceCB = new JComboBox<>(
         new String[]{IMG_SRC_LAYER, IMG_SRC_COMP});
 
-    private JComboBox<Value> distTypeCombo;
+    private JComboBox<Item> distTypeCombo;
     private final RangeParam tolerance = new RangeParam("Tolerance", 0, 10, 150);
     private final RangeParam softness = new RangeParam("   Softness", 0, 10, 100);
     private JCheckBox invertCheckBox;
@@ -124,11 +125,11 @@ public class MaskFromColorRangePanel extends JPanel {
     }
 
     private void createColorSpaceComboBox() {
-        distTypeCombo = new JComboBox<>(new Value[]{
-            new Value("HSB", MaskFromColorRangeFilter.HSB),
-            new Value("Hue", MaskFromColorRangeFilter.HUE),
-            new Value("Sat", MaskFromColorRangeFilter.SAT),
-            new Value("RGB", MaskFromColorRangeFilter.RGB),
+        distTypeCombo = new JComboBox<>(new Item[]{
+            new Item("HSB", MaskFromColorRangeFilter.HSB),
+            new Item("Hue", MaskFromColorRangeFilter.HUE),
+            new Item("Sat", MaskFromColorRangeFilter.SAT),
+            new Item("RGB", MaskFromColorRangeFilter.RGB),
         });
         distTypeCombo.setName("distTypeCombo");
     }
@@ -252,7 +253,7 @@ public class MaskFromColorRangePanel extends JPanel {
     private MaskFromColorRangeFilter createFilterFromSettings(Color c) {
         MaskFromColorRangeFilter filter = new MaskFromColorRangeFilter(NAME);
 
-        int distType = ((Value) distTypeCombo.getSelectedItem()).getValue();
+        int distType = ((Item) distTypeCombo.getSelectedItem()).getValue();
         filter.setDistType(distType);
         filter.setColor(c);
         filter.setTolerance(tolerance.getValue(), softness.getPercentageValF());
@@ -306,8 +307,7 @@ public class MaskFromColorRangePanel extends JPanel {
         BufferedImage preview = createSysCompatibleImage(
             rgbMask.getWidth(), rgbMask.getHeight());
         Graphics2D previewG = preview.createGraphics();
-        previewG.setColor(matteColor);
-        previewG.fillRect(0, 0, preview.getWidth(), preview.getHeight());
+        Colors.fillWith(matteColor, previewG, preview.getWidth(), preview.getHeight());
         previewG.drawImage(thumbWithTransparency, 0, 0, null);
         previewG.dispose();
 

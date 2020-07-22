@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -76,6 +76,8 @@ public class MirrorFilter extends CenteredTransformFilter {
                     out[1] = cy + cy - y;
                 }
                 break;
+            default:
+                throw new IllegalStateException("Unexpected type: " + type);
         } // end of switch
     }
 }

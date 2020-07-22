@@ -18,12 +18,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
-import pixelitor.filters.gui.ChannelMixerGUI;
-import pixelitor.filters.gui.FilterButtonModel;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
 
@@ -44,25 +39,30 @@ public class ChannelMixer extends ParametrizedFilter {
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;
 
-    private final RangeParam redFromRed = createParam("Red", "Red", 100);
-    private final RangeParam redFromGreen = createParam("Red", "Green", 0);
-    private final RangeParam redFromBlue = createParam("Red", "Blue", 0);
+    private static final String GREEN = "Green";
+    private static final String RED = "Red";
+    private static final String BLUE = "Blue";
 
-    private final RangeParam greenFromRed = createParam("Green", "Red", 0);
-    private final RangeParam greenFromGreen = createParam("Green", "Green", 100);
-    private final RangeParam greenFromBlue = createParam("Green", "Blue", 0);
+    private final RangeParam redFromRed = from(RED, RED, 100);
+    private final RangeParam redFromGreen = from(RED, GREEN, 0);
+    private final RangeParam redFromBlue = from(RED, BLUE, 0);
 
-    private final RangeParam blueFromRed = createParam("Blue", "Red", 0);
-    private final RangeParam blueFromGreen = createParam("Blue", "Green", 0);
-    private final RangeParam blueFromBlue = createParam("Blue", "Blue", 100);
+    private final RangeParam greenFromRed = from(GREEN, RED, 0);
+    private final RangeParam greenFromGreen = from(GREEN, GREEN, 100);
+    private final RangeParam greenFromBlue = from(GREEN, BLUE, 0);
+
+    private final RangeParam blueFromRed = from(BLUE, RED, 0);
+    private final RangeParam blueFromGreen = from(BLUE, GREEN, 0);
+    private final RangeParam blueFromBlue = from(BLUE, BLUE, 100);
 
     private final Runnable normalizeAction = () -> {
         normalizeChannel(redFromRed, redFromGreen, redFromBlue);
         normalizeChannel(greenFromRed, greenFromGreen, greenFromBlue);
         normalizeChannel(blueFromRed, blueFromGreen, blueFromBlue);
 
-        // no need for filter triggering here, because this will happen automatically via ActionParam
-        // the presets on the right side DO require explicit triggering because they are simple JButtons
+        // no need for triggering the filter here, because it will happen
+        // automatically via ActionParam, but the presets on the right side
+        // DO require explicit triggering because they are simple JButtons
     };
 
     private final Action swapRedGreen
@@ -393,16 +393,13 @@ public class ChannelMixer extends ParametrizedFilter {
         float bfg = blueFromGreen.getPercentageValF();
         float bfb = blueFromBlue.getPercentageValF();
 
-        if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f) {
-            if (gfr == 0.0f && gfg == 1.0f && gfb == 0.0f) {
-                if (bfr == 0.0f && bfg == 0.0f && bfb == 1.0f) {
-                    return src;
-                }
-            }
+        if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f
+            && gfr == 0.0f && gfg == 1.0f && gfb == 0.0f
+            && bfr == 0.0f && bfg == 0.0f && bfb == 1.0f) {
+            return src;
         }
 
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
-
         if (packedInt) {
             int[] srcData = ImageUtils.getPixelsAsArray(src);
             int[] destData = ImageUtils.getPixelsAsArray(dest);
@@ -446,9 +443,9 @@ public class ChannelMixer extends ParametrizedFilter {
         return new ChannelMixerGUI(this, dr, presets);
     }
 
-    private static RangeParam createParam(String first, String second, int defaultValue) {
+    private static RangeParam from(String first, String second, int defaultValue) {
         String name = "<html><b><font color=" + first + ">" + first
-                + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%)";
+            + "</font></b> from <b><font color=" + second + ">" + second + "</font></b> (%)";
         return new RangeParam(name, MIN_PERCENT, defaultValue, MAX_PERCENT, true, NONE);
     }
 

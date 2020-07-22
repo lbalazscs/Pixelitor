@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import javax.swing.*;
 import java.awt.Rectangle;
@@ -57,32 +57,32 @@ public class FilterParamTest {
     @Parameters(name = "{index}: param = {0}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {new RangeParam("Param Name", 0, 0, 10)},
-                {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},
-                {new GroupedRangeParam("Param Name", 0, 0, 100, true)},
-                {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
-                {new ImagePositionParam("Param Name")},
-                {new GradientParam("Param Name", BLACK, WHITE)},
-                {new TextParam("Param Name", "default text")},
-                {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
-                {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
-                {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
-                {new BooleanParam("Param Name", true)},
-                {new AngleParam("Param Name", 0)},
-                {new ElevationAngleParam("Param Name", 0)},
-                {new IntChoiceParam("Param Name", new Value[]{
-                        new Value("Better", 0),
-                        new Value("Faster", 1),
-                })
-                },
-                {new StrokeParam("Param Name")},
-                {new EffectsParam("Param Name")},
-                {new DialogParam("Param Name",
-                        new RangeParam("Child", 0, 50, 100),
-                        new AngleParam("Child 2", 0),
-                        new BooleanParam("Child 3", true))
-                },
-                {new LogZoomParam("Param Name", 200, 200, 1000)}
+            {new RangeParam("Param Name", 0, 0, 10)},
+            {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},
+            {new GroupedRangeParam("Param Name", 0, 0, 100, true)},
+            {new GroupedRangeParam("Param Name", 0, 0, 100, false)},
+            {new ImagePositionParam("Param Name")},
+            {new GradientParam("Param Name", BLACK, WHITE)},
+            {new TextParam("Param Name", "default text")},
+            {new ColorParam("Param Name", BLACK, FREE_TRANSPARENCY)},
+            {new ColorParam("Param Name", WHITE, USER_ONLY_TRANSPARENCY)},
+            {new ColorParam("Param Name", BLUE, NO_TRANSPARENCY)},
+            {new BooleanParam("Param Name", true)},
+            {new AngleParam("Param Name", 0)},
+            {new ElevationAngleParam("Param Name", 0)},
+            {new IntChoiceParam("Param Name", new Item[]{
+                new Item("Better", 0),
+                new Item("Faster", 1),
+            })
+            },
+            {new StrokeParam("Param Name")},
+            {new EffectsParam("Param Name")},
+            {new DialogParam("Param Name",
+                new RangeParam("Child", 0, 50, 100),
+                new AngleParam("Child 2", 0),
+                new BooleanParam("Child 3", true))
+            },
+            {new LogZoomParam("Param Name", 200, 200, 1000)}
         });
     }
 

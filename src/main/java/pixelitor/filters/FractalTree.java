@@ -18,21 +18,13 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
-import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
@@ -59,19 +51,19 @@ public class FractalTree extends ParametrizedFilter {
     private final RangeParam angle = new RangeParam("Angle", 1, 20, 45);
     private final RangeParam randomnessParam = new RangeParam("Randomness", 0, 40, 100);
     private final GroupedRangeParam width = new GroupedRangeParam("Width",
-            new RangeParam[]{
-                    new RangeParam("Overall", 50, 100, 300),
-                    new RangeParam("Trunk", 50, 200, 500),
-            },
-            false);
+        new RangeParam[]{
+            new RangeParam("Overall", 50, 100, 300),
+            new RangeParam("Trunk", 50, 200, 500),
+        },
+        false);
 
     private final RangeParam zoom = new RangeParam("Zoom", 1, 100, 301);
     private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 48);
     private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
-            "Gravity", "Wind", -100, 0, 100, false);
-    private final IntChoiceParam quality = new IntChoiceParam("Quality", new Value[]{
-            new Value("Better", QUALITY_BETTER),
-            new Value("Faster", QUALITY_FASTER)
+        "Gravity", "Wind", -100, 0, 100, false);
+    private final IntChoiceParam quality = new IntChoiceParam("Quality", new Item[]{
+        new Item("Better", QUALITY_BETTER),
+        new Item("Faster", QUALITY_FASTER)
     }, IGNORE_RANDOMIZE);
 
     // precalculated objects for the various depths

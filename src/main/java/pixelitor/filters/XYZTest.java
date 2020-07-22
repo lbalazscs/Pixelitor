@@ -17,14 +17,15 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.PixelUtils;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.Utils;
 
-import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 
 /**
@@ -38,7 +39,7 @@ public class XYZTest extends ParametrizedFilter {
     private final RangeParam z = new RangeParam("Z", -20, 0, 20);
     private final BooleanParam linRGB = new BooleanParam("Linearize", false);
 
-    private static final ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
+//    private static final ColorSpace XYZ_CS = ColorSpace.getInstance(ColorSpace.CS_CIEXYZ);
 
     public XYZTest() {
         super(ShowOriginal.YES);
@@ -88,24 +89,9 @@ public class XYZTest extends ParametrizedFilter {
             xyz[1] += yVal;
             xyz[2] += zVal;
 
-            if (xyz[0] > 1) {
-                xyz[0] = 1;
-            }
-            if (xyz[1] > 1) {
-                xyz[1] = 1;
-            }
-            if (xyz[2] > 1) {
-                xyz[2] = 1;
-            }
-            if (xyz[0] < 0) {
-                xyz[0] = 0;
-            }
-            if (xyz[1] < 0) {
-                xyz[1] = 0;
-            }
-            if (xyz[2] < 0) {
-                xyz[2] = 0;
-            }
+            xyz[0] = Utils.clamp01(xyz[0]);
+            xyz[1] = Utils.clamp01(xyz[1]);
+            xyz[2] = Utils.clamp01(xyz[2]);
 
 //            rgb = XYZ_CS.toRGB(xyz);
             xyz2rgb(xyz, rgb, linearize);
@@ -114,24 +100,9 @@ public class XYZTest extends ParametrizedFilter {
             int g = (int) (rgb[1] * 256);
             int b = (int) (rgb[2] * 256);
 
-            if (r > 255) {
-                r = 255;
-            }
-            if (g > 255) {
-                g = 255;
-            }
-            if (b > 255) {
-                b = 255;
-            }
-            if (r < 0) {
-                r = 0;
-            }
-            if (g < 0) {
-                g = 0;
-            }
-            if (b < 0) {
-                b = 0;
-            }
+            r = PixelUtils.clamp(r);
+            g = PixelUtils.clamp(g);
+            b = PixelUtils.clamp(b);
 
             pixels[i] = a << 24 | r << 16 | g << 8 | b;
 

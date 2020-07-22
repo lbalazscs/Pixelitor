@@ -19,13 +19,8 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.geom.Point2D;
@@ -43,10 +38,10 @@ public class Flashlight extends ParametrizedFilter {
     private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
     private final IntChoiceParam shape = BlurredShape.getChoices();
-    private final IntChoiceParam bg = new IntChoiceParam("Background", new Value[]{
-            new Value("Black", Impl.BG_BLACK),
-            new Value("White", Impl.BG_WHITE),
-            new Value("Transparent", Impl.BG_TRANSPARENT),
+    private final IntChoiceParam bg = new IntChoiceParam("Background", new Item[]{
+        new Item("Black", Impl.BG_BLACK),
+        new Item("White", Impl.BG_WHITE),
+        new Item("Transparent", Impl.BG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
     private final BooleanParam invert = new BooleanParam("Invert", false);
 
@@ -56,12 +51,12 @@ public class Flashlight extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                center,
-                radius.withAdjustedRange(1.0),
-                softness,
-                shape,
-                invert,
-                bg
+            center,
+            radius.withAdjustedRange(1.0),
+            softness,
+            shape,
+            invert,
+            bg
         );
     }
 
@@ -128,7 +123,7 @@ public class Flashlight extends ParametrizedFilter {
         }
 
         public void setCenter(double cx, double cy) {
-            this.center = new Point2D.Double(cx, cy);
+            center = new Point2D.Double(cx, cy);
         }
 
         public void setRadius(double radiusX, double radiusY, double softness) {

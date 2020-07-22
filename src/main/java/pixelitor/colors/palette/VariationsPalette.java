@@ -17,7 +17,7 @@
 
 package pixelitor.colors.palette;
 
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 
 import java.awt.Color;
 
@@ -38,7 +38,7 @@ public class VariationsPalette extends Palette {
         super(lastRows, lastCols);
         this.dialogTitle = dialogTitle;
         assert refColor != null;
-        float[] hsb = ColorUtils.toHSB(refColor);
+        float[] hsb = Colors.toHSB(refColor);
         refHue = hsb[0];
         config = new HueSatPaletteConfig(0, hsb[1]);
     }

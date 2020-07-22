@@ -17,7 +17,7 @@
 
 package pixelitor.tools;
 
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -88,9 +88,9 @@ public class BrushTool extends BlendingModeBrushTool {
             Color fg = getFGColor();
             Color bg = getBGColor();
             if (e.isControlDown()) {
-                drawingColor = ColorUtils.calcHSBAverage(fg, bg);
+                drawingColor = Colors.calcHSBAverage(fg, bg);
             } else {
-                drawingColor = ColorUtils.calcRGBAverage(fg, bg);
+                drawingColor = Colors.calcRGBAverage(fg, bg);
             }
         } else {
             drawingColor = getFGColor();

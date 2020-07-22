@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
+import pixelitor.colors.Colors;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -97,8 +98,7 @@ public enum LayerMaskAddType {
         Graphics2D g = bwImage.createGraphics();
 
         // fill background
-        g.setColor(bg);
-        g.fillRect(0, 0, width, height);
+        Colors.fillWith(bg, g, width, height);
 
         // fill foreground
         if (fg != null) {
@@ -141,8 +141,7 @@ public enum LayerMaskAddType {
         Graphics2D g = bwImage.createGraphics();
 
         // fill the background with white so that transparent parts become white
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, image.getWidth(), image.getHeight());
+        Colors.fillWith(Color.WHITE, g, image.getWidth(), image.getHeight());
 
         if (onlyTransparency) {
             // with DstOut only the source alpha will matter

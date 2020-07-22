@@ -247,21 +247,19 @@ public class History {
             return Optional.empty();
         }
         PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit != null) {
-            if (lastEdit instanceof FadeableEdit) {
-                FadeableEdit fadeableEdit = (FadeableEdit) lastEdit;
-                if (!fadeableEdit.isFadeable()) {
-                    return Optional.empty();
-                }
-
-                Drawable lastLayer = fadeableEdit.getFadingLayer();
-                if (dr != lastLayer) {
-                    // this happens if the active image layer has changed
-                    // since the last edit, for example by going to mask edit
-                    return Optional.empty();
-                }
-                return Optional.of(fadeableEdit);
+        if (lastEdit instanceof FadeableEdit) {
+            FadeableEdit fadeableEdit = (FadeableEdit) lastEdit;
+            if (!fadeableEdit.isFadeable()) {
+                return Optional.empty();
             }
+
+            Drawable lastLayer = fadeableEdit.getFadingLayer();
+            if (dr != lastLayer) {
+                // this happens if the active image layer has changed
+                // since the last edit, for example by going to mask edit
+                return Optional.empty();
+            }
+            return Optional.of(fadeableEdit);
         }
         return Optional.empty();
     }

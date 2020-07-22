@@ -76,7 +76,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void onWizardCanceled(Drawable dr) {
-
+            // do nothing
         }
 
         @Override

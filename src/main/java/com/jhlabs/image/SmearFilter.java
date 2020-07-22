@@ -119,17 +119,9 @@ public class SmearFilter extends WholeImageFilter {
         }
 
         switch (shape) {
-            case CROSSES:
-                renderCrosses(width, height, inPixels, outPixels);
-                break;
-            case LINES:
-                renderLines(width, height, inPixels, outPixels);
-                break;
-            case SQUARES:
-            case CIRCLES:
-            case DIAMONDS:
-                renderShapes(width, height, inPixels, outPixels);
-                break;
+            case CROSSES -> renderCrosses(width, height, inPixels, outPixels);
+            case LINES -> renderLines(width, height, inPixels, outPixels);
+            case SQUARES, CIRCLES, DIAMONDS -> renderShapes(width, height, inPixels, outPixels);
         }
 
         finishProgressTracker();
@@ -304,15 +296,9 @@ public class SmearFilter extends WholeImageFilter {
         }
 
         switch (shape) {
-            case CIRCLES:
-                makeCircle(width, outPixels, radius2, sx, sy, rgb, minSx, maxSx, minSy, maxSy);
-                break;
-            case SQUARES:
-                makeSquare(width, outPixels, rgb, minSx, maxSx, minSy, maxSy);
-                break;
-            case DIAMONDS:
-                makeDiamond(width, outPixels, radius, sx, sy, rgb, minSx, maxSx, minSy, maxSy);
-                break;
+            case CIRCLES -> makeCircle(width, outPixels, radius2, sx, sy, rgb, minSx, maxSx, minSy, maxSy);
+            case SQUARES -> makeSquare(width, outPixels, rgb, minSx, maxSx, minSy, maxSy);
+            case DIAMONDS -> makeDiamond(width, outPixels, radius, sx, sy, rgb, minSx, maxSx, minSy, maxSy);
         }
     }
 

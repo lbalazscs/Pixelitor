@@ -295,8 +295,11 @@ public class Dialogs {
                 Thread.sleep(100);
                 channel.noteOff(sound + i);
             }
-        } catch (MidiUnavailableException | InterruptedException e1) {
-            e1.printStackTrace();
+        } catch (MidiUnavailableException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            e.printStackTrace();
         }
     }
 

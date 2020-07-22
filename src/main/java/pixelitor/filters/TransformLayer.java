@@ -18,11 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.OpenImages;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.colors.Colors;
+import pixelitor.filters.gui.*;
 import pixelitor.layers.Drawable;
 
 import java.awt.Graphics2D;
@@ -30,11 +27,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static pixelitor.colors.ColorUtils.TRANSPARENT_COLOR;
+import static java.awt.RenderingHints.*;
+import static pixelitor.colors.Colors.TRANSPARENT_COLOR;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
 /**
@@ -80,8 +74,7 @@ public class TransformLayer extends ParametrizedFilter {
     }
 
     private void fillWithBgColor(BufferedImage dest, Graphics2D g) {
-        g.setColor(bgColorParam.getColor());
-        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+        Colors.fillWith(bgColorParam.getColor(), g, dest.getWidth(), dest.getHeight());
     }
 
     private AffineTransform calcTransform(BufferedImage src) {

@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -44,9 +44,9 @@ public class AddNoise extends ParametrizedFilter {
     private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
     private final RangeParam coverageParam = new RangeParam("Coverage (%)", 0, 50, 100);
     private final RangeParam saturationParam = new RangeParam("Saturation (%)", 0, 100, 100);
-    private final IntChoiceParam method = new IntChoiceParam("Method", new Value[]{
-            new Value("Faster", METHOD_FASTER),
-            new Value("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
+    private final IntChoiceParam method = new IntChoiceParam("Method", new Item[]{
+        new Item("Faster", METHOD_FASTER),
+        new Item("Smooth Coverage Animation", METHOD_COVERAGE_ANIM),
     });
 
     private final float[] tmpHSV = new float[3];
@@ -55,10 +55,10 @@ public class AddNoise extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                coverageParam,
-                saturationParam,
-                opacityParam,
-                method
+            coverageParam,
+            saturationParam,
+            opacityParam,
+            method
         ).withAction(ReseedSupport.createAction());
     }
 
@@ -78,7 +78,7 @@ public class AddNoise extends ParametrizedFilter {
                                         boolean coverageAnim, Random rand) {
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
-        int length = destData.length;
+        int numPixels = destData.length;
 
         boolean fullSaturation = saturationParam.getValue() == 100;
         boolean fullOpacity = opacityParam.getValue() == 100;
@@ -89,10 +89,10 @@ public class AddNoise extends ParametrizedFilter {
 
         int workUnit = 100_000;
         int counter = 0;
-        int numWorkUnits = length / workUnit;
+        int numWorkUnits = numPixels / workUnit;
         var pt = new StatusBarProgressTracker(NAME, numWorkUnits);
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < numPixels; i++) {
             // count at the beginning of the loop because of early returns
             counter++;
             if (counter == workUnit) {

@@ -69,10 +69,8 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
     public void setSelectedItem(E value, boolean trigger) {
         delegateModel.setSelectedItem(value);
 
-        if (trigger) {
-            if (adjustmentListener != null) {
-                adjustmentListener.paramAdjusted();
-            }
+        if (trigger && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
     }
 

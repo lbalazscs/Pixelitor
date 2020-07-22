@@ -22,14 +22,9 @@
 
 package org.jdesktop.swingx.painter.effects;
 
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Shape;
+import java.awt.*;
 
 /**
  * An effect which draws a multicolored border around a painter's shape.
@@ -62,7 +57,6 @@ public class NeonBorderEffect extends AbstractAreaEffect {
      * Creates a new instance of NeonBorderEffect
      */
     public NeonBorderEffect(Color edgeColor, Color centerColor, double effectWidth, float opacity) {
-        super();
         setEffectWidth(effectWidth);
         this.setEdgeColor(edgeColor);
         this.setCenterColor(centerColor);
@@ -128,7 +122,7 @@ public class NeonBorderEffect extends AbstractAreaEffect {
 
     }
 
-    protected Color interpolateColor(float t, Color start, Color end) {
+    private static Color interpolateColor(float t, Color start, Color end) {
         float[] partsS = start.getRGBComponents(null);
         float[] partsE = end.getRGBComponents(null);
         float[] partsR = new float[4];
@@ -187,27 +181,25 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     public void setBorderPosition(BorderPosition borderPosition) {
         this.borderPosition = borderPosition;
         switch (borderPosition) {
-            case Centered:
-                setShapeMasked(false);
-                break;
-            case Inside:
+            case Centered -> setShapeMasked(false);
+            case Inside -> {
                 setShapeMasked(true);
                 setRenderInsideShape(true);
-                break;
-            case Outside:
+            }
+            case Outside -> {
                 setShapeMasked(true);
                 setRenderInsideShape(false);
-                break;
+            }
         }
-        if (borderPosition == BorderPosition.Centered) {
-        }
+//        if (borderPosition == BorderPosition.Centered) {
+//        }
     }
 
     public Color interpolateEdgeColor(Color endColor, float progress) {
-        return ColorUtils.interpolateInRGB(edgeColor, endColor, progress);
+        return Colors.interpolateInRGB(edgeColor, endColor, progress);
     }
 
     public Color interpolateCenterColor(Color endColor, float progress) {
-        return ColorUtils.interpolateInRGB(centerColor, endColor, progress);
+        return Colors.interpolateInRGB(centerColor, endColor, progress);
     }
 }

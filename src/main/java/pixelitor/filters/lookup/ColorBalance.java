@@ -20,7 +20,7 @@ package pixelitor.filters.lookup;
 import com.jhlabs.image.PixelUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.gui.ShowOriginal;
@@ -29,12 +29,7 @@ import pixelitor.filters.levels.RGBLookup;
 import java.awt.image.BufferedImage;
 import java.awt.image.ShortLookupTable;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.CYAN;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.MAGENTA;
-import static java.awt.Color.RED;
-import static java.awt.Color.YELLOW;
+import static java.awt.Color.*;
 
 /**
  * Color balance filter
@@ -45,11 +40,11 @@ public class ColorBalance extends ParametrizedFilter {
     private static final int MIDTONES = 2;
     private static final int HIGHLIGHTS = 4;
 
-    private final IntChoiceParam affect = new IntChoiceParam("Affect", new Value[]{
-            new Value("Everything", EVERYTHING),
-            new Value("Shadows", SHADOWS),
-            new Value("Midtones", MIDTONES),
-            new Value("Highlights", HIGHLIGHTS),
+    private final IntChoiceParam affect = new IntChoiceParam("Affect", new Item[]{
+        new Item("Everything", EVERYTHING),
+        new Item("Shadows", SHADOWS),
+        new Item("Midtones", MIDTONES),
+        new Item("Highlights", HIGHLIGHTS),
     });
 
     private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 0, 100);
@@ -134,7 +129,7 @@ public class ColorBalance extends ParametrizedFilter {
         }
 
         private void setupMappingsForPartiallyAffected() {
-            float[] affectFactor = calculateAffectFactor(affect);
+            float[] affectFactor = calcAffectFactor(affect);
             for (short i = 0; i < LUT_TABLE_SIZE; i++) {
                 short r = (short) (i + affectFactor[i] * (cyanRed - magentaGreen / 2 - yellowBlue / 2));
                 r = PixelUtils.clamp(r);
@@ -150,31 +145,33 @@ public class ColorBalance extends ParametrizedFilter {
             }
         }
 
-        private static float[] calculateAffectFactor(int affect) {
+        private static float[] calcAffectFactor(int affect) {
             float[] affectFactor = new float[LUT_TABLE_SIZE];
             for (int i = 0; i < LUT_TABLE_SIZE; i++) {
-                switch (affect) {
-                    case SHADOWS:
-                        affectFactor[i] = 1.0f - (1.0f * i) / LUT_TABLE_SIZE;
-                        break;
-                    case HIGHLIGHTS:
-                        affectFactor[i] = (1.0f * i) / LUT_TABLE_SIZE;
-                        break;
-                    case MIDTONES:
-                        int halfSize = LUT_TABLE_SIZE / 2;
-                        if (i <= halfSize) {
-                            affectFactor[i] = (2.0f * i) / LUT_TABLE_SIZE;
-                        } else {
-                            affectFactor[i] = 2 * (1.0f - (1.0f * i) / LUT_TABLE_SIZE);
-                        }
-                        break;
-                    case EVERYTHING:
-                        // should not get here
-                        affectFactor[i] = 1.0f;
-                        break;
-                }
+                affectFactor[i] = switch (affect) {
+                    case SHADOWS -> calcAffectForShadows(i);
+                    case HIGHLIGHTS -> calcAffectForHighlights(i);
+                    case MIDTONES -> calcAffectForMidtones(i);
+                    default -> 1.0f; // should not get here
+                };
             }
             return affectFactor;
+        }
+
+        private static float calcAffectForMidtones(int i) {
+            if (i <= LUT_TABLE_SIZE / 2) {
+                return 2.0f * (calcAffectForHighlights(i));
+            } else {
+                return 2.0f * (calcAffectForShadows(i));
+            }
+        }
+
+        private static float calcAffectForHighlights(int i) {
+            return (1.0f * i) / LUT_TABLE_SIZE;
+        }
+
+        private static float calcAffectForShadows(int i) {
+            return 1.0f - calcAffectForHighlights(i);
         }
     }
 

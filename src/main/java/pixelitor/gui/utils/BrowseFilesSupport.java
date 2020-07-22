@@ -113,10 +113,8 @@ public class BrowseFilesSupport {
 
             if (mode == FILE) {
                 boolean noExtGivenByUser = !FileUtils.hasExtension(selectedFile.getName());
-                if (noExtGivenByUser) {
-                    if (fileFilter != null) {
-                        filePath = filePath + '.' + fileFilter.getExtensions()[0];
-                    }
+                if (noExtGivenByUser && fileFilter != null) {
+                    filePath = filePath + '.' + fileFilter.getExtensions()[0];
                 }
             }
 

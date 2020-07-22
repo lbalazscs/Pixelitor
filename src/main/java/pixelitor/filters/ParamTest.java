@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.RunContext;
 import pixelitor.filters.gui.*;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGUITest;
@@ -55,21 +55,21 @@ public class ParamTest extends ParametrizedFilter {
         Color[] defaultValues = {BLACK, BLUE, WHITE};
 
         return new FilterParam[]{
-                new GradientParam("Colors", defaultThumbPositions, defaultValues),
-                new RangeParam("RangeParam", 0, 50, 100),
-                new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),
-                new ImagePositionParam("ImagePositionParam"),
-                new IntChoiceParam("IntChoiceParam", new Value[]{
-                        new Value("value 1", 1),
-                        new Value("value 2", 2),
-                }),
-                new ColorParam("ColorParam", WHITE, FREE_TRANSPARENCY),
-                new AngleParam("AngleParam", 0),
-                new ElevationAngleParam("ElevationAngleParam", 0),
-                new BlendingModeParam(BlendingMode.values()),
-                new BooleanParam("BooleanParam", false),
-                new TextParam("TextParam", "default value"),
-                new LogZoomParam("Zoom", 200, 200, 1000),
+            new GradientParam("Colors", defaultThumbPositions, defaultValues),
+            new RangeParam("RangeParam", 0, 50, 100),
+            new RangeWithColorsParam(RED, BLUE, "RangeWithColorsParam", 0, 50, 100),
+            new ImagePositionParam("ImagePositionParam"),
+            new IntChoiceParam("IntChoiceParam", new Item[]{
+                new Item("value 1", 1),
+                new Item("value 2", 2),
+            }),
+            new ColorParam("ColorParam", WHITE, FREE_TRANSPARENCY),
+            new AngleParam("AngleParam", 0),
+            new ElevationAngleParam("ElevationAngleParam", 0),
+            new BlendingModeParam(BlendingMode.values()),
+            new BooleanParam("BooleanParam", false),
+            new TextParam("TextParam", "default value"),
+            new LogZoomParam("Zoom", 200, 200, 1000),
         };
     }
 }

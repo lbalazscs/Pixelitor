@@ -20,12 +20,8 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.CellularFilter;
 import com.jhlabs.math.Noise;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.GradientParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
@@ -43,7 +39,7 @@ public class JHCells extends ParametrizedFilter {
     private static final int TYPE_STRANGE = 3;
 
     private final GradientParam gradient =
-            GradientParam.createBlackToWhite("Colors");
+        GradientParam.createBlackToWhite("Colors");
 
     private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
@@ -51,10 +47,10 @@ public class JHCells extends ParametrizedFilter {
     private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
     private final IntChoiceParam gridType = IntChoiceParam.forGridType("Grid Type", gridRandomness);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
-            new Value("Cells", TYPE_CELLS),
-            new Value("Grid", TYPE_GRID),
-            new Value("Grid 2", TYPE_STRANGE),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Cells", TYPE_CELLS),
+        new Item("Grid", TYPE_GRID),
+        new Item("Grid 2", TYPE_STRANGE),
     });
     private final RangeParam refineType = new RangeParam("Refine Type", 0, 0, 100);
     private final RangeParam darkLightBalance = new RangeParam("Dark/Light Balance", -20, 0, 20);
@@ -92,23 +88,22 @@ public class JHCells extends ParametrizedFilter {
         float f1, f2, f3;
 
         switch (type.getValue()) {
-            case TYPE_CELLS:
+            case TYPE_CELLS -> {
                 f1 = 1.0f - tune;
                 f2 = tune;
                 f3 = -tune / 3;
-                break;
-            case TYPE_GRID:
+            }
+            case TYPE_GRID -> {
                 f1 = -1.0f + tune;
                 f2 = 1.0f;
                 f3 = -tune / 2;
-                break;
-            case TYPE_STRANGE:
+            }
+            case TYPE_STRANGE -> {
                 f1 = -0.5f + tune;
                 f2 = 0.5f - tune;
                 f3 = 0.15f + tune / 2;
-                break;
-            default:
-                throw new IllegalStateException("type.getValue() = " + type.getValue());
+            }
+            default -> throw new IllegalStateException("type.getValue() = " + type.getValue());
         }
 
         float bw = darkLightBalance.getPercentageValF();

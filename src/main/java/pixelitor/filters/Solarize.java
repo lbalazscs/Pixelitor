@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
@@ -38,19 +38,19 @@ public class Solarize extends ParametrizedFilter {
     private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 128, 255);
     private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 128, 255);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
-            new Value("Classic", TYPE_CLASSIC),
-            new Value("Inverted", TYPE_INVERTED)
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Classic", TYPE_CLASSIC),
+        new Item("Inverted", TYPE_INVERTED)
     });
 
     public Solarize() {
         super(ShowOriginal.YES);
 
         setParams(
-                type,
-                redThreshold,
-                greenThreshold,
-                blueThreshold
+            type,
+            redThreshold,
+            greenThreshold,
+            blueThreshold
         );
     }
 

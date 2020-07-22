@@ -36,7 +36,7 @@ import java.awt.event.ActionListener;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static pixelitor.colors.ColorUtils.selectColorWithDialog;
+import static pixelitor.colors.Colors.selectColorWithDialog;
 
 /**
  * A panel that contains the buttons for selecting
@@ -164,10 +164,10 @@ public class FgBgColorSelector extends JLayeredPane {
 
         popup.addSeparator();
 
-        ColorUtils.setupCopyColorPopupMenu(popup,
+        Colors.setupCopyColorPopupMenu(popup,
             () -> fg ? getFgColor() : getBgColor());
 
-        ColorUtils.setupPasteColorPopupMenu(popup, pw, color -> {
+        Colors.setupPasteColorPopupMenu(popup, pw, color -> {
             if (fg) {
                 setFgColor(color, true);
             } else {
@@ -306,7 +306,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setFgColor(Color c, boolean notifyListeners) {
         Color newColor;
         if (layerMaskEditing) {
-            maskFgColor = ColorUtils.toGray(c);
+            maskFgColor = Colors.toGray(c);
             newColor = maskFgColor;
         } else {
             fgColor = c;
@@ -328,7 +328,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public void setBgColor(Color c, boolean notifyListeners) {
         Color newColor;
         if (layerMaskEditing) {
-            maskBgColor = ColorUtils.toGray(c);
+            maskBgColor = Colors.toGray(c);
             newColor = maskBgColor;
         } else {
             bgColor = c;

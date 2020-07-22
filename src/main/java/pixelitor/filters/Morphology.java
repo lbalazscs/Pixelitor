@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
@@ -39,15 +39,15 @@ public class Morphology extends ParametrizedFilter {
     private static final int OP_CLOSE = 11;
 
     private final RangeParam radius = new RangeParam("Radius", 1, 1, 21);
-    private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Value[]{
-            new Value("Diamond", MorphologyFilter.KERNEL_DIAMOND),
-            new Value("Square", MorphologyFilter.KERNEL_SQUARE),
+    private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Item[]{
+        new Item("Diamond", MorphologyFilter.KERNEL_DIAMOND),
+        new Item("Square", MorphologyFilter.KERNEL_SQUARE),
     });
-    private final IntChoiceParam op = new IntChoiceParam("Operation", new Value[]{
-            new Value("Maximum (Dilate)", OP_DILATE),
-            new Value("Minimum (Erode)", OP_ERODE),
-            new Value("Open (Erode, then Dilate)", OP_OPEN),
-            new Value("Close (Dilate, then Erode)", OP_CLOSE),
+    private final IntChoiceParam op = new IntChoiceParam("Operation", new Item[]{
+        new Item("Maximum (Dilate)", OP_DILATE),
+        new Item("Minimum (Erode)", OP_ERODE),
+        new Item("Open (Erode, then Dilate)", OP_OPEN),
+        new Item("Close (Dilate, then Erode)", OP_CLOSE),
     });
 
     public Morphology() {

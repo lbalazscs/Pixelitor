@@ -18,25 +18,14 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.BoxBlurFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.DialogParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.colors.Colors;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.Utils;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -46,10 +35,7 @@ import java.util.Random;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.*;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 
@@ -102,12 +88,12 @@ public class PhotoCollage extends ParametrizedFilter {
         int xSize = size.getValue(0);
         int ySize = size.getValue(1);
 
-        // fill with the background color
         Graphics2D g = dest.createGraphics();
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR);
-        g.setColor(bgColor.getColor());
-        g.fillRect(0, 0, dest.getWidth(), dest.getHeight());
+
+        // fill with the background color
+        Colors.fillWith(bgColor.getColor(), g, dest.getWidth(), dest.getHeight());
 
         var photoRect = new Rectangle(0, 0, xSize, ySize);
         int margin = marginSize.getValue();

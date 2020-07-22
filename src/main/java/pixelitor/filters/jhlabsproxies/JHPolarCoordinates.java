@@ -18,12 +18,8 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.PolarFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import java.awt.image.BufferedImage;
 
@@ -35,10 +31,10 @@ public class JHPolarCoordinates extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private static final Value[] gridTypeChoices = {
-            new Value("Rectangular to Polar ", PolarFilter.RECT_TO_POLAR),
-            new Value("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
-            new Value("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
+    private static final Item[] gridTypeChoices = {
+        new Item("Rectangular to Polar ", PolarFilter.RECT_TO_POLAR),
+        new Item("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
+        new Item("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
     };
     private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();

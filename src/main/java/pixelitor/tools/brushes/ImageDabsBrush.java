@@ -78,14 +78,11 @@ public class ImageDabsBrush extends DabsBrush {
     }
 
     private void recreateBrushImage(double newSize, boolean colorChanged) {
-        if (!colorChanged) {
-            if (finalScaledImg != null && finalScaledImg.getWidth() == newSize) {
-                // it already has the desired size
-                return;
-            }
+        if (!colorChanged && brushImageHasSize(newSize)) {
+            return;
         }
-        // if the color changed, then recreate it no matter what the size is
 
+        // if the color changed, then recreate it no matter what the size is
         if (finalScaledImg != null) {
             finalScaledImg.flush();
         }
@@ -98,13 +95,17 @@ public class ImageDabsBrush extends DabsBrush {
         g.dispose();
     }
 
+    private boolean brushImageHasSize(double newSize) {
+        return finalScaledImg != null && finalScaledImg.getWidth() == newSize;
+    }
+
     /**
      * Creates a colorized brush image from the template image
      * according to the foreground color
      */
     private void colorizeBrushImage(Color color) {
         coloredBrushImg = new BufferedImage(
-                templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
+            templateImg.getWidth(), templateImg.getHeight(), TYPE_INT_ARGB);
         int[] srcPixels = ImageUtils.getPixelsAsArray(templateImg);
         int[] destPixels = ImageUtils.getPixelsAsArray(coloredBrushImg);
 

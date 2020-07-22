@@ -171,6 +171,16 @@ public final class Utils {
         return new Point.Double(offsetX, offsetY);
     }
 
+    public static double clamp01(double d) {
+        if (d < 0) {
+            return 0;
+        }
+        if (d > 1) {
+            return 1;
+        }
+        return d;
+    }
+
     public static float parseFloat(String input, float defaultValue) {
         if ((input != null) && !input.isEmpty()) {
             return Float.parseFloat(input);
@@ -201,6 +211,7 @@ public final class Utils {
         try {
             Thread.sleep(unit.toMillis(duration));
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("interrupted!");
         }
     }
@@ -389,7 +400,7 @@ public final class Utils {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }
 
-    public static double parseDouble(String s) throws NumberFormatException {
+    public static double parseDouble(String s) {
         // don't accept strings that end with an 'f' or 'd',
         // which are accepted by Double.parseDouble(s)
         if (s.indexOf('f') != -1) {

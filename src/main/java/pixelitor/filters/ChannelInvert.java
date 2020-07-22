@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ImageUtils;
 
@@ -51,28 +51,28 @@ public class ChannelInvert extends ParametrizedFilter {
     private static final int SAT_BRI = 13;
     private static final int HUE_SAT_BRI = 14;
 
-    private final Value[] invertChoices = {
-            new Value("Nothing", NOTHING),
+    private final Item[] invertChoices = {
+        new Item("Nothing", NOTHING),
 
-            new Value("Hue", HUE_ONLY),
-            new Value("Saturation", SATURATION_ONLY),
-            new Value("Brightness", BRI_ONLY),
+        new Item("Hue", HUE_ONLY),
+        new Item("Saturation", SATURATION_ONLY),
+        new Item("Brightness", BRI_ONLY),
 
-            new Value("Hue and Saturation", HUE_SAT),
-            new Value("Hue and Brightness", HUE_BRI),
-            new Value("Saturation and Brightness", SAT_BRI),
+        new Item("Hue and Saturation", HUE_SAT),
+        new Item("Hue and Brightness", HUE_BRI),
+        new Item("Saturation and Brightness", SAT_BRI),
 
-            new Value("Hue, Saturation and Brightness", HUE_SAT_BRI),
+        new Item("Hue, Saturation and Brightness", HUE_SAT_BRI),
 
-            new Value("Red", RED_ONLY),
-            new Value("Green", GREEN_ONLY),
-            new Value("Blue", BLUE_ONLY),
+        new Item("Red", RED_ONLY),
+        new Item("Green", GREEN_ONLY),
+        new Item("Blue", BLUE_ONLY),
 
-            new Value("Red and Green", RED_GREEN),
-            new Value("Red and Blue", RED_BLUE),
-            new Value("Green and Blue", GREEN_BLUE),
+        new Item("Red and Green", RED_GREEN),
+        new Item("Red and Blue", RED_BLUE),
+        new Item("Green and Blue", GREEN_BLUE),
 
-            new Value("Red, Green and Blue", RED_GREEN_BLUE),
+        new Item("Red, Green and Blue", RED_GREEN_BLUE),
     };
 
     private final IntChoiceParam invertTypeSelector = new IntChoiceParam("Invert Channel", invertChoices);
@@ -102,15 +102,16 @@ public class ChannelInvert extends ParametrizedFilter {
             if (alpha == 0) {
                 destData[i] = srcPixel;
             } else {
-                switch (invertType) {
-                    case RED_ONLY -> destData[i] = srcPixel ^ 0x00FF0000;
-                    case GREEN_ONLY -> destData[i] = srcPixel ^ 0x0000FF00;
-                    case BLUE_ONLY -> destData[i] = srcPixel ^ 0x000000FF;
-                    case RED_GREEN -> destData[i] = srcPixel ^ 0x00FFFF00;
-                    case RED_BLUE -> destData[i] = srcPixel ^ 0x00FF00FF;
-                    case GREEN_BLUE -> destData[i] = srcPixel ^ 0x0000FFFF;
-                    case RED_GREEN_BLUE -> destData[i] = srcPixel ^ 0x00FFFFFF;
-                }
+                destData[i] = switch (invertType) {
+                    case RED_ONLY -> srcPixel ^ 0x00FF0000;
+                    case GREEN_ONLY -> srcPixel ^ 0x0000FF00;
+                    case BLUE_ONLY -> srcPixel ^ 0x000000FF;
+                    case RED_GREEN -> srcPixel ^ 0x00FFFF00;
+                    case RED_BLUE -> srcPixel ^ 0x00FF00FF;
+                    case GREEN_BLUE -> srcPixel ^ 0x0000FFFF;
+                    case RED_GREEN_BLUE -> srcPixel ^ 0x00FFFFFF;
+                    default -> throw new IllegalStateException("Unexpected type: " + invertType);
+                };
             }
         }
 

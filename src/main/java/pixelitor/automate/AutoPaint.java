@@ -20,7 +20,7 @@ package pixelitor.automate;
 import net.jafama.FastMath;
 import pixelitor.Canvas;
 import pixelitor.Composition;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
 import pixelitor.history.History;
@@ -132,7 +132,7 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            Color interpolated = ColorUtils.interpolateInRGB(
+            Color interpolated = Colors.interpolateInRGB(
                 origFg, origBg, rand.nextFloat());
             setFGColor(interpolated);
         }

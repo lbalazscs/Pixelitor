@@ -17,12 +17,8 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.LogZoomParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -46,24 +42,24 @@ public abstract class ComplexFractal extends ParametrizedFilter {
     protected final LogZoomParam zoomParam = new LogZoomParam("Log(Zoom)", 200, 200, 1000);
     protected final ImagePositionParam zoomCenter;
     protected final RangeParam iterationsParam;
-    private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Value[]{
-            new Value("Contrasting", COLORS_CONTRASTING),
-            new Value("Continuous", COLORS_CONTINUOUS),
-            new Value("Blues", COLORS_BLUES),
+    private final IntChoiceParam colorsParam = new IntChoiceParam("Colors", new Item[]{
+        new Item("Contrasting", COLORS_CONTRASTING),
+        new Item("Continuous", COLORS_CONTINUOUS),
+        new Item("Blues", COLORS_BLUES),
     });
-    private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new Value[]{
-            new Value("None (Faster)", AA_NONE),
-            new Value("2x2 (Better, Slower)", AA_2x2),
+    private final IntChoiceParam aaParam = new IntChoiceParam("Supersampling", new Item[]{
+        new Item("None (Faster)", AA_NONE),
+        new Item("2x2 (Better, Slower)", AA_2x2),
     }, IGNORE_RANDOMIZE);
 
     protected ComplexFractal(int defaultIterations, float zoomX) {
         super(ShowOriginal.NO);
 
         iterationsParam = new RangeParam.Builder("Iterations")
-                .min(2)
-                .def(defaultIterations)
-                .max(998)
-                .randomizePolicy(IGNORE_RANDOMIZE)
+            .min(2)
+            .def(defaultIterations)
+            .max(998)
+            .randomizePolicy(IGNORE_RANDOMIZE)
                 .build();
 
         zoomCenter = new ImagePositionParam("Zoom Center", zoomX, 0.5f);

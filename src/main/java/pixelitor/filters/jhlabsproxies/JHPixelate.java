@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,10 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.BlockFilter;
+import pixelitor.colors.Colors;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
@@ -47,15 +48,15 @@ public class JHPixelate extends ParametrizedFilter {
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Value[]{
-            new Value("Squares", TYPE_SQUARE),
-            new Value("Brick Wall", TYPE_BRICK),
+    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
+        new Item("Squares", TYPE_SQUARE),
+        new Item("Brick Wall", TYPE_BRICK),
     });
 
-    private final IntChoiceParam styleParam = new IntChoiceParam("Style", new Value[]{
-            new Value("Flat", STYLE_FLAT),
-            new Value("3D", STYLE_3D),
-            new Value("Embedded", STYLE_EMBEDDED),
+    private final IntChoiceParam styleParam = new IntChoiceParam("Style", new Item[]{
+        new Item("Flat", STYLE_FLAT),
+        new Item("3D", STYLE_3D),
+        new Item("Embedded", STYLE_EMBEDDED),
 //            new IntChoiceParam.Value("Grid", STYLE_GRID_ONLY)
     });
 
@@ -134,8 +135,7 @@ public class JHPixelate extends ParametrizedFilter {
 
         Graphics2D g = bumpSource.createGraphics();
 
-        g.setColor(WHITE);
-        g.fillRect(0, 0, width, height);
+        Colors.fillWith(WHITE, g, width, height);
 
         if (type == TYPE_SQUARE) {
             ImageUtils.drawGrid(GRAY, g, width, height,

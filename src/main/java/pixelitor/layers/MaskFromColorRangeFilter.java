@@ -79,8 +79,32 @@ class MaskFromColorRangeFilter extends PointFilter {
 
     @Override
     public int filterRGB(int x, int y, int rgb) {
-        double dist;
+        double dist = calcDistance(rgb);
 
+        if (dist > minTolerance) {
+            if (invert) {
+                return WHITE_PIXEL;
+            } else {
+                return BLACK_PIXEL;
+            }
+        } else if (dist < maxTolerance) {
+            if (invert) {
+                return BLACK_PIXEL;
+            } else {
+                return WHITE_PIXEL;
+            }
+        } else {
+            // linear interpolation
+            int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
+            if (invert) {
+                v = 255 - v;
+            }
+            return 0xFF_00_00_00 | v << 16 | v << 8 | v;
+        }
+    }
+
+    private double calcDistance(int rgb) {
+        double dist;
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
@@ -126,26 +150,6 @@ class MaskFromColorRangeFilter extends PointFilter {
         } else {
             throw new IllegalStateException("interpolation = " + distType);
         }
-
-        if (dist > minTolerance) {
-            if (invert) {
-                return WHITE_PIXEL;
-            } else {
-                return BLACK_PIXEL;
-            }
-        } else if (dist < maxTolerance) {
-            if (invert) {
-                return BLACK_PIXEL;
-            } else {
-                return WHITE_PIXEL;
-            }
-        } else {
-            // linear interpolation
-            int v = (int) ((minTolerance - dist) * 255 / (minTolerance - maxTolerance));
-            if (invert) {
-                v = 255 - v;
-            }
-            return 0xFF_00_00_00 | v << 16 | v << 8 | v;
-        }
+        return dist;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,7 +27,6 @@ import java.awt.Dimension;
  * Resettable is not set to its default value
  */
 public class DefaultButton extends JButton {
-    private static final Icon WEST_ARROW_ICON = Icons.getWestArrowIcon();
     private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
     private Resettable resettable;
 
@@ -64,7 +63,7 @@ public class DefaultButton extends JButton {
         if (isSetToDefault) {
             setIcon(null);
         } else {
-            setIcon(WEST_ARROW_ICON);
+            setIcon(Icons.getWestArrowIcon());
         }
     }
 

@@ -22,7 +22,7 @@ import pixelitor.filters.Invert;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
@@ -35,20 +35,20 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class JHConvolutionEdge extends ParametrizedFilter {
     public static final String NAME = "Convolution Edge Detection";
 
-    private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new Value[]{
-            new Value("Sobel", METHOD_SOBEL),
-            new Value("Prewitt", METHOD_PREWITT),
-            new Value("Roberts", METHOD_ROBERTS),
-            new Value("Frei-Chen", METHOD_FREI_CHEN),
-            new Value("None", METHOD_NONE),
+    private final IntChoiceParam horizontalMethod = new IntChoiceParam("Horizontal Edges", new Item[]{
+        new Item("Sobel", METHOD_SOBEL),
+        new Item("Prewitt", METHOD_PREWITT),
+        new Item("Roberts", METHOD_ROBERTS),
+        new Item("Frei-Chen", METHOD_FREI_CHEN),
+        new Item("None", METHOD_NONE),
     });
 
-    private final IntChoiceParam verticalMethod = new IntChoiceParam("Vertical Edges", new Value[]{
-            new Value("Sobel", METHOD_SOBEL),
-            new Value("Prewitt", METHOD_PREWITT),
-            new Value("Roberts", METHOD_ROBERTS),
-            new Value("Frei-Chen", METHOD_FREI_CHEN),
-            new Value("None", METHOD_NONE),
+    private final IntChoiceParam verticalMethod = new IntChoiceParam("Vertical Edges", new Item[]{
+        new Item("Sobel", METHOD_SOBEL),
+        new Item("Prewitt", METHOD_PREWITT),
+        new Item("Roberts", METHOD_ROBERTS),
+        new Item("Frei-Chen", METHOD_FREI_CHEN),
+        new Item("None", METHOD_NONE),
     });
 
     private final BooleanParam invertImage = new BooleanParam("Invert", false, IGNORE_RANDOMIZE);

@@ -52,7 +52,7 @@ public class BatchFilterWizard extends Wizard {
 
     @Override
     protected void finalCleanup() {
-
+        // nothing to do
     }
 
     public Filter getFilter() {

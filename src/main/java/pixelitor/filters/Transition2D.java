@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BricTransitionFilter;
@@ -35,42 +35,42 @@ public class Transition2D extends ParametrizedFilter {
     public static final String NAME = "2D Transitions";
 
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
-            new Value("Box In", BOX_IN),
-            new Value("Box Out", BOX_OUT),
-            new Value("Bars (Horizontal)", BARS_HORIZONTAL),
-            new Value("Bars (Vertical)", BARS_VERTICAL),
-            new Value("Checkerboard", CHECKERBOARD),
-            new Value("Circle In", CIRCLE_IN),
-            new Value("Circle Out", CIRCLE_OUT),
-            new Value("Collapse", COLLAPSE),
-            new Value("Curtain", CURTAIN),
-            new Value("Diamonds", DIAMONDS),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Box In", BOX_IN),
+        new Item("Box Out", BOX_OUT),
+        new Item("Bars (Horizontal)", BARS_HORIZONTAL),
+        new Item("Bars (Vertical)", BARS_VERTICAL),
+        new Item("Checkerboard", CHECKERBOARD),
+        new Item("Circle In", CIRCLE_IN),
+        new Item("Circle Out", CIRCLE_OUT),
+        new Item("Collapse", COLLAPSE),
+        new Item("Curtain", CURTAIN),
+        new Item("Diamonds", DIAMONDS),
 //            new IntChoiceParam.Value("Documentary", DOCUMENTARY),
-            new Value("Dots", DOTS),
-            new Value("Exploding Squares", SQUARES),
-            new Value("Fade", FADE),
-            new Value("Flurry", FLURRY),
-            new Value("Funky Wipe", FUNKY_WIPE),
-            new Value("Goo", GOO),
-            new Value("Halftone", HALFTONE),
-            new Value("Kaleidoscope", KALEIDOSCOPE),
-            new Value("Levitate", LEVITATE),
-            new Value("Microscope", MICROSCOPE),
-            new Value("Pivot", PIVOT),
-            new Value("Radial Wipe", RADIAL_WIPE),
-            new Value("Reveal", REVEAL),
-            new Value("Rotate", ROTATE),
-            new Value("Scale", SCALE),
-            new Value("Scribble", SCRIBBLE),
-            new Value("Scribble Twice", SCRIBBLE_TWICE),
-            new Value("Spiral", SPIRAL),
-            new Value("Spiral Sprawl", SPIRAL_SPRAWL),
-            new Value("Square Rain", SQUARE_RAIN),
-            new Value("Stars", STARS),
-            new Value("Toss In", TOSS_IN),
-            new Value("Venetian Blinds", BLINDS),
-            new Value("Wave", WAVE),
+        new Item("Dots", DOTS),
+        new Item("Exploding Squares", SQUARES),
+        new Item("Fade", FADE),
+        new Item("Flurry", FLURRY),
+        new Item("Funky Wipe", FUNKY_WIPE),
+        new Item("Goo", GOO),
+        new Item("Halftone", HALFTONE),
+        new Item("Kaleidoscope", KALEIDOSCOPE),
+        new Item("Levitate", LEVITATE),
+        new Item("Microscope", MICROSCOPE),
+        new Item("Pivot", PIVOT),
+        new Item("Radial Wipe", RADIAL_WIPE),
+        new Item("Reveal", REVEAL),
+        new Item("Rotate", ROTATE),
+        new Item("Scale", SCALE),
+        new Item("Scribble", SCRIBBLE),
+        new Item("Scribble Twice", SCRIBBLE_TWICE),
+        new Item("Spiral", SPIRAL),
+        new Item("Spiral Sprawl", SPIRAL_SPRAWL),
+        new Item("Square Rain", SQUARE_RAIN),
+        new Item("Stars", STARS),
+        new Item("Toss In", TOSS_IN),
+        new Item("Venetian Blinds", BLINDS),
+        new Item("Wave", WAVE),
     });
 
     private BricTransitionFilter filter;

@@ -17,24 +17,13 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.DialogParam;
-import pixelitor.filters.gui.EffectsParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.ShowOriginal;
-import pixelitor.filters.gui.StrokeParam;
+import pixelitor.colors.Colors;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RadialGradientPaint;
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
@@ -68,19 +57,19 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
-    private final IntChoiceParam background = new IntChoiceParam("Background", new Value[]{
-            new Value("Black", BG_BLACK),
-            new Value("Original Image", BG_ORIGINAL),
-            new Value("Transparent", BG_TRANSPARENT),
-            new Value("Background Color", BG_TOOL),
+    private final IntChoiceParam background = new IntChoiceParam("Background", new Item[]{
+        new Item("Black", BG_BLACK),
+        new Item("Original Image", BG_ORIGINAL),
+        new Item("Transparent", BG_TRANSPARENT),
+        new Item("Background Color", BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
-    private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Value[]{
-            new Value("White", FG_WHITE),
-            new Value("Black", FG_BLACK),
-            new Value("Radial Gradient", FG_GRADIENT),
-            new Value("Foreground Color", FG_TOOL),
-            new Value("Transparent", FG_TRANSPARENT),
+    private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Item[]{
+        new Item("White", FG_WHITE),
+        new Item("Black", FG_BLACK),
+        new Item("Radial Gradient", FG_GRADIENT),
+        new Item("Foreground Color", FG_TOOL),
+        new Item("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 
     private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
@@ -120,13 +109,12 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         if (waterMark.isChecked()) {
             bumpImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_RGB);
             g2 = bumpImage.createGraphics();
-            g2.setColor(BLACK);
-            g2.fillRect(0, 0, srcWidth, srcHeight);
+            Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
             g2.setColor(Color.GRAY);
         } else {
             dest = ImageUtils.createImageWithSameCM(src);
             g2 = dest.createGraphics();
-            setupBackground(src, srcWidth, srcHeight, g2);
+            fillBackground(src, g2, srcWidth, srcHeight);
             setupForeground(srcWidth, srcHeight, g2);
         }
 
@@ -168,50 +156,37 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         return dest;
     }
 
-    private void setupBackground(BufferedImage src, int srcWidth, int srcHeight, Graphics2D g2) {
+    private void fillBackground(BufferedImage src, Graphics2D g2, int srcWidth, int srcHeight) {
         int bg = background.getValue();
         switch (bg) {
-            case BG_BLACK:
-                g2.setColor(BLACK);
-                g2.fillRect(0, 0, srcWidth, srcHeight);
-                break;
-            case BG_TOOL:
-                g2.setColor(getBGColor());
-                g2.fillRect(0, 0, srcWidth, srcHeight);
-                break;
-            case BG_ORIGINAL:
-                g2.drawImage(src, 0, 0, null);
-                break;
-            case BG_TRANSPARENT:
-                // do nothing
-                break;
+            case BG_BLACK -> Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
+            case BG_TOOL -> Colors.fillWith(getBGColor(), g2, srcWidth, srcHeight);
+            case BG_ORIGINAL -> g2.drawImage(src, 0, 0, null);
+            case BG_TRANSPARENT -> {
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + bg);
         }
     }
 
     private void setupForeground(int srcWidth, int srcHeight, Graphics2D g2) {
         int fg = foreground.getValue();
         switch (fg) {
-            case FG_WHITE:
-                g2.setColor(WHITE);
-                break;
-            case FG_BLACK:
-                g2.setColor(BLACK);
-                break;
-            case FG_TOOL:
-                g2.setColor(getFGColor());
-                break;
-            case FG_GRADIENT:
-                float cx = srcWidth / 2.0f;
-                float cy = srcHeight / 2.0f;
-                float radius = getGradientRadius(cx, cy);
-                float[] fractions = {0.0f, 1.0f};
-                Color[] colors = {DARK_GREEN, PURPLE};
-                g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
-                break;
-            case FG_TRANSPARENT:
-                g2.setComposite(AlphaComposite.Clear);
-                break;
+            case FG_WHITE -> g2.setColor(WHITE);
+            case FG_BLACK -> g2.setColor(BLACK);
+            case FG_TOOL -> g2.setColor(getFGColor());
+            case FG_GRADIENT -> setupGradientForeground(g2, srcWidth, srcHeight);
+            case FG_TRANSPARENT -> g2.setComposite(AlphaComposite.Clear);
+            default -> throw new IllegalStateException("Unexpected value: " + fg);
         }
+    }
+
+    private void setupGradientForeground(Graphics2D g2, int srcWidth, int srcHeight) {
+        float cx = srcWidth / 2.0f;
+        float cy = srcHeight / 2.0f;
+        float radius = getGradientRadius(cx, cy);
+        float[] fractions = {0.0f, 1.0f};
+        Color[] colors = {DARK_GREEN, PURPLE};
+        g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
     }
 
     protected float getGradientRadius(float cx, float cy) {

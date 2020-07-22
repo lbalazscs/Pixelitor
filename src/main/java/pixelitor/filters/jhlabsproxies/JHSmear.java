@@ -21,7 +21,7 @@ import com.jhlabs.image.SmearFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.utils.ReseedSupport;
@@ -40,12 +40,12 @@ public class JHSmear extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);
     private final RangeParam mix = new RangeParam("Opacity (%)", 0, 50, 100);
 
-    private static final Value[] shapeChoices = {
-            new Value("Lines", SmearFilter.LINES),
-            new Value("Crosses", SmearFilter.CROSSES),
-            new Value("Circles", SmearFilter.CIRCLES),
-            new Value("Squares", SmearFilter.SQUARES),
-            new Value("Diamonds", SmearFilter.DIAMONDS),
+    private static final Item[] shapeChoices = {
+        new Item("Lines", SmearFilter.LINES),
+        new Item("Crosses", SmearFilter.CROSSES),
+        new Item("Circles", SmearFilter.CIRCLES),
+        new Item("Squares", SmearFilter.SQUARES),
+        new Item("Diamonds", SmearFilter.DIAMONDS),
     };
     private final IntChoiceParam shape = new IntChoiceParam("Shape", shapeChoices);
 
@@ -55,11 +55,11 @@ public class JHSmear extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                distance.withAdjustedRange(0.1),
-                shape.withAction(ReseedSupport.createAction()),
-                angle,
-                density,
-                mix
+            distance.withAdjustedRange(0.1),
+            shape.withAction(ReseedSupport.createAction()),
+            angle,
+            density,
+            mix
         );
 
         // disable angle if the shape is not lines

@@ -78,7 +78,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private void addOutputTypeSelector(GridBagHelper gbh) {
         var model = new EnumComboBoxModel<>(TweenOutputType.class);
 
-        outputTypeCB = new JComboBox<TweenOutputType>(model);
+        outputTypeCB = new JComboBox<>(model);
         outputTypeCB.addActionListener(e -> outputTypeChanged());
         outputTypeChanged(); // initial setup
 
@@ -110,7 +110,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private void addInterpolationSelector(GridBagHelper gbh) {
         EnumComboBoxModel<Interpolation> ipCBM
                 = new EnumComboBoxModel<>(Interpolation.class);
-        ipCB = new JComboBox<Interpolation>(ipCBM);
+        ipCB = new JComboBox<>(ipCBM);
 
         gbh.addLabelAndControl("Interpolation:", ipCB);
     }

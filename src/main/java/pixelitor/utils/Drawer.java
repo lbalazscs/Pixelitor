@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.utils;
+
+import pixelitor.colors.Colors;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -55,8 +57,7 @@ public class Drawer {
         Graphics2D g2 = image.createGraphics();
 
         if (fillColor != null) {
-            g2.setColor(fillColor);
-            g2.fillRect(0, 0, image.getWidth(), image.getHeight());
+            Colors.fillWith(fillColor, g2, image.getWidth(), image.getHeight());
         }
         if (useAA) {
             g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);

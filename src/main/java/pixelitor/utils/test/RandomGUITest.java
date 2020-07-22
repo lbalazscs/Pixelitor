@@ -814,34 +814,41 @@ public class RandomGUITest {
 
     private static void randomRotateFlip() {
         int r = rand.nextInt(5);
-        Action action;
-
-        switch (r) {
-            case 0:
-                log("rotate 90 CW");
-                action = new Rotate(ANGLE_90);
-                break;
-            case 1:
-                log("rotate 180");
-                action = new Rotate(ANGLE_180);
-                break;
-            case 2:
-                log("rotate 90 CCW");
-                action = new Rotate(ANGLE_270);
-                break;
-            case 3:
-                log("flip horizontal");
-                action = new Flip(HORIZONTAL);
-                break;
-            case 4:
-                log("flip vertical");
-                action = new Flip(VERTICAL);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + r);
-        }
+        Action action = switch (r) {
+            case 0 -> rotate90Action();
+            case 1 -> rotate180Action();
+            case 2 -> rotate90CCWAction();
+            case 3 -> flipHorizontalAction();
+            case 4 -> flipVerticalAction();
+            default -> throw new IllegalStateException("Unexpected value: " + r);
+        };
 
         executeAction(action);
+    }
+
+    private static Action rotate90Action() {
+        log("rotate 90 CW");
+        return new Rotate(ANGLE_90);
+    }
+
+    private static Action rotate180Action() {
+        log("rotate 180");
+        return new Rotate(ANGLE_180);
+    }
+
+    private static Action rotate90CCWAction() {
+        log("rotate 90 CCW");
+        return new Rotate(ANGLE_270);
+    }
+
+    private static Action flipHorizontalAction() {
+        log("flip horizontal");
+        return new Flip(HORIZONTAL);
+    }
+
+    private static Action flipVerticalAction() {
+        log("flip vertical");
+        return new Flip(VERTICAL);
     }
 
     private static void activateRandomView() {
@@ -853,33 +860,44 @@ public class RandomGUITest {
         var comp = OpenImages.getActiveComp();
         int r = rand.nextInt(6);
         switch (r) {
-            case 0:
-                log("layer order change: active to top");
-                comp.moveActiveLayerToTop();
-                break;
-            case 1:
-                log("layer order change: active to bottom");
-                comp.moveActiveLayerToBottom();
-                break;
-            case 2:
-                log("layer order change: selection up");
-                comp.moveLayerSelectionUp();
-                break;
-            case 3:
-                log("layer order change: selection down");
-                comp.moveLayerSelectionDown();
-                break;
-            case 4:
-                log("layer order change: active up");
-                comp.moveActiveLayerUp();
-                break;
-            case 5:
-                log("layer order change: active down");
-                comp.moveActiveLayerDown();
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + r);
+            case 0 -> moveActiveLayerToTop(comp);
+            case 1 -> moveActiveLayerToBottom(comp);
+            case 2 -> moveLayerSelectionUp(comp);
+            case 3 -> moveLayerSelectionDown(comp);
+            case 4 -> moveActiveLayerUp(comp);
+            case 5 -> moveActiveLayerDown(comp);
+            default -> throw new IllegalStateException("Unexpected value: " + r);
         }
+    }
+
+    private static void moveActiveLayerToTop(Composition comp) {
+        log("layer order change: active to top");
+        comp.moveActiveLayerToTop();
+    }
+
+    private static void moveActiveLayerToBottom(Composition comp) {
+        log("layer order change: active to bottom");
+        comp.moveActiveLayerToBottom();
+    }
+
+    private static void moveLayerSelectionUp(Composition comp) {
+        log("layer order change: selection up");
+        comp.moveLayerSelectionUp();
+    }
+
+    private static void moveLayerSelectionDown(Composition comp) {
+        log("layer order change: selection down");
+        comp.moveLayerSelectionDown();
+    }
+
+    private static void moveActiveLayerUp(Composition comp) {
+        log("layer order change: active up");
+        comp.moveActiveLayerUp();
+    }
+
+    private static void moveActiveLayerDown(Composition comp) {
+        log("layer order change: active down");
+        comp.moveActiveLayerDown();
     }
 
     private static void layerMerge() {

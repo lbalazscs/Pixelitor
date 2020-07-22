@@ -18,7 +18,7 @@
 package pixelitor.filters.painters;
 
 import com.bric.swing.ColorSwatch;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.utils.Rnd;
 
@@ -43,16 +43,16 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
 
         GUIUtils.addColorDialogListener(innerColorSwatch, this::innerColorSwatchClicked);
 
-        ColorUtils.setupFilterColorsPopupMenu(this, innerColorSwatch,
-                this::getInnerColor, c -> setInnerColor(c, true));
+        Colors.setupFilterColorsPopupMenu(this, innerColorSwatch,
+            this::getInnerColor, c -> setInnerColor(c, true));
 
         gbh.addLabelAndControlNoStretch("Inner Color:", innerColorSwatch);
     }
 
     private void innerColorSwatchClicked() {
-        ColorUtils.selectColorWithDialog(this, "Inner Color",
-                innerColor, true,
-                color -> setInnerColor(color, true));
+        Colors.selectColorWithDialog(this, "Inner Color",
+            innerColor, true,
+            color -> setInnerColor(color, true));
     }
 
     public void setInnerColor(Color selectedColor, boolean trigger) {

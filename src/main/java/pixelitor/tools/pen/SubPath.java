@@ -448,17 +448,13 @@ public class SubPath implements Serializable, Transformable {
     public boolean checkConsistency() {
         checkWiring();
 
-        if (closed) {
-            if (!finished) {
-                throw new IllegalStateException(
-                    "subpath " + this + " is closed but not finished");
-            }
+        if (closed && !finished) {
+            throw new IllegalStateException(
+                "subpath " + this + " is closed but not finished");
         }
-        if (finished) {
-            if (moving != null) {
-                throw new IllegalStateException(
-                    "subpath " + this + " is finished, but moving");
-            }
+        if (finished && moving != null) {
+            throw new IllegalStateException(
+                "subpath " + this + " is finished, but moving");
         }
         return true;
     }

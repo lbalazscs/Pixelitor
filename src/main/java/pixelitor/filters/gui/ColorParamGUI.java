@@ -18,7 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.bric.swing.ColorSwatch;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
@@ -55,8 +55,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
         GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
 
-        ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
-                model::getColor, this::updateColor);
+        Colors.setupFilterColorsPopupMenu(this, colorSwatch,
+            model::getColor, this::updateColor);
 
         if (addDefaultButton) {
             defaultButton = new DefaultButton("Reset Color", model);
@@ -67,8 +67,8 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private void showColorDialog() {
 //        Color color = JColorChooser.showDialog(this, "Select Color", model.getColor());
 
-        ColorUtils.selectColorWithDialog(this, model.getName(),
-                model.getColor(), model.allowTransparency(), this::updateColor);
+        Colors.selectColorWithDialog(this, model.getName(),
+            model.getColor(), model.allowTransparency(), this::updateColor);
     }
 
     private void updateColor(Color color) {

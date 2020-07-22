@@ -101,27 +101,35 @@ public class TweenAnimation {
         assert calledOnEDT() : threadInfo();
 
         if (outputType.needsDirectory()) {
-            if (output.list().length == 0) {
-                return true;
-            } else {
-                return showFolderNotEmptyDialog(dialogParent);
-            }
+            return checkOverwriteForDirectory(dialogParent);
         } else { // file
-            if (output.exists()) {
-                boolean overwrite = showFileExistsDialog(dialogParent);
-                if (overwrite) {
-                    if (isWritable(output.toPath())) {
-                        return true;
-                    } else {
-                        Dialogs.showFileNotWritableDialog(output);
-                        return false;
-                    }
+            return checkOverwriteForFile(dialogParent);
+        }
+    }
+
+    private boolean checkOverwriteForDirectory(Component dialogParent) {
+        if (output.list().length == 0) {
+            return true; // empty directory: OK
+        } else {
+            return showFolderNotEmptyDialog(dialogParent);
+        }
+    }
+
+    private boolean checkOverwriteForFile(Component dialogParent) {
+        if (output.exists()) {
+            boolean overwrite = showFileExistsDialog(dialogParent);
+            if (overwrite) {
+                if (isWritable(output.toPath())) {
+                    return true;
                 } else {
+                    Dialogs.showFileNotWritableDialog(output);
                     return false;
                 }
             } else {
-                return true;
+                return false;
             }
+        } else {
+            return true; // the output file doesn't exist: OK
         }
     }
 

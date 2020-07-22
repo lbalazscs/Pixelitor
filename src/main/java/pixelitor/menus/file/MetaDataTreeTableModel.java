@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,21 +43,18 @@ public class MetaDataTreeTableModel extends AbstractTreeTableModel {
     @Override
     public Object getValueAt(Object node, int column) {
         if (node instanceof DirNode) {
-            DirNode dir = (DirNode) node;
-            switch (column) {
-                case 0:
-                    return dir.getName();
-                case 1:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> ((DirNode) node).getName();
+                case 1 -> null;
+                default -> throw new IllegalStateException("Unexpected column: " + column);
+            };
         } else if (node instanceof TagNode) {
             TagNode tag = (TagNode) node;
-            switch (column) {
-                case 0:
-                    return tag.getName();
-                case 1:
-                    return tag.getValue();
-            }
+            return switch (column) {
+                case 0 -> tag.getName();
+                case 1 -> tag.getValue();
+                default -> throw new IllegalStateException("Unexpected column: " + column);
+            };
         }
         return null;
     }

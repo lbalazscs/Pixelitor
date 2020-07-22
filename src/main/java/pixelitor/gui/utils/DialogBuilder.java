@@ -300,11 +300,9 @@ public class DialogBuilder {
     }
 
     private void okButtonPressed(JDialog d) {
-        if (validator != null) {
-            if (!validator.test(d)) {
-                // keep the dialog open
-                return;
-            }
+        if (dialogIsInvalid(d)) {
+            // keep the dialog open
+            return;
         }
 
         closeDialog(d);
@@ -315,16 +313,18 @@ public class DialogBuilder {
 
     // a dialog without a Cancel button can still be cancelled with Esc/X
     private void dialogCancelled(JDialog d) {
-        if (validateWhenCanceled && validator != null) {
-            if (!validator.test(d)) {
-                // keep the dialog open
-                return;
-            }
+        if (validateWhenCanceled && dialogIsInvalid(d)) {
+            // keep the dialog open
+            return;
         }
         closeDialog(d);
         if (cancelAction != null) {
             cancelAction.run();
         }
+    }
+
+    private boolean dialogIsInvalid(JDialog d) {
+        return validator != null && !validator.test(d);
     }
 
     private void closeDialog(JDialog d) {

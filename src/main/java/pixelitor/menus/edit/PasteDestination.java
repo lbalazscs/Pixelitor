@@ -19,6 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.Canvas;
 import pixelitor.OpenImages;
+import pixelitor.colors.Colors;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
 
@@ -82,8 +83,7 @@ public enum PasteDestination {
 
             // if the pasted image is too small, pad it with white
             if (!canvas.isFullyCoveredBy(pastedImage)) {
-                g.setColor(Color.WHITE);
-                g.fillRect(0, 0, canvasWidth, canvasHeight);
+                Colors.fillWith(Color.WHITE, g, canvasWidth, canvasHeight);
             }
 
             // center the pasted image

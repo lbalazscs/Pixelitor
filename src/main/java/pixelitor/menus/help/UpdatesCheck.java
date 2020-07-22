@@ -48,20 +48,20 @@ public class UpdatesCheck {
 
             if (Pixelitor.VERSION_NUMBER.equals(lastVersion)) {
                 String msg = format(
-                        "You already have the latest version (%s) of Pixelitor installed",
-                        lastVersion);
+                    "You already have the latest version (%s) of Pixelitor installed",
+                    lastVersion);
                 Messages.showInfo("Pixelitor is up to date", msg);
             } else {
                 String requiredJavaVersion = versionInfo.getProperty(
-                        "required_java_version").trim(); // like "7"
+                    "required_java_version").trim(); // like "7"
                 newVersionAlert(lastVersion, requiredJavaVersion);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             String msg = "Could not check for updates on the Pixelitor website.";
             String title = "Could not check for updates";
             Object[] options = {"See Details", "Close"};
             if (Dialogs.showOKCancelDialog(msg, title,
-                    options, 1, ERROR_MESSAGE)) {
+                options, 1, ERROR_MESSAGE)) {
                 Messages.showException(e);
             }
         }

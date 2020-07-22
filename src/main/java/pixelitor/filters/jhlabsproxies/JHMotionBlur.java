@@ -22,13 +22,8 @@ import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
 import pixelitor.filters.FilterAction;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -72,9 +67,9 @@ public class JHMotionBlur extends ParametrizedFilter {
         public abstract MotionBlur createFilter(String filterName);
     }
 
-    private static final Value[] methodChoices = {
-            new Value("Faster", FASTER.ordinal()),
-            new Value("High Quality (slow for large images)", BETTER.ordinal()),
+    private static final Item[] methodChoices = {
+        new Item("Faster", FASTER.ordinal()),
+        new Item("High Quality (slow for large images)", BETTER.ordinal()),
     };
 
     private final IntChoiceParam method = new IntChoiceParam("Quality", methodChoices, IGNORE_RANDOMIZE);

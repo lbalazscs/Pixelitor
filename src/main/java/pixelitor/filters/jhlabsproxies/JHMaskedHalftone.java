@@ -21,7 +21,7 @@ import com.jhlabs.image.HalftoneFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -32,15 +32,15 @@ import java.awt.image.BufferedImage;
  * Abstract base class for filters that use {@link HalftoneFilter}
  */
 public abstract class JHMaskedHalftone extends ParametrizedFilter {
-    protected static final int REPETITION_REFLECT = 1;
-    protected static final int REPETITION_REPEAT = 2;
+    private static final int REPETITION_REFLECT = 1;
+    private static final int REPETITION_REPEAT = 2;
 
     protected final BooleanParam monochrome = new BooleanParam("Monochrome", true);
     protected final BooleanParam invert = new BooleanParam("Invert Pattern", false);
     protected final RangeParam stripesDistance = new RangeParam("Stripes Distance (px)", 1, 20, 101);
-    protected final IntChoiceParam repetitionType = new IntChoiceParam("Stripes Type", new Value[]{
-            new Value("Symmetric", REPETITION_REFLECT),
-            new Value("One-sided", REPETITION_REPEAT),
+    protected final IntChoiceParam repetitionType = new IntChoiceParam("Stripes Type", new Item[]{
+        new Item("Symmetric", REPETITION_REFLECT),
+        new Item("One-sided", REPETITION_REPEAT),
     });
     protected final RangeParam shiftStripes = new RangeParam("Shift Stripes (%)", 0, 0, 100);
     protected final RangeParam softness = new RangeParam("Softness", 0, 10, 100);

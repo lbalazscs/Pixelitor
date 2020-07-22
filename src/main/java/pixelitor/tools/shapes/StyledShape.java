@@ -127,63 +127,87 @@ public class StyledShape implements Cloneable, Transformable {
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
 
         if (hasFill()) {
-            if (shapeType.isClosed()) {
-                fillPaintType.prepare(g, transformedImDrag);
-                g.fill(shape);
-                fillPaintType.finish(g);
-            } else if (!hasStroke()) {
-                // Special case: an open shape can't be filled,
-                // it can be only stroked, even if stroke is disabled.
-                // So use the default stroke and the fill paint.
-                g.setStroke(STROKE_FOR_OPEN_SHAPES);
-                fillPaintType.prepare(g, transformedImDrag);
-                g.draw(shape);
-                fillPaintType.finish(g);
-            }
+            paintFill(g);
         }
 
         if (hasStroke()) {
-            g.setStroke(stroke);
-            strokePaintType.prepare(g, transformedImDrag);
-            g.draw(shape);
-            strokePaintType.finish(g);
+            paintStroke(g);
         }
 
         if (effects != null) {
-            if (hasStroke()) {
-                if (shapeType.isClosed()) {
-                    // add the outline area of the stroke to the shape area
-                    // to get the shape for the effects, but these Area operations
-                    // could be too slow for the WobbleStroke
-                    if (stroke instanceof WobbleStroke) {
-                        // give up, just draw something
-                        effects.drawOn(g, shape);
-                    } else {
-                        // do the correct thing
-                        Shape strokeOutline = stroke.createStrokedShape(shape);
-                        Area strokeOutlineArea = new Area(strokeOutline);
-                        Area combined = new Area(shape);
-                        combined.add(strokeOutlineArea);
-                        effects.drawOn(g, combined);
-                    }
-                } else {
-                    if (stroke instanceof WobbleStroke) {
-                        // be careful and consistent with the behavior above
-                        effects.drawOn(g, shape);
-                    } else {
-                        // Open shape with stroke: apply the effects on the stroke outline
-                        Shape outline = stroke.createStrokedShape(shape);
-                        effects.drawOn(g, outline);
-                    }
-                }
-            } else { // no stroke
-                if (shapeType.isClosed()) {
-                    effects.drawOn(g, shape); // simplest case
-                } else {
-                    Shape defaultOutline = STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
-                    effects.drawOn(g, defaultOutline);
-                }
+            paintEffects(g);
+        }
+    }
+
+    private void paintFill(Graphics2D g) {
+        if (shapeType.isClosed()) {
+            fillPaintType.prepare(g, transformedImDrag);
+            g.fill(shape);
+            fillPaintType.finish(g);
+        } else if (!hasStroke()) {
+            // Special case: an open shape can't be filled,
+            // it can be only stroked, even if stroke is disabled.
+            // So use the default stroke and the fill paint.
+            g.setStroke(STROKE_FOR_OPEN_SHAPES);
+            fillPaintType.prepare(g, transformedImDrag);
+            g.draw(shape);
+            fillPaintType.finish(g);
+        }
+    }
+
+    private void paintStroke(Graphics2D g) {
+        g.setStroke(stroke);
+        strokePaintType.prepare(g, transformedImDrag);
+        g.draw(shape);
+        strokePaintType.finish(g);
+    }
+
+    private void paintEffects(Graphics2D g) {
+        if (hasStroke()) {
+            if (shapeType.isClosed()) {
+                paintEffectsForClosedShapeWithStroke(g);
+            } else {
+                paintEffectsForOpenShapeWithStroke(g);
             }
+        } else {
+            paintEffectsNoStroke(g);
+        }
+    }
+
+    private void paintEffectsForClosedShapeWithStroke(Graphics2D g) {
+        // add the outline area of the stroke to the shape area
+        // to get the shape for the effects, but these Area operations
+        // could be too slow for the WobbleStroke
+        if (stroke instanceof WobbleStroke) {
+            // give up, just draw something
+            effects.drawOn(g, shape);
+        } else {
+            // do the correct thing
+            Shape strokeOutline = stroke.createStrokedShape(shape);
+            Area strokeOutlineArea = new Area(strokeOutline);
+            Area combined = new Area(shape);
+            combined.add(strokeOutlineArea);
+            effects.drawOn(g, combined);
+        }
+    }
+
+    private void paintEffectsForOpenShapeWithStroke(Graphics2D g) {
+        if (stroke instanceof WobbleStroke) {
+            // be careful and consistent with the behavior above
+            effects.drawOn(g, shape);
+        } else {
+            // Open shape with stroke: apply the effects on the stroke outline
+            Shape outline = stroke.createStrokedShape(shape);
+            effects.drawOn(g, outline);
+        }
+    }
+
+    private void paintEffectsNoStroke(Graphics2D g) {
+        if (shapeType.isClosed()) {
+            effects.drawOn(g, shape); // simplest case
+        } else {
+            Shape defaultOutline = STROKE_FOR_OPEN_SHAPES.createStrokedShape(shape);
+            effects.drawOn(g, defaultOutline);
         }
     }
 
@@ -432,33 +456,25 @@ public class StyledShape implements Cloneable, Transformable {
     public void regenerate(TransformBox box, ShapesTool tool, String editName) {
         StyledShape backup = clone();
 
+        // calculate the new transformed shape
         switch (editName) {
-            case ShapesTool.CHANGE_SHAPE_TYPE:
+            case ShapesTool.CHANGE_SHAPE_TYPE -> {
                 changeTypeInBox(tool);
-
-                // calculate the new transformed shape
                 box.applyTransform();
-                break;
-            case ShapesTool.CHANGE_SHAPE_FILL:
-                setFillPaintType(tool.getSelectedFillPaint());
-                break;
-            case ShapesTool.CHANGE_SHAPE_STROKE:
-                setStrokePaintType(tool.getSelectedStrokePaint());
-                break;
-            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS:
+            }
+            case ShapesTool.CHANGE_SHAPE_FILL -> setFillPaintType(tool.getSelectedFillPaint());
+            case ShapesTool.CHANGE_SHAPE_STROKE -> setStrokePaintType(tool.getSelectedStrokePaint());
+            case ShapesTool.CHANGE_SHAPE_STROKE_SETTINGS -> {
                 setStroke(tool.getStroke());
                 strokeSettings = tool.getStrokeSettings();
                 tool.invalidateStroke();
-                break;
-            case ShapesTool.CHANGE_SHAPE_EFFECTS:
-                setEffects(tool.getEffects());
-                break;
-            case ShapesTool.CHANGE_SHAPE_COLORS:
+            }
+            case ShapesTool.CHANGE_SHAPE_EFFECTS -> setEffects(tool.getEffects());
+            case ShapesTool.CHANGE_SHAPE_COLORS -> {
                 setFgColor(getFGColor());
                 setBgColor(getBGColor());
-                break;
-            default:
-                throw new IllegalStateException("Unexpected edit: " + editName);
+            }
+            default -> throw new IllegalStateException("Unexpected edit: " + editName);
         }
 
         var comp = OpenImages.getActiveComp();

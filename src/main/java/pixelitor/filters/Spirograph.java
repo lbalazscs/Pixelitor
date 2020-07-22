@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
@@ -37,24 +37,24 @@ public class Spirograph extends ShapeFilter {
 
     private final RangeParam time = new RangeParam("Time", 0, 185, 800);
     private final GroupedRangeParam radii = new GroupedRangeParam("Radii",
-            new RangeParam[]{
-                    new RangeParam("r", 1, 224, 500),
-                    new RangeParam("R", 1, 114, 500),
-                    new RangeParam("d", 0, 189, 500)
-            }, false);
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
-            new Value("Hypotrochoid", TYPE_HYPOTROCHOID),
-            new Value("Epitrochoid", TYPE_EPITROCHOID),
+        new RangeParam[]{
+            new RangeParam("r", 1, 224, 500),
+            new RangeParam("R", 1, 114, 500),
+            new RangeParam("d", 0, 189, 500)
+        }, false);
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Hypotrochoid", TYPE_HYPOTROCHOID),
+        new Item("Epitrochoid", TYPE_EPITROCHOID),
     }, IGNORE_RANDOMIZE);
 
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 701);
 
     public Spirograph() {
         addParamsToFront(
-                time,
-                radii.notLinkable().withAdjustedRange(0.5),
-                type,
-                zoom
+            time,
+            radii.notLinkable().withAdjustedRange(0.5),
+            type,
+            zoom
         );
     }
 

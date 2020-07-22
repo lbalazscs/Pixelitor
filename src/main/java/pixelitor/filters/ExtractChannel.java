@@ -19,7 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.FastLookupOp;
 import pixelitor.filters.lookup.LookupFactory;
@@ -42,13 +42,13 @@ public class ExtractChannel extends ParametrizedFilter {
     private static final int BLUE_CHANNEL = 5;
     private static final int REMOVE_BLUE_CHANNEL = 6;
 
-    private final IntChoiceParam channelParam = new IntChoiceParam("Channel", new Value[]{
-            new Value("Red", RED_CHANNEL),
-            new Value("Remove Red", REMOVE_RED_CHANNEL),
-            new Value("Green", GREEN_CHANNEL),
-            new Value("Remove Green", REMOVE_GREEN_CHANNEL),
-            new Value("Blue", BLUE_CHANNEL),
-            new Value("Remove Blue", REMOVE_BLUE_CHANNEL),
+    private final IntChoiceParam channelParam = new IntChoiceParam("Channel", new Item[]{
+        new Item("Red", RED_CHANNEL),
+        new Item("Remove Red", REMOVE_RED_CHANNEL),
+        new Item("Green", GREEN_CHANNEL),
+        new Item("Remove Green", REMOVE_GREEN_CHANNEL),
+        new Item("Blue", BLUE_CHANNEL),
+        new Item("Remove Blue", REMOVE_BLUE_CHANNEL),
     });
     private final BooleanParam bwParam = new BooleanParam("Black and White", false);
 
@@ -56,8 +56,8 @@ public class ExtractChannel extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                channelParam,
-                bwParam);
+            channelParam,
+            bwParam);
     }
 
     @Override

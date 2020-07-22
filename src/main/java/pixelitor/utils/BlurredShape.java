@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.tools.shapes.ShapeType;
 
 import java.awt.geom.Point2D;
@@ -42,12 +42,12 @@ public interface BlurredShape {
     int TYPE_DIAMOND = 3;
 
     static IntChoiceParam getChoices() {
-        return new IntChoiceParam("Shape", new Value[]{
-                new Value("Ellipse", TYPE_ELLIPSE),
+        return new IntChoiceParam("Shape", new Item[]{
+            new Item("Ellipse", TYPE_ELLIPSE),
 //                new Value("Rectangle", TYPE_RECTANGLE),
-                new Value("Rectangle", TYPE_RECTANGLE2),
-                new Value("Heart", TYPE_HEART),
-                new Value("Diamond", TYPE_DIAMOND),
+            new Item("Rectangle", TYPE_RECTANGLE2),
+            new Item("Heart", TYPE_HEART),
+            new Item("Diamond", TYPE_DIAMOND),
         });
     }
 

@@ -65,8 +65,7 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForNewComp(View view) {
-        Guides copy = new Guides();
-        copy.name = name + " copy";
+        Guides copy = createCopyGuides();
 
         copy.horizontals.addAll(horizontals);
         copy.verticals.addAll(verticals);
@@ -77,8 +76,7 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForFlip(Flip.Direction direction, View view) {
-        Guides copy = new Guides();
-        copy.name = name + " copy";
+        Guides copy = createCopyGuides();
 
         if (direction == HORIZONTAL) {
             copy.horizontals.addAll(horizontals);
@@ -100,8 +98,7 @@ public class Guides implements Serializable {
     }
 
     public Guides copyForRotate(Rotate.SpecialAngle angle, View view) {
-        Guides copy = new Guides();
-        copy.name = name + " copy";
+        Guides copy = createCopyGuides();
 
         if (angle == ANGLE_90) {
             for (Double horizontal : horizontals) {
@@ -129,10 +126,16 @@ public class Guides implements Serializable {
         return copy;
     }
 
+    private Guides createCopyGuides() {
+        Guides copy = new Guides();
+        copy.setName(name + " copy");
+        return copy;
+    }
+
     public Guides copyForEnlargedCanvas(int north, int east, int south, int west, View view, Canvas oldCanvas) {
         Guides copy = new Guides();
         copy.setName(format("enlarged : north = %d, east = %d, south = %d, west = %d%n",
-                north, east, south, west));
+            north, east, south, west));
 
         copyVerticals(copy, east, west, oldCanvas);
         copyHorizontals(copy, north, south, oldCanvas);

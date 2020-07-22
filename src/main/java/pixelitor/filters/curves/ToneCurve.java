@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 /**
  * Represents single tone curve
@@ -54,14 +55,14 @@ public class ToneCurve {
         this.curveType = curveType;
     }
 
-    public void setSize(int width, int height){
+    public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
     public void reset() {
-        curve.x = new float[] {0, 1};
-        curve.y = new float[] {0, 1};
+        curve.x = new float[]{0, 1};
+        curve.y = new float[]{0, 1};
         isDirty = true;
     }
 
@@ -72,9 +73,9 @@ public class ToneCurve {
         }
     }
 
-    private static boolean isClose(Point.Float p, Point.Float q) {
-        if(Math.abs(p.x - q.x) < NEARBY_RADIUS) {
-            if(Math.abs(p.y - q.y) < NEARBY_RADIUS) {
+    private static boolean isClose(Point2D p, Point2D q) {
+        if (Math.abs(p.getX() - q.getX()) < NEARBY_RADIUS) {
+            if (Math.abs(p.getY() - q.getY()) < NEARBY_RADIUS) {
                 return true;
             }
         }
@@ -94,14 +95,14 @@ public class ToneCurve {
         int index = curve.findKnotPos(p.x);
 
         // Can't add knot at first/last position
-        if (index <=0 || index > lastIndex) {
+        if (index <= 0 || index > lastIndex) {
             return -1;
         }
 
         // if point is too close to next/prev knot -> replace the nearest
         // this protect against placing two knots too close to each other
         if (allowReplace) {
-            int prevIndex = index-1;
+            int prevIndex = index - 1;
             if (isClose(p, new Point.Float(curve.x[prevIndex], curve.y[prevIndex]))) {
                 setKnotPosition(prevIndex, p);
                 return prevIndex;
@@ -121,7 +122,7 @@ public class ToneCurve {
     }
 
     public void deleteKnot(int index) {
-        if (index < 0 || index > curve.x.length -1) {
+        if (index < 0 || index > curve.x.length - 1) {
             return;
         }
 
@@ -135,21 +136,22 @@ public class ToneCurve {
 
     /**
      * Set new knot location
+     *
      * @param index point index
-     * @param p normalized point data
+     * @param p     normalized point data
      */
-    public void setKnotPosition(int index, Point.Float p){
+    public void setKnotPosition(int index, Point.Float p) {
         int lastIndex = curve.x.length - 1;
 
-        if (index <0 || index > lastIndex) {
+        if (index < 0 || index > lastIndex) {
             return;
         }
 
         // check prev/next index - knots can't change they index
-        if (index > 0 && p.x < curve.x[index-1]) {
-            p.x = curve.x[index-1];
-        } else if (index < lastIndex && p.x > curve.x[index+1]) {
-            p.x = curve.x[index+1];
+        if (index > 0 && p.x < curve.x[index - 1]) {
+            p.x = curve.x[index - 1];
+        } else if (index < lastIndex && p.x > curve.x[index + 1]) {
+            p.x = curve.x[index + 1];
         }
 
         curve.x[index] = ImageMath.clamp(p.x, 0, 1);
@@ -159,15 +161,16 @@ public class ToneCurve {
 
     /**
      * Check if point p is out of index range (check prev/next knot)
+     *
      * @param index knot index
-     * @param p normalized point data
+     * @param p     normalized point data
      */
     public boolean isDraggedOff(int index, Point.Float p) {
-        if (index <=0 || index >= curve.x.length - 1) {
+        if (index <= 0 || index >= curve.x.length - 1) {
             return false;
         }
 
-        if (p.x > curve.x[index+1] + 0.02F || p.x < curve.x[index-1] - 0.02F) {
+        if (p.x > curve.x[index + 1] + 0.02F || p.x < curve.x[index - 1] - 0.02F) {
             return true;
         }
 
@@ -176,15 +179,16 @@ public class ToneCurve {
 
     /**
      * Check if point p is allowed to put at given index
+     *
      * @param index knot index
-     * @param p normalized point data
+     * @param p     normalized point data
      */
     public boolean isDraggedIn(int index, Point.Float p) {
-        if (index <=0 || index > curve.x.length - 1) {
+        if (index <= 0 || index > curve.x.length - 1) {
             return false;
         }
 
-        if (p.x < curve.x[index] && p.x > curve.x[index-1]) {
+        if (p.x < curve.x[index] && p.x > curve.x[index - 1]) {
             return true;
         }
 
@@ -263,8 +267,8 @@ public class ToneCurve {
         int knotSize = 2 * KNOT_RADIUS_PX;
         for (int i = 0; i < curve.x.length; i++) {
             gr.drawOval(
-                (int)(curve.x[i] * width) - KNOT_RADIUS_PX,
-                (int)(curve.y[i] * height) - KNOT_RADIUS_PX,
+                (int) (curve.x[i] * width) - KNOT_RADIUS_PX,
+                (int) (curve.y[i] * height) - KNOT_RADIUS_PX,
                 knotSize,
                 knotSize
             );

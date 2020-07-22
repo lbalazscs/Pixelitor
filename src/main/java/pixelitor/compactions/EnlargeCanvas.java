@@ -98,7 +98,7 @@ public class EnlargeCanvas extends SimpleCompAction {
     private static void showInDialog() {
         var p = new EnlargeCanvasPanel();
         new DialogBuilder()
-                .title("Enlarge Canvas")
+            .title(NAME)
                 .content(p)
                 .okAction(() -> {
                     var comp = OpenImages.getActiveComp();

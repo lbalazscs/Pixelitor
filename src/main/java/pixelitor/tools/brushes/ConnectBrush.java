@@ -40,7 +40,6 @@ public class ConnectBrush extends AbstractBrush {
     public ConnectBrush(ConnectBrushSettings settings, double radius) {
         super(radius);
         this.settings = settings;
-        settings.setBrush(this);
     }
 
     @Override

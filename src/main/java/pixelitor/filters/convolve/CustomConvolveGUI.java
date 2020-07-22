@@ -307,14 +307,12 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         }
         enableNormalizeButton(sum);
 
-        if (e.getSource() == normalizeButton) {
-            if (sum != 0.0f) {
-                for (int i = 0; i < values.length; i++) {
-                    values[i] /= sum;
-                }
-
-                setValues(values);
+        if (e.getSource() == normalizeButton && sum != 0.0f) {
+            for (int i = 0; i < values.length; i++) {
+                values[i] /= sum;
             }
+
+            setValues(values);
         }
 
         ((Convolve) filter).setKernelMatrix(values);

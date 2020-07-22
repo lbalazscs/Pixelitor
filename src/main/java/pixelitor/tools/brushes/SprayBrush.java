@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.Composition;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.gui.View;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.PPoint;
@@ -27,11 +27,7 @@ import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 
 import static pixelitor.utils.Rnd.nextGaussian;
 
@@ -122,25 +118,18 @@ public class SprayBrush extends AbstractBrush {
             updateTheMaxRadius(dx, dy);
 
             if (randomOpacity) {
-                Composite composite;
-                float strength = rnd.nextFloat();
-                if (isEraser) {
-                    composite = AlphaComposite.DstOut.derive(strength);
-                } else {
-                    composite = AlphaComposite.SrcOver.derive(strength);
-                }
-                targetG.setComposite(composite);
+                setRandomOpacity();
             }
 
             if (!isEraser && colorRandomness > 0.0f) {
                 Color randomColor = Rnd.createRandomColor();
-                Color color = ColorUtils.interpolateInRGB(baseColor, randomColor, colorRandomness);
+                Color color = Colors.interpolateInRGB(baseColor, randomColor, colorRandomness);
                 targetG.setColor(color);
             }
 
             double shapeRadius = nextShapeRadius();
             Shape shape = shapeType.createShape(
-                    x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
+                x - shapeRadius, y - shapeRadius, 2 * shapeRadius);
             targetG.fill(shape);
 
             if (x > maxX) {
@@ -157,12 +146,23 @@ public class SprayBrush extends AbstractBrush {
             }
         }
         PRectangle area = PRectangle.fromIm(
-                minX - maxShapeRadius,
-                minY - maxShapeRadius,
-                maxX - minX + 2 * maxShapeRadius + 2,
+            minX - maxShapeRadius,
+            minY - maxShapeRadius,
+            maxX - minX + 2 * maxShapeRadius + 2,
             maxY - minY + 2 * maxShapeRadius + 2, view);
 
         comp.repaintRegion(area);
+    }
+
+    private void setRandomOpacity() {
+        Composite composite;
+        float strength = rnd.nextFloat();
+        if (isEraser) {
+            composite = AlphaComposite.DstOut.derive(strength);
+        } else {
+            composite = AlphaComposite.SrcOver.derive(strength);
+        }
+        targetG.setComposite(composite);
     }
 
     private void updateTheMaxRadius(double dx, double dy) {
@@ -206,15 +206,17 @@ public class SprayBrush extends AbstractBrush {
         super.finishBrushStroke();
         assert timer != null;
 
-        if (timer != null) {
-            timer.stop();
-            timer = null;
-        }
+        stopTimer();
     }
 
     @Override
     public void dispose() {
+        assert timer == null;
         // should be stopped already, but to be sure
+        stopTimer();
+    }
+
+    private void stopTimer() {
         if (timer != null) {
             timer.stop();
             timer = null;

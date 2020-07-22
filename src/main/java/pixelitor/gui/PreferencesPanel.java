@@ -46,7 +46,7 @@ public class PreferencesPanel extends JPanel {
     private static final Border EMPTY_BORDER =
         BorderFactory.createEmptyBorder(0, 10, 5, 0);
     private JTextField undoLevelsTF;
-    private JComboBox<IntChoiceParam.Value> thumbSizeCB;
+    private JComboBox<IntChoiceParam.Item> thumbSizeCB;
 
     private PreferencesPanel() {
         var tabbedPane = new JTabbedPane(LEFT);
@@ -112,7 +112,7 @@ public class PreferencesPanel extends JPanel {
         });
     }
 
-    private void addUIChooser(GridBagHelper gbh) {
+    private static void addUIChooser(GridBagHelper gbh) {
         JComboBox<ImageArea.Mode> uiChooser = new JComboBox<>(ImageArea.Mode.values());
         uiChooser.setSelectedItem(ImageArea.getMode());
         uiChooser.setName("uiChooser");
@@ -133,11 +133,11 @@ public class PreferencesPanel extends JPanel {
     }
 
     private void addThumbSizeChooser(GridBagHelper gbh) {
-        IntChoiceParam.Value[] thumbSizes = {
-            new IntChoiceParam.Value("24x24 pixels", 24),
-            new IntChoiceParam.Value("48x48 pixels", 48),
-            new IntChoiceParam.Value("72x72 pixels", 72),
-            new IntChoiceParam.Value("96x96 pixels", 96),
+        IntChoiceParam.Item[] thumbSizes = {
+            new IntChoiceParam.Item("24x24 pixels", 24),
+            new IntChoiceParam.Item("48x48 pixels", 48),
+            new IntChoiceParam.Item("72x72 pixels", 72),
+            new IntChoiceParam.Item("96x96 pixels", 96),
         };
         thumbSizeCB = new JComboBox<>(thumbSizes);
         thumbSizeCB.setName("thumbSizeCB");
@@ -232,7 +232,7 @@ public class PreferencesPanel extends JPanel {
     }
 
     private void updateThumbSize() {
-        int newSize = ((IntChoiceParam.Value) thumbSizeCB.getSelectedItem()).getValue();
+        int newSize = ((IntChoiceParam.Item) thumbSizeCB.getSelectedItem()).getValue();
         LayerButtonLayout.setThumbSize(newSize);
     }
 

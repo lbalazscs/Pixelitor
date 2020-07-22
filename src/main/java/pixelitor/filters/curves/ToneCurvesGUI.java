@@ -19,6 +19,7 @@ package pixelitor.filters.curves;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Icons;
 
@@ -47,29 +48,8 @@ public class ToneCurvesGUI extends FilterGUI {
         JPanel chartPanel = new JPanel(new FlowLayout(LEFT));
         chartPanel.add(curvesPanel);
 
-        var curveTypeCB = new JComboBox<ToneCurveType>(ToneCurveType.values());
-        curveTypeCB.setMaximumRowCount(curveTypeCB.getItemCount());
-        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
-        curveTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
-                (ToneCurveType) curveTypeCB.getSelectedItem()));
-
-        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
-        resetChannel.addActionListener(e -> curvesPanel.resetActiveCurve());
-
-        JButton resetAllBtn = new JButton("Reset All", Icons.getWestArrowIcon());
-        resetAllBtn.addActionListener(e -> curvesPanel.reset());
-
-        JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
-        channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(curveTypeCB);
-        channelPanel.add(resetChannel);
-
-        JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
-        JCheckBox showOriginalCB = new JCheckBox("Show Original");
-        showOriginalCB.setName("show original");
-        showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
-        buttonsPanel.add(showOriginalCB);
-        buttonsPanel.add(resetAllBtn);
+        JPanel channelPanel = createChannelPanel(curvesPanel);
+        JPanel buttonsPanel = createButtonsPanel(dr, curvesPanel);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, PAGE_AXIS));
@@ -78,5 +58,35 @@ public class ToneCurvesGUI extends FilterGUI {
         mainPanel.add(buttonsPanel);
 
         add(mainPanel);
+    }
+
+    private static JPanel createChannelPanel(ToneCurvesPanel curvesPanel) {
+        var curveTypeCB = new JComboBox<>(ToneCurveType.values());
+        curveTypeCB.setMaximumRowCount(curveTypeCB.getItemCount());
+        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
+        curveTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
+            (ToneCurveType) curveTypeCB.getSelectedItem()));
+
+        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
+        resetChannel.addActionListener(e -> curvesPanel.resetActiveCurve());
+
+        JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
+        channelPanel.add(new JLabel("Channel:"));
+        channelPanel.add(curveTypeCB);
+        channelPanel.add(resetChannel);
+        return channelPanel;
+    }
+
+    private static JPanel createButtonsPanel(Drawable dr, ToneCurvesPanel curvesPanel) {
+        JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
+
+        JCheckBox showOriginalCB = new JCheckBox("Show Original");
+        showOriginalCB.setName("show original");
+        showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
+        buttonsPanel.add(showOriginalCB);
+
+        buttonsPanel.add(GUIUtils.createResetAllButton(
+            e -> curvesPanel.reset()));
+        return buttonsPanel;
     }
 }

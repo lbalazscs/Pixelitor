@@ -18,7 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -28,19 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 
-import static java.awt.AlphaComposite.CLEAR;
-import static java.awt.AlphaComposite.DST;
-import static java.awt.AlphaComposite.DST_ATOP;
-import static java.awt.AlphaComposite.DST_IN;
-import static java.awt.AlphaComposite.DST_OUT;
-import static java.awt.AlphaComposite.DST_OVER;
-import static java.awt.AlphaComposite.SRC;
-import static java.awt.AlphaComposite.SRC_ATOP;
-import static java.awt.AlphaComposite.SRC_IN;
-import static java.awt.AlphaComposite.SRC_OUT;
-import static java.awt.AlphaComposite.SRC_OVER;
-import static java.awt.AlphaComposite.XOR;
-import static java.awt.AlphaComposite.getInstance;
+import static java.awt.AlphaComposite.*;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
@@ -53,24 +41,24 @@ public class PorterDuff extends ParametrizedFilter {
     private static final int MODE_SHAPE = 1;
     private static final int MODE_IMAGE = 2;
 
-    private final IntChoiceParam rule = new IntChoiceParam("Rule", new Value[]{
-            new Value("SRC_OVER", SRC_OVER),
-            new Value("SRC", SRC),
-            new Value("DST_OVER", DST_OVER),
-            new Value("DST", DST),
-            new Value("SRC_IN", SRC_IN),
-            new Value("DST_IN", DST_IN),
-            new Value("SRC_ATOP", SRC_ATOP),
-            new Value("DST_ATOP", DST_ATOP),
-            new Value("SRC_OUT", SRC_OUT),
-            new Value("DST_OUT", DST_OUT),
-            new Value("CLEAR", CLEAR),
-            new Value("XOR", XOR),
+    private final IntChoiceParam rule = new IntChoiceParam("Rule", new Item[]{
+        new Item("SRC_OVER", SRC_OVER),
+        new Item("SRC", SRC),
+        new Item("DST_OVER", DST_OVER),
+        new Item("DST", DST),
+        new Item("SRC_IN", SRC_IN),
+        new Item("DST_IN", DST_IN),
+        new Item("SRC_ATOP", SRC_ATOP),
+        new Item("DST_ATOP", DST_ATOP),
+        new Item("SRC_OUT", SRC_OUT),
+        new Item("DST_OUT", DST_OUT),
+        new Item("CLEAR", CLEAR),
+        new Item("XOR", XOR),
     });
 
-    private final IntChoiceParam mode = new IntChoiceParam("Mode", new Value[]{
-            new Value("Shape", MODE_SHAPE),
-            new Value("Image", MODE_IMAGE),
+    private final IntChoiceParam mode = new IntChoiceParam("Mode", new Item[]{
+        new Item("Shape", MODE_SHAPE),
+        new Item("Image", MODE_IMAGE),
     });
 
     private final RangeParam alpha = new RangeParam("Constant Alpha (%)", 0, 100, 100);

@@ -37,10 +37,8 @@ public class ValidationResult {
         this.valid = valid;
         this.errorMsg = errorMsg;
 
-        if (!valid) {
-            if (errorMsg == null) {
-                throw new IllegalStateException("missing error message");
-            }
+        if (!valid && errorMsg == null) {
+            throw new IllegalStateException("missing error message");
         }
     }
 

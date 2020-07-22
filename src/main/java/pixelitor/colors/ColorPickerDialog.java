@@ -38,12 +38,12 @@ public class ColorPickerDialog {
     }
 
     private void showColorDialog() {
-        ColorUtils.selectColorWithDialog(colorSwatch, "Select Color",
-                colorSwatch.getForeground(), false,
-                color -> {
-                    colorSwatch.setForeground(color);
-                    action.accept(color);
-                }
+        Colors.selectColorWithDialog(colorSwatch, "Select Color",
+            colorSwatch.getForeground(), false,
+            color -> {
+                colorSwatch.setForeground(color);
+                action.accept(color);
+            }
         );
     }
 }

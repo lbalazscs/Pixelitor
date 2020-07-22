@@ -537,15 +537,16 @@ public class ImageLayerTest {
         ImageLayer duplicate = layer.duplicate(false);
 
         assertThat(duplicate)
-                .blendingModeIs(layer.getBlendingMode())
-                .opacityIs(layer.getOpacity())
-                .imageBoundsIsEqualTo(layer.getImageBounds());
+            .blendingModeIs(layer.getBlendingMode())
+            .opacityIs(layer.getOpacity())
+            .imageBoundsIsEqualTo(layer.getImageBounds());
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();
         assertNotSame(duplicateImage, image);
-        assertThat(image).widthIs(duplicateImage.getWidth());
-        assertThat(image).heightIs(duplicateImage.getHeight());
+        assertThat(image)
+            .widthIs(duplicateImage.getWidth())
+            .heightIs(duplicateImage.getHeight());
 
         iconUpdates.check(0, 0);
     }

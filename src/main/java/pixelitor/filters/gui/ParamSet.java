@@ -116,19 +116,19 @@ public class ParamSet implements Iterable<FilterParam> {
 
     private void addRandomizeAction() {
         var randomizeAction = new FilterButtonModel("Randomize Settings",
-                this::randomize,
-                Icons.getDiceIcon(),
-                "Randomize the settings for this filter.",
-                "randomize");
+            this::randomize,
+            Icons.getDiceIcon(),
+            "Randomize the settings for this filter.",
+            "randomize");
         actionList.add(randomizeAction);
     }
 
     private void addResetAllAction() {
         var resetAllAction = new FilterButtonModel("Reset All",
-                this::reset,
-                Icons.getWestArrowIcon(),
-                "Reset all settings to their default values.",
-                "resetAll");
+            this::reset,
+            Icons.getWestArrowIcon(),
+            Resettable.RESET_ALL_TOOLTIP,
+            "resetAll");
         actionList.add(resetAllAction);
     }
 
@@ -191,11 +191,11 @@ public class ParamSet implements Iterable<FilterParam> {
     public void setState(CompositeState newStateSet) {
         Iterator<ParamState<?>> newStates = newStateSet.iterator();
         paramList.stream()
-                .filter(FilterParam::canBeAnimated)
-                .forEach(param -> {
-                    ParamState<?> newState = newStates.next();
-                    param.setState(newState);
-                });
+            .filter(FilterParam::canBeAnimated)
+            .forEach(param -> {
+                ParamState<?> newState = newStates.next();
+                param.setState(newState);
+            });
     }
 
     /**
@@ -234,11 +234,6 @@ public class ParamSet implements Iterable<FilterParam> {
 
     @Override
     public String toString() {
-        String s = "ParamSet[";
-        for (FilterParam param : paramList) {
-            s += ("\n    " + param);
-        }
-        s += "\n]";
-        return s;
+        return "ParamSet {" + paramList.toString() + "}";
     }
 }

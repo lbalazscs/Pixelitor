@@ -17,22 +17,13 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ElevationAngleParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RadialGradientPaint;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
@@ -57,16 +48,16 @@ public class RandomSpheres extends ParametrizedFilter {
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 221);
 
     private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source",
-            new Value[]{
-                    new Value("Sample Image", COLORS_SAMPLE_IMAGE),
-                    new Value("Use FG, BG Colors", COLORS_FG_BG),
-            });
+        new Item[]{
+            new Item("Sample Image", COLORS_SAMPLE_IMAGE),
+            new Item("Use FG, BG Colors", COLORS_FG_BG),
+        });
     private final BooleanParam addHighLightsCB = new BooleanParam(
-            "Add Highlights", true);
+        "Add Highlights", true);
     private final AngleParam highlightAngleSelector = new AngleParam(
-            "Light Direction (Azimuth) - Degrees", 0);
+        "Light Direction (Azimuth) - Degrees", 0);
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
-            "Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
+        "Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
 
     private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
 

@@ -22,6 +22,7 @@ import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.colors.Colors;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
@@ -181,8 +182,7 @@ public class TextSettings implements Serializable {
                                              int width, int height) {
         BufferedImage bumpImage = new BufferedImage(width, height, TYPE_INT_RGB);
         Graphics2D g = bumpImage.createGraphics();
-        g.setColor(BLACK);
-        g.fillRect(0, 0, width, height);
+        Colors.fillWith(BLACK, g, width, height);
         textPainter.setFillPaint(WHITE);
         textPainter.paint(g, this, width, height);
         g.dispose();

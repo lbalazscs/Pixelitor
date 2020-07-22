@@ -17,13 +17,9 @@
 
 package pixelitor.filters.curves;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import pixelitor.colors.Colors;
+
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.EnumMap;
@@ -105,8 +101,7 @@ public class ToneCurves {
         gr.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // clear background
-        gr.setColor(Color.WHITE);
-        gr.fillRect(0, 0, width, height);
+        Colors.fillWith(Color.WHITE, gr, width, height);
 
         // apply CURVE_PADDING, and prepare for y-axis up drawing
         var transform = gr.getTransform();

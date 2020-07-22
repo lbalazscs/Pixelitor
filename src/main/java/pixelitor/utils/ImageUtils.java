@@ -24,6 +24,7 @@ import com.jhlabs.image.EmbossFilter;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
+import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.selection.Selection;
@@ -51,8 +52,8 @@ import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
-import static pixelitor.colors.ColorUtils.rgbIntToString;
-import static pixelitor.colors.ColorUtils.toPackedInt;
+import static pixelitor.colors.Colors.packedIntToString;
+import static pixelitor.colors.Colors.toPackedInt;
 import static pixelitor.utils.Threads.onPool;
 
 /**
@@ -474,8 +475,7 @@ public class ImageUtils {
 
         Graphics2D g = dest.createGraphics();
         // this hideous color will be transparent
-        g.setColor(new Color(231, 20, 189));
-        g.fillRect(0, 0, src.getWidth(), src.getHeight());
+        Colors.fillWith(new Color(231, 20, 189), g, src.getWidth(), src.getHeight());
         g.dispose();
 
         dest = makeIndexedTransparent(dest, 0, 0);
@@ -773,8 +773,7 @@ public class ImageUtils {
 
         Graphics2D g = brushImage.createGraphics();
 
-        g.setColor(WHITE);
-        g.fillRect(0, 0, size, size);
+        Colors.fillWith(WHITE, g, size, size);
 
         g.setColor(BLACK);
 
@@ -1006,7 +1005,7 @@ public class ImageUtils {
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
                     String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                        x, y, rgbIntToString(rgb1), rgbIntToString(rgb2));
+                        x, y, packedIntToString(rgb1), packedIntToString(rgb2));
                     System.out.println("ImageUtils::compareSmallImages: " + msg);
                     return false;
                 }
@@ -1023,7 +1022,7 @@ public class ImageUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);
-                String asString = rgbIntToString(rgb);
+                String asString = packedIntToString(rgb);
                 s.append(asString);
                 if (x == width - 1) {
                     s.append("\n");

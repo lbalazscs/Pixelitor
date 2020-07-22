@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Laszlo Balazs-Csiki
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,17 +45,12 @@ public class WaveType {
     }
 
     public static double wave(double in, int type) {
-        switch (type) {
-            case SINE:
-                return FastMath.sin(in);
-            case SAWTOOTH:
-                return ImageMath.sinLikeSawtooth(in);
-            case TRIANGLE:
-                return ImageMath.sinLikeTriangle(in);
-            case NOISE:
-                return Noise.sinLikeNoise1((float) in);
-            default:
-                throw new IllegalStateException("type == " + type);
-        }
+        return switch (type) {
+            case SINE -> FastMath.sin(in);
+            case SAWTOOTH -> ImageMath.sinLikeSawtooth(in);
+            case TRIANGLE -> ImageMath.sinLikeTriangle(in);
+            case NOISE -> Noise.sinLikeNoise1((float) in);
+            default -> throw new IllegalStateException("type == " + type);
+        };
     }
 }

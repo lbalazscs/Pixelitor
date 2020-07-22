@@ -111,59 +111,34 @@ public final class MiscComposite implements Composite {
     }
 
     public static Composite getInstance(int rule, float alpha) {
-        switch (rule) {
-            case BLEND:
-                return AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
-            case ADD:
-                return new AddComposite(alpha);
-            case SUBTRACT:
-                return new SubtractComposite(alpha);
-            case DIFFERENCE:
-                return new DifferenceComposite(alpha);
-            case MULTIPLY:
-                return new MultiplyComposite(alpha);
-            case DARKEN:
-                return new DarkenComposite(alpha);
-            case BURN:
-                return new BurnComposite(alpha);
-            case COLOR_BURN:
-                return new ColorBurnComposite(alpha);
-            case SCREEN:
-                return new ScreenComposite(alpha);
-            case LIGHTEN:
-                return new LightenComposite(alpha);
-            case DODGE:
-                return new DodgeComposite(alpha);
-            case COLOR_DODGE:
-                return new ColorDodgeComposite(alpha);
-            case HUE:
-                return new HueComposite(alpha);
-            case SATURATION:
-                return new SaturationComposite(alpha);
-            case VALUE:
-                return new ValueComposite(alpha);
-            case COLOR:
-                return new ColorComposite(alpha);
-            case OVERLAY:
-                return new OverlayComposite(alpha);
-            case SOFT_LIGHT:
-                return new SoftLightComposite(alpha);
-            case HARD_LIGHT:
-                return new HardLightComposite(alpha);
-            case PIN_LIGHT:
-                return new PinLightComposite(alpha);
-            case EXCLUSION:
-                return new ExclusionComposite(alpha);
-            case NEGATION:
-                return new NegationComposite(alpha);
-            case AVERAGE:
-                return new AverageComposite(alpha);
-            case STENCIL:
-                return AlphaComposite.getInstance(AlphaComposite.DST_IN, alpha);
-            case SILHOUETTE:
-                return AlphaComposite.getInstance(AlphaComposite.DST_OUT, alpha);
-        }
-        return new MiscComposite(rule, alpha);
+        return switch (rule) {
+            case BLEND -> AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+            case ADD -> new AddComposite(alpha);
+            case SUBTRACT -> new SubtractComposite(alpha);
+            case DIFFERENCE -> new DifferenceComposite(alpha);
+            case MULTIPLY -> new MultiplyComposite(alpha);
+            case DARKEN -> new DarkenComposite(alpha);
+            case BURN -> new BurnComposite(alpha);
+            case COLOR_BURN -> new ColorBurnComposite(alpha);
+            case SCREEN -> new ScreenComposite(alpha);
+            case LIGHTEN -> new LightenComposite(alpha);
+            case DODGE -> new DodgeComposite(alpha);
+            case COLOR_DODGE -> new ColorDodgeComposite(alpha);
+            case HUE -> new HueComposite(alpha);
+            case SATURATION -> new SaturationComposite(alpha);
+            case VALUE -> new ValueComposite(alpha);
+            case COLOR -> new ColorComposite(alpha);
+            case OVERLAY -> new OverlayComposite(alpha);
+            case SOFT_LIGHT -> new SoftLightComposite(alpha);
+            case HARD_LIGHT -> new HardLightComposite(alpha);
+            case PIN_LIGHT -> new PinLightComposite(alpha);
+            case EXCLUSION -> new ExclusionComposite(alpha);
+            case NEGATION -> new NegationComposite(alpha);
+            case AVERAGE -> new AverageComposite(alpha);
+            case STENCIL -> AlphaComposite.getInstance(AlphaComposite.DST_IN, alpha);
+            case SILHOUETTE -> AlphaComposite.getInstance(AlphaComposite.DST_OUT, alpha);
+            default -> new MiscComposite(rule, alpha);
+        };
     }
 
     @Override

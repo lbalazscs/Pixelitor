@@ -153,6 +153,8 @@ public class Automate {
                     OpenImages.warnAndClose(view);
                     stopProcessing = true;
                     return CompletableFuture.completedFuture(null);
+                default:
+                    throw new IllegalStateException("Unexpected value: " + answer);
             }
         } else { // the file does not exist or overwrite all was pressed previously
             view.paintImmediately();

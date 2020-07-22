@@ -37,18 +37,17 @@ import java.awt.geom.Point2D;
  * The move tool.
  */
 public class MoveTool extends DragTool {
-    private final JCheckBox autoSelectCheckBox = new JCheckBox();
-//    private final ObjectsFinder objectFinder = new ObjectsFinder();
-
     private final JComboBox<MoveMode> modeSelector = new JComboBox<>(MoveMode.values());
     private MoveMode currentMode = (MoveMode) modeSelector.getSelectedItem();
 
+    private final JCheckBox autoSelectCheckBox = new JCheckBox();
+
     public MoveTool() {
         super("Move", 'V', "move_tool_icon.png",
-                "<b>drag</b> to move the active layer, " +
-                        "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
-                        "<b>Shift-drag</b> to constrain the movement.",
-                Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
+            "<b>drag</b> to move the active layer, " +
+                "<b>Alt-drag</b> (or <b>right-mouse-drag</b>) to move a duplicate of the active layer. " +
+                "<b>Shift-drag</b> to constrain the movement.",
+            Cursors.DEFAULT, false, true, true, ClipStrategy.CANVAS);
     }
 
     @Override
@@ -59,7 +58,7 @@ public class MoveTool extends DragTool {
         settingsPanel.addSeparator();
 
         settingsPanel.addWithLabel("Auto Select Layer:",
-                autoSelectCheckBox, "autoSelectCheckBox");
+            autoSelectCheckBox, "autoSelectCheckBox");
     }
 
     @Override
@@ -67,35 +66,37 @@ public class MoveTool extends DragTool {
         super.mouseMoved(e, view);
 
         if (currentMode.movesTheLayer()) {
-            if (autoSelectCheckBox.isSelected()) {
-                Point2D p = view.componentToImageSpace(e.getPoint());
-                ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
-
-                if (objectsSelection.isEmpty()) {
-                    view.setCursor(Cursors.DEFAULT);
-                    return;
-                }
-            }
-            view.setCursor(Cursors.MOVE);
+            setMoveCursor(view, e);
         }
+    }
+
+    private void setMoveCursor(View view, MouseEvent e) {
+        if (useAutoSelect()) {
+            Point2D p = view.componentToImageSpace(e.getPoint());
+            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, view.getComp());
+
+            if (objectsSelection.isEmpty()) {
+                view.setCursor(Cursors.DEFAULT);
+                return;
+            }
+        }
+        view.setCursor(Cursors.MOVE);
     }
 
     @Override
     public void dragStarted(PMouseEvent e) {
-        if (currentMode.movesTheLayer()) {
-            if (autoSelectCheckBox.isSelected()) {
-                Point2D p = e.asImPoint2D();
-                ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
+        if (currentMode.movesTheLayer() && useAutoSelect()) {
+            Point2D p = e.asImPoint2D();
+            ObjectsSelection objectsSelection = ObjectsFinder.findLayerAtPoint(p, e.getComp());
 
-                if (objectsSelection.isEmpty()) {
-                    userDrag.cancel();
-                    return;
-                }
-                e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
+            if (objectsSelection.isEmpty()) {
+                userDrag.cancel();
+                return;
             }
+            e.getComp().setActiveLayer((Layer) objectsSelection.getObject());
         }
         e.getComp().startMovement(
-                currentMode, e.isAltDown() || e.isRight());
+            currentMode, e.isAltDown() || e.isRight());
     }
 
     @Override
@@ -130,10 +131,13 @@ public class MoveTool extends DragTool {
     public boolean arrowKeyPressed(ArrowKey key) {
         var comp = OpenImages.getActiveComp();
         if (comp != null) {
-
             move(comp, currentMode, key.getMoveX(), key.getMoveY());
             return true;
         }
         return false;
+    }
+
+    private boolean useAutoSelect() {
+        return autoSelectCheckBox.isSelected();
     }
 }

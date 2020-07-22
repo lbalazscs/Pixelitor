@@ -72,7 +72,6 @@ public class PathBuilder implements PenToolMode {
 
         BuildState state = path.getBuildState();
 
-//        assert state.isMoving() : "state = " + state;
         if (state == DRAGGING_THE_CONTROL_OF_LAST) {
             state = recoverFromUnexpectedDragState("mousePressed", e.getView());
         }

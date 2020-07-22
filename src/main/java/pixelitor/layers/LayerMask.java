@@ -18,6 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.colors.Colors;
 import pixelitor.history.History;
 import pixelitor.history.LinkLayerMaskEdit;
 import pixelitor.tools.Tools;
@@ -116,8 +117,7 @@ public class LayerMask extends ImageLayer {
 
         // when enlarging a layer mask, the new areas need to be white
         Graphics2D g = empty.createGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
+        Colors.fillWith(Color.WHITE, g, width, height);
         g.dispose();
 
         return empty;
@@ -130,7 +130,7 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public void updateIconImage() {
-        LayerUI ui = getUI();
+//        LayerUI ui = getUI();
         if (ui != null) { // can be null while deserializing
             ui.updateLayerIconImageAsync(this);
         }

@@ -21,7 +21,7 @@ import com.jhlabs.image.StampFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ColorParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 
@@ -45,11 +45,11 @@ public class JHStamp extends ParametrizedFilter {
     private final ColorParam brightColor = new ColorParam("Bright Color", WHITE, USER_ONLY_TRANSPARENCY);
 
     private final IntChoiceParam blurMethod = new IntChoiceParam("Blur Method",
-            new Value[]{
-                    // this is calculated with floats, but the animation is still not smooth
-                    new Value("Fast", StampFilter.BOX3_BLUR),
-                    new Value("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
-            }, IGNORE_RANDOMIZE);
+        new Item[]{
+            // this is calculated with floats, but the animation is still not smooth
+            new Item("Fast", StampFilter.BOX3_BLUR),
+            new Item("Gaussian (slow for large images!)", StampFilter.GAUSSIAN_BLUR)
+        }, IGNORE_RANDOMIZE);
 
     private StampFilter filter;
 

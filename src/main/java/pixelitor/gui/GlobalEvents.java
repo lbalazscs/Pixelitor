@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS;
 import static java.awt.KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS;
+import static java.awt.event.KeyEvent.*;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -75,7 +76,7 @@ public class GlobalEvents {
     static {
         Toolkit.getDefaultToolkit().addAWTEventListener(event -> {
             KeyEvent keyEvent = (KeyEvent) event;
-            if (keyEvent.getID() != KeyEvent.KEY_PRESSED) {
+            if (keyEvent.getID() != KEY_PRESSED) {
                 // we are only interested in key pressed events
                 return;
             }
@@ -119,9 +120,9 @@ public class GlobalEvents {
         KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         keyboardFocusManager.addKeyEventDispatcher(e -> {
             int id = e.getID();
-            if (id == KeyEvent.KEY_PRESSED) {
+            if (id == KEY_PRESSED) {
                 keyPressed(e);
-            } else if (id == KeyEvent.KEY_RELEASED) {
+            } else if (id == KEY_RELEASED) {
                 keyReleased(e);
             }
             return false;
@@ -147,70 +148,64 @@ public class GlobalEvents {
     private static void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.VK_SPACE:
-                // Alt-space is not treated as space-down because on Windows
-                // this opens the system menu, and we get the space-pressed
-                // event, but not the space released-event, and the app gets
-                // stuck in Hand mode, which looks like a freeze when there
-                // are no scrollbars. See issue #29
-                if (numNestedDialogs == 0 && !e.isAltDown()) {
-                    keyListener.spacePressed();
-                    spaceDown = true;
-                    e.consume();
-                }
+            case VK_SPACE -> spacePressed(e);
+            case VK_RIGHT, VK_KP_RIGHT -> arrowKeyPressed(e, ArrowKey.right(e.isShiftDown()));
+            case VK_LEFT, VK_KP_LEFT -> arrowKeyPressed(e, ArrowKey.left(e.isShiftDown()));
+            case VK_UP, VK_KP_UP -> arrowKeyPressed(e, ArrowKey.up(e.isShiftDown()));
+            case VK_DOWN, VK_KP_DOWN -> arrowKeyPressed(e, ArrowKey.down(e.isShiftDown()));
+            case VK_ESCAPE -> escPressed();
+            case VK_ALT -> altPressed();
+            default -> keyListener.otherKeyPressed(e);
+        }
+    }
 
-                break;
-            case KeyEvent.VK_RIGHT:
-            case KeyEvent.VK_KP_RIGHT:
-                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.right(e.isShiftDown()))) {
-                    e.consume();
-                }
-                break;
-            case KeyEvent.VK_LEFT:
-            case KeyEvent.VK_KP_LEFT:
-                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.left(e.isShiftDown()))) {
-                    e.consume();
-                }
-                break;
-            case KeyEvent.VK_UP:
-            case KeyEvent.VK_KP_UP:
-                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.up(e.isShiftDown()))) {
-                    e.consume();
-                }
-                break;
-            case KeyEvent.VK_DOWN:
-            case KeyEvent.VK_KP_DOWN:
-                if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(ArrowKey.down(e.isShiftDown()))) {
-                    e.consume();
-                }
-                break;
-            case KeyEvent.VK_ESCAPE:
-                if (numNestedDialogs == 0) {
-                    keyListener.escPressed();
-                }
-                break;
-            case KeyEvent.VK_ALT:
-                if (numNestedDialogs == 0) {
-                    keyListener.altPressed();
-                }
-                break;
-            default:
-                keyListener.otherKeyPressed(e);
+    private static void spacePressed(KeyEvent e) {
+        // Alt-space is not treated as space-down because on Windows
+        // this opens the system menu, and we get the space-pressed
+        // event, but not the space released-event, and the app gets
+        // stuck in Hand mode, which looks like a freeze when there
+        // are no scrollbars. See issue #29
+        if (numNestedDialogs == 0 && !e.isAltDown()) {
+            keyListener.spacePressed();
+            spaceDown = true;
+            e.consume();
+        }
+    }
+
+    private static void arrowKeyPressed(KeyEvent e, ArrowKey key) {
+        if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(key)) {
+            e.consume();
+        }
+    }
+
+    private static void escPressed() {
+        if (numNestedDialogs == 0) {
+            keyListener.escPressed();
+        }
+    }
+
+    private static void altPressed() {
+        if (numNestedDialogs == 0) {
+            keyListener.altPressed();
         }
     }
 
     private static void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
         switch (keyCode) {
-            case KeyEvent.VK_SPACE:
-                keyListener.spaceReleased();
-                spaceDown = false;
-                break;
-            case KeyEvent.VK_ALT:
-                if (numNestedDialogs == 0) {
-                    keyListener.altReleased();
-                }
-                break;
+            case VK_SPACE -> spaceReleased();
+            case VK_ALT -> altReleased();
+        }
+    }
+
+    private static void spaceReleased() {
+        keyListener.spaceReleased();
+        spaceDown = false;
+    }
+
+    private static void altReleased() {
+        if (numNestedDialogs == 0) {
+            keyListener.altReleased();
         }
     }
 

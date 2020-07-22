@@ -21,8 +21,8 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.levels.LevelsModel;
 import pixelitor.filters.levels.OneChannelLevelsModel;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
-import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -31,9 +31,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
+import static java.awt.BorderLayout.*;
 
 /**
  * The GUI for the levels filter
@@ -58,8 +56,8 @@ public class LevelsGUI extends FilterGUI implements ItemListener {
         JPanel northPanel = new JPanel();
         northPanel.setLayout(new FlowLayout());
         northPanel.add(selector);
-        JButton resetAllButton = new JButton("Reset all", Icons.getWestArrowIcon());
-        resetAllButton.addActionListener(e -> model.resetToDefaultSettings());
+        JButton resetAllButton = GUIUtils.createResetAllButton(
+            e -> model.resetToDefaultSettings());
         northPanel.add(resetAllButton);
         add(northPanel, NORTH);
 

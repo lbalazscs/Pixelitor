@@ -18,6 +18,7 @@
 package pixelitor.utils;
 
 import com.jhlabs.image.BoxBlurFilter;
+import pixelitor.colors.Colors;
 import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.ImDrag;
 
@@ -98,8 +99,7 @@ public class GenericBlurredShape implements BlurredShape {
         imgHeight = (int) (2 * outerRadiusY);
         BufferedImage img = new BufferedImage(imgWidth, imgHeight, TYPE_BYTE_GRAY);
         Graphics2D g2 = img.createGraphics();
-        g2.setColor(Color.WHITE);
-        g2.fillRect(0, 0, imgWidth, imgHeight);
+        Colors.fillWith(Color.WHITE, g2, imgWidth, imgHeight);
 
         // the shape coordinates within the blurred image
         double shapeStartX = (outerRadiusX - innerRadiusX) / 2.0;
@@ -110,8 +110,7 @@ public class GenericBlurredShape implements BlurredShape {
         Shape shape = shapeType.createShape(
                 new ImDrag(shapeStartX, shapeStartY, shapeEndX, shapeEndY), null);
         g2.setClip(shape);
-        g2.setColor(Color.BLACK);
-        g2.fillRect(0, 0, imgWidth, imgHeight);
+        Colors.fillWith(Color.BLACK, g2, imgWidth, imgHeight);
         g2.dispose();
 
         int numIterations = 3;
@@ -153,7 +152,7 @@ public class GenericBlurredShape implements BlurredShape {
 
         int xx = (int) (x - imgTx);
         int yy = (int) (y - imgTy);
-        int pixel = 0;
+        int pixel;
         try {
             pixel = pixels[xx + imgWidth * yy];
         } catch (ArrayIndexOutOfBoundsException e) {

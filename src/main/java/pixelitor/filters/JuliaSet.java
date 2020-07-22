@@ -57,8 +57,8 @@ public class JuliaSet extends ComplexFractal {
         filter.setColors(createColors(iterations));
         filter.setMaxIterations(iterations);
 
-        filter.setCy(cParam.getValueAsDPercentage(0));
-        filter.setCx(cParam.getValueAsDPercentage(1));
+        filter.setCx(cParam.getValueAsDPercentage(0));
+        filter.setCy(cParam.getValueAsDPercentage(1));
 
         return filter.filter(src, dest);
     }
@@ -80,11 +80,11 @@ class JuliaSetImpl extends ComplexFractalImpl {
         return calcIteratedColor(zx, zy, cx, cy);
     }
 
-    public void setCy(double cx) {
+    public void setCx(double cx) {
         this.cx = cx;
     }
 
-    public void setCx(double cy) {
+    public void setCy(double cy) {
         this.cy = cy;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,9 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.TransformFilter;
-import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MirrorFilter;
 
@@ -32,15 +31,15 @@ import java.awt.image.BufferedImage;
 public class Mirror extends ParametrizedFilter {
     public static final String NAME = "Mirror";
 
-    private final AngleParam angle = new AngleParam("Angle", 0);
+    //    private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Value[]{
-            new Value("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
-            new Value("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
-            new Value("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),
-            new Value("Top Over Bottom", MirrorFilter.TOP_OVER_BOTTOM),
+    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+        new Item("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
+        new Item("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
+        new Item("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),
+        new Item("Top Over Bottom", MirrorFilter.TOP_OVER_BOTTOM),
     });
 
     private MirrorFilter filter;
@@ -49,10 +48,10 @@ public class Mirror extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                type,
-                center,
+            type,
+            center,
 //                angle,
-                edgeAction
+            edgeAction
         );
     }
 

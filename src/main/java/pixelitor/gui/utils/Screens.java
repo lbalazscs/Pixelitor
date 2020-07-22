@@ -25,13 +25,9 @@ import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 
 public class Screens {
-    private static final GraphicsEnvironment localGraphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    private static final GraphicsDevice[] screens = localGraphics.getScreenDevices();
-    private static final boolean multiMonitors = screens.length > 1;
-
-//    static {
-//        System.out.println("Screens::static initializer: multiMonitors = " + multiMonitors);
-//    }
+    private static final GraphicsEnvironment LOCAL_GRAPHICS = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    private static final GraphicsDevice[] SCREEN_DEVICES = LOCAL_GRAPHICS.getScreenDevices();
+    private static final boolean MULTI_MONITORS = SCREEN_DEVICES.length > 1;
 
     public enum Align {SCREEN_CENTER, FRAME_RIGHT}
 
@@ -44,11 +40,11 @@ public class Screens {
     public static void position(Window window, Align align) {
         PixelitorWindow pw = PixelitorWindow.get();
         Rectangle screenBounds;
-        if (multiMonitors) {
+        if (MULTI_MONITORS) {
             screenBounds = pw.getGraphicsConfiguration().getBounds();
         } else {
             // takes the taskbar into account
-            screenBounds = localGraphics.getMaximumWindowBounds();
+            screenBounds = LOCAL_GRAPHICS.getMaximumWindowBounds();
         }
         Rectangle windowBounds = window.getBounds();
 
@@ -93,7 +89,7 @@ public class Screens {
             // a "Window must not be zero" if there are 3 monitors
             // on Linux with some newer Java versions, see
             // https://github.com/lbalazscs/Pixelitor/issues/15
-            bounds = localGraphics.getMaximumWindowBounds();
+            bounds = LOCAL_GRAPHICS.getMaximumWindowBounds();
         } catch (Exception e) {
             return Toolkit.getDefaultToolkit().getScreenSize();
         }
@@ -102,6 +98,6 @@ public class Screens {
     }
 
     public static boolean hasMultipleMonitors() {
-        return multiMonitors;
+        return MULTI_MONITORS;
     }
 }

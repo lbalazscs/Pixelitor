@@ -75,15 +75,13 @@ public class FilterButtonModel implements FilterSetting {
     @Override
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
-            case APP_LOGIC:
-                enabledByFilterLogic = b;
-                break;
-            case FINAL_ANIMATION_SETTING:
+            case APP_LOGIC -> enabledByFilterLogic = b;
+            case FINAL_ANIMATION_SETTING -> {
                 if (ignoreFinalAnimationSettingMode) {
                     return;
                 }
                 enabledByAnimationSetting = b;
-                break;
+            }
         }
         if (button != null) {
             button.setEnabled(shouldBeEnabled());

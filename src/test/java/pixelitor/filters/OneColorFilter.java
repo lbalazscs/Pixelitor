@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import pixelitor.colors.Colors;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -37,8 +38,7 @@ public class OneColorFilter extends Filter {
     protected BufferedImage transform(BufferedImage src, BufferedImage dest) {
         dest = ImageUtils.createImageWithSameCM(src);
         Graphics2D g = dest.createGraphics();
-        g.setColor(color);
-        g.fillRect(0, 0, src.getWidth(), src.getHeight());
+        Colors.fillWith(color, g, src.getWidth(), src.getHeight());
         g.dispose();
         return dest;
     }

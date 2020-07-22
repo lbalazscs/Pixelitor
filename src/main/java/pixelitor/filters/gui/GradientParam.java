@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import com.bric.swing.GradientSlider;
 import com.jhlabs.image.Colormap;
 import com.jhlabs.image.ImageMath;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -32,9 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.GRAY;
-import static java.awt.Color.WHITE;
+import static java.awt.Color.*;
 import static java.lang.String.format;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
@@ -44,7 +42,7 @@ import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
  * a GUI-free model, the actual value is stored inside the GradientSlider.
  */
 public class GradientParam extends AbstractFilterParam {
-    private static final String GRADIENT_SLIDER_USE_BEVEL = "GradientSlider.useBevel";
+    private static final String USE_BEVEL = "GradientSlider.useBevel";
     private GradientSlider gradientSlider;
     private GUI gui;
     private final float[] defaultThumbPositions;
@@ -55,10 +53,10 @@ public class GradientParam extends AbstractFilterParam {
 
     public GradientParam(String name, Color firstColor, Color secondColor) {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
-                new Color[]{
-                        firstColor,
-                        ColorUtils.calcRGBAverage(firstColor, secondColor),
-                        secondColor});
+            new Color[]{
+                firstColor,
+                Colors.calcRGBAverage(firstColor, secondColor),
+                secondColor});
     }
 
     public GradientParam(String name, float[] defaultThumbPositions,
@@ -85,7 +83,7 @@ public class GradientParam extends AbstractFilterParam {
     private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
         gradientSlider = new GradientSlider(HORIZONTAL, defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(this::sliderPropertyChanged);
-        gradientSlider.putClientProperty(GRADIENT_SLIDER_USE_BEVEL, "true");
+        gradientSlider.putClientProperty(USE_BEVEL, "true");
         gradientSlider.setPreferredSize(new Dimension(250, 30));
     }
 
@@ -99,20 +97,11 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private boolean shouldStartFilter(PropertyChangeEvent evt) {
-        if (evt.getPropertyName().equals(GRADIENT_SLIDER_USE_BEVEL)) {
-            return false;
-        }
-        if (evt.getPropertyName().equals("enabled")) {
-            return false;
-        }
-
         if (trigger && !gradientSlider.isValueAdjusting() && adjustmentListener != null) {
-            String propertyName = evt.getPropertyName();
-            if (!"ancestor".equals(propertyName)) {
-                if (!"selected thumb".equals(propertyName)) {
-                    return true;
-                }
-            }
+            return switch (evt.getPropertyName()) {
+                case "ancestor", "selected thumb", "enabled", USE_BEVEL -> false;
+                default -> true;
+            };
         }
         return false;
     }
@@ -276,7 +265,7 @@ public class GradientParam extends AbstractFilterParam {
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                Color interpolated = ColorUtils.interpolateInRGB(initial, end, progress);
+                Color interpolated = Colors.interpolateInRGB(initial, end, progress);
                 interpolatedColors[i] = interpolated;
             }
             return interpolatedColors;

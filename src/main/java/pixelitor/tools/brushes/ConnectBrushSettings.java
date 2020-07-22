@@ -29,7 +29,6 @@ public class ConnectBrushSettings extends BrushSettings {
 
     private final EnumParam<Style> styleModel = Style.asParam();
 
-    private ConnectBrush brush;
     private final RangeParam densityModel = new RangeParam("Line Density (%)", 1, 50, 100);
     private final RangeParam widthModel = new RangeParam("Line Width (px)", 1, 1, 10);
 
@@ -58,10 +57,6 @@ public class ConnectBrushSettings extends BrushSettings {
         p.addOnlyButton("Reset History Now", e -> ConnectBrush.deleteHistory());
 
         return p;
-    }
-
-    public void setBrush(ConnectBrush brush) {
-        this.brush = brush;
     }
 
     public double getDensity() {

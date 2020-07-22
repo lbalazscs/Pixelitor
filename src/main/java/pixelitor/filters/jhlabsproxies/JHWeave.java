@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,15 +22,12 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.IntChoiceParam.Value;
+import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 
 import java.awt.image.BufferedImage;
 
-import static com.jhlabs.image.WeaveFilter.BASKET_PATTERN;
-import static com.jhlabs.image.WeaveFilter.CROWFOOT_PATTERN;
-import static com.jhlabs.image.WeaveFilter.PLAIN_PATTERN;
-import static com.jhlabs.image.WeaveFilter.TWILL_PATTERN;
+import static com.jhlabs.image.WeaveFilter.*;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 /**
@@ -39,11 +36,11 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class JHWeave extends ParametrizedFilter {
     public static final String NAME = "Weave";
 
-    private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new Value[]{
-            new Value("Plain", PLAIN_PATTERN),
-            new Value("Basket", BASKET_PATTERN),
-            new Value("Twill", TWILL_PATTERN),
-            new Value("Crowfoot", CROWFOOT_PATTERN),
+    private final IntChoiceParam pattern = new IntChoiceParam("Pattern", new Item[]{
+        new Item("Plain", PLAIN_PATTERN),
+        new Item("Basket", BASKET_PATTERN),
+        new Item("Twill", TWILL_PATTERN),
+        new Item("Crowfoot", CROWFOOT_PATTERN),
     });
     private final GroupedRangeParam size = new GroupedRangeParam("Size", "Width", "Height", 0, 16, 100, true);
     private final GroupedRangeParam gap = new GroupedRangeParam("Gap", 0, 6, 100);

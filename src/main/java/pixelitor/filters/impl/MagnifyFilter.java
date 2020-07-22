@@ -82,11 +82,9 @@ public class MagnifyFilter extends CenteredTransformFilter {
         if (outside == 1.0) { // outside
             out[0] = x;
             out[1] = y;
-            return;
         } else if (outside == 0.0) { // innermost region
             out[0] = radiusRatio * x + (1 - radiusRatio) * cx;
             out[1] = radiusRatio * y + (1 - radiusRatio) * cy;
-            return;
         } else { // between the inner and outer radius
             double simpleX = radiusRatio * x + (1 - radiusRatio) * cx;
             double simpleY = radiusRatio * y + (1 - radiusRatio) * cy;

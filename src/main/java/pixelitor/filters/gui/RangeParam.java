@@ -43,7 +43,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private double defaultValue;
     private int decimalPlaces = 0;
 
-     // Not stored as an int in order to enable animation interpolations
+    // Not stored as an int in order to enable animation interpolations
     private double value;
 
     private boolean adjusting;
@@ -102,8 +102,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public void setupEnableOtherIfNotZero(FilterSetting other) {
         other.setEnabled(getValue() != 0, EnabledReason.APP_LOGIC);
         addChangeListener(e ->
-                other.setEnabled(getValue() != 0,
-                        EnabledReason.APP_LOGIC));
+            other.setEnabled(getValue() != 0,
+                EnabledReason.APP_LOGIC));
     }
 
     /**
@@ -151,9 +151,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      */
     public void linkWith(RangeParam other, double multiplier) {
         addChangeListener(e -> other.setValueNoTrigger(
-                getValueAsDouble() * multiplier));
+            getValueAsDouble() * multiplier));
         other.addChangeListener(e -> setValueNoTrigger(
-                other.getValueAsDouble() / multiplier));
+            other.getValueAsDouble() / multiplier));
     }
 
     @Override
@@ -292,12 +292,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public void setValueIsAdjusting(boolean b) {
-        if (!b) {
-            if (adjusting) {
-                if (adjustmentListener != null) {
-                    adjustmentListener.paramAdjusted();
-                }
-            }
+        if (!b && adjusting && adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
         }
         if (adjusting != b) {
             adjusting = b;
@@ -420,7 +416,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     @Override
     public String toString() {
         return format("%s[name = '%s', value = %.2f]",
-                getClass().getSimpleName(), getName(), value);
+            getClass().getSimpleName(), getName(), value);
     }
 
     public static class Builder {
@@ -474,7 +470,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         public RangeParam build() {
             RangeParam rp = new RangeParam(name, min, def, max,
-                    addDefaultButton, textPosition, randomizePolicy);
+                addDefaultButton, textPosition, randomizePolicy);
             rp.setDecimalPlaces(decimalPlaces);
             return rp;
         }
@@ -500,7 +496,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         @Override
         public String toString() {
             return format("%s[value=%.2f]",
-                    getClass().getSimpleName(), value);
+                getClass().getSimpleName(), value);
         }
     }
 }

@@ -19,7 +19,7 @@ package pixelitor.filters.painters;
 
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.painter.effects.AbstractAreaEffect;
-import pixelitor.colors.ColorUtils;
+import pixelitor.colors.Colors;
 import pixelitor.filters.gui.DefaultButton;
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
@@ -75,8 +75,8 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
         GUIUtils.addColorDialogListener(colorSwatch, this::showColorDialog);
 
-        ColorUtils.setupFilterColorsPopupMenu(this, colorSwatch,
-                this::getColor, c -> setColor(c, true));
+        Colors.setupFilterColorsPopupMenu(this, colorSwatch,
+            this::getColor, c -> setColor(c, true));
 
         setLayout(new GridBagLayout());
 
@@ -91,9 +91,9 @@ public abstract class EffectPanel extends JPanel implements Resettable {
     }
 
     private void showColorDialog() {
-        ColorUtils.selectColorWithDialog(this,
-                "Select Color", color, true,
-                c -> setColor(c, true));
+        Colors.selectColorWithDialog(this,
+            "Select Color", color, true,
+            c -> setColor(c, true));
     }
 
     public void setColor(Color newColor, boolean trigger) {

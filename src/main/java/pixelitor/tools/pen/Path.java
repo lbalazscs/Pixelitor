@@ -286,7 +286,7 @@ public class Path implements Serializable {
 
         Path backup = deepCopy(comp);
         subPaths.removeIf(sp -> sp == subPath);
-        assert subPaths.size() >= 1; // should never be called for the last subpath
+        assert !subPaths.isEmpty(); // should never be called for the last subpath
         activeSubPath = subPaths.get(subPaths.size() - 1);
         comp.repaint();
 
@@ -333,11 +333,9 @@ public class Path implements Serializable {
 
         prevBuildState = buildState;
 
-        if (newState == MOVING_TO_NEXT_ANCHOR) {
-            if (!hasMovingPoint()) {
-                MovingPoint m = PenToolMode.BUILD.createMovingPoint(activeSubPath);
-                activeSubPath.setMovingPoint(m);
-            }
+        if (newState == MOVING_TO_NEXT_ANCHOR && !hasMovingPoint()) {
+            MovingPoint m = PenToolMode.BUILD.createMovingPoint(activeSubPath);
+            activeSubPath.setMovingPoint(m);
         }
 
         buildState = newState;
