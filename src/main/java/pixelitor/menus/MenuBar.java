@@ -74,7 +74,6 @@ import java.awt.image.BufferedImage;
 import java.lang.management.ManagementFactory;
 import java.util.ResourceBundle;
 
-import static java.lang.String.format;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.OpenImages.*;
 import static pixelitor.colors.FillType.*;
@@ -1156,8 +1155,8 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 String vmRuntimeInfo = ManagementFactory.getRuntimeMXBean().getName();
-                System.out.println(format("MenuBar::onClick: vmRuntimeInfo = '%s'",
-                    vmRuntimeInfo));
+                System.out.printf("MenuBar::onClick: vmRuntimeInfo = '%s'%n",
+                    vmRuntimeInfo);
             }
         });
 

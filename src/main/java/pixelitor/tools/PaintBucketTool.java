@@ -127,26 +127,19 @@ public class PaintBucketTool extends Tool {
             default -> throw new IllegalStateException("fill = " + fill);
         };
 
-        Rectangle replacedArea;
         String action = (String) actionCB.getSelectedItem();
         int tolerance = toleranceParam.getValue();
-        switch (action) {
-            case ACTION_LOCAL:
-                replacedArea = scanlineFloodFill(workingImage,
-                    x, y, tolerance, rgbAtMouse, fillRGB);
-                break;
-            case ACTION_GLOBAL:
-                globalReplaceColor(workingImage,
-                    tolerance, rgbAtMouse, fillRGB);
-                replacedArea = new Rectangle(0, 0, imgWidth, imgHeight);
-                break;
-            default:
-                throw new IllegalStateException("action = " + action);
-        }
+        Rectangle replacedArea = switch (action) {
+            case ACTION_LOCAL -> scanlineFloodFill(workingImage,
+                x, y, tolerance, rgbAtMouse, fillRGB);
+            case ACTION_GLOBAL -> globalReplaceColor(workingImage,
+                tolerance, rgbAtMouse, fillRGB);
+            default -> throw new IllegalStateException("action = " + action);
+        };
 
         if (replacedArea != null) { // something was replaced
             PartialImageEdit edit = History.createPartialImageEdit(replacedArea, backupForUndo, dr,
-                    true, getName());
+                true, getName());
             if (edit != null) {
                 History.add(edit);
             }
@@ -289,15 +282,18 @@ public class PaintBucketTool extends Tool {
         return new Rectangle(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
-    private static void globalReplaceColor(BufferedImage img,
-                                           int tolerance,
-                                           int rgbAtMouse, int newRGB) {
+    private static Rectangle globalReplaceColor(BufferedImage img,
+                                                int tolerance,
+                                                int rgbAtMouse, int newRGB) {
         int[] pixels = ImageUtils.getPixelsAsArray(img);
         for (int i = 0; i < pixels.length; i++) {
             if (isSimilar(pixels[i], rgbAtMouse, tolerance)) {
                 pixels[i] = newRGB;
             }
         }
+
+        // return the replaced area, which is the whole image
+        return new Rectangle(0, 0, img.getWidth(), img.getHeight());
     }
 
     private static boolean isSimilar(int color1, int color2, int tolerance) {

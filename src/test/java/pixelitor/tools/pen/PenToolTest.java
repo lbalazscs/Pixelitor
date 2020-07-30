@@ -377,7 +377,7 @@ public class PenToolTest {
             .pathActionAreEnabled();
         assertThat(PenTool.path).numSubPathsIs(1);
 
-        Assertions.assertTrue(sp == PenTool.path.getSubPath(0));
+        Assertions.assertSame(sp, PenTool.path.getSubPath(0));
         assertThat(sp)
             .isClosed()
             .isFinished()

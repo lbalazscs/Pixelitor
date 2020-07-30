@@ -146,15 +146,12 @@ public enum Symmetry {
 
         @Override
         public PPoint transform(PPoint p, int brushNo) {
-            if (brushNo == 1) {
-                return p.mirrorVertically(compWidth);
-            } else if (brushNo == 2) {
-                return p.mirrorHorizontally(compHeight);
-            } else if (brushNo == 3) {
-                return p.mirrorBoth(compWidth, compHeight);
-            } else {
-                throw new IllegalArgumentException("brushNo = " + brushNo);
-            }
+            return switch (brushNo) {
+                case 1 -> p.mirrorVertically(compWidth);
+                case 2 -> p.mirrorHorizontally(compHeight);
+                case 3 -> p.mirrorBoth(compWidth, compHeight);
+                default -> throw new IllegalArgumentException("brushNo = " + brushNo);
+            };
         }
     }, CENTRAL_SYMMETRY("Central Symmetry", 2) {
         @Override

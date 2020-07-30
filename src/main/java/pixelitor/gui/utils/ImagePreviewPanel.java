@@ -101,12 +101,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     }
 
     private static File getFileFromFileChooserEvent(PropertyChangeEvent e) {
-        File file;
-        file = switch (e.getPropertyName()) {
+        return switch (e.getPropertyName()) {
             case JFileChooser.SELECTED_FILE_CHANGED_PROPERTY -> (File) e.getNewValue();
             default -> null;
         };
-        return file;
     }
 
     @Override

@@ -245,32 +245,21 @@ public class Shapes {
     }
 
     public static void debugPathIterator(Shape shape) {
-        PathIterator it = shape.getPathIterator(null);
+        PathIterator pathIterator = shape.getPathIterator(null);
         double[] coords = new double[6];
-        while (!it.isDone()) {
-            int type = it.currentSegment(coords);
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
 
             switch (type) {
-                case SEG_MOVETO:
-                    System.out.println("MOVE TO " + Arrays.toString(coords));
-                    break;
-                case SEG_LINETO:
-                    System.out.println("LINE TO " + Arrays.toString(coords));
-                    break;
-                case SEG_QUADTO:
-                    System.out.println("QUAD TO " + Arrays.toString(coords));
-                    break;
-                case SEG_CUBICTO:
-                    System.out.println("CUBIC TO " + Arrays.toString(coords));
-                    break;
-                case SEG_CLOSE:
-                    System.out.println("CLOSE " + Arrays.toString(coords));
-                    break;
-                default:
-                    throw new IllegalArgumentException("type = " + type);
+                case SEG_MOVETO -> System.out.println("MOVE TO " + Arrays.toString(coords));
+                case SEG_LINETO -> System.out.println("LINE TO " + Arrays.toString(coords));
+                case SEG_QUADTO -> System.out.println("QUAD TO " + Arrays.toString(coords));
+                case SEG_CUBICTO -> System.out.println("CUBIC TO " + Arrays.toString(coords));
+                case SEG_CLOSE -> System.out.println("CLOSE " + Arrays.toString(coords));
+                default -> throw new IllegalArgumentException("type = " + type);
             }
 
-            it.next();
+            pathIterator.next();
         }
     }
 

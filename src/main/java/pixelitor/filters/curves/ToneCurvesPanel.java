@@ -23,11 +23,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.EventListener;
 
@@ -67,8 +63,8 @@ public class ToneCurvesPanel extends JPanel implements MouseMotionListener, Mous
     }
 
     private void fireActionPerformed(ActionEvent actionEvent) {
-        EventListener[] listenerList = actionListenerList.getListeners(ActionListener.class);
-        for (EventListener eventListener : listenerList) {
+        EventListener[] listeners = actionListenerList.getListeners(ActionListener.class);
+        for (EventListener eventListener : listeners) {
             ((ActionListener) eventListener).actionPerformed(actionEvent);
         }
     }

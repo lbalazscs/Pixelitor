@@ -69,16 +69,12 @@ public class FlowerOfLife extends ShapeFilter {
         for (int it = 2; it <= numIterations; it++) {
             List<Circle> circlesSoFar = new ArrayList<>(circles);
             for (Circle circle : circlesSoFar) {
-                List<Circle> neighbors;
-                if (gridType == GRID_TYPE_TRIANGULAR) {
-                    neighbors = circle.genTriangleGridNeighbors();
-                } else if (gridType == GRID_TYPE_SQUARE) {
-                    neighbors = circle.genSquareGridNeighbors();
-                } else if (gridType == GRID_TYPE_SQUARE_2) {
-                    neighbors = circle.genSquare2GridNeighbors();
-                } else {
-                    throw new IllegalStateException("gridType = " + gridType);
-                }
+                List<Circle> neighbors = switch (gridType) {
+                    case GRID_TYPE_TRIANGULAR -> circle.genTriangleGridNeighbors();
+                    case GRID_TYPE_SQUARE -> circle.genSquareGridNeighbors();
+                    case GRID_TYPE_SQUARE_2 -> circle.genSquare2GridNeighbors();
+                    default -> throw new IllegalStateException("gridType = " + gridType);
+                };
                 circles.addAll(neighbors);
             }
         }
@@ -163,14 +159,11 @@ public class FlowerOfLife extends ShapeFilter {
         float r = radius.getValueAsFloat();
         int it = iterations.getValue();
 
-        if (gridType == GRID_TYPE_TRIANGULAR) {
-            return it * r;
-        } else if (gridType == GRID_TYPE_SQUARE) {
-            return (float) (r + (it - 1) * SQRT_2 * r);
-        } else if (gridType == GRID_TYPE_SQUARE_2) {
-            return r + (it - 1) * 2 * r;
-        } else {
-            throw new IllegalStateException("gridType = " + gridType);
-        }
+        return switch (gridType) {
+            case GRID_TYPE_TRIANGULAR -> it * r;
+            case GRID_TYPE_SQUARE -> (float) (r + (it - 1) * SQRT_2 * r);
+            case GRID_TYPE_SQUARE_2 -> r + (it - 1) * 2 * r;
+            default -> throw new IllegalStateException("gridType = " + gridType);
+        };
     }
 }

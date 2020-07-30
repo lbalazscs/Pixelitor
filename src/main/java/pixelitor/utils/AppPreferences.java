@@ -23,6 +23,7 @@ import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.ImageArea;
+import pixelitor.gui.ImageAreaSavedInfo;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.WorkSpace;
 import pixelitor.gui.utils.Screens;
@@ -397,25 +398,25 @@ public final class AppPreferences {
         return ((retVal + 4) / 5) * 5;
     }
 
-    public static ImageArea.SavedInfo loadDesktopMode() {
+    public static ImageAreaSavedInfo loadDesktopMode() {
         String value = mainNode.get(UI_KEY, "TabsN");
         if (value.startsWith("Tabs")) {
             return loadSavedTabsInfo(value);
         } else {
             // return TOP tab placement so that if the user
             // changes the UI via preferences, this will be set
-            return new ImageArea.SavedInfo(FRAMES, TOP);
+            return new ImageAreaSavedInfo(FRAMES, TOP);
         }
     }
 
-    private static ImageArea.SavedInfo loadSavedTabsInfo(String value) {
+    private static ImageAreaSavedInfo loadSavedTabsInfo(String value) {
         int tabPlacement = switch (value) {
             case "TabsL" -> LEFT;
             case "TabsR" -> RIGHT;
             case "TabsB" -> BOTTOM;
             default -> TOP;
         };
-        return new ImageArea.SavedInfo(TABS, tabPlacement);
+        return new ImageAreaSavedInfo(TABS, tabPlacement);
     }
 
     private static void saveDesktopMode() {

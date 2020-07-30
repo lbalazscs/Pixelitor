@@ -391,16 +391,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public String getResetToolTip() {
-        String defaultAsString;
-        if (decimalPlaces == 0) {
-            defaultAsString = String.valueOf((int) defaultValue);
-        } else if (decimalPlaces == 1) {
-            defaultAsString = format("%.1f", defaultValue);
-        } else if (decimalPlaces == 2) {
-            defaultAsString = format("%.2f", defaultValue);
-        } else {
-            throw new IllegalStateException();
-        }
+        String defaultAsString = switch (decimalPlaces) {
+            case 0 -> String.valueOf((int) defaultValue);
+            case 1 -> format("%.1f", defaultValue);
+            case 2 -> format("%.2f", defaultValue);
+            default -> throw new IllegalStateException();
+        };
         return super.getResetToolTip() + " to " + defaultAsString;
     }
 

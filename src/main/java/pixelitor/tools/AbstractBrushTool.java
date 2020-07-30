@@ -595,9 +595,9 @@ public abstract class AbstractBrushTool extends Tool {
             PPoint p = PPoint.lazyFromIm(x, y, view);
             affectedArea.updateWith(p);
 
+            // we can get here more than once if there are multiple subpaths!
             switch (type) {
-                case SEG_MOVETO:
-                    // we can get here more than once if there are multiple subpaths!
+                case SEG_MOVETO -> {
                     subPathIndex++;
                     startingPoint = p;
                     if (!brushStrokePrepared) {
@@ -611,15 +611,10 @@ public abstract class AbstractBrushTool extends Tool {
                         brush.finishBrushStroke();
                     }
                     brush.startAt(p);
-                    break;
-                case SEG_LINETO:
-                    brush.continueTo(p);
-                    break;
-                case SEG_CLOSE:
-                    brush.continueTo(startingPoint);
-                    break;
-                default:
-                    throw new IllegalArgumentException("type = " + type);
+                }
+                case SEG_LINETO -> brush.continueTo(p);
+                case SEG_CLOSE -> brush.continueTo(startingPoint);
+                default -> throw new IllegalArgumentException("type = " + type);
             }
 
             fpi.next();

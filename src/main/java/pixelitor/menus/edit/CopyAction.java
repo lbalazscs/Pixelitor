@@ -33,8 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 
-import static java.lang.String.format;
-
 /**
  * Copies the image given by the {@link CopySource}
  * to the system clipboard
@@ -81,8 +79,7 @@ public class CopyAction extends AbstractAction {
             rfe.printStackTrace();
             var node = DebugNodes.createBufferedImageNode("active image", activeImage);
             String s = node.toDetailedString();
-            System.out.println(format(
-                    "CopyAction: RasterFormatException in actionPerformed: %s", s));
+            System.out.println("CopyAction: RasterFormatException in actionPerformed: " + s);
         }
     }
 }

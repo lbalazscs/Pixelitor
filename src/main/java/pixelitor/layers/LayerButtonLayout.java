@@ -66,20 +66,11 @@ public class LayerButtonLayout implements LayoutManager {
     public void addLayoutComponent(String name, Component comp) {
         synchronized (comp.getTreeLock()) {
             switch (name) {
-                case CHECKBOX:
-                    checkBox = (JCheckBox) comp;
-                    break;
-                case LAYER:
-                    layerLabel = (JLabel) comp;
-                    break;
-                case MASK:
-                    maskLabel = (JLabel) comp;
-                    break;
-                case NAME_EDITOR:
-                    nameEditor = comp;
-                    break;
-                default:
-                    throw new IllegalStateException();
+                case CHECKBOX -> checkBox = (JCheckBox) comp;
+                case LAYER -> layerLabel = (JLabel) comp;
+                case MASK -> maskLabel = (JLabel) comp;
+                case NAME_EDITOR -> nameEditor = comp;
+                default -> throw new IllegalStateException();
             }
         }
     }

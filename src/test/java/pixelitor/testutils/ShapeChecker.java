@@ -19,11 +19,7 @@ package pixelitor.testutils;
 
 import java.awt.Shape;
 
-import static java.awt.geom.PathIterator.SEG_CLOSE;
-import static java.awt.geom.PathIterator.SEG_CUBICTO;
-import static java.awt.geom.PathIterator.SEG_LINETO;
-import static java.awt.geom.PathIterator.SEG_MOVETO;
-import static java.awt.geom.PathIterator.SEG_QUADTO;
+import static java.awt.geom.PathIterator.*;
 
 public class ShapeChecker {
     private int numMoveTos = 0;
@@ -33,73 +29,55 @@ public class ShapeChecker {
     private int numCloses = 0;
 
     public ShapeChecker(Shape shape) {
-        var it = shape.getPathIterator(null);
+        var pathIterator = shape.getPathIterator(null);
         float[] coords = new float[6];
-        while (!it.isDone()) {
-            int type = it.currentSegment(coords);
-//            float x = coords[0];
-//            float y = coords[1];
-//            float xx = coords[2];
-//            float yy = coords[3];
-//            float xxx = coords[4];
-//            float yyy = coords[5];
-
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(coords);
             switch (type) {
-                case SEG_MOVETO:
-                    numMoveTos++;
-                    break;
-                case SEG_LINETO:
-                    numLineTos++;
-                    break;
-                case SEG_QUADTO:
-                    numQuadTos++;
-                    break;
-                case SEG_CUBICTO:
-                    numCubicTos++;
-                    break;
-                case SEG_CLOSE:
-                    numCloses++;
-                    break;
-                default:
-                    throw new IllegalArgumentException("type = " + type);
+                case SEG_MOVETO -> numMoveTos++;
+                case SEG_LINETO -> numLineTos++;
+                case SEG_QUADTO -> numQuadTos++;
+                case SEG_CUBICTO -> numCubicTos++;
+                case SEG_CLOSE -> numCloses++;
+                default -> throw new IllegalArgumentException("type = " + type);
             }
 
-            it.next();
+            pathIterator.next();
         }
     }
 
     public void assertNumMoveTosWas(int expected) {
         if (numMoveTos != expected) {
             throw new AssertionError("numMoveTos = " + numMoveTos
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
     public void assertNumLineTosWas(int expected) {
         if (numLineTos != expected) {
             throw new AssertionError("numLineTos = " + numLineTos
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
     public void assertNumQuadTosWas(int expected) {
         if (numQuadTos != expected) {
             throw new AssertionError("numQuadTos = " + numQuadTos
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
     public void assertNumCubicTosWas(int expected) {
         if (numCubicTos != expected) {
             throw new AssertionError("numCubicTos = " + numCubicTos
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 
     public void assertNumClosesWas(int expected) {
         if (numCloses != expected) {
             throw new AssertionError("numCloses = " + numCloses
-                    + ", expected = " + expected);
+                + ", expected = " + expected);
         }
     }
 

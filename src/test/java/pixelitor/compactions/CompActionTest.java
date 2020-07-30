@@ -291,57 +291,44 @@ public class CompActionTest {
                             origImageHeight);
         } else {
             assertThat(newComp)
-                    .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
-                    .activeLayerAndMaskImageSizeIs(
-                            origImageHeight,
-                            origImageWidth);
+                .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
+                .activeLayerAndMaskImageSizeIs(
+                    origImageHeight,
+                    origImageWidth);
         }
 
         int canvasDistFromImgBottom = origImageHeight - ORIG_CANVAS_HEIGHT
-                + withTranslation.getExpectedTY();
+            + withTranslation.getExpectedTY();
         int canvasDistFromImgRight = origImageWidth - ORIG_CANVAS_WIDTH
-                + withTranslation.getExpectedTX();
-        if (angle == ANGLE_90) {
-            assertThat(newComp).activeLayerTranslationIs(
-                    canvasDistFromImgBottom,
-                    withTranslation.getExpectedTX());
-        } else if (angle == ANGLE_180) {
-            assertThat(newComp).activeLayerTranslationIs(
-                    canvasDistFromImgRight,
-                    canvasDistFromImgBottom);
-        } else if (angle == ANGLE_270) {
-            assertThat(newComp).activeLayerTranslationIs(
-                    withTranslation.getExpectedTY(),
-                    canvasDistFromImgRight);
+            + withTranslation.getExpectedTX();
+
+        switch (angle) {
+            case ANGLE_90 -> assertThat(newComp).activeLayerTranslationIs(
+                canvasDistFromImgBottom, withTranslation.getExpectedTX());
+            case ANGLE_180 -> assertThat(newComp).activeLayerTranslationIs(
+                canvasDistFromImgRight, canvasDistFromImgBottom);
+            case ANGLE_270 -> assertThat(newComp).activeLayerTranslationIs(
+                withTranslation.getExpectedTY(), canvasDistFromImgRight);
         }
 
         if (withSelection.isTrue()) {
-            Rectangle rotatedSelectionBounds = null;
 
             int distFromBottom = ORIG_CANVAS_HEIGHT - origSelection.height - origSelection.y;
             int distFromRight = ORIG_CANVAS_WIDTH - origSelection.width - origSelection.x;
             int distFromLeft = origSelection.x;
             int distFromTop = origSelection.y;
 
-            if (angle == ANGLE_90) {
-                rotatedSelectionBounds = new Rectangle(
-                        distFromBottom,
-                        distFromLeft,
-                        origSelection.height,
-                        origSelection.width);
-            } else if (angle == ANGLE_180) {
-                rotatedSelectionBounds = new Rectangle(
-                        distFromRight,
-                        distFromBottom,
-                        origSelection.width,
-                        origSelection.height);
-            } else if (angle == ANGLE_270) {
-                rotatedSelectionBounds = new Rectangle(
-                        distFromTop,
-                        distFromRight,
-                        origSelection.height,
-                        origSelection.width);
-            }
+            Rectangle rotatedSelectionBounds = switch (angle) {
+                case ANGLE_90 -> new Rectangle(
+                    distFromBottom, distFromLeft,
+                    origSelection.height, origSelection.width);
+                case ANGLE_180 -> new Rectangle(
+                    distFromRight, distFromBottom,
+                    origSelection.width, origSelection.height);
+                case ANGLE_270 -> new Rectangle(
+                    distFromTop, distFromRight,
+                    origSelection.height, origSelection.width);
+            };
 
             assertThat(newComp).selectionBoundsIs(rotatedSelectionBounds);
         }

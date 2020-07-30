@@ -135,15 +135,12 @@ public class Flashlight extends ParametrizedFilter {
         }
 
         public void setBG(int bg) {
-            if (bg == BG_BLACK) {
-                bgPixel = 0xFF000000;
-            } else if (bg == BG_WHITE) {
-                bgPixel = 0xFFFFFFFF;
-            } else if (bg == BG_TRANSPARENT) {
-                bgPixel = 0;
-            } else {
-                throw new IllegalArgumentException("bg = " + bg);
-            }
+            bgPixel = switch (bg) {
+                case BG_BLACK -> 0xFF000000;
+                case BG_WHITE -> 0xFFFFFFFF;
+                case BG_TRANSPARENT -> 0;
+                default -> throw new IllegalArgumentException("bg = " + bg);
+            };
         }
 
         // must be called after the shape arguments!

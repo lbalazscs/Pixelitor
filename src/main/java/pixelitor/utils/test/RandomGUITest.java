@@ -473,15 +473,15 @@ public class RandomGUITest {
                 BufferedImage src = dr.getFilterSourceImage();
                 if (f instanceof ParametrizedFilter) {
                     ParamSet paramSet = ((ParametrizedFilter) f).getParamSet();
-                    System.out.println(format(
+                    System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d, params = %s",
-                        filterName, src.getWidth(), src.getHeight(), paramSet));
+                            "src.width = %d, src.height = %d, params = %s%n",
+                        filterName, src.getWidth(), src.getHeight(), paramSet);
                 } else {
-                    System.out.println(format(
+                    System.out.printf(
                         "RandomGUITest::randomFilter: filterName = %s, " +
-                            "src.width = %d, src.height = %d",
-                        filterName, src.getWidth(), src.getHeight()));
+                            "src.width = %d, src.height = %d%n",
+                        filterName, src.getWidth(), src.getHeight());
                 }
                 throw e;
             }
@@ -496,9 +496,9 @@ public class RandomGUITest {
             try {
                 f.startOn(dr, FILTER_WITHOUT_DIALOG);
             } catch (Throwable e) {
-                System.out.println(format(
-                    "RandomGUITest::randomFilter: name = %s, width = %d, height = %d",
-                    filterName, src.getWidth(), src.getHeight()));
+                System.out.printf(
+                    "RandomGUITest::randomFilter: name = %s, width = %d, height = %d%n",
+                    filterName, src.getWidth(), src.getHeight());
                 throw e;
             }
         }
@@ -715,8 +715,7 @@ public class RandomGUITest {
     private static void randomCrop() {
         boolean enabled = SelectionActions.areEnabled();
         if (enabled) {
-            log("crop");
-            executeAction(SelectionActions.getCrop());
+            runAction(SelectionActions.getCrop());
         }
     }
 
@@ -761,8 +760,7 @@ public class RandomGUITest {
 
     private static void deselect() {
         if (SelectionActions.areEnabled()) {
-            log("deselect");
-            executeAction(SelectionActions.getDeselect());
+            runAction(SelectionActions.getDeselect());
         }
     }
 
@@ -778,29 +776,25 @@ public class RandomGUITest {
 
     private static void invertSelection() {
         if (SelectionActions.areEnabled()) {
-            log("invert selection");
-            executeAction(SelectionActions.getInvert());
+            runAction(SelectionActions.getInvert());
         }
     }
 
     private static void traceWithCurrentBrush() {
         if (canTrace()) {
-            log("trace with current brush");
-            executeAction(PenTool.getTraceWithBrush());
+            runAction(PenTool.getTraceWithBrush());
         }
     }
 
     private static void traceWithCurrentEraser() {
         if (canTrace()) {
-            log("trace with current eraser");
-            executeAction(PenTool.getTraceWithEraser());
+            runAction(PenTool.getTraceWithEraser());
         }
     }
 
     private static void traceWithCurrentSmudge() {
         if (canTrace()) {
-            log("trace with current smudge");
-            executeAction(PenTool.getTraceWithSmudge());
+            runAction(PenTool.getTraceWithSmudge());
         }
     }
 
@@ -814,41 +808,14 @@ public class RandomGUITest {
 
     private static void randomRotateFlip() {
         int r = rand.nextInt(5);
-        Action action = switch (r) {
-            case 0 -> rotate90Action();
-            case 1 -> rotate180Action();
-            case 2 -> rotate90CCWAction();
-            case 3 -> flipHorizontalAction();
-            case 4 -> flipVerticalAction();
-            default -> throw new IllegalStateException("Unexpected value: " + r);
-        };
-
-        executeAction(action);
-    }
-
-    private static Action rotate90Action() {
-        log("rotate 90 CW");
-        return new Rotate(ANGLE_90);
-    }
-
-    private static Action rotate180Action() {
-        log("rotate 180");
-        return new Rotate(ANGLE_180);
-    }
-
-    private static Action rotate90CCWAction() {
-        log("rotate 90 CCW");
-        return new Rotate(ANGLE_270);
-    }
-
-    private static Action flipHorizontalAction() {
-        log("flip horizontal");
-        return new Flip(HORIZONTAL);
-    }
-
-    private static Action flipVerticalAction() {
-        log("flip vertical");
-        return new Flip(VERTICAL);
+        switch (r) {
+            case 0 -> runAction(new Rotate(ANGLE_90));
+            case 1 -> runAction(new Rotate(ANGLE_180));
+            case 2 -> runAction(new Rotate(ANGLE_270));
+            case 3 -> runAction(new Flip(HORIZONTAL));
+            case 4 -> runAction(new Flip(VERTICAL));
+            default -> throw new IllegalStateException("r = " + r);
+        }
     }
 
     private static void activateRandomView() {
@@ -915,13 +882,11 @@ public class RandomGUITest {
     private static void layerAddDelete() {
         if (rand.nextBoolean()) {
             if (AddNewLayerAction.INSTANCE.isEnabled()) {
-                log("add new layer");
-                executeAction(AddNewLayerAction.INSTANCE);
+                runAction(AddNewLayerAction.INSTANCE);
             }
         } else {
             if (DeleteActiveLayerAction.INSTANCE.isEnabled()) {
-                log("delete active layer");
-                executeAction(DeleteActiveLayerAction.INSTANCE);
+                runAction(DeleteActiveLayerAction.INSTANCE);
             }
         }
     }
@@ -932,35 +897,30 @@ public class RandomGUITest {
         }
 
         int r = rand.nextInt(5);
-        if (r == 0) {
-            log("show-hide histograms");
-            executeAction(ShowHideHistogramsAction.INSTANCE);
-        } else if (r == 1) {
-            log("show-hide layers");
-            executeAction(ShowHideLayersAction.INSTANCE);
-        } else if (r == 2) {
-            log("show-hide tools");
-            executeAction(ShowHideToolsAction.INSTANCE);
-        } else if (r == 4) {
-            log("show-hide status bar");
-            executeAction(ShowHideStatusBarAction.INSTANCE);
-        } else if (r == 5) {
-            log("show-hide all");
-            executeAction(ShowHideAllAction.INSTANCE);
+        switch (r) {
+            case 0 -> runAction(ShowHideHistogramsAction.INSTANCE);
+            case 1 -> runAction(ShowHideLayersAction.INSTANCE);
+            case 2 -> runAction(ShowHideToolsAction.INSTANCE);
+            case 4 -> runAction(ShowHideStatusBarAction.INSTANCE);
+            case 5 -> runAction(ShowHideAllAction.INSTANCE);
+            default -> throw new IllegalStateException("r = " + r);
         }
     }
 
     private static void randomCopy() {
         if (rand.nextBoolean()) {
-            log("copy layer");
-            executeAction(new CopyAction(CopySource.LAYER_OR_MASK));
+            runAction(new CopyAction(CopySource.LAYER_OR_MASK));
         } else {
-            log("copy composite");
-            executeAction(new CopyAction(CopySource.COMPOSITE));
+            runAction(new CopyAction(CopySource.COMPOSITE));
         }
     }
 
-    private static void executeAction(Action action) {
+    private static void runAction(Action action) {
+        String msg = format("action \"%s\" (class: \"%s\")",
+            action.getValue(Action.NAME),
+            action.getClass().getSimpleName());
+        log(msg);
+
         action.actionPerformed(new ActionEvent("", 0, ""));
     }
 
@@ -973,12 +933,10 @@ public class RandomGUITest {
             if (singleImageTest) {
                 return;
             }
-            log("paste as new image");
-            executeAction(new PasteAction(PasteDestination.NEW_IMAGE));
+            runAction(new PasteAction(PasteDestination.NEW_IMAGE));
             numPastedImages++;
         } else if (r == 1) {
-            log("paste as new layer");
-            executeAction(new PasteAction(PasteDestination.NEW_LAYER));
+            runAction(new PasteAction(PasteDestination.NEW_LAYER));
             numPastedImages++;
         }
         // paste as mask?
@@ -1107,8 +1065,7 @@ public class RandomGUITest {
         Layer layer = OpenImages.getActiveLayer();
         if (!layer.hasMask()) {
             assert AddLayerMaskAction.INSTANCE.isEnabled();
-            log("add layer mask");
-            executeAction(AddLayerMaskAction.INSTANCE);
+            runAction(AddLayerMaskAction.INSTANCE);
         } else {
             assert !AddLayerMaskAction.INSTANCE.isEnabled();
             if (rand.nextFloat() < 0.2 && layer instanceof ContentLayer) {

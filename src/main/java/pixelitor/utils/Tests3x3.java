@@ -164,6 +164,6 @@ public class Tests3x3 {
     public static void dumpCompositeOfActive() {
         BufferedImage img = OpenImages.getActiveCompositeImage();
         String actual = getExpectedFromActual(img);
-        System.out.println(format("Tests3x3::dumpCompositeOfActive: \n%s\n", actual));
+        System.out.printf("Tests3x3::dumpCompositeOfActive: \n%s\n%n", actual);
     }
 }

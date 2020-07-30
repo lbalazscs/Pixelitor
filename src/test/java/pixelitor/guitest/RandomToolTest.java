@@ -203,8 +203,8 @@ public class RandomToolTest {
             testWithTimeout(selectedTool);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.println(format("Test \u001B[31m%d\u001B[0m (%s) took %.2f s",
-                testNr, selectedTool.getName(), estimatedSeconds));
+            System.out.printf("Test \u001B[31m%d\u001B[0m (%s) took %.2f s%n",
+                testNr, selectedTool.getName(), estimatedSeconds);
             testTimes.add(estimatedSeconds);
         }
     }
@@ -730,19 +730,13 @@ public class RandomToolTest {
     // The Tab hotkey is tested separately,
     // this is for hiding/showing with menu shortcuts
     private void randomShowHide() {
-        int i = Rnd.nextInt(10);
-        if (i == 0) {
-            randomShowHide("Tools",
-                () -> PixelitorWindow.get().areToolsShown());
-        } else if (i == 1) {
-            randomShowHide("Layers",
-                LayersContainer::areLayersShown);
-        } else if (i == 2) {
-            randomShowHide("Histograms", HistogramsPanel::isShown);
-        } else if (i == 3) {
-            randomShowHide("Status Bar", StatusBar::isShown);
-        } else {
-            // do nothing, this doesn't have to be tested all the time
+        int randomNumber = Rnd.nextInt(10);
+        switch (randomNumber) {
+            case 0 -> randomShowHide("Tools", () -> PixelitorWindow.get().areToolsShown());
+            case 1 -> randomShowHide("Layers", LayersContainer::areLayersShown);
+            case 2 -> randomShowHide("Histograms", HistogramsPanel::isShown);
+            case 3 -> randomShowHide("Status Bar", StatusBar::isShown);
+            // by default do nothing, this doesn't have to be tested all the time
         }
     }
 
@@ -779,14 +773,11 @@ public class RandomToolTest {
         }
         int num = Rnd.nextInt(4) + 1;
         log("changing the mask view mode: Ctrl-" + num);
-        if (num == 1) {
-            keyboard.pressCtrlOne();
-        } else if (num == 2) {
-            keyboard.pressCtrlTwo();
-        } else if (num == 3) {
-            keyboard.pressCtrlThree();
-        } else if (num == 4) {
-            keyboard.pressCtrlFour();
+        switch (num) {
+            case 1 -> keyboard.pressCtrlOne();
+            case 2 -> keyboard.pressCtrlTwo();
+            case 3 -> keyboard.pressCtrlThree();
+            case 4 -> keyboard.pressCtrlFour();
         }
     }
 
@@ -904,12 +895,12 @@ class MeasuredTask implements Runnable {
         long allocatedKB;
         if (TRACK_MEMORY) {
             allocatedKB = (startFree - Runtime.getRuntime().freeMemory()) / 1024;
-            System.out.println(format("%s was running for %.2f s, allocated %d kBytes", name, seconds, allocatedKB));
+            System.out.printf("%s was running for %.2f s, allocated %d kBytes%n", name, seconds, allocatedKB);
             if (allocatedKB > 100 * 1024) { // more than 100 mega: why?
                 System.exit(1);
             }
         } else {
-            System.out.println(format("%s was running for %.2f s", name, seconds));
+            System.out.printf("%s was running for %.2f s%n", name, seconds);
         }
     }
 }

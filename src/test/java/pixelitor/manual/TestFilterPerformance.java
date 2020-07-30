@@ -46,14 +46,14 @@ public class TestFilterPerformance {
         int NUM_TESTS_PER_FILTER = 20;
         for (int i = 0; i < NUM_TESTS_PER_FILTER; i++) {
             double seconds = measurePerformance(getFilter(), bigImage);
-            System.out.print(String.format("%.2f ", seconds));
+            System.out.printf("%.2f ", seconds);
             if (seconds < minSeconds) {
                 minSeconds = seconds;
             }
             sumSeconds += seconds;
         }
-        System.out.println(String.format("   min = %.2f, average = %.2f",
-                minSeconds, sumSeconds / NUM_TESTS_PER_FILTER));
+        System.out.printf("   min = %.2f, average = %.2f%n",
+            minSeconds, sumSeconds / NUM_TESTS_PER_FILTER);
         System.exit(0);
     }
 

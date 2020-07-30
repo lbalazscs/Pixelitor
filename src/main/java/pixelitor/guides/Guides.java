@@ -39,7 +39,6 @@ import java.util.function.Consumer;
 import static java.lang.String.format;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
-import static pixelitor.compactions.Rotate.SpecialAngle.*;
 
 /**
  * Represents a set of guides.
@@ -100,30 +99,38 @@ public class Guides implements Serializable {
     public Guides copyForRotate(Rotate.SpecialAngle angle, View view) {
         Guides copy = createCopyGuides();
 
-        if (angle == ANGLE_90) {
-            for (Double horizontal : horizontals) {
-                copy.verticals.add(1 - horizontal);
-            }
-            copy.horizontals.addAll(verticals);
-        } else if (angle == ANGLE_180) {
-            for (Double horizontal : horizontals) {
-                copy.horizontals.add(1 - horizontal);
-            }
-            for (Double vertical : verticals) {
-                copy.verticals.add(1 - vertical);
-            }
-        } else if (angle == ANGLE_270) {
-            copy.verticals.addAll(horizontals);
-            for (Double vertical : verticals) {
-                copy.horizontals.add(1 - vertical);
-            }
-        } else {
-            throw new IllegalStateException();
+        switch (angle) {
+            case ANGLE_90 -> copyLinesRotating90(copy);
+            case ANGLE_180 -> copyLinesRotating180(copy);
+            case ANGLE_270 -> copyLinesRotating270(copy);
         }
 
         copy.regenerateLines(view);
 
         return copy;
+    }
+
+    private void copyLinesRotating90(Guides copy) {
+        for (Double horizontal : horizontals) {
+            copy.verticals.add(1 - horizontal);
+        }
+        copy.horizontals.addAll(verticals);
+    }
+
+    private void copyLinesRotating180(Guides copy) {
+        for (Double horizontal : horizontals) {
+            copy.horizontals.add(1 - horizontal);
+        }
+        for (Double vertical : verticals) {
+            copy.verticals.add(1 - vertical);
+        }
+    }
+
+    private void copyLinesRotating270(Guides copy) {
+        copy.verticals.addAll(horizontals);
+        for (Double vertical : verticals) {
+            copy.horizontals.add(1 - vertical);
+        }
     }
 
     private Guides createCopyGuides() {

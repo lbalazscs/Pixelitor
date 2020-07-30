@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,40 +65,36 @@ public class TransformHelper {
         int offsetX = moveOffset.x;
         int offsetY = moveOffset.y;
         switch (cursorType) {
-            case Cursor.NW_RESIZE_CURSOR:
+            case Cursor.NW_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.height -= offsetY;
                 rect.x += offsetX;
                 rect.y += offsetY;
-                break;
-            case Cursor.SE_RESIZE_CURSOR:
+            }
+            case Cursor.SE_RESIZE_CURSOR -> {
                 rect.width += offsetX;
                 rect.height += offsetY;
-                break;
-            case Cursor.SW_RESIZE_CURSOR:
+            }
+            case Cursor.SW_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.height += offsetY;
                 rect.x += offsetX;
-                break;
-            case Cursor.NE_RESIZE_CURSOR:
+            }
+            case Cursor.NE_RESIZE_CURSOR -> {
                 rect.width += offsetX;
                 rect.height -= offsetY;
                 rect.y += offsetY;
-                break;
-            case Cursor.N_RESIZE_CURSOR:
+            }
+            case Cursor.N_RESIZE_CURSOR -> {
                 rect.height -= offsetY;
                 rect.y += offsetY;
-                break;
-            case Cursor.S_RESIZE_CURSOR:
-                rect.height += offsetY;
-                break;
-            case Cursor.E_RESIZE_CURSOR:
-                rect.width += offsetX;
-                break;
-            case Cursor.W_RESIZE_CURSOR:
+            }
+            case Cursor.S_RESIZE_CURSOR -> rect.height += offsetY;
+            case Cursor.E_RESIZE_CURSOR -> rect.width += offsetX;
+            case Cursor.W_RESIZE_CURSOR -> {
                 rect.width -= offsetX;
                 rect.x += offsetX;
-                break;
+            }
         }
     }
 

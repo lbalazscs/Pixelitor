@@ -65,7 +65,7 @@ public class ImageArea {
     private static int tabPlacement = TOP;
 
     static {
-        SavedInfo savedInfo = AppPreferences.loadDesktopMode();
+        ImageAreaSavedInfo savedInfo = AppPreferences.loadDesktopMode();
         mode = savedInfo.getMode();
         tabPlacement = savedInfo.getTabPlacement();
 
@@ -212,21 +212,4 @@ public class ImageArea {
                 "and there is no selection.");
     }
 
-    public static class SavedInfo {
-        private final Mode mode;
-        private final int tabPlacement;
-
-        public SavedInfo(Mode mode, int tabPlacement) {
-            this.mode = mode;
-            this.tabPlacement = tabPlacement;
-        }
-
-        public Mode getMode() {
-            return mode;
-        }
-
-        public int getTabPlacement() {
-            return tabPlacement;
-        }
-    }
 }

@@ -24,7 +24,6 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 
 /**
@@ -124,6 +123,6 @@ public class FilterUtils {
         allFilters.forEach(FilterAction::getFilter);
 
         double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-        System.out.println(format("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'", estimatedSeconds));
+        System.out.printf("FilterUtils::createAllFilters: estimatedSeconds = '%.2f'%n", estimatedSeconds);
     }
 }

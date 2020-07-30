@@ -15,16 +15,25 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.gui;
+package pixelitor.gui;
 
 /**
- * Whether a filter GUI should have
- * a "Show Original" checkbox.
+ * Represents the information that is saved about an {@link ImageArea}.
  */
-public enum ShowOriginal {
-    YES , NO;
+public class ImageAreaSavedInfo {
+    private final ImageArea.Mode mode;
+    private final int tabPlacement;
 
-    public boolean isYes() {
-        return this == YES;
+    public ImageAreaSavedInfo(ImageArea.Mode mode, int tabPlacement) {
+        this.mode = mode;
+        this.tabPlacement = tabPlacement;
+    }
+
+    public ImageArea.Mode getMode() {
+        return mode;
+    }
+
+    public int getTabPlacement() {
+        return tabPlacement;
     }
 }

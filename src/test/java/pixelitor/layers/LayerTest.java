@@ -38,8 +38,8 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static pixelitor.TestHelper.createEmptyImageLayer;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.layers.BlendingMode.DIFFERENCE;
@@ -169,7 +169,7 @@ public class LayerTest {
                 .classIs(layer.getClass())
                 .uiIsVisible();
 
-        assertTrue(copy.hasMask() == withMask.isTrue());
+        assertEquals(copy.hasMask(), withMask.isTrue());
     }
 
     @Test

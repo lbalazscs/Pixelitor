@@ -262,11 +262,8 @@ public class TextSettingsPanel extends FilterGUI
         int size = fontSizeSlider.getCurrentValue();
         Font font = new Font(fontFamily, style, size);
 
-        // It is important to create here a new Map, because
-        // the old one stores old values in TextAttribute.SIZE
+        // Create a new Map, because the old one stores old values in TextAttribute.SIZE
         // and other fields which would override the current ones.
-        // TODO there has to be a simpler way, for example overwriting
-        // however, it is not trivial, there is no single "style" TextAttribute
         var oldMap = map;
         map = new HashMap<>();
 

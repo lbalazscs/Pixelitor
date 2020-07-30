@@ -395,23 +395,12 @@ public class ImageLayer extends ContentLayer implements Drawable {
      * Returns the image that should be shown by this layer.
      */
     protected BufferedImage getVisibleImage() {
-        BufferedImage visibleImage;
+        BufferedImage visibleImage = switch (state) {
+            case NORMAL, SHOW_ORIGINAL -> image;
+            case PREVIEW -> previewImage;
+        };
 
-        switch (state) {
-            case NORMAL:
-                visibleImage = image;
-                break;
-            case PREVIEW:
-                assert previewImage != null : "no preview image in state " + state;
-                visibleImage = previewImage;
-                break;
-            case SHOW_ORIGINAL:
-                assert previewImage != null : "no preview image in state " + state;
-                visibleImage = image;
-                break;
-            default:
-                throw new IllegalStateException("state = " + state);
-        }
+        assert visibleImage != null;
         return visibleImage;
     }
 
@@ -844,15 +833,20 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int canvasHeight = comp.getCanvasHeight();
 
         int angleDegree = angle.getAngleDegree();
-        if (angleDegree == 90) {
-            newTxAbs = imageHeight - tyAbs - canvasHeight;
-            newTyAbs = txAbs;
-        } else if (angleDegree == 270) {
-            newTxAbs = tyAbs;
-            newTyAbs = imageWidth - txAbs - canvasWidth;
-        } else if (angleDegree == 180) {
-            newTxAbs = imageWidth - canvasWidth - txAbs;
-            newTyAbs = imageHeight - canvasHeight - tyAbs;
+        switch (angleDegree) {
+            case 90 -> {
+                newTxAbs = imageHeight - tyAbs - canvasHeight;
+                newTyAbs = txAbs;
+            }
+            case 270 -> {
+                newTxAbs = tyAbs;
+                newTyAbs = imageWidth - txAbs - canvasWidth;
+            }
+            case 180 -> {
+                newTxAbs = imageWidth - canvasWidth - txAbs;
+                newTyAbs = imageHeight - canvasHeight - tyAbs;
+            }
+            default -> throw new IllegalStateException("angleDegree = " + angleDegree);
         }
 
         BufferedImage dest = angle.createDestImage(image);

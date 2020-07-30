@@ -110,15 +110,14 @@ public class TabsUI extends JTabbedPane implements ImageAreaUI {
         group.add(rightMI);
 
         assert tabPlacement == ImageArea.getTabPlacement();
-        if (tabPlacement == TOP) {
-            topMI.setSelected(true);
-        } else if (tabPlacement == BOTTOM) {
-            bottomMI.setSelected(true);
-        } else if (tabPlacement == LEFT) {
-            leftMI.setSelected(true);
-        } else if (tabPlacement == RIGHT) {
-            rightMI.setSelected(true);
-        }
+        JRadioButtonMenuItem selected = switch (tabPlacement) {
+            case TOP -> topMI;
+            case BOTTOM -> bottomMI;
+            case LEFT -> leftMI;
+            case RIGHT -> rightMI;
+            default -> throw new IllegalStateException("tabPlacement = " + tabPlacement);
+        };
+        selected.setSelected(true);
 
         menu.add(topMI);
         menu.add(bottomMI);

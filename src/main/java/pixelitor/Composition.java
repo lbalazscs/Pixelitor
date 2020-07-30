@@ -989,16 +989,13 @@ public class Composition implements Serializable {
                 return null;
             }
             Shape oldShape = selection.getShape();
-            ShapeCombination interaction = null;
-            if (answer == 0) { // replace
-                interaction = ShapeCombination.REPLACE;
-            } else if (answer == 1) { // add
-                interaction = ShapeCombination.ADD;
-            } else if (answer == 2) { // subtract
-                interaction = ShapeCombination.SUBTRACT;
-            } else if (answer == 3) { // intersect
-                interaction = ShapeCombination.INTERSECT;
-            }
+            ShapeCombination interaction = switch (answer) {
+                case 0 -> ShapeCombination.REPLACE;
+                case 1 -> ShapeCombination.ADD;
+                case 2 -> ShapeCombination.SUBTRACT;
+                case 3 -> ShapeCombination.INTERSECT;
+                default -> throw new IllegalStateException("answer = " + answer);
+            };
             selection.setShape(interaction.combine(oldShape, newShape));
             selection.setHidden(false, false);
             edit = new SelectionShapeChangeEdit("Selection Change", this, oldShape);

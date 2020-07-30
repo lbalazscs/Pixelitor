@@ -109,47 +109,56 @@ class MaskFromColorRangeFilter extends PointFilter {
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        if (distType == RGB) {
-            int deltaR = r - refR;
-            int deltaG = g - refG;
-            int deltaB = b - refB;
-
-            dist = FastMath.sqrtQuick(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
-        } else if (distType == HSB) {
-            float[] hsb = Color.RGBtoHSB(r, g, b, null);
-
-            float deltaHue = hsb[0] - refHue;
-            float deltaSat = hsb[1] - refSat;
-            float deltaBri = hsb[2] - refBri;
-
-            // hue is an angle
-            if (deltaHue > 0.5f) {
-                deltaHue = 1.0f - deltaHue;
-            } else if (deltaHue < -0.5f) {
-                deltaHue = 1.0f + deltaHue;
-            }
-
-//            int v = Math.abs((int) (deltaHue * 255 * 2));
-//            return 0xFF_00_00_00 | (v << 16) | (v << 8) | v;
-
-            dist = 150 * FastMath.sqrtQuick(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
-        } else if (distType == HUE) {
-            float[] hsb = Color.RGBtoHSB(r, g, b, null);
-            float deltaHue = hsb[0] - refHue;
-            // hue is an angle
-            if (deltaHue > 0.5f) {
-                deltaHue = 1.0f - deltaHue;
-            } else if (deltaHue < -0.5f) {
-                deltaHue = 1.0f + deltaHue;
-            }
-            dist =  Math.abs(1000 * deltaHue);
-        } else if (distType == SAT) {
-            float[] hsb = Color.RGBtoHSB(r, g, b, null);
-            float deltaSat = hsb[1] - refSat;
-            dist = 150 * Math.abs(deltaSat);
-        } else {
-            throw new IllegalStateException("interpolation = " + distType);
-        }
+        dist = switch (distType) {
+            case RGB -> calcRGBDistance(r, g, b);
+            case HSB -> calcHSBDistance(r, g, b);
+            case HUE -> calcHueDistance(r, g, b);
+            case SAT -> calcSatDistance(r, g, b);
+            default -> throw new IllegalStateException("distType = " + distType);
+        };
         return dist;
+    }
+
+    private double calcRGBDistance(int r, int g, int b) {
+        int deltaR = r - refR;
+        int deltaG = g - refG;
+        int deltaB = b - refB;
+
+        return FastMath.sqrtQuick(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
+    }
+
+    private double calcHSBDistance(int r, int g, int b) {
+        float[] hsb = Color.RGBtoHSB(r, g, b, null);
+
+        float deltaHue = hsb[0] - refHue;
+        float deltaSat = hsb[1] - refSat;
+        float deltaBri = hsb[2] - refBri;
+
+        // hue is an angle
+        if (deltaHue > 0.5f) {
+            deltaHue = 1.0f - deltaHue;
+        } else if (deltaHue < -0.5f) {
+            deltaHue = 1.0f + deltaHue;
+        }
+
+        return 150 * FastMath.sqrtQuick(deltaHue * deltaHue + deltaSat * deltaSat + deltaBri * deltaBri);
+    }
+
+    private double calcHueDistance(int r, int g, int b) {
+        float[] hsb = Color.RGBtoHSB(r, g, b, null);
+        float deltaHue = hsb[0] - refHue;
+        // hue is an angle
+        if (deltaHue > 0.5f) {
+            deltaHue = 1.0f - deltaHue;
+        } else if (deltaHue < -0.5f) {
+            deltaHue = 1.0f + deltaHue;
+        }
+        return Math.abs(1000 * deltaHue);
+    }
+
+    private double calcSatDistance(int r, int g, int b) {
+        float[] hsb = Color.RGBtoHSB(r, g, b, null);
+        float deltaSat = hsb[1] - refSat;
+        return 150 * Math.abs(deltaSat);
     }
 }

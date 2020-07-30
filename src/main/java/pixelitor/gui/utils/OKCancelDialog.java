@@ -41,7 +41,7 @@ public abstract class OKCancelDialog extends JDialog {
     private JComponent formPanel;
     private JLabel msgLabel;
     private JScrollPane scrollPane;
-    private JButton okButton;
+    private final JButton okButton;
 
     protected OKCancelDialog(JComponent form, Frame owner,
                              String title, String okText, String cancelText) {

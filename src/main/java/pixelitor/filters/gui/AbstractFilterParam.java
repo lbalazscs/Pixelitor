@@ -70,17 +70,15 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public void setEnabled(boolean b, EnabledReason reason) {
         switch (reason) {
-            case APP_LOGIC:
-                enabledByAppLogic = b;
-                break;
-            case FINAL_ANIMATION_SETTING:
+            case APP_LOGIC -> enabledByAppLogic = b;
+            case FINAL_ANIMATION_SETTING -> {
                 if (canBeAnimated()) {
                     // the whole point of the final animation setting mode
                     // is to disable/enable the filter params that can't be animated
                     return;
                 }
                 enabledByAnimation = b;
-                break;
+            }
         }
 
         setEnabledState();
