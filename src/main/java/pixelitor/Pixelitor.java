@@ -143,7 +143,7 @@ public class Pixelitor {
             return CompletableFuture.completedFuture(null);
         }
 
-        List<CompletableFuture<?>> openedFiles = new ArrayList<>();
+        List<CompletableFuture<Composition>> openedFiles = new ArrayList<>();
 
         for (String fileName : args) {
             File f = new File(fileName);

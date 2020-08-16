@@ -152,7 +152,7 @@ public class Resize implements CompAction {
     private static CompletableFuture<Composition> resizeLayers(Composition comp, Dimension newSize) {
         // this could be called on the EDT or on another thread, the layers
         // themselves are resized in parallel using the thread pool's threads
-        List<CompletableFuture<?>> futures = new ArrayList<>();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         comp.forEachLayer(layer -> {
             futures.add(layer.resize(newSize));
             if (layer.hasMask()) {

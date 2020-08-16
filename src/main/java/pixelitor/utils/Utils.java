@@ -396,7 +396,7 @@ public final class Utils {
      * Returns a new CompletableFuture that is completed when all of the
      * CompletableFutures in the given list complete
      */
-    public static CompletableFuture<Void> allOfList(List<CompletableFuture<?>> list) {
+    public static CompletableFuture<Void> allOfList(List<? extends CompletableFuture<?>> list) {
         return CompletableFuture.allOf(list.toArray(EMPTY_CF_ARRAY));
     }
 
