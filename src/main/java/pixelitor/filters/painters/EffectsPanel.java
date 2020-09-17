@@ -17,16 +17,8 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.effects.AreaEffect;
-import org.jdesktop.swingx.painter.effects.GlowPathEffect;
-import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
-import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
-import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
-import pixelitor.filters.gui.DefaultButton;
-import pixelitor.filters.gui.EffectsParam;
-import pixelitor.filters.gui.ParamAdjustmentListener;
-import pixelitor.filters.gui.ParamGUI;
-import pixelitor.filters.gui.Resettable;
+import org.jdesktop.swingx.painter.effects.*;
+import pixelitor.filters.gui.*;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -35,10 +27,7 @@ import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 
 import static java.awt.BorderLayout.CENTER;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
-import static java.awt.Color.WHITE;
+import static java.awt.Color.*;
 import static java.awt.FlowLayout.LEFT;
 
 /**
@@ -247,6 +236,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         JPanel tabPanel = new JPanel(new FlowLayout(LEFT));
         JCheckBox tabCB = new JCheckBox();
         tabCB.setModel(configurator.getEnabledModel());
+        tabCB.setName(name);
         tabPanel.add(tabCB);
         tabPanel.add(new JLabel(name));
 

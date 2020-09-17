@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
 import static pixelitor.tools.shapes.ShapesToolState.NO_INTERACTION;
@@ -216,7 +217,7 @@ public class WorkflowTest {
         EDT.assertShapesToolStateIs(NO_INTERACTION);
         pw.button("convertToSelection").requireDisabled();
 
-        AppRunner.findButtonByText(pw, "Stroke Settings...")
+        findButtonByText(pw, "Stroke Settings...")
                 .requireEnabled()
                 .click();
         var dialog = app.findDialogByTitle("Stroke Settings");
@@ -316,7 +317,7 @@ public class WorkflowTest {
         app.clickTool(Tools.PEN);
         pw.button("toSelectionButton").requireEnabled();
 
-        AppRunner.findButtonByText(pw, "Stroke with Current Brush")
+        findButtonByText(pw, "Stroke with Current Brush")
                 .requireEnabled()
                 .click();
         keyboard.undoRedo("Brush");
@@ -343,7 +344,7 @@ public class WorkflowTest {
     private void pasteSelection() {
         app.runMenuCommand("Paste Selection");
         var dialog = app.findDialogByTitle("Existing Selection");
-        AppRunner.findButtonByText(dialog, "Intersect").click();
+        findButtonByText(dialog, "Intersect").click();
     }
 
     private void flipHorizontal() {

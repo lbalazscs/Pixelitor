@@ -34,6 +34,7 @@ public class OnePixelBrushSettings extends BrushSettings {
         p.add(new JLabel("Anti-aliasing"));
         if (aa == null) {
             aa = new JCheckBox("", DEFAULT_AA);
+            aa.setName("aa");
         }
         p.add(aa);
 

@@ -134,23 +134,18 @@ public final class SelectionActions {
             RangeParam amount = new RangeParam("Amount (pixels)", 1, 10, 100);
             EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
-            JComponent amountGUI = amount.createGUI();
-            amountGUI.setName("amount");
-            gbh.addLabelAndControl("Amount", amountGUI);
-
-            JComponent typeGUI = type.createGUI();
-            typeGUI.setName("type");
-            gbh.addLabelAndControl("Type", typeGUI);
+            gbh.addLabelAndControl("Amount", amount.createGUI("amount"));
+            gbh.addLabelAndControl("Type", type.createGUI("type"));
 
             new DialogBuilder()
-                    .content(panel)
-                    .title("Modify Selection")
-                    .okText("Change!")
-                    .cancelText("Close")
-                    .validator(d -> {
-                        modifySelection(type, amount);
+                .content(panel)
+                .title("Modify Selection")
+                .okText("Change!")
+                .cancelText("Close")
+                .validator(d -> {
+                    modifySelection(type, amount);
 
-                        // always return false so that
+                    // always return false so that
                         // the Change button does not close it
                         return false;
                     })

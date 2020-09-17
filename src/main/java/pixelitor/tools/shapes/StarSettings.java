@@ -40,7 +40,7 @@ class StarSettings extends ShapeTypeSettings {
     protected JPanel createConfigPanel() {
 //        JPanel p = GUIUtils.arrangeVertically(List.of(width, cap));
         JPanel p = new JPanel();
-        p.add(numBranches.createGUI());
+        p.add(numBranches.createGUI("numBranches"));
         return p;
     }
 

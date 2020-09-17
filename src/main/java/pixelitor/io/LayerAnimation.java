@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,8 +81,7 @@ public class LayerAnimation {
         e.setDelay(delayMillis);
         e.setRepeat(0);
         images.forEach(e::addFrame);
-        boolean ok = e.finish();
-        // TODO handle ok status
+        e.finish();
     }
 
     public void saveToFile(File selectedFile) {

@@ -22,6 +22,7 @@ import org.assertj.swing.edt.GuiActionRunner;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
+import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.guides.Guides;
 import pixelitor.history.History;
@@ -225,5 +226,16 @@ public class EDT {
         assertThat(active(Composition::getCanvas))
             .hasWidth(expectedWidth)
             .hasHeight(expectedHeight);
+    }
+
+    public static int getNumModalDialogs() {
+        return call(GlobalEvents::getNumModalDialogs);
+    }
+
+    public static void assertNumModalDialogsIs(int expected) {
+        int actual = getNumModalDialogs();
+        if (actual != expected) {
+            throw new AssertionError("expected " + expected + ", found " + actual);
+        }
     }
 }

@@ -226,6 +226,11 @@ public class TestHelper {
             return null;
         }).when(view).replaceComp(any(Composition.class));
 
+        doAnswer(invocation -> {
+            currentComp = (Composition) invocation.getArguments()[0];
+            return null;
+        }).when(view).replaceComp(any(Composition.class), any(MaskViewMode.class), anyBoolean());
+
         // when getComp() is called on the mock, then return the currentComp field
         when(view.getComp()).thenAnswer((Answer<Composition>) invocation -> currentComp);
 

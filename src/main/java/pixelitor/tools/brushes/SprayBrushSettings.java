@@ -43,15 +43,15 @@ public class SprayBrushSettings extends BrushSettings {
         BrushSettingsPanel p = new BrushSettingsPanel();
 
         typeModel = ShapeType.asParam(DEFAULT_SHAPE);
-        p.addParam(typeModel);
+        p.addParam(typeModel, "shape");
 
-        p.addSlider(radiusModel);
-        p.addSlider(radiusVariabilityModel);
-        p.addSlider(flowModel);
-        p.addParam(randomOpacityModel);
+        p.addSlider(radiusModel, "avgRadius");
+        p.addSlider(radiusVariabilityModel, "radiusVar");
+        p.addSlider(flowModel, "flow");
+        p.addParam(randomOpacityModel, "rndOpacity");
 
         if (tool != Tools.ERASER) {
-            p.addSlider(colorRandomnessModel);
+            p.addSlider(colorRandomnessModel, "colorRand");
         }
 
         return p;

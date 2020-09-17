@@ -362,10 +362,10 @@ public class DialogBuilder {
             if (notifyGlobalEvents) {
                 if (b) {
                     GlobalEvents.dialogOpened(getTitle());
-                    assert !rootDialog || GlobalEvents.getNumNestedDialogs() == 1;
+                    assert !rootDialog || GlobalEvents.getNumModalDialogs() == 1;
                 } else {
                     GlobalEvents.dialogClosed(getTitle());
-                    assert !rootDialog || GlobalEvents.getNumNestedDialogs() == 0;
+                    assert !rootDialog || GlobalEvents.getNumModalDialogs() == 0;
                 }
             }
             super.setVisible(b);

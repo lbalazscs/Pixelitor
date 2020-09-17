@@ -24,7 +24,6 @@ import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.OpenImages;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.GlobalEvents;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
@@ -294,32 +293,32 @@ public class Keyboard {
     }
 
     public void pressCtrl() {
-        pw.pressKey(VK_CONTROL);
+        robot.pressKey(VK_CONTROL);
         ctrlDown = true;
     }
 
     public void releaseCtrl() {
-        pw.releaseKey(VK_CONTROL);
+        robot.releaseKey(VK_CONTROL);
         ctrlDown = false;
     }
 
     public void pressAlt() {
-        pw.pressKey(VK_ALT);
+        robot.pressKey(VK_ALT);
         altDown = true;
     }
 
     public void releaseAlt() {
-        pw.releaseKey(VK_ALT);
+        robot.releaseKey(VK_ALT);
         altDown = false;
     }
 
     public void pressShift() {
-        pw.pressKey(VK_SHIFT);
+        robot.pressKey(VK_SHIFT);
         shiftDown = true;
     }
 
     public void releaseShift() {
-        pw.releaseKey(VK_SHIFT);
+        robot.releaseKey(VK_SHIFT);
         shiftDown = false;
     }
 
@@ -334,12 +333,9 @@ public class Keyboard {
     public void releaseModifierKeys() {
         assert calledOutsideEDT() : "on EDT";
 
-        // TODO it can release them only on the main window
-        if (EDT.call(() -> GlobalEvents.getNumNestedDialogs() == 0)) {
-            releaseCtrl();
-            releaseAlt();
-            releaseShift();
-        }
+        releaseCtrl();
+        releaseAlt();
+        releaseShift();
     }
 
     public void releaseModifierKeysFromAnyThread() {

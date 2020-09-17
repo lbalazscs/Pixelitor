@@ -43,10 +43,10 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
 
     private void addAngleSettingsSelector() {
         angleJitter = new RangeParam("Angle Jitter (degrees)", 0, 0, 180, true, NONE);
-        addSlider(angleJitter);
+        addSlider(angleJitter, "angleJitter");
 
         angleAware = new BooleanParam("Angle Follows Movement", true);
-        addParam(angleAware);
+        addParam(angleAware, "angleAware");
 
         angleJitter.setAdjustmentListener(this::changeAngleSettings);
         angleAware.setAdjustmentListener(this::changeAngleSettings);
@@ -56,14 +56,14 @@ public class ShapeDabsBrushSettingsPanel extends BrushSettingsPanel {
         RangeParam spacingSelector = new RangeParam("Spacing (radius %)", 1,
                 (int) Math.round(DEFAULT_SPACING_RATIO * 100),
                 1000, true, NONE);
-        addSlider(spacingSelector);
+        addSlider(spacingSelector, "spacing");
         spacingSelector.setAdjustmentListener(
-                () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getPercentageValF())));
+            () -> settings.changeSpacing(new RadiusRatioSpacing(spacingSelector.getPercentageValF())));
     }
 
     private void addShapeTypeSelector(ShapeDabsBrushSettings settings) {
         EnumParam<ShapeType> typeModel = ShapeType.asParam(DEFAULT_SHAPE);
-        JComponent typeSelector = typeModel.createGUI();
+        JComponent typeSelector = typeModel.createGUI("shape");
         typeModel.setAdjustmentListener(() ->
                 settings.setShapeType(typeModel.getSelected()));
 

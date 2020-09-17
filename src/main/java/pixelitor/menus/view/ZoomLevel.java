@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,13 @@
 
 package pixelitor.menus.view;
 
+import pixelitor.Canvas;
+import pixelitor.gui.AutoZoom;
+import pixelitor.gui.ImageArea;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Rnd;
+
+import java.awt.Dimension;
 
 /**
  * The available zoom levels
@@ -26,7 +31,7 @@ import pixelitor.utils.Rnd;
 public enum ZoomLevel {
     Z12("12.5%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 12.5;
         }
 
@@ -40,8 +45,9 @@ public enum ZoomLevel {
             return Z12;
         }
     }, Z18("17.7%") { // 12.5 * sqrt(2)
+
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 17.67766952966369;
         }
 
@@ -56,7 +62,7 @@ public enum ZoomLevel {
         }
     }, Z25("25%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 25;
         }
 
@@ -71,7 +77,7 @@ public enum ZoomLevel {
         }
     }, Z35("35.3%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 35.35533905932738;
         }
 
@@ -86,7 +92,7 @@ public enum ZoomLevel {
         }
     }, Z50("50%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 50;
         }
 
@@ -101,7 +107,7 @@ public enum ZoomLevel {
         }
     }, Z71("70.7%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 70.71067811865476;
         }
 
@@ -116,7 +122,7 @@ public enum ZoomLevel {
         }
     }, Z100("100%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 100;
         }
 
@@ -131,7 +137,7 @@ public enum ZoomLevel {
         }
     }, Z141("141.4%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 141.4213562373095;
         }
 
@@ -146,7 +152,7 @@ public enum ZoomLevel {
         }
     }, Z200("200%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 200;
         }
 
@@ -161,7 +167,7 @@ public enum ZoomLevel {
         }
     }, Z283("282.8%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 282.842712474619;
         }
 
@@ -176,7 +182,7 @@ public enum ZoomLevel {
         }
     }, Z400("400%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 400;
         }
 
@@ -191,7 +197,7 @@ public enum ZoomLevel {
         }
     }, Z566("565.7%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 565.685424949238;
         }
 
@@ -206,7 +212,7 @@ public enum ZoomLevel {
         }
     }, Z800("800%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 800;
         }
 
@@ -221,7 +227,7 @@ public enum ZoomLevel {
         }
     }, Z1131("1131.4%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 1131.370849898476;
         }
 
@@ -236,7 +242,7 @@ public enum ZoomLevel {
         }
     }, Z1600("1600%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 1600;
         }
 
@@ -251,7 +257,7 @@ public enum ZoomLevel {
         }
     }, Z2263("2262.7%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 2262.741699796952;
         }
 
@@ -266,7 +272,7 @@ public enum ZoomLevel {
         }
     }, Z3200("3200%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 3200;
         }
 
@@ -281,7 +287,7 @@ public enum ZoomLevel {
         }
     }, Z4525("4525.5%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 4525.483399593904;
         }
 
@@ -296,7 +302,7 @@ public enum ZoomLevel {
         }
     }, Z6400("6400%") {
         @Override
-        public double getPercentValue() {
+        public double asPercent() {
             return 6400;
         }
 
@@ -331,7 +337,7 @@ public enum ZoomLevel {
         return menuItem.get();
     }
 
-    public abstract double getPercentValue();
+    public abstract double asPercent();
 
     public abstract ZoomLevel zoomIn();
 
@@ -342,10 +348,69 @@ public enum ZoomLevel {
     }
 
     public double getViewScale() {
-        return getPercentValue() / 100.0;
+        return asPercent() / 100.0;
     }
 
     public boolean allowPixelGrid() {
-        return getPercentValue() > 1500;
+        return asPercent() > 1500;
+    }
+
+    /**
+     * Calculate the optimal zoom level for a given canvas,
+     * and possibly for a given auto zoom.
+     */
+    public static ZoomLevel calcZoom(Canvas canvas, AutoZoom autoZoom, boolean zoomInToFitSpace) {
+        if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
+            return Z100;
+        }
+        if (autoZoom == null) {
+            // if this is not an auto zoom, then the algorithm is the same
+            // as for "Fit Space"
+            autoZoom = AutoZoom.FIT_SPACE;
+        }
+
+        double idealZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
+
+        ZoomLevel[] zoomLevels = values();
+        ZoomLevel maximallyZoomedOut = zoomLevels[0];
+
+        if (maximallyZoomedOut.asPercent() > idealZoomPercent) {
+            // the image is so big that it will need scroll bars
+            // even if it is maximally zoomed out
+            return maximallyZoomedOut;
+        }
+
+        ZoomLevel lastOK = maximallyZoomedOut;
+        // iterate all the zoom levels from zoomed out to zoomed in
+        for (ZoomLevel level : zoomLevels) {
+            if (level.asPercent() > idealZoomPercent) {
+                // found one that is too much zoomed in
+                return lastOK;
+            }
+            if (!zoomInToFitSpace) { // we don't want to zoom in more than 100%
+                if (lastOK == Z100) {
+                    return Z100;
+                }
+            }
+            lastOK = level;
+        }
+        // if we get here, the image is so small that even at maximal zoom
+        // it fits in the available space: set it then to the maximal zoom
+        return lastOK;
+    }
+
+    private static double calcSizeRatio(Canvas canvas, AutoZoom autoZoom) {
+        Dimension availableArea = ImageArea.getSize();
+        double availableWidth = availableArea.getWidth();
+        double availableHeight = availableArea.getHeight();
+        if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
+            int internalFrameHeight = 35; // Nimbus
+            availableHeight -= internalFrameHeight;
+        }
+
+        double horRatio = canvas.getWidth() / availableWidth;
+        double verRatio = canvas.getHeight() / availableHeight;
+
+        return autoZoom.selectRatio(horRatio, verRatio);
     }
 }

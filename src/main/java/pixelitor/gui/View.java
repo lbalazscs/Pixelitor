@@ -93,8 +93,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         canvas = comp.getCanvas();
         comp.setView(this);
 
-        ZoomLevel fitZoom = AutoZoom.SPACE.calcZoom(canvas, false);
-        setZoom(fitZoom, null);
+        ZoomLevel fitZoom = ZoomLevel.calcZoom(canvas, null, false);
+        setZoom(fitZoom);
 
         layersPanel = new LayersPanel();
 
@@ -550,12 +550,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         return canvas;
     }
 
-    public void zoomToFit(AutoZoom autoZoom) {
-        ZoomLevel bestZoom = autoZoom.calcZoom(canvas, true);
-        setZoom(bestZoom, null);
+    public void setZoom(AutoZoom autoZoom) {
+        ZoomLevel fittingZoom = ZoomLevel.calcZoom(canvas, autoZoom, true);
+        setZoom(fittingZoom);
     }
 
-    public void setZoomAtCenter(ZoomLevel newZoom) {
+    public void setZoom(ZoomLevel newZoom) {
         setZoom(newZoom, null);
     }
 
@@ -568,11 +568,17 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             return;
         }
 
-        setZoomLevel(newZoom);
+        this.zoomLevel = newZoom;
+        scaling = newZoom.getViewScale();
+        canvas.recalcCoSize(this);
 
-        // otherwise the scrollbars don't appear
-        // when using the tabbed UI
-        revalidate();
+        if (ImageArea.currentModeIs(ImageArea.Mode.FRAMES)) {
+            updateTitle();
+        } else {
+            // otherwise the scrollbars don't appear
+            // when using the tabbed UI
+            revalidate();
+        }
 
         if (viewContainer != null) {
             moveScrollbarsAfterZoom(oldZoom, newZoom, mousePos);
@@ -584,19 +590,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
     }
 
-    private void setZoomLevel(ZoomLevel zoomLevel) {
-        this.zoomLevel = zoomLevel;
-        scaling = zoomLevel.getViewScale();
-        canvas.recalcCoSize(this);
-        updateTitle();
-    }
-
     private void moveScrollbarsAfterZoom(ZoomLevel oldZoom,
                                          ZoomLevel newZoom,
                                          Point mousePos) {
         Rectangle visiblePart = getVisiblePart();
         Point zoomOrigin;
-        if (mousePos != null) { // we had a mouse event
+        if (mousePos != null) { // started from a mouse event
             zoomOrigin = mousePos;
         } else {
             int cx = visiblePart.x + visiblePart.width / 2;
@@ -604,9 +603,8 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
             zoomOrigin = new Point(cx, cy);
         }
-        // the x, y coordinates were generated BEFORE the zooming
-        // so we need to find the corresponding coordinates after zooming
-        // TODO maybe this would not be necessary if we did this earlier?
+        // the x, y coordinates were generated BEFORE the zooming,
+        // now find the corresponding coordinates after zooming
         Point imOrigin = fromComponentToImageSpace(zoomOrigin, oldZoom);
         zoomOrigin = fromImageToComponentSpace(imOrigin, newZoom);
 

@@ -79,14 +79,15 @@ public class CloneTool extends BlendingModeBrushTool {
 
         settingsPanel.addSeparator();
         settingsPanel.addCheckBox("Aligned", true, "alignedCB",
-                cloneBrush::setAligned);
+            cloneBrush::setAligned);
 
         settingsPanel.addSeparator();
         settingsPanel.addCheckBox("Sample All Layers", false,
-                "sampleAllLayersCB", selected -> sampleAllLayers = selected);
+            "sampleAllLayersCB", selected -> sampleAllLayers = selected);
 
         settingsPanel.addSeparator();
-        settingsPanel.addButton("Transform...", e -> transformButtonPressed());
+        settingsPanel.addButton("Transform...", e -> transformButtonPressed(),
+            "transformButton", "Transform while cloning");
 
         addLazyMouseDialogButton();
     }
@@ -105,9 +106,9 @@ public class CloneTool extends BlendingModeBrushTool {
     private JPanel createTransformPanel() {
         var transformPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(transformPanel);
-        gbh.addLabelAndControl("Scale (%):", scaleParam.createGUI());
-        gbh.addLabelAndControl("Rotate (Degrees):", rotationParam.createGUI());
-        gbh.addLabelAndControl("Mirror:", mirrorParam.createGUI());
+        gbh.addLabelAndControl("Scale (%):", scaleParam.createGUI("scale"));
+        gbh.addLabelAndControl("Rotate (Degrees):", rotationParam.createGUI("rotate"));
+        gbh.addLabelAndControl("Mirror:", mirrorParam.createGUI("mirror"));
         return transformPanel;
     }
 

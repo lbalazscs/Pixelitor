@@ -47,14 +47,16 @@ public class ConnectBrushSettings extends BrushSettings {
     protected JPanel createConfigPanel() {
         BrushSettingsPanel p = new BrushSettingsPanel();
 
-        p.addParam(styleModel);
-        p.addSlider(densityModel);
-        p.addSlider(widthModel);
+        p.addParam(styleModel, "length");
+        p.addSlider(densityModel, "density");
+        p.addSlider(widthModel, "width");
 
         resetForEachStroke = new JCheckBox("", RESET_DEFAULT);
+        resetForEachStroke.setName("resetForEach");
         p.addLabelWithControl("Reset History for Each Stroke: ", resetForEachStroke);
 
-        p.addOnlyButton("Reset History Now", e -> ConnectBrush.deleteHistory());
+        p.addOnlyButton("Reset History Now",
+            e -> ConnectBrush.deleteHistory(), "resetHistNow");
 
         return p;
     }

@@ -26,15 +26,7 @@ import java.awt.event.ActionListener;
 import java.awt.font.TextAttribute;
 import java.util.Map;
 
-import static java.awt.font.TextAttribute.KERNING;
-import static java.awt.font.TextAttribute.KERNING_ON;
-import static java.awt.font.TextAttribute.LIGATURES;
-import static java.awt.font.TextAttribute.LIGATURES_ON;
-import static java.awt.font.TextAttribute.STRIKETHROUGH;
-import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
-import static java.awt.font.TextAttribute.TRACKING;
-import static java.awt.font.TextAttribute.UNDERLINE;
-import static java.awt.font.TextAttribute.UNDERLINE_ON;
+import static java.awt.font.TextAttribute.*;
 
 /**
  * GUI for the advanced font attribute settings
@@ -97,8 +89,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
         trackingParam = new RangeParam("", -20, 0, 70);
         trackingParam.setValue(tracking);
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
-        var trackingGUI = trackingParam.createGUI();
-        trackingGUI.setName("trackingGUI");
+        var trackingGUI = trackingParam.createGUI("trackingGUI");
         gbh.addLabelAndControl("Tracking (Letter-spacing):", trackingGUI);
     }
 

@@ -45,17 +45,19 @@ public class BrushSettingsPanel extends JPanel {
         gbh.addLabelAndControlNoStretch(text, c);
     }
 
-    public void addSlider(RangeParam param) {
+    public void addSlider(RangeParam param, String name) {
         var slider = new SliderSpinner(param, NONE, true);
+        slider.setName(name);
         gbh.addLabelAndControl(param.getName() + ":", slider);
     }
 
-    public void addParam(FilterParam param) {
-        gbh.addLabelAndControlNoStretch(param.getName() + ":", param.createGUI());
+    public void addParam(FilterParam param, String name) {
+        gbh.addLabelAndControlNoStretch(param.getName() + ":", param.createGUI(name));
     }
 
-    public void addOnlyButton(String text, ActionListener action) {
-        var button = new JButton(text);
+    public void addOnlyButton(String text, ActionListener action, String name) {
+        JButton button = new JButton(text);
+        button.setName(name);
         gbh.addOnlyControl(button);
         button.addActionListener(action);
     }

@@ -39,7 +39,7 @@ class RectangleSettings extends ShapeTypeSettings {
     @Override
     protected JPanel createConfigPanel() {
         JPanel p = new JPanel();
-        p.add(radius.createGUI());
+        p.add(radius.createGUI("radius"));
         return p;
     }
 

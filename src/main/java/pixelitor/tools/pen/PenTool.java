@@ -123,12 +123,15 @@ public class PenTool extends Tool {
 //        settingsPanel.addButton(traceAction, "traceAction",
 //                "Trace the path with a stroke or with a tool");
 
-        settingsPanel.addButton(traceWithBrush);
-        settingsPanel.addButton(traceWithEraser);
-        settingsPanel.addButton(traceWithSmudge);
+        settingsPanel.addButton(traceWithBrush, "traceWithBrush",
+            "Stroke the path using the current settings of the Brush Tool");
+        settingsPanel.addButton(traceWithEraser, "traceWithEraser",
+            "Stroke the path using the current settings of the Eraser Tool");
+        settingsPanel.addButton(traceWithSmudge, "traceWithSmudge",
+            "Stroke the path using the current settings of the Smudge Tool");
 
         if (RunContext.isDevelopment()) {
-            settingsPanel.addButton(dumpPathAction);
+            settingsPanel.addButton(dumpPathAction, "dumpPathAction", "");
         }
     }
 

@@ -21,7 +21,6 @@ import com.bric.util.JVM;
 import org.assertj.swing.core.BasicRobot;
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.Robot;
-import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.finder.JFileChooserFinder;
 import org.assertj.swing.finder.JOptionPaneFinder;
 import org.assertj.swing.finder.WindowFinder;
@@ -33,6 +32,7 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
 import pixelitor.io.IOTasks;
 import pixelitor.selection.SelectionModifyType;
+import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
@@ -47,7 +47,11 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
+import static pixelitor.guitest.AJSUtils.*;
+import static pixelitor.tools.BrushType.*;
+import static pixelitor.tools.Tools.ERASER;
 import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.utils.Threads.threadInfo;
 
 /**
  * A utility class for running Pixelitor with assertj-swing based tests
@@ -157,6 +161,43 @@ public class AppRunner {
         findJOptionPane().yesButton().click();
     }
 
+    public void testBrushSettings(BrushType brushType, Tool tool) {
+        var dialog = findDialogByTitleStartingWith("Settings for the");
+
+        if (brushType == CALLIGRAPHY) {
+            slideRandomly(dialog.slider("angle"));
+        } else if (brushType == SHAPE) {
+            chooseRandomly(dialog.comboBox("shape"));
+            slideRandomly(dialog.slider("spacing"));
+            slideRandomly(dialog.slider("angleJitter"));
+            checkRandomly(dialog.checkBox("angleAware"));
+        } else if (brushType == SPRAY) {
+            chooseRandomly(dialog.comboBox("shape"));
+            slideRandomly(dialog.slider("avgRadius"));
+            slideRandomly(dialog.slider("radiusVar"));
+            slideRandomly(dialog.slider("flow"));
+            checkRandomly(dialog.checkBox("rndOpacity"));
+            slideRandomly(dialog.slider("flow"));
+            if (tool != ERASER) {
+                slideRandomly(dialog.slider("colorRand"));
+            }
+        } else if (brushType == CONNECT) {
+            chooseRandomly(dialog.comboBox("length"));
+            slideRandomly(dialog.slider("density"));
+            slideRandomly(dialog.slider("width"));
+            checkRandomly(dialog.checkBox("resetForEach"));
+            pushRandomly(0.1, dialog.button("resetHistNow"));
+        } else if (brushType == OUTLINE_CIRCLE || brushType == OUTLINE_SQUARE) {
+            checkRandomly(dialog.checkBox("dependsOnSpeed"));
+        } else if (brushType == ONE_PIXEL) {
+            checkRandomly(dialog.checkBox("aa"));
+        } else {
+            throw new IllegalStateException("brushType is " + brushType);
+        }
+
+        dialog.button("ok").click();
+    }
+
     void clickTool(Tool tool) {
         pw.toggleButton(tool.getName() + " Tool Button").click();
         //EDT.run(() -> Tools.changeTo(tool));
@@ -166,6 +207,8 @@ public class AppRunner {
     }
 
     void runMenuCommand(String text) {
+        assert calledOutsideEDT() : threadInfo();
+
 //        JMenuItemFixture menuItem = EDT.call(() -> findMenuItemByText(text));
 //        menuItem.click();
 
@@ -232,14 +275,7 @@ public class AppRunner {
         boolean warnings = true;
         while (warnings) {
             try {
-                var optionPane = findJOptionPane();
-                // click "Don't Save"
-                optionPane.button(new GenericTypeMatcher<>(JButton.class) {
-                    @Override
-                    protected boolean isMatching(JButton button) {
-                        return button.getText().equals("Don't Save");
-                    }
-                }).click();
+                findJOptionPane().buttonWithText("Don't Save").click();
             } catch (Exception e) { // no more JOptionPane found
                 warnings = false;
             }
@@ -249,20 +285,7 @@ public class AppRunner {
     }
 
     void resize(int targetWidth) {
-        runMenuCommand("Resize...");
-        var dialog = findDialogByTitle("Resize");
-
-        dialog.textBox("widthTF")
-            .deleteText()
-            .enterText(String.valueOf(targetWidth));
-
-        // no need to also set the height, because
-        // constrain proportions is checked by default
-
-        dialog.button("ok").click();
-        dialog.requireNotVisible();
-
-        Utils.sleep(5, SECONDS);
+        resize(targetWidth, -1);
     }
 
     void resize(int targetWidth, int targetHeight) {
@@ -273,12 +296,16 @@ public class AppRunner {
             .deleteText()
             .enterText(String.valueOf(targetWidth));
 
-        // disable constrain proportions
-        dialog.checkBox().uncheck();
+        if (targetHeight == -1) {
+            // no target height was given, rely on "constrain proportions"
+        } else {
+            // disable constrain proportions
+            dialog.checkBox().uncheck();
 
-        dialog.textBox("heightTF")
-            .deleteText()
-            .enterText(String.valueOf(targetHeight));
+            dialog.textBox("heightTF")
+                .deleteText()
+                .enterText(String.valueOf(targetHeight));
+        }
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -307,22 +334,22 @@ public class AppRunner {
         dialog.comboBox("type").selectItem(type.toString());
 
         for (int i = 0; i < numClicks; i++) {
-            findButtonByText(dialog, "Change!").click();
+            AJSUtils.findButtonByText(dialog, "Change!").click();
         }
 
-        findButtonByText(dialog, "Close").click();
+        AJSUtils.findButtonByText(dialog, "Close").click();
         dialog.requireNotVisible();
     }
 
     static void clickPopupMenu(JPopupMenuFixture popupMenu, String text) {
-        findPopupMenuFixtureByText(popupMenu, text)
+        AJSUtils.findPopupMenuFixtureByText(popupMenu, text)
             .requireEnabled()
             .click();
     }
 
     void expectAndCloseErrorDialog() {
         var errorDialog = findDialogByTitle("Error");
-        findButtonByText(errorDialog, "OK").click();
+        AJSUtils.findButtonByText(errorDialog, "OK").click();
         errorDialog.requireNotVisible();
     }
 
@@ -352,6 +379,10 @@ public class AppRunner {
         return WindowFinder.findDialog("filterDialog").using(robot);
     }
 
+    DialogFixture findAnyDialog() {
+        return WindowFinder.findDialog(JDialog.class).using(robot);
+    }
+
     DialogFixture findDialogByTitle(String title) {
         return new DialogFixture(robot, robot.finder().find(new GenericTypeMatcher<>(JDialog.class) {
             @Override
@@ -379,22 +410,19 @@ public class AppRunner {
 
             @Override
             public String toString() {
-                return "Matcher for JDialogs with title = " + start;
+                return "Matcher for JDialogs with title starting with " + start;
             }
         }));
     }
 
     JOptionPaneFixture findJOptionPane() {
-        return JOptionPaneFinder.findOptionPane().withTimeout(10, SECONDS).using(robot);
+        return JOptionPaneFinder.findOptionPane()
+            .withTimeout(10, SECONDS)
+            .using(robot);
     }
 
     JFileChooserFixture findSaveFileChooser() {
         return JFileChooserFinder.findFileChooser("save").using(robot);
-    }
-
-    static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
-        var matcher = JButtonMatcher.withText(text).andShowing();
-        return container.button(matcher);
     }
 
     public JButtonFixture findButton(String name) {
@@ -402,78 +430,7 @@ public class AppRunner {
     }
 
     public JButtonFixture findButtonByText(String text) {
-        return findButtonByText(pw, text);
-    }
-
-    static JMenuItemFixture findPopupMenuFixtureByText(JPopupMenuFixture popupMenu, String text) {
-        var menuItemFixture = popupMenu.menuItem(
-            new GenericTypeMatcher<JMenuItem>(JMenuItem.class) {
-                @Override
-                protected boolean isMatching(JMenuItem menuItem) {
-                    if (!menuItem.isShowing()) {
-                        return false; // not interested in menuItems that are not currently displayed
-                    }
-                    String menuItemText = menuItem.getText();
-                    if (menuItemText == null) {
-                        menuItemText = "";
-                    }
-                    return menuItemText.equals(text);
-                }
-
-                @Override
-                public String toString() {
-                    return "[Popup menu item Matcher, text = " + text + "]";
-                }
-            });
-
-        return menuItemFixture;
-    }
-
-    static JButtonFixture findButtonByActionName(ComponentContainerFixture container, String actionName) {
-        return container.button(
-            new GenericTypeMatcher<>(JButton.class) {
-                @Override
-                protected boolean isMatching(JButton button) {
-                    if (!button.isShowing()) {
-                        return false; // not interested in buttons that are not currently displayed
-                    }
-                    Action action = button.getAction();
-                    if (action == null) {
-                        return false;
-                    }
-                    String buttonActionName = (String) action.getValue(Action.NAME);
-                    return actionName.equals(buttonActionName);
-                }
-
-                @Override
-                public String toString() {
-                    return "[Button Action Name Matcher, action name = " + actionName + "]";
-                }
-            });
-    }
-
-    static JButtonFixture findButtonByToolTip(ComponentContainerFixture container, String toolTip) {
-        var buttonFixture = container.button(
-            new GenericTypeMatcher<>(JButton.class) {
-                @Override
-                protected boolean isMatching(JButton button) {
-                    if (!button.isShowing()) {
-                        return false; // not interested in buttons that are not currently displayed
-                    }
-                    String buttonToolTip = button.getToolTipText();
-                    if (buttonToolTip == null) {
-                        buttonToolTip = "";
-                    }
-                    return buttonToolTip.equals(toolTip);
-                }
-
-                @Override
-                public String toString() {
-                    return "[Button Tooltip Matcher, tooltip = " + toolTip + "]";
-                }
-            });
-
-        return buttonFixture;
+        return AJSUtils.findButtonByText(pw, text);
     }
 
     public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
@@ -481,7 +438,7 @@ public class AppRunner {
         var dialog = findFilterDialog();
 
         for (String buttonText : extraButtonsToClick) {
-            findButtonByText(dialog, buttonText)
+            AJSUtils.findButtonByText(dialog, buttonText)
                 .requireEnabled()
                 .click();
         }

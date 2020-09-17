@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.assertions;
 
 import pixelitor.layers.ImageLayer;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -62,6 +63,17 @@ public class ImageLayerAssert extends ContentLayerAssert<ImageLayerAssert, Image
     public ImageLayerAssert imageBoundsIsEqualTo(Rectangle bounds) {
         isNotNull();
         assertThat(actual.getImageBounds()).isEqualTo(bounds);
+        return this;
+    }
+
+    public ImageLayerAssert imageSizeIsEqualTo(int width, int height) {
+        isNotNull();
+
+        BufferedImage img = actual.getImage();
+        Dimension foundSize = new Dimension(img.getWidth(), img.getHeight());
+        Dimension expectedSize = new Dimension(width, height);
+        assertThat(foundSize).isEqualTo(expectedSize);
+
         return this;
     }
 }

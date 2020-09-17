@@ -156,10 +156,10 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            if (outputSettingsPanel != null) {
-                throw new IllegalStateException("called twice");
+            if (outputSettingsPanel == null) {
+                // keeps the output settings by reusing the panel
+                outputSettingsPanel = new TweenOutputSettingsPanel();
             }
-            outputSettingsPanel = new TweenOutputSettingsPanel();
             return outputSettingsPanel;
         }
 

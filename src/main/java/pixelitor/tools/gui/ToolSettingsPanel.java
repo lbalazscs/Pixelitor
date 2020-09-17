@@ -58,12 +58,6 @@ public class ToolSettingsPanel extends JPanel {
         addWithLabel(text, box, name);
     }
 
-    public JButton addButton(Action action) {
-        JButton button = new JButton(action);
-        add(button);
-        return button;
-    }
-
     public JButton addButton(Action action, String name, String toolTip) {
         JButton button = new JButton(action);
         button.setName(name);
@@ -72,14 +66,8 @@ public class ToolSettingsPanel extends JPanel {
         return button;
     }
 
-    public JButton addButton(String text, ActionListener listener) {
-        JButton button = new JButton(text);
-        add(button);
-        button.addActionListener(listener);
-        return button;
-    }
-
-    public JButton addButton(String text, ActionListener listener, String name, String toolTip) {
+    public JButton addButton(String text, ActionListener listener,
+                             String name, String toolTip) {
         JButton button = new JButton(text);
         button.setName(name);
         button.setToolTipText(toolTip);

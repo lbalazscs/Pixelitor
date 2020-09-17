@@ -88,7 +88,8 @@ public class SelectionTool extends DragTool {
 
         settingsPanel.addSeparator();
 
-        settingsPanel.addButton(SelectionActions.getCrop());
+        settingsPanel.addButton(SelectionActions.getCrop(),
+            "cropButton", "Crop using the current selection");
 
         settingsPanel.addButton(SelectionActions.getConvertToPath(),
             "toPathButton", "Convert the selection to a path");

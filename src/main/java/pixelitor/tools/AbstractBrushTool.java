@@ -658,7 +658,7 @@ public abstract class AbstractBrushTool extends Tool {
         this.brush = brush;
     }
 
-    private BrushType getBrushType() {
+    public BrushType getBrushType() {
         return (BrushType) typeCB.getSelectedItem();
     }
 

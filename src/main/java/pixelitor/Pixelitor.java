@@ -87,7 +87,7 @@ public class Pixelitor {
             }
         }
 
-        ExceptionHandler.INSTANCE.addLastHandler((t, e) -> Messages.showException(e, t));
+        ExceptionHandler.INSTANCE.addHandler((t, e) -> Messages.showException(e, t));
 
         EventQueue.invokeLater(() -> {
             try {

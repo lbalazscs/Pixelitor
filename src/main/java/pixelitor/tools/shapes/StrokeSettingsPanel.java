@@ -24,14 +24,7 @@ import pixelitor.filters.gui.StrokeParam;
 import pixelitor.gui.utils.GridBagHelper;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.geom.QuadCurve2D;
 
 import static java.awt.BorderLayout.CENTER;
@@ -39,9 +32,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.tools.shapes.ShapeType.KIWI;
-import static pixelitor.tools.shapes.StrokeType.BASIC;
-import static pixelitor.tools.shapes.StrokeType.SHAPE;
-import static pixelitor.tools.shapes.StrokeType.ZIGZAG;
+import static pixelitor.tools.shapes.StrokeType.*;
 
 /**
  * Stroke configuration used by the shapes tool and by
@@ -54,14 +45,14 @@ public class StrokeSettingsPanel extends JPanel {
 
         setLayout(new GridBagLayout());
 
-        JComponent strokeWidthGUI = strokeWidthParam.createGUI();
+        JComponent strokeWidthGUI = strokeWidthParam.createGUI("width");
         GridBagConstraints gbc = new GridBagConstraints(
-                0, 0, 1, 1,
-                1.0, 0,
-                GridBagConstraints.CENTER,
-                GridBagConstraints.HORIZONTAL,
-                new Insets(0, 0, 0, 0),
-                3, 3);
+            0, 0, 1, 1,
+            1.0, 0,
+            GridBagConstraints.CENTER,
+            GridBagConstraints.HORIZONTAL,
+            new Insets(0, 0, 0, 0),
+            3, 3);
         add(strokeWidthGUI, gbc);
 
         JPanel capJoinPanel = createCapJoinPanel(sp);
@@ -89,7 +80,7 @@ public class StrokeSettingsPanel extends JPanel {
 
         var gbh = new GridBagHelper(p);
 
-        JComponent capSelector = capParam.createGUI();
+        JComponent capSelector = capParam.createGUI("cap");
 
         // Dirty trick: manually set the preferred width so that
         // the layout aligns with the layout in the other panel.
@@ -98,7 +89,7 @@ public class StrokeSettingsPanel extends JPanel {
         dim.setSize(dim.getWidth() * 2, dim.getHeight());
         capSelector.setPreferredSize(dim);
 
-        JComponent joinSelector = joinParam.createGUI();
+        JComponent joinSelector = joinParam.createGUI("join");
 
         capParam.setToolTip("The shape of the line endpoints");
         joinParam.setToolTip("The way lines connect at the corners");
@@ -122,25 +113,22 @@ public class StrokeSettingsPanel extends JPanel {
         shapeTypeParam.selectAndSetAsDefault(KIWI);
 
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
-                strokeType -> strokeType == SHAPE);
+            strokeType -> strokeType == SHAPE);
 
         strokeTypeParam.setupDisableOtherIf(dashedParam,
-                strokeType -> strokeType != BASIC
-                        && strokeType != ZIGZAG
-                        && strokeType != SHAPE);
+            strokeType -> strokeType != BASIC
+                && strokeType != ZIGZAG
+                && strokeType != SHAPE);
 
         var gbh = new GridBagHelper(p);
-        JComponent strokeTypeGUI = strokeTypeParam.createGUI();
-        strokeTypeGUI.setName("strokeType");
-        gbh.addLabelAndControl(StrokeType.NAME + ":", strokeTypeGUI);
+        gbh.addLabelAndControl(StrokeType.NAME + ":",
+            strokeTypeParam.createGUI("strokeType"));
 
-        JComponent shapeTypeGUI = shapeTypeParam.createGUI();
-        shapeTypeGUI.setName("shapeType");
-        gbh.addLabelAndControl(ShapeType.NAME + ":", shapeTypeGUI);
+        gbh.addLabelAndControl(ShapeType.NAME + ":",
+            shapeTypeParam.createGUI("shapeType"));
 
-        JComponent dashedGUI = dashedParam.createGUI();
-        dashedGUI.setName("dashed");
-        gbh.addLabelAndControl("Dashed:", dashedGUI);
+        gbh.addLabelAndControl("Dashed:",
+            dashedParam.createGUI("dashed"));
 
         return p;
     }

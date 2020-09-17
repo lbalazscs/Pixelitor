@@ -31,7 +31,7 @@ public class ZoomMenuItem extends OpenImageAwareRadioButtonMenuItem {
 
         addActionListener(e -> {
             View view = OpenImages.getActiveView();
-            view.setZoom(zoomLevel, null);
+            view.setZoom(zoomLevel);
         });
     }
 }

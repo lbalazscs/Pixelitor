@@ -41,6 +41,10 @@ public class Threads {
         return EventQueue.isDispatchThread();
     }
 
+    public static boolean calledOn(String expectedThreadName) {
+        return threadName().equals(expectedThreadName);
+    }
+
     public static boolean calledOutsideEDT() {
         return !EventQueue.isDispatchThread();
     }

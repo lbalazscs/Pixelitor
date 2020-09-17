@@ -24,8 +24,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.TestHelper;
+import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.ImageLayer;
 import pixelitor.testutils.NumLayers;
@@ -48,9 +48,8 @@ public class CompActionTest {
     private static final int ORIG_CANVAS_WIDTH = 20;
     private static final int ORIG_CANVAS_HEIGHT = 10;
 
-    private Composition comp;
-
-    private ImageLayer layer2;
+    private Composition origComp;
+    private View view;
 
     private Rectangle origSelection;
     private final int origTX;
@@ -59,19 +58,19 @@ public class CompActionTest {
     private final int origImageHeight;
 
     // the parameters
-    private final NumLayers numLayers;
     private final WithTranslation withTranslation;
     private final WithSelection withSelection;
     private final WithMask withMask;
+    private final NumLayers numLayers;
 
-    public CompActionTest(NumLayers numLayers,
-                          WithTranslation withTranslation,
+    public CompActionTest(WithTranslation withTranslation,
                           WithSelection withSelection,
-                          WithMask withMask) {
-        this.numLayers = numLayers;
+                          WithMask withMask,
+                          NumLayers numLayers) {
         this.withSelection = withSelection;
         this.withTranslation = withTranslation;
         this.withMask = withMask;
+        this.numLayers = numLayers;
 
         origTX = withTranslation.getExpectedTX();
         origTY = withTranslation.getExpectedTY();
@@ -80,14 +79,14 @@ public class CompActionTest {
         origImageHeight = ORIG_CANVAS_HEIGHT - origTY;
     }
 
-    @Parameters(name = "{index}: layers = {0}, translation = {1}, selection = {2}, mask = {3}")
+    @Parameters(name = "{index}: translation = {0}, selection = {1}, mask = {2}, layers = {3}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {NumLayers.MORE, WithTranslation.NO, WithSelection.NO, WithMask.NO},
-                {NumLayers.MORE, WithTranslation.NO, WithSelection.NO, WithMask.YES},
-                {NumLayers.ONE, WithTranslation.NO, WithSelection.NO, WithMask.YES},
-                {NumLayers.ONE, WithTranslation.YES, WithSelection.NO, WithMask.YES},
-                {NumLayers.ONE, WithTranslation.NO, WithSelection.YES, WithMask.YES},
+            {WithTranslation.NO, WithSelection.NO, WithMask.NO, NumLayers.ONE},
+            {WithTranslation.YES, WithSelection.NO, WithMask.NO, NumLayers.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.NO, NumLayers.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.ONE},
+            {WithTranslation.YES, WithSelection.YES, WithMask.YES, NumLayers.MORE},
         });
     }
 
@@ -100,47 +99,44 @@ public class CompActionTest {
 
     @Before
     public void beforeEachTest() {
-        comp = TestHelper.create2LayerComp(true);
-        assertThat(comp)
-                .isNotEmpty()
-                .hasName("Test")
-                .numLayersIs(2)
-                .layerNamesAre("layer 1", "layer 2")
-                .activeLayerNameIs("layer 2")
-                .doesNotHaveSelection()
-                .firstLayerHasMask()
-                .secondLayerHasMask();
+        origComp = TestHelper.create2LayerComp(true);
+        assertThat(origComp)
+            .isNotEmpty()
+            .hasName("Test")
+            .numLayersIs(2)
+            .layerNamesAre("layer 1", "layer 2")
+            .activeLayerNameIs("layer 2")
+            .doesNotHaveSelection()
+            .firstLayerHasMask()
+            .secondLayerHasMask();
 
-//        ImageLayer layer1 = (ImageLayer) comp.getLayer(0);
-        layer2 = (ImageLayer) comp.getLayer(1);
-
-        numLayers.setupFor(comp);
-        withTranslation.setupFor(comp);
-        withSelection.setupFor(comp);
-        withMask.setupFor(comp);
+        withTranslation.setupFor(origComp);
+        withSelection.setupFor(origComp);
+        withMask.setupFor(origComp);
+        numLayers.setupFor(origComp);
 
         if (withSelection.isTrue()) {
             origSelection = WithSelection.SELECTION_SHAPE;
         }
         History.clear();
+        view = origComp.getView();
     }
 
     private void checkOriginalState() {
-        assertThat(comp)
-                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
-                .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
-                .activeLayerTranslationIs(origTX, origTY)
-                .allLayerUIsAreOK()
-                .invariantIsOK();
+        assert view.getComp() == origComp;
+
+        assertThat(origComp)
+            .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+            .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight)
+            .activeLayerTranslationIs(origTX, origTY)
+            .allLayerUIsAreOK()
+            .invariantIsOK();
 
         if (withSelection.isTrue()) {
-            assertThat(comp).selectionBoundsIs(origSelection);
+            assertThat(origComp).selectionBoundsIs(origSelection);
         }
 
-        if (numLayers == NumLayers.MORE) {
-            // check the translation of the non-active layer
-            assertThat(layer2).translationIs(0, 0);
-        }
+        checkTranslationOfNonActiveLayer();
     }
 
     @Test
@@ -151,7 +147,10 @@ public class CompActionTest {
         int east = 4;
         int south = 5;
         int west = 2;
-        new EnlargeCanvas(north, east, south, west).process(comp).join();
+        EnlargeCanvas action = new EnlargeCanvas(north, east, south, west);
+        Composition enlarged = action.process(view.getComp()).join();
+        assert enlarged != origComp;
+        assert view.getComp() == enlarged;
 
         checkStateAfterEnlargeCanvas(north, east, south, west);
 
@@ -168,24 +167,24 @@ public class CompActionTest {
         int newCanvasWidth = ORIG_CANVAS_WIDTH + west + east;
         int newCanvasHeight = ORIG_CANVAS_HEIGHT + north + south;
 
-        var newComp = OpenImages.getActiveComp();
+        var newComp = view.getComp();
 
         assertThat(newComp)
-                .invariantIsOK()
-                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
-                .activeLayerTranslationIs(
-                        Math.min(0, origTX + west),
-                        Math.min(0, origTY + north))
-                .activeLayerAndMaskImageSizeIs(
-                        origImageWidth + east + Math.max(0, origTX + west),
-                        origImageHeight + south + Math.max(0, origTY + north));
+            .invariantIsOK()
+            .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+            .activeLayerTranslationIs(
+                Math.min(0, origTX + west),
+                Math.min(0, origTY + north))
+            .activeLayerAndMaskImageSizeIs(
+                origImageWidth + east + Math.max(0, origTX + west),
+                origImageHeight + south + Math.max(0, origTY + north));
 
         if (withSelection.isTrue()) {
             assertThat(newComp).selectionBoundsIs(new Rectangle(
-                    origSelection.x + west,
-                    origSelection.y + north,
-                    origSelection.width,
-                    origSelection.height));
+                origSelection.x + west,
+                origSelection.y + north,
+                origSelection.width,
+                origSelection.height));
         }
     }
 
@@ -195,7 +194,9 @@ public class CompActionTest {
 
         int targetWidth = ORIG_CANVAS_WIDTH / 2;
         int targetHeight = ORIG_CANVAS_HEIGHT / 2;
-        new Resize(targetWidth, targetHeight, false).process(comp).join();
+        Composition resized = new Resize(targetWidth, targetHeight, false).process(view.getComp()).join();
+        assert resized != origComp;
+        assert view.getComp() == resized;
 
         checkStateAfterResize();
 
@@ -209,14 +210,14 @@ public class CompActionTest {
     }
 
     private void checkStateAfterResize() {
-        var newComp = OpenImages.getActiveComp();
+        var newComp = view.getComp();
 
         if (withSelection.isTrue()) {
             var halfOfOrigSelection = new Rectangle(
-                    origSelection.x / 2,
-                    origSelection.y / 2,
-                    origSelection.width / 2,
-                    origSelection.height / 2);
+                origSelection.x / 2,
+                origSelection.y / 2,
+                origSelection.width / 2,
+                origSelection.height / 2);
             assertThat(newComp).selectionBoundsIs(halfOfOrigSelection);
         }
 
@@ -224,71 +225,58 @@ public class CompActionTest {
         int newCanvasHeight = ORIG_CANVAS_HEIGHT / 2;
 
         assertThat(newComp)
-                .invariantIsOK()
-                .canvasSizeIs(newCanvasWidth, newCanvasHeight)
-                .activeLayerAndMaskImageSizeIs(
-                        newCanvasWidth - origTX / 2,
-                        newCanvasHeight - origTY / 2)
-                .activeLayerTranslationIs(
-                        Math.min(0, origTX / 2),
-                        Math.min(0, origTY / 2));
+            .invariantIsOK()
+            .canvasSizeIs(newCanvasWidth, newCanvasHeight)
+            .activeLayerAndMaskImageSizeIs(
+                newCanvasWidth - origTX / 2,
+                newCanvasHeight - origTY / 2)
+            .activeLayerTranslationIs(
+                Math.min(0, origTX / 2),
+                Math.min(0, origTY / 2));
     }
 
     @Test
     public void rotate90() {
-        checkOriginalState();
-        new Rotate(ANGLE_90).process(comp).join();
-        checkStateAfterRotate(ANGLE_90);
-
-        History.assertNumEditsIs(1);
-
-        History.undo("Rotate 90° CW");
-        checkOriginalState();
-
-        History.redo("Rotate 90° CW");
-        checkStateAfterRotate(ANGLE_90);
+        testRotate(ANGLE_90, "Rotate 90° CW");
     }
 
     @Test
     public void rotate180() {
-        checkOriginalState();
-        new Rotate(ANGLE_180).process(comp).join();
-        checkStateAfterRotate(ANGLE_180);
-
-        History.assertNumEditsIs(1);
-
-        History.undo("Rotate 180°");
-        checkOriginalState();
-
-        History.redo("Rotate 180°");
-        checkStateAfterRotate(ANGLE_180);
+        testRotate(ANGLE_180, "Rotate 180°");
     }
 
     @Test
     public void rotate270() {
+        testRotate(ANGLE_270, "Rotate 90° CCW");
+    }
+
+    private void testRotate(Rotate.SpecialAngle angle, String editName) {
         checkOriginalState();
-        new Rotate(ANGLE_270).process(comp).join();
-        checkStateAfterRotate(ANGLE_270);
+        Composition rotated = new Rotate(angle).process(view.getComp()).join();
+        assert rotated != origComp;
+        assert view.getComp() == rotated;
+
+        checkStateAfterRotate(angle);
 
         History.assertNumEditsIs(1);
 
-        History.undo("Rotate 90° CCW");
+        History.undo(editName);
         checkOriginalState();
 
-        History.redo("Rotate 90° CCW");
-        checkStateAfterRotate(ANGLE_270);
+        History.redo(editName);
+        checkStateAfterRotate(angle);
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
     private void checkStateAfterRotate(Rotate.SpecialAngle angle) {
-        var newComp = OpenImages.getActiveComp();
+        var newComp = view.getComp();
 
         if (angle == ANGLE_180) {
             assertThat(newComp)
-                    .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
-                    .activeLayerAndMaskImageSizeIs(
-                            origImageWidth,
-                            origImageHeight);
+                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+                .activeLayerAndMaskImageSizeIs(
+                    origImageWidth,
+                    origImageHeight);
         } else {
             assertThat(newComp)
                 .canvasSizeIs(ORIG_CANVAS_HEIGHT, ORIG_CANVAS_WIDTH)
@@ -312,7 +300,6 @@ public class CompActionTest {
         }
 
         if (withSelection.isTrue()) {
-
             int distFromBottom = ORIG_CANVAS_HEIGHT - origSelection.height - origSelection.y;
             int distFromRight = ORIG_CANVAS_WIDTH - origSelection.width - origSelection.x;
             int distFromLeft = origSelection.x;
@@ -333,62 +320,53 @@ public class CompActionTest {
             assertThat(newComp).selectionBoundsIs(rotatedSelectionBounds);
         }
 
-        if (numLayers == NumLayers.MORE) {
-            // check the translation of the non-active layer
-            assertThat(layer2).translationIs(0, 0);
-        }
-
-        assertThat(comp).invariantIsOK();
+        assertThat(newComp).invariantIsOK();
     }
 
     @Test
     public void flipHorizontal() {
-        checkOriginalState();
-
-        new Flip(HORIZONTAL).process(comp).join();
-        checkStateAfterFlip(HORIZONTAL);
-
-        History.assertNumEditsIs(1);
-
-        History.undo("Flip Horizontal");
-        checkOriginalState();
-
-        History.redo("Flip Horizontal");
-        checkStateAfterFlip(HORIZONTAL);
+        testFlip(HORIZONTAL, "Flip Horizontal");
     }
 
     @Test
     public void flipVertical() {
+        testFlip(VERTICAL, "Flip Vertical");
+    }
+
+    private void testFlip(Flip.Direction direction, String editName) {
         checkOriginalState();
 
-        new Flip(VERTICAL).process(comp).join();
-        checkStateAfterFlip(VERTICAL);
+        Composition flipped = new Flip(direction).process(view.getComp()).join();
+        assert flipped != origComp;
+        assert view.getComp() == flipped;
+
+        checkStateAfterFlip(direction);
 
         History.assertNumEditsIs(1);
 
-        History.undo("Flip Vertical");
+        History.undo(editName);
         checkOriginalState();
 
-        History.redo("Flip Vertical");
-        checkStateAfterFlip(VERTICAL);
+        History.redo(editName);
+        checkStateAfterFlip(direction);
     }
 
     private void checkStateAfterFlip(Flip.Direction direction) {
-        var newComp = OpenImages.getActiveComp();
+        var newComp = view.getComp();
 
         assertThat(newComp)
-                .invariantIsOK()
-                .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
-                .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
+            .invariantIsOK()
+            .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT)
+            .activeLayerAndMaskImageSizeIs(origImageWidth, origImageHeight);
 
         if (direction == HORIZONTAL) {
             assertThat(newComp).activeLayerTranslationIs(
-                    -(origImageWidth - ORIG_CANVAS_WIDTH + origTX),
-                    origTY);
+                -(origImageWidth - ORIG_CANVAS_WIDTH + origTX),
+                origTY);
         } else if (direction == VERTICAL) {
             assertThat(newComp).activeLayerTranslationIs(
-                    origTX,
-                    -(origImageHeight - ORIG_CANVAS_HEIGHT + origTY));
+                origTX,
+                -(origImageHeight - ORIG_CANVAS_HEIGHT + origTY));
         } else {
             throw new IllegalStateException();
         }
@@ -405,55 +383,110 @@ public class CompActionTest {
                 throw new IllegalStateException();
             }
             assertThat(newComp).selectionBoundsIs(new Rectangle(
-                    flippedX,
-                    flippedY,
-                    origSelection.width,
-                    origSelection.height
+                flippedX,
+                flippedY,
+                origSelection.width,
+                origSelection.height
             ));
-        }
-
-        if (numLayers == NumLayers.MORE) {
-            // check the translation of the non-active layer
-            assertThat(layer2).translationIs(0, 0);
         }
     }
 
     @Test
     public void crop() {
-        checkOriginalState();
+        boolean[] options = {false, true};
 
-        var imCropRect = new Rectangle(3, 3, 6, 3);
-        new Crop(imCropRect, false, false, true, false)
-                .process(comp).join();
-        checkStateAfterCrop();
+        // could be simple after this file is transitioned to JUnit 5
+        for (boolean selectionCrop : options) {
+            for (boolean allowGrowing : options) {
+                for (boolean deleteCroppedPixels : options) {
+                    for (boolean addHidingMask : options) {
+                        if (addHidingMask && !selectionCrop) {
+                            continue; // this combination doesn't make sense
+                        }
+                        if (addHidingMask && !withSelection.isTrue()) {
+                            continue;
+                        }
+
+                        testCrop(selectionCrop, allowGrowing,
+                            deleteCroppedPixels, addHidingMask);
+                    }
+                }
+            }
+        }
+    }
+
+    private void testCrop(boolean selectionCrop, boolean allowGrowing,
+                          boolean deleteCroppedPixels, boolean addHidingMask) {
+        var imCropRect = new Rectangle(10, 3, 15, 3);
+        Crop crop = new Crop(imCropRect, selectionCrop, allowGrowing, deleteCroppedPixels, addHidingMask);
+        Composition cropped = crop.process(origComp).join();
+        assert cropped != origComp;
+        assert view.getComp() == cropped;
+        assertThat(origComp)
+            .canvasSizeIs(ORIG_CANVAS_WIDTH, ORIG_CANVAS_HEIGHT);
+
+        checkStateAfterCrop(selectionCrop, allowGrowing, deleteCroppedPixels, addHidingMask);
 
         // test undo with one layer
         History.assertNumEditsIs(1);
 
-        History.undo("Crop");
+        String expectedEditName = "Crop";
+        if (addHidingMask) {
+            expectedEditName = "Crop and Hide";
+        }
+
+        History.undo(expectedEditName);
         checkOriginalState();
 
-        History.redo("Crop");
-        checkStateAfterCrop();
+        History.redo(expectedEditName);
+        checkStateAfterCrop(selectionCrop, allowGrowing, deleteCroppedPixels, addHidingMask);
 
-        // TODO
-        // test selection crop with selection
-        // test crop tool crop with selection
-        // test with allow growing
+        // prepare next round of testing
+        History.undo(expectedEditName);
+        checkOriginalState();
     }
 
-    private void checkStateAfterCrop() {
-        String afterCropState = "{canvasWidth=6, canvasHeight=3, tx=0, ty=0, imgWidth=6, imgHeight=3}";
+    private void checkStateAfterCrop(boolean selectionCrop, boolean allowGrowing,
+                                     boolean deleteCroppedPixels, boolean addHidingMask) {
+        Composition cropped = view.getComp();
+        assert cropped != origComp;
 
-        // the layer references have changed after the crop
-        var newComp = OpenImages.getActiveComp();
-        var newLayer1 = (ImageLayer) newComp.getLayer(0);
-
-        assertThat(newLayer1.toDebugCanvasString()).isEqualTo(afterCropState);
-        if (numLayers == NumLayers.MORE) {
-            var newLayer2 = (ImageLayer) newComp.getLayer(1);
-            assertThat(newLayer2.toDebugCanvasString()).isEqualTo(afterCropState);
+        int expectedCanvasWidth = 10;
+        if (allowGrowing) {
+            expectedCanvasWidth = 15;
         }
-        // TODO check translation, selection etc
+        assertThat(cropped).canvasSizeIs(expectedCanvasWidth, 3);
+        ImageLayer layer = (ImageLayer) cropped.getLayer(0);
+
+        if (deleteCroppedPixels) {
+            if (allowGrowing) {
+                assertThat(layer).imageSizeIsEqualTo(15, 3);
+            } else {
+                assertThat(layer).imageSizeIsEqualTo(10, 3);
+            }
+        } else {
+            if (allowGrowing) {
+                assertThat(layer).imageSizeIsEqualTo(origImageWidth + 5, origImageHeight);
+            } else {
+                assertThat(layer).imageSizeIsEqualTo(origImageWidth, origImageHeight);
+            }
+        }
+
+        if (selectionCrop) {
+            assertThat(cropped).doesNotHaveSelection();
+        }
+    }
+
+    private void checkTranslationOfNonActiveLayer() {
+        if (numLayers == NumLayers.MORE) {
+            var activeComp = view.getComp();
+
+            var layer2 = (ImageLayer) activeComp.getLayer(1);
+            if (withTranslation.isTrue()) {
+                assertThat(layer2).translationIs(-4, -4);
+            } else {
+                assertThat(layer2).translationIs(0, 0);
+            }
+        }
     }
 }

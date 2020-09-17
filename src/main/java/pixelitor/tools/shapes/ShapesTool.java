@@ -116,7 +116,7 @@ public class ShapesTool extends DragTool {
 
     private ShapesToolState state = NO_INTERACTION;
 
-    private final Action convertToSelectionAction = new AbstractAction("Convert to Selection...") {
+    private final Action convertToSelectionAction = new AbstractAction("Convert to Selection") {
         @Override
         public void actionPerformed(ActionEvent e) {
             convertToSelection();
@@ -142,17 +142,19 @@ public class ShapesTool extends DragTool {
 
         JComboBox<ShapeType> shapeTypeCB = createShapeTypeCombo();
         settingsPanel.addComboBox("Shape:", shapeTypeCB, "shapeTypeCB");
-        settingsPanel.addButton(shapeSettingsAction);
+        settingsPanel.addButton(shapeSettingsAction, "shapeSettingsButton",
+            "Configure the selected shape");
 
         settingsPanel.addSeparator();
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
         strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
-            e -> initAndShowStrokeSettingsDialog());
+            e -> initAndShowStrokeSettingsDialog(), "strokeSettingsButton",
+            "Configure the stroke");
 
-        settingsPanel.addButton("Effects...",
-            e -> showEffectsDialog());
+        settingsPanel.addButton("Effects...", e -> showEffectsDialog(),
+            "effectsButton", "Configure the effects");
 
         settingsPanel.addButton(convertToSelectionAction, "convertToSelection",
             "Convert the active shape to a selection");

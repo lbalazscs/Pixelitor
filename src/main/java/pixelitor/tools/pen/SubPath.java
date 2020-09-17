@@ -154,8 +154,6 @@ public class SubPath implements Serializable, Transformable {
     }
 
     public void addToComponentSpaceShape(GeneralPath path) {
-        // TODO cache, but one must be careful to
-        // re-create after any editing
         addToShape(path, p -> p.x, p1 -> p1.y);
     }
 
@@ -677,27 +675,14 @@ public class SubPath implements Serializable, Transformable {
 
         assert ShapeUtils.isValid(gp) : "invalid shape for " + toDetailedString();
 
-//        Rectangle2D coBoundingBox = Shapes.calcBounds(anchorPoints);
         Rectangle2D coBoundingBox = gp.getBounds2D();
-
-//        boolean badX = Double.isNaN(coBoundingBox.getX());
-//        boolean badY = Double.isNaN(coBoundingBox.getY());
-//        boolean badWidth = Double.isNaN(coBoundingBox.getWidth());
-//        boolean badHeight = Double.isNaN(coBoundingBox.getHeight());
-//        if (badX || badY || badWidth || badHeight) {
-//            if (RandomGUITest.isRunning()) {
-//                throw new IllegalStateException("bad coordinates for " + toDetailedString());
-//            }
-//            return null;
-//        }
 
         if (coBoundingBox.isEmpty()) {
             // it can happen that a subpath consists of a single point
             return null;
         }
 
-        TransformBox box = new TransformBox(coBoundingBox, comp.getView(), this);
-        return box;
+        return new TransformBox(coBoundingBox, comp.getView(), this);
     }
 
     @Override
@@ -743,7 +728,7 @@ public class SubPath implements Serializable, Transformable {
             .collect(joining(",", " [", "]"));
     }
 
-    // also includes the anchor point positions
+    // like toString(), but also includes the anchor point positions
     public String toDetailedString() {
         return id + anchorPoints.stream()
             .map(AnchorPoint::toString)

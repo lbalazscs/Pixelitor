@@ -161,24 +161,26 @@ public class Debug {
     }
 
     public static String mouseModifiers(MouseEvent e) {
-        boolean altDown = e.isAltDown();
-        boolean controlDown = e.isControlDown();
-        boolean shiftDown = e.isShiftDown();
-        boolean rightMouse = SwingUtilities.isRightMouseButton(e);
+        return modifierString(e.isControlDown(), e.isAltDown(), e.isShiftDown(),
+            SwingUtilities.isRightMouseButton(e), e.isPopupTrigger());
+    }
+
+    public static String modifierString(boolean control, boolean alt, boolean shift,
+                                        boolean right, boolean popup) {
         StringBuilder msg = new StringBuilder(25);
-        if (controlDown) {
+        if (control) {
             msg.append(Ansi.red("ctrl-"));
         }
-        if (altDown) {
+        if (alt) {
             msg.append(Ansi.green("alt-"));
         }
-        if (shiftDown) {
+        if (shift) {
             msg.append(Ansi.blue("shift-"));
         }
-        if (rightMouse) {
+        if (right) {
             msg.append(Ansi.yellow("right-"));
         }
-        if (e.isPopupTrigger()) {
+        if (popup) {
             msg.append(Ansi.cyan("popup-"));
         }
         return msg.toString();
@@ -399,7 +401,6 @@ public class Debug {
         JTree tree = new JTree(node);
 
         JLabel explainLabel = new JLabel(
-            // TODO re-formulate
             "<html>If you are reporting a bug that cannot be reproduced," +
                 "<br>please include the following information:");
         explainLabel.setBorder(createEmptyBorder(5, 5, 5, 5));

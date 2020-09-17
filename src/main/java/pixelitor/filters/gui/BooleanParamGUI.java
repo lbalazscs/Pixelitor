@@ -68,6 +68,14 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
     }
 
     @Override
+    public void setName(String name) {
+        super.setName(name);
+
+        // help assertj-swing to find the checkBox
+        checkBox.setName(name);
+    }
+
+    @Override
     public void updateGUI() {
         checkBox.setSelected(model.isChecked());
     }

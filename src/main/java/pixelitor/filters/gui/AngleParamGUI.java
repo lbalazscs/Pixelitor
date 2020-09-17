@@ -126,6 +126,14 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
     }
 
     @Override
+    public void setName(String name) {
+        super.setName(name);
+
+        // help assertj-swing to find the slider
+        sliderSpinner.setName(name);
+    }
+
+    @Override
     public void setToolTip(String tip) {
         setToolTipText(tip);
         angleUI.setToolTipText(tip);

@@ -32,9 +32,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.Random;
 
-import static java.awt.event.KeyEvent.VK_ALT;
-import static java.awt.event.KeyEvent.VK_CONTROL;
-import static java.awt.event.KeyEvent.VK_SHIFT;
+import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.swing.core.MouseButton.LEFT_BUTTON;
@@ -137,12 +135,12 @@ public class Mouse {
 
     private int createRandomScreenXWithinCanvas() {
         return canvasBounds.x + CANVAS_SAFETY_DIST
-                + random.nextInt(canvasBounds.width - CANVAS_SAFETY_DIST * 2);
+            + random.nextInt(canvasBounds.width - CANVAS_SAFETY_DIST * 2);
     }
 
     private int createRandomScreenYWithinCanvas() {
         return canvasBounds.y + CANVAS_SAFETY_DIST
-                + random.nextInt(canvasBounds.height - CANVAS_SAFETY_DIST * 2);
+            + random.nextInt(canvasBounds.height - CANVAS_SAFETY_DIST * 2);
     }
 
     void shiftMoveClickRandom() {
@@ -156,7 +154,7 @@ public class Mouse {
 
     void moveToActiveICCenter() {
         moveToScreen(canvasBounds.x + canvasBounds.width / 2,
-                canvasBounds.y + canvasBounds.height / 2);
+            canvasBounds.y + canvasBounds.height / 2);
         robot.waitForIdle();
     }
 
@@ -201,9 +199,38 @@ public class Mouse {
         click();
     }
 
+    void randomClick(boolean ctrl, boolean alt, boolean shift) {
+        moveRandomlyWithinCanvas();
+        click(ctrl, alt, shift);
+    }
+
     void randomDoubleClick() {
         moveRandomlyWithinCanvas();
         doubleClick();
+    }
+
+    void click(boolean ctrl, boolean alt, boolean shift) {
+        if (ctrl) {
+            robot.pressKey(VK_CONTROL);
+        }
+        if (alt) {
+            robot.pressKey(VK_ALT);
+        }
+        if (shift) {
+            robot.pressKey(VK_SHIFT);
+        }
+
+        click();
+
+        if (ctrl) {
+            robot.releaseKey(VK_CONTROL);
+        }
+        if (alt) {
+            robot.releaseKey(VK_ALT);
+        }
+        if (shift) {
+            robot.releaseKey(VK_SHIFT);
+        }
     }
 
     void altClick() {
@@ -251,15 +278,15 @@ public class Mouse {
     void dragFromCanvasCenterToTheRight() {
         // move to the canvas center
         moveToScreen(canvasBounds.x + canvasBounds.width / 2,
-                canvasBounds.y + canvasBounds.height / 2);
+            canvasBounds.y + canvasBounds.height / 2);
         // drag horizontally to the right
         dragToScreen(canvasBounds.x + canvasBounds.width,
-                canvasBounds.y + canvasBounds.height / 2);
+            canvasBounds.y + canvasBounds.height / 2);
     }
 
     void recalcCanvasBounds() {
         canvasBounds = EDT.call(() ->
-                OpenImages.getActiveView().getVisibleCanvasBoundsOnScreen());
+            OpenImages.getActiveView().getVisibleCanvasBoundsOnScreen());
 
 //        debugCanvasBounds();
     }

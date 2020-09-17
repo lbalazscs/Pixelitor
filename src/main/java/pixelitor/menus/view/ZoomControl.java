@@ -84,7 +84,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
     private void zoomAccordingToTheSlider(View view) {
         int sliderValue = zoomSlider.getValue();
         ZoomLevel zoomLevel = zoomLevels[sliderValue];
-        view.setZoomAtCenter(zoomLevel);
+        view.setZoom(zoomLevel);
         setZoomText(zoomLevel);
     }
 
@@ -112,7 +112,6 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         b.addActionListener(action);
         b.setToolTipText(tooltip);
         b.setPreferredSize(buttonSize);
-
         b.setBorder(createEmptyBorder());
 
         add(b);

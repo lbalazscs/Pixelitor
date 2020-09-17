@@ -31,6 +31,7 @@ public class OutlineBrushSettings extends BrushSettings {
         p.add(new JLabel("Radius depends on mouse speed"));
         if (dependsOnSpeedCB == null) {
             dependsOnSpeedCB = new JCheckBox("", DEFAULT_SPEED_DEPENDENCE);
+            dependsOnSpeedCB.setName("dependsOnSpeed");
         }
         p.add(dependsOnSpeedCB);
 

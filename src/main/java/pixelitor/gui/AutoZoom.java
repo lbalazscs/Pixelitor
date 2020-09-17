@@ -17,46 +17,43 @@
 
 package pixelitor.gui;
 
-import pixelitor.Canvas;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.NamedAction;
-import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
 
 import javax.swing.*;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
 /**
  * Ways to calculate zoom levels automatically, based on the available space
  */
 public enum AutoZoom {
-    SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
+    FIT_SPACE("Fit Space", ZoomMenu.FIT_SPACE_TOOLTIP) {
         @Override
-        public double calcImageToDesktopRatio(double hor, double ver) {
+        public double selectRatio(double hor, double ver) {
             return Math.max(hor, ver);
         }
-    }, WIDTH("Fit Width", "Fit the width of the image to the available horizontal space") {
+    }, FIT_WIDTH("Fit Width", "Fit the width of the image to the available horizontal space") {
         @Override
-        public double calcImageToDesktopRatio(double hor, double ver) {
+        public double selectRatio(double hor, double ver) {
             return hor;
         }
-    }, HEIGHT("Fit Height", "Fit the height of the image to the available vertical space") {
+    }, FIT_HEIGHT("Fit Height", "Fit the height of the image to the available vertical space") {
         @Override
-        public double calcImageToDesktopRatio(double hor, double ver) {
+        public double selectRatio(double hor, double ver) {
             return ver;
         }
-    }, ACTUAL("Actual Pixels", ZoomMenu.ACTUAL_PIXELS_TOOLTIP) {
+    }, ACTUAL_PIXELS("Actual Pixels", ZoomMenu.ACTUAL_PIXELS_TOOLTIP) {
         @Override
-        public double calcImageToDesktopRatio(double hor, double ver) {
+        public double selectRatio(double hor, double ver) {
             throw new IllegalStateException("should not be called");
         }
     };
 
-    public static final Action ACTUAL_PIXELS_ACTION = ACTUAL.asAction();
-    public static final Action FIT_HEIGHT_ACTION = HEIGHT.asAction();
-    public static final Action FIT_WIDTH_ACTION = WIDTH.asAction();
-    public static final Action FIT_SPACE_ACTION = SPACE.asAction();
+    public static final Action ACTUAL_PIXELS_ACTION = ACTUAL_PIXELS.asAction();
+    public static final Action FIT_HEIGHT_ACTION = FIT_HEIGHT.asAction();
+    public static final Action FIT_WIDTH_ACTION = FIT_WIDTH.asAction();
+    public static final Action FIT_SPACE_ACTION = FIT_SPACE.asAction();
 
     private final String guiName;
     private final String toolTip;
@@ -66,65 +63,20 @@ public enum AutoZoom {
         this.toolTip = toolTip;
     }
 
-    public abstract double calcImageToDesktopRatio(double hor, double ver);
+    /**
+     * Selects the image-to-available-area ratio that
+     * will be used for the auto zoom calculations
+     */
+    public abstract double selectRatio(double hor, double ver);
 
     private Action asAction() {
         var action = new NamedAction(guiName) {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenImages.fitActiveTo(AutoZoom.this);
+                OpenImages.fitActive(AutoZoom.this);
             }
         };
         action.setToolTip(toolTip);
         return action;
-    }
-
-    public ZoomLevel calcZoom(Canvas canvas, boolean zoomInToFitSpace) {
-        if (this == ACTUAL) {
-            return ZoomLevel.Z100;
-        }
-
-        int canvasWidth = canvas.getWidth();
-        int canvasHeight = canvas.getHeight();
-
-        Dimension desktopSize = ImageArea.getSize();
-        double desktopWidth = desktopSize.getWidth();
-        double desktopHeight = desktopSize.getHeight();
-
-        double canvasToDesktopHorRatio = canvasWidth / desktopWidth;
-        // TODO what about the tabbed interface
-        int internalFrameHeightFactor = 35;
-        double canvasToDesktopVerRatio = canvasHeight / (desktopHeight - internalFrameHeightFactor);
-
-        double imageToDesktopRatio = calcImageToDesktopRatio(
-                canvasToDesktopHorRatio, canvasToDesktopVerRatio);
-
-        double idealZoomPercent = 100.0 / imageToDesktopRatio;
-        ZoomLevel[] zoomLevels = ZoomLevel.values();
-        ZoomLevel maximallyZoomedOut = zoomLevels[0];
-
-        if (maximallyZoomedOut.getPercentValue() > idealZoomPercent) {
-            // the image is so big that it will need scroll bars even
-            // if it is maximally zoomed out
-            return maximallyZoomedOut;
-        }
-
-        ZoomLevel lastOK = maximallyZoomedOut;
-        // iterate all the zoom levels from zoomed out to zoomed in
-        for (ZoomLevel level : zoomLevels) {
-            if (level.getPercentValue() > idealZoomPercent) {
-                // found one that is too much zoomed in
-                return lastOK;
-            }
-            if (!zoomInToFitSpace) { // we don't want to zoom in more than 100%
-                if (lastOK == ZoomLevel.Z100) {
-                    return ZoomLevel.Z100;
-                }
-            }
-            lastOK = level;
-        }
-        // if we get here, the image is so small that even at maximal zoom
-        // it fits in the available space: set it then to the maximal zoom
-        return lastOK;
     }
 }

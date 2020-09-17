@@ -52,8 +52,8 @@ public class GlobalEvents {
 
     // Dialogs can be inside dialogs, and this keeps track of the nesting
     // so that in a dialog the Tab key can be used for navigating the UI,
-    // and not for "Hide All".
-    private static int numNestedDialogs = 0;
+    // and not for "Hide All". Non-modal dialogs are not counted.
+    private static int numModalDialogs = 0;
 
     private static KeyListener keyListener;
 
@@ -165,7 +165,7 @@ public class GlobalEvents {
         // event, but not the space released-event, and the app gets
         // stuck in Hand mode, which looks like a freeze when there
         // are no scrollbars. See issue #29
-        if (numNestedDialogs == 0 && !e.isAltDown()) {
+        if (numModalDialogs == 0 && !e.isAltDown()) {
             keyListener.spacePressed();
             spaceDown = true;
             e.consume();
@@ -173,19 +173,19 @@ public class GlobalEvents {
     }
 
     private static void arrowKeyPressed(KeyEvent e, ArrowKey key) {
-        if (numNestedDialogs == 0 && keyListener.arrowKeyPressed(key)) {
+        if (numModalDialogs == 0 && keyListener.arrowKeyPressed(key)) {
             e.consume();
         }
     }
 
     private static void escPressed() {
-        if (numNestedDialogs == 0) {
+        if (numModalDialogs == 0) {
             keyListener.escPressed();
         }
     }
 
     private static void altPressed() {
-        if (numNestedDialogs == 0) {
+        if (numModalDialogs == 0) {
             keyListener.altPressed();
         }
     }
@@ -204,7 +204,7 @@ public class GlobalEvents {
     }
 
     private static void altReleased() {
-        if (numNestedDialogs == 0) {
+        if (numModalDialogs == 0) {
             keyListener.altReleased();
         }
     }
@@ -222,34 +222,38 @@ public class GlobalEvents {
     public static void dialogOpened(String title) {
         assert calledOnEDT() : threadInfo();
 
-        numNestedDialogs++;
-        if (numNestedDialogs == 1) {
+        numModalDialogs++;
+        if (numModalDialogs == 1) {
             Tools.firstModalDialogShown();
         }
+
+//        System.out.printf("dialog '%s' opened, numModalDialogs = %d%n", title, numModalDialogs);
     }
 
     // keeps track of dialog nesting
     public static void dialogClosed(String title) {
         assert calledOnEDT() : threadInfo();
 
-        numNestedDialogs--;
-        assert numNestedDialogs >= 0;
-        if (numNestedDialogs == 0) {
+        numModalDialogs--;
+        assert numModalDialogs >= 0;
+        if (numModalDialogs == 0) {
             Tools.firstModalDialogHidden();
         }
+
+//        System.out.printf("dialog '%s' closed, numModalDialogs = %d%n", title, numModalDialogs);
     }
 
     @VisibleForTesting
     public static void assertDialogNestingIs(int expected) {
-        if (numNestedDialogs != expected) {
-            throw new AssertionError("numNestedDialogs = " + numNestedDialogs
+        if (numModalDialogs != expected) {
+            throw new AssertionError("numNestedDialogs = " + numModalDialogs
                 + ", expected = " + expected);
         }
     }
 
     @VisibleForTesting
-    public static int getNumNestedDialogs() {
-        return numNestedDialogs;
+    public static int getNumModalDialogs() {
+        return numModalDialogs;
     }
 
     public static void addBrushSizeActions() {

@@ -20,11 +20,13 @@ package pixelitor.guitest;
 import com.bric.util.JVM;
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.core.Robot;
-import org.assertj.swing.core.matcher.JButtonMatcher;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.exception.ComponentLookupException;
 import org.assertj.swing.finder.JFileChooserFinder;
-import org.assertj.swing.fixture.*;
+import org.assertj.swing.fixture.DialogFixture;
+import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JButtonFixture;
+import org.assertj.swing.fixture.JSliderFixture;
 import org.fest.util.Files;
 import pixelitor.Canvas;
 import pixelitor.Composition;
@@ -83,6 +85,7 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.guitest.AppRunner.clickPopupMenu;
 import static pixelitor.guitest.AppRunner.getCurrentTimeHM;
 import static pixelitor.guitest.MaskMode.NO_MASK;
@@ -118,7 +121,8 @@ public class AssertJSwingTest {
 
     private MaskMode maskMode = NO_MASK;
 
-    private boolean textFilterTestedAlready = false;
+    // whether to expect the default text
+    private boolean textFilterTested = false;
 
     // these don't have to be tested for every mask mode
     private boolean maskIndependentToolsTested = false;
@@ -286,7 +290,7 @@ public class AssertJSwingTest {
         // make sure we have a big enough canvas for the tool tests
         keyboard.actualPixels();
 
-        if (!maskIndependentToolsTested) {
+        if (!maskIndependentToolsTested || Rnd.nextDouble() < 0.05) {
             testMoveTool();
             testCropTool();
             testSelectionToolAndMenus();
@@ -560,7 +564,7 @@ public class AssertJSwingTest {
     }
 
     private void testMaskFromColorRange() {
-        if (maskFromColorRangeTested) {
+        if (maskFromColorRangeTested && Rnd.nextDouble() > 0.05) {
             return;
         }
 
@@ -630,7 +634,7 @@ public class AssertJSwingTest {
 
         dialog.slider("fontSize").slideTo(250);
         dialog.checkBox("boldCB").check().uncheck();
-        dialog.checkBox("italicCB").check();
+        dialog.checkBox("italicCB").check().uncheck().check();
 
         findButtonByText(dialog, "Advanced...").click();
 
@@ -647,7 +651,6 @@ public class AssertJSwingTest {
 
     private void testAdjLayers() {
         addAdjustmentLayer();
-        // TODO
 
         checkConsistency();
     }
@@ -668,7 +671,7 @@ public class AssertJSwingTest {
     }
 
     void testHelpMenu() {
-        if (helpMenuTested) {
+        if (helpMenuTested && Rnd.nextDouble() > 0.05) {
             return;
         }
         log(0, "help menu");
@@ -708,7 +711,7 @@ public class AssertJSwingTest {
     }
 
     void testColors() {
-        if (colorsTested) {
+        if (colorsTested && Rnd.nextDouble() > 0.05) {
             return;
         }
         log(0, "colors");
@@ -815,7 +818,7 @@ public class AssertJSwingTest {
     }
 
     private void testPreferences() {
-        if (preferencesTested) {
+        if (preferencesTested && Rnd.nextDouble() > 0.05) {
             return;
         }
         log(1, "preferences dialog");
@@ -963,7 +966,7 @@ public class AssertJSwingTest {
     }
 
     void testFileMenu() {
-        if (fileMenuTested) {
+        if (fileMenuTested && Rnd.nextDouble() > 0.05) {
             return;
         }
         log(0, "file menu");
@@ -1221,8 +1224,7 @@ public class AssertJSwingTest {
         dialog.requireVisible(); // still visible because of the validation error
 
         // say OK to the folder not empty question
-        var optionPane = app.findJOptionPane();
-        optionPane.yesButton().click();
+        app.findJOptionPane().yesButton().click();
         dialog.requireNotVisible();
 
         app.waitForProgressMonitorEnd();
@@ -1255,9 +1257,7 @@ public class AssertJSwingTest {
     }
 
     private void closeDoYouWantToSaveChangesDialog() {
-        var optionPane = app.findJOptionPane();
-        var matcher = JButtonMatcher.withText("Don't Save").andShowing();
-        optionPane.button(matcher).click();
+        app.findJOptionPane().buttonWithText("Don't Save").click();
     }
 
     private void testCloseAll() {
@@ -1282,7 +1282,7 @@ public class AssertJSwingTest {
         dialog.button("collapseButton").click();
 
         findButtonByText(dialog, "Help").click();
-        app.findJOptionPane().buttonWithText("OK").click();
+        app.findJOptionPane().okButton().click();
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
@@ -1457,7 +1457,7 @@ public class AssertJSwingTest {
     }
 
     void testViewMenu() {
-        if (viewMenuTested) {
+        if (viewMenuTested && Rnd.nextDouble() > 0.05) {
             return;
         }
         log(0, "view menu");
@@ -1838,13 +1838,13 @@ public class AssertJSwingTest {
         runMenuCommand("Text...");
         var dialog = app.findFilterDialog();
 
-        testTextDialog(dialog, textFilterTestedAlready ?
+        testTextDialog(dialog, textFilterTested ?
             "my text" : TextSettings.DEFAULT_TEXT);
 
         findButtonByText(dialog, "OK").click();
         afterFilterRunActions("Text");
 
-        textFilterTestedAlready = true;
+        textFilterTested = true;
     }
 
     private void testRandomFilter() {
@@ -2251,11 +2251,7 @@ public class AssertJSwingTest {
                     }
                     pw.comboBox("colorTypeCB").selectItem(colorType.toString());
 
-                    if (random.nextBoolean()) {
-                        pw.checkBox("revertCB").uncheck();
-                    } else {
-                        pw.checkBox("revertCB").check();
-                    }
+                    AJSUtils.checkRandomly(pw.checkBox("revertCB"));
 
                     // drag the gradient
                     Point start = mouse.moveRandomlyWithinCanvas();
@@ -2299,7 +2295,7 @@ public class AssertJSwingTest {
 
         app.clickTool(Tools.ERASER);
 
-        testBrushStrokes(false);
+        testBrushStrokes(Tools.ERASER);
 
         checkConsistency();
     }
@@ -2310,7 +2306,7 @@ public class AssertJSwingTest {
         app.clickTool(Tools.BRUSH);
 
         enableLazyMouse(false);
-        testBrushStrokes(true);
+        testBrushStrokes(Tools.BRUSH);
 
         // TODO this freezes when running with coverage??
         // sometimes also without coverage??
@@ -2340,14 +2336,18 @@ public class AssertJSwingTest {
         dialog.requireNotVisible();
     }
 
-    private void testBrushStrokes(boolean brush) {
+    private void testBrushStrokes(Tool tool) {
         mouse.randomAltClick();
 
         boolean tested = false;
         for (BrushType brushType : BrushType.values()) {
             pw.comboBox("typeCB").selectItem(brushType.toString());
+            var settingsButton = app.findButtonByText("Settings...");
             if (brushType.hasSettings()) {
-                // TODO set random settings
+                settingsButton.requireEnabled().click();
+                app.testBrushSettings(brushType, tool);
+            } else {
+                settingsButton.requireDisabled();
             }
             for (Symmetry symmetry : Symmetry.values()) {
                 if (skipThis()) {
@@ -2361,7 +2361,7 @@ public class AssertJSwingTest {
             }
         }
         if (tested) {
-            keyboard.undoRedo(brush ? "Brush" : "Eraser");
+            keyboard.undoRedo(tool == Tools.BRUSH ? "Brush" : "Eraser");
         }
     }
 
@@ -2486,8 +2486,7 @@ public class AssertJSwingTest {
         mouse.dragToCanvas(e2X + e2Width, e2Y + e2Height);
 
         // test crop selection by clicking on the button
-        testCropSelection(() ->
-                findButtonByText(pw, "Crop Selection").requireEnabled().click(),
+        testCropSelection(() -> findButtonByText(pw, "Crop Selection").requireEnabled().click(),
             true, 300.0, 200.0);
 
         if (!quick) {
@@ -2536,9 +2535,7 @@ public class AssertJSwingTest {
         }
 
         // not rectangular: test choosing "Only Crop"
-        app.findJOptionPane()
-            .buttonWithText("Only Crop")
-            .click();
+        app.findJOptionPane().buttonWithText("Only Crop").click();
         undoRedoUndoSimpleSelectionCrop(origCanvasWidth, origCanvasHeight, selWidth, selHeight);
 
         if (skipThis(0.5)) {
@@ -2547,9 +2544,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Only Hide"
         triggerTask.run();
-        app.findJOptionPane()
-            .buttonWithText("Only Hide")
-            .click();
+        app.findJOptionPane().buttonWithText("Only Hide").click();
 
         EDT.assertThereIsNoSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
@@ -2565,9 +2560,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Crop and Hide"
         triggerTask.run();
-        app.findJOptionPane()
-            .buttonWithText("Crop and Hide")
-            .click();
+        app.findJOptionPane().buttonWithText("Crop and Hide").click();
         checkAfterSelectionCrop(selWidth, selHeight);
         assert EDT.activeLayerHasMask();
 
@@ -2581,9 +2574,7 @@ public class AssertJSwingTest {
 
         // not rectangular: test choosing "Cancel"
         triggerTask.run();
-        app.findJOptionPane()
-            .buttonWithText("Cancel")
-            .click();
+        app.findJOptionPane().buttonWithText("Cancel").click();
 
         EDT.assertThereIsSelection();
         EDT.assertCanvasSizeIs(origCanvasWidth, origCanvasHeight);
@@ -3165,9 +3156,5 @@ public class AssertJSwingTest {
 
     private DialogFixture findDialogByTitle(String title) {
         return app.findDialogByTitle(title);
-    }
-
-    private static JButtonFixture findButtonByText(ComponentContainerFixture container, String text) {
-        return AppRunner.findButtonByText(container, text);
     }
 }

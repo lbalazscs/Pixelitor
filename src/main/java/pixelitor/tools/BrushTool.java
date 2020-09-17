@@ -17,7 +17,6 @@
 
 package pixelitor.tools;
 
-import pixelitor.colors.Colors;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -81,17 +80,6 @@ public class BrushTool extends BlendingModeBrushTool {
     private void setupDrawingColor(PMouseEvent e) {
         if (e.isRight()) {
             drawingColor = getBGColor();
-        } else if (e.isMiddle()) {
-            // TODO we never get here because isAltDown is always true
-            // for middle-button events, even if Alt is not pressed?
-            // See source comment in java.awt.Event for ALT_MASK
-            Color fg = getFGColor();
-            Color bg = getBGColor();
-            if (e.isControlDown()) {
-                drawingColor = Colors.calcHSBAverage(fg, bg);
-            } else {
-                drawingColor = Colors.calcRGBAverage(fg, bg);
-            }
         } else {
             drawingColor = getFGColor();
         }

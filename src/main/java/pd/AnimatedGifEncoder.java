@@ -10,11 +10,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * Class AnimatedGifEncoder - Encodes a GIF file consisting of one or more
@@ -181,11 +177,10 @@ public class AnimatedGifEncoder {
      * Flushes any pending data and closes output file. If writing to an
      * OutputStream, the stream is not closed.
      */
-    public boolean finish() {
+    public void finish() {
         if (!started) {
-            return false;
+            throw new IllegalStateException();
         }
-        boolean ok = true;
         started = false;
         try {
             out.write(0x3b); // gif trailer
@@ -194,7 +189,7 @@ public class AnimatedGifEncoder {
                 out.close();
             }
         } catch (IOException e) {
-            ok = false;
+            throw new UncheckedIOException(e);
         }
 
         // reset for subsequent use
@@ -206,12 +201,17 @@ public class AnimatedGifEncoder {
         colorTab = null;
         closeStream = false;
         firstFrame = true;
-
-        return ok;
     }
 
     public void cancel() {
-        if (finish()) {
+        boolean ok = true;
+        try {
+            finish();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            ok = false;
+        }
+        if (ok) {
             file.delete();
         }
     }

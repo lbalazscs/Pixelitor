@@ -207,9 +207,9 @@ public class OpenImages {
         }
     }
 
-    public static void fitActiveTo(AutoZoom autoZoom) {
+    public static void fitActive(AutoZoom autoZoom) {
         if (activeView != null) {
-            activeView.zoomToFit(autoZoom);
+            activeView.setZoom(autoZoom);
         }
     }
 

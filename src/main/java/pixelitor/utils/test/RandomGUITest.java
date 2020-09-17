@@ -51,7 +51,7 @@ import pixelitor.utils.MemoryInfo;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
-import pixelitor.utils.debug.Ansi;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.*;
@@ -188,11 +188,6 @@ public class RandomGUITest {
 
     public static boolean isRunning() {
         return running;
-    }
-
-    // a hack so that other random tests also can avoid dialogs
-    public static void setRunning(boolean running) {
-        RandomGUITest.running = running;
     }
 
     public static void stop() {
@@ -377,31 +372,24 @@ public class RandomGUITest {
     }
 
     private static String doWithModifiers(Robot r, Runnable action) {
-        String modifiers = "";
-        boolean rightMouse = rand.nextFloat() < 0.2;
-        if (rightMouse) {
-            modifiers = Ansi.yellow("right-") + modifiers;
-        }
         boolean shiftDown = rand.nextBoolean();
         if (shiftDown) {
             r.keyPress(VK_SHIFT);
             r.delay(50);
-            modifiers = Ansi.blue("shift-") + modifiers;
         }
         // don't generate Alt-movements on Linux, because it can drag the window
         boolean altDown = JVM.isLinux ? false : rand.nextBoolean();
         if (altDown) {
             r.keyPress(VK_ALT);
             r.delay(50);
-            modifiers = Ansi.green("alt-") + modifiers;
         }
         boolean ctrlDown = rand.nextBoolean();
         if (ctrlDown) {
             r.keyPress(VK_CONTROL);
             r.delay(50);
-            modifiers = Ansi.red("ctrl-") + modifiers;
         }
 
+        boolean rightMouse = rand.nextFloat() < 0.2;
         if (rightMouse) {
             r.mousePress(BUTTON3_DOWN_MASK);
         } else {
@@ -432,7 +420,8 @@ public class RandomGUITest {
             r.keyRelease(VK_SHIFT);
             r.delay(50);
         }
-        return modifiers;
+
+        return Debug.modifierString(ctrlDown, altDown, shiftDown, rightMouse, false);
     }
 
     private static void randomColors() {
@@ -570,16 +559,16 @@ public class RandomGUITest {
         double r = Math.random();
         if (r > 0.75) {
             log("fitActiveTo SPACE");
-            OpenImages.fitActiveTo(AutoZoom.SPACE);
+            OpenImages.fitActive(AutoZoom.FIT_SPACE);
         } else if (r > 0.5) {
             log("fitActiveTo WIDTH");
-            OpenImages.fitActiveTo(AutoZoom.WIDTH);
+            OpenImages.fitActive(AutoZoom.FIT_WIDTH);
         } else if (r > 0.25) {
             log("fitActiveTo HEIGHT");
-            OpenImages.fitActiveTo(AutoZoom.HEIGHT);
+            OpenImages.fitActive(AutoZoom.FIT_HEIGHT);
         } else {
             log("fitActiveToActualPixels");
-            OpenImages.fitActiveTo(AutoZoom.ACTUAL);
+            OpenImages.fitActive(AutoZoom.ACTUAL_PIXELS);
         }
     }
 
@@ -639,7 +628,7 @@ public class RandomGUITest {
         log("zoom zoomLevel = " + randomZoomLevel);
 
         if (rand.nextBoolean()) {
-            view.setZoom(randomZoomLevel, null);
+            view.setZoom(randomZoomLevel);
         } else {
             Point mousePos = pickRandomPointOn(view);
             view.setZoom(randomZoomLevel, mousePos);
@@ -651,7 +640,7 @@ public class RandomGUITest {
         ZoomLevel level = null;
         while (percentValue < 49) {
             level = ZoomLevel.getRandomZoomLevel();
-            percentValue = level.getPercentValue();
+            percentValue = level.asPercent();
         }
         return level;
     }
@@ -676,7 +665,7 @@ public class RandomGUITest {
         if (view != null) {
             ZoomLevel newZoom = view.getZoomLevel().zoomOut();
             if (rand.nextBoolean()) {
-                view.setZoom(newZoom, null);
+                view.setZoom(newZoom);
             } else {
                 Point mousePos = pickRandomPointOn(view);
                 view.setZoom(newZoom, mousePos);

@@ -36,6 +36,15 @@ public interface FilterSetting {
      */
     JComponent createGUI();
 
+    /**
+     * Convenience method which also sets a name for the created GUI
+     */
+    default JComponent createGUI(String name) {
+        JComponent gui = createGUI();
+        gui.setName(name);
+        return gui;
+    }
+
     void setAdjustmentListener(ParamAdjustmentListener listener);
 
     /**

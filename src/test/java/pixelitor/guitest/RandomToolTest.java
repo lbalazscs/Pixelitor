@@ -18,27 +18,31 @@
 package pixelitor.guitest;
 
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
+import org.assertj.swing.fixture.DialogFixture;
 import pixelitor.Composition;
 import pixelitor.ExceptionHandler;
 import pixelitor.OpenImages;
+import pixelitor.filters.painters.EffectsPanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.StatusBar;
 import pixelitor.history.History;
 import pixelitor.layers.LayersContainer;
+import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.pen.Path;
 import pixelitor.tools.pen.PenTool;
 import pixelitor.tools.pen.PenToolMode;
+import pixelitor.tools.shapes.BasicStrokeCap;
+import pixelitor.tools.shapes.ShapeType;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.utils.Rnd;
-import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.Ansi;
-import pixelitor.utils.test.RandomGUITest;
+import pixelitor.utils.debug.Debug;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -49,12 +53,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.*;
+import static pixelitor.guitest.AJSUtils.*;
 import static pixelitor.tools.Tools.*;
-import static pixelitor.utils.Threads.calledOutsideEDT;
+import static pixelitor.tools.shapes.ShapeType.*;
+import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
 
@@ -68,48 +76,37 @@ public class RandomToolTest {
     private final Mouse mouse;
     private final Keyboard keyboard;
 
-    private final Object resumeMonitor = new Object();
-    private final CountDownLatch mainThreadExitLatch = new CountDownLatch(1);
-
     private volatile boolean paused = false;
     private volatile boolean stopped = false;
 
-    private long testNr = 1;
+    private final AtomicLong testNr = new AtomicLong(0);
 
     private List<Runnable> events;
     private final ArrowKey[] arrowKeys = ArrowKey.values();
-    private final List<Double> testTimes = new ArrayList<>();
+    private final List<Double> testDurations = new ArrayList<>();
+
+    private final Object resumeMonitor = new Object();
+    private final CountDownLatch mainLoopExitLatch = new CountDownLatch(1);
 
     private static final String[] simpleMultiLayerEdits = {
         "Rotate 90° CW", "Rotate 180°", "Rotate 90° CCW",
         "Flip Horizontal", "Flip Vertical"
     };
 
-    private static final int[] TOOL_HOTKEYS = {
-        VK_V,
-        VK_C,
-        VK_M,
-        VK_B,
-        VK_S,
-        VK_E,
-        VK_K,
-        VK_G,
-        VK_N,
-        VK_I,
-        VK_P,
-        VK_U,
-        VK_H,
-        VK_Z,
-    };
     private static final String[] ADD_MASK_MENU_COMMANDS = {
         "Add White (Reveal All)", "Add Black (Hide All)", "Add from Layer"};
+
     private static final String[] REMOVE_MASK_MENU_COMMANDS = {
         "Delete", "Apply"};
+
+    private static final int[] TOOL_HOTKEYS = {
+        VK_V, VK_C, VK_M, VK_B, VK_S, VK_E, VK_K,
+        VK_G, VK_N, VK_I, VK_P, VK_U, VK_H, VK_Z,
+    };
 
     public static void main(String[] args) {
         Utils.makeSureAssertionsAreEnabled();
         FailOnThreadViolationRepaintManager.install();
-        RandomGUITest.setRunning(true);
 
         new RandomToolTest(args);
     }
@@ -129,28 +126,26 @@ public class RandomToolTest {
         });
 
         initEventList();
-
         app.runMenuCommand("Fit Space");
+
         app.runTests(this::mainLoop);
 
         // It's the final countdown...
-        mainThreadExitLatch.countDown();
+        // (signal that the main loop was exited cleanly)
+        mainLoopExitLatch.countDown();
     }
 
     // the main loop is the test loop with pause-resume support
     private void mainLoop() {
+        assert calledOn("main") : threadInfo();
+
         while (true) {
             try {
                 testLoop();
             } catch (StoppedException e) {
                 assert stopped;
                 System.out.println("\n" + RandomToolTest.class.getSimpleName() + " stopped.");
-
-                var stats = testTimes.stream()
-                    .mapToDouble(s -> s)
-                    .summaryStatistics();
-                System.out.printf("time stats: count = %d, min = %.2fs, max = %.2fs, avg = %.2fs%n",
-                    stats.getCount(), stats.getMin(), stats.getMax(), stats.getAverage());
+                printDurationStatistics();
 
                 return; // if stopped, then exit the main loop
             } catch (PausedException e) {
@@ -168,6 +163,14 @@ public class RandomToolTest {
         }
     }
 
+    private void printDurationStatistics() {
+        var stats = testDurations.stream()
+            .mapToDouble(s -> s)
+            .summaryStatistics();
+        System.out.printf("duration stats: count = %d, min = %.2fs, max = %.2fs, avg = %.2fs%n",
+            stats.getCount(), stats.getMin(), stats.getMax(), stats.getAverage());
+    }
+
     private void waitForResumeSignal() {
         synchronized (resumeMonitor) {
             try {
@@ -181,32 +184,39 @@ public class RandomToolTest {
     }
 
     private void testLoop() {
-        List<Tool> preferredTools = List.of();
-
         // exit this infinite loop only by throwing an exception
         while (true) {
-            Tool selectedTool;
-            if (preferredTools.isEmpty()) {
-                // there is no preferred tool, each tool gets equal chance
-                selectedTool = getRandomTool();
-            } else {
-                // with 50% probability force using a preferred tool
-                if (Rnd.nextBoolean()) {
-                    selectedTool = Rnd.chooseFrom(preferredTools);
-                } else {
-                    selectedTool = getRandomTool();
-                }
-            }
-            long startTime = System.nanoTime();
+            Tool tool = selectNextToolForTesting();
 
-            testNr++;
-            testWithTimeout(selectedTool);
+            long startTime = System.nanoTime();
+            testNr.incrementAndGet();
+
+            testWithTimeout(tool);
 
             double estimatedSeconds = (System.nanoTime() - startTime) / 1_000_000_000.0;
-            System.out.printf("Test \u001B[31m%d\u001B[0m (%s) took %.2f s%n",
-                testNr, selectedTool.getName(), estimatedSeconds);
-            testTimes.add(estimatedSeconds);
+            testDurations.add(estimatedSeconds);
         }
+    }
+
+    private static Tool selectNextToolForTesting() {
+        // this can't be a field because the tools
+        // are initialized after the fields of this class
+//        List<Tool> preferredTools = List.of(SHAPES);
+        List<Tool> preferredTools = List.of();
+
+        Tool selectedTool;
+        if (preferredTools.isEmpty()) {
+            // there is no preferred tool, each tool gets equal chance
+            selectedTool = getRandomTool();
+        } else {
+            // with 80% probability force using a preferred tool
+            if (Rnd.nextDouble() < 0.8) {
+                selectedTool = Rnd.chooseFrom(preferredTools);
+            } else {
+                selectedTool = getRandomTool();
+            }
+        }
+        return selectedTool;
     }
 
     private void testWithTimeout(Tool tool) {
@@ -257,8 +267,10 @@ public class RandomToolTest {
     private void test(Tool tool) {
         Utils.sleep(200, MILLISECONDS);
         activate(tool);
+
+        EDT.assertNumModalDialogsIs(0);
         randomizeToolSettings(tool);
-        GlobalEvents.assertDialogNestingIs(0);
+        EDT.assertNumModalDialogsIs(0);
 
         // set the source point for the clone tool
         if (tool == CLONE) {
@@ -266,17 +278,36 @@ public class RandomToolTest {
         }
 
         randomEvents();
-        dragRandomly();
+        dragRandomly(tool);
         randomEvents();
         pushToolButtons();
-        GlobalEvents.assertDialogNestingIs(0);
+
+        closeRareDialog(tool);
+
         randomEvents();
 
         cleanupAfterTool();
-        GlobalEvents.assertDialogNestingIs(0);
+        EDT.assertNumModalDialogsIs(0);
 
         Utils.sleep(200, MILLISECONDS);
         checkControlVariables();
+    }
+
+    private void closeRareDialog(Tool tool) {
+        if (EDT.getNumModalDialogs() == 0) {
+            return;
+        }
+        var optionPane = app.findJOptionPane();
+        String title = optionPane.title();
+        switch (title) {
+            case "Nothing selected", "No Selection" -> optionPane.okButton().click();
+            case "Selection Crop Type" -> optionPane.buttonWithText("Crop and Hide").click();
+            case "Existing Selection" -> optionPane.buttonWithText("Replace").click();
+            default -> System.out.println("RandomToolTest::closeRareDialog: tool = "
+                + tool + ", title = " + title);
+        }
+        Utils.sleep(200, MILLISECONDS);
+        EDT.assertNumModalDialogsIs(0);
     }
 
     private void activate(Tool tool) {
@@ -294,21 +325,21 @@ public class RandomToolTest {
         log("randomize the settings of " + tool.getName());
         EDT.run(ToolSettingsPanelContainer.get()::randomizeToolSettings);
 
-        if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
-            // prevent paths getting too large
-            log("removing the path");
-            Rnd.withProbability(0.5, () -> EDT.run(PEN::removePath));
+        if (tool == PEN && !PenTool.hasPath()) {
+            // error dialog when switching to Edit or Transform mode
+            if (EDT.getNumModalDialogs() > 0) {
+                app.findJOptionPane().okButton().click();
+            }
         }
     }
 
     private void initEventList() {
         events = new ArrayList<>();
 
-        addEvent(this::click, "click");
+        for (int i = 0; i < 5; i++) {
+            addClickEvent();
+        }
 
-        addEvent(this::ctrlClick, "ctrlClick");
-        addEvent(this::altClick, "altClick");
-        addEvent(this::shiftClick, "shiftClick");
         addEvent(this::doubleClick, "doubleClick");
         addEvent(this::pressEnter, "pressEnter");
         addEvent(this::pressEsc, "pressEsc");
@@ -329,6 +360,15 @@ public class RandomToolTest {
 
     private void addEvent(Runnable event, String name) {
         events.add(new MeasuredTask(event, name));
+    }
+
+    private void addClickEvent() {
+        events.add(new MeasuredTask(() -> {
+            boolean ctrl = Rnd.nextBoolean();
+            boolean alt = Rnd.nextBoolean();
+            boolean shift = Rnd.nextBoolean();
+            return click(ctrl, alt, shift);
+        }));
     }
 
     private void randomEvents() {
@@ -382,6 +422,12 @@ public class RandomToolTest {
 
         if (tool == ZOOM) {
             Rnd.withProbability(0.5, this::actualPixels);
+        }
+
+        if (tool == PEN && PEN.getMode() == PenToolMode.BUILD) {
+            // prevent paths getting too large
+            log("removing the path");
+            Rnd.withProbability(0.5, () -> EDT.run(PEN::removePath));
         }
 
         Rnd.withProbability(0.05, this::reload);
@@ -440,7 +486,9 @@ public class RandomToolTest {
         app.runMenuCommand("Actual Pixels");
     }
 
-    private void dragRandomly() {
+    private void dragRandomly(Tool tool) {
+        EDT.assertNumModalDialogsIs(0);
+
         int numDrags = Rnd.intInRange(1, 5);
         for (int i = 0; i < numDrags; i++) {
             Utils.sleep(200, MILLISECONDS);
@@ -449,21 +497,14 @@ public class RandomToolTest {
             boolean ctrlPressed = Rnd.withProbability(0.25, keyboard::pressCtrl);
             boolean altPressed = Rnd.withProbability(0.25, keyboard::pressAlt);
             boolean shiftPressed = Rnd.withProbability(0.25, keyboard::pressShift);
-            String msg = "random ";
-            if (ctrlPressed) {
-                msg += "ctrl-";
-            }
-            if (altPressed) {
-                msg += "alt-";
-            }
-            if (shiftPressed) {
-                msg += "shift-";
-            }
-            msg += "drag";
+            String msg = "random " + Debug.modifierString(ctrlPressed, altPressed,
+                shiftPressed, false, false) + "drag";
             log(msg);
 
             Utils.sleep(200, MILLISECONDS);
             mouse.dragRandomlyWithinCanvas();
+
+            closeRareDialog(tool);
 
             if (ctrlPressed) {
                 keyboard.releaseCtrl();
@@ -493,28 +534,14 @@ public class RandomToolTest {
         }
     }
 
-    private void click() {
-        log("random click");
-        Utils.sleep(200, MILLISECONDS);
-        mouse.randomClick();
-    }
+    private String click(boolean ctrl, boolean alt, boolean shift) {
+        String modifierDescr = Debug.modifierString(ctrl, alt, shift, false, false);
+        String name = "random " + modifierDescr + "click";
+        log(name);
 
-    private void ctrlClick() {
-        log("random ctrl-click");
         Utils.sleep(200, MILLISECONDS);
-        mouse.randomCtrlClick();
-    }
-
-    private void altClick() {
-        log("random alt-click");
-        Utils.sleep(200, MILLISECONDS);
-        mouse.randomAltClick();
-    }
-
-    private void shiftClick() {
-        log("random shift-click");
-        Utils.sleep(200, MILLISECONDS);
-        mouse.randomShiftClick();
+        mouse.randomClick(ctrl, alt, shift);
+        return name;
     }
 
     private void doubleClick() {
@@ -544,7 +571,7 @@ public class RandomToolTest {
     }
 
     private void parseCLArguments(String[] args) {
-        assert args.length > 0 : "missing CL argument";
+        assert args.length == 1 : "missing inputDir argument";
         inputDir = new File(args[0]);
         assert inputDir.exists() : "input dir doesn't exist";
         assert inputDir.isDirectory() : "input dir is not a directory";
@@ -628,49 +655,170 @@ public class RandomToolTest {
 
         Tool tool = EDT.call(Tools::getCurrent);
 
-        // TODO Clone Transform
-        // TODO Shape: "Stroke Settings...", "Effects...", "Convert to Selection"
-        if (tool == BRUSH || tool == ERASER) {
+        if (tool == CROP) {
+            Rnd.withProbability(0.5, this::clickCropToolButton);
+        } else if (tool == BRUSH || tool == ERASER) {
             Rnd.withProbability(0.2, this::changeLazyMouseSetting);
-            Rnd.withProbability(0.2, this::changeBrushSetting);
+            Rnd.withProbability(0.2, () -> changeBrushSetting(tool));
         } else if (tool == CLONE || tool == SMUDGE) {
             Rnd.withProbability(0.2, this::changeLazyMouseSetting);
+            if (tool == CLONE) {
+                Rnd.withProbability(0.2, this::changeCloneTransform);
+            }
         } else if (tool == PEN) {
             Rnd.withProbability(0.4, this::clickPenToolButton);
         } else if (tool == ZOOM || tool == HAND) {
             Rnd.withProbability(0.2, this::clickZoomOrHandToolButton);
-        } else if (tool == CROP) {
-            Rnd.withProbability(0.5, this::clickCropToolButton);
         } else if (tool == SELECTION) {
             Rnd.withProbability(0.5, this::clickSelectionToolButton);
+        } else if (tool == SHAPES) {
+            Rnd.withProbability(0.2, this::changeShapeTypeSettings);
+            Rnd.withProbability(0.2, this::changeShapeStrokeSettings);
+            Rnd.withProbability(0.2, this::changeShapeEffects);
+            Rnd.withProbability(0.2, this::clickShapeConvertToSelection);
         }
     }
 
-    private void changeLazyMouseSetting() {
-        app.findButton("lazyMouseDialogButton").click();
-        var dialog = app.findDialogByTitle("Lazy Mouse Settings");
+    private void changeShapeTypeSettings() {
+        var button = app.findButton("shapeSettingsButton");
+        if (!button.isEnabled()) {
+            return;
+        }
 
-        log("changing the lazy mouse setting");
+        ShapeType shapeType = EDT.call(SHAPES::getSelectedType);
+        log("changing the shape type setting for " + shapeType);
+        button.click();
         Utils.sleep(200, MILLISECONDS);
-        dialog.checkBox().click();
+        var dialog = app.findDialogByTitleStartingWith("Settings for");
+
+        if (shapeType == RECTANGLE) {
+            slideRandomly(dialog.slider("radius"));
+        } else if (shapeType == LINE) {
+            slideRandomly(dialog.slider("Width (px)"));
+            chooseRandomly(dialog.comboBox(BasicStrokeCap.NAME));
+        } else if (shapeType == STAR) {
+            slideRandomly(dialog.slider("numBranches"));
+        } else {
+            throw new IllegalStateException("shapeType is " + shapeType);
+        }
+
+        dialog.button("ok").click();
+    }
+
+    private void changeShapeStrokeSettings() {
+        var button = app.findButton("strokeSettingsButton");
+        if (!button.isEnabled()) {
+            return;
+        }
+
+        log("changing the shapes stroke setting");
+        button.click();
+        Utils.sleep(200, MILLISECONDS);
+
+        var dialog = app.findDialogByTitle("Stroke Settings");
+
+        slideRandomly(dialog.slider("width"));
+        chooseRandomly(dialog.comboBox("cap"));
+        chooseRandomly(dialog.comboBox("join"));
+        chooseRandomly(dialog.comboBox("strokeType"));
+
+        var shapeType = dialog.comboBox("shapeType");
+        if (shapeType.isEnabled()) {
+            chooseRandomly(shapeType);
+        }
+
+        var dashed = dialog.checkBox("dashed");
+        if (dashed.isEnabled()) {
+            checkRandomly(dashed);
+        }
+
+        dialog.button("ok").click();
+    }
+
+    private void changeShapeEffects() {
+        log("changing the shapes effects");
+        var dialog = startToolDialog("effectsButton", "Effects");
+
+        int selectedTabIndex = Rnd.nextInt(4);
+        String[] tabNames = {
+            EffectsPanel.GLOW_TAB_NAME,
+            EffectsPanel.INNER_GLOW_TAB_NAME,
+            EffectsPanel.NEON_BORDER_TAB_NAME,
+            EffectsPanel.DROP_SHADOW_TAB_NAME};
+
+        for (int i = 0; i < tabNames.length; i++) {
+            String tabName = tabNames[i];
+            if (i == selectedTabIndex) {
+                dialog.checkBox(tabName).check();
+            } else {
+                dialog.checkBox(tabName).uncheck();
+            }
+        }
+
+        dialog.button("ok").click();
+    }
+
+    private void clickShapeConvertToSelection() {
+        clickRandomToolButton(new String[]{"Convert to Selection"});
+    }
+
+    private void changeCloneTransform() {
+        log("changing the clone transform setting");
+        var dialog = startToolDialog("transformButton", "Clone Transform");
+
+        slideRandomly(dialog.slider("scale"));
+        slideRandomly(dialog.slider("rotate"));
+        chooseRandomly(dialog.comboBox("mirror"));
+
+        dialog.button("ok").click();
+    }
+
+    private void changeLazyMouseSetting() {
+        log("changing the lazy mouse setting");
+
+        var dialog = startToolDialog("lazyMouseDialogButton", "Lazy Mouse Settings");
+        var enabledCB = dialog.checkBox();
+        enabledCB.click();
+        if (enabledCB.target().isSelected()) {
+            slideRandomly(dialog.slider("distSlider"));
+            slideRandomly(dialog.slider("spacingSlider"));
+        }
+
         Utils.sleep(200, MILLISECONDS);
 
         dialog.button("ok").click();
     }
 
-    private void changeBrushSetting() {
+    private DialogFixture startToolDialog(String buttonName, String dialogTitle) {
+        app.findButton(buttonName).click();
+        var dialog = app.findDialogByTitle(dialogTitle);
+
+        Utils.sleep(200, MILLISECONDS);
+        return dialog;
+    }
+
+    private void changeBrushSetting(Tool tool) {
         var settingsButton = app.findButtonByText("Settings...");
         if (!settingsButton.isEnabled()) {
             return;
         }
 
-        log("changing the brush setting");
+        BrushType brushType = getActiveBrushType(tool);
+        log("changing the brush setting for " + tool + ", brushType = " + brushType);
+
         settingsButton.click();
-        var settingsDialog = app.findDialogByTitleStartingWith("Settings for the");
+        app.testBrushSettings(brushType, tool);
+    }
 
-        // TODO
-
-        settingsDialog.button("ok").click();
+    private static BrushType getActiveBrushType(Tool tool) {
+        return EDT.call(() -> {
+            if (tool == BRUSH) {
+                return BRUSH.getBrushType();
+            } else if (tool == ERASER) {
+                return ERASER.getBrushType();
+            }
+            throw new IllegalStateException("tool = " + tool);
+        });
     }
 
     private void clickPenToolButton() {
@@ -796,19 +944,24 @@ public class RandomToolTest {
         GlobalEvents.addHotKey(PAUSE_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (paused) {
-                    System.err.println(PAUSE_KEY_CHAR + " pressed, starting again.");
-                    paused = false;
-                    synchronized (resumeMonitor) {
-                        // wake up the waiting main thread from the EDT
-                        resumeMonitor.notify();
-                    }
-                } else {
-                    System.err.println(PAUSE_KEY_CHAR + " pressed, pausing.");
-                    paused = true;
-                }
+                pauseKeyPressed();
             }
         });
+    }
+
+    private void pauseKeyPressed() {
+        assert calledOnEDT() : threadInfo();
+        if (paused) {
+            System.err.println(PAUSE_KEY_CHAR + " pressed, starting again.");
+            paused = false;
+            synchronized (resumeMonitor) {
+                // wake up the waiting main thread from the EDT
+                resumeMonitor.notify();
+            }
+        } else {
+            System.err.println(PAUSE_KEY_CHAR + " pressed, pausing.");
+            paused = true;
+        }
     }
 
     private void setupExitKey() {
@@ -816,13 +969,18 @@ public class RandomToolTest {
         GlobalEvents.addHotKey(EXIT_KEY_CHAR, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.err.println("\nexiting because '" + EXIT_KEY_CHAR + "' was pressed");
-
-                // we are on the EDT now, and before exiting
-                // we want to wait until the modifier keys are released
-                exitInNewThread();
+                exitKeyPressed();
             }
         });
+    }
+
+    private void exitKeyPressed() {
+        assert calledOnEDT() : threadInfo();
+        System.err.println("\nexiting because '" + EXIT_KEY_CHAR + "' was pressed");
+
+        // we are on the EDT now, and before exiting
+        // we want to wait until the modifier keys are released
+        exitInNewThread();
     }
 
     private void exitInNewThread() {
@@ -833,10 +991,10 @@ public class RandomToolTest {
         // avoid blocking the EDT
         assert calledOutsideEDT() : "on EDT";
         // this should also not be called from the main thread
-        assert !Threads.threadName().equals("main");
+        assert !threadName().equals("main");
 
         if (paused) {
-            // if already paused, then we can exit immediately
+            // if already paused, then exit immediately
             keyboard.releaseModifierKeys();
             System.exit(0);
         }
@@ -847,7 +1005,7 @@ public class RandomToolTest {
         // wait for the main thread to complete in a consistent state,
         // (with the modifier keys released), and finish
         try {
-            boolean ok = mainThreadExitLatch.await(30, SECONDS);
+            boolean ok = mainLoopExitLatch.await(30, SECONDS);
             if (!ok) {
                 System.err.println("Timed out waiting for the main thread to finish");
                 System.exit(1);
@@ -860,6 +1018,7 @@ public class RandomToolTest {
         // The EDT is still running => force the exit
         System.exit(0);
     }
+
 }
 
 class TestControlException extends RuntimeException {
@@ -874,11 +1033,16 @@ class StoppedException extends TestControlException {
 class MeasuredTask implements Runnable {
     private static final boolean TRACK_MEMORY = false;
     private final Runnable task;
-    private final String name;
+    private String name;
 
     public MeasuredTask(Runnable task, String name) {
         this.task = task;
         this.name = name;
+    }
+
+    // the name of the task is given at runtime by the given supplier
+    public MeasuredTask(Supplier<String> supplier) {
+        task = () -> name = supplier.get();
     }
 
     @Override
@@ -900,7 +1064,7 @@ class MeasuredTask implements Runnable {
                 System.exit(1);
             }
         } else {
-            System.out.printf("%s was running for %.2f s%n", name, seconds);
+//            System.out.printf("%s was running for %.2f s%n", name, seconds);
         }
     }
 }
