@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,8 @@ package pixelitor.assertions;
 import org.assertj.core.api.AbstractObjectAssert;
 import pixelitor.filters.Filter;
 import pixelitor.filters.RandomFilterSource;
+
+import static java.lang.String.format;
 
 /**
  * Custom AssertJ assertions for {@link RandomFilterSource} objects.
@@ -61,9 +63,9 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
 
         Filter lastFilter = actual.getLastFilter();
         if (lastFilter != expected) {
-            failWithMessage(String
-                    .format("\nExpecting that the last filter is equal to the expected, but it is not. " +
-                            "\nExpected: %s, actual last filer: %s", expected.getName(), lastFilter.getName()));
+            failWithMessage(format("""
+                Expecting that the last filter is equal to the expected, but it is not.
+                Expected: %s, actual last filer: %s""", expected.getName(), lastFilter.getName()));
         }
 
         return this;
@@ -74,9 +76,9 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
 
         Filter previous = actual.getPrevious();
         if (previous != expected) {
-            failWithMessage(String
-                    .format("\nExpecting that the previous filter is equal to the expected, but it is not. " +
-                            "\nExpected: %s, actual previous filer: %s", expected.getName(), previous.getName()));
+            failWithMessage(format("""
+                Expecting that the previous filter is equal to the expected, but it is not.
+                Expected: %s, actual previous filer: %s""", expected.getName(), previous.getName()));
         }
 
         return this;
@@ -87,9 +89,9 @@ public class RandomFilterSourceAssert extends AbstractObjectAssert<RandomFilterS
 
         Filter next = actual.getNext();
         if (next != expected) {
-            failWithMessage(String
-                    .format("\nExpecting that the next filter is equal to the expected, but it is not. " +
-                            "\nExpected: %s, actual next filer: %s", expected.getName(), next.getName()));
+            failWithMessage(format("""
+                Expecting that the next filter is equal to the expected, but it is not.
+                Expected: %s, actual next filer: %s""", expected.getName(), next.getName()));
         }
 
         return this;

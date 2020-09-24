@@ -66,9 +66,11 @@ public class OpenRaster {
         var fos = new FileOutputStream(outFile);
         var zos = new ZipOutputStream(fos);
 
-        String stackXML = format("<?xml version='1.0' encoding='UTF-8'?>\n" +
-            "<image w=\"%d\" h=\"%d\">\n" +
-            "<stack>\n", comp.getCanvasWidth(), comp.getCanvasHeight());
+        String stackXML = format("""
+            <?xml version='1.0' encoding='UTF-8'?>
+            <image w="%d" h="%d">
+            <stack>
+            """, comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
         int numImageLayers = comp.getNumImageLayers();
