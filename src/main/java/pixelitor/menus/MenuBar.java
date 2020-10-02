@@ -98,7 +98,7 @@ public class MenuBar extends JMenuBar {
     public MenuBar(PixelitorWindow pw) {
         ResourceBundle texts = Texts.getResources();
 
-        add(createFileMenu(pw));
+        add(createFileMenu(pw, texts));
         add(createEditMenu(texts));
         add(createLayerMenu(pw));
         add(createSelectMenu());
@@ -114,8 +114,9 @@ public class MenuBar extends JMenuBar {
         add(createHelpMenu(pw));
     }
 
-    private static JMenu createFileMenu(PixelitorWindow pw) {
-        PMenu fileMenu = new PMenu("File", 'F');
+    private static JMenu createFileMenu(PixelitorWindow pw, ResourceBundle texts) {
+        // TODO adapt the mnemonic
+        PMenu fileMenu = new PMenu(texts.getString("file"), 'F');
 
         // new image
         fileMenu.buildAction(NewImage.getAction())
@@ -136,21 +137,21 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        fileMenu.addActionWithKey(new MenuAction("Save") {
+        fileMenu.addActionWithKey(new MenuAction(texts.getString("save")) {
             @Override
             public void onClick() {
                 IO.save(false);
             }
         }, CTRL_S);
 
-        fileMenu.addActionWithKey(new MenuAction("Save As...") {
+        fileMenu.addActionWithKey(new MenuAction(texts.getString("save_as") + "...") {
             @Override
             public void onClick() {
                 IO.save(true);
             }
         }, CTRL_SHIFT_S);
 
-        fileMenu.addAction(new MenuAction("Export Optimized JPEG...") {
+        fileMenu.addAction(new MenuAction(texts.getString("export_optimized_jpeg") + "...") {
             @Override
             public void onClick() {
                 BufferedImage image = getActiveCompositeImage();
@@ -158,7 +159,7 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        fileMenu.addAction(new MenuAction("Export OpenRaster...") {
+        fileMenu.addAction(new MenuAction(texts.getString("export_open_raster") + "...") {
             @Override
             public void onClick() {
                 OpenRasterExportPanel.showInDialog();
@@ -167,14 +168,14 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        fileMenu.addAction(new MenuAction("Export Layer Animation...") {
+        fileMenu.addAction(new MenuAction(texts.getString("export_layer_animation") + "...") {
             @Override
             public void onClick() {
-                AnimGifExport.start();
+                LayerAnimExport.start();
             }
         });
 
-        fileMenu.addAction(new DrawableAction("Export Tweening Animation") {
+        fileMenu.addAction(new DrawableAction(texts.getString("export_tweening_animation")) {
             @Override
             protected void process(Drawable dr) {
                 new TweenWizard(dr).start(pw);
@@ -184,14 +185,14 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // reload
-        fileMenu.addActionWithKey(new MenuAction("Reload") {
+        fileMenu.addActionWithKey(new MenuAction(texts.getString("reload")) {
             @Override
             public void onClick() {
                 reloadActiveFromFileAsync();
             }
         }, F12);
 
-        fileMenu.addAction(new MenuAction("Show Metadata...") {
+        fileMenu.addAction(new MenuAction(texts.getString("show_metadata") + "...") {
             @Override
             public void onClick() {
                 MetaDataPanel.showInDialog(pw);
@@ -208,7 +209,7 @@ public class MenuBar extends JMenuBar {
 
         fileMenu.addSeparator();
 
-        fileMenu.add(createAutomateSubmenu(pw));
+        fileMenu.add(createAutomateSubmenu(pw, texts));
 
         if (!JVM.isMac) {
             fileMenu.add(new ScreenCaptureAction());
@@ -228,17 +229,18 @@ public class MenuBar extends JMenuBar {
         return fileMenu;
     }
 
-    private static JMenu createAutomateSubmenu(PixelitorWindow pw) {
-        PMenu automateMenu = new PMenu("Automate");
+    private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu automateMenu = new PMenu(texts.getString("automate"));
 
-        automateMenu.add(new MenuAction("Batch Resize...") {
+//        automateMenu.add(new MenuAction("Batch Resize...") {
+        automateMenu.add(new MenuAction(texts.getString("batch_resize") + "...") {
             @Override
             public void onClick() {
                 BatchResize.start();
             }
         });
 
-        automateMenu.buildAction(new DrawableAction("Batch Filter") {
+        automateMenu.buildAction(new DrawableAction(texts.getString("batch_filter")) {
             @Override
             protected void process(Drawable dr) {
                 new BatchFilterWizard(dr).start(pw);
@@ -247,14 +249,14 @@ public class MenuBar extends JMenuBar {
 
         // formats other than PNG are not supported in order
         // to avoid problems with translucency
-        automateMenu.addAction(new MenuAction("Export Layers to PNG...") {
+        automateMenu.addAction(new MenuAction(texts.getString("export_layers_to_png") + "...") {
             @Override
             public void onClick() {
                 IO.exportLayersToPNGAsync();
             }
         });
 
-        automateMenu.addAction(new DrawableAction("Auto Paint") {
+        automateMenu.addAction(new DrawableAction(texts.getString("auto_paint")) {
             @Override
             protected void process(Drawable dr) {
                 AutoPaint.showDialog(dr);

@@ -34,8 +34,8 @@ import static java.lang.Integer.parseInt;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.io.FileChoosers.gifFilter;
 
-public class AnimGifExport {
-    private AnimGifExport() {
+public class LayerAnimExport {
+    private LayerAnimExport() {
     }
 
     public static void start() {

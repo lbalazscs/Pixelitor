@@ -31,10 +31,7 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Rnd;
-import pixelitor.utils.ViewActivationListener;
-import pixelitor.utils.VisibleForTesting;
+import pixelitor.utils.*;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Cursor;
@@ -63,14 +60,14 @@ public class OpenImages {
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction("Close All") {
+    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(Texts.get("close_all")) {
         @Override
         public void onClick() {
             warnAndCloseAll();
         }
     };
 
-    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction("Close") {
+    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(Texts.get("close")) {
         @Override
         public void onClick() {
             warnAndCloseActive();

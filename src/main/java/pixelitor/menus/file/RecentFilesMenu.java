@@ -20,6 +20,7 @@ package pixelitor.menus.file;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.BoundedUniqueList;
 import pixelitor.utils.Messages;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.io.File;
@@ -40,7 +41,7 @@ public final class RecentFilesMenu extends JMenu {
     private BoundedUniqueList<RecentFile> recentFiles;
 
     private RecentFilesMenu() {
-        super("Recent Files");
+        super(Texts.get("recent_files"));
 
         clearMenuItem = new JMenuItem("Clear Recent Files");
         clearMenuItem.addActionListener(e -> clear());
