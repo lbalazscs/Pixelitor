@@ -22,6 +22,7 @@ package pixelitor.utils;
  */
 public enum Language {
     ENGLISH("English", "en") {},
+    GERMAN("German", "de") {},
     SPANISH("Spanish", "es") {};
 
     private final String guiName;
