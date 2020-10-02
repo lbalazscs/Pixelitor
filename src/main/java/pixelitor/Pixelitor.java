@@ -28,8 +28,8 @@ import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
 import pixelitor.tools.util.DragDisplay;
 import pixelitor.utils.AppPreferences;
+import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import java.awt.EventQueue;
@@ -68,11 +68,11 @@ public class Pixelitor {
         // but keep the system locale for number formatting
         SYS_LOCALE = Locale.getDefault();
         String sysLangCode = SYS_LOCALE.getLanguage();
-        if (!Texts.isLangCodeSupported(sysLangCode)) { // except if supported
+        if (!Language.isCodeSupported(sysLangCode)) { // except if supported
             Locale.setDefault(Locale.US);
         }
 
-        Texts.loadLanguage();
+        Language.load();
 
         System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Pixelitor");
 

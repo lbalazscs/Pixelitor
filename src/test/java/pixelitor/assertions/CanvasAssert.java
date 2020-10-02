@@ -18,11 +18,11 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.util.Objects;
 import pixelitor.Canvas;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.util.Objects;
 
 /**
  * Custom AssertJ assertions for {@link Canvas} objects.
@@ -44,7 +44,7 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         String msg = "\nExpecting bounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         Rectangle actualBounds = actual.getBounds();
-        if (!Objects.areEqual(actualBounds, bounds)) {
+        if (!Objects.equals(actualBounds, bounds)) {
             failWithMessage(msg, actual, bounds, actualBounds);
         }
 
@@ -118,7 +118,7 @@ public class CanvasAssert extends AbstractAssert<CanvasAssert, Canvas> {
         String msg = "\nExpecting coSize of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         Dimension actualCoSize = actual.getCoSize();
-        if (!Objects.areEqual(actualCoSize, coSize)) {
+        if (!Objects.equals(actualCoSize, coSize)) {
             failWithMessage(msg, actual, coSize, actualCoSize);
         }
 

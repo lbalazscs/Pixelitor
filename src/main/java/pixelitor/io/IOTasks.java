@@ -19,11 +19,14 @@ package pixelitor.io;
 
 import pixelitor.ThreadPool;
 import pixelitor.utils.SerialExecutor;
+import pixelitor.utils.Utils;
+import pixelitor.utils.VisibleForTesting;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
@@ -109,7 +112,11 @@ public class IOTasks {
     /**
      * Waits until all IO operations have finished
      */
+    @VisibleForTesting
     public static void waitForIdle() {
+        // make sure that the IO task is started
+        Utils.sleep(200, TimeUnit.MILLISECONDS);
+
         // waiting until an empty task finishes works
         // because the IO executor is serialized
         var latch = new CountDownLatch(1);
@@ -119,5 +126,7 @@ public class IOTasks {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        Utils.sleep(200, TimeUnit.MILLISECONDS);
     }
 }

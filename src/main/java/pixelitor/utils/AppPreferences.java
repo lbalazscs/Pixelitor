@@ -465,6 +465,6 @@ public final class AppPreferences {
     }
 
     private static void saveLanguage() {
-        mainNode.put(LANG_KEY, Texts.getCurrentLanguage().getCode());
+        mainNode.put(LANG_KEY, Language.getCurrent().getCode());
     }
 }

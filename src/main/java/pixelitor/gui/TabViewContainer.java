@@ -19,7 +19,6 @@ package pixelitor.gui;
 
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -116,8 +115,8 @@ public class TabViewContainer extends JComponent implements ViewContainer {
                 OpenImages.warnAndCloseAllBut(view);
             }
         });
-        popup.add(Texts.CLOSE_UNMODIFIED_ACTION);
-        popup.add(Texts.CLOSE_ALL_ACTION);
+        popup.add(OpenImages.CLOSE_UNMODIFIED_ACTION);
+        popup.add(OpenImages.CLOSE_ALL_ACTION);
 
         if (Desktop.isDesktopSupported()) {
             var comp = view.getComp();

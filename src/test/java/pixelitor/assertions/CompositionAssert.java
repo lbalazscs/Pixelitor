@@ -18,7 +18,6 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.util.Objects;
 import pixelitor.Composition;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
@@ -27,6 +26,7 @@ import pixelitor.layers.LayerUI;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -218,7 +218,7 @@ public class CompositionAssert extends AbstractAssert<CompositionAssert, Composi
         String msg = "\nExpecting name of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         String actualName = actual.getName();
-        if (!Objects.areEqual(actualName, name)) {
+        if (!Objects.equals(actualName, name)) {
             failWithMessage(msg, actual, name, actualName);
         }
 

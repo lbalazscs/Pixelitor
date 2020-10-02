@@ -59,6 +59,7 @@ import static pixelitor.utils.Threads.threadInfo;
 public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
     public static final int ROBOT_DELAY_SLOW = 300; // millis
+
     private static final DateTimeFormatter DATE_FORMAT_HM =
         DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMAT_HMS =
@@ -99,6 +100,11 @@ public class AppRunner {
             return;
         }
 
+        waitForImageLoading();
+        mouse.recalcCanvasBounds();
+    }
+
+    private static void waitForImageLoading() {
         // wait even after the frame is shown to
         // make sure that the image is also loaded
         var comp = EDT.getComp();
@@ -106,7 +112,6 @@ public class AppRunner {
             Utils.sleep(1, SECONDS);
             comp = EDT.getComp();
         }
-        mouse.recalcCanvasBounds();
     }
 
     public Robot getRobot() {
@@ -209,10 +214,7 @@ public class AppRunner {
     void runMenuCommand(String text) {
         assert calledOutsideEDT() : threadInfo();
 
-//        JMenuItemFixture menuItem = EDT.call(() -> findMenuItemByText(text));
-//        menuItem.click();
-
-        findMenuItemByText(text).click(); //
+        findMenuItemByText(text).click();
         Utils.sleep(200, MILLISECONDS);
     }
 
@@ -234,7 +236,6 @@ public class AppRunner {
 
         // wait a bit to make sure that the async open completed
         IOTasks.waitForIdle();
-        Utils.sleep(1, SECONDS);
         mouse.recalcCanvasBounds();
 
         if (EDT.active(Composition::isDirty)) {

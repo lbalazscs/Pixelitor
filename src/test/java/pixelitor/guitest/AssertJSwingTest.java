@@ -1448,7 +1448,6 @@ public class AssertJSwingTest {
 
         // reloading is asynchronous, wait a bit
         IOTasks.waitForIdle();
-        Utils.sleep(1, SECONDS);
 
         keyboard.undoRedo("Reload");
         maskMode.set(this);

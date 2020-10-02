@@ -202,10 +202,10 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // close
-        fileMenu.addActionWithKey(Texts.CLOSE_ACTIVE_ACTION, CTRL_W);
+        fileMenu.addActionWithKey(CLOSE_ACTIVE_ACTION, CTRL_W);
 
         // close all
-        fileMenu.addActionWithKey(Texts.CLOSE_ALL_ACTION, CTRL_ALT_W);
+        fileMenu.addActionWithKey(CLOSE_ALL_ACTION, CTRL_ALT_W);
 
         fileMenu.addSeparator();
 

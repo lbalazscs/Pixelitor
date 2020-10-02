@@ -17,10 +17,6 @@
 
 package pixelitor.utils;
 
-import pixelitor.OpenImages;
-import pixelitor.menus.MenuAction;
-
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -28,42 +24,10 @@ import java.util.ResourceBundle;
  * The internationalized texts of the UI
  */
 public class Texts {
-    private static Language currentLang = Language.ENGLISH;
-    private static ResourceBundle resources;
-    private static final Language[] languages = Language.values();
+    // this locale is used in the tests, the GUI replaces it
+    private static ResourceBundle resources = ResourceBundle.getBundle("texts", Locale.US);
 
     private Texts() {
-    }
-
-    public static boolean isLangCodeSupported(String code) {
-        for (Language lang : languages) {
-            if(lang.getCode().equals(code)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static Language getCurrentLanguage() {
-        return currentLang;
-    }
-
-    public static void loadLanguage() {
-        String loadedCode = AppPreferences.loadLanguageCode();
-
-        Language loadedLang = Arrays.stream(languages)
-              .filter(lang -> lang.getCode().equals(loadedCode))
-              .findFirst()
-              .orElse(Language.ENGLISH);
-
-        setCurrentLang(loadedLang);
-    }
-
-    public static void setCurrentLang(Language lang) {
-        currentLang = lang;
-        Locale newLocale = new Locale(currentLang.getCode());
-        Locale.setDefault(newLocale);
-        resources = ResourceBundle.getBundle("texts", newLocale);
     }
 
     public static ResourceBundle getResources() {
@@ -74,24 +38,7 @@ public class Texts {
         return resources.getString(key);
     }
 
-    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(get("close_all")) {
-        @Override
-        public void onClick() {
-            OpenImages.warnAndCloseAll();
-        }
-    };
-    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(get("close")) {
-        @Override
-        public void onClick() {
-            OpenImages.warnAndCloseActive();
-        }
-    };
-    public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
-        @Override
-        public void onClick() {
-            OpenImages.warnAndCloseUnmodified();
-        }
-    };
-
-    public static final String NEW_IMAGE_STRING = get("new_image");
+    public static void setLocale(Locale newLocale) {
+        resources = ResourceBundle.getBundle("texts", newLocale);
+    }
 }

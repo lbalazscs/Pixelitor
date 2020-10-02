@@ -17,6 +17,9 @@
 
 package pixelitor.utils;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 /**
  * The languages supported by Pixelitor
  */
@@ -40,5 +43,41 @@ public enum Language {
     @Override
     public String toString() {
         return guiName;
+    }
+
+    // from here static members and methods
+
+    private static Language currentLang = ENGLISH;
+    private static final Language[] languages = values();
+
+    public static boolean isCodeSupported(String code) {
+        for (Language lang : languages) {
+            if (lang.getCode().equals(code)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void load() {
+        String loadedCode = AppPreferences.loadLanguageCode();
+
+        Language loadedLang = Arrays.stream(languages)
+            .filter(lang -> lang.getCode().equals(loadedCode))
+            .findFirst()
+            .orElse(ENGLISH);
+
+        setCurrent(loadedLang);
+    }
+
+    public static Language getCurrent() {
+        return currentLang;
+    }
+
+    public static void setCurrent(Language lang) {
+        currentLang = lang;
+        Locale newLocale = new Locale(currentLang.getCode());
+        Locale.setDefault(newLocale);
+        Texts.setLocale(newLocale);
     }
 }

@@ -18,11 +18,11 @@
 package pixelitor.assertions;
 
 import org.assertj.core.api.AbstractObjectAssert;
-import org.assertj.core.util.Objects;
 import pixelitor.selection.Selection;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
+import java.util.Objects;
 
 /**
  * Custom AssertJ assertions for {@link Selection} objects.
@@ -124,7 +124,7 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         String msg = "\nExpecting shape of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         Shape actualShape = actual.getShape();
-        if (!Objects.areEqual(actualShape, shape)) {
+        if (!Objects.equals(actualShape, shape)) {
             failWithMessage(msg, actual, shape, actualShape);
         }
 
@@ -137,7 +137,7 @@ public class SelectionAssert extends AbstractObjectAssert<SelectionAssert, Selec
         String msg = "\nExpecting shapeBounds of:\n  <%s>\nto be:\n  <%s>\nbut was:\n  <%s>";
 
         Rectangle2D actualShapeBounds = actual.getShapeBounds2D();
-        if (!Objects.areEqual(actualShapeBounds, shapeBounds)) {
+        if (!Objects.equals(actualShapeBounds, shapeBounds)) {
             failWithMessage(msg, actual, shapeBounds, actualShapeBounds);
         }
 

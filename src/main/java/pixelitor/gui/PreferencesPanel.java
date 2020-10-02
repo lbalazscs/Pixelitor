@@ -29,7 +29,6 @@ import pixelitor.layers.LayerButtonLayout;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Language;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -74,7 +73,7 @@ public class PreferencesPanel extends JPanel {
 
     private void addLanguageChooser(GridBagHelper gbh) {
         var languages = new EnumComboBoxModel<>(Language.class);
-        languages.setSelectedItem(Texts.getCurrentLanguage());
+        languages.setSelectedItem(Language.getCurrent());
 
         @SuppressWarnings("unchecked")
         JComboBox<Language> langChooser = new JComboBox<>(languages);
@@ -83,8 +82,8 @@ public class PreferencesPanel extends JPanel {
         gbh.addLabelAndControl("Language: ", langChooser);
         langChooser.addActionListener(e -> {
             Language language = languages.getSelectedItem();
-            if (language != Texts.getCurrentLanguage()) {
-                Texts.setCurrentLang(language);
+            if (language != Language.getCurrent()) {
+                Language.setCurrent(language);
                 EventQueue.invokeLater(() -> Dialogs.showInfoDialog(this,
                     "Needs Restart",
                     "Changing the display language will take effect after restarting Pixelitor."));
