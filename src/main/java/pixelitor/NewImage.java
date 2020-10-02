@@ -41,7 +41,6 @@ import static pixelitor.utils.MemoryInfo.ONE_MEGABYTE;
  * Static methods for creating new images
  */
 public final class NewImage {
-    public static final String NEW_IMAGE_STRING = Texts.get("new_image");
     private static int untitledCount = 1;
 
     private static final Dimension lastSize = AppPreferences.getNewImageSize();
@@ -72,14 +71,14 @@ public final class NewImage {
     private static void showInDialog() {
         var panel = new NewImagePanel();
         new DialogBuilder()
-            .title(NEW_IMAGE_STRING)
+            .title(Texts.NEW_IMAGE_STRING)
                 .validatedContent(panel)
                 .okAction(panel::okPressedInDialog)
                 .show();
     }
 
     public static Action getAction() {
-        return new AbstractAction(NEW_IMAGE_STRING + "...") {
+        return new AbstractAction(Texts.NEW_IMAGE_STRING + "...") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showInDialog();

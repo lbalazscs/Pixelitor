@@ -23,7 +23,6 @@ import pixelitor.history.History;
 import pixelitor.io.IO;
 import pixelitor.io.IOTasks;
 import pixelitor.layers.*;
-import pixelitor.menus.MenuAction;
 import pixelitor.menus.file.RecentFilesMenu;
 import pixelitor.menus.view.ZoomLevel;
 import pixelitor.menus.view.ZoomMenu;
@@ -31,7 +30,10 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.*;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Cursor;
@@ -59,27 +61,6 @@ public class OpenImages {
     private static View activeView;
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
-
-    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(Texts.get("close_all")) {
-        @Override
-        public void onClick() {
-            warnAndCloseAll();
-        }
-    };
-
-    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(Texts.get("close")) {
-        @Override
-        public void onClick() {
-            warnAndCloseActive();
-        }
-    };
-
-    public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
-        @Override
-        public void onClick() {
-            warnAndCloseUnmodified();
-        }
-    };
 
     private OpenImages() {
     }
@@ -306,7 +287,7 @@ public class OpenImages {
             .collect(joining(", ", "[", "]"));
     }
 
-    private static void warnAndCloseActive() {
+    public static void warnAndCloseActive() {
         warnAndClose(activeView);
     }
 
@@ -342,7 +323,7 @@ public class OpenImages {
         }
     }
 
-    private static void warnAndCloseAll() {
+    public static void warnAndCloseAll() {
         warnAndCloseAllIf(view -> true);
     }
 
@@ -350,7 +331,7 @@ public class OpenImages {
         warnAndCloseAllIf(view -> view != selected);
     }
 
-    private static void warnAndCloseUnmodified() {
+    public static void warnAndCloseUnmodified() {
         warnAndCloseAllIf(view -> !view.getComp().isDirty());
     }
 

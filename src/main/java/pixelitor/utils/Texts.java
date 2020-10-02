@@ -17,6 +17,9 @@
 
 package pixelitor.utils;
 
+import pixelitor.OpenImages;
+import pixelitor.menus.MenuAction;
+
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -70,4 +73,25 @@ public class Texts {
     public static String get(String key) {
         return resources.getString(key);
     }
+
+    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(get("close_all")) {
+        @Override
+        public void onClick() {
+            OpenImages.warnAndCloseAll();
+        }
+    };
+    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(get("close")) {
+        @Override
+        public void onClick() {
+            OpenImages.warnAndCloseActive();
+        }
+    };
+    public static final MenuAction CLOSE_UNMODIFIED_ACTION = new MenuAction("Close Unmodified") {
+        @Override
+        public void onClick() {
+            OpenImages.warnAndCloseUnmodified();
+        }
+    };
+
+    public static final String NEW_IMAGE_STRING = get("new_image");
 }
