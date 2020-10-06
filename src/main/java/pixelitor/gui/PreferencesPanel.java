@@ -46,15 +46,30 @@ public class PreferencesPanel extends JPanel {
         BorderFactory.createEmptyBorder(0, 10, 5, 0);
     private JTextField undoLevelsTF;
     private JComboBox<IntChoiceParam.Item> thumbSizeCB;
+    private JComboBox<MouseZoomMethod> zoomMethodCB;
+
+    // the panel is re-created every time, but the last selected tab
+    // should be selected automatically the next time
+    private static int lastSelectedTabIndex = 0;
 
     private PreferencesPanel() {
         var tabbedPane = new JTabbedPane(LEFT);
-        var generalPanel = createGeneralPanel();
-        var guidesPanel = createGuidesPanel();
 
-        tabbedPane.add("General", generalPanel);
-        tabbedPane.add("Guides", guidesPanel);
+        tabbedPane.add("General", createGeneralPanel());
+        tabbedPane.add("Mouse", createMousePanel());
+        tabbedPane.add("Guides", createGuidesPanel());
+
+        setupTabSelection(tabbedPane);
+
         add(tabbedPane);
+    }
+
+    private void setupTabSelection(JTabbedPane tabbedPane) {
+        if (lastSelectedTabIndex != 0) {
+            tabbedPane.setSelectedIndex(lastSelectedTabIndex);
+        }
+        tabbedPane.addChangeListener(e ->
+            lastSelectedTabIndex = tabbedPane.getSelectedIndex());
     }
 
     private JPanel createGeneralPanel() {
@@ -201,10 +216,23 @@ public class PreferencesPanel extends JPanel {
         });
     }
 
+    private JPanel createMousePanel() {
+        var mousePanel = new JPanel(new GridBagLayout());
+        var gbh = new GridBagHelper(mousePanel);
+
+        zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
+        zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
+        zoomMethodCB.setName("zoomMethod");
+        gbh.addLabelAndControl("Zoom with:", zoomMethodCB);
+
+        mousePanel.setBorder(EMPTY_BORDER);
+        return mousePanel;
+    }
+
     private boolean validate(JDialog d) {
         // we don't want to continuously set the undo levels
         // as the user edits the text field, because low levels
-        // erase the history, so we set it in the validator
+        // erase the history, therefore it is set here
         int undoLevels = 0;
         boolean couldParse = true;
         try {
@@ -218,12 +246,15 @@ public class PreferencesPanel extends JPanel {
 
         if (couldParse) {
             History.setUndoLevels(undoLevels);
-            return true;
         } else {
             Dialogs.showErrorDialog(d, "Error",
                 "<html>The <b>Undo/Redo Levels</b> must be a positive integer.");
             return false;
         }
+
+        // the mouse zoom can't be set interactively => set it here
+        MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
+        return true;
     }
 
     private int getUndoLevels() {

@@ -22,10 +22,7 @@ import pixelitor.NewImage;
 import pixelitor.Pixelitor;
 import pixelitor.TipsOfTheDay;
 import pixelitor.colors.FgBgColors;
-import pixelitor.gui.ImageArea;
-import pixelitor.gui.ImageAreaSavedInfo;
-import pixelitor.gui.PixelitorWindow;
-import pixelitor.gui.WorkSpace;
+import pixelitor.gui.*;
 import pixelitor.gui.utils.Screens;
 import pixelitor.gui.utils.Theme;
 import pixelitor.gui.utils.Themes;
@@ -89,6 +86,7 @@ public final class AppPreferences {
     private static final String LAST_TOOL_KEY = "last_tool";
     private static final String THEME_KEY = "theme";
     private static final String LANG_KEY = "lang";
+    private static final String MOUSE_ZOOM_KEY = "mouse_zoom";
 
     private static final String GUIDE_COLOR_KEY = "guide_color";
     private static final String GUIDE_STROKE_KEY = "guide_stroke";
@@ -362,6 +360,7 @@ public final class AppPreferences {
         saveCropGuideStyles();
         saveTheme();
         saveLanguage();
+        saveMouseZoom();
     }
 
     public static Color loadFgColor() {
@@ -449,7 +448,7 @@ public final class AppPreferences {
         String code = mainNode.get(THEME_KEY, "Nimbus");
         Theme[] themes = Theme.values();
         for (Theme theme : themes) {
-            if (code.equals(theme.toString())) {
+            if (code.equals(theme.getSaveCode())) {
                 return theme;
             }
         }
@@ -466,5 +465,13 @@ public final class AppPreferences {
 
     private static void saveLanguage() {
         mainNode.put(LANG_KEY, Language.getCurrent().getCode());
+    }
+
+    public static String loadMouseZoom() {
+        return mainNode.get(MOUSE_ZOOM_KEY, MouseZoomMethod.CTRL_WHEEL.saveCode());
+    }
+
+    private static void saveMouseZoom() {
+        mainNode.put(MOUSE_ZOOM_KEY, MouseZoomMethod.CURRENT.saveCode());
     }
 }

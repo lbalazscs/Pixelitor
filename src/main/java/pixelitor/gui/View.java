@@ -163,15 +163,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         addMouseListener(this);
         addMouseMotionListener(this);
 
-        addMouseWheelListener(e -> {
-            if (e.isControlDown()) {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    increaseZoom(e.getPoint());
-                } else {  // down, towards the user
-                    decreaseZoom(e.getPoint());
-                }
-            }
-        });
+        MouseZoomMethod.CURRENT.installOnView(this);
     }
 
     public boolean isDirty() {

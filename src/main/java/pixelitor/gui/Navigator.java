@@ -73,6 +73,8 @@ public class Navigator extends JComponent
     // explicitly given zoom level instead of the navigator size
     private ZoomLevel exactZoom = null;
 
+    private static Navigator navigatorPanel;
+
     private Navigator(View view) {
         adjListener = e ->
             SwingUtilities.invokeLater(this::updateViewBoxPosition);
@@ -152,20 +154,7 @@ public class Navigator extends JComponent
     }
 
     private void addMouseWheelZoomingSupport() {
-        addMouseWheelListener(e -> {
-            if (e.isControlDown()) {
-                if (e.getWheelRotation() < 0) { // up, away from the user
-                    // this.view will be always the active image...
-                    if (view != null) { // ...and it is null if all images are closed
-                        view.increaseZoom();
-                    }
-                } else {  // down, towards the user
-                    if (view != null) {
-                        view.decreaseZoom();
-                    }
-                }
-            }
-        });
+        MouseZoomMethod.CURRENT.installOnNavigator(this, view);
     }
 
     public static void showInDialog() {
@@ -175,17 +164,26 @@ public class Navigator extends JComponent
         }
 
         View view = OpenImages.getActiveView();
-        var navigator = new Navigator(view);
+        navigatorPanel = new Navigator(view);
 
         dialog = new DialogBuilder()
             .title("Navigator")
-            .content(navigator)
+            .content(navigatorPanel)
             .notModal()
             .noOKButton()
             .noCancelButton()
             .noGlobalKeyChange()
-            .cancelAction(navigator::dispose) // when it is closed with X
+            .cancelAction(navigatorPanel::dispose) // when it is closed with X
             .show();
+    }
+
+    public static void setMouseZoomMethod(MouseZoomMethod newZoomMethod) {
+        if (dialog == null || !dialog.isVisible()) {
+            return;
+        }
+        assert navigatorPanel != null;
+        assert navigatorPanel.view != null;
+        newZoomMethod.installOnNavigator(navigatorPanel, navigatorPanel.view);
     }
 
     public void recalculateSize(View view,

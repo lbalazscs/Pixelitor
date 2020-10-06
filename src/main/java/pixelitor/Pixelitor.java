@@ -21,6 +21,7 @@ import com.bric.util.JVM;
 import net.jafama.FastMath;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.GUIMessageHandler;
+import pixelitor.gui.MouseZoomMethod;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Themes;
@@ -124,6 +125,8 @@ public class Pixelitor {
         FgBgColors.getGUI().requestFocus();
 
         TipsOfTheDay.showTips(pw, false);
+
+        MouseZoomMethod.load();
 
         // The IO-intensive pre-loading of fonts is scheduled
         // to run after all the files have been opened,
