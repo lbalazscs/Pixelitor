@@ -87,6 +87,7 @@ public final class AppPreferences {
     private static final String THEME_KEY = "theme";
     private static final String LANG_KEY = "lang";
     private static final String MOUSE_ZOOM_KEY = "mouse_zoom";
+    private static final String PAN_KEY = "pan";
 
     private static final String GUIDE_COLOR_KEY = "guide_color";
     private static final String GUIDE_STROKE_KEY = "guide_stroke";
@@ -361,6 +362,7 @@ public final class AppPreferences {
         saveTheme();
         saveLanguage();
         saveMouseZoom();
+        savePan();
     }
 
     public static Color loadFgColor() {
@@ -473,5 +475,13 @@ public final class AppPreferences {
 
     private static void saveMouseZoom() {
         mainNode.put(MOUSE_ZOOM_KEY, MouseZoomMethod.CURRENT.saveCode());
+    }
+
+    public static String loadPan() {
+        return mainNode.get(PAN_KEY, PanMethod.SPACE_DRAG.saveCode());
+    }
+
+    private static void savePan() {
+        mainNode.put(PAN_KEY, PanMethod.CURRENT.saveCode());
     }
 }

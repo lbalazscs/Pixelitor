@@ -18,7 +18,7 @@
 package pixelitor.tools.toolhandlers;
 
 import pixelitor.OpenImages;
-import pixelitor.gui.GlobalEvents;
+import pixelitor.gui.PanMethod;
 import pixelitor.tools.Tool;
 import pixelitor.tools.Tools;
 import pixelitor.tools.util.PMouseEvent;
@@ -31,7 +31,7 @@ import java.awt.Cursor;
  */
 public class HandToolHandler extends ToolHandler {
     private boolean handToolForwarding = false;
-    private boolean spaceDown = false;
+    private boolean panning = false;
 
     private final Cursor cursor;
     private final Tool tool;
@@ -43,14 +43,14 @@ public class HandToolHandler extends ToolHandler {
 
     @Override
     boolean mousePressed(PMouseEvent e) {
-        if (GlobalEvents.isSpaceDown()) {
-            spaceDown = true; // necessary in unit tests
+        if (PanMethod.CURRENT.initPan(e)) {
+            panning = true; // necessary in unit tests
 
             Tools.HAND.mousePressed(e);
             handToolForwarding = true;
             return true;
         }
-        spaceDown = false;
+        panning = false;
         handToolForwarding = false;
 
         // forwards the mouse event to the next handler
@@ -60,7 +60,7 @@ public class HandToolHandler extends ToolHandler {
     @Override
     boolean mouseDragged(PMouseEvent e) {
         if (handToolForwarding) {
-            if (!spaceDown) { // space was released in the meantime
+            if (!panning) { // space was released in the meantime
                 handToolForwarding = false;
                 tool.mousePressed(e); // initialize the real tool's drag
                 return false;
@@ -86,16 +86,22 @@ public class HandToolHandler extends ToolHandler {
     }
 
     public void spacePressed() {
-        if (!spaceDown) { // this is called all the time while the space is held down
+        if (PanMethod.ignoreSpace()) {
+            return;
+        }
+        if (!panning) { // this is called all the time while the space is held down
             if (handToolForwarding) {
                 OpenImages.setCursorForAll(Tools.HAND.getStartingCursor());
             }
         }
-        spaceDown = true;
+        panning = true;
     }
 
     public void spaceReleased() {
-        spaceDown = false;
+        if (PanMethod.ignoreSpace()) {
+            return;
+        }
+        panning = false;
         if (!handToolForwarding) {
             OpenImages.setCursorForAll(cursor);
         }

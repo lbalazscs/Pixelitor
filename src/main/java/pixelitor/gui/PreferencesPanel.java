@@ -32,6 +32,7 @@ import pixelitor.utils.Language;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 
@@ -47,6 +48,7 @@ public class PreferencesPanel extends JPanel {
     private JTextField undoLevelsTF;
     private JComboBox<IntChoiceParam.Item> thumbSizeCB;
     private JComboBox<MouseZoomMethod> zoomMethodCB;
+    private JComboBox<PanMethod> panMethodCB;
 
     // the panel is re-created every time, but the last selected tab
     // should be selected automatically the next time
@@ -217,13 +219,23 @@ public class PreferencesPanel extends JPanel {
     }
 
     private JPanel createMousePanel() {
-        var mousePanel = new JPanel(new GridBagLayout());
-        var gbh = new GridBagHelper(mousePanel);
+        var mousePanel = new JPanel(new BorderLayout());
+        // put the contents to the north of a border layout,
+        // so that it is not stretched vertically
+        var contents = new JPanel(new GridBagLayout());
+        mousePanel.add(contents, BorderLayout.NORTH);
+
+        var gbh = new GridBagHelper(contents);
 
         zoomMethodCB = new JComboBox<>(MouseZoomMethod.values());
         zoomMethodCB.setSelectedItem(MouseZoomMethod.CURRENT);
         zoomMethodCB.setName("zoomMethod");
         gbh.addLabelAndControl("Zoom with:", zoomMethodCB);
+
+        panMethodCB = new JComboBox<>(PanMethod.values());
+        panMethodCB.setSelectedItem(PanMethod.CURRENT);
+        panMethodCB.setName("panMethod");
+        gbh.addLabelAndControl("Pan with:", panMethodCB);
 
         mousePanel.setBorder(EMPTY_BORDER);
         return mousePanel;
@@ -252,8 +264,9 @@ public class PreferencesPanel extends JPanel {
             return false;
         }
 
-        // the mouse zoom can't be set interactively => set it here
+        // the mouse zoom and pan can't be set interactively => set it here
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
+        PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
         return true;
     }
 
