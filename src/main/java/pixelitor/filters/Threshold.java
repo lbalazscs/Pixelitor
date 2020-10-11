@@ -23,6 +23,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
+import pixelitor.filters.util.FilterUtils;
 
 import java.awt.image.BufferedImage;
 

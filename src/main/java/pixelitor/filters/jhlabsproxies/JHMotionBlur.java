@@ -20,10 +20,10 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MotionBlur;
 import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
-import pixelitor.filters.FilterAction;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.util.FilterAction;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;

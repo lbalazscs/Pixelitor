@@ -19,9 +19,9 @@ package pixelitor.automate;
 
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.filters.Filter;
-import pixelitor.filters.FilterAction;
-import pixelitor.filters.FilterUtils;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.io.FileFormat;
 import pixelitor.layers.Drawable;
 

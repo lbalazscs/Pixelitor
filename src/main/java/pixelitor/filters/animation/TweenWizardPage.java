@@ -19,10 +19,10 @@ package pixelitor.filters.animation;
 
 import pixelitor.automate.Wizard;
 import pixelitor.automate.WizardPage;
-import pixelitor.filters.FilterAction;
-import pixelitor.filters.FilterUtils;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 

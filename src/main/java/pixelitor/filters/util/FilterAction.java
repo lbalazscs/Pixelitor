@@ -15,9 +15,13 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters;
+package pixelitor.filters.util;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
+import pixelitor.filters.Fade;
+import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
+import pixelitor.filters.SimpleForwardingFilter;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;

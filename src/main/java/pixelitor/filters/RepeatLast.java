@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
-import static pixelitor.filters.FilterUtils.getLastFilter;
+import static pixelitor.filters.util.FilterUtils.getLastFilter;
 
 /**
  * The "Repeat" action, which repeats the last edit.

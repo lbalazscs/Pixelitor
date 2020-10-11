@@ -18,9 +18,9 @@
 package pixelitor.filters.convolve;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
-import pixelitor.filters.FilterAction;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.util.FilterAction;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 

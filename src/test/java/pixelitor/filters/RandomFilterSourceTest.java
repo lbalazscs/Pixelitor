@@ -17,13 +17,9 @@
 
 package pixelitor.filters;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Mockito.mock;

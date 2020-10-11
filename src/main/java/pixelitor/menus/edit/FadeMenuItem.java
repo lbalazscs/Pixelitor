@@ -19,7 +19,7 @@ package pixelitor.menus.edit;
 
 import pixelitor.OpenImages;
 import pixelitor.filters.Fade;
-import pixelitor.filters.FilterAction;
+import pixelitor.filters.util.FilterAction;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.utils.ViewActivationListener;

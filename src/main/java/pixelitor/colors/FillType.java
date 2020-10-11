@@ -17,7 +17,7 @@
 package pixelitor.colors;
 
 import pixelitor.filters.Fill;
-import pixelitor.filters.FilterAction;
+import pixelitor.filters.util.FilterAction;
 
 import java.awt.Color;
 

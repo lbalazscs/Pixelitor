@@ -17,6 +17,9 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 

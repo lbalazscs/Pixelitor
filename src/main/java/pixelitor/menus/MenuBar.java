@@ -42,6 +42,9 @@ import pixelitor.filters.levels.Levels;
 import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterSearch;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.NamedAction;
@@ -721,6 +724,13 @@ public class MenuBar extends JMenuBar {
 
     private static JMenu createFilterMenu() {
         PMenu filterMenu = new PMenu("Filter", 'T');
+
+        filterMenu.addActionWithKey(new MenuAction("Filter Search...") {
+            @Override
+            public void onClick() {
+                FilterSearch.showInDialog();
+            }
+        }, CTRL_ALT_S);
 
         filterMenu.add(createBlurSharpenSubmenu());
         filterMenu.add(createDistortSubmenu());

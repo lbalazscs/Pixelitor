@@ -32,6 +32,8 @@ import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.gui.CompositeState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.guides.Guides;

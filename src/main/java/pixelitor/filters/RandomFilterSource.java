@@ -17,6 +17,8 @@
 
 package pixelitor.filters;
 
+import pixelitor.filters.util.FilterUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 

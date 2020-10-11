@@ -19,7 +19,7 @@ package pixelitor.menus;
 
 import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.filters.Filter;
-import pixelitor.filters.FilterAction;
+import pixelitor.filters.util.FilterAction;
 
 import javax.swing.*;
 import java.util.function.Supplier;

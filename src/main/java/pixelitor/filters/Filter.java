@@ -18,6 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.ChangeReason;
+import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;

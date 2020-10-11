@@ -22,18 +22,7 @@ import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import static java.awt.event.KeyEvent.VK_ADD;
-import static java.awt.event.KeyEvent.VK_BACK_SPACE;
-import static java.awt.event.KeyEvent.VK_EQUALS;
-import static java.awt.event.KeyEvent.VK_ESCAPE;
-import static java.awt.event.KeyEvent.VK_F12;
-import static java.awt.event.KeyEvent.VK_F6;
-import static java.awt.event.KeyEvent.VK_F7;
-import static java.awt.event.KeyEvent.VK_MINUS;
-import static java.awt.event.KeyEvent.VK_NUMPAD0;
-import static java.awt.event.KeyEvent.VK_PLUS;
-import static java.awt.event.KeyEvent.VK_SUBTRACT;
-import static java.awt.event.KeyEvent.VK_TAB;
+import static java.awt.event.KeyEvent.*;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 /**
@@ -54,6 +43,8 @@ public class Keys {
 
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL + ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL + ALT);
+    public static final KeyStroke CTRL_ALT_S = getKeyStroke('S', CTRL + ALT);
+
     public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL + ALT + SHIFT);
     public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL + ALT + SHIFT);
     public static final KeyStroke CTRL_SHIFT_R = getKeyStroke('R', CTRL + SHIFT);

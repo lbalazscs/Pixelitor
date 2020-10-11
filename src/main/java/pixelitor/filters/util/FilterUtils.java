@@ -15,8 +15,12 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters;
+package pixelitor.filters.util;
 
+import pixelitor.filters.Fade;
+import pixelitor.filters.Filter;
+import pixelitor.filters.RGBPixelOp;
+import pixelitor.filters.RepeatLast;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 
