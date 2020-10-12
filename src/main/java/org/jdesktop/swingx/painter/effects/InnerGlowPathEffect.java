@@ -22,15 +22,7 @@
 
 package org.jdesktop.swingx.painter.effects;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -140,7 +132,7 @@ public class InnerGlowPathEffect extends AbstractAreaEffect {
 
         // draw the effect
         for (float i = 0; i < steps; i = i + 1.0f) {
-            float brushWidth = (float) (i * effectWidth / steps);
+            float brushWidth = (float) (i * effectWidthDouble / steps);
             g2.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(clipShape);

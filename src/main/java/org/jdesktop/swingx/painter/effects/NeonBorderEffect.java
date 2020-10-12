@@ -33,6 +33,7 @@ import java.awt.*;
  * @author joshy
  */
 public class NeonBorderEffect extends AbstractAreaEffect {
+    private static final long serialVersionUID = -5540563968609885522L;
 
     private Color edgeColor;
     private Color centerColor;

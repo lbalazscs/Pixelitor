@@ -30,6 +30,8 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Objects;
 
 /**
@@ -243,7 +245,7 @@ public class AbstractAreaEffect implements AreaEffect {
 
         // draw the effect
         for (float i = 0; i < steps; i = i + 1f) {
-            float brushWidth = (float) (i * effectWidth / steps);
+            float brushWidth = (float) (i * effectWidthDouble / steps);
             g2.setStroke(new BasicStroke(brushWidth,
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(clipShape);
@@ -323,14 +325,27 @@ public class AbstractAreaEffect implements AreaEffect {
         int oldBrushSteps = this.brushSteps;
         this.brushSteps = brushSteps;
         propertyChangeSupport.firePropertyChange("brushSteps",
-                Integer.valueOf(oldBrushSteps),
-                Integer.valueOf(brushSteps));
+            Integer.valueOf(oldBrushSteps),
+            Integer.valueOf(brushSteps));
     }
 
     /**
      * Holds value of property effectWidth.
      */
-    protected double effectWidth;
+    protected double effectWidthDouble;
+
+    /**
+     * This is only for serialization compatibility with Pixelitor 4.2.3:
+     * previously effectWidth was an int, now it is a double
+     */
+    protected int effectWidth;
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        if (effectWidthDouble < 0.01) { // 4.2.3 file => effectWidthDouble is uninitialized
+            effectWidthDouble = effectWidth;
+        }
+    }
 
     /**
      * Getter for property effectWidth.
@@ -338,11 +353,11 @@ public class AbstractAreaEffect implements AreaEffect {
      * @return Value of property effectWidth.
      */
     public double getEffectWidth() {
-        return this.effectWidth;
+        return this.effectWidthDouble;
     }
 
     public int getEffectWidthInt() {
-        return (int) this.effectWidth;
+        return (int) this.effectWidthDouble;
     }
 
     /**
@@ -351,11 +366,11 @@ public class AbstractAreaEffect implements AreaEffect {
      * @param effectWidth New value of property effectWidth.
      */
     public void setEffectWidth(double effectWidth) {
-        double oldEffectWidth = this.effectWidth;
-        this.effectWidth = effectWidth;
+        double oldEffectWidth = this.effectWidthDouble;
+        this.effectWidthDouble = effectWidth;
         propertyChangeSupport.firePropertyChange("effectWidth",
-                oldEffectWidth,
-                effectWidth);
+            oldEffectWidth,
+            effectWidth);
     }
 
     /**
@@ -485,20 +500,20 @@ public class AbstractAreaEffect implements AreaEffect {
         }
         AbstractAreaEffect that = (AbstractAreaEffect) o;
         return brushSteps == that.brushSteps &&
-                effectWidth == that.effectWidth &&
-                renderInsideShape == that.renderInsideShape &&
-                shouldFillShape == that.shouldFillShape &&
-                shapeMasked == that.shapeMasked &&
-                Float.compare(that.opacity, opacity) == 0 &&
-                brushColor.equals(that.brushColor) &&
-                Objects.equals(offset, that.offset);
+            effectWidthDouble == that.effectWidthDouble &&
+            renderInsideShape == that.renderInsideShape &&
+            shouldFillShape == that.shouldFillShape &&
+            shapeMasked == that.shapeMasked &&
+            Float.compare(that.opacity, opacity) == 0 &&
+            brushColor.equals(that.brushColor) &&
+            Objects.equals(offset, that.offset);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(brushColor, brushSteps,
-                effectWidth, renderInsideShape, offset,
-                shouldFillShape, shapeMasked, opacity);
+            effectWidthDouble, renderInsideShape, offset,
+            shouldFillShape, shapeMasked, opacity);
     }
 
     public Color interpolateBrushColor(Color endColor, float progress) {
@@ -510,6 +525,6 @@ public class AbstractAreaEffect implements AreaEffect {
     }
 
     public double interpolateEffectWidth(double endWidth, double progress) {
-        return ImageMath.lerp(progress, effectWidth, endWidth);
+        return ImageMath.lerp(progress, effectWidthDouble, endWidth);
     }
 }

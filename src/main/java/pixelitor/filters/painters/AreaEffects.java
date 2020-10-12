@@ -17,11 +17,7 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.effects.AreaEffect;
-import org.jdesktop.swingx.painter.effects.GlowPathEffect;
-import org.jdesktop.swingx.painter.effects.InnerGlowPathEffect;
-import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
-import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
+import org.jdesktop.swingx.painter.effects.*;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
 
@@ -42,45 +38,46 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     private static final long serialVersionUID = 1L;
     private static final AreaEffect[] EMPTY_ARRAY = new AreaEffect[0];
 
-    private GlowPathEffect glow;
-    private InnerGlowPathEffect innerGlow;
-    private NeonBorderEffect neonBorder;
-    private ShadowPathEffect dropShadow;
+    // must not be renamed (serialized fields)
+    private GlowPathEffect glowEffect;
+    private InnerGlowPathEffect innerGlowEffect;
+    private NeonBorderEffect neonBorderEffect;
+    private ShadowPathEffect dropShadowEffect;
 
     public AreaEffects() {
     }
 
     public void setDropShadow(ShadowPathEffect dropShadow) {
-        this.dropShadow = dropShadow;
+        this.dropShadowEffect = dropShadow;
     }
 
     public void setGlow(GlowPathEffect glow) {
-        this.glow = glow;
+        this.glowEffect = glow;
     }
 
     public void setInnerGlow(InnerGlowPathEffect innerGlow) {
-        this.innerGlow = innerGlow;
+        this.innerGlowEffect = innerGlow;
     }
 
     public void setNeonBorder(NeonBorderEffect neonBorder) {
-        this.neonBorder = neonBorder;
+        this.neonBorderEffect = neonBorder;
     }
 
     public AreaEffect[] asArray() {
         List<AreaEffect> effects = new ArrayList<>(2);
         // draw the drop shadow first so that
         // it gets painted behind the other effects
-        if (dropShadow != null) {
-            effects.add(dropShadow);
+        if (dropShadowEffect != null) {
+            effects.add(dropShadowEffect);
         }
-        if (glow != null) {
-            effects.add(glow);
+        if (glowEffect != null) {
+            effects.add(glowEffect);
         }
-        if (innerGlow != null) {
-            effects.add(innerGlow);
+        if (innerGlowEffect != null) {
+            effects.add(innerGlowEffect);
         }
-        if (neonBorder != null) {
-            effects.add(neonBorder);
+        if (neonBorderEffect != null) {
+            effects.add(neonBorderEffect);
         }
         return effects.toArray(EMPTY_ARRAY);
     }
@@ -99,23 +96,23 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
         // the inner glow is not considered here,
         // because it doesn't add extra thickness
         int max = 0;
-        if (glow != null) {
-            int effectWidth = glow.getEffectWidthInt();
+        if (glowEffect != null) {
+            int effectWidth = glowEffect.getEffectWidthInt();
             if (effectWidth > max) {
                 max = effectWidth;
             }
         }
-        if (neonBorder != null) {
-            int effectWidth = neonBorder.getEffectWidthInt();
+        if (neonBorderEffect != null) {
+            int effectWidth = neonBorderEffect.getEffectWidthInt();
             if (effectWidth > max) {
                 max = effectWidth;
             }
         }
-        if (dropShadow != null) {
+        if (dropShadowEffect != null) {
             double safetyFactor = 2.0;
-            int effectWidth = 3 + (int) (dropShadow.getEffectWidth() * safetyFactor);
+            int effectWidth = 3 + (int) (dropShadowEffect.getEffectWidth() * safetyFactor);
 
-            Point2D offset = dropShadow.getOffset();
+            Point2D offset = dropShadowEffect.getOffset();
 
             int xGap = effectWidth + (int) Math.abs(offset.getX() * safetyFactor);
             if (xGap > max) {
@@ -130,19 +127,19 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     }
 
     public GlowPathEffect getGlow() {
-        return glow;
+        return glowEffect;
     }
 
     public ShadowPathEffect getDropShadow() {
-        return dropShadow;
+        return dropShadowEffect;
     }
 
     public InnerGlowPathEffect getInnerGlow() {
-        return innerGlow;
+        return innerGlowEffect;
     }
 
     public NeonBorderEffect getNeonBorder() {
-        return neonBorder;
+        return neonBorderEffect;
     }
 
     @Override
@@ -150,49 +147,49 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
         float progressF = (float) progress;
         AreaEffects retVal = new AreaEffects();
 
-        if (dropShadow != null) {
+        if (dropShadowEffect != null) {
             var endEffect = endState.getDropShadow();
-            float newOpacity = dropShadow.interpolateOpacity(
-                    endEffect.getOpacity(), progressF);
+            float newOpacity = dropShadowEffect.interpolateOpacity(
+                endEffect.getOpacity(), progressF);
             var newDropShadow = new ShadowPathEffect(newOpacity);
-            Color newBrushColor = dropShadow.interpolateBrushColor(
-                    endEffect.getBrushColor(), progressF);
+            Color newBrushColor = dropShadowEffect.interpolateBrushColor(
+                endEffect.getBrushColor(), progressF);
             newDropShadow.setBrushColor(newBrushColor);
             retVal.setDropShadow(newDropShadow);
         }
-        if (glow != null) {
+        if (glowEffect != null) {
             var endEffect = endState.getGlow();
-            float newOpacity = glow.interpolateOpacity(
-                    endEffect.getOpacity(), progressF);
+            float newOpacity = glowEffect.interpolateOpacity(
+                endEffect.getOpacity(), progressF);
             var newGlowEffect = new GlowPathEffect(newOpacity);
-            Color newBrushColor = glow.interpolateBrushColor(
-                    endEffect.getBrushColor(), progressF);
-            glow.setBrushColor(newBrushColor);
+            Color newBrushColor = glowEffect.interpolateBrushColor(
+                endEffect.getBrushColor(), progressF);
+            glowEffect.setBrushColor(newBrushColor);
 
             retVal.setGlow(newGlowEffect);
         }
-        if (innerGlow != null) {
+        if (innerGlowEffect != null) {
             var endEffect = endState.getInnerGlow();
-            float newOpacity = innerGlow.interpolateOpacity(
-                    endEffect.getOpacity(), progressF);
+            float newOpacity = innerGlowEffect.interpolateOpacity(
+                endEffect.getOpacity(), progressF);
             var newInnerGlow = new InnerGlowPathEffect(newOpacity);
-            Color newBrushColor = innerGlow.interpolateBrushColor(
-                    endEffect.getBrushColor(), progressF);
+            Color newBrushColor = innerGlowEffect.interpolateBrushColor(
+                endEffect.getBrushColor(), progressF);
             newInnerGlow.setBrushColor(newBrushColor);
             retVal.setInnerGlow(newInnerGlow);
         }
-        if (neonBorder != null) {
+        if (neonBorderEffect != null) {
             var endEffect = endState.getNeonBorder();
-            Color newEdgeColor = neonBorder.interpolateEdgeColor(
-                    endEffect.getEdgeColor(), progressF);
-            Color newCenterColor = neonBorder.interpolateCenterColor(
-                    endEffect.getCenterColor(), progressF);
-            float newOpacity = neonBorder.interpolateOpacity(
-                    endEffect.getOpacity(), progressF);
-            double newWidth = neonBorder.interpolateEffectWidth(
-                    endEffect.getEffectWidth(), progress);
+            Color newEdgeColor = neonBorderEffect.interpolateEdgeColor(
+                endEffect.getEdgeColor(), progressF);
+            Color newCenterColor = neonBorderEffect.interpolateCenterColor(
+                endEffect.getCenterColor(), progressF);
+            float newOpacity = neonBorderEffect.interpolateOpacity(
+                endEffect.getOpacity(), progressF);
+            double newWidth = neonBorderEffect.interpolateEffectWidth(
+                endEffect.getEffectWidth(), progress);
             var newNeonBorder = new NeonBorderEffect(newEdgeColor, newCenterColor,
-                    newWidth, newOpacity);
+                newWidth, newOpacity);
             retVal.setNeonBorder(newNeonBorder);
         }
         return retVal;
@@ -207,14 +204,24 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
             return false;
         }
         AreaEffects that = (AreaEffects) o;
-        return Objects.equals(glow, that.glow) &&
-                Objects.equals(innerGlow, that.innerGlow) &&
-                Objects.equals(neonBorder, that.neonBorder) &&
-                Objects.equals(dropShadow, that.dropShadow);
+        return Objects.equals(glowEffect, that.glowEffect) &&
+            Objects.equals(innerGlowEffect, that.innerGlowEffect) &&
+            Objects.equals(neonBorderEffect, that.neonBorderEffect) &&
+            Objects.equals(dropShadowEffect, that.dropShadowEffect);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(glow, innerGlow, neonBorder, dropShadow);
+        return Objects.hash(glowEffect, innerGlowEffect, neonBorderEffect, dropShadowEffect);
+    }
+
+    @Override
+    public String toString() {
+        String sb = "AreaEffects{glow=" + (glowEffect == null ? "null" : "not null") +
+            ", innerGlow=" + (innerGlowEffect == null ? "null" : "not null") +
+            ", neonBorder=" + (neonBorderEffect == null ? "null" : "not null") +
+            ", dropShadow=" + (dropShadowEffect == null ? "null" : "not null") +
+            '}';
+        return sb;
     }
 }
