@@ -440,7 +440,6 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                !(filter instanceof Fade) &&
                     !(filter instanceof RandomFilter));
         } else {
             f = preferredFilter;

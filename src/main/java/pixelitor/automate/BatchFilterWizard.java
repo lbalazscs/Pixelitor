@@ -35,7 +35,7 @@ public class BatchFilterWizard extends Wizard {
 
     public BatchFilterWizard(Drawable dr) {
         super(SELECT_FILTER_AND_DIRS, "Batch Filter",
-            "Start Processing", 490, 380, dr);
+            "Start Processing", 490, 500, dr);
     }
 
     @Override

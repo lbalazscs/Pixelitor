@@ -45,6 +45,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     private final boolean defaultEnabled;
     private final Color defaultColor;
+    private final int defaultOpacityInt; // opacity as a 0..100 value
 
     private Color color;
     static final int BUTTON_SIZE = 20;
@@ -56,13 +57,15 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     protected final GridBagHelper gbh;
 
-    EffectPanel(String effectName, boolean defaultEnabled, Color defaultColor) {
+    EffectPanel(String effectName, boolean defaultEnabled,
+                Color defaultColor, float defaultOpacity) {
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
+        this.defaultOpacityInt = (int) (100 * defaultOpacity);
 
         setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
-        opacityRange = new RangeParam("Width:", 1, 100, 100);
+        opacityRange = new RangeParam("Opacity", 1, defaultOpacityInt, 100);
         var opacitySlider = SliderSpinner.from(opacityRange);
 
         enabledCB = new JCheckBox();
@@ -86,8 +89,8 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         gbh.addLabelAndControl("Opacity:", opacitySlider);
     }
 
-    public void setTabEnabled(boolean defaultEnabled) {
-        enabledCB.setSelected(defaultEnabled);
+    public void setTabEnabled(boolean enabled) {
+        enabledCB.setSelected(enabled);
     }
 
     private void showColorDialog() {
@@ -124,6 +127,14 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         return opacityRange.getPercentageValF();
     }
 
+    public void setOpacity(float opacity) {
+        opacityRange.setValueNoTrigger(100 * opacity);
+    }
+
+    public void setOpacityAsInt(int opacity) {
+        opacityRange.setValueNoTrigger(opacity);
+    }
+
     public abstract double getBrushWidth();
 
     public abstract void setBrushWidth(double value);
@@ -157,13 +168,15 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         boolean enabled = enabledCB.isSelected();
 
         return enabled == defaultEnabled
-                && Objects.equals(color, defaultColor);
+            && Objects.equals(color, defaultColor)
+            && opacityRange.isSetToDefault();
     }
 
     @Override
     public void reset(boolean trigger) {
         setTabEnabled(defaultEnabled);
         setColor(defaultColor, trigger);
+        setOpacityAsInt(defaultOpacityInt);
     }
 
     public boolean randomize() {

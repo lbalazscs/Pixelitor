@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.ColorHistory;
 import pixelitor.colors.Colors;
+import pixelitor.utils.Icons;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -49,11 +50,19 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ColorParamGUI(this, true);
+        var gui = new ColorParamGUI(this, action, true);
         paramGUI = gui;
         setGUIEnabledState();
 
         return gui;
+    }
+
+    public ColorParam withRandomizeAction() {
+        action = new FilterButtonModel("",
+            this::randomize, Icons.getDiceIcon(),
+            "<html>Randomize the color of <b>" + getName() + "</b>", null);
+
+        return this;
     }
 
     @Override
@@ -94,6 +103,14 @@ public class ColorParam extends AbstractFilterParam {
                 adjustmentListener.paramAdjusted();
             }
         }
+    }
+
+    public void darker() {
+        setColor(color.darker(), false);
+    }
+
+    public void brighter() {
+        setColor(color.brighter(), false);
     }
 
     public boolean allowTransparency() {

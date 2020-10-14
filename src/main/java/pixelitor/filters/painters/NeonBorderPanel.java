@@ -32,10 +32,9 @@ public class NeonBorderPanel extends EffectWithWidthPanel {
     private final Color defaultInnerColor;
     private final ColorSwatch innerColorSwatch;
 
-    NeonBorderPanel(boolean defaultSelected,
-                    Color defaultColor, Color innerColor,
-                    double defaultWidth) {
-        super("Neon Border", defaultSelected, defaultColor, defaultWidth);
+    NeonBorderPanel(boolean selected, Color color, Color innerColor,
+                    double width, float opacity) {
+        super("Neon Border", selected, color, width, opacity);
 
         this.innerColor = innerColor;
         defaultInnerColor = innerColor;

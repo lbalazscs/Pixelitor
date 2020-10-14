@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import javax.swing.*;
 import javax.swing.plaf.LayerUI;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.function.Predicate;
 
 import static java.awt.Color.RED;
 import static java.awt.Color.WHITE;
@@ -32,10 +33,14 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  * Paints a red X on the textfield if the content is not valid.
  */
 public class TFValidationLayerUI extends LayerUI<JTextField> {
-    private final TextFieldValidator validator;
+    private final Predicate<JTextField> checker;
 
-    public TFValidationLayerUI(TextFieldValidator validator) {
-        this.validator = validator;
+    public TFValidationLayerUI(Predicate<JTextField> checker) {
+        this.checker = checker;
+    }
+
+    public static TFValidationLayerUI fromValidator(TextFieldValidator validator) {
+        return new TFValidationLayerUI(tf -> validator.check(tf).isOK());
     }
 
     @Override
@@ -46,8 +51,8 @@ public class TFValidationLayerUI extends LayerUI<JTextField> {
         JLayer<JTextField> jLayer = (JLayer<JTextField>) c;
 
         JTextField textField = jLayer.getView();
-        ValidationResult result = validator.check(textField);
-        if (!result.isOK()) {
+        boolean isOK = checker.test(textField);
+        if (!isOK) {
             Graphics2D g2 = (Graphics2D) g.create();
 
             // Paint the red X.

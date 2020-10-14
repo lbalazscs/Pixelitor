@@ -80,6 +80,13 @@ public class ParamSet implements Iterable<FilterParam> {
         return this;
     }
 
+    public ParamSet withActionsAtFront(FilterButtonModel... actions) {
+        for (FilterButtonModel action : actions) {
+            actionList.add(0, action);
+        }
+        return this;
+    }
+
     public ParamSet withAction(FilterButtonModel action) {
         actionList.add(action);
         return this;

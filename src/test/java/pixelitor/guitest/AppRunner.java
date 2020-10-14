@@ -34,6 +34,7 @@ import pixelitor.io.IOTasks;
 import pixelitor.selection.SelectionModifyType;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tool;
+import pixelitor.utils.Language;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.PixelitorEventListener;
 
@@ -102,6 +103,10 @@ public class AppRunner {
 
         waitForImageLoading();
         mouse.recalcCanvasBounds();
+
+        if (Language.getCurrent() != Language.ENGLISH) {
+            throw new IllegalStateException("language is " + Language.getCurrent());
+        }
     }
 
     private static void waitForImageLoading() {

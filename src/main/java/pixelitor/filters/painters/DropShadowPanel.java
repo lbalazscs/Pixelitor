@@ -38,8 +38,8 @@ public class DropShadowPanel extends EffectPanel {
 
     DropShadowPanel(boolean defaultEnabled, Color defaultColor,
                     int defaultDistance, double defaultAngle,
-                    double defaultSpread) {
-        super("Drop Shadow", defaultEnabled, defaultColor);
+                    double defaultSpread, float opacity) {
+        super("Drop Shadow", defaultEnabled, defaultColor, opacity);
 
         distanceParam = new RangeParam("Distance:", 1, defaultDistance, 100);
         var distanceSlider = SliderSpinner.from(distanceParam);

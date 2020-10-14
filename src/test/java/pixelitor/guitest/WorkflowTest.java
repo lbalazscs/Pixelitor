@@ -35,6 +35,7 @@ import pixelitor.utils.Utils;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
+import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
@@ -252,7 +253,28 @@ public class WorkflowTest {
     }
 
     private void renderCaustics() {
-        app.runFilterWithDialog("Caustics", Randomize.NO, Reseed.NO, ShowOriginal.NO);
+        pw.pressKey(VK_F3);
+
+        var searchDialog = app.findDialogByTitle("Filter Search");
+        searchDialog.releaseKey(VK_F3);
+
+        searchDialog.textBox()
+            .requireEmpty()
+            .enterText("caus")
+            .pressKey(VK_DOWN);
+
+        searchDialog.list()
+            .requireFocused()
+            .releaseKey(VK_DOWN)
+            .pressKey(VK_ENTER);
+
+        searchDialog.requireNotVisible();
+
+        var filterDialog = app.findFilterDialog();
+        filterDialog.releaseKey(VK_ENTER);
+        filterDialog.button("ok").click();
+        filterDialog.requireNotVisible();
+
         keyboard.undoRedo("Caustics");
     }
 

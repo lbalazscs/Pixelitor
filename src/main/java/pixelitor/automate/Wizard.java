@@ -62,7 +62,6 @@ public abstract class Wizard {
         assert dialog == null; // this should be called once per object
 
         dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next", "Cancel") {
-
             @Override
             protected void cancelAction() {
                 currentPage.onWizardCanceled(dr);
@@ -79,7 +78,7 @@ public abstract class Wizard {
         // it is packed already, but not correctly, because of the header message
         // and anyway we don't know the size of the filter dialogs in advance
         dialog.setSize(initialDialogWidth, initialDialogHeight);
-
+        currentPage.onShowingInDialog(dialog);
         GUIUtils.showDialog(dialog);
     }
 

@@ -43,7 +43,7 @@ public class Keys {
 
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL + ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL + ALT);
-    public static final KeyStroke CTRL_ALT_S = getKeyStroke('S', CTRL + ALT);
+//    public static final KeyStroke CTRL_ALT_S = getKeyStroke('S', CTRL + ALT);
 
     public static final KeyStroke CTRL_SHIFT_ALT_R = getKeyStroke('R', CTRL + ALT + SHIFT);
     public static final KeyStroke CTRL_SHIFT_ALT_L = getKeyStroke('L', CTRL + ALT + SHIFT);
@@ -87,6 +87,7 @@ public class Keys {
     public static final KeyStroke CTRL_1 = getKeyStroke('1', CTRL);
     public static final KeyStroke ALT_BACKSPACE = getKeyStroke(VK_BACK_SPACE, ALT);
     public static final KeyStroke T = getKeyStroke('T');
+    public static final KeyStroke F3 = getKeyStroke(VK_F3, 0);
     public static final KeyStroke F6 = getKeyStroke(VK_F6, 0);
     public static final KeyStroke F7 = getKeyStroke(VK_F7, 0);
     public static final KeyStroke F12 = getKeyStroke(VK_F12, 0);

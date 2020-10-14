@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
  * The Fade filter
  */
 public class Fade extends ParametrizedFilter {
+    public static final String NAME = "Fade";
     private static final int FADE_MIN = 0;
     private static final int FADE_MAX = 100;
     private static final int FADE_INIT = 100;

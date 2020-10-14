@@ -68,6 +68,7 @@ public class DialogBuilder {
     private boolean validateWhenCanceled = false;
 
     private String name;
+    private JButton okButton;
 
     public DialogBuilder() {
     }
@@ -202,6 +203,10 @@ public class DialogBuilder {
         return this;
     }
 
+    public JButton getOkButton() {
+        return okButton;
+    }
+
     /**
      * Builds the dialog and also shows it.
      */
@@ -269,7 +274,6 @@ public class DialogBuilder {
     }
 
     private void addButtons(JDialog d) {
-        JButton okButton = null;
         if (addOKButton) {
             okButton = new JButton(okText);
             okButton.setName("ok");

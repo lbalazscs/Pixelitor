@@ -119,7 +119,7 @@ public class TextSettingsPanel extends FilterGUI
 
         gbh.addLabel("Color:", 0, 1);
         color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
-        gbh.addControl(new ColorParamGUI(color, false));
+        gbh.addControl(new ColorParamGUI(color, null, false));
         color.setAdjustmentListener(this);
 
         gbh.addLabel("Rotation:", 2, 1);

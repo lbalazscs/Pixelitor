@@ -19,18 +19,12 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.FourColorFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.GridAdjustmentPanel;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.layers.Drawable;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.ORANGE;
-import static java.awt.Color.RED;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
 
 /**
@@ -39,22 +33,41 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENC
 public class JHFourColorGradient extends ParametrizedFilter {
     public static final String NAME = "Four Color Gradient";
 
-    private final ColorParam northWestParam = new ColorParam("Northwest", GREEN, NO_TRANSPARENCY);
-    private final ColorParam northEastParam = new ColorParam("Northeast", ORANGE, NO_TRANSPARENCY);
-    private final ColorParam southWestParam = new ColorParam("Southwest", BLUE, NO_TRANSPARENCY);
-    private final ColorParam southEastParam = new ColorParam("Southeast", RED, NO_TRANSPARENCY);
+    private final ColorParam northWestParam = new ColorParam("Northwest", new Color(20, 128, 20), NO_TRANSPARENCY);
+    private final ColorParam northEastParam = new ColorParam("Northeast", new Color(200, 200, 20), NO_TRANSPARENCY);
+    private final ColorParam southWestParam = new ColorParam("Southwest", new Color(20, 20, 200), NO_TRANSPARENCY);
+    private final ColorParam southEastParam = new ColorParam("Southeast", new Color(200, 20, 20), NO_TRANSPARENCY);
 
     private FourColorFilter filter;
 
     public JHFourColorGradient() {
         super(ShowOriginal.NO);
 
+        var darkenAll = new FilterButtonModel("Darker",
+            this::darkenColors, "Darken all colors");
+        var brightenAll = new FilterButtonModel("Brighter",
+            this::brightenColors, "Brighten all colors");
+
         setParams(
-                northWestParam,
-                northEastParam,
-                southWestParam,
-                southEastParam
-        );
+            northWestParam,
+            northEastParam,
+            southWestParam,
+            southEastParam
+        ).withActionsAtFront(darkenAll, brightenAll);
+    }
+
+    private void darkenColors() {
+        northWestParam.darker();
+        northEastParam.darker();
+        southWestParam.darker();
+        southEastParam.darker();
+    }
+
+    private void brightenColors() {
+        northWestParam.brighter();
+        northEastParam.brighter();
+        southWestParam.brighter();
+        southEastParam.brighter();
     }
 
     @Override

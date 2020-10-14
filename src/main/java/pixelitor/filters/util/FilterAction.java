@@ -47,7 +47,9 @@ public class FilterAction extends DrawableAction {
 
         this.filterSupplier = filterSupplier;
 
-        FilterUtils.addFilter(this);
+        if (!name.equals(Fade.NAME)) {
+            FilterUtils.addFilter(this);
+        }
     }
 
     public FilterAction(String name, AbstractBufferedImageOp op) {

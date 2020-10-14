@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,15 @@ public class TextLayerAssert extends ContentLayerAssert<TextLayerAssert, TextLay
         isNotNull();
 
         assertThat(actual.getSettings().getText()).isEqualTo(expected);
+
+        return this;
+    }
+
+    public <S> TextLayerAssert hasNumEffects(int expected) {
+        isNotNull();
+
+        int actualNumEffects = actual.getSettings().getAreaEffects().asArray().length;
+        assertThat(actualNumEffects).isEqualTo(expected);
 
         return this;
     }

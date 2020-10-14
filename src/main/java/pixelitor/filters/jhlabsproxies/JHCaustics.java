@@ -37,7 +37,7 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 public class JHCaustics extends ParametrizedFilter {
     public static final String NAME = "Caustics";
 
-    private final ColorParam bgColor = new ColorParam("Background Color", new Color(0, 200, 175), USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam("Background", new Color(0, 200, 175), USER_ONLY_TRANSPARENCY);
     private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
     private final RangeParam brightness = new RangeParam("Brightness", 0, 7, 20);
     private final RangeParam focus = new RangeParam("Focus", 0, 50, 100);
@@ -53,14 +53,14 @@ public class JHCaustics extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         setParams(
-                bgColor,
-                zoom,
-                brightness,
-                turbulence,
-                time,
-                focus,
-                dispersion,
-                samples
+            bgColor,
+            zoom,
+            brightness,
+            turbulence,
+            time,
+            focus,
+            dispersion,
+            samples
         ).withAction(reseedNoise());
     }
 

@@ -22,13 +22,14 @@ import pixelitor.automate.WizardPage;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ParametrizedFilterGUI;
 import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.gui.utils.ValidationResult;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.util.Optional;
 
 /**
@@ -36,11 +37,11 @@ import java.util.Optional;
  */
 public enum TweenWizardPage implements WizardPage {
     SELECT_FILTER {
-        JComboBox<FilterAction> filtersCB;
+        private FilterSearchPanel searchPanel;
 
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html> Create a tweening animation based on the settings of a filter.";
+            return "<html> Create a tweening animation based on the settings of the selected filter.";
         }
 
         @Override
@@ -50,11 +51,17 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            var p = new JPanel(new FlowLayout());
-            p.add(new JLabel("Select Filter:"));
-            filtersCB = new JComboBox<>(FilterUtils.getAnimationFiltersSorted());
-            p.add(filtersCB);
-            return p;
+            searchPanel = new FilterSearchPanel(FilterUtils.getAnimationFiltersSorted());
+            return searchPanel;
+        }
+
+        @Override
+        public void onShowingInDialog(OKCancelDialog dialog) {
+            JButton okButton = dialog.getOkButton();
+
+            okButton.setEnabled(false);
+            searchPanel.addSelectionListener(e ->
+                okButton.setEnabled(searchPanel.hasSelection()));
         }
 
         @Override
@@ -63,7 +70,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public void finish(Wizard wizard, Drawable dr) {
-            FilterAction selectedItem = (FilterAction) filtersCB.getSelectedItem();
+            FilterAction selectedItem = searchPanel.getSelectedFilter();
             ParametrizedFilter filter = (ParametrizedFilter) selectedItem.getFilter();
             getAnimation(wizard).setFilter(filter);
         }

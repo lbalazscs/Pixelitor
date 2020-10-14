@@ -34,7 +34,6 @@ import pixelitor.testutils.WithMask;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @RunWith(Parameterized.class)
@@ -119,16 +118,7 @@ public class TextLayerTest {
     }
 
     @Test
-    public void commitSettings_Fail() {
-        TextSettings oldSettings = layer.getSettings();
-        // expected to throw exception because it
-        // is the same settings object
-        assertThrows(IllegalArgumentException.class, () ->
-                layer.commitSettings(oldSettings));
-    }
-
-    @Test
-    public void commitSettings_OK() {
+    public void commitSettings() {
         TextSettings oldSettings = layer.getSettings();
         String oldText = oldSettings.getText();
         assertThat(layer).nameIs(oldText);

@@ -63,7 +63,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         numFramesLabel.setName("numFramesLabel");
 
         // A single TFValidationLayerUI for all the textfields.
-        LayerUI<JTextField> tfLayerUI = new TFValidationLayerUI(this);
+        LayerUI<JTextField> tfLayerUI = TFValidationLayerUI.fromValidator(this);
 
         var gbh = new GridBagHelper(this);
 

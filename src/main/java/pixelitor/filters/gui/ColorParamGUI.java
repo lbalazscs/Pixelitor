@@ -39,7 +39,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     private static final int BUTTON_SIZE = 30;
     private DefaultButton defaultButton;
 
-    public ColorParamGUI(ColorParam model, boolean addDefaultButton) {
+    public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addDefaultButton) {
         this.model = model;
         setLayout(new FlowLayout(LEFT));
 
@@ -58,8 +58,12 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
         Colors.setupFilterColorsPopupMenu(this, colorSwatch,
             model::getColor, this::updateColor);
 
+        if (action != null) {
+            add(action.createGUI());
+        }
+
         if (addDefaultButton) {
-            defaultButton = new DefaultButton("Reset Color", model);
+            defaultButton = new DefaultButton(model);
             add(defaultButton);
         }
     }
@@ -86,7 +90,7 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 //        button.setBackground(model.getColor());
 
         colorSwatch.setForeground(model.getColor());
-        if(defaultButton != null) {
+        if (defaultButton != null) {
             defaultButton.updateIcon();
         }
     }

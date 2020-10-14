@@ -20,13 +20,13 @@ package pixelitor.automate;
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.util.FilterAction;
+import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.io.FileFormat;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
-import java.awt.FlowLayout;
 import java.util.Optional;
 
 /**
@@ -35,7 +35,7 @@ import java.util.Optional;
 public enum BatchFilterWizardPage implements WizardPage {
     SELECT_FILTER_AND_DIRS {
         private OpenSaveDirsPanel openSaveDirsPanel;
-        private JComboBox<FilterAction> filtersCB;
+        private FilterSearchPanel searchPanel;
 
         @Override
         public String getHelpText(Wizard wizard) {
@@ -44,7 +44,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public Optional<WizardPage> getNext() {
-            var selectedAction = (FilterAction) filtersCB.getSelectedItem();
+            var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
             if (filter instanceof FilterWithGUI) {
                 return Optional.of(FILTER_GUI);
@@ -55,23 +55,27 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            var p = new JPanel(new FlowLayout());
-            p.add(new JLabel("Select Filter:"));
-            if (filtersCB == null) {
-                filtersCB = new JComboBox<>(FilterUtils.getAllFiltersSorted());
-                filtersCB.setName("filtersCB");
-            }
-            p.add(filtersCB);
+            searchPanel = new FilterSearchPanel(FilterUtils.getAllFiltersSorted());
+            searchPanel.setBorder(BorderFactory.createTitledBorder("Select Filter"));
 
             var mainPanel = new JPanel(new VerticalLayout());
-            mainPanel.add(p);
+            mainPanel.add(searchPanel);
             if (openSaveDirsPanel == null) {
                 openSaveDirsPanel = new OpenSaveDirsPanel(
-                        false, FileFormat.getLastOutput());
+                    false, FileFormat.getLastOutput());
             }
             mainPanel.add(openSaveDirsPanel);
 
             return mainPanel;
+        }
+
+        @Override
+        public void onShowingInDialog(OKCancelDialog dialog) {
+            JButton okButton = dialog.getOkButton();
+
+            okButton.setEnabled(false);
+            searchPanel.addSelectionListener(e ->
+                okButton.setEnabled(searchPanel.hasSelection()));
         }
 
         @Override
@@ -81,7 +85,7 @@ public enum BatchFilterWizardPage implements WizardPage {
 
         @Override
         public void finish(Wizard wizard, Drawable dr) {
-            var selectedAction = (FilterAction) filtersCB.getSelectedItem();
+            var selectedAction = searchPanel.getSelectedFilter();
             var filter = selectedAction.getFilter();
 
             ((BatchFilterWizard) wizard).setFilter(filter);

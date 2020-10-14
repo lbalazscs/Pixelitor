@@ -30,11 +30,13 @@ import pixelitor.colors.FgBgColors;
 import pixelitor.colors.FillType;
 import pixelitor.filters.ColorWheel;
 import pixelitor.filters.ValueNoise;
+import pixelitor.filters.jhlabsproxies.JHBrushedMetal;
 import pixelitor.filters.jhlabsproxies.JHDropShadow;
 import pixelitor.filters.painters.AreaEffects;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
+import pixelitor.io.FileUtils;
 import pixelitor.io.SaveSettings;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
@@ -73,7 +75,9 @@ import static pixelitor.utils.Threads.*;
  */
 public class SplashImageCreator {
     private static final String SPLASH_SMALL_FONT = "DejaVu Sans Light";
-    private static final String SPLASH_MAIN_FONT = "Azonix";
+    private static final String SPLASH_MAIN_FONT = "Segoe Print";
+    private static final int MAIN_FONT_SIZE = 62;
+
     private static final int SPLASH_WIDTH = 400;
     private static final int SPLASH_HEIGHT = 247;
 
@@ -92,26 +96,26 @@ public class SplashImageCreator {
         var progressHandler = Messages.startProgress(msg, numImages);
 
         CompletableFuture<Void> cf = CompletableFuture.completedFuture(null);
+        FileFormat format = FileFormat.getLastOutput();
         for (int i = 0; i < numImages; i++) {
             int seqNo = i;
-            cf = cf.thenCompose(v -> makeSplashAsync(progressHandler, seqNo));
+            cf = cf.thenCompose(v -> makeSplashAsync(progressHandler, seqNo, format));
         }
         cf.thenRunAsync(() -> cleanupAfterManySplashes(numImages, progressHandler), onEDT);
     }
 
-    private static CompletableFuture<Void> makeSplashAsync(ProgressHandler ph, int seqNo) {
+    private static CompletableFuture<Void> makeSplashAsync(ProgressHandler ph, int seqNo, FileFormat format) {
         return CompletableFuture
-            .supplyAsync(() -> makeOneSplashImage(ph, seqNo), onEDT)
-            .thenCompose(SplashImageCreator::saveAndCloseOneSplash);
+            .supplyAsync(() -> makeOneSplashImage(ph, seqNo, format), onEDT)
+            .thenCompose(comp -> saveAndCloseOneSplash(comp, format));
     }
 
-    private static Composition makeOneSplashImage(ProgressHandler ph, int seqNo) {
+    private static Composition makeOneSplashImage(ProgressHandler ph, int seqNo, FileFormat format) {
         ph.updateProgress(seqNo);
 
         var comp = createSplashComp();
         comp.getView().paintImmediately();
 
-        FileFormat format = FileFormat.getLastOutput();
         String fileName = format("splash%04d.%s", seqNo, format);
         comp.setFile(new File(Dirs.getLastSave(), fileName));
 
@@ -139,6 +143,11 @@ public class SplashImageCreator {
                 false, MULTIPLY, 1.0f);
             gradient.drawOn(layer);
         }
+
+        layer = addNewLayer(comp, "rendered");
+        var brushedMetal = new JHBrushedMetal();
+        brushedMetal.startOn(layer, FILTER_WITHOUT_DIALOG);
+        layer.setBlendingMode(MULTIPLY, true);
 
         addTextLayers(comp);
 
@@ -175,17 +184,18 @@ public class SplashImageCreator {
 
     private static void addTextLayers(Composition comp) {
         FgBgColors.setFGColor(WHITE);
-        Font font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, 48);
+
+        Font font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
+        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, WHITE,
+            font, 50, NORMAL, 1.0f, true);
+
+        font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, MAIN_FONT_SIZE);
         addTextLayer(comp, "Pixelitor", WHITE,
             font, -17, NORMAL, 1.0f, true);
 
         font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 22);
         addTextLayer(comp, "Loading...", WHITE,
             font, -70, NORMAL, 1.0f, true);
-
-        font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
-        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, WHITE,
-            font, 50, NORMAL, 1.0f, true);
     }
 
     private static Font createSplashFont(String name, int style, int size) {
@@ -279,10 +289,15 @@ public class SplashImageCreator {
         gradient.drawOn(dr);
     }
 
-    private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp) {
-        var saveSettings = new SaveSettings(FileFormat.getLastOutput(), comp.getFile());
+    private static CompletableFuture<Void> saveAndCloseOneSplash(Composition comp, FileFormat format) {
+        var flatSettings = new SaveSettings(format, comp.getFile());
 
-        return comp.saveAsync(saveSettings, false)
+        var pxcFile = new File(comp.getFile().getParent(),
+            FileUtils.replaceExt(comp.getFile().getName(), "pxc"));
+        var psxSettings = new SaveSettings(FileFormat.PXC, pxcFile);
+
+        return comp.saveAsync(flatSettings, false)
+            .thenCompose(v -> comp.saveAsync(psxSettings, false))
             .thenAcceptAsync(v -> comp.getView().close(), onEDT);
     }
 

@@ -34,7 +34,6 @@ import pixelitor.tools.util.PRectangle;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Messages;
-import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.test.Assertions;
 
@@ -836,7 +835,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Returns the bounds of the visible part of the canvas
      * in screen coordinates
      */
-    @VisibleForTesting
     public Rectangle getVisibleCanvasBoundsOnScreen() {
         Rectangle canvasRelativeToView = new Rectangle(
             (int) canvasStartX, (int) canvasStartY,

@@ -86,21 +86,24 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         boolean enable = false;
         Color color = WHITE;
         double width = 10;
+        float opacity = 1.0f;
         if (effects != null) {
             var effect = effects.getGlow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
                 width = effect.getEffectWidth();
+                opacity = effect.getOpacity();
             }
         }
         if (glowPanel == null) { // first initialization
             glowPanel = new EffectWithWidthPanel(
-                    "Glow", enable, color, width);
+                "Glow", enable, color, width, opacity);
         } else {
             glowPanel.setTabEnabled(enable);
             glowPanel.setBrushWidth(width);
             glowPanel.setColor(color, false);
+            glowPanel.setOpacity(opacity);
         }
     }
 
@@ -108,21 +111,24 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         boolean enable = false;
         Color color = RED;
         double width = 10;
+        float opacity = 1.0f;
         if (effects != null) {
             var effect = effects.getInnerGlow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
                 width = effect.getEffectWidth();
+                opacity = effect.getOpacity();
             }
         }
         if (innerGlowPanel == null) { // first initialization
             innerGlowPanel = new EffectWithWidthPanel(
-                    "Inner Glow", enable, color, width);
+                "Inner Glow", enable, color, width, opacity);
         } else {
             innerGlowPanel.setTabEnabled(enable);
             innerGlowPanel.setBrushWidth(width);
             innerGlowPanel.setColor(color, false);
+            innerGlowPanel.setOpacity(opacity);
         }
     }
 
@@ -131,6 +137,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         Color color = GREEN;
         Color innerColor = WHITE;
         double width = 10;
+        float opacity = 1.0f;
         if (effects != null) {
             var effect = effects.getNeonBorder();
             if (effect != null) {
@@ -138,15 +145,17 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
                 color = effect.getEdgeColor();
                 innerColor = effect.getCenterColor();
                 width = effect.getEffectWidth();
+                opacity = effect.getOpacity();
             }
         }
         if (neonBorderPanel == null) { // first initialization
             neonBorderPanel = new NeonBorderPanel(
-                    enable, color, innerColor, width);
+                enable, color, innerColor, width, opacity);
         } else {
             neonBorderPanel.setTabEnabled(enable);
             neonBorderPanel.setBrushWidth(width);
             neonBorderPanel.setColor(color, false);
+            neonBorderPanel.setOpacity(opacity);
             neonBorderPanel.setInnerColor(innerColor, false);
         }
     }
@@ -157,11 +166,13 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         int distance = 10;
         double angle = 0.7;
         double spread = 10;
+        float opacity = 1.0f;
         if (effects != null) {
             var effect = effects.getDropShadow();
             if (effect != null) {
                 enable = true;
                 color = effect.getBrushColor();
+                opacity = effect.getOpacity();
 
                 Point2D offset = effect.getOffset();
                 double x = offset.getX();
@@ -174,11 +185,12 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
         }
         if (dropShadowPanel == null) { // first initialization
             dropShadowPanel = new DropShadowPanel(
-                    enable, color, distance, angle, spread);
+                enable, color, distance, angle, spread, opacity);
         } else {
             dropShadowPanel.setTabEnabled(enable);
             dropShadowPanel.setBrushWidth(spread);
             dropShadowPanel.setColor(color, false);
+            dropShadowPanel.setOpacity(opacity);
             dropShadowPanel.setAngle(angle);
             dropShadowPanel.setDistance(distance);
         }

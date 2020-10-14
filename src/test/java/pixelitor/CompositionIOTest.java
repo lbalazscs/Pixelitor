@@ -91,6 +91,7 @@ public class CompositionIOTest {
             assert secondLayer instanceof TextLayer;
             assertThat((TextLayer) secondLayer)
                 .textIs("T")
+                .hasNumEffects(4)
                 .hasNoMask();
         });
         // extra check for pxc with adjustment layer

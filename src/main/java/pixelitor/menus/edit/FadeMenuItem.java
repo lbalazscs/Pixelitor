@@ -35,7 +35,7 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Vie
     public static final FadeMenuItem INSTANCE = new FadeMenuItem();
 
     private FadeMenuItem() {
-        super(new FilterAction("Fade", Fade::new));
+        super(new FilterAction(Fade.NAME, Fade::new));
         History.addUndoableEditListener(this);
         OpenImages.addActivationListener(this);
         setEnabled(false);

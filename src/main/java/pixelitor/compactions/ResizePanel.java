@@ -85,7 +85,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         updateWidthTextPixels();
         pixelPercentChooser1 = new JComboBox<>(sharedComboBoxModel);
         var widthLayer = new JLayer<>(widthTF,
-                new TFValidationLayerUI(widthValidator));
+            TFValidationLayerUI.fromValidator(widthValidator));
         gbh.addLabelAndTwoControls("Width:", widthLayer, pixelPercentChooser1);
 
         heightTF = new JTextField(NUM_TF_COLUMNS);
@@ -94,7 +94,7 @@ public class ResizePanel extends ValidatedPanel implements KeyListener, ItemList
         heightTF.addKeyListener(this);
         var pixelPercentChooser2 = new JComboBox<>(sharedComboBoxModel);
         var heightLayer = new JLayer<>(heightTF,
-                new TFValidationLayerUI(heightValidator));
+            TFValidationLayerUI.fromValidator(heightValidator));
         gbh.addLabelAndTwoControls("Height:", heightLayer, pixelPercentChooser2);
 
         titledBorder = BorderFactory.createTitledBorder("");

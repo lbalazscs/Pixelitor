@@ -125,6 +125,14 @@ public class TextLayer extends ContentLayer {
     }
 
     public void commitSettings(TextSettings oldSettings) {
+        if (oldSettings == settings) {
+            // The settings object is replaced every time
+            // the user changes something in the dialog.
+            // If it is still the same, in means that
+            // nothing was changed.
+            return;
+        }
+
         updateLayerName();
         var edit = new TextLayerChangeEdit(comp, this, oldSettings);
         History.add(edit);

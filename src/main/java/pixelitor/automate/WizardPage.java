@@ -17,6 +17,7 @@
 
 package pixelitor.automate;
 
+import pixelitor.gui.utils.OKCancelDialog;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -49,5 +50,8 @@ public interface WizardPage {
 
     default boolean isLast() {
         return getNext().isEmpty();
+    }
+
+    default void onShowingInDialog(OKCancelDialog dialog) {
     }
 }

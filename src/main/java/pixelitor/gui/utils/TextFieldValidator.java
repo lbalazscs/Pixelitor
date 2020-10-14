@@ -70,8 +70,8 @@ public interface TextFieldValidator {
     static JLayer<JTextField> createPositiveIntLayer(String label,
                                                      JTextField tf,
                                                      boolean allowZero) {
-        TFValidationLayerUI layerUI = new TFValidationLayerUI(
-                textField1 -> hasPositiveInt(textField1, label, allowZero));
+        TFValidationLayerUI layerUI = TFValidationLayerUI.fromValidator(
+            textField1 -> hasPositiveInt(textField1, label, allowZero));
         return new JLayer<>(tf, layerUI);
     }
 }

@@ -43,7 +43,7 @@ import pixelitor.filters.lookup.ColorBalance;
 import pixelitor.filters.lookup.Luminosity;
 import pixelitor.filters.painters.TextFilter;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.filters.util.FilterSearch;
+import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.*;
 import pixelitor.gui.utils.Dialogs;
@@ -728,9 +728,9 @@ public class MenuBar extends JMenuBar {
         filterMenu.addActionWithKey(new MenuAction("Filter Search...") {
             @Override
             public void onClick() {
-                FilterSearch.showInDialog();
+                FilterSearchPanel.showInDialog();
             }
-        }, CTRL_ALT_S);
+        }, F3);
 
         filterMenu.add(createBlurSharpenSubmenu());
         filterMenu.add(createDistortSubmenu());
@@ -1247,12 +1247,12 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        developMenu.addAlwaysEnabledAction(new MenuAction("Change UI") {
+        developMenu.add(new MenuAction("Change UI") {
             @Override
             public void onClick() {
                 ImageArea.changeUI();
             }
-        }, CTRL_K);
+        });
 
         developMenu.add(new MenuAction("frame size 1366x728") {
             @Override
@@ -1374,12 +1374,12 @@ public class MenuBar extends JMenuBar {
     private static JMenu createSplashSubmenu() {
         PMenu sub = new PMenu("Splash");
 
-        sub.add(new MenuAction("Create Splash Image") {
+        sub.addActionWithKey(new MenuAction("Create Splash Image") {
             @Override
             public void onClick() {
                 SplashImageCreator.createSplashComp();
             }
-        });
+        }, CTRL_K);
 
         sub.add(new MenuAction("Save Many Splash Images...") {
             @Override

@@ -30,11 +30,11 @@ import java.awt.Color;
 public class EffectWithWidthPanel extends EffectPanel {
     private final RangeParam widthRange;
 
-    public EffectWithWidthPanel(String effectName, boolean defaultSelected,
-                                Color defaultColor, double defaultWidth) {
-        super(effectName, defaultSelected, defaultColor);
+    public EffectWithWidthPanel(String effectName, boolean selected,
+                                Color color, double width, float opacity) {
+        super(effectName, selected, color, opacity);
 
-        widthRange = new RangeParam("Width:", 1, defaultWidth, 100);
+        widthRange = new RangeParam("Width:", 1, width, 100);
         SliderSpinner widthSlider = SliderSpinner.from(widthRange);
 
         gbh.addLabelAndControl("Width:", widthSlider);

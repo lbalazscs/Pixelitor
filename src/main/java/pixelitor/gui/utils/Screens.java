@@ -17,7 +17,9 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
+import pixelitor.gui.View;
 
 import java.awt.*;
 
@@ -72,6 +74,17 @@ public class Screens {
                 // else position it relative to the screen
                 locY = screenBounds.y + (screenBounds.height - windowBounds.height) / 2;
             }
+
+            View view = OpenImages.getActiveView();
+            if (view != null) {
+                Rectangle canvasBounds = view.getVisibleCanvasBoundsOnScreen();
+                int canvasMaxX = canvasBounds.x + canvasBounds.width;
+                if (canvasMaxX < locX) {
+                    int dist = locX - canvasMaxX;
+                    locX -= dist / 2;
+                }
+            }
+
             window.setLocation(locX, locY);
         } else {
             throw new IllegalStateException();

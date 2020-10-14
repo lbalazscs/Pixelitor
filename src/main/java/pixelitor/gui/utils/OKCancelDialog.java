@@ -146,4 +146,8 @@ public abstract class OKCancelDialog extends JDialog {
             scrollPane = null; // so that we later know that we have to remove from the root
         }
     }
+
+    public JButton getOkButton() {
+        return okButton;
+    }
 }

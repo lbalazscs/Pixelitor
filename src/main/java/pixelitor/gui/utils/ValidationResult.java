@@ -112,7 +112,7 @@ public class ValidationResult {
     }
 
     public void showErrorDialog(Component dialogParent) {
-        assert !errorMsg.startsWith("<html>");
+        assert !errorMsg.startsWith("<html>") : "errorMsg = " + errorMsg;
         Dialogs.showErrorDialog(dialogParent, "Error", "<html>" + errorMsg);
     }
 
