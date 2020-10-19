@@ -27,6 +27,7 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
@@ -89,10 +90,11 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
 
     @Override
     public void setSelectedItem(Object item) {
-        setSelectedItem(item, true);
+        setSelectedItem((IntChoiceParam.Item) item, true);
     }
 
-    public void setSelectedItem(Object item, boolean trigger) {
+    @Override
+    public void setSelectedItem(IntChoiceParam.Item item, boolean trigger) {
         if (!currentChoice.equals(item)) {
             currentChoice = (Item) item;
             fireContentsChanged(this, -1, -1);
@@ -153,21 +155,13 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
             if (o == null || getClass() != o.getClass()) {
                 return false;
             }
-
-            Item other = (Item) o;
-
-            if (value != other.value) {
-                return false;
-            }
-            return !(name != null ? !name.equals(other.name) : other.name != null);
-
+            Item item = (Item) o;
+            return value == item.value;
         }
 
         @Override
         public int hashCode() {
-            int result = value;
-            result = 31 * result + (name != null ? name.hashCode() : 0);
-            return result;
+            return Objects.hash(value);
         }
 
         @Override

@@ -20,6 +20,7 @@ package pixelitor.filters.painters;
 import org.jdesktop.swingx.painter.effects.*;
 import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
+import pixelitor.filters.gui.UserPreset;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -213,6 +214,60 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     @Override
     public int hashCode() {
         return Objects.hash(glowEffect, innerGlowEffect, neonBorderEffect, dropShadowEffect);
+    }
+
+    @Override
+    public String toSaveString() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void loadStateFrom(UserPreset preset) {
+        if (preset.get("Glow.Enabled").equals("yes")) {
+            glowEffect = new GlowPathEffect();
+            glowEffect.loadStateFrom(preset, "Glow.", false);
+        }
+        if (preset.get("InnerGlow.Enabled").equals("yes")) {
+            innerGlowEffect = new InnerGlowPathEffect();
+            innerGlowEffect.loadStateFrom(preset, "InnerGlow.", false);
+        }
+        if (preset.get("NeonBorder.Enabled").equals("yes")) {
+            neonBorderEffect = new NeonBorderEffect();
+            neonBorderEffect.loadStateFrom(preset, "NeonBorder.", false);
+        }
+        if (preset.get("DropShadow.Enabled").equals("yes")) {
+            dropShadowEffect = new ShadowPathEffect();
+            dropShadowEffect.loadStateFrom(preset, "DropShadow.", true);
+        }
+    }
+
+    public void saveStateTo(UserPreset preset) {
+        if (glowEffect != null) {
+            preset.put("Glow.Enabled", "yes");
+            glowEffect.saveStateTo(preset, "Glow.", false);
+        } else {
+            preset.put("Glow.Enabled", "no");
+        }
+
+        if (innerGlowEffect != null) {
+            preset.put("InnerGlow.Enabled", "yes");
+            innerGlowEffect.saveStateTo(preset, "InnerGlow.", false);
+        } else {
+            preset.put("InnerGlow.Enabled", "no");
+        }
+
+        if (neonBorderEffect != null) {
+            preset.put("NeonBorder.Enabled", "yes");
+            neonBorderEffect.saveStateTo(preset, "NeonBorder.", false);
+        } else {
+            preset.put("NeonBorder.Enabled", "no");
+        }
+
+        if (dropShadowEffect != null) {
+            preset.put("DropShadow.Enabled", "yes");
+            dropShadowEffect.saveStateTo(preset, "DropShadow.", true);
+        } else {
+            preset.put("DropShadow.Enabled", "no");
+        }
     }
 
     @Override

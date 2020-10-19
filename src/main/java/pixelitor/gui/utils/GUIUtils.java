@@ -19,8 +19,8 @@ package pixelitor.gui.utils;
 
 import com.bric.util.JVM;
 import pixelitor.Composition;
-import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.ParamGUI;
+import pixelitor.filters.gui.FilterSetting;
+import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.PixelitorWindow;
@@ -86,36 +86,29 @@ public final class GUIUtils {
             .show();
     }
 
-    public static JPanel arrangeVertically(Iterable<FilterParam> params) {
+    public static JPanel arrangeVertically(ParamSet paramSet) {
         var p = new JPanel();
-        arrangeVertically(p, params);
+        arrangeVertically(p, paramSet);
         return p;
     }
 
-    public static void arrangeVertically(JPanel p, Iterable<FilterParam> params) {
+    public static void arrangeVertically(JPanel p, ParamSet paramSet) {
         p.setLayout(new GridBagLayout());
-
-        int row = 0;
-
         var gbh = new GridBagHelper(p);
-        for (FilterParam param : params) {
-            JComponent control = param.createGUI();
 
-            // so that assertj-swing can find it easily
-            control.setName(param.getName());
+        gbh.arrangeVertically(paramSet.getParams());
+    }
 
-            int numColumns = ((ParamGUI) control).getNumLayoutColumns();
-            if (numColumns == 1) {
-                gbh.addOnlyControlToRow(control, row);
-            } else if (numColumns == 2) {
-                gbh.addLabel(param.getName() + ':', 0, row);
-                gbh.addLastControl(control);
-            } else {
-                throw new IllegalStateException("numColumns = " + numColumns);
-            }
+    public static JPanel arrVer(Iterable<? extends FilterSetting> settings) {
+        var p = new JPanel();
+        arrVer(p, settings);
+        return p;
+    }
 
-            row++;
-        }
+    public static void arrVer(JPanel p, Iterable<? extends FilterSetting> settings) {
+        p.setLayout(new GridBagLayout());
+        var gbh = new GridBagHelper(p);
+        gbh.arrangeVertically(settings);
     }
 
     public static Container getTopContainer(Container c) {

@@ -161,6 +161,16 @@ public class Dialogs {
         GlobalEvents.dialogClosed(title);
     }
 
+    public static String getTextDialog(Component parent, String title, String msg) {
+        String userInput;
+
+        GlobalEvents.dialogOpened(title);
+        userInput = showInputDialog(parent, msg, title, QUESTION_MESSAGE);
+        GlobalEvents.dialogClosed(title);
+
+        return userInput;
+    }
+
     public static void showFileNotWritableDialog(File file) {
         showFileNotWritableDialog(getParent(), file);
     }

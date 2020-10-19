@@ -93,12 +93,17 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public ParamState<?> copyState() {
-        throw new UnsupportedOperationException();
+        return new TextParamState(gui.getText());
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        throw new UnsupportedOperationException();
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        gui.setText(((TextParamState) state).getValue());
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        gui.setText(savedValue);
     }
 
     public boolean isTrigger() {
@@ -113,6 +118,28 @@ public class TextParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', text = '%s']",
-                getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
+            getClass().getSimpleName(), getName(), gui == null ? "null" : gui.getText());
+    }
+
+    private static class TextParamState implements ParamState<TextParamState> {
+        private final String value;
+
+        public TextParamState(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public TextParamState interpolate(TextParamState endState, double progress) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String toSaveString() {
+            return value;
+        }
     }
 }

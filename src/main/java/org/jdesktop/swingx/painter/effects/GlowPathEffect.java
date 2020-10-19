@@ -31,18 +31,19 @@ import java.awt.Point;
  * @author joshy
  */
 public class GlowPathEffect extends AbstractAreaEffect {
+    private static final long serialVersionUID = -6738743422803660317L;
 
-    /**
-     * Creates a new instance of GlowPathEffect
-     */
-    public GlowPathEffect(float opacity) {
+    public GlowPathEffect() {
         super();
         setBrushColor(Color.WHITE);
         setBrushSteps(10);
         setEffectWidth(10);
         setShouldFillShape(false);
         setOffset(new Point(0, 0));
+    }
 
+    public GlowPathEffect(float opacity) {
+        this();
         setOpacity(opacity); // opacity support added by lbalazscs
     }
 

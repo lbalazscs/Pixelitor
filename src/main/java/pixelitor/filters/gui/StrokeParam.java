@@ -42,7 +42,7 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<BasicStrokeJoin> strokeJoinParam = BasicStrokeJoin.asParam();
     private final EnumParam<StrokeType> strokeTypeParam = StrokeType.asParam();
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
-    private final BooleanParam dashedParam = new BooleanParam("", false);
+    private final BooleanParam dashedParam = new BooleanParam("Dashed", false);
     private DefaultButton defaultButton;
     private JComponent previewer;
 
@@ -162,7 +162,7 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         StrokeSettings setting = (StrokeSettings) state;
 
         strokeWidthParam.setValueNoTrigger(setting.getWidth());
@@ -171,6 +171,28 @@ public class StrokeParam extends AbstractFilterParam {
         strokeTypeParam.setSelectedItem(setting.getType(), false);
         shapeTypeParam.setSelectedItem(setting.getShapeType(), false);
         dashedParam.setValue(setting.isDashed(), true, false);
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        for (FilterParam param : allParams) {
+            String savedString = preset.get(param.getName());
+            if (savedString != null) { // presets don't have to include everything
+                param.setState(savedString);
+            }
+        }
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        for (FilterParam param : allParams) {
+            preset.put(param.getName(), param.copyState().toSaveString());
+        }
     }
 
     @Override

@@ -39,7 +39,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 /**
  * A GUI for configuring an area effect
  */
-public abstract class EffectPanel extends JPanel implements Resettable {
+public abstract class BaseEffectPanel extends JPanel implements Resettable {
     private final JCheckBox enabledCB;
     private final ColorSwatch colorSwatch;
 
@@ -57,8 +57,8 @@ public abstract class EffectPanel extends JPanel implements Resettable {
 
     protected final GridBagHelper gbh;
 
-    EffectPanel(String effectName, boolean defaultEnabled,
-                Color defaultColor, float defaultOpacity) {
+    BaseEffectPanel(String effectName, boolean defaultEnabled,
+                    Color defaultColor, float defaultOpacity) {
         this.defaultEnabled = defaultEnabled;
         this.defaultColor = defaultColor;
         this.defaultOpacityInt = (int) (100 * defaultOpacity);
@@ -115,7 +115,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         return enabledCB.getModel();
     }
 
-    public boolean isSelected() {
+    public boolean isEffectEnabled() {
         return enabledCB.isSelected();
     }
 
@@ -156,11 +156,7 @@ public abstract class EffectPanel extends JPanel implements Resettable {
         double brushWidth = getBrushWidth();
         effect.setEffectWidth(brushWidth);
 
-        effect.setBrushSteps(calculateBrushSteps(brushWidth));
-    }
-
-    private static int calculateBrushSteps(double brushWidth) {
-        return (int) (1 + brushWidth / 3);
+        effect.setAutoBrushSteps();
     }
 
     @Override

@@ -47,7 +47,7 @@ public class AddSingleGuidePanel extends JPanel {
         percents.linkWith(pixels, maxSize / 100.0);
 
         BooleanParam clearExisting = builder.getClearExisting();
-        GUIUtils.arrangeVertically(this, List.of(percents, pixels, clearExisting));
+        GUIUtils.arrVer(this, List.of(percents, pixels, clearExisting));
 
         ParamAdjustmentListener updatePreview = () -> createGuides(true);
         percents.setAdjustmentListener(updatePreview);

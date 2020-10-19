@@ -41,7 +41,7 @@ import static pixelitor.utils.Utils.parseDouble;
  * The settings for the tweening animation output
  */
 public class TweenOutputSettingsPanel extends ValidatedPanel
-        implements TextFieldValidator {
+    implements TextFieldValidator {
 
     private final JTextField numSecondsTF = new JTextField("2", 3);
     private final JTextField fpsTF = new JTextField("24", 3);
@@ -52,7 +52,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(
-            Dirs.getLastSave().getAbsolutePath());
+        Dirs.getLastSave().getAbsolutePath());
     private JTextField fileNameTF;
 
     public TweenOutputSettingsPanel() {
@@ -88,7 +88,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private void addAnimationLengthSelector(LayerUI<JTextField> tfLayerUI,
                                             GridBagHelper gbh) {
         gbh.addLabelAndControl("Number of Seconds:",
-                new JLayer<>(numSecondsTF, tfLayerUI));
+            new JLayer<>(numSecondsTF, tfLayerUI));
 
         KeyListener keyListener = new KeyAdapter() {
             @Override
@@ -99,7 +99,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         numSecondsTF.addKeyListener(keyListener);
 
         gbh.addLabelAndControl("Frames per Second:",
-                new JLayer<>(fpsTF, tfLayerUI));
+            new JLayer<>(fpsTF, tfLayerUI));
         fpsTF.addKeyListener(keyListener);
 
         updateCalculations();
@@ -109,7 +109,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     @SuppressWarnings("unchecked")
     private void addInterpolationSelector(GridBagHelper gbh) {
         EnumComboBoxModel<Interpolation> ipCBM
-                = new EnumComboBoxModel<>(Interpolation.class);
+            = new EnumComboBoxModel<>(Interpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
         gbh.addLabelAndControl("Interpolation:", ipCB);
@@ -127,7 +127,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
         fileNameTF = browseFilesSupport.getNameTF();
         filePanel.add(new JLayer<>(fileNameTF, tfLayerUI));
         filePanel.add(browseFilesSupport.getBrowseButton());
-        gbh.addOnlyControlToRow(filePanel, 6);
+        gbh.addOnlyControl(filePanel);
     }
 
     private void outputTypeChanged() {
@@ -167,7 +167,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
             int totalFrames = 2 * nrFrames - 2;
             double totalSeconds = totalFrames / fps;
             labelText += format(" (with PP: %d frames, %.2f seconds)",
-                    totalFrames, totalSeconds);
+                totalFrames, totalSeconds);
         }
         return labelText;
     }
@@ -175,8 +175,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     @Override
     public ValidationResult checkValidity() {
         return check(numSecondsTF)
-                .and(check(fpsTF))
-                .and(check(fileNameTF));
+            .and(check(fpsTF))
+            .and(check(fileNameTF));
     }
 
     @Override

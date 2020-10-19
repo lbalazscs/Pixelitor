@@ -78,7 +78,7 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     protected void doRandomize() {
         setColor(Rnd.createRandomColor(
-                transparencyPolicy.allowTransparencyWhenRandomized), false);
+            transparencyPolicy.allowTransparencyWhenRandomized), false);
     }
 
     public Color getColor() {
@@ -128,8 +128,19 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        color = ((ColorParamState) state).color;
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        Color newColor = ((ColorParamState) state).color;
+        if (updateGUI) {
+            setColor(newColor, false);
+        } else {
+            color = newColor;
+        }
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        Color newColor = Colors.fromHTMLHex(savedValue);
+        setColor(newColor, false);
     }
 
     @Override
@@ -140,7 +151,7 @@ public class ColorParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', color = '%s']",
-                getClass().getSimpleName(), getName(), color);
+            getClass().getSimpleName(), getName(), color);
     }
 
     private static class ColorParamState implements ParamState<ColorParamState> {
@@ -157,9 +168,14 @@ public class ColorParam extends AbstractFilterParam {
         }
 
         @Override
+        public String toSaveString() {
+            return Colors.toHTMLHex(color, true);
+        }
+
+        @Override
         public String toString() {
             return format("%s[color=%s]",
-                    getClass().getSimpleName(), color);
+                getClass().getSimpleName(), color);
         }
     }
 

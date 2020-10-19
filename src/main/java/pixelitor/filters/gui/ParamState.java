@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,4 +30,9 @@ public interface ParamState<S extends ParamState<S>> {
      * and the given argument represents the end state
      */
     S interpolate(S endState, double progress);
+
+    /**
+     * Returns a string representation suitable for saving presets to text files.
+     */
+    String toSaveString();
 }

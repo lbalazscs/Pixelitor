@@ -89,8 +89,8 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         angleUI.repaint();
         try {
             userChangedSlider = false;
-            int degrees = angleParam.getValueInDegrees();
-            sliderModel.setValue(degrees);
+            double degrees = angleParam.getValueInDegrees();
+            sliderModel.setValue(degrees, true);
 
             // this is necessary because if a 359->360 change originated from
             // the spinner, then the angle is reset to 0, this resets the slider

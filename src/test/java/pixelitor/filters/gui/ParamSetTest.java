@@ -36,8 +36,8 @@ public class ParamSetTest {
     @BeforeEach
     void beforeEachTest() {
         params = new ParamSet(ParamTest.getTestParams())
-                .withAction(ReseedSupport.createAction())
-                .addCommonActions();
+            .withAction(ReseedSupport.createAction())
+            .addCommonActions();
         adjustmentListener = mock(ParamAdjustmentListener.class);
         params.setAdjustmentListener(adjustmentListener);
         extraParam = new RangeParam("Extra Param", 0, 0, 200);
@@ -73,8 +73,8 @@ public class ParamSetTest {
     @Test
     @DisplayName("copyState()/setState()")
     void copyState_setState() {
-        CompositeState state = params.copyState();
-        params.setState(state);
+        FilterState state = params.copyState(true);
+        params.setState(state, true);
 
         verify(adjustmentListener, never()).paramAdjusted();
     }

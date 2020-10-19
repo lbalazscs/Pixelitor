@@ -24,6 +24,8 @@ import javax.swing.*;
 import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -178,7 +180,7 @@ public class GroupedRangeParam extends AbstractFilterParam {
             return false;
         }
         return Utils.allMatch(rangeParams,
-                RangeParam::isSetToDefault);
+            RangeParam::isSetToDefault);
     }
 
     @Override
@@ -243,8 +245,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public String toString() {
         String rangeStrings = Arrays.stream(rangeParams)
-                .map(RangeParam::toString)
-                .collect(joining(",", "[", "]"));
+            .map(RangeParam::toString)
+            .collect(joining(",", "[", "]"));
 
         return getClass().getSimpleName() + rangeStrings;
     }
@@ -252,19 +254,32 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public GroupedRangeParamState copyState() {
         double[] values = Arrays.stream(rangeParams)
-                .mapToDouble(RangeParam::getValue)
-                .toArray();
+            .mapToDouble(RangeParam::getValue)
+            .toArray();
 
         return new GroupedRangeParamState(values);
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         GroupedRangeParamState grState = (GroupedRangeParamState) state;
         double[] values = grState.values;
         for (int i = 0; i < values.length; i++) {
             double value = values[i];
-            rangeParams[i].setValueNoGUI(value);
+            if (updateGUI) {
+                rangeParams[i].setValueNoTrigger(value);
+            } else {
+                rangeParams[i].setValueNoGUI(value);
+            }
+        }
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        StringTokenizer st = new StringTokenizer(savedValue, ",");
+        for (RangeParam param : rangeParams) {
+            String s = st.nextToken();
+            param.setValueNoTrigger(Double.parseDouble(s));
         }
     }
 
@@ -282,8 +297,8 @@ public class GroupedRangeParam extends AbstractFilterParam {
     @Override
     public Object getParamValue() {
         List<Object> childValues = Stream.of(rangeParams)
-                .map(FilterParam::getParamValue)
-                .collect(toList());
+            .map(FilterParam::getParamValue)
+            .collect(toList());
         return childValues;
     }
 
@@ -299,17 +314,24 @@ public class GroupedRangeParam extends AbstractFilterParam {
             double[] interpolatedValues = new double[values.length];
             for (int i = 0; i < values.length; i++) {
                 interpolatedValues[i] = ImageMath.lerp(
-                        progress, values[i], endState.values[i]);
+                    progress, values[i], endState.values[i]);
             }
 
             return new GroupedRangeParamState(interpolatedValues);
         }
 
         @Override
+        public String toSaveString() {
+            return DoubleStream.of(values)
+                .mapToObj("%.2f"::formatted)
+                .collect(joining(","));
+        }
+
+        @Override
         public String toString() {
             return format("%s[values=%s]",
-                    getClass().getSimpleName(),
-                    Arrays.toString(values));
+                getClass().getSimpleName(),
+                Arrays.toString(values));
         }
     }
 }

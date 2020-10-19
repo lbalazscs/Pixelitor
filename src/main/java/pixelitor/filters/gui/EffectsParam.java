@@ -50,7 +50,7 @@ public class EffectsParam extends AbstractFilterParam {
             effectsPanel.setDefaultButton(defaultButton);
 
             var configureParamGUI = new ConfigureParamGUI(owner ->
-                    buildDialog(owner, true), defaultButton);
+                buildDialog(owner, true), defaultButton);
 
             paramGUI = configureParamGUI;
             setGUIEnabledState();
@@ -72,12 +72,12 @@ public class EffectsParam extends AbstractFilterParam {
             builder = builder.notModal();
         }
         return builder
-                .title("Effects")
-                .content(effectsPanel)
-                .withScrollbars()
-                .okText("Close")
-                .noCancelButton()
-                .build();
+            .title("Effects")
+            .content(effectsPanel)
+            .withScrollbars()
+            .okText("Close")
+            .noCancelButton()
+            .build();
     }
 
     public AreaEffects getEffects() {
@@ -115,8 +115,23 @@ public class EffectsParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         setEffects((AreaEffects) state);
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        effectsPanel.loadStateFrom(preset);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        effectsPanel.saveStateTo(preset);
     }
 
     @Override

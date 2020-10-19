@@ -135,30 +135,30 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     private JSpinner createSpinner(RangeParam model) {
         SpinnerNumberModel spinnerModel;
         int decimalPlaces = model.getDecimalPlaces();
-        if(decimalPlaces > 0) {
+        if (decimalPlaces > 0) {
             double stepSize;
-            if(decimalPlaces == 1) {
+            if (decimalPlaces == 1) {
                 stepSize = 0.1;
-            } else if(decimalPlaces == 2) {
+            } else if (decimalPlaces == 2) {
                 stepSize = 0.01;
             } else {
                 throw new IllegalStateException();
             }
             spinnerModel = new SpinnerNumberModel(
-                    model.getValueAsDouble(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    stepSize);
+                model.getValueAsDouble(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                stepSize);
         } else {
             spinnerModel = new SpinnerNumberModel(
-                    model.getValue(), //initial value
-                    model.getMinimum(), //min
-                    model.getMaximum(), //max
-                    1);
+                model.getValue(), //initial value
+                model.getMinimum(), //min
+                model.getMaximum(), //max
+                1);
         }
         JSpinner s = new JSpinner(spinnerModel);
 
-        if(decimalPlaces > 0) {
+        if (decimalPlaces > 0) {
             var editor = (JSpinner.NumberEditor) s.getEditor();
             DecimalFormat format = editor.getFormat();
             format.setMinimumFractionDigits(decimalPlaces);
@@ -194,7 +194,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         } else if (range == 255) { // Levels, Solarize, etc.
             minorSpacing = 0;
             majorSpacing = 51;
-        } else if(min == 1 && max < 702 && range % 100 == 0) {
+        } else if (min == 1 && max < 702 && range % 100 == 0) {
             // special case for zoom sliders
             setupZoomTicks(max);
             return;
@@ -241,7 +241,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
 
         // so far the labels table contains only the minimum value
         int percent = 100;
-        while(percent <= max) {
+        while (percent <= max) {
             labels.put(percent, new JLabel(String.valueOf(percent)));
             percent = percent + 100;
         }
@@ -279,7 +279,7 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
             }
             // this gets called even if the slider is modified by the user
             spinnerMoved = true;
-            if(model.getDecimalPlaces() > 0) {
+            if (model.getDecimalPlaces() > 0) {
                 double value = (double) spinner.getValue();
                 model.setValue(value, true);
             } else {
@@ -317,6 +317,22 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
     }
 
     @Override
+    public void updateGUI() {
+        // the GUI is already updated, but since this happens through
+        // the slider's model, the spinner now has int precision
+        if (model.getDecimalPlaces() > 0) {
+            double value = model.getValueAsDouble();
+            boolean hasFractionalPart = value - (int) value > 0.0001;
+            if (hasFractionalPart) {
+                sliderMoved = true; // avoid updating the slider
+                var editor = (JSpinner.NumberEditor) spinner.getEditor();
+                editor.getTextField().setValue(value);
+                sliderMoved = false;
+            }
+        }
+    }
+
+    @Override
     public Dimension getMaximumSize() {
         return getPreferredSize();
     }
@@ -338,11 +354,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (defaultButton != null) {
             defaultButton.setEnabled(enabled);
         }
-    }
-
-    @Override
-    public void updateGUI() {
-        // nothing to do
     }
 
     @Override

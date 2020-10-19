@@ -23,6 +23,7 @@
 package org.jdesktop.swingx.painter.effects;
 
 import pixelitor.colors.Colors;
+import pixelitor.filters.gui.UserPreset;
 
 import java.awt.*;
 
@@ -45,7 +46,6 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     public enum BorderPosition {
         Inside, Centered, Outside
     }
-
 
     /**
      * Create a new NeonBorderEffect
@@ -202,5 +202,21 @@ public class NeonBorderEffect extends AbstractAreaEffect {
 
     public Color interpolateCenterColor(Color endColor, float progress) {
         return Colors.interpolateInRGB(centerColor, endColor, progress);
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset, String keyPrefix, boolean includeOffset) {
+        super.saveStateTo(preset, keyPrefix, includeOffset);
+
+        preset.putColor(keyPrefix + "EdgeColor", this.edgeColor);
+        preset.putColor(keyPrefix + "CenterColor", this.centerColor);
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset, String keyPrefix, boolean checkOffset) {
+        super.loadStateFrom(preset, keyPrefix, checkOffset);
+
+        setEdgeColor(preset.getColor(keyPrefix + "EdgeColor"));
+        setCenterColor(preset.getColor(keyPrefix + "CenterColor"));
     }
 }

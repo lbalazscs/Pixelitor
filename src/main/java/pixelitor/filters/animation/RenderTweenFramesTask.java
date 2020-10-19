@@ -19,7 +19,7 @@ package pixelitor.filters.animation;
 
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.CompositeState;
+import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -142,8 +142,8 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
 
         long runCountBefore = Filter.runCount;
 
-        CompositeState intermediateState = animation.tween(time);
-        filter.getParamSet().setState(intermediateState);
+        FilterState intermediateState = animation.tween(time);
+        filter.getParamSet().setState(intermediateState, true);
 
         // all sorts of problems can happen
         // if filters run outside of EDT

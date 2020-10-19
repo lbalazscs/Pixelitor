@@ -46,15 +46,28 @@ public interface FilterParam extends FilterSetting, Resettable {
     /**
      * Captures the state of this parameter into the returned
      * "memento" object.
-     * Implemented only for parameters that can be animated.
      */
     ParamState<?> copyState();
 
     /**
      * Sets the internal state according to the given {@link ParamState}
-     * Implemented only for parameters that can be animated.
+     * without triggering the filter.
      */
-    void setState(ParamState<?> state);
+    void setState(ParamState<?> state, boolean updateGUI);
+
+    /**
+     * Sets the internal state according to the given saved
+     * preset string, without triggering the filter. The GUI is updated.
+     */
+    void setState(String savedValue);
+
+    default void loadStateFrom(UserPreset preset) {
+        setState(preset.get(getName()));
+    }
+
+    default void saveStateTo(UserPreset preset) {
+        preset.put(getName(), copyState().toSaveString());
+    }
 
     /**
      * True if the value can be interpolated in some useful way.

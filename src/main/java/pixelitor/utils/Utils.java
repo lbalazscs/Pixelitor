@@ -59,7 +59,7 @@ public final class Utils {
      * Replaces all the special characters in s string with an underscore
      */
     public static String toFileName(String s) {
-        return s.replaceAll("[^A-Za-z0-9_]", "_");
+        return s.trim().replaceAll("[/\\\\?%*:|\"<>.,;=]", "_");
     }
 
     public static String float2String(float f) {

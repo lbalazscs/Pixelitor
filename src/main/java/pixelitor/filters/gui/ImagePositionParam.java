@@ -125,10 +125,25 @@ public class ImagePositionParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         ImagePositionParamState s = (ImagePositionParamState) state;
-        relativeX = (float) s.relativeX;
-        relativeY = (float) s.relativeY;
+        float newRelX = (float) s.relativeX;
+        float newRelY = (float) s.relativeY;
+
+        if (updateGUI) {
+            setRelativeValues(newRelX, newRelY, true, false, false);
+        } else {
+            this.relativeX = newRelX;
+            this.relativeY = newRelY;
+        }
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        int commaIndex = savedValue.indexOf(',');
+        float newRelX = Float.parseFloat(savedValue.substring(0, commaIndex));
+        float newRelY = Float.parseFloat(savedValue.substring(commaIndex + 1));
+        setRelativeValues(newRelX, newRelY, true, false, false);
     }
 
     @Override
@@ -139,7 +154,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', relativeX= %.2f, relativeY= %.2f]",
-                getClass().getSimpleName(), getName(), relativeX, relativeY);
+            getClass().getSimpleName(), getName(), relativeX, relativeY);
     }
 
     private static class ImagePositionParamState implements ParamState<ImagePositionParamState> {
@@ -159,10 +174,16 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
 
         @Override
+        public String toSaveString() {
+            // mandelbrot has 2 decimal places
+            return "%.4f,%.4f".formatted(relativeX, relativeY);
+        }
+
+        @Override
         public String toString() {
             return format("%s[relX=%.2f, relY=%.2f]",
-                    getClass().getSimpleName(),
-                    relativeX, relativeY);
+                getClass().getSimpleName(),
+                relativeX, relativeY);
         }
     }
 }

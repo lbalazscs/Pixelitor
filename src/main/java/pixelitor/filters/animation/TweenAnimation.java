@@ -17,7 +17,7 @@
 package pixelitor.filters.animation;
 
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.CompositeState;
+import pixelitor.filters.gui.FilterState;
 import pixelitor.gui.utils.Dialogs;
 
 import java.awt.Component;
@@ -29,8 +29,8 @@ import static pixelitor.utils.Threads.threadInfo;
 
 public class TweenAnimation {
     private ParametrizedFilter filter;
-    private CompositeState initialState;
-    private CompositeState finalState;
+    private FilterState initialState;
+    private FilterState finalState;
     private int numFrames;
     private int millisBetweenFrames;
     private Interpolation interpolation;
@@ -47,11 +47,11 @@ public class TweenAnimation {
     }
 
     public void copyFinalStateFromCurrent() {
-        finalState = filter.getParamSet().copyState();
+        finalState = filter.getParamSet().copyState(true);
     }
 
     public void copyInitialStateFromCurrent() {
-        initialState = filter.getParamSet().copyState();
+        initialState = filter.getParamSet().copyState(true);
     }
 
     public Interpolation getInterpolation() {
@@ -86,7 +86,7 @@ public class TweenAnimation {
         return outputType.createAnimationWriter(output, millisBetweenFrames);
     }
 
-    public CompositeState tween(double time) {
+    public FilterState tween(double time) {
         double progress = interpolation.time2progress(time);
         return initialState.interpolate(finalState, progress);
     }

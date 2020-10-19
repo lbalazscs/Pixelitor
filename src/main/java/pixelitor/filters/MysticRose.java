@@ -34,10 +34,12 @@ public class MysticRose extends ShapeFilter {
 
     public MysticRose() {
         addParamsToFront(
-                nrPoints,
-                rotate,
-                radius.withAdjustedRange(0.6)
+            nrPoints,
+            rotate,
+            radius.withAdjustedRange(0.6)
         );
+
+        helpURL = "https://en.wikipedia.org/wiki/Complete_graph";
     }
 
     @Override

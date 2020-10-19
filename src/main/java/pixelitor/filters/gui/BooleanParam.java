@@ -74,7 +74,7 @@ public class BooleanParam extends AbstractFilterParam {
 
     public static BooleanParam forHPSharpening() {
         return new BooleanParam("High-Pass Sharpening",
-                false, IGNORE_RANDOMIZE);
+            false, IGNORE_RANDOMIZE);
     }
 
     /**
@@ -87,7 +87,7 @@ public class BooleanParam extends AbstractFilterParam {
             // strangely this seems to work without invokeLater,
             // but for safety call it after the pending events are processed
             EventQueue.invokeLater(() ->
-                    other.setEnabled(isChecked(), EnabledReason.APP_LOGIC));
+                other.setEnabled(isChecked(), EnabledReason.APP_LOGIC));
         });
     }
 
@@ -102,7 +102,7 @@ public class BooleanParam extends AbstractFilterParam {
             // invoke later because when this listener is called,
             // isChecked does not contain yet the updated value.
             EventQueue.invokeLater(() ->
-                    other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC));
+                other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC));
         });
     }
 
@@ -145,12 +145,26 @@ public class BooleanParam extends AbstractFilterParam {
 
     @Override
     public ParamState<?> copyState() {
-        throw new UnsupportedOperationException();
+        return currentValue ? BooleanParamState.YES : BooleanParamState.NO;
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        throw new UnsupportedOperationException();
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        boolean newValue = switch ((BooleanParamState) state) {
+            case YES -> true;
+            case NO -> false;
+        };
+        setValue(newValue, updateGUI, false);
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        boolean newValue = switch (savedValue) {
+            case "yes" -> true;
+            case "no" -> false;
+            default -> throw new IllegalStateException("Unexpected value: " + savedValue);
+        };
+        setValue(newValue, true, false);
     }
 
     public void addActionListener(ActionListener actionListener) {
@@ -176,6 +190,26 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', currentValue = %s]",
-                getClass().getSimpleName(), getName(), currentValue);
+            getClass().getSimpleName(), getName(), currentValue);
+    }
+
+    public enum BooleanParamState implements ParamState<BooleanParamState> {
+        YES, NO;
+
+        private final String saveString;
+
+        BooleanParamState() {
+            this.saveString = super.toString().toLowerCase();
+        }
+
+        @Override
+        public BooleanParamState interpolate(BooleanParamState endState, double progress) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String toSaveString() {
+            return saveString;
+        }
     }
 }

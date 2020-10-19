@@ -275,7 +275,12 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
         if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
             value = v;
-            fireStateChanged(); // update the GUI
+            fireStateChanged(); // update the GUI, because this is the model of the slider
+            if (paramGUI != null) {
+                // make sure fractional values are also updated in the spinner
+                paramGUI.updateGUI();
+            }
+
             if (!adjusting && trigger && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted(); // run the filter
             }
@@ -381,23 +386,38 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
 
     @Override
     public RangeParamState copyState() {
-        return new RangeParamState(value);
+        return new RangeParamState(value, decimalPlaces);
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        value = ((RangeParamState) state).getValue();
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        double newValue = ((RangeParamState) state).getValue();
+        if (updateGUI) {
+            setValueNoTrigger(newValue);
+        } else {
+            value = newValue;
+        }
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        double v = Double.parseDouble(savedValue);
+        setValueNoTrigger(v);
     }
 
     @Override
     public String getResetToolTip() {
-        String defaultAsString = switch (decimalPlaces) {
-            case 0 -> String.valueOf((int) defaultValue);
-            case 1 -> format("%.1f", defaultValue);
-            case 2 -> format("%.2f", defaultValue);
+        String defaultAsString = formatAsString(defaultValue, decimalPlaces);
+        return super.getResetToolTip() + " to " + defaultAsString;
+    }
+
+    private static String formatAsString(double d, int decimalPlaces) {
+        return switch (decimalPlaces) {
+            case 0 -> String.valueOf((int) d);
+            case 1 -> format("%.1f", d);
+            case 2 -> format("%.2f", d);
             default -> throw new IllegalStateException();
         };
-        return super.getResetToolTip() + " to " + defaultAsString;
     }
 
     @Override
@@ -472,21 +492,32 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         }
     }
 
-    private static class RangeParamState implements ParamState<RangeParamState> {
+    public static class RangeParamState implements ParamState<RangeParamState> {
         final double value;
+        final int decimalPlaces;
 
         public RangeParamState(double value) {
+            this(value, 0);
+        }
+
+        public RangeParamState(double value, int decimalPlaces) {
             this.value = value;
+            this.decimalPlaces = decimalPlaces;
         }
 
         @Override
         public RangeParamState interpolate(RangeParamState endState, double progress) {
             double interpolated = ImageMath.lerp(progress, value, endState.value);
-            return new RangeParamState(interpolated);
+            return new RangeParamState(interpolated, decimalPlaces);
         }
 
         public double getValue() {
             return value;
+        }
+
+        @Override
+        public String toSaveString() {
+            return formatAsString(value, decimalPlaces);
         }
 
         @Override

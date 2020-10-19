@@ -17,8 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.SliderSpinner;
-
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -46,12 +44,12 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         this.model = model;
 
         xSliderModel = new RangeParam(
-                "Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
+            "Horizontal Position (%)", 0, defaultX, 100, true, NORTH);
         xSliderModel.setDecimalPlaces(model.getDecimalPlaces());
         ySliderModel = new RangeParam(
-                "Vertical Position (%)", 0, defaultY, 100, true, NORTH);
+            "Vertical Position (%)", 0, defaultY, 100, true, NORTH);
         ySliderModel.setDecimalPlaces(model.getDecimalPlaces());
-        
+
         setBorder(createTitledBorder(model.getName()));
         setLayout(new BorderLayout(10, 0));
 
@@ -61,9 +59,9 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
         // add the two sliders
         Box verticalBox = Box.createVerticalBox();
-        xSlider = new SliderSpinner(xSliderModel, NORTH, true);
+        xSlider = xSliderModel.createGUI();
         verticalBox.add(xSlider);
-        ySlider = new SliderSpinner(ySliderModel, NORTH, true);
+        ySlider = ySliderModel.createGUI();
         verticalBox.add(ySlider);
         add(verticalBox, CENTER);
 
@@ -88,7 +86,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private void onXSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
             model.setRelativeX(xSliderModel.getPercentageValF(),
-                    xSliderModel.getValueIsAdjusting());
+                xSliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
     }
@@ -96,7 +94,7 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     private void onYSliderChange(ImagePositionParam model) {
         if (slidersMovedByUser) {
             model.setRelativeY(ySliderModel.getPercentageValF(),
-                    ySliderModel.getValueIsAdjusting());
+                ySliderModel.getValueIsAdjusting());
             imgPosSelector.repaint();
         }
     }
@@ -109,15 +107,15 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
         slidersMovedByUser = false;
 
         int xValue = xSliderModel.getValue();
-        int modelXValue = (int) (model.getRelativeX() * 100);
+        float modelXValue = model.getRelativeX() * 100;
         if (modelXValue != xValue) {
-            xSliderModel.setValue(modelXValue);
+            xSliderModel.setValue(modelXValue, true);
         }
 
         int yValue = ySliderModel.getValue();
-        int modelYValue = (int) (model.getRelativeY() * 100);
+        float modelYValue = model.getRelativeY() * 100;
         if (modelYValue != yValue) {
-            ySliderModel.setValue(modelYValue);
+            ySliderModel.setValue(modelYValue, true);
         }
 
         slidersMovedByUser = true;

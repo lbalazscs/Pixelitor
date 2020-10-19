@@ -24,6 +24,7 @@ package org.jdesktop.swingx.painter.effects;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.colors.Colors;
+import pixelitor.filters.gui.UserPreset;
 
 import java.awt.*;
 import java.awt.geom.Area;
@@ -65,14 +66,14 @@ public class AbstractAreaEffect implements AreaEffect {
     public void apply(Graphics2D g, Shape clipShape, int width, int height) {
         // opacity support added by lbalazscs
         Composite savedComposite = g.getComposite();
-        if(opacity < 1.0f){
+        if (opacity < 1.0f) {
             g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
         }
 
         // create a rect to hold the bounds
         Rectangle2D clipShapeBounds = clipShape.getBounds2D();
 
-        if(clipShapeBounds.isEmpty()) {
+        if (clipShapeBounds.isEmpty()) {
             // check added by lbalazscs
             return;
         }
@@ -80,8 +81,8 @@ public class AbstractAreaEffect implements AreaEffect {
         width = (int) (clipShapeBounds.getWidth() + clipShapeBounds.getX());
         height = (int) (clipShapeBounds.getHeight() + clipShapeBounds.getY());
         Rectangle effectBounds = new Rectangle(0, 0,
-                (int) (width + getEffectWidth() * 2 + 1),
-                (int) (height + getEffectWidth() * 2 + 1));
+            (int) (width + getEffectWidth() * 2 + 1),
+            (int) (height + getEffectWidth() * 2 + 1));
 
         if (effectBounds.isEmpty()) {
             // check added by lbalazscs
@@ -109,14 +110,14 @@ public class AbstractAreaEffect implements AreaEffect {
                     g2.setPaint(Color.WHITE);
                     g2.setComposite(AlphaComposite.SrcOver);
                     g2.drawRect(0, 0, effectBounds.width - 1,
-                            effectBounds.height - 1);
+                        effectBounds.height - 1);
                 }
 
                 // turn on smoothing
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                        RenderingHints.VALUE_ANTIALIAS_ON);
+                    RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.translate(getEffectWidth() - getOffset().getX(),
-                        getEffectWidth() - getOffset().getY());
+                    getEffectWidth() - getOffset().getY());
                 paintBorderGlow(g2, clipShape, width, height);
 
                 // clip out the parts we don't want
@@ -156,11 +157,11 @@ public class AbstractAreaEffect implements AreaEffect {
     protected BufferedImage getClipImage(final Rectangle effectBounds) {
         // set up a temp buffer
         if (_clipImage == null ||
-                _clipImage.getWidth() != effectBounds.width ||
-                _clipImage.getHeight() != effectBounds.height) {
+            _clipImage.getWidth() != effectBounds.width ||
+            _clipImage.getHeight() != effectBounds.height) {
             _clipImage = new BufferedImage(
-                    effectBounds.width,
-                    effectBounds.height, BufferedImage.TYPE_INT_ARGB);
+                effectBounds.width,
+                effectBounds.height, BufferedImage.TYPE_INT_ARGB);
         }
         return _clipImage;
     }
@@ -194,7 +195,7 @@ public class AbstractAreaEffect implements AreaEffect {
 
 
     /* draws the actual shaded border to the specified graphics
-    */
+     */
 
     /**
      * Paints the border glow
@@ -221,9 +222,9 @@ public class AbstractAreaEffect implements AreaEffect {
             if (inside) {
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 1f));
                 Area a1 = new Area(new Rectangle(
-                        (int) -offset.getX() - 20,
-                        (int) -offset.getY() - 20,
-                        width + 40, height + 40));
+                    (int) -offset.getX() - 20,
+                    (int) -offset.getY() - 20,
+                    width + 40, height + 40));
                 Area a2 = new Area(clipShape);
                 a1.subtract(a2);
                 g2.fill(a1);
@@ -247,7 +248,7 @@ public class AbstractAreaEffect implements AreaEffect {
         for (float i = 0; i < steps; i = i + 1f) {
             float brushWidth = (float) (i * effectWidthDouble / steps);
             g2.setStroke(new BasicStroke(brushWidth,
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g2.draw(clipShape);
         }
         g2.translate(-offset.getX(), -offset.getY());
@@ -329,6 +330,10 @@ public class AbstractAreaEffect implements AreaEffect {
             Integer.valueOf(brushSteps));
     }
 
+    public void setAutoBrushSteps() {
+        setBrushSteps((int) (1 + effectWidthDouble / 3));
+    }
+
     /**
      * Holds value of property effectWidth.
      */
@@ -396,8 +401,8 @@ public class AbstractAreaEffect implements AreaEffect {
         boolean oldRenderInsideShape = this.renderInsideShape;
         this.renderInsideShape = renderInsideShape;
         propertyChangeSupport.firePropertyChange("renderInsideShape",
-                Boolean.valueOf(oldRenderInsideShape),
-                Boolean.valueOf(renderInsideShape));
+            Boolean.valueOf(oldRenderInsideShape),
+            Boolean.valueOf(renderInsideShape));
     }
 
     /**
@@ -448,8 +453,8 @@ public class AbstractAreaEffect implements AreaEffect {
         boolean oldShouldFillShape = this.shouldFillShape;
         this.shouldFillShape = shouldFillShape;
         propertyChangeSupport.firePropertyChange("shouldFillShape",
-                Boolean.valueOf(oldShouldFillShape),
-                Boolean.valueOf(shouldFillShape));
+            Boolean.valueOf(oldShouldFillShape),
+            Boolean.valueOf(shouldFillShape));
     }
 
     /**
@@ -475,8 +480,8 @@ public class AbstractAreaEffect implements AreaEffect {
         boolean oldShapeMasked = this.shapeMasked;
         this.shapeMasked = shapeMasked;
         propertyChangeSupport.firePropertyChange("shapeMasked",
-                Boolean.valueOf(oldShapeMasked),
-                Boolean.valueOf(shapeMasked));
+            Boolean.valueOf(oldShapeMasked),
+            Boolean.valueOf(shapeMasked));
     }
 
     protected float opacity = 1.0f;
@@ -526,5 +531,29 @@ public class AbstractAreaEffect implements AreaEffect {
 
     public double interpolateEffectWidth(double endWidth, double progress) {
         return ImageMath.lerp(progress, effectWidthDouble, endWidth);
+    }
+
+    public void saveStateTo(UserPreset preset, String keyPrefix, boolean includeOffset) {
+        preset.putColor(keyPrefix + "Color", this.brushColor);
+        preset.putFloat(keyPrefix + "Opacity", opacity);
+        preset.putFloat(keyPrefix + "Width", (float) this.effectWidthDouble);
+
+        if (includeOffset) {
+            preset.putFloat(keyPrefix + "OffsetX", (float) offset.getX());
+            preset.putFloat(keyPrefix + "OffsetY", (float) offset.getY());
+        }
+    }
+
+    public void loadStateFrom(UserPreset preset, String keyPrefix, boolean checkOffset) {
+        setBrushColor(preset.getColor(keyPrefix + "Color"));
+        setOpacity(preset.getFloat(keyPrefix + "Opacity"));
+        setEffectWidth(preset.getFloat(keyPrefix + "Width"));
+        setAutoBrushSteps();
+
+        if (checkOffset) {
+            double offsetX = preset.getFloat("DropShadow.OffsetX");
+            double offsetY = preset.getFloat("DropShadow.OffsetY");
+            setOffset(new Point2D.Double(offsetX, offsetY));
+        }
     }
 }

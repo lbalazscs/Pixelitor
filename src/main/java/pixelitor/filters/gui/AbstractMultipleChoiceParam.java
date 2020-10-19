@@ -22,11 +22,13 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.function.Predicate;
 
+import static java.lang.String.format;
+
 /**
  * Base class for filter params that have a JComboBox as their GUI
  */
 public abstract class AbstractMultipleChoiceParam<E>
-        extends AbstractFilterParam implements ComboBoxModel<E> {
+    extends AbstractFilterParam implements ComboBoxModel<E> {
 
     protected AbstractMultipleChoiceParam(String name,
                                           RandomizePolicy randomizePolicy) {
@@ -47,14 +49,31 @@ public abstract class AbstractMultipleChoiceParam<E>
     }
 
     @Override
-    public ParamState<?> copyState() {
-        throw new UnsupportedOperationException();
+    @SuppressWarnings("unchecked")
+    public ChoiceParamState<E> copyState() {
+        return new ChoiceParamState<E>((E) getSelectedItem());
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        throw new UnsupportedOperationException();
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        @SuppressWarnings("unchecked")
+        ChoiceParamState<E> paramState = (ChoiceParamState<E>) state;
+        setSelectedItem(paramState.getValue(), false);
     }
+
+    @Override
+    public void setState(String savedValue) {
+        int numEntries = getSize();
+        for (int i = 0; i < numEntries; i++) {
+            E item = getElementAt(i);
+            if (item.toString().equals(savedValue)) {
+                setSelectedItem(item, false);
+                break;
+            }
+        }
+    }
+
+    public abstract void setSelectedItem(E value, boolean trigger);
 
     /**
      * Sets up the automatic enabling of another {@link FilterSetting}
@@ -110,5 +129,33 @@ public abstract class AbstractMultipleChoiceParam<E>
                 }
             }
         });
+    }
+
+    public static class ChoiceParamState<E> implements ParamState<ChoiceParamState<E>> {
+        final E value;
+
+        public ChoiceParamState(E value) {
+            this.value = value;
+        }
+
+        @Override
+        public ChoiceParamState<E> interpolate(ChoiceParamState<E> endState, double progress) {
+            throw new UnsupportedOperationException();
+        }
+
+        public E getValue() {
+            return value;
+        }
+
+        @Override
+        public String toSaveString() {
+            return value.toString();
+        }
+
+        @Override
+        public String toString() {
+            return format("%s[value=%s]",
+                getClass().getSimpleName(), value);
+        }
     }
 }

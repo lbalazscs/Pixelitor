@@ -55,6 +55,8 @@ public class Voronoi extends ParametrizedFilter {
             useImageColors,
             antiAliasing
         ).withAction(ReseedSupport.createAction());
+
+        helpURL = "https://en.wikipedia.org/wiki/Voronoi_diagram";
     }
 
     @Override

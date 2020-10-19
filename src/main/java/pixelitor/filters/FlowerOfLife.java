@@ -49,6 +49,8 @@ public class FlowerOfLife extends ShapeFilter {
             radius.withAdjustedRange(0.2),
             iterations,
             grid);
+
+        helpURL = "https://en.wikipedia.org/wiki/Overlapping_circles_grid";
     }
 
     @Override

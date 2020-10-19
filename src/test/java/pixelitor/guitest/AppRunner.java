@@ -450,9 +450,29 @@ public class AppRunner {
         }
 
         if (randomize == Randomize.YES) {
+            boolean presetAdded = false;
+            JDialog realDialog = (JDialog) dialog.target();
+            JMenuBar menuBar = realDialog.getJMenuBar();
+            if (menuBar != null) {
+                if ("Presets".equals(menuBar.getMenu(0).getText())) {
+                    dialog.menuItem("savePreset").click();
+                    var pane = findJOptionPane();
+                    pane.textBox().enterText("test preset");
+                    pane.okButton().click();
+                    presetAdded = true;
+                }
+            }
+
             dialog.button("randomize").click();
             dialog.button("resetAll").click();
             dialog.button("randomize").click();
+
+            if (presetAdded) {
+                dialog.menuItem("test preset").click();
+                // the filter should now be set to default again
+
+                dialog.button("randomize").click();
+            }
         }
 
         if (checkShowOriginal.isYes()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,11 +43,13 @@ public class JHDifferenceOfGaussians extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                radius1.withAdjustedRange(0.01),
-                radius2.withAdjustedRange(0.01),
-                normalize,
-                invert
+            radius1.withAdjustedRange(0.01),
+            radius2.withAdjustedRange(0.01),
+            normalize,
+            invert
         );
+
+        helpURL = "https://en.wikipedia.org/wiki/Difference_of_Gaussians";
     }
 
     @Override

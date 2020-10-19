@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.filters.gui.RangeParam.RangeParamState;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -37,6 +38,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.lang.Math.PI;
+import static pixelitor.filters.gui.BooleanParam.BooleanParamState.NO;
+import static pixelitor.filters.gui.BooleanParam.BooleanParamState.YES;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
 
@@ -72,14 +75,53 @@ public class ChaosGame extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         setParams(
-                numVerticesParam,
-                fraction,
-                iterations,
-                colors,
-                centerJump,
-                midpointJump,
-                restrict,
-                showPoly).withAction(ReseedActions.noOpReseed());
+            numVerticesParam,
+            fraction,
+            iterations,
+            colors,
+            centerJump,
+            midpointJump,
+            restrict,
+            showPoly).withAction(ReseedActions.noOpReseed());
+
+        FilterState triangle = new FilterState("Sierpinski Triangle (defaults)")
+            .with(numVerticesParam, new RangeParamState(3))
+            .with(fraction, new RangeParamState(50))
+            .with(centerJump, NO)
+            .with(midpointJump, NO)
+            .with(restrict, NO);
+
+        FilterState carpet = new FilterState("Sierpinski Carpet")
+            .with(numVerticesParam, new RangeParamState(4))
+            .with(fraction, new RangeParamState(33.33))
+            .with(centerJump, NO)
+            .with(midpointJump, YES)
+            .with(restrict, NO);
+
+        FilterState vicsek = new FilterState("Vicsek Fractal")
+            .with(numVerticesParam, new RangeParamState(4))
+            .with(fraction, new RangeParamState(33.33))
+            .with(centerJump, YES)
+            .with(midpointJump, NO)
+            .with(restrict, NO);
+
+        FilterState penta = new FilterState("Pentaflake")
+            .with(numVerticesParam, new RangeParamState(5))
+            .with(fraction, new RangeParamState(38.1966))
+            .with(centerJump, NO)
+            .with(midpointJump, NO)
+            .with(restrict, NO);
+
+        FilterState hexa = new FilterState("Hexaflake")
+            .with(numVerticesParam, new RangeParamState(6))
+            .with(fraction, new RangeParamState(33.33))
+            .with(centerJump, YES)
+            .with(midpointJump, NO)
+            .with(restrict, NO);
+
+        paramSet.setBuiltinPresets(triangle, carpet, vicsek, penta, hexa);
+
+        helpURL = "https://en.wikipedia.org/wiki/Chaos_game";
     }
 
     @Override
@@ -277,7 +319,7 @@ public class ChaosGame extends ParametrizedFilter {
             }
             g.draw(new Line2D.Double(lastVertex.x, lastVertex.y, vertex.x, vertex.y));
         }
-        if(color) {
+        if (color) {
             for (Vertex p : vertices) {
                 g.setColor(new Color(p.color));
                 var circle = Shapes.createCircle(p.x, p.y, MARGIN);

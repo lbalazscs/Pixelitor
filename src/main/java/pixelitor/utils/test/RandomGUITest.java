@@ -29,7 +29,7 @@ import pixelitor.compactions.Rotate;
 import pixelitor.filters.*;
 import pixelitor.filters.animation.Interpolation;
 import pixelitor.filters.animation.TweenAnimation;
-import pixelitor.filters.gui.CompositeState;
+import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.filters.util.FilterAction;
@@ -440,7 +440,7 @@ public class RandomGUITest {
         Filter f;
         if (preferredFilter == null) {
             f = FilterUtils.getRandomFilter(filter ->
-                    !(filter instanceof RandomFilter));
+                !(filter instanceof RandomFilter));
         } else {
             f = preferredFilter;
         }
@@ -525,8 +525,8 @@ public class RandomGUITest {
         animation.copyFinalStateFromCurrent();
 
         double randomTime = Math.random();
-        CompositeState intermediateState = animation.tween(randomTime);
-        paramSet.setState(intermediateState);
+        FilterState intermediateState = animation.tween(randomTime);
+        paramSet.setState(intermediateState, true);
 
         // run everything without showing a modal dialog
         dr.tweenCalculatingStarted();

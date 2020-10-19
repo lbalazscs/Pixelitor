@@ -127,7 +127,7 @@ public class StrokeSettingsPanel extends JPanel {
         gbh.addLabelAndControl(ShapeType.NAME + ":",
             shapeTypeParam.createGUI("shapeType"));
 
-        gbh.addLabelAndControl("Dashed:",
+        gbh.addLabelAndControl(dashedParam.getName() + ":",
             dashedParam.createGUI("dashed"));
 
         return p;
@@ -145,7 +145,6 @@ public class StrokeSettingsPanel extends JPanel {
                 int width = getWidth();
                 int height = getHeight();
                 g2.fillRect(0, 0, width, height);
-//                Line2D shape = new Line2D.Double(width * 0.1, height * 0.5, width * 0.9, height * 0.5);
                 QuadCurve2D.Double shape = new QuadCurve2D.Double(
                         width * 0.1, height * 0.4,
                         width * 0.5, height * 0.8,

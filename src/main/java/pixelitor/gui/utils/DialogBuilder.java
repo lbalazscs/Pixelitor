@@ -69,6 +69,7 @@ public class DialogBuilder {
 
     private String name;
     private JButton okButton;
+    private JMenuBar menuBar;
 
     public DialogBuilder() {
     }
@@ -203,6 +204,11 @@ public class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder menuBar(JMenuBar m) {
+        menuBar = m;
+        return this;
+    }
+
     public JButton getOkButton() {
         return okButton;
     }
@@ -232,6 +238,9 @@ public class DialogBuilder {
 
         d.setTitle(title);
         d.setModal(modal);
+        if (menuBar != null) {
+            d.setJMenuBar(menuBar);
+        }
 
         if (name != null) {
             d.setName(name);

@@ -25,38 +25,22 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-/**
- * Captures the state of a list of animatable {@link FilterParam}s.
- * It acts as the state of a {@link ParamSet}, and also as a composite {@link ParamState}
- * for composite {@link FilterParam}s, like the {@link DialogParam}.
- */
-public class CompositeState implements ParamState<CompositeState>, Iterable<ParamState<?>> {
+public class CompositeParamState implements ParamState<CompositeParamState> {
     private final List<ParamState<?>> states;
 
-    public CompositeState(ParamSet paramSet) {
-        this(paramSet.getParams().stream());
-    }
-
-    public CompositeState(FilterParam[] children) {
+    public CompositeParamState(FilterParam[] children) {
         this(Arrays.stream(children));
     }
 
-    private CompositeState(Stream<FilterParam> paramStream) {
-        states = paramStream
-                .filter(FilterParam::canBeAnimated)
-                .map(FilterParam::copyState)
-                .collect(toList());
-    }
-
-    private CompositeState(List<ParamState<?>> states) {
-        for (ParamState<?> state : states) {
-            assert state != null;
-        }
+    private CompositeParamState(List<ParamState<?>> states) {
         this.states = states;
     }
 
-    private ParamState<?> getParamState(int index) {
-        return states.get(index);
+    private CompositeParamState(Stream<FilterParam> paramStream) {
+        states = paramStream
+            .filter(FilterParam::canBeAnimated)
+            .map(FilterParam::copyState)
+            .collect(toList());
     }
 
     /**
@@ -64,7 +48,7 @@ public class CompositeState implements ParamState<CompositeState>, Iterable<Para
      * where the current object is the starting state
      */
     @Override
-    public CompositeState interpolate(CompositeState endState, double progress) {
+    public CompositeParamState interpolate(CompositeParamState endState, double progress) {
         List<ParamState<?>> interpolatedStates = new ArrayList<>();
         for (int i = 0; i < states.size(); i++) {
             // each ParamState is interpolated independently
@@ -74,20 +58,29 @@ public class CompositeState implements ParamState<CompositeState>, Iterable<Para
             @SuppressWarnings("rawtypes")
             ParamState state = states.get(i);
 
-            ParamState<?> endParamState = endState.getParamState(i);
+            ParamState<?> endParamState = endState.get(i);
 
             @SuppressWarnings("unchecked")
             ParamState<?> interpolated = state.interpolate(
-                    endParamState,
-                    progress);
+                endParamState,
+                progress);
 
+            assert interpolated != null;
             interpolatedStates.add(interpolated);
         }
-        return new CompositeState(interpolatedStates);
+        return new CompositeParamState(interpolatedStates);
+    }
+
+    public Iterator<ParamState<?>> iterator() {
+        return states.iterator();
+    }
+
+    public ParamState<?> get(int index) {
+        return states.get(index);
     }
 
     @Override
-    public Iterator<ParamState<?>> iterator() {
-        return states.iterator();
+    public String toSaveString() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -21,12 +21,16 @@ import pixelitor.filters.Filter;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.layers.Drawable;
 
+import javax.swing.*;
+
 import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 
 /**
  * A filter that has a GUI for customization
  */
 public abstract class FilterWithGUI extends Filter {
+    protected String helpURL;
+
     protected FilterWithGUI() {
     }
 
@@ -40,19 +44,54 @@ public abstract class FilterWithGUI extends Filter {
 
     public abstract void randomizeSettings();
 
+    private JMenuBar getMenuBar() {
+        boolean addPresets = hasBuiltinPresets() || canHaveUserPresets();
+        if (!hasHelp() && !addPresets) {
+            return null;
+        }
+
+        return new FilterMenuBar(this, addPresets);
+    }
+
+    protected void saveAsPreset(FilterMenuBar menu) {
+        // only subclasses know how to do it
+        throw new UnsupportedOperationException();
+    }
+
+    protected boolean hasBuiltinPresets() {
+        return false;
+    }
+
+    protected FilterState[] getBuiltinPresets() {
+        throw new UnsupportedOperationException();
+    }
+
+    protected boolean canHaveUserPresets() {
+        return false;
+    }
+
+    public boolean hasHelp() {
+        return helpURL != null;
+    }
+
+    public String getHelpURL() {
+        return helpURL;
+    }
+
     @Override
     public void startOn(Drawable dr) {
         dr.startPreviewing();
 
         FilterGUI gui = createGUI(dr);
         new DialogBuilder()
-                .title(getName())
-                .name("filterDialog")
-                .content(gui)
-                .align(FRAME_RIGHT)
-                .withScrollbars()
-                .okAction(() -> dr.onFilterDialogAccepted(getName()))
-                .cancelAction(dr::onFilterDialogCanceled)
-                .show();
+            .title(getName())
+            .menuBar(getMenuBar())
+            .name("filterDialog")
+            .content(gui)
+            .align(FRAME_RIGHT)
+            .withScrollbars()
+            .okAction(() -> dr.onFilterDialogAccepted(getName()))
+            .cancelAction(dr::onFilterDialogCanceled)
+            .show();
     }
 }

@@ -82,6 +82,7 @@ import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.within;
+import static org.assertj.swing.core.matcher.JButtonMatcher.withText;
 import static org.junit.Assert.assertFalse;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
@@ -1198,11 +1199,13 @@ public class AssertJSwingTest {
 
         runMenuCommand("Export Tweening Animation...");
         var dialog = findDialogByTitle("Export Tweening Animation");
-        dialog.comboBox().selectItem("Angular Waves");
+        dialog.textBox("searchTF").enterText("wav");
+        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
+            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
         dialog.button("ok").click(); // next
         dialog.requireVisible();
 
-        findButtonByText(dialog, "Randomize Settings").click();
+        dialog.button(withText("Randomize Settings")).click();
         dialog.button("ok").click(); // next
         dialog.requireVisible();
 
@@ -1328,7 +1331,9 @@ public class AssertJSwingTest {
 
         runMenuCommand("Batch Filter...");
         var dialog = findDialogByTitle("Batch Filter");
-        dialog.comboBox("filtersCB").selectItem("Angular Waves");
+        dialog.textBox("searchTF").enterText("wav");
+        dialog.pressKey(VK_DOWN).releaseKey(VK_DOWN)
+            .pressKey(VK_DOWN).releaseKey(VK_DOWN);
         dialog.button("ok").click(); // next
 
         findButtonByText(dialog, "Randomize Settings").click();

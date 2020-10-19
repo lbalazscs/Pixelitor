@@ -17,15 +17,11 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.ParametrizedFilterGUI;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
+import pixelitor.utils.Utils;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -102,6 +98,10 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         return paramSet;
     }
 
+//    protected void setHardcodedPresets(CompositeState[] presets) {
+//        paramSet.setHardcodedPresets(presets);
+//    }
+
     public void setAffectedAreaShapes(Shape[] affectedAreaShapes) {
         this.affectedAreaShapes = affectedAreaShapes;
     }
@@ -124,5 +124,35 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
 
     public void insertParamAtIndex(FilterParam param, int index) {
         paramSet.insertParamAtIndex(param, index);
+    }
+
+    @Override
+    protected boolean hasBuiltinPresets() {
+        return paramSet.hasBuiltinPresets();
+    }
+
+    @Override
+    protected FilterState[] getBuiltinPresets() {
+        return paramSet.getBuiltinPresets();
+    }
+
+    @Override
+    protected boolean canHaveUserPresets() {
+        return paramSet.isNonTrivialFilter();
+    }
+
+    @Override
+    protected void saveAsPreset(FilterMenuBar menu) {
+        String presetName = Dialogs.getTextDialog(menu, "Preset Name", "Preset Name:");
+        if (presetName == null || presetName.isBlank()) {
+            return;
+        }
+        if (presetName.equals("null")) {
+            Thread.dumpStack();
+        }
+
+        presetName = Utils.toFileName(presetName);
+
+        menu.addNewUserPreset(paramSet.toUserPreset(getName(), presetName), paramSet);
     }
 }

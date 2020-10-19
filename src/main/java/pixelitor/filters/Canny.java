@@ -50,14 +50,16 @@ public class Canny extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                lowThreshold,
-                highThreshold,
-                gaussianKernelWidth,
-                gaussianKernelRadius.withDecimalPlaces(1),
-                contrastNormalized,
-                invert
+            lowThreshold,
+            highThreshold,
+            gaussianKernelWidth,
+            gaussianKernelRadius.withDecimalPlaces(1),
+            contrastNormalized,
+            invert
         );
         highThreshold.ensureHigherValueThan(lowThreshold);
+
+        helpURL = "https://en.wikipedia.org/wiki/Canny_edge_detector";
     }
 
     @Override

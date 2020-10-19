@@ -122,8 +122,8 @@ public class FilterParamTest {
         param.setRandomizePolicy(RandomizePolicy.IGNORE_RANDOMIZE);
         param.randomize();
         assertThat(param.getParamValue())
-                .isNotNull()
-                .isEqualTo(beforeValue);
+            .isNotNull()
+            .isEqualTo(beforeValue);
         checkThatFilterWasNotCalled();
     }
 
@@ -160,28 +160,24 @@ public class FilterParamTest {
             changed = !param.isSetToDefault();
         }
         assertThat(param.getParamValue())
-                .isNotNull()
-                .isNotEqualTo(defaultValue);
+            .isNotNull()
+            .isNotEqualTo(defaultValue);
 
         param.reset(true);
 
         assertThat(param).isSetToDefault();
         assertThat(param.getParamValue())
-                .isNotNull()
-                .isEqualTo(defaultValue);
+            .isNotNull()
+            .isEqualTo(defaultValue);
 
         verify(adjustmentListener, times(1)).paramAdjusted();
     }
 
     @Test
     public void copyState_setState() {
-        try {
-            ParamState<?> paramState = param.copyState();
-            assertThat(paramState).isNotNull();
-            param.setState(paramState);
-        } catch (UnsupportedOperationException e) {
-            // It is OK to ignore this exception
-        }
+        ParamState<?> paramState = param.copyState();
+        assertThat(paramState).isNotNull();
+        param.setState(paramState, false);
         checkThatFilterWasNotCalled();
     }
 

@@ -56,6 +56,8 @@ public class Spirograph extends ShapeFilter {
             type,
             zoom
         );
+
+        helpURL = "https://en.wikipedia.org/wiki/Spirograph";
     }
 
     @Override

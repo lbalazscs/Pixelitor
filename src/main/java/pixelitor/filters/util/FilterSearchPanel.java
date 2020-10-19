@@ -59,6 +59,7 @@ public class FilterSearchPanel extends JPanel {
 
     private void createSearchTextField() {
         searchTF = new JXTextField("Search");
+        searchTF.setName("searchTF");
         PromptSupport.setFocusBehavior(SHOW_PROMPT, searchTF);
         JLabel searchIcon = new JLabel(new String(Character.toChars(0x1F50D)) + " ");
         searchIcon.setForeground(Color.GRAY);

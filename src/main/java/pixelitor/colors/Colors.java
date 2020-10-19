@@ -270,9 +270,35 @@ public class Colors {
     }
 
     public static void copyColorToClipboard(Color c) {
-        String htmlHexString = format("%06X", 0xFFFFFF & c.getRGB());
+        Utils.copyStringToClipboard(toHTMLHex(c, false));
+    }
 
-        Utils.copyStringToClipboard(htmlHexString);
+    public static String toHTMLHex(Color c, boolean includeAlpha) {
+        if (includeAlpha) {
+            String argb = format("%08X", c.getRGB());
+            String rgba = argb.substring(2) + argb.substring(0, 2);
+            return rgba;
+        } else {
+            return format("%06X", 0xFFFFFF & c.getRGB());
+        }
+    }
+
+    public static Color fromHTMLHex(String text) {
+        int length = text.length();
+        if (length == 6) {
+            return new Color(
+                parseInt(text.substring(0, 2), 16),
+                parseInt(text.substring(2, 4), 16),
+                parseInt(text.substring(4, 6), 16));
+        } else if (length == 8) {
+            return new Color(
+                parseInt(text.substring(0, 2), 16),
+                parseInt(text.substring(2, 4), 16),
+                parseInt(text.substring(4, 6), 16),
+                parseInt(text.substring(6, 8), 16));
+        } else {
+            throw new IllegalArgumentException("text = " + text);
+        }
     }
 
     public static Color getColorFromClipboard() {
@@ -285,15 +311,11 @@ public class Colors {
         }
 
         text = text.trim();
-
         text = text.startsWith("#") ? text.substring(1) : text;
 
         // try HTML hex format
         if (text.length() == 6) {
-            return new Color(
-                parseInt(text.substring(0, 2), 16),
-                parseInt(text.substring(2, 4), 16),
-                parseInt(text.substring(4, 6), 16));
+            return fromHTMLHex(text);
         }
 
         // try rgb(163, 69, 151) format

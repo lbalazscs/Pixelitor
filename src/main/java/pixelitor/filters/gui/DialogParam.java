@@ -58,15 +58,15 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     private JDialog createDialog(JDialog owner) {
-        JPanel p = GUIUtils.arrangeVertically(List.of(children));
+        JPanel p = GUIUtils.arrVer(List.of(children));
         JDialog d = new DialogBuilder()
-                .owner(owner)
-                .content(p)
-                .title(getName())
-                .withScrollbars()
-                .okText("Close")
-                .noCancelButton()
-                .build();
+            .owner(owner)
+            .content(p)
+            .title(getName())
+            .withScrollbars()
+            .okText("Close")
+            .noCancelButton()
+            .build();
         return d;
     }
 
@@ -86,17 +86,40 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     @Override
-    public CompositeState copyState() {
-        return new CompositeState(children);
+    public CompositeParamState copyState() {
+        return new CompositeParamState(children);
     }
 
     @Override
-    public void setState(ParamState<?> state) {
-        CompositeState newStates = (CompositeState) state;
+    public void setState(ParamState<?> state, boolean updateGUI) {
+        CompositeParamState newStates = (CompositeParamState) state;
         Iterator<ParamState<?>> stateIterator = newStates.iterator();
         for (FilterParam child : children) {
+            // this matching only works for animation
             if (child.canBeAnimated()) {
-                child.setState(stateIterator.next());
+                child.setState(stateIterator.next(), updateGUI);
+            }
+        }
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void saveStateTo(UserPreset preset) {
+        for (FilterParam child : children) {
+            preset.put(child.getName(), child.copyState().toSaveString());
+        }
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        for (FilterParam child : children) {
+            String savedString = preset.get(child.getName());
+            if (savedString != null) { // presets don't have to include everything
+                child.setState(savedString);
             }
         }
     }
@@ -124,7 +147,7 @@ public class DialogParam extends AbstractFilterParam {
     @Override
     public boolean isSetToDefault() {
         return Arrays.stream(children)
-                .allMatch(Resettable::isSetToDefault);
+            .allMatch(Resettable::isSetToDefault);
     }
 
     @Override
@@ -165,8 +188,8 @@ public class DialogParam extends AbstractFilterParam {
     @Override
     public Object getParamValue() {
         List<Object> childValues = Stream.of(children)
-                .map(FilterParam::getParamValue)
-                .collect(toList());
+            .map(FilterParam::getParamValue)
+            .collect(toList());
         return childValues;
     }
 }

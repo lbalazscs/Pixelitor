@@ -76,4 +76,9 @@ public class StrokeSettings implements ParamState<StrokeSettings> {
     public boolean isDashed() {
         return dashed;
     }
+
+    @Override
+    public String toSaveString() {
+        return "TODO";
+    }
 }

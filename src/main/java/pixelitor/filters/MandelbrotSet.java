@@ -30,6 +30,8 @@ public class MandelbrotSet extends ComplexFractal {
 
     public MandelbrotSet() {
         super(100, 0.2028f);
+
+        helpURL = "https://en.wikipedia.org/wiki/Mandelbrot_set";
     }
 
     @Override

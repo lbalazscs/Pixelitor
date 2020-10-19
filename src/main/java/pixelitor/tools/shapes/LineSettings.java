@@ -46,16 +46,14 @@ class LineSettings extends ShapeTypeSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        JPanel p = GUIUtils.arrangeVertically(List.of(width, cap));
+        JPanel p = GUIUtils.arrVer(List.of(width, cap));
         return p;
     }
 
     public Stroke getStroke() {
         //noinspection MagicConstant
-        return new BasicStroke(
-                width.getValueAsFloat(),
-                cap.getSelected().getValue(),
-                BasicStroke.JOIN_ROUND);
+        return new BasicStroke(width.getValueAsFloat(),
+            cap.getSelected().getValue(), BasicStroke.JOIN_ROUND);
     }
 
     @Override

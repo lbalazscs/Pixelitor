@@ -24,7 +24,6 @@ import pixelitor.utils.Utils;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
@@ -32,11 +31,13 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
 /**
  * A fixed set of filter parameter objects
  */
-public class ParamSet implements Iterable<FilterParam> {
+public class ParamSet {
     private List<FilterParam> paramList = new ArrayList<>();
     private final List<FilterButtonModel> actionList = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable beforeResetAction;
+    private FilterState[] builtinPresets;
+    private boolean nonTrivialFilter;
 
     public ParamSet(FilterParam... params) {
         paramList.addAll(List.of(params));
@@ -101,20 +102,20 @@ public class ParamSet implements Iterable<FilterParam> {
 
         // no need for "randomize"/"reset all"
         // if the filter has only one parameter...
-        boolean addRandomizeAndResetAll = paramList.size() > 1;
+        nonTrivialFilter = paramList.size() > 1;
 
-        if (!addRandomizeAndResetAll) {
+        if (!nonTrivialFilter) {
             FilterParam param = paramList.get(0);
             // ...except if that single parameter is grouped...
             if (param instanceof GroupedRangeParam) {
-                addRandomizeAndResetAll = true;
+                nonTrivialFilter = true;
             }
             // ...or it is a gradient param
             if (param instanceof GradientParam) {
-                addRandomizeAndResetAll = true;
+                nonTrivialFilter = true;
             }
         }
-        if (addRandomizeAndResetAll) {
+        if (nonTrivialFilter) {
             addRandomizeAction();
             addResetAllAction();
         }
@@ -191,18 +192,48 @@ public class ParamSet implements Iterable<FilterParam> {
         }
     }
 
-    public CompositeState copyState() {
-        return new CompositeState(this);
+    public FilterState copyState(boolean animOnly) {
+        return new FilterState(this, animOnly);
     }
 
-    public void setState(CompositeState newStateSet) {
-        Iterator<ParamState<?>> newStates = newStateSet.iterator();
-        paramList.stream()
-            .filter(FilterParam::canBeAnimated)
-            .forEach(param -> {
-                ParamState<?> newState = newStates.next();
-                param.setState(newState);
-            });
+    public FilterState createPreset(String name) {
+        FilterState preset = copyState(false);
+        preset.setName(name);
+        return preset;
+    }
+
+    public void setState(FilterState newStateSet, boolean forAnimation) {
+        for (FilterParam param : paramList) {
+            if (forAnimation && !param.canBeAnimated()) {
+                continue;
+            }
+            String name = param.getName();
+            ParamState<?> newState = newStateSet.get(name);
+
+            if (newState != null) { // a preset doesn't have to contain all key-value pairs
+                param.setState(newState, !forAnimation);
+            }
+        }
+    }
+
+    public void applyPreset(FilterState preset) {
+        setState(preset, false);
+        runFilter();
+    }
+
+    public void loadPreset(UserPreset preset) {
+        long runCountBefore = Filter.runCount;
+        System.out.println("ParamSet::loadPreset: loading from preset " + preset.toString());
+        for (FilterParam param : paramList) {
+            param.loadStateFrom(preset);
+        }
+        assert runCountBefore == Filter.runCount :
+            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
+
+        runFilter();
+
+        assert runCountBefore + 1 == Filter.runCount :
+            "runCountBefore = " + runCountBefore + ", runCount = " + Filter.runCount;
     }
 
     /**
@@ -234,9 +265,28 @@ public class ParamSet implements Iterable<FilterParam> {
         return paramList;
     }
 
-    @Override
-    public Iterator<FilterParam> iterator() {
-        return paramList.iterator();
+    public void setBuiltinPresets(FilterState... filterStates) {
+        this.builtinPresets = filterStates;
+    }
+
+    public FilterState[] getBuiltinPresets() {
+        return builtinPresets;
+    }
+
+    public boolean hasBuiltinPresets() {
+        return builtinPresets != null;
+    }
+
+    public UserPreset toUserPreset(String filterName, String presetName) {
+        UserPreset p = new UserPreset(presetName, filterName);
+        for (FilterParam param : paramList) {
+            param.saveStateTo(p);
+        }
+        return p;
+    }
+
+    public boolean isNonTrivialFilter() {
+        return nonTrivialFilter;
     }
 
     @Override

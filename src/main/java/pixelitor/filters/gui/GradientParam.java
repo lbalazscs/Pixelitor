@@ -30,10 +30,13 @@ import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.bric.swing.MultiThumbSlider.HORIZONTAL;
 import static java.awt.Color.*;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 
 /**
@@ -76,8 +79,8 @@ public class GradientParam extends AbstractFilterParam {
 
     public static GradientParam createBlackToWhite(String name) {
         return new GradientParam(name,
-                new float[]{0.0f, 0.5f, 1.0f},
-                new Color[]{BLACK, GRAY, WHITE});
+            new float[]{0.0f, 0.5f, 1.0f},
+            new Color[]{BLACK, GRAY, WHITE});
     }
 
     private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
@@ -85,6 +88,12 @@ public class GradientParam extends AbstractFilterParam {
         gradientSlider.addPropertyChangeListener(this::sliderPropertyChanged);
         gradientSlider.putClientProperty(USE_BEVEL, "true");
         gradientSlider.setPreferredSize(new Dimension(250, 30));
+    }
+
+    private void setValuesNoTrigger(float[] thumbPositions, Color[] defaultColors) {
+        this.trigger = false;
+        gradientSlider.setValues(thumbPositions, defaultColors);
+        this.trigger = true;
     }
 
     private void sliderPropertyChanged(PropertyChangeEvent evt) {
@@ -131,9 +140,7 @@ public class GradientParam extends AbstractFilterParam {
             randomColors[i] = Rnd.createRandomColor();
         }
 
-        trigger = false;
-        gradientSlider.setValues(defaultThumbPositions, randomColors);
-        trigger = true;
+        setValuesNoTrigger(defaultThumbPositions, randomColors);
         if (gui != null) {
             gui.updateDefaultButtonIcon();
         }
@@ -184,9 +191,7 @@ public class GradientParam extends AbstractFilterParam {
         if (trigger) {
             gradientSlider.setValues(defaultThumbPositions, defaultColors);
         } else {
-            this.trigger = false;
-            gradientSlider.setValues(defaultThumbPositions, defaultColors);
-            this.trigger = true;
+            setValuesNoTrigger(defaultThumbPositions, defaultColors);
         }
         if (gui != null) {
             gui.updateDefaultButtonIcon();
@@ -207,16 +212,39 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public GradientParamState copyState() {
-        return new GradientParamState(gradientSlider.getThumbPositions(), gradientSlider.getColors());
+        return new GradientParamState(gradientSlider.getThumbPositions(),
+            gradientSlider.getColors());
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         GradientParamState gr = (GradientParamState) state;
 
-        trigger = false;
-        createGradientSlider(gr.thumbPositions, gr.colors);
-        trigger = true;
+        setValuesNoTrigger(gr.thumbPositions, gr.colors);
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        // the expected argument format is like: 0.00,0.50,1.00|91707B,1E165B,BF7512
+        int pipeIndex = savedValue.indexOf('|');
+        if (pipeIndex == -1) {
+            throw new IllegalArgumentException("savedValue = " + savedValue);
+        }
+
+        String[] thumbStrings = savedValue.substring(0, pipeIndex).split(",");
+        String[] colorStrings = savedValue.substring(pipeIndex + 1).split(",");
+        if (thumbStrings.length != colorStrings.length) {
+            throw new IllegalArgumentException("savedValue = " + savedValue);
+        }
+
+        float[] thumbPositions = new float[thumbStrings.length];
+        Color[] colors = new Color[colorStrings.length];
+        for (int i = 0; i < thumbStrings.length; i++) {
+            thumbPositions[i] = Float.parseFloat(thumbStrings[i]);
+            colors[i] = Colors.fromHTMLHex(colorStrings[i]);
+        }
+
+        setValuesNoTrigger(thumbPositions, colors);
     }
 
     @Override
@@ -272,10 +300,24 @@ public class GradientParam extends AbstractFilterParam {
         }
 
         @Override
+        public String toSaveString() {
+            String thumbsString = IntStream.range(0, thumbPositions.length)
+                .mapToDouble(i -> thumbPositions[i])
+                .mapToObj("%.2f"::formatted)
+                .collect(joining(",", "", "|"));
+
+            String colorsString = Stream.of(colors)
+                .map(c -> Colors.toHTMLHex(c, true))
+                .collect(joining(","));
+
+            return thumbsString + colorsString;
+        }
+
+        @Override
         public String toString() {
             return format("%s[thumbPositions=%s]",
-                    getClass().getSimpleName(),
-                    Arrays.toString(thumbPositions));
+                getClass().getSimpleName(),
+                Arrays.toString(thumbPositions));
         }
     }
 

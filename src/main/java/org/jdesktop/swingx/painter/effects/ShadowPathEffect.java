@@ -31,18 +31,18 @@ import java.awt.Point;
  * @author joshy
  */
 public class ShadowPathEffect extends AbstractAreaEffect {
+    private static final long serialVersionUID = 1223861400165925384L;
 
-    /**
-     * Creates a new instance of ShadowPathEffect
-     */
-    public ShadowPathEffect(float opacity) {
+    public ShadowPathEffect() {
         super();
         setBrushColor(Color.BLACK);
         setRenderInsideShape(false);
         setShouldFillShape(true);
         setOffset(new Point(3, 3));
-
-        setOpacity(opacity); // opacity support added by lbalazscs
     }
 
+    public ShadowPathEffect(float opacity) {
+        this();
+        setOpacity(opacity); // opacity support added by lbalazscs
+    }
 }

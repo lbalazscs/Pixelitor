@@ -33,11 +33,9 @@ import java.awt.image.BufferedImage;
  * @author joshy
  */
 public class InnerGlowPathEffect extends AbstractAreaEffect {
+    private static final long serialVersionUID = 1887188174881815174L;
 
-    /**
-     * Creates a new instance of InnerGlowPathEffect
-     */
-    public InnerGlowPathEffect(float opacity) {
+    public InnerGlowPathEffect() {
         super();
         setBrushColor(Color.WHITE);
         setBrushSteps(10);
@@ -45,7 +43,10 @@ public class InnerGlowPathEffect extends AbstractAreaEffect {
         setShouldFillShape(false);
         setOffset(new Point(0, 0));
         setRenderInsideShape(true);
+    }
 
+    public InnerGlowPathEffect(float opacity) {
+        this();
         setOpacity(opacity); // opacity support added by lbalazscs
     }
 

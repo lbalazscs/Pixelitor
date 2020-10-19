@@ -40,10 +40,12 @@ public class JHUnsharpMask extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                amount,
-                radius,
-                threshold
+            amount,
+            radius,
+            threshold
         );
+
+        helpURL = "https://en.wikipedia.org/wiki/Unsharp_masking";
     }
 
     @Override

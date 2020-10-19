@@ -84,12 +84,12 @@ public class AngleParam extends AbstractFilterParam {
         return (int) Math.toDegrees(angle);
     }
 
-    public int getValueInDegrees() {
-        int degrees = (int) Math.toDegrees(angle);
+    public double getValueInDegrees() {
+        double degrees = Math.toDegrees(angle);
         if (degrees <= 0) {
             degrees = -degrees;
         } else {
-            degrees = 360 - degrees;
+            degrees = 360.0 - degrees;
         }
         return degrees;
     }
@@ -170,8 +170,14 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     @Override
-    public void setState(ParamState<?> state) {
+    public void setState(ParamState<?> state, boolean updateGUI) {
         setValueInDegrees(((AngleParamState) state).angle, false);
+    }
+
+    @Override
+    public void setState(String savedValue) {
+        double d = Double.parseDouble(savedValue);
+        setValueInDegrees(d, false);
     }
 
     @Override
@@ -182,7 +188,7 @@ public class AngleParam extends AbstractFilterParam {
     @Override
     public String toString() {
         return format("%s[name = '%s', angle = %.2f]",
-                getClass().getSimpleName(), getName(), angle);
+            getClass().getSimpleName(), getName(), angle);
     }
 
     private static class AngleParamState implements ParamState<AngleParamState> {
@@ -199,9 +205,14 @@ public class AngleParam extends AbstractFilterParam {
         }
 
         @Override
+        public String toSaveString() {
+            return "%.2f".formatted(angle);
+        }
+
+        @Override
         public String toString() {
             return format("%s[degrees=%.2f]",
-                    getClass().getSimpleName(), angle);
+                getClass().getSimpleName(), angle);
         }
     }
 }
