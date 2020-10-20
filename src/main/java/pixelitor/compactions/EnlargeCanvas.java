@@ -27,6 +27,7 @@ import pixelitor.guides.Guides;
 import pixelitor.layers.ContentLayer;
 
 import javax.swing.*;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
@@ -38,10 +39,10 @@ import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
  */
 public class EnlargeCanvas extends SimpleCompAction {
     public static final String NAME = "Enlarge Canvas";
-    private final int north;
-    private final int east;
-    private final int south;
-    private final int west;
+    private int north;
+    private int east;
+    private int south;
+    private int west;
     private int newCanvasWidth;
     private int newCanvasHeight;
 
@@ -51,6 +52,27 @@ public class EnlargeCanvas extends SimpleCompAction {
         this.east = east;
         this.south = south;
         this.west = west;
+    }
+
+    public void ensureCovering(Rectangle imageBounds, Canvas canvas) {
+        if (imageBounds.x < -west) {
+            west = -imageBounds.x;
+        }
+        if (imageBounds.y < -north) {
+            north = -imageBounds.y;
+        }
+        int imageMaxX = imageBounds.x + imageBounds.width;
+        if (imageMaxX > canvas.getWidth() + east) {
+            east = imageMaxX - canvas.getWidth();
+        }
+        int imageMaxY = imageBounds.y + imageBounds.height;
+        if (imageMaxY > canvas.getHeight() + south) {
+            south = imageMaxY - canvas.getHeight();
+        }
+    }
+
+    public boolean doesNothing() {
+        return north == 0 && east == 0 && south == 0 && west == 0;
     }
 
     @Override

@@ -273,14 +273,6 @@ public class MenuBar extends JMenuBar {
         String editMenuName = texts.getString("edit");
         PMenu editMenu = new PMenu(editMenuName, 'E');
 
-        // last op
-        editMenu.buildAction(RepeatLast.INSTANCE)
-            .enableIf(CAN_REPEAT)
-            .withKey(CTRL_F)
-            .add();
-
-        editMenu.addSeparator();
-
         // undo
         editMenu.buildAction(History.UNDO_ACTION)
             .enableIf(UNDO_POSSIBLE)
@@ -602,6 +594,13 @@ public class MenuBar extends JMenuBar {
 
         imageMenu.addAction(EnlargeCanvas.getAction());
 
+        imageMenu.addAction(new MenuAction("Fit Canvas to Layers") {
+            @Override
+            public void onClick() {
+                getActiveComp().fitCanvasToLayers();
+            }
+        });
+
         imageMenu.addAction(new MenuAction("Layer to Canvas Size") {
             @Override
             public void onClick() {
@@ -731,6 +730,13 @@ public class MenuBar extends JMenuBar {
                 FilterSearchPanel.showInDialog();
             }
         }, F3);
+
+        filterMenu.buildAction(RepeatLast.INSTANCE)
+            .enableIf(CAN_REPEAT)
+            .withKey(CTRL_F)
+            .add();
+
+        filterMenu.addSeparator();
 
         filterMenu.add(createBlurSharpenSubmenu());
         filterMenu.add(createDistortSubmenu());

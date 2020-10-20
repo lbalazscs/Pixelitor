@@ -33,6 +33,8 @@ import javax.swing.event.UndoableEditListener;
  * Currently only the filters can be repeated.
  */
 public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, ViewActivationListener {
+    public static final String DEFAULT_NAME = "Repeat Last";
+
     public RepeatMenuItem(Action a) {
         super(a);
         History.addUndoableEditListener(this);
@@ -46,12 +48,22 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, V
 
         if (edit == null) { // happens when all images are closed
             setEnabled(false);
-            getAction().putValue(Action.NAME, "Repeat");
+            getAction().putValue(Action.NAME, DEFAULT_NAME);
             return;
         }
 
         setEnabled(edit.canRepeat());
-        getAction().putValue(Action.NAME, "Repeat " + edit.getPresentationName());
+        setMenuText(edit.getPresentationName());
+    }
+
+    private void setMenuText(String lastEditName) {
+        String newName;
+        if (lastEditName.isEmpty()) {
+            newName = DEFAULT_NAME;
+        } else {
+            newName = "Repeat " + lastEditName;
+        }
+        getAction().putValue(Action.NAME, newName);
     }
 
     @Override
@@ -67,8 +79,8 @@ public class RepeatMenuItem extends JMenuItem implements UndoableEditListener, V
 
     private void onNewComp(Composition comp) {
         if (comp.activeIsDrawable()) {
-            setEnabled(History.canRepeatOperation());
-            getAction().putValue(Action.NAME, "Repeat " + History.getLastEditName());
+            setEnabled(History.canRepeatFilter());
+            setMenuText(History.getLastEditName());
         } else {
             setEnabled(false);
         }

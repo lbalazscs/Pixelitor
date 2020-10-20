@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
+import pixelitor.menus.RepeatMenuItem;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.util.FilterUtils.getLastFilter;
@@ -31,7 +32,7 @@ public class RepeatLast extends DrawableAction {
     public static final RepeatLast INSTANCE = new RepeatLast();
 
     private RepeatLast() {
-        super("Repeat Last Operation");
+        super(RepeatMenuItem.DEFAULT_NAME);
         setEnabled(false);
     }
 

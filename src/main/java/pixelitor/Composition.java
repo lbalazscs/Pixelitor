@@ -17,6 +17,7 @@
 
 package pixelitor;
 
+import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.gui.HistogramsPanel;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -1220,6 +1221,30 @@ public class Composition implements Serializable {
         }
 
         ((ImageLayer) activeLayer).toCanvasSizeWithHistory();
+    }
+
+    public void fitCanvasToLayers() {
+        EnlargeCanvas enlargeCanvas = new EnlargeCanvas(0, 0, 0, 0);
+
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                Rectangle imageBounds = imageLayer.getImageBounds();
+                enlargeCanvas.ensureCovering(imageBounds, canvas);
+            } else if (layer instanceof TextLayer) {
+                TextLayer textLayer = (TextLayer) layer;
+                Rectangle boundingBox = textLayer.getEffectiveBoundingBox();
+                enlargeCanvas.ensureCovering(boundingBox, canvas);
+            }
+        }
+
+        if (enlargeCanvas.doesNothing()) {
+            Dialogs.showInfoDialog("Nothing to be done",
+                "The canvas is already large enough to show all layer content.");
+            return;
+        }
+
+        enlargeCanvas.process(this);
     }
 
     /**

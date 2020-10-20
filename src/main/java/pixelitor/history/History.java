@@ -210,7 +210,7 @@ public class History {
         return undoManager.getLimit();
     }
 
-    public static boolean canRepeatOperation() {
+    public static boolean canRepeatFilter() {
         if (numUndoneEdits > 0) {
             return false;
         }
@@ -370,7 +370,7 @@ public class History {
         node.addBoolean("can undo", canUndo());
         node.addBoolean("can redo", canRedo());
         node.addBoolean("can fade", canFade());
-        node.addBoolean("can repeat", canRepeatOperation());
+        node.addBoolean("can repeat", canRepeatFilter());
 
         return node;
     }

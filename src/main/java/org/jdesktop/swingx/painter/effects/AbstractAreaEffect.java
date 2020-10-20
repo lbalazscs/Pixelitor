@@ -551,8 +551,8 @@ public class AbstractAreaEffect implements AreaEffect {
         setAutoBrushSteps();
 
         if (checkOffset) {
-            double offsetX = preset.getFloat("DropShadow.OffsetX");
-            double offsetY = preset.getFloat("DropShadow.OffsetY");
+            double offsetX = preset.getFloat(keyPrefix + "OffsetX");
+            double offsetY = preset.getFloat(keyPrefix + "OffsetY");
             setOffset(new Point2D.Double(offsetX, offsetY));
         }
     }
