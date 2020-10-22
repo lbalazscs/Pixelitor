@@ -17,6 +17,9 @@
 
 package pixelitor.filters;
 
+import org.jdesktop.swingx.painter.effects.GlowPathEffect;
+import org.jdesktop.swingx.painter.effects.NeonBorderEffect;
+import org.jdesktop.swingx.painter.effects.ShadowPathEffect;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
@@ -73,7 +76,6 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     }, IGNORE_RANDOMIZE);
 
     private final BooleanParam waterMark = new BooleanParam("Watermarking", false);
-
     protected final ImagePositionParam center = new ImagePositionParam("Center");
     private final GroupedRangeParam scale = new GroupedRangeParam("Scale (%)", 1, 100, 500, false);
 
@@ -81,17 +83,13 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         setParams(
-                background,
-                foreground,
-                waterMark,
-                new DialogParam("Transform", center, scale),
-                strokeParam,
-                effectsParam
+            background,
+            foreground,
+            waterMark,
+            new DialogParam("Transform", center, scale),
+            strokeParam,
+            effectsParam
         );
-
-        // disable effects if foreground is set to transparent
-        foreground.setupDisableOtherIf(effectsParam,
-                selectedValue -> selectedValue.getValue() == FG_TRANSPARENT);
 
         // disable foreground and background if watermarking is selected
         waterMark.setupDisableOtherIfChecked(foreground);
@@ -106,7 +104,8 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         Graphics2D g2;
         BufferedImage bumpImage = null;
 
-        if (waterMark.isChecked()) {
+        boolean watermarking = waterMark.isChecked();
+        if (watermarking) {
             bumpImage = new BufferedImage(srcWidth, srcHeight, TYPE_INT_RGB);
             g2 = bumpImage.createGraphics();
             Colors.fillWith(BLACK, g2, srcWidth, srcHeight);
@@ -132,28 +131,72 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
                 // http://stackoverflow.com/questions/17113234/affine-transform-scale-around-a-point
                 var at = AffineTransform.getTranslateInstance
-                        (cx - scaleX * cx, cy - scaleY * cy);
+                    (cx - scaleX * cx, cy - scaleY * cy);
                 at.scale(scaleX, scaleY);
 
                 shape = at.createTransformedShape(shape);
             }
 
             // work with the outline so that we can have "inner glow"
-            Shape outline = stroke.createStrokedShape(shape);
+            shape = stroke.createStrokedShape(shape);
 
-            g2.fill(outline);
+            g2.fill(shape);
 
+            // If there are effects and the foreground is set to transparent,
+            // then the effects have to be run on a temporary image, because
+            // they also set the composite. Also inner glow is ignored.
             AreaEffects effects = effectsParam.getEffects();
-            effects.drawOn(g2, outline);
+            if (!effects.isEmpty()) {
+                if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
+                    drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);
+                } else { // the simple case
+                    effects.drawOn(g2, shape);
+                }
+            }
         }
 
         g2.dispose();
 
-        if(waterMark.isChecked()) {
+        if (watermarking) {
             dest = ImageUtils.bumpMap(src, bumpImage, getName());
+            bumpImage.flush();
         }
 
         return dest;
+    }
+
+    private static void drawEffectsWithTransparency(AreaEffects effects, Graphics2D g2, Shape shape, int srcWidth, int srcHeight) {
+        GlowPathEffect glow = effects.getGlow();
+        NeonBorderEffect neonBorder = effects.getNeonBorder();
+        ShadowPathEffect dropShadow = effects.getDropShadow();
+        if (glow != null || neonBorder != null || dropShadow != null) {
+            var maskImage = ImageUtils.createSysCompatibleImage(srcWidth, srcHeight);
+            Graphics2D tmpG = maskImage.createGraphics();
+            // fill with transparent pixels
+            tmpG.setComposite(AlphaComposite.Clear);
+            tmpG.fillRect(0, 0, srcWidth, srcHeight);
+
+            tmpG.setComposite(AlphaComposite.SrcOver);
+            // inner glow is ignored
+            if (glow != null) {
+                glow.setBrushColor(WHITE);
+                glow.apply(tmpG, shape, 0, 0);
+            }
+            if (neonBorder != null) {
+                neonBorder.setBrushColor(WHITE);
+                neonBorder.setCenterColor(WHITE);
+                neonBorder.setEdgeColor(WHITE);
+                neonBorder.apply(tmpG, shape, 0, 0);
+            }
+            if (dropShadow != null) {
+                dropShadow.setBrushColor(WHITE);
+                dropShadow.apply(tmpG, shape, 0, 0);
+            }
+            tmpG.dispose();
+            g2.setComposite(AlphaComposite.DstOut);
+            g2.drawImage(maskImage, 0, 0, null);
+            maskImage.flush();
+        }
     }
 
     private void fillBackground(BufferedImage src, Graphics2D g2, int srcWidth, int srcHeight) {

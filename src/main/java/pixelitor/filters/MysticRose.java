@@ -62,12 +62,13 @@ public class MysticRose extends ShapeFilter {
         int numPoints = nrPoints.getValue();
         Point2D[] points = new Point2D[numPoints];
         double r = radius.getValueAsDouble();
-        double startAngle = 2 * Math.PI / numPoints * rotate.getPercentageValD();
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
+        double angle = 2 * Math.PI / numPoints;
+        double startAngle = angle * rotate.getPercentageValD();
         for (int i = 0; i < points.length; i++) {
-            double theta = startAngle + 2 * Math.PI * i / numPoints;
+            double theta = startAngle + i * angle;
             points[i] = new Point2D.Double(
                 cx + r * Math.cos(theta),
                 cy + r * Math.sin(theta));
