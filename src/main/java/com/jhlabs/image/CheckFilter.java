@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import net.jafama.FastMath;
+
 /**
  * A Filter to draw grids and check patterns.
  */
@@ -42,6 +44,8 @@ public class CheckFilter extends PointFilter {
     private float invAaRes;
 
     private boolean straight;
+    private float distortion;
+    private float phase;
 
     private void setAaRes(int aaRes) {
         this.aaRes = aaRes;
@@ -167,8 +171,8 @@ public class CheckFilter extends PointFilter {
      */
     public void setAngle(float angle) {
         this.angle = angle;
-        float cos = (float) Math.cos(angle);
-        float sin = (float) Math.sin(angle);
+        float cos = (float) FastMath.cos(angle);
+        float sin = (float) FastMath.sin(angle);
         m00 = cos;
         m01 = sin;
         m10 = -sin;
@@ -177,18 +181,19 @@ public class CheckFilter extends PointFilter {
         // no AA is necessary if the angle is 0, 90, 180 or 270 grades
         straight = ((Math.abs(sin) < 0.0000001) || (Math.abs(cos) < 0.0000001));
 
-        if (!straight) {
+        boolean hasDistortion = distortion > 0;
+        if (!straight || hasDistortion) {
             // the necessary AA quality depends on the angle
             float minSinCos = Math.min(Math.abs(sin), Math.abs(cos));
-            if (minSinCos > 0.5) {
+            if (minSinCos > 0.5 || hasDistortion && distortion > 0.5) {
                 setAaRes(3);
-            } else if (minSinCos > 0.15) {
+            } else if (minSinCos > 0.15 || (hasDistortion && distortion > 0.2)) {
                 setAaRes(4);
-            } else if (minSinCos > 0.1) {
+            } else if (minSinCos > 0.1 || (hasDistortion && distortion > 0.1)) {
                 setAaRes(5);
-            } else if (minSinCos > 0.07) {
+            } else if (minSinCos > 0.07 || (hasDistortion && distortion > 0.05)) {
                 setAaRes(6);
-            } else if (minSinCos > 0.03) {
+            } else if (minSinCos > 0.03 || (hasDistortion && distortion > 0.02)) {
                 setAaRes(7);
             } else {
                 setAaRes(8);
@@ -206,10 +211,22 @@ public class CheckFilter extends PointFilter {
         return angle;
     }
 
+    public void setDistortion(float distortion) {
+        this.distortion = distortion;
+    }
+
+    public void setPhase(float phase) {
+        this.phase = phase;
+    }
+
     @Override
     public int filterRGB(int x, int y, int rgb) {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;
+        if (distortion > 0) {
+            nx += distortion * FastMath.sin(ny + phase);
+            ny += distortion * FastMath.sin(nx + phase);
+        }
 
         // guaranteed to be positive
         float pnx = nx + 100000;
@@ -223,7 +240,10 @@ public class CheckFilter extends PointFilter {
         float dy = pny - iny;
 
         boolean needsAA = false;
-        if (!straight) {
+        // the fuzziness condition is imperfect, because very small images benefit
+        // from AA even with a small fuzziness, but in larger images with small
+        // fuzziness, the AA is an artifact
+        if ((!straight || distortion > 0) && fuzziness == 0) {
             needsAA = dx < aaThresholdX || dy < aaThresholdY || dx > upperAaThresholdX || dy > upperAaThresholdY;
         }
 
@@ -244,16 +264,40 @@ public class CheckFilter extends PointFilter {
         }
 
         if (fuzziness != 0) {
+            // The fuzziness implementation is based on
+            // the checker of http://doup.github.io/sapo.js/
+
+            // In order to implement fuzziness, we have to know
+            // the distance from the cell border.
+            // We "fold" the coordinates to simplify the edge
+            // detection. dx and dy are now in the range [ 0, 0.5 ),
+            // and only their lower part must be checked
+            //
+            dx = dx < 0.5f ? dx : 1.0f - dx;
+            dy = dy < 0.5f ? dy : 1.0f - dy;
+
+            // After this diagonal folding only the lower part of dy has to be checked
+            if (dy > dx) {
+                dy = dx;
+            }
+
             float fuzz = (fuzziness / 100.0f);
-            float fx = ImageMath.smoothPulse(0, fuzz, 1 - fuzz, 1, ImageMath.mod(nx, 1));
-            float fy = ImageMath.smoothPulse(0, fuzz, 1 - fuzz, 1, ImageMath.mod(ny, 1));
-            f *= fx * fy;
+            if (dy < fuzz) { // close to the border
+                fuzz = ((dy / fuzz) / 2.0f) + 0.5f;
+                fuzz = ImageMath.smoothStep(0.0f, 1.0f, fuzz);
+
+                if (f == 1.0f) { // foreground color
+                    f = fuzz;
+                } else if (f == 0.0f) { // background color
+                    f = 1.0f - fuzz;
+                }
+            }
         }
 
-        if (f == 0.0) {
+        if (f == 0.0f) {
             return foreground;
         }
-        if (f == 1.0) {
+        if (f == 1.0f) {
             return background;
         }
 
@@ -263,6 +307,10 @@ public class CheckFilter extends PointFilter {
     private float calcSubPixelInterpolation(float x, float y) {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;
+        if (distortion > 0) {
+            nx += distortion * FastMath.sin(ny + phase);
+            ny += distortion * FastMath.sin(nx + phase);
+        }
 
         // guaranteed to be positive
         float pnx = nx + 100000;

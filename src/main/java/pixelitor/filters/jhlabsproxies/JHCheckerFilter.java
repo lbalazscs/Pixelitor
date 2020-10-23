@@ -18,13 +18,9 @@
 package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.CheckFilter;
+import com.jhlabs.image.ImageMath;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -43,7 +39,11 @@ public class JHCheckerFilter extends ParametrizedFilter {
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final ColorParam color1 = new ColorParam("Color 1", Color.BLACK, NO_TRANSPARENCY);
     private final ColorParam color2 = new ColorParam("Color 2", Color.WHITE, NO_TRANSPARENCY);
-    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 48);
+    private final RangeParam fuzziness = new RangeParam("Fuzziness", 0, 0, 100);
+    private final GroupedRangeParam distortion = new GroupedRangeParam(
+        "Waves", new RangeParam[]{
+        new RangeParam("Amount", 0, 0, 100),
+        new RangeParam("Phase (Time)", 0, 0, 100)}, false);
     private final BooleanParam bumpMap = new BooleanParam("Bump Map Original", false, IGNORE_RANDOMIZE);
 
 //    private final RangeParam aaRes = new RangeParam("Anti-aliasing Quality", 1, 10, 2);
@@ -54,12 +54,13 @@ public class JHCheckerFilter extends ParametrizedFilter {
         super(ShowOriginal.YES);
 
         setParams(
-                size.withAdjustedRange(1.0),
-                angle,
-                color1,
-                color2,
-                fuzziness,
-                bumpMap
+            size.withAdjustedRange(1.0),
+            angle,
+            color1,
+            color2,
+            fuzziness,
+            distortion.notLinkable(),
+            bumpMap
         );
     }
 
@@ -72,11 +73,15 @@ public class JHCheckerFilter extends ParametrizedFilter {
 //        filter.setAaRes(aaRes.getValue());
 
         filter.setFuzziness(fuzziness.getValue());
-        filter.setAngle((float) angle.getValueInRadians());
         filter.setBackground(color1.getColor().getRGB());
         filter.setForeground(color2.getColor().getRGB());
         filter.setXScale(size.getValue(0));
         filter.setYScale(size.getValue(1));
+        filter.setDistortion(distortion.getValueAsPercentage(0));
+        filter.setPhase(distortion.getValueAsPercentage(1) * ImageMath.TWO_PI);
+
+        // must be set after the distortion
+        filter.setAngle((float) angle.getValueInRadians());
 
         dest = filter.filter(src, dest);
 
