@@ -45,6 +45,7 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static pixelitor.ChangeReason.BATCH_AUTOMATE;
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
@@ -646,9 +647,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         // A filter without dialog should never return the original image...
         if (transformedImage == image) {
-            // ...unless "Repeat Last" starts a filter with settings
-            // without a dialog
-            if (cr != REPEAT_LAST) {
+            // ...unless "Repeat Last" or "Batch Filter" starts a filter
+            // with settings without its dialog
+            if (cr != REPEAT_LAST && cr != BATCH_AUTOMATE) {
                 throw new IllegalStateException(filterName
                     + " returned the original image, changeReason = " + cr);
             } else {
