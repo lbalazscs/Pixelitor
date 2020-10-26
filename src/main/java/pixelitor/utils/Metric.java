@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -74,4 +74,16 @@ public enum Metric {
 
     // a slower version with double arguments
     public abstract double distanceDouble(double x1, double x2, double y1, double y2);
+
+    public DistanceFunction asIntPrecisionDistance() {
+        return (x1, x2, y1, y2) -> distanceInt((int) x1, (int) x2, (int) y1, (int) y2);
+    }
+
+    public DistanceFunction asDoublePrecisionDistance() {
+        return this::distanceDouble;
+    }
+
+    public static interface DistanceFunction {
+        double apply(double x1, double x2, double y1, double y2);
+    }
 }

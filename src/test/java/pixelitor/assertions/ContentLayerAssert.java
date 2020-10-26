@@ -19,6 +19,8 @@ package pixelitor.assertions;
 
 import pixelitor.layers.ContentLayer;
 
+import java.awt.Rectangle;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -38,4 +40,9 @@ public class ContentLayerAssert<S extends ContentLayerAssert<S, T>, T extends Co
         return myself;
     }
 
+    public S contentBoundsIsEqualTo(Rectangle bounds) {
+        isNotNull();
+        assertThat(actual.getContentBounds()).isEqualTo(bounds);
+        return myself;
+    }
 }

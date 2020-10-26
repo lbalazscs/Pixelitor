@@ -17,10 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.CircleToSquareFilter;
 
 import java.awt.image.BufferedImage;
@@ -31,8 +28,7 @@ import java.awt.image.BufferedImage;
 public class CircleToSquare extends ParametrizedFilter {
     public static final String NAME = "Circle to Square";
 
-    // private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 500, 200);
-    private final RangeParam radius = new RangeParam("Radius", 0, 200, 500);
+    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 200, 500);
     private final RangeParam amount = new RangeParam("Amount (%)", -200, 100, 200);
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
@@ -62,13 +58,8 @@ public class CircleToSquare extends ParametrizedFilter {
 
         filter.setRelCenter(center.getRelativeX(), center.getRelativeY());
 
-// ellipse
-//        filter.setRadiusX(radius.getValue(0));
-//        filter.setRadiusY(radius.getValue(1));
-
-// circle
-        filter.setRadiusX(radius.getValueAsFloat());
-        filter.setRadiusY(radius.getValueAsFloat());
+        filter.setRadiusX(radius.getValueAsFloat(0));
+        filter.setRadiusY(radius.getValueAsFloat(1));
 
         filter.setAmount(amount.getPercentageValF());
 

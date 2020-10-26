@@ -17,6 +17,7 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import net.jafama.FastMath;
 import pixelitor.filters.gui.RangeParam;
 
@@ -115,9 +116,9 @@ public class SpiderWeb extends ShapeFilter {
             double midX = (prevX + toX) / 2;
             double midY = (prevY + toY) / 2;
             double centerPull = curvature * 0.1;
-            double stiffness = 1.0 - centerPull;
-            double controlX = midX * stiffness + cx * centerPull;
-            double controlY = midY * stiffness + cy * centerPull;
+            double controlX = ImageMath.lerp(centerPull, midX, cx);
+            double controlY = ImageMath.lerp(centerPull, midY, cy);
+
             shape.quadTo(controlX, controlY, toX, toY);
         }
     }

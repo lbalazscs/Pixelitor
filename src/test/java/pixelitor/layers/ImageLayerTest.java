@@ -260,8 +260,8 @@ public class ImageLayerTest {
     }
 
     @Test
-    public void getImageBounds() {
-        Rectangle bounds = layer.getImageBounds();
+    public void getContentBounds() {
+        Rectangle bounds = layer.getContentBounds();
 
         assertThat(bounds).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
@@ -391,7 +391,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
-        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 3, 5, 5);
 
         // when
@@ -410,7 +410,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
-        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 3, 50, 50);
 
         // when
@@ -427,7 +427,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origImBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
-        assertThat(layer).imageBoundsIsEqualTo(origImBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origImBounds);
         Rectangle cropRect = new Rectangle(3, 4, 50, 50);
 
         // when
@@ -446,7 +446,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
-        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(3, 4, 50, 50);
 
         // when
@@ -463,7 +463,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - tx);
-        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(-10, 3, 20, 3);
 
         // when
@@ -480,7 +480,7 @@ public class ImageLayerTest {
         int tx = layer.getTx();
         int ty = layer.getTy();
         Rectangle origBounds = new Rectangle(tx, ty, 20 - tx, 10 - ty);
-        assertThat(layer).imageBoundsIsEqualTo(origBounds);
+        assertThat(layer).contentBoundsIsEqualTo(origBounds);
         Rectangle cropRect = new Rectangle(8, 5, 4, 10);
 
         // when
@@ -494,14 +494,14 @@ public class ImageLayerTest {
     private void checkLayerAfterCrop(int expectedTx, int expectedTy,
                                      int expectedImWidth, int expectedImHeight,
                                      Rectangle expectedNewCanvas) {
-        assertThat(layer).imageBoundsIsEqualTo(
-                new Rectangle(expectedTx, expectedTy,
-                        expectedImWidth, expectedImHeight));
+        assertThat(layer).contentBoundsIsEqualTo(
+            new Rectangle(expectedTx, expectedTy,
+                expectedImWidth, expectedImHeight));
         iconUpdates.check(0, 0);
 
         comp.getCanvas().changeSize(
-                (int) expectedNewCanvas.getWidth(),
-                (int) expectedNewCanvas.getHeight(), comp.getView());
+            (int) expectedNewCanvas.getWidth(),
+            (int) expectedNewCanvas.getHeight(), comp.getView());
         ConsistencyChecks.imageCoversCanvas(layer);
     }
 
@@ -539,7 +539,7 @@ public class ImageLayerTest {
         assertThat(duplicate)
             .blendingModeIs(layer.getBlendingMode())
             .opacityIs(layer.getOpacity())
-            .imageBoundsIsEqualTo(layer.getImageBounds());
+            .contentBoundsIsEqualTo(layer.getContentBounds());
 
         BufferedImage image = layer.getImage();
         BufferedImage duplicateImage = duplicate.getImage();

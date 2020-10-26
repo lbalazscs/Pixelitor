@@ -33,7 +33,7 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 public class Voronoi extends ParametrizedFilter {
     public static final String NAME = "Voronoi Diagram";
 
-    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 10, 221);
+    private final RangeParam numberOfPoints = new RangeParam("Number of Points", 1, 100, 2021);
     private final EnumParam<Metric> distance = new EnumParam<>("Distance", Metric.class);
     private final BooleanParam showPoints = new BooleanParam("Show Points", false, IGNORE_RANDOMIZE);
     private final BooleanParam useImageColors = new BooleanParam("Use Image Colors", false, IGNORE_RANDOMIZE);
@@ -72,7 +72,6 @@ public class Voronoi extends ParametrizedFilter {
         dest = filter.filter(src, dest);
 
         int aaRes = antiAliasing.getValue();
-
         if (aaRes != 0) {
             filter.setAaRes(aaRes);
             filter.antiAlias(dest);
@@ -80,6 +79,10 @@ public class Voronoi extends ParametrizedFilter {
 
         if (showPoints.isChecked()) {
             filter.showPoints(dest);
+        }
+
+        if (false) {
+            filter.debugGrid(dest);
         }
 
         return dest;

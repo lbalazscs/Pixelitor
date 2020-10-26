@@ -20,13 +20,20 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.PointFilter;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Metric;
+import pixelitor.utils.Metric.DistanceFunction;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -36,14 +43,14 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class VoronoiFilter extends PointFilter {
     private int numPoints = 10;
-    private int[] xCoords;
-    private int[] yCoords;
-    private int[] colors;
     private Metric metric;
     private boolean useImageColors;
 
     private int aaRes = 2;
     private int aaRes2 = aaRes * aaRes;
+    private double gridPixelWidth;
+    private double gridPixelHeight;
+    private GridCell[][] cells;
 
     public VoronoiFilter(String filterName) {
         super(filterName);
@@ -68,29 +75,109 @@ public class VoronoiFilter extends PointFilter {
 
     @Override
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        xCoords = new int[numPoints];
-        yCoords = new int[numPoints];
-        colors = new int[numPoints];
+        int width = src.getWidth();
+        int height = src.getHeight();
 
         Random rand = ReseedSupport.reInitialize();
 
+        double aspectRatio = width / (double) height;
+        int numVerGridCells = (int) (1 + Math.sqrt(numPoints / 10.0));
+        int numHorGridCells = (int) (1 + (numVerGridCells * aspectRatio));
+
+        gridPixelWidth = width / (double) numHorGridCells;
+        gridPixelHeight = height / (double) numVerGridCells;
+
+        cells = new GridCell[numHorGridCells][numVerGridCells];
+        for (int i = 0; i < numHorGridCells; i++) {
+            GridCell[] column = new GridCell[numVerGridCells];
+            cells[i] = column;
+            for (int j = 0; j < numVerGridCells; j++) {
+                column[j] = new GridCell(i, j);
+            }
+        }
+
+        for (int i = 0; i < numHorGridCells; i++) {
+            GridCell[] column = cells[i];
+            GridCell[] leftCol = null;
+            if (i > 0) {
+                leftCol = cells[i - 1];
+            }
+            GridCell[] rightCol = null;
+            if (i < numHorGridCells - 1) {
+                rightCol = cells[i + 1];
+            }
+
+            for (int j = 0; j < numVerGridCells; j++) {
+                GridCell cell = column[j];
+                if (leftCol != null) {
+                    cell.addNeighbour(leftCol[j]); // west
+                    if (j > 0) {
+                        cell.addNeighbour(leftCol[j - 1]); // north-west
+                    }
+                    if (j < numVerGridCells - 1) {
+                        cell.addNeighbour(leftCol[j + 1]); // south-west
+                    }
+                }
+                if (j > 0) {
+                    cell.addNeighbour(column[j - 1]); // north
+                }
+                if (j < numVerGridCells - 1) {
+                    cell.addNeighbour(column[j + 1]); // south
+                }
+                if (rightCol != null) {
+                    cell.addNeighbour(rightCol[j]); // east
+                    if (j > 0) {
+                        cell.addNeighbour(rightCol[j - 1]); // north-east
+                    }
+                    if (j < numVerGridCells - 1) {
+                        cell.addNeighbour(rightCol[j + 1]); // south-east
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < numPoints; i++) {
-            xCoords[i] = rand.nextInt(src.getWidth());
-            yCoords[i] = rand.nextInt(src.getHeight());
+            int x = rand.nextInt(width);
+            int y = rand.nextInt(height);
+            int color;
 
             if (useImageColors) {
-                colors[i] = src.getRGB(xCoords[i], yCoords[i]);
+                color = src.getRGB(x, y);
             } else {
-                colors[i] = 0xFF_00_00_00 | rand.nextInt(0xFF_FF_FF);
+                color = 0xFF_00_00_00 | rand.nextInt(0xFF_FF_FF);
             }
+            VorPoint point = new VorPoint(x, y, color);
+
+            int gridIndexX = (int) (x / gridPixelWidth);
+            int gridIndexY = (int) (y / gridPixelHeight);
+            cells[gridIndexX][gridIndexY].points.add(point);
         }
 
         return super.filter(src, dst);
     }
 
+    public void debugGrid(BufferedImage img) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        Graphics2D rg = img.createGraphics();
+        double yy = 0;
+        while (yy < height) {
+            yy += gridPixelHeight;
+            Line2D.Double line = new Line2D.Double(0, yy, width, yy);
+            rg.draw(line);
+        }
+        double xx = 0;
+        while (xx < width) {
+            xx += gridPixelWidth;
+            Line2D.Double line = new Line2D.Double(xx, 0, xx, height);
+            rg.draw(line);
+        }
+        rg.dispose();
+    }
+
     public void showPoints(BufferedImage img) {
         double radius = (img.getWidth() + img.getHeight()) / 300.0;
-        if(radius < 1) {
+        if (radius < 1) {
             radius = 1;
         }
         Graphics2D g = img.createGraphics();
@@ -99,53 +186,27 @@ public class VoronoiFilter extends PointFilter {
         if (useImageColors) {
             g.setXORMode(Color.WHITE);
         }
-        for (int i = 0; i < numPoints; i++) {
-            g.fill(Shapes.createCircle(xCoords[i], yCoords[i], radius));
+        for (GridCell[] cols : cells) {
+            for (GridCell cell : cols) {
+                for (VorPoint point : cell.points) {
+                    g.fill(Shapes.createCircle(point.x, point.y, radius));
+                }
+            }
         }
         g.dispose();
     }
 
     @Override
     public int filterRGB(int x, int y, int rgb) {
-        int closestPointIndex = 0;
-        double fromHereToClosestSoFar = Double.POSITIVE_INFINITY;
-
-        // naive brute-force search, but quite fast, because
-        // it doesn't calculate square roots for the distance
-        // TODO use a faster algorithm
-        for (int i = 0; i < numPoints; i++) {
-            double fromHereToPointI = metric.distanceInt(
-                    xCoords[i], x, yCoords[i], y);
-            if (fromHereToPointI < fromHereToClosestSoFar) {
-                closestPointIndex = i;
-                fromHereToClosestSoFar = fromHereToPointI;
-            }
-        }
-
-        return colors[closestPointIndex];
-    }
-
-    /**
-     * Finds the nearest point with double precision. Used for AA
-     */
-    private int nearestSiteDouble(double x, double y) {
-        int closestPointIndex = 0;
-        double fromHereToClosestSoFar = Double.POSITIVE_INFINITY;
-
-        for (int i = 0; i < numPoints; i++) {
-            double fromHereToPointI = metric.distanceDouble(
-                    xCoords[i], x, yCoords[i], y);
-            if (fromHereToPointI < fromHereToClosestSoFar) {
-                closestPointIndex = i;
-                fromHereToClosestSoFar = fromHereToPointI;
-            }
-        }
-        return closestPointIndex;
+        int gridIndexX = (int) (x / gridPixelWidth);
+        int gridIndexY = (int) (y / gridPixelHeight);
+        VorPoint closest = cells[gridIndexX][gridIndexY].findClosestPointTo(x, y,
+            metric.asIntPrecisionDistance());
+        return closest.color;
     }
 
     /**
      * Check whether the pixel is different from its neighbours.
-     * It is enough to check in the horizontal direction
      */
     private static boolean isEdge(int[] allPixels, int pixelIndex, int width) {
         int color = allPixels[pixelIndex];
@@ -162,6 +223,16 @@ public class VoronoiFilter extends PointFilter {
         return false;
     }
 
+    private static boolean tryIsEdge(int width, int[] pixelsCopy, int i) {
+        boolean edge;
+        try {
+            edge = isEdge(pixelsCopy, i, width);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            edge = false;
+        }
+        return edge;
+    }
+
     private int calcSuperSampledColor(int pixelIndex, int width) {
         int x = pixelIndex % width;
         int y = pixelIndex / width;
@@ -174,8 +245,12 @@ public class VoronoiFilter extends PointFilter {
             double yy = y + 1.0 / aaRes * i - 0.5;
             for (int j = 0; j < aaRes; j++) {
                 double xx = x + 1.0 / aaRes * j - 0.5;
-                int closestPointIndex = nearestSiteDouble(xx, yy);
-                int color = colors[closestPointIndex];
+                // xx and yy are the supersampling coordinates
+                int gridIndexX = (int) (xx / gridPixelWidth);
+                int gridIndexY = (int) (yy / gridPixelHeight);
+                VorPoint closest = cells[gridIndexX][gridIndexY].findClosestPointTo(xx, yy,
+                    metric.asDoublePrecisionDistance());
+                int color = closest.color;
                 r += (color >>> 16) & 0xFF;
                 g += (color >>> 8) & 0xFF;
                 b += color & 0xFF;
@@ -193,23 +268,94 @@ public class VoronoiFilter extends PointFilter {
         int width = imgSoFar.getWidth();
         int[] pixels = ImageUtils.getPixelsAsArray(imgSoFar);
 
-        // make a copy so that the original is inspected for edges
-        // while the array is changed
-        int[] pixelsCopy = new int[pixels.length];
-        System.arraycopy(pixels, 0, pixelsCopy, 0, pixels.length);
+        // since this code runs outside the superclass-powered
+        // parallelization, use parallel streams
+        int[] aaPixels = IntStream.range(0, pixels.length).parallel()
+            .map(i -> {
+                // only pixels at the edges are supersampled
+                if (tryIsEdge(width, pixels, i)) {
+                    return calcSuperSampledColor(i, width);
+                } else {
+                    return pixels[i];
+                }
+            }).toArray();
+        System.arraycopy(aaPixels, 0, pixels, 0, pixels.length);
+    }
 
-        for (int i = 0; i < pixels.length; i++) {
-            // only pixels at the edges are supersampled
-            boolean edge;
-            try {
-                edge = isEdge(pixelsCopy, i, width);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                edge = false;
+    private static class VorPoint {
+        final int x;
+        final int y;
+        final int color;
+
+        public VorPoint(int x, int y, int color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+        }
+
+        @Override
+        public String toString() {
+            return "{x=" + x + ", y=" + y + '}';
+        }
+    }
+
+    private static class GridCell {
+        final List<VorPoint> points = new ArrayList<>();
+        final List<GridCell> neighbours = new ArrayList<>();
+        final int horPos;
+        final int verPos;
+
+        public GridCell(int horPos, int verPos) {
+            this.horPos = horPos;
+            this.verPos = verPos;
+        }
+
+        public void addNeighbour(GridCell n) {
+            if (n == this) {
+                throw new IllegalStateException();
+            }
+            neighbours.add(n);
+        }
+
+        public VorPoint findClosestPointTo(double x, double y, DistanceFunction distFunc) {
+            double minDistSoFar = Double.POSITIVE_INFINITY;
+            VorPoint closest = null;
+
+            for (VorPoint point : points) {
+                double dist = distFunc.apply(x, point.x, y, point.y);
+                if (dist < minDistSoFar) {
+                    minDistSoFar = dist;
+                    closest = point;
+                }
             }
 
-            if(edge) {
-                pixels[i] = calcSuperSampledColor(i, width);
+            for (GridCell neighbour : neighbours) {
+                for (VorPoint point : neighbour.points) {
+                    double dist = distFunc.apply(x, point.x, y, point.y);
+                    if (dist < minDistSoFar) {
+                        minDistSoFar = dist;
+                        closest = point;
+                    }
+                }
             }
+
+            return closest;
+        }
+
+        public String toPosString() {
+            return new StringJoiner(", ", "Cell(", ")")
+                .add("" + horPos)
+                .add("" + verPos)
+                .toString();
+        }
+
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", "Cell[", "]")
+                .add("" + horPos)
+                .add("" + verPos)
+                .add("neighbours=" + neighbours.stream().map(GridCell::toPosString).collect(Collectors.joining(",")))
+                .toString();
         }
     }
 }

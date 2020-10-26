@@ -20,7 +20,6 @@ package pixelitor.assertions;
 import pixelitor.layers.ImageLayer;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,12 +56,6 @@ public class ImageLayerAssert extends ContentLayerAssert<ImageLayerAssert, Image
     public ImageLayerAssert previewImageIsNot(BufferedImage image) {
         isNotNull();
         assertThat(actual.getPreviewImage()).isNotSameAs(image);
-        return this;
-    }
-
-    public ImageLayerAssert imageBoundsIsEqualTo(Rectangle bounds) {
-        isNotNull();
-        assertThat(actual.getImageBounds()).isEqualTo(bounds);
         return this;
     }
 

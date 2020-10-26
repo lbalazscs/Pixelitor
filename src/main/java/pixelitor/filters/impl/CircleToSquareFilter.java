@@ -23,7 +23,6 @@ import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 
 /**
  * The implementation of the {@link CircleToSquare} filter.
@@ -32,7 +31,6 @@ import java.awt.image.BufferedImage;
 public class CircleToSquareFilter extends CenteredTransformFilter {
     private float radiusX = 500;
     private float radiusY = 500;
-    private float radiusRatio;
     private float amount = 1.0f;
 
     public CircleToSquareFilter() {
@@ -51,12 +49,6 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
         this.amount = amount;
     }
 
-    @Override
-    public BufferedImage filter(BufferedImage src, BufferedImage dst) {
-        radiusRatio = radiusX / radiusY;
-        return super.filter(src, dst);
-    }
-
     public Shape[] getAffectedAreaShapes() {
         Shape rect = new Rectangle2D.Float(cx - radiusX, cy - radiusY, 2 * radiusX, 2 * radiusY);
         Shape ellipse = Shapes.createEllipse(cx, cy, radiusX, radiusY);
@@ -67,28 +59,42 @@ public class CircleToSquareFilter extends CenteredTransformFilter {
     protected void transformInverse(int x, int y, float[] out) {
         float dx = x - cx;
         float dy = y - cy;
-        float xDist = Math.abs(dx);
 
+        float xDist = Math.abs(dx);
         float yDist = Math.abs(dy);
+
         if (xDist > radiusX || yDist > radiusY) { // out of the affected area
             out[0] = x;
             out[1] = y;
             return;
         }
 
+        float sdx, sdy, sXDist, sYDist;
+        if (radiusX == radiusY) {
+            sdx = dx;
+            sdy = dy;
+            sXDist = xDist;
+            sYDist = yDist;
+        } else {
+            // if the coordinates are stretched, then it becomes an
+            // ellipse-to-rectangle distortion
+            sdx = dx / radiusX;
+            sdy = dy / radiusY;
+            sXDist = xDist / radiusX;
+            sYDist = yDist / radiusY;
+        }
+
         double angle;
-        if (xDist >= yDist) { // we want to move from a vertical line  to the circle
-            angle = FastMath.atan2(dy, xDist);
+        if (sXDist >= sYDist) { // we want to move from a vertical line  to the circle
+            angle = FastMath.atan2(sdy, sXDist);
         } else { // move from horizontal line
             //noinspection SuspiciousNameCombination
-            angle = FastMath.atan2(dx, yDist);
+            angle = FastMath.atan2(sdx, sYDist);
         }
 
         double magnificationInverse = FastMath.cos(angle);
 
-        // dividing by radiusRatio transforms the circle-to-square transformation
-        // into an ellipse-to-rectangle transformation
-        float transformedX = cx + (float) (dx * magnificationInverse / radiusRatio);
+        float transformedX = cx + (float) (dx * magnificationInverse);
         float transformedY = cy + (float) (dy * magnificationInverse);
 
         if (amount == 1.0f) {

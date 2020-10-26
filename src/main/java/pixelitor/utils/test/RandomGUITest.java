@@ -27,7 +27,7 @@ import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.filters.*;
-import pixelitor.filters.animation.Interpolation;
+import pixelitor.filters.animation.TimeInterpolation;
 import pixelitor.filters.animation.TweenAnimation;
 import pixelitor.filters.gui.FilterState;
 import pixelitor.filters.gui.FilterWithGUI;
@@ -515,7 +515,7 @@ public class RandomGUITest {
 
         var animation = new TweenAnimation();
         animation.setFilter(filter);
-        animation.setInterpolation(Rnd.chooseFrom(Interpolation.values()));
+        animation.setInterpolation(Rnd.chooseFrom(TimeInterpolation.values()));
 
         ParamSet paramSet = filter.getParamSet();
         paramSet.randomize();

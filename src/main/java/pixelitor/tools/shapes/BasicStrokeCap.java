@@ -50,9 +50,7 @@ public enum BasicStrokeCap {
         return new EnumParam<>(NAME, BasicStrokeCap.class);
     }
 
-    public static EnumParam<BasicStrokeCap> asParam(BasicStrokeCap defaultValue) {
-        EnumParam<BasicStrokeCap> param = asParam();
-        param.selectAndSetAsDefault(defaultValue);
-        return param;
+    public static EnumParam<BasicStrokeCap> asParam(BasicStrokeCap defaultCap) {
+        return asParam().withDefault(defaultCap);
     }
 }

@@ -19,11 +19,7 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SparkleFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ColorParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.utils.ReseedSupport;
 
 import java.awt.image.BufferedImage;
@@ -38,14 +34,13 @@ import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRAN
 public class JHSparkle extends ParametrizedFilter {
     public static final String NAME = "Sparkle";
 
-    private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
     private final ImagePositionParam center = new ImagePositionParam("Center");
+    private final BooleanParam lightOnly = new BooleanParam("Light Only", false);
+    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
     private final RangeParam nrOfRays = new RangeParam("Number of Rays", 1, 200, 501);
     private final RangeParam radius = new RangeParam("High Intensity Radius", 1, 50, 500);
     private final RangeParam shine = new RangeParam("Shine", 0, 50, 100);
     private final RangeParam randomness = new RangeParam("Randomness", 0, 24, 48);
-
-    private final ColorParam color = new ColorParam("Color", WHITE, USER_ONLY_TRANSPARENCY);
 
     private SparkleFilter filter;
 
@@ -55,13 +50,13 @@ public class JHSparkle extends ParametrizedFilter {
         var reseed = ReseedSupport.createAction("", "Reseed Randomness");
         randomness.setupEnableOtherIfNotZero(reseed);
         setParams(
-                center,
-                lightOnly,
-                color,
-                nrOfRays,
-                radius.withAdjustedRange(1.0),
-                shine,
-                randomness.withAction(reseed)
+            center,
+            lightOnly,
+            color,
+            nrOfRays,
+            radius.withAdjustedRange(1.0),
+            shine,
+            randomness.withAction(reseed)
         );
     }
 
@@ -83,7 +78,6 @@ public class JHSparkle extends ParametrizedFilter {
         filter.setColor(color.getColor().getRGB());
         filter.setRandom(rand);
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

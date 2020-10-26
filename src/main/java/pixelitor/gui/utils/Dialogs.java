@@ -250,8 +250,12 @@ public class Dialogs {
         }
 
         Frame parent = getParent();
-        String basicErrorMessage = "An exception occurred: " + e.getMessage();
-        var errorInfo = new ErrorInfo("Program error",
+        String basicErrorMessage = """
+            A program error occurred.
+                        
+            Please consider reporting this error to the developers by opening a new issue on GitHub (see "Help/Report an Issue..." in the menus).
+            If you do, then open "Details", click "Copy to Clipboard", and paste the details into the new issue.""";
+        var errorInfo = new ErrorInfo("Program Error",
             basicErrorMessage, null, null, e,
             Level.SEVERE, null);
         JXErrorPane.showDialog(parent, errorInfo);

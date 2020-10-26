@@ -176,23 +176,22 @@ public abstract class ShapeFilter extends ParametrizedFilter {
             tmpG.setComposite(AlphaComposite.Clear);
             tmpG.fillRect(0, 0, srcWidth, srcHeight);
 
+            // reset the composite to normal.
             tmpG.setComposite(AlphaComposite.SrcOver);
-            // inner glow is ignored
+
+            // check the effects individually in order to skip inner glow.
             if (glow != null) {
-                glow.setBrushColor(WHITE);
                 glow.apply(tmpG, shape, 0, 0);
             }
             if (neonBorder != null) {
-                neonBorder.setBrushColor(WHITE);
-                neonBorder.setCenterColor(WHITE);
-                neonBorder.setEdgeColor(WHITE);
                 neonBorder.apply(tmpG, shape, 0, 0);
             }
             if (dropShadow != null) {
-                dropShadow.setBrushColor(WHITE);
                 dropShadow.apply(tmpG, shape, 0, 0);
             }
             tmpG.dispose();
+
+            // the effect colors won't matter, only their opacity
             g2.setComposite(AlphaComposite.DstOut);
             g2.drawImage(maskImage, 0, 0, null);
             maskImage.flush();

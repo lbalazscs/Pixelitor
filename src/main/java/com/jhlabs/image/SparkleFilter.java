@@ -19,11 +19,7 @@ package com.jhlabs.image;
 
 import java.util.Random;
 
-import static com.jhlabs.image.ImageMath.PI;
-import static com.jhlabs.image.ImageMath.TWO_PI;
-import static com.jhlabs.image.ImageMath.clamp;
-import static com.jhlabs.image.ImageMath.lerp;
-import static com.jhlabs.image.ImageMath.mixColors;
+import static com.jhlabs.image.ImageMath.*;
 import static net.jafama.FastMath.atan2;
 import static net.jafama.FastMath.powQuick;
 
@@ -154,7 +150,7 @@ public class SparkleFilter extends PointFilter {
             f = 1 - f * f;
             f *= g;
         }
-        f = clamp(f, 0, 1);
+        f = clamp01(f);
         if (lightOnly) {
             return mixColors(f, 0, color);
         } else {

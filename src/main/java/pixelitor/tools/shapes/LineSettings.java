@@ -46,7 +46,7 @@ class LineSettings extends ShapeTypeSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        JPanel p = GUIUtils.arrVer(List.of(width, cap));
+        JPanel p = GUIUtils.arrangeVertically(List.of(width, cap));
         return p;
     }
 

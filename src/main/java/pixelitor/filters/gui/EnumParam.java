@@ -61,9 +61,10 @@ public class EnumParam<E extends Enum<E>> extends AbstractMultipleChoiceParam<E>
         setSelectedItem((E) anItem, true);
     }
 
-    public void selectAndSetAsDefault(E item) {
+    public EnumParam<E> withDefault(E item) {
         defaultValue = item;
         setSelectedItem(item, false);
+        return this;
     }
 
     @Override

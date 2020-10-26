@@ -173,7 +173,7 @@ public enum StrokeType {
         }
     };
 
-    public static final String NAME = "Line Type";
+    private static final String NAME = "Line Type";
     private static final float OUTLINE_WIDTH = 1.0f;
     private static final BasicStroke innerOutlineStroke = new BasicStroke(OUTLINE_WIDTH);
 

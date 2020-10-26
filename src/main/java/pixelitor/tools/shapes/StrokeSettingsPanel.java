@@ -103,14 +103,13 @@ public class StrokeSettingsPanel extends JPanel {
     private static JPanel createStrokeTypePanel(StrokeParam sp) {
         EnumParam<StrokeType> strokeTypeParam = sp.getStrokeTypeParam();
         BooleanParam dashedParam = sp.getDashedParam();
-        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam();
+        EnumParam<ShapeType> shapeTypeParam = sp.getShapeTypeParam()
+            .withDefault(KIWI);
 
         var p = new JPanel();
         p.setBorder(createTitledBorder("Stroke Type"));
 
         p.setLayout(new GridBagLayout());
-
-        shapeTypeParam.selectAndSetAsDefault(KIWI);
 
         strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
             strokeType -> strokeType == SHAPE);
@@ -121,10 +120,10 @@ public class StrokeSettingsPanel extends JPanel {
                 && strokeType != SHAPE);
 
         var gbh = new GridBagHelper(p);
-        gbh.addLabelAndControl(StrokeType.NAME + ":",
+        gbh.addLabelAndControl(strokeTypeParam.getName() + ":",
             strokeTypeParam.createGUI("strokeType"));
 
-        gbh.addLabelAndControl(ShapeType.NAME + ":",
+        gbh.addLabelAndControl(shapeTypeParam.getName() + ":",
             shapeTypeParam.createGUI("shapeType"));
 
         gbh.addLabelAndControl(dashedParam.getName() + ":",

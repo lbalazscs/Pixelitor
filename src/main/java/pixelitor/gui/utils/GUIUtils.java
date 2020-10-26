@@ -95,17 +95,16 @@ public final class GUIUtils {
     public static void arrangeVertically(JPanel p, ParamSet paramSet) {
         p.setLayout(new GridBagLayout());
         var gbh = new GridBagHelper(p);
-
         gbh.arrangeVertically(paramSet.getParams());
     }
 
-    public static JPanel arrVer(Iterable<? extends FilterSetting> settings) {
+    public static JPanel arrangeVertically(Iterable<? extends FilterSetting> settings) {
         var p = new JPanel();
-        arrVer(p, settings);
+        arrangeVertically(p, settings);
         return p;
     }
 
-    public static void arrVer(JPanel p, Iterable<? extends FilterSetting> settings) {
+    public static void arrangeVertically(JPanel p, Iterable<? extends FilterSetting> settings) {
         p.setLayout(new GridBagLayout());
         var gbh = new GridBagHelper(p);
         gbh.arrangeVertically(settings);

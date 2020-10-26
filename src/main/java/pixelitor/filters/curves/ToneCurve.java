@@ -83,8 +83,8 @@ public class ToneCurve {
     }
 
     private static void clampPoint(Point.Float p) {
-        p.x = ImageMath.clamp(p.x, 0, 1);
-        p.y = ImageMath.clamp(p.y, 0, 1);
+        p.x = ImageMath.clamp01(p.x);
+        p.y = ImageMath.clamp01(p.y);
     }
 
     public int addKnot(Point.Float p, boolean allowReplace) {
@@ -154,8 +154,8 @@ public class ToneCurve {
             p.x = curve.x[index + 1];
         }
 
-        curve.x[index] = ImageMath.clamp(p.x, 0, 1);
-        curve.y[index] = ImageMath.clamp(p.y, 0, 1);
+        curve.x[index] = ImageMath.clamp01(p.x);
+        curve.y[index] = ImageMath.clamp01(p.y);
         isDirty = true;
     }
 

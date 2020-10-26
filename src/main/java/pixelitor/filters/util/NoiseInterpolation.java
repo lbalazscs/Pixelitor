@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -15,41 +15,36 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.animation;
+package pixelitor.filters.util;
 
-/**
- * Different ways to interpolate between two values
- * as the time passes
- *
- * The four curves can be viewed here:
- * http://www.wolframalpha.com/input/?i=Plot[{x%2C+x*x%2C+-x*%28x+-+2%29%2C++x*x*%283+-+2*x%29}%2C+{x%2C+0%2C+1}]
- */
-public enum Interpolation {
-    LINEAR("Linear (uniform)") {
+import com.jhlabs.image.ImageMath;
+
+public enum NoiseInterpolation {
+    NONE("None") {
         @Override
-        double time2progress(double time) {
-            return time;
+        public float step(float x) {
+            return x < 0.5 ? 0 : 1;
         }
-    }, QUAD_EASE_IN("Ease In (slow start)") {
+    }, LINEAR("Linear (uniform)") {
         @Override
-        double time2progress(double time) {
-            return time * time;
+        public float step(float x) {
+            return x;
         }
-    }, QUAD_EASE_OUT("Ease Out (slow stop)") {
+    }, CUBIC("Cubic (smooth)") {
         @Override
-        double time2progress(double time) {
-            return -time * (time - 2);
+        public float step(float x) {
+            return ImageMath.smoothStep01(x);
         }
-    }, EASE_IN_OUT("Ease In and Out") {
+    }, QUINTIC("Quintic (smoother)") {
         @Override
-        double time2progress(double time) {
-            return time * time * (3 - 2 * time);
+        public float step(float x) {
+            return ImageMath.smootherStep01(x);
         }
     };
 
     private final String guiName;
 
-    Interpolation(String guiName) {
+    NoiseInterpolation(String guiName) {
         this.guiName = guiName;
     }
 
@@ -59,7 +54,7 @@ public enum Interpolation {
      * @param time a value between 0 and 1
      * @return a value between 0 and 1
      */
-    abstract double time2progress(double time);
+    public abstract float step(float x);
 
     @Override
     public String toString() {

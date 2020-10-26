@@ -140,8 +140,8 @@ public class Clouds extends ParametrizedFilter {
         y -= ((int) y);
 
         // compute the fade curves for x and y
-        float u = fade(x);
-        float v = fade(y);
+        float u = ImageMath.smootherStep01(x);
+        float v = ImageMath.smootherStep01(y);
 
         // calculate hashed gradient indices
         int a = p[gridX] + gridY;
@@ -165,13 +165,7 @@ public class Clouds extends ParametrizedFilter {
         return noise;
     }
 
-    // a smooth interpolation between 0 and 1
-    // see http://en.wikipedia.org/wiki/Smoothstep
-    private static float fade(float t) {
-        return t * t * t * (t * (t * 6 - 15) + 10);
-    }
-
-//    // permutation table that contains the integers from 0 to 255 in random order
+    //    // permutation table that contains the integers from 0 to 255 in random order
 //    static final int permutation[] = {151, 160, 137, 91, 90, 15,
 //            131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140, 36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23,
 //            190, 6, 148, 247, 120, 234, 75, 0, 26, 197, 62, 94, 252, 219, 203, 117, 35, 11, 32, 57, 177, 33,

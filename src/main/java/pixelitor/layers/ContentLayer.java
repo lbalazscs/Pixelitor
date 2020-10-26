@@ -69,21 +69,26 @@ public abstract class ContentLayer extends Layer {
     }
 
     /**
-     * Returns the layer bounding box relative to the canvas
-     * It must return rect trimmed from transparent pixels
+     * Returns the layer bounding box relative to the canvas.
+     * The returned rectangle must be trimmed from transparent pixels.
      */
     public abstract Rectangle getEffectiveBoundingBox();
 
     /**
-     * Returns the bounding box relative to the canvas used for snapping
-     * It must return rect that can help user position the layer
-     * It don't have to be the same as effective bounding box
+     * Returns the bounding box relative to the canvas used for snapping.
+     * The returned rectangle can help with positioning the layer.
+     * It doesn't have to be the same as effective bounding box.
      */
     public abstract Rectangle getSnappingBoundingBox();
 
     /**
-     * Returns pixel (sRGB) at point or zero if point is out of layer
-     * Zero means black transparent pixel (omitted from hit detection)
+     * Returns the rectangle representing the content, relative to the canvas.
+     */
+    public abstract Rectangle getContentBounds();
+
+    /**
+     * Returns the pixel value at the given point or zero if
+     * the point is outside the contents or it is transparent.
      */
     public abstract int getMouseHitPixelAtPoint(Point p);
 

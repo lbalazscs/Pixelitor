@@ -58,7 +58,7 @@ public class DialogParam extends AbstractFilterParam {
     }
 
     private JDialog createDialog(JDialog owner) {
-        JPanel p = GUIUtils.arrVer(List.of(children));
+        JPanel p = GUIUtils.arrangeVertically(List.of(children));
         JDialog d = new DialogBuilder()
             .owner(owner)
             .content(p)

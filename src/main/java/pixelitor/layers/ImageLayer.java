@@ -699,15 +699,6 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
     }
 
-    /**
-     * Returns the image bounds relative to the canvas
-     */
-    public Rectangle getImageBounds() {
-        return new Rectangle(
-            translationX, translationY,
-            image.getWidth(), image.getHeight());
-    }
-
     private void invalidateTrimCache() {
         trimmedBoundingBox = null;
     }
@@ -732,12 +723,22 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return getEffectiveBoundingBox();
     }
 
+    /**
+     * Returns the image bounds relative to the canvas
+     */
+    @Override
+    public Rectangle getContentBounds() {
+        return new Rectangle(
+            translationX, translationY,
+            image.getWidth(), image.getHeight());
+    }
+
     @Override
     public int getMouseHitPixelAtPoint(Point p) {
         int x = p.x - translationX;
         int y = p.y - translationY;
         if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
-            if (hasMask() && getMask().isMaskEnabled()) {
+            if (hasMask() && isMaskEnabled()) {
                 int maskPixel = getMask().getMouseHitPixelAtPoint(p);
                 if (maskPixel != 0) {
                     int imagePixel = image.getRGB(x, y);
@@ -756,7 +757,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     private boolean checkImageDoesNotCoverCanvas() {
         Rectangle canvasBounds = comp.getCanvasBounds();
-        Rectangle imageBounds = getImageBounds();
+        Rectangle imageBounds = getContentBounds();
         boolean needsEnlarging = !imageBounds.contains(canvasBounds);
         return needsEnlarging;
     }
@@ -766,7 +767,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private void enlargeImage(Rectangle canvasBounds) {
         try {
-            Rectangle current = getImageBounds();
+            Rectangle current = getContentBounds();
             Rectangle target = current.union(canvasBounds);
 
             BufferedImage bi = createEmptyImageForLayer(target.width, target.height);
@@ -994,7 +995,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     public void enlargeCanvas(int north, int east, int south, int west) {
         // all coordinates in this method are
         // relative to the previous state of the canvas
-        Rectangle imageBounds = getImageBounds();
+        Rectangle imageBounds = getContentBounds();
         Rectangle canvasBounds = comp.getCanvasBounds();
 
         int newX = canvasBounds.x - west;
@@ -1107,7 +1108,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
      */
     private boolean isBigLayer() {
         Rectangle canvasBounds = comp.getCanvasBounds();
-        Rectangle layerBounds = getImageBounds();
+        Rectangle layerBounds = getContentBounds();
         return !canvasBounds.contains(layerBounds);
     }
 

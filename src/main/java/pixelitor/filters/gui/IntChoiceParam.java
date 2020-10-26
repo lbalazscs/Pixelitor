@@ -96,7 +96,7 @@ public class IntChoiceParam extends AbstractMultipleChoiceParam<IntChoiceParam.I
     @Override
     public void setSelectedItem(IntChoiceParam.Item item, boolean trigger) {
         if (!currentChoice.equals(item)) {
-            currentChoice = (Item) item;
+            currentChoice = item;
             fireContentsChanged(this, -1, -1);
             if (trigger) {
                 if (adjustmentListener != null) {  // when called from randomize, this is null

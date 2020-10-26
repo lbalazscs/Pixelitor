@@ -33,7 +33,7 @@ public class TweenAnimation {
     private FilterState finalState;
     private int numFrames;
     private int millisBetweenFrames;
-    private Interpolation interpolation;
+    private TimeInterpolation interpolation;
     private TweenOutputType outputType;
     private File output; // file or directory
     private boolean pingPong;
@@ -54,11 +54,11 @@ public class TweenAnimation {
         initialState = filter.getParamSet().copyState(true);
     }
 
-    public Interpolation getInterpolation() {
+    public TimeInterpolation getInterpolation() {
         return interpolation;
     }
 
-    public void setInterpolation(Interpolation interpolation) {
+    public void setInterpolation(TimeInterpolation interpolation) {
         this.interpolation = interpolation;
     }
 

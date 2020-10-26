@@ -48,7 +48,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
     private int nrFrames;
     private final JLabel numFramesLabel = new JLabel();
     private double fps;
-    private JComboBox<Interpolation> ipCB;
+    private JComboBox<TimeInterpolation> ipCB;
     private JComboBox<TweenOutputType> outputTypeCB;
     private final JCheckBox pingPongCB = new JCheckBox();
     private final BrowseFilesSupport browseFilesSupport = new BrowseFilesSupport(
@@ -108,8 +108,8 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
     @SuppressWarnings("unchecked")
     private void addInterpolationSelector(GridBagHelper gbh) {
-        EnumComboBoxModel<Interpolation> ipCBM
-            = new EnumComboBoxModel<>(Interpolation.class);
+        EnumComboBoxModel<TimeInterpolation> ipCBM
+            = new EnumComboBoxModel<>(TimeInterpolation.class);
         ipCB = new JComboBox<>(ipCBM);
 
         gbh.addLabelAndControl("Interpolation:", ipCB);
@@ -209,7 +209,7 @@ public class TweenOutputSettingsPanel extends ValidatedPanel
 
         animation.setNumFrames(nrFrames);
         animation.setMillisBetweenFrames((int) (1000.0 / fps));
-        animation.setInterpolation((Interpolation) ipCB.getSelectedItem());
+        animation.setInterpolation((TimeInterpolation) ipCB.getSelectedItem());
         animation.setPingPong(pingPongCB.isSelected());
 
         if (output.isDirectory()) {

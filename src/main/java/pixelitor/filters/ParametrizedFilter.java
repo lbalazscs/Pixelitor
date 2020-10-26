@@ -98,10 +98,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         return paramSet;
     }
 
-//    protected void setHardcodedPresets(CompositeState[] presets) {
-//        paramSet.setHardcodedPresets(presets);
-//    }
-
     public void setAffectedAreaShapes(Shape[] affectedAreaShapes) {
         this.affectedAreaShapes = affectedAreaShapes;
     }
@@ -146,9 +142,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         String presetName = Dialogs.getTextDialog(menu, "Preset Name", "Preset Name:");
         if (presetName == null || presetName.isBlank()) {
             return;
-        }
-        if (presetName.equals("null")) {
-            Thread.dumpStack();
         }
 
         presetName = Utils.toFileName(presetName);

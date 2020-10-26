@@ -1193,7 +1193,7 @@ public class Composition implements Serializable {
         for (Layer layer : layerList) {
             if (layer instanceof ImageLayer) {
                 ImageLayer imageLayer = (ImageLayer) layer;
-                Rectangle layerBounds = imageLayer.getImageBounds();
+                Rectangle layerBounds = imageLayer.getContentBounds();
                 max.add(layerBounds);
             }
         }
@@ -1227,14 +1227,10 @@ public class Composition implements Serializable {
         EnlargeCanvas enlargeCanvas = new EnlargeCanvas(0, 0, 0, 0);
 
         for (Layer layer : layerList) {
-            if (layer instanceof ImageLayer) {
-                ImageLayer imageLayer = (ImageLayer) layer;
-                Rectangle imageBounds = imageLayer.getImageBounds();
-                enlargeCanvas.ensureCovering(imageBounds, canvas);
-            } else if (layer instanceof TextLayer) {
-                TextLayer textLayer = (TextLayer) layer;
-                Rectangle boundingBox = textLayer.getEffectiveBoundingBox();
-                enlargeCanvas.ensureCovering(boundingBox, canvas);
+            if (layer instanceof ContentLayer) {
+                ContentLayer contentLayer = (ContentLayer) layer;
+                Rectangle contentBounds = contentLayer.getContentBounds();
+                enlargeCanvas.ensureCovering(contentBounds, canvas);
             }
         }
 

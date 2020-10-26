@@ -17,10 +17,13 @@
 
 package pixelitor.filters;
 
+import com.jhlabs.image.ImageMath;
 import pixelitor.ThreadPool;
 import pixelitor.filters.gui.ColorParam;
+import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.util.NoiseInterpolation;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.StatusBarProgressTracker;
 
@@ -51,6 +54,10 @@ public class ValueNoise extends ParametrizedFilter {
 
     private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
+    private final RangeParam persistenceParam =
+        new RangeParam("Roughness (%)", 0, 60, 100);
+    private final EnumParam<NoiseInterpolation> interpolation
+        = new EnumParam<>("Interpolation", NoiseInterpolation.class);
 
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);
     private final ColorParam color2 = new ColorParam("Color 2", WHITE, USER_ONLY_TRANSPARENCY);
@@ -59,11 +66,15 @@ public class ValueNoise extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         setParams(
-                scale.withAdjustedRange(0.3),
-                details,
-                color1,
-                color2
+            scale.withAdjustedRange(0.3),
+            details,
+            persistenceParam,
+            interpolation.withDefault(NoiseInterpolation.CUBIC),
+            color1,
+            color2
         ).withAction(reseedByCalling(ValueNoise::reseed));
+
+        helpURL = "https://en.wikipedia.org/wiki/Value_noise";
     }
 
     @Override
@@ -84,16 +95,16 @@ public class ValueNoise extends ParametrizedFilter {
         int height = dest.getHeight();
         float frequency = 1.0f / scale.getValueAsFloat();
 
-        float persistence = 0.6f;
-        float amplitude = 1.0f;
+        float persistence = persistenceParam.getPercentageValF();
 
         var pt = new StatusBarProgressTracker(NAME, height);
+        NoiseInterpolation interp = interpolation.getSelected();
 
         Future<?>[] futures = new Future[height];
         for (int y = 0; y < height; y++) {
             int finalY = y;
             Runnable lineTask = () -> calculateLine(lookupTable, destData,
-                    width, frequency, persistence, amplitude, finalY);
+                width, frequency, persistence, finalY, interp);
             futures[y] = ThreadPool.submit(lineTask);
         }
         ThreadPool.waitFor(futures, pt);
@@ -105,12 +116,12 @@ public class ValueNoise extends ParametrizedFilter {
 
     private void calculateLine(int[] lookupTable, int[] destData,
                                int width, float frequency, float persistence,
-                               float amplitude, int y) {
+                               int y, NoiseInterpolation interp) {
         for (int x = 0; x < width; x++) {
             int octaves = details.getValue();
 
             int noise = (int) (255 * generateValueNoise(x, y,
-                    octaves, frequency, persistence, amplitude));
+                octaves, frequency, persistence, interp));
 
             int value = lookupTable[noise];
             destData[x + y * width] = value;
@@ -125,35 +136,29 @@ public class ValueNoise extends ParametrizedFilter {
                                            int octaves,
                                            float frequency,
                                            float persistence,
-                                           float amplitude) {
+                                           NoiseInterpolation interp) {
         float total = 0.0f;
 
+        float amplitude = 1.0f;
         for (int lcv = 0; lcv < octaves; lcv++) {
-            total += smooth(x * frequency, y * frequency) * amplitude;
+            total += smooth(x * frequency, y * frequency, interp) * amplitude;
             frequency *= 2;
             amplitude *= persistence;
         }
 
-        if (total < 0) {
-            total = 0.0f;
-        }
-        if (total > 1) {
-            total = 1.0f;
-        }
-
-        return total;
+        return ImageMath.clamp01(total);
     }
 
-    private static float smooth(float x, float y) {
+    private static float smooth(float x, float y, NoiseInterpolation interp) {
         float n1 = noise((int) x, (int) y);
         float n2 = noise((int) x + 1, (int) y);
         float n3 = noise((int) x, (int) y + 1);
         float n4 = noise((int) x + 1, (int) y + 1);
 
-        float i1 = interpolate(n1, n2, x - (int) x);
-        float i2 = interpolate(n3, n4, x - (int) x);
+        float i1 = interpolate(n1, n2, x - (int) x, interp);
+        float i2 = interpolate(n3, n4, x - (int) x, interp);
 
-        return interpolate(i1, i2, y - (int) y);
+        return interpolate(i1, i2, y - (int) y, interp);
     }
 
     public static void reseed() {
@@ -169,15 +174,9 @@ public class ValueNoise extends ParametrizedFilter {
         return (1.0f - ((n * (n * n * r1 + r2) + r3) & 0x7fffffff) / 1.07374182E+9f);
     }
 
-    private static float interpolate(float x, float y, float a) {
-//        float val = (float) ((1 - FastMath.cos(a * Math.PI)) * 0.5);
-
-        // the smooth step is very similar but much faster than the cosine interpolation
-        // http://en.wikipedia.org/wiki/Smoothstep
-        // http://www.wolframalpha.com/input/?i=Plot[{3+*+a+*+a+-+2+*+a+*+a+*a%2C+%281+-+Cos[a+*+Pi]%29+*+0.5}%2C+{a%2C+0%2C+1}]
-        float val = a * a * (3 - 2 * a);
-
-        return x * (1 - val) + y * val;
+    private static float interpolate(float x, float y, float a, NoiseInterpolation interp) {
+        float t = interp.step(a);
+        return ImageMath.lerp(t, x, y);
     }
 
     public void setDetails(int newDetails) {

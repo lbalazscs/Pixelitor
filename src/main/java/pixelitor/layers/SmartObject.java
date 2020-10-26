@@ -63,6 +63,11 @@ public class SmartObject extends ContentLayer {
     }
 
     @Override
+    public Rectangle getContentBounds() {
+        return null;
+    }
+
+    @Override
     public Layer duplicate(boolean compCopy) {
         return new SmartObject(comp, name);
     }

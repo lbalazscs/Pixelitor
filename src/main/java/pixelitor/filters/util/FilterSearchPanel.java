@@ -203,6 +203,7 @@ public class FilterSearchPanel extends JPanel {
         JDialog dialog = builder.build();
 
         // this must be done after building, but before showing
+        builder.getOkButton().setEnabled(false);
         panel.addSelectionListener(e ->
             builder.getOkButton().setEnabled(panel.hasSelection()));
 

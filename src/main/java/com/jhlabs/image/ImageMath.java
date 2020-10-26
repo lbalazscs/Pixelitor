@@ -145,8 +145,19 @@ public class ImageMath {
             return 1;
         }
         x = (x - a) / (b - a);
-        // http://en.wikipedia.org/wiki/Smoothstep
+        return smoothStep01(x);
+    }
+
+    // cubic smooth step for floats assuming that
+    // the input is already in the 0..1 range
+    public static float smoothStep01(float x) {
         return x * x * (3 - 2 * x);
+    }
+
+    // quintic smooth step for floats assuming that
+    // the input is already in the 0..1 range
+    public static float smootherStep01(float x) {
+        return x * x * x * (x * (x * 6 - 15) + 10);
     }
 
     // smooth step with doubles
@@ -158,9 +169,20 @@ public class ImageMath {
             return 1;
         }
         x = (x - a) / (b - a);
+        return smoothStep01(x);
+    }
+
+    // cubic smooth step for doubles assuming that
+    // the input is already in the 0..1 range
+    public static double smoothStep01(double x) {
         return x * x * (3 - 2 * x);
     }
 
+    // quintic smooth step for doubles assuming that
+    // the input is already in the 0..1 range
+    public static double smootherStep01(double x) {
+        return x * x * x * (x * (x * 6 - 15) + 10);
+    }
 
     /**
      * A "circle up" function. Returns y on a unit circle given 1-x. Useful for forming bevels.
@@ -192,7 +214,11 @@ public class ImageMath {
      * @return the clamped value
      */
     public static float clamp(float input, float a, float b) {
-        return (input < a) ? a : (input > b) ? b : input;
+        return (input < a) ? a : Math.min(input, b);
+    }
+
+    public static float clamp01(float input) {
+        return (input < 0.0f) ? 0.0f : Math.min(input, 1.0f);
     }
 
     /**
@@ -516,7 +542,7 @@ public class ImageMath {
             throw new IllegalArgumentException("Too few knots in spline");
         }
 
-        x = clamp(x, 0, 1) * numSpans;
+        x = clamp01(x) * numSpans;
         span = (int) x;
         if (span > numKnots - 4) {
             span = numKnots - 4;
@@ -554,7 +580,7 @@ public class ImageMath {
             throw new IllegalArgumentException("Too few knots in spline");
         }
 
-        x = clamp(x, 0, 1) * numSpans;
+        x = clamp01(x) * numSpans;
         span = (int) x;
         if (span > numKnots - 4) {
             span = numKnots - 4;
@@ -640,7 +666,7 @@ public class ImageMath {
             throw new IllegalArgumentException("Too few knots in spline");
         }
 
-        x = clamp(x, 0, 1) * numSpans;
+        x = clamp01(x) * numSpans;
         span = (int) x;
         if (span > numKnots - 4) {
             span = numKnots - 4;

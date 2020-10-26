@@ -20,7 +20,6 @@ package pixelitor.utils;
 import javax.swing.*;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
 import static java.awt.event.KeyEvent.*;
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -31,15 +30,15 @@ import static javax.swing.KeyStroke.getKeyStroke;
 public class Keys {
     // Ctrl on Win/Linux, Command on Mac
     private static final int CTRL
-            = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
     //    private static final int CTRL = InputEvent.CTRL_DOWN_MASK;
     private static final int ALT = InputEvent.ALT_DOWN_MASK;
     private static final int SHIFT = InputEvent.SHIFT_DOWN_MASK;
 
     public static final KeyStroke CTRL_MINUS = getKeyStroke(VK_MINUS, CTRL);
     public static final KeyStroke CTRL_PLUS = getKeyStroke(VK_PLUS, CTRL);
-    public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(KeyEvent.VK_0, CTRL + ALT);
-    public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(KeyEvent.VK_0, CTRL);
+    public static final KeyStroke FIT_SPACE_KEY = getKeyStroke(VK_0, CTRL + ALT);
+    public static final KeyStroke ACTUAL_PIXELS_KEY = getKeyStroke(VK_0, CTRL);
 
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL + ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL + ALT);

@@ -128,14 +128,6 @@ public class LayerMask extends ImageLayer {
         updateFromBWImage();
     }
 
-    @Override
-    public void updateIconImage() {
-//        LayerUI ui = getUI();
-        if (ui != null) { // can be null while deserializing
-            ui.updateLayerIconImageAsync(this);
-        }
-    }
-
     /**
      * Duplicates this layer mask, and attaches the duplicated mask
      * to the given layer
@@ -210,11 +202,11 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public Rectangle getEffectiveBoundingBox() {
-        return getImageBounds();
+        return getContentBounds();
     }
 
     @Override
     public Rectangle getSnappingBoundingBox() {
-        return getImageBounds();
+        return getContentBounds();
     }
 }
