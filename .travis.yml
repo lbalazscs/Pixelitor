@@ -4,8 +4,6 @@ dist: focal
 jdk:
   - openjdk15
 
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
+services:
+  - xvfb
   
