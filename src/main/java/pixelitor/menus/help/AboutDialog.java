@@ -33,7 +33,7 @@ import static javax.swing.SwingConstants.CENTER;
  */
 public class AboutDialog {
     private static Box box;
-    public static final String HOME_PAGE = "http://pixelitor.sourceforge.net";
+    public static final String HOME_PAGE = "https://pixelitor.sourceforge.io";
 
     private AboutDialog() {
         // should not be instantiated
