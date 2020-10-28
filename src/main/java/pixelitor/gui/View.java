@@ -473,8 +473,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         startY = startY - thickness;
         endY = endY + thickness;
 
-        double repWidth = endX - startX;
-        double repHeight = endY - startY;
+        // add 1 to the width and height because
+        // casting to int will round them downwards
+        double repWidth = endX - startX + 1;
+        double repHeight = endY - startY + 1;
 
         repaint((int) startX, (int) startY, (int) repWidth, (int) repHeight);
     }
