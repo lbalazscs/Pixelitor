@@ -81,27 +81,7 @@ public abstract class AbstractMultipleChoiceParam<E>
      */
     public void setupEnableOtherIf(FilterSetting other,
                                    Predicate<E> condition) {
-        // disable by default
-        other.setEnabled(false, EnabledReason.APP_LOGIC);
-        addListDataListener(new ListDataListener() {
-            @Override
-            public void intervalAdded(ListDataEvent e) {
-            }
-
-            @Override
-            public void intervalRemoved(ListDataEvent e) {
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void contentsChanged(ListDataEvent e) {
-                if (condition.test((E) getSelectedItem())) {
-                    other.setEnabled(true, EnabledReason.APP_LOGIC);
-                } else {
-                    other.setEnabled(false, EnabledReason.APP_LOGIC);
-                }
-            }
-        });
+        setupOther(other, condition, true);
     }
 
     /**
@@ -110,6 +90,11 @@ public abstract class AbstractMultipleChoiceParam<E>
      */
     public void setupDisableOtherIf(FilterSetting other,
                                     Predicate<E> condition) {
+        setupOther(other, condition, false);
+    }
+
+    private void setupOther(FilterSetting other, Predicate<E> condition, boolean enable) {
+        other.setEnabled(!enable, EnabledReason.APP_LOGIC);
         addListDataListener(new ListDataListener() {
             @Override
             public void intervalAdded(ListDataEvent e) {
@@ -123,9 +108,9 @@ public abstract class AbstractMultipleChoiceParam<E>
             @SuppressWarnings("unchecked")
             public void contentsChanged(ListDataEvent e) {
                 if (condition.test((E) getSelectedItem())) {
-                    other.setEnabled(false, EnabledReason.APP_LOGIC);
+                    other.setEnabled(enable, EnabledReason.APP_LOGIC);
                 } else {
-                    other.setEnabled(true, EnabledReason.APP_LOGIC);
+                    other.setEnabled(!enable, EnabledReason.APP_LOGIC);
                 }
             }
         });

@@ -21,6 +21,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 
 import static java.awt.FlowLayout.LEFT;
 
@@ -87,6 +88,10 @@ public class BooleanParamGUI extends JPanel implements ParamGUI {
 
     public void addChangeListener(ChangeListener changeListener) {
         checkBox.addChangeListener(changeListener);
+    }
+
+    public void addItemListener(ItemListener itemListener) {
+        checkBox.addItemListener(itemListener);
     }
 
     public void addActionListener(ActionListener listener) {

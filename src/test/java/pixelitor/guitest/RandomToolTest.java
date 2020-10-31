@@ -61,7 +61,6 @@ import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.*;
 import static pixelitor.guitest.AJSUtils.*;
 import static pixelitor.tools.Tools.*;
-import static pixelitor.tools.shapes.ShapeType.*;
 import static pixelitor.utils.Threads.*;
 import static pixelitor.utils.test.RandomGUITest.EXIT_KEY_CHAR;
 import static pixelitor.utils.test.RandomGUITest.PAUSE_KEY_CHAR;
@@ -691,15 +690,18 @@ public class RandomToolTest {
         Utils.sleep(200, MILLISECONDS);
         var dialog = app.findDialogByTitleStartingWith("Settings for");
 
-        if (shapeType == RECTANGLE) {
-            slideRandomly(dialog.slider("radius"));
-        } else if (shapeType == LINE) {
-            slideRandomly(dialog.slider("Width (px)"));
-            chooseRandomly(dialog.comboBox(BasicStrokeCap.NAME));
-        } else if (shapeType == STAR) {
-            slideRandomly(dialog.slider("numBranches"));
-        } else {
-            throw new IllegalStateException("shapeType is " + shapeType);
+        //noinspection EnumSwitchStatementWhichMissesCases
+        switch (shapeType) {
+            case RECTANGLE -> slideRandomly(dialog.slider("radius"));
+            case LINE -> {
+                slideRandomly(dialog.slider("Width (px)"));
+                chooseRandomly(dialog.comboBox(BasicStrokeCap.NAME));
+            }
+            case STAR -> {
+                slideRandomly(dialog.slider("Number of Branches"));
+                slideRandomly(dialog.slider("Inner/Outer Radius Ratio (%)"));
+            }
+            default -> throw new IllegalStateException("shapeType is " + shapeType);
         }
 
         dialog.button("ok").click();

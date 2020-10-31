@@ -19,44 +19,50 @@ package pixelitor.tools.shapes;
 
 import pixelitor.filters.gui.ParamAdjustmentListener;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
+import java.util.List;
 
 /**
  * The settings for a line.
  */
 class StarSettings extends ShapeTypeSettings {
     private final RangeParam numBranches;
+    private final RangeParam radiusRatio;
 
     public StarSettings() {
         numBranches = new RangeParam("Number of Branches", 3, 7, 12);
+        radiusRatio = new RangeParam("Inner/Outer Radius Ratio (%)", 1, 50, 99);
     }
 
-    private StarSettings(RangeParam numBranches) {
+    private StarSettings(RangeParam numBranches, RangeParam radiusRatio) {
         this.numBranches = numBranches;
+        this.radiusRatio = radiusRatio;
     }
 
     @Override
     protected JPanel createConfigPanel() {
-//        JPanel p = GUIUtils.arrangeVertically(List.of(width, cap));
-        JPanel p = new JPanel();
-        p.add(numBranches.createGUI("numBranches"));
-        return p;
+        return GUIUtils.arrangeVertically(List.of(numBranches, radiusRatio));
     }
 
     public int getNumBranches() {
         return numBranches.getValue();
     }
 
+    public double getRadiusRatio() {
+        return radiusRatio.getPercentageValD();
+    }
+
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
         numBranches.setAdjustmentListener(listener);
+        radiusRatio.setAdjustmentListener(listener);
     }
 
     @Override
     public StarSettings copy() {
-        StarSettings copy = new StarSettings(numBranches.copy());
-        return copy;
+        return new StarSettings(numBranches.copy(), radiusRatio.copy());
     }
 
     @Override

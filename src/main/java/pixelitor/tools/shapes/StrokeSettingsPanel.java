@@ -32,7 +32,6 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.tools.shapes.ShapeType.KIWI;
-import static pixelitor.tools.shapes.StrokeType.*;
 
 /**
  * Stroke configuration used by the shapes tool and by
@@ -110,14 +109,6 @@ public class StrokeSettingsPanel extends JPanel {
         p.setBorder(createTitledBorder("Stroke Type"));
 
         p.setLayout(new GridBagLayout());
-
-        strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
-            strokeType -> strokeType == SHAPE);
-
-        strokeTypeParam.setupDisableOtherIf(dashedParam,
-            strokeType -> strokeType != BASIC
-                && strokeType != ZIGZAG
-                && strokeType != SHAPE);
 
         var gbh = new GridBagHelper(p);
         gbh.addLabelAndControl(strokeTypeParam.getName() + ":",

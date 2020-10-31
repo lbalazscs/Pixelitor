@@ -76,4 +76,9 @@ public class Spiral extends ShapeFilter {
 
         return shape;
     }
+
+    @Override
+    protected float getGradientRadius(float cx, float cy) {
+        return Math.min(cx, cy);
+    }
 }

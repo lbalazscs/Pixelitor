@@ -39,9 +39,9 @@ class LineSettings extends ShapeTypeSettings {
         cap = BasicStrokeCap.asParam();
     }
 
-    private LineSettings(RangeParam width, BasicStrokeCap defaultCap) {
+    private LineSettings(RangeParam width, EnumParam<BasicStrokeCap> cap) {
         this.width = width;
-        cap = BasicStrokeCap.asParam(defaultCap);
+        this.cap = cap;
     }
 
     @Override
@@ -64,7 +64,10 @@ class LineSettings extends ShapeTypeSettings {
 
     @Override
     public LineSettings copy() {
-        LineSettings copy = new LineSettings(width.copy(), cap.getSelected());
+        EnumParam<BasicStrokeCap> capCopy = BasicStrokeCap.asParam(); // same default
+        capCopy.setSelectedItem(cap.getSelected(), false); // different value
+
+        LineSettings copy = new LineSettings(width.copy(), capCopy);
         return copy;
     }
 

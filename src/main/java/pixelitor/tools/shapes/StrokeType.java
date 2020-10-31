@@ -151,11 +151,11 @@ public enum StrokeType {
                 advance *= 2.0f; // simulate dashes
             }
             int size = (int) width;
-            Shape shape = getShape(size);
+            Shape shape = createShape(size);
             return new ShapeStroke(shape, advance);
         }
 
-        public Shape getShape(int size) {
+        public Shape createShape(int size) {
             if (shapeType == null) {
                 shapeType = ShapeType.KIWI;
             }

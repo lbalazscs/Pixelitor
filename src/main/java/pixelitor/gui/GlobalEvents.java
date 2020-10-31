@@ -84,6 +84,9 @@ public class GlobalEvents {
                 // hotkeys should be inactive while editing text
                 return;
             }
+            if (numModalDialogs > 0) {
+                return;
+            }
 
             KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(keyEvent);
             Action action = hotKeyMap.get(keyStroke);
@@ -119,6 +122,9 @@ public class GlobalEvents {
         // handled before it gets consumed
         KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         keyboardFocusManager.addKeyEventDispatcher(e -> {
+            if (numModalDialogs > 0) {
+                return false;
+            }
             int id = e.getID();
             if (id == KEY_PRESSED) {
                 keyPressed(e);

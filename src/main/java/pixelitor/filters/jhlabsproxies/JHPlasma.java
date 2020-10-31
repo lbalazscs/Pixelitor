@@ -29,7 +29,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.*;
-import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
 import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
 
 /**
@@ -48,7 +48,7 @@ public class JHPlasma extends ParametrizedFilter {
         new Item("Less", LESS_COLORS),
         new Item("More", MORE_COLORS),
         new Item("Use Gradient", GRADIENT_COLORS),
-    }, IGNORE_RANDOMIZE);
+    }, ALLOW_RANDOMIZE);
 
     private PlasmaFilter filter;
 
@@ -59,22 +59,17 @@ public class JHPlasma extends ParametrizedFilter {
     public JHPlasma() {
         super(ShowOriginal.NO);
 
-        type.setupEnableOtherIf(gradient,
-                v -> v.getValue() == GRADIENT_COLORS);
+        type.setupEnableOtherIf(gradient, v -> v.getValue() == GRADIENT_COLORS);
+
         setParams(
-                turbulence,
-                type,
-                gradient
-        ).withAction(reseedByCalling(() -> {
-            if (filter != null) {
-                filter.randomize();
-            }
-        }));
+            turbulence,
+            type,
+            gradient
+        ).withAction(reseedByCalling(() -> filter.randomize()));
     }
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-
         if (filter == null) {
             filter = new PlasmaFilter(NAME);
         }
@@ -84,7 +79,6 @@ public class JHPlasma extends ParametrizedFilter {
         filter.setUseColormap(type.getValue() == GRADIENT_COLORS);
         filter.setColormap(gradient.getValue());
 
-        dest = filter.filter(src, dest);
-        return dest;
+        return filter.filter(src, dest);
     }
 }

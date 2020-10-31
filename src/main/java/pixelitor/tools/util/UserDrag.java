@@ -59,6 +59,7 @@ public class UserDrag {
 
     private boolean constrainPoints = false;
     private boolean startFromCenter = false;
+    private boolean equallySized = false;
 
     public UserDrag() {
     }
@@ -88,6 +89,20 @@ public class UserDrag {
             Point2D constrainedEnd = Utils.constrainEndPoint(coStartX, coStartY, coEndX, coEndY);
             coEndX = constrainedEnd.getX();
             coEndY = constrainedEnd.getY();
+        } else if (equallySized) { // the two special cases are not used at the same time
+            double width = Math.abs(coEndX - coStartX);
+            double height = Math.abs(coEndY - coStartY);
+            double max = Math.max(width, height);
+            if (coEndX > coStartX) {
+                coEndX = coStartX + max;
+            } else {
+                coEndX = coStartX - max;
+            }
+            if (coEndY > coStartY) {
+                coEndY = coStartY + max;
+            } else {
+                coEndY = coStartY - max;
+            }
         }
 
         imEndX = view.componentXToImageSpace(coEndX);
@@ -131,6 +146,7 @@ public class UserDrag {
 
     public ImDrag toImDrag() {
         ImDrag d = new ImDrag(imStartX, imStartY, imEndX, imEndY);
+        // the equally sized property is already contained in the coordinates
         d.setStartFromCenter(startFromCenter);
         return d;
     }
@@ -163,6 +179,10 @@ public class UserDrag {
 
     public void setStartFromCenter(boolean startFromCenter) {
         this.startFromCenter = startFromCenter;
+    }
+
+    public void setEquallySized(boolean equallySized) {
+        this.equallySized = equallySized;
     }
 
     public boolean isDragging() {

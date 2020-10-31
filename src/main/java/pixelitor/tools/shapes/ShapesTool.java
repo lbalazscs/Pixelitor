@@ -275,6 +275,8 @@ public class ShapesTool extends DragTool {
             .title("Settings for " + selectedType)
             .withScrollbars()
             .content(configPanel)
+            .noCancelButton()
+            .okText("Close")
             .show();
     }
 
@@ -317,6 +319,7 @@ public class ShapesTool extends DragTool {
         assert state == INITIAL_DRAG : "state = " + state;
 
         userDrag.setStartFromCenter(e.isAltDown());
+        userDrag.setEquallySized(e.isShiftDown());
 
         var comp = e.getComp();
 
@@ -351,6 +354,8 @@ public class ShapesTool extends DragTool {
         }
 
         userDrag.setStartFromCenter(e.isAltDown());
+        userDrag.setEquallySized(e.isShiftDown());
+
         var comp = e.getComp();
 
         transformBox = styledShape.createBox(userDrag, e.getView());

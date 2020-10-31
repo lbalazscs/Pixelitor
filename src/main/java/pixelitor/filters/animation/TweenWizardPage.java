@@ -77,7 +77,8 @@ public enum TweenWizardPage implements WizardPage {
     }, INITIAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the filter";
+            return "<html> Select the <b><font color=blue size=+1>initial</font></b> settings for the <i>"
+                + getFilter(wizard).getName() + "</i> filter.";
         }
 
         @Override
@@ -87,7 +88,7 @@ public enum TweenWizardPage implements WizardPage {
 
         @Override
         public JComponent createPanel(Wizard wizard, Drawable dr) {
-            ParametrizedFilter filter = getAnimation(wizard).getFilter();
+            ParametrizedFilter filter = getFilter(wizard);
             dr.startPreviewing();
 
             return filter.createGUI(dr);
@@ -103,13 +104,14 @@ public enum TweenWizardPage implements WizardPage {
             getAnimation(wizard).copyInitialStateFromCurrent();
 
             ParametrizedFilterGUI.setResetParams(false);
-            getAnimation(wizard).getFilter().getParamSet().setFinalAnimationSettingMode(true);
+            getFilter(wizard).getParamSet().setFinalAnimationSettingMode(true);
         }
     }, FINAL_FILTER_SETTINGS {
         @Override
         public String getHelpText(Wizard wizard) {
-            String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the filter.";
-            boolean hasGradient = getAnimation(wizard).getFilter().getParamSet().hasGradient();
+            String text = "<html> Select the <b><font color=green size=+1>final</font></b> settings for the <i>"
+                + getFilter(wizard).getName() + "</i> filter.";
+            boolean hasGradient = getFilter(wizard).getParamSet().hasGradient();
             if (hasGradient) {
                 text += "<br>Don't change the number of thumbs for the gradient, only their color or position.";
             }
@@ -128,9 +130,7 @@ public enum TweenWizardPage implements WizardPage {
             dr.stopPreviewing(); // stop the initial one
             dr.startPreviewing(); // start the final one
 
-            ParametrizedFilter filter = getAnimation(wizard).getFilter();
-
-            return filter.createGUI(dr);
+            return getFilter(wizard).createGUI(dr);
         }
 
         @Override
@@ -152,8 +152,8 @@ public enum TweenWizardPage implements WizardPage {
         @Override
         public String getHelpText(Wizard wizard) {
             return "<html> <b>Output settings</b>" +
-                    "<p>For file sequence output select an existing folder." +
-                    "<br>For file output select a new or existing file in an existing folder.";
+                "<p>For file sequence output select an existing folder." +
+                "<br>For file output select a new or existing file in an existing folder.";
         }
 
         @Override
@@ -200,7 +200,10 @@ public enum TweenWizardPage implements WizardPage {
     };
 
     private static TweenAnimation getAnimation(Wizard wizard) {
-        // all wizards here can be casted to TweenWizard
         return ((TweenWizard) wizard).getAnimation();
+    }
+
+    private static ParametrizedFilter getFilter(Wizard wizard) {
+        return getAnimation(wizard).getFilter();
     }
 }

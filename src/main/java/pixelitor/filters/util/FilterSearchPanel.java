@@ -24,6 +24,7 @@ import org.jdesktop.swingx.prompt.PromptSupport;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TFValidationLayerUI;
+import pixelitor.utils.Icons;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -33,6 +34,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static java.awt.event.KeyEvent.*;
 import static org.jdesktop.swingx.prompt.PromptSupport.FocusBehavior.SHOW_PROMPT;
@@ -41,7 +44,7 @@ import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 public class FilterSearchPanel extends JPanel {
     private static final int GAP = 4;
 
-    private JXTextField searchTF;
+    private JTextField searchTF;
     private JXList filtersList;
     private HighlightListCellRenderer highlighter;
 
@@ -61,31 +64,16 @@ public class FilterSearchPanel extends JPanel {
         searchTF = new JXTextField("Search");
         searchTF.setName("searchTF");
         PromptSupport.setFocusBehavior(SHOW_PROMPT, searchTF);
-        JLabel searchIcon = new JLabel(new String(Character.toChars(0x1F50D)) + " ");
+        JLabel searchIcon = new JLabel(Icons.getSearchIcon());
         searchIcon.setForeground(Color.GRAY);
         BuddySupport.addLeft(searchIcon, searchTF);
 
-        searchTF.requestFocus();
+        searchTF.requestFocusInWindow();
 
         searchTF.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                int keyCode = e.getKeyCode();
-                if (keyCode == VK_DOWN || keyCode == VK_UP) {
-                    int numFilters = numMatchingFilters();
-                    if (numFilters > 0) {
-                        if (filtersList.isSelectionEmpty()) {
-                            if (keyCode == VK_DOWN) {
-                                selectFilter(0);
-                            } else if (keyCode == VK_UP) {
-                                selectFilter(numFilters - 1);
-                            }
-                        } else {
-                            filtersList.dispatchEvent(e);
-                        }
-                        filtersList.requestFocus();
-                    }
-                }
+                forwardUpDownToFilterList(e);
             }
         });
         searchTF.getDocument().addDocumentListener(new DocumentListener() {
@@ -106,6 +94,25 @@ public class FilterSearchPanel extends JPanel {
         });
     }
 
+    public void forwardUpDownToFilterList(KeyEvent e) {
+        int keyCode = e.getKeyCode();
+        if (keyCode == VK_DOWN || keyCode == VK_UP) {
+            int numFilters = numMatchingFilters();
+            if (numFilters > 0) {
+                if (filtersList.isSelectionEmpty()) {
+                    if (keyCode == VK_DOWN) {
+                        selectFilter(0);
+                    } else if (keyCode == VK_UP) {
+                        selectFilter(numFilters - 1);
+                    }
+                } else {
+                    forwardEvent(filtersList, e);
+                }
+                filtersList.requestFocusInWindow();
+            }
+        }
+    }
+
     private void createFiltersList(FilterAction[] filters) {
         filtersList = new JXList(filters);
         filtersList.setAutoCreateRowSorter(true);
@@ -117,21 +124,34 @@ public class FilterSearchPanel extends JPanel {
         filtersList.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == VK_BACK_SPACE) {
-                    // a backspace surely was meant for the search field
-                    searchTF.dispatchEvent(e);
-                    searchTF.requestFocus();
-                } else if (e.getKeyCode() == VK_UP) {
+                if (e.getKeyCode() == VK_UP) {
                     if (firstFilterIsSelected()) {
-                        searchTF.requestFocus();
+                        searchTF.requestFocusInWindow();
                     }
                 } else if (e.getKeyCode() == VK_DOWN) {
                     if (lastFilterIsSelected()) {
-                        searchTF.requestFocus();
+                        searchTF.requestFocusInWindow();
                     }
+                } else if (e.getKeyCode() == VK_BACK_SPACE) {
+                    forwardEvent(searchTF, e);
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char keyChar = e.getKeyChar();
+                //noinspection CharacterComparison
+                if (keyChar >= 'A' && keyChar <= 'z') {
+                    forwardEvent(searchTF, e);
                 }
             }
         });
+    }
+
+    private static void forwardEvent(JComponent target, KeyEvent e) {
+        e.setSource(target);
+        target.dispatchEvent(e);
+        target.requestFocusInWindow();
     }
 
     private int numMatchingFilters() {
@@ -206,6 +226,19 @@ public class FilterSearchPanel extends JPanel {
         builder.getOkButton().setEnabled(false);
         panel.addSelectionListener(e ->
             builder.getOkButton().setEnabled(panel.hasSelection()));
+
+        panel.filtersList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    // double click on a selected filter starts it
+                    if (panel.hasSelection()) {
+                        GUIUtils.closeDialog(dialog, true);
+                        panel.startSelectedFilter();
+                    }
+                }
+            }
+        });
 
         GUIUtils.showDialog(dialog, SCREEN_CENTER);
     }

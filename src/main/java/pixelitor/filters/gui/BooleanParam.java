@@ -21,7 +21,7 @@ import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.EventQueue;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean currentValue;
     private final boolean addDefaultButton;
-    private List<ActionListener> actionListenerList;
+    private List<ItemListener> itemListeners;
 
     public BooleanParam(String name, boolean defaultV) {
         this(name, defaultV, ALLOW_RANDOMIZE);
@@ -59,14 +59,14 @@ public class BooleanParam extends AbstractFilterParam {
         paramGUI = gui;
         setGUIEnabledState();
 
-        if (actionListenerList != null) {
+        if (itemListeners != null) {
             // some action listeners for the GUI
             // were temporarily stored here
 
-            for (ActionListener listener : actionListenerList) {
-                gui.addActionListener(listener);
+            for (ItemListener listener : itemListeners) {
+                gui.addItemListener(listener);
             }
-            actionListenerList.clear();
+            itemListeners.clear();
         }
 
         return gui;
@@ -82,13 +82,7 @@ public class BooleanParam extends AbstractFilterParam {
      * whenever this one is checked.
      */
     public void setupEnableOtherIfChecked(FilterSetting other) {
-        other.setEnabled(isChecked(), EnabledReason.APP_LOGIC);
-        addActionListener(e -> {
-            // strangely this seems to work without invokeLater,
-            // but for safety call it after the pending events are processed
-            EventQueue.invokeLater(() ->
-                other.setEnabled(isChecked(), EnabledReason.APP_LOGIC));
-        });
+        setupOther(other, true);
     }
 
     /**
@@ -96,13 +90,19 @@ public class BooleanParam extends AbstractFilterParam {
      * whenever this one is checked.
      */
     public void setupDisableOtherIfChecked(FilterSetting other) {
-        other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC);
+        setupOther(other, false);
+    }
 
-        addActionListener(e -> {
-            // invoke later because when this listener is called,
-            // isChecked does not contain yet the updated value.
+    private void setupOther(FilterSetting other, boolean enable) {
+        other.setEnabled(enable ? isChecked() : !isChecked(), EnabledReason.APP_LOGIC);
+
+        // a change listener fires too much, even for rollover, and
+        // an action listener ignores changes caused by randomize!
+        addItemListener(e -> {
+            // invoke later because by then isChecked()
+            // is guaranteed to return the correct new value
             EventQueue.invokeLater(() ->
-                other.setEnabled(!isChecked(), EnabledReason.APP_LOGIC));
+                other.setEnabled(enable ? isChecked() : !isChecked(), EnabledReason.APP_LOGIC));
         });
     }
 
@@ -167,19 +167,19 @@ public class BooleanParam extends AbstractFilterParam {
         setValue(newValue, true, false);
     }
 
-    public void addActionListener(ActionListener actionListener) {
+    public void addItemListener(ItemListener itemListener) {
         if (paramGUI != null) {
             // if a GUI was already created, pass the listener to it
-            ((BooleanParamGUI) paramGUI).addActionListener(actionListener);
+            ((BooleanParamGUI) paramGUI).addItemListener(itemListener);
             return;
         }
 
         // if there is no GUI, store the listener so that
         // it can be added to the GUI as soon as the GUI is created
-        if (actionListenerList == null) {
-            actionListenerList = new ArrayList<>(2);
+        if (itemListeners == null) {
+            itemListeners = new ArrayList<>(2);
         }
-        actionListenerList.add(actionListener);
+        itemListeners.add(itemListener);
     }
 
     @Override

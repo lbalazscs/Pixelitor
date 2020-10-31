@@ -54,9 +54,6 @@ public abstract class ShapeFilter extends ParametrizedFilter {
     private static final int FG_GRADIENT = 8;
     private static final int FG_TRANSPARENT = 9;
 
-    private static final Color DARK_GREEN = new Color(0, 120, 0);
-    private static final Color PURPLE = new Color(155, 0, 155);
-
     private final StrokeParam strokeParam = new StrokeParam("Stroke Settings");
     private final EffectsParam effectsParam = new EffectsParam("Effects");
 
@@ -227,7 +224,7 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         float cy = srcHeight / 2.0f;
         float radius = getGradientRadius(cx, cy);
         float[] fractions = {0.0f, 1.0f};
-        Color[] colors = {DARK_GREEN, PURPLE};
+        Color[] colors = {getFGColor(), getBGColor()};
         g2.setPaint(new RadialGradientPaint(cx, cy, radius, fractions, colors));
     }
 

@@ -426,7 +426,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam copy() {
-        return new RangeParam(getName(), minValue, value, maxValue, addDefaultButton, textPosition, randomizePolicy);
+        RangeParam copy = new RangeParam(getName(), minValue, defaultValue, maxValue, addDefaultButton, textPosition, randomizePolicy);
+        // set the value separately in order to make
+        // sure that the default value is copied
+        copy.setValueNoTrigger(value);
+        return copy;
     }
 
     @Override

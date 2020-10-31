@@ -25,6 +25,7 @@ import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
+import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.*;
@@ -111,7 +112,12 @@ public enum ShapeType {
         @Override
         public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
             var lineSettings = (LineSettings) settings;
-            Stroke stroke = lineSettings.getStroke();
+            Stroke stroke;
+            if (lineSettings != null) {
+                stroke = lineSettings.getStroke();
+            } else {
+                stroke = new BasicStroke(5);
+            }
             return stroke.createStrokedShape(imDrag.asLine());
         }
 
@@ -123,7 +129,7 @@ public enum ShapeType {
         @Override
         public Shape createHorizontalShape(ImDrag imDrag, ShapeTypeSettings settings) {
             var line = new Line2D.Double(imDrag.getStartX(), imDrag.getStartY(),
-                    imDrag.getStartX() + imDrag.getDistance(), imDrag.getStartY());
+                imDrag.getStartX() + imDrag.getDistance(), imDrag.getStartY());
             var lineSettings = (LineSettings) settings;
             Stroke stroke = lineSettings.getStroke();
             return stroke.createStrokedShape(line);
@@ -152,37 +158,51 @@ public enum ShapeType {
     }, STAR("Star", true, false, true) {
         @Override
         public Shape createShape(ImDrag imDrag, ShapeTypeSettings settings) {
-            setCoordinates(imDrag);
+            setPositiveCoordinates(imDrag);
             StarSettings starSettings = (StarSettings) settings;
-            return createStar(starSettings.getNumBranches(), x, y, width, height);
+            int numBranches;
+            double radiusRatio;
+            if (starSettings != null) {
+                numBranches = starSettings.getNumBranches();
+                radiusRatio = starSettings.getRadiusRatio();
+            } else {
+                numBranches = 7;
+                radiusRatio = 0.5;
+            }
+
+            return createStar(numBranches, x, y, width, height, radiusRatio);
         }
 
-        private Shape createStar(int numBranches, double x, double y, double width, double height) {
+        private Shape createStar(int numBranches, double x, double y,
+                                 double width, double height, double radiusRatio) {
             double halfWidth = width / 2;
             double halfHeight = height / 2;
             double cx = x + halfWidth;
             double cy = y + halfHeight;
-            double innerRadius;
-            double outerRadius;
-            if (width > height) {
-                innerRadius = halfHeight;
-                outerRadius = halfWidth;
-            } else if (height > width) {
-                innerRadius = halfWidth;
-                outerRadius = halfHeight;
-            } else {
-                // the Star2D constructor insists that the outer radius
-                // must be greater than the inner radius
-                innerRadius = halfWidth;
-                outerRadius = innerRadius + 0.01;
-            }
 
-            return new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
+            double outerRadius = Math.max(halfWidth, halfHeight);
+            double innerRadius = radiusRatio * outerRadius;
+
+            Shape shape = new Star2D(cx, cy, innerRadius, outerRadius, numBranches);
+            if (width != height) {
+                double sx = 1.0;
+                double sy = 1.0;
+                if (width > height) {
+                    sy = height / width;
+                } else {
+                    sx = width / height;
+                }
+                AffineTransform at = AffineTransform.getTranslateInstance(cx, cy);
+                at.scale(sx, sy);
+                at.translate(-cx, -cy);
+                shape = at.createTransformedShape(shape);
+            }
+            return shape;
         }
 
         @Override
         public Shape createShape(double x, double y, double diameter) {
-            return createStar(7, x, y, diameter, diameter / 3.0 + 1);
+            return createStar(7, x, y, diameter, diameter / 3.0 + 1, 0.5);
         }
 
         @Override
@@ -260,10 +280,10 @@ public enum ShapeType {
         public Shape createShape(double x, double y, double diameter) {
             double middleY = y + diameter / 2.0;
             ImDrag imDrag = new ImDrag(
-                    x,
-                    middleY,
-                    x + diameter,
-                    middleY);
+                x,
+                middleY,
+                x + diameter,
+                middleY);
             return createShape(imDrag, null);
         }
 

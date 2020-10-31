@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.tools.shapes.StrokeType.*;
 
 /**
  * A {@link FilterParam} for stroke settings.
@@ -52,6 +53,14 @@ public class StrokeParam extends AbstractFilterParam {
 
     public StrokeParam(String name) {
         super(name, ALLOW_RANDOMIZE);
+
+        strokeTypeParam.setupEnableOtherIf(shapeTypeParam,
+            strokeType -> strokeType == SHAPE);
+
+        strokeTypeParam.setupDisableOtherIf(dashedParam,
+            strokeType -> strokeType != BASIC
+                && strokeType != ZIGZAG
+                && strokeType != SHAPE);
     }
 
     @Override
