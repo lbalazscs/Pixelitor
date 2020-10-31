@@ -879,9 +879,10 @@ public class MenuBar extends JMenuBar {
 
         sub.addFilter("Flower of Life", FlowerOfLife::new);
         sub.addFilter("Grid", RenderGrid::new);
-        sub.addFilter("Lissajous Curve", Lissajous::new);
-        sub.addFilter("Mystic Rose", MysticRose::new);
+        sub.addFilter(Lissajous.NAME, Lissajous::new);
+        sub.addFilter(MysticRose.NAME, MysticRose::new);
         sub.addFilter(SpiderWeb.NAME, SpiderWeb::new);
+        sub.addFilter(Spiral.NAME, Spiral::new);
         sub.addFilter("Spirograph", Spirograph::new);
 
         return sub;

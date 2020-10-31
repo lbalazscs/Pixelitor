@@ -18,28 +18,30 @@
 package pixelitor.filters;
 
 import net.jafama.FastMath;
+import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 
 import java.awt.geom.Path2D;
 
 /**
- * A shape filter rendering a Lissajous curve.
+ * A shape filter rendering a spiral.
  */
-public class Lissajous extends ShapeFilter {
-    public static final String NAME = "Lissajous Curve";
+public class Spiral extends ShapeFilter {
+    public static final String NAME = "Spiral";
 
-    private static final int NUMBER_OF_STEPS = 2000;
+    private static final int NUM_STEPS_PER_SPIN = 100;
 
-    private final RangeParam a = new RangeParam("a", 1, 4, 41);
-    private final RangeParam b = new RangeParam("b", 1, 5, 41);
+    private final RangeParam numSpinsParam = new RangeParam("Number of Spins",
+        1, 3, 10);
+    private final BooleanParam symmetry = new BooleanParam("Symmetric", false);
 
-    public Lissajous() {
+    public Spiral() {
         addParamsToFront(
-            a,
-            b
+            numSpinsParam,
+            symmetry
         );
 
-        helpURL = "https://en.wikipedia.org/wiki/Lissajous_curve";
+        helpURL = "https://en.wikipedia.org/wiki/Spiral";
     }
 
     @Override
@@ -49,20 +51,28 @@ public class Lissajous extends ShapeFilter {
         double cx = width * center.getRelativeX();
         double cy = height * center.getRelativeY();
 
-        double aVal = a.getValueAsDouble();
-        double bVal = b.getValueAsDouble();
+        int numSpins = numSpinsParam.getValue();
 
         double w = width / 2.0;
         double h = height / 2.0;
-        double dt = 2 * Math.PI / NUMBER_OF_STEPS;
+        double maxAngle = 2 * Math.PI * numSpins;
+        double dt = maxAngle / (NUM_STEPS_PER_SPIN * numSpins);
+        double a = 1.0 / maxAngle;
 
         shape.moveTo(cx, cy);
-        for (double t = 0; t < 2 * Math.PI; t += dt) {
-            double x = w * FastMath.sin(aVal * t) + cx;
-            double y = h * FastMath.sin(bVal * t) + cy;
+        for (double t = dt; t < maxAngle; t += dt) {
+            double x = w * a * t * FastMath.cos(t) + cx;
+            double y = h * a * t * FastMath.sin(t) + cy;
             shape.lineTo(x, y);
         }
-        shape.closePath();
+        if (symmetry.isChecked()) {
+            shape.moveTo(cx, cy);
+            for (double t = dt; t < maxAngle; t += dt) {
+                double x = -w * a * t * FastMath.cos(t) + cx;
+                double y = -h * a * t * FastMath.sin(t) + cy;
+                shape.lineTo(x, y);
+            }
+        }
 
         return shape;
     }

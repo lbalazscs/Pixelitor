@@ -24,9 +24,7 @@ import pixelitor.filters.gui.RangeParam;
 import java.awt.geom.Path2D;
 
 /**
- * A shape filter rendering a Lissajous curve
- *
- * See https://en.wikipedia.org/wiki/Lissajous_curve
+ * A shape filter rendering a spider web.
  */
 public class SpiderWeb extends ShapeFilter {
     public static final String NAME = "Spider Web";
