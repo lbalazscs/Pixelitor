@@ -78,7 +78,7 @@ public class PalettePanel extends JPanel {
 
     private void setNewSizes(int newNumRows, int newNumCols) {
         if (newNumRows != numRows
-                || newNumCols != numCols) {
+            || newNumCols != numCols) {
             palette.setSize(newNumRows, newNumCols);
             regenerate(newNumRows, newNumCols);
         }
@@ -91,6 +91,7 @@ public class PalettePanel extends JPanel {
     }
 
     private void regenerate(int newNumRows, int newNumCols) {
+        ColorSwatchButton.last = null;
         if (newNumRows < numRows || newNumCols < numCols) {
             // remove only the unnecessary
             int count = getComponentCount();
@@ -159,21 +160,21 @@ public class PalettePanel extends JPanel {
     public static void showFGVariationsDialog(PixelitorWindow pw) {
         Color refColor = getFGColor();
         var palette = new VariationsPalette(refColor,
-                "Foreground Color Variations");
+            "Foreground Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showBGVariationsDialog(PixelitorWindow pw) {
         Color refColor = getBGColor();
         var palette = new VariationsPalette(refColor,
-                "Background Color Variations");
+            "Background Color Variations");
         showDialog(pw, palette, ColorSwatchClickHandler.STANDARD);
     }
 
     public static void showFilterVariationsDialog(Window window, Color refColor,
                                                   ColorSwatchClickHandler clickHandler) {
         var palette = new VariationsPalette(refColor,
-                "Filter Color Variations");
+            "Filter Color Variations");
         showDialog(window, palette, clickHandler);
     }
 
@@ -196,18 +197,18 @@ public class PalettePanel extends JPanel {
         JPanel form = new JPanel(new BorderLayout());
 
         form.add(palette.getConfig()
-                .createConfigPanel(palettePanel), NORTH);
+            .createConfigPanel(palettePanel), NORTH);
         form.add(palettePanel, CENTER);
 
         new DialogBuilder()
-                .title(palette.getDialogTitle())
-                .owner(window)
-                .content(form)
-                .notModal()
-                .noOKButton()
-                .noCancelButton()
-                .noGlobalKeyChange()
-                .show();
+            .title(palette.getDialogTitle())
+            .owner(window)
+            .content(form)
+            .notModal()
+            .noOKButton()
+            .noCancelButton()
+            .noGlobalKeyChange()
+            .show();
 
         Messages.showInStatusBar(palette.getStatusHelp());
     }

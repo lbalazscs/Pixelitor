@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@ public class ColorSwatchButton extends JComponent {
     private final int yPos;
 
     private boolean marked = false;
+    public static ColorSwatchButton last = null;
 
     private static final Dimension size = new Dimension(SIZE, SIZE);
     private Color color;
@@ -67,6 +68,12 @@ public class ColorSwatchButton extends JComponent {
             }
 
             private void regularClick(MouseEvent e) {
+                ColorSwatchButton prev = last;
+                last = ColorSwatchButton.this;
+                if (prev != null) {
+                    prev.repaint();
+                }
+
                 Color newColor = ColorSwatchButton.this.color;
                 clickHandler.onClick(newColor, e);
             }
@@ -90,6 +97,10 @@ public class ColorSwatchButton extends JComponent {
     protected void paintComponent(Graphics g) {
         g.setColor(color);
         g.fill3DRect(0, 0, SIZE, SIZE, raised);
+        if (this == last) {
+            g.draw3DRect(1, 1, SIZE - 3, SIZE - 3, raised);
+            g.draw3DRect(2, 2, SIZE - 5, SIZE - 5, raised);
+        }
         if (marked) {
             g.setColor(LayerButton.SELECTED_COLOR);
             g.fillRect(1, 1, 7, 7);
