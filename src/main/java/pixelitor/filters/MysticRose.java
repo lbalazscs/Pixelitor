@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -29,7 +30,7 @@ public class MysticRose extends ShapeFilter {
     public static final String NAME = "Mystic Rose";
 
     private final RangeParam nrPoints = new RangeParam("Number of Points", 3, 10, 43);
-    private final RangeParam radius = new RangeParam("Radius", 1, 500, 1000);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 500, 1000);
     private final RangeParam rotate = new RangeParam("Rotate", 0, 0, 100);
 
     public MysticRose() {

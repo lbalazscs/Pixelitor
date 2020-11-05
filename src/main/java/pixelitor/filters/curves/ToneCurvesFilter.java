@@ -25,13 +25,15 @@ import pixelitor.layers.Drawable;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Tone ToneCurvesFilter filter
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
 public class ToneCurvesFilter extends FilterWithGUI {
-    public static final String NAME = "Curves";
+    public static final String NAME = i18n("curves");
 
     private CurvesFilter filter;
     private ToneCurves curves;

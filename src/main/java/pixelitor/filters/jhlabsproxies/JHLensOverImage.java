@@ -18,11 +18,8 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.SphereFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -33,7 +30,7 @@ public class JHLensOverImage extends ParametrizedFilter {
     public static final String NAME = "Lens Over Image";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 0, 200, 999);
+    private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
 
     // less than 100% doesn't create anything usable
     private final RangeParam refractionIndex = new RangeParam("Refraction Index (%)", 100, 150, 300);

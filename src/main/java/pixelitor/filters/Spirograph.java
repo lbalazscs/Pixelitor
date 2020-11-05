@@ -21,12 +21,14 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 
 import java.awt.geom.Path2D;
 
 import static net.jafama.FastMath.cos;
 import static net.jafama.FastMath.sin;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * "Spirograph" shape filter
@@ -42,12 +44,12 @@ public class Spirograph extends ShapeFilter {
             new RangeParam("R", 1, 114, 500),
             new RangeParam("d", 0, 189, 500)
         }, false);
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Hypotrochoid", TYPE_HYPOTROCHOID),
         new Item("Epitrochoid", TYPE_EPITROCHOID),
     }, IGNORE_RANDOMIZE);
 
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 701);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 701);
 
     public Spirograph() {
         addParamsToFront(

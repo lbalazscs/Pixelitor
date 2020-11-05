@@ -19,6 +19,8 @@ package pixelitor.filters.curves;
 
 import java.awt.Color;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Curve type enum
  *
@@ -26,9 +28,9 @@ import java.awt.Color;
  */
 public enum ToneCurveType {
     RGB("RGB", Color.BLACK),
-    RED("Red", Color.RED),
-    GREEN("Green", Color.GREEN),
-    BLUE("Blue", Color.BLUE);
+    RED(i18n("red"), Color.RED),
+    GREEN(i18n("green"), Color.GREEN),
+    BLUE(i18n("blue"), Color.BLUE);
 
     private final String name;
     private final Color color;

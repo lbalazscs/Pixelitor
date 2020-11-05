@@ -565,15 +565,15 @@ public class CompositionTest {
                 .thirdLayerIsActive();
         History.assertNumEditsIs(1);
 
-        History.undo("New Layer from Composite");
+        History.undo("New Layer from Visible");
         assertThat(comp)
-                .layerNamesAre("layer 1", "layer 2")
-                .secondLayerIsActive();
+            .layerNamesAre("layer 1", "layer 2")
+            .secondLayerIsActive();
 
-        History.redo("New Layer from Composite");
+        History.redo("New Layer from Visible");
         assertThat(comp)
-                .layerNamesAre("layer 1", "layer 2", "Composite")
-                .thirdLayerIsActive();
+            .layerNamesAre("layer 1", "layer 2", "Composite")
+            .thirdLayerIsActive();
     }
 
     @Test

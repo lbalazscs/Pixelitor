@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MirrorFilter;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -29,13 +30,13 @@ import java.awt.image.BufferedImage;
  * Mirror filter
  */
 public class Mirror extends ParametrizedFilter {
-    public static final String NAME = "Mirror";
+    public static final String NAME = GUIText.MIRROR;
 
     //    private final AngleParam angle = new AngleParam("Angle", 0);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Left Over Right", MirrorFilter.LEFT_OVER_RIGHT),
         new Item("Right Over Left", MirrorFilter.RIGHT_OVER_LEFT),
         new Item("Bottom Over Top", MirrorFilter.BOTTOM_OVER_TOP),

@@ -21,6 +21,7 @@ import com.jhlabs.image.UnsharpFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -31,7 +32,7 @@ public class JHUnsharpMask extends ParametrizedFilter {
     public static final String NAME = "Unsharp Mask";
 
     private final RangeParam amount = new RangeParam("Amount", 0, 50, 100);
-    private final RangeParam radius = new RangeParam("Radius", 0, 2, 100);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 0, 2, 100);
     private final RangeParam threshold = new RangeParam("Threshold", 0, 0, 100);
 
     private UnsharpFilter filter;

@@ -17,23 +17,30 @@
 
 package pixelitor.filters.gui;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import pixelitor.TestHelper;
 
 import java.util.stream.Stream;
 
-import static java.awt.Color.BLACK;
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
+import static java.awt.Color.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.FREE_TRANSPARENCY;
 
 @DisplayName("ParamState tests")
-public class ParamStateTest {
+class ParamStateTest {
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     static Stream<Arguments> instancesToTest() {
+        // this method runs before beforeAllTests
+        TestHelper.setUnitTestingMode();
+
         FilterParam angleParamStart = new AngleParam("AngleParam", 0);
         FilterParam angleParamEnd = new AngleParam("AngleParam", 1);
 

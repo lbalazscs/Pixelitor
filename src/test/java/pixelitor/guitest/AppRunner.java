@@ -27,6 +27,7 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
+import pixelitor.filters.gui.FilterMenuBar;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
@@ -162,6 +163,10 @@ public class AppRunner {
     void delayBetweenEvents(int millis) {
         robot.settings().delayBetweenEvents(millis);
         robot.settings().eventPostingDelay(2 * millis);
+    }
+
+    void runSlowly() {
+        delayBetweenEvents(ROBOT_DELAY_SLOW);
     }
 
     void exit() {
@@ -454,7 +459,7 @@ public class AppRunner {
             JDialog realDialog = (JDialog) dialog.target();
             JMenuBar menuBar = realDialog.getJMenuBar();
             if (menuBar != null) {
-                if ("Presets".equals(menuBar.getMenu(0).getText())) {
+                if (FilterMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
                     dialog.menuItem("savePreset").click();
                     var pane = findJOptionPane();
                     pane.textBox().enterText("test preset");

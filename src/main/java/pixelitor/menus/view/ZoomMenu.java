@@ -26,19 +26,9 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 
 import static java.lang.String.format;
-import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
-import static pixelitor.gui.AutoZoom.FIT_HEIGHT_ACTION;
-import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
-import static pixelitor.gui.AutoZoom.FIT_WIDTH_ACTION;
-import static pixelitor.utils.Keys.ACTUAL_PIXELS_KEY;
-import static pixelitor.utils.Keys.CTRL_ALT_NUMPAD_0;
-import static pixelitor.utils.Keys.CTRL_MINUS;
-import static pixelitor.utils.Keys.CTRL_NUMPAD_0;
-import static pixelitor.utils.Keys.CTRL_NUMPAD_MINUS;
-import static pixelitor.utils.Keys.CTRL_NUMPAD_PLUS;
-import static pixelitor.utils.Keys.CTRL_PLUS;
-import static pixelitor.utils.Keys.CTRL_SHIFT_EQUALS;
-import static pixelitor.utils.Keys.FIT_SPACE_KEY;
+import static pixelitor.gui.AutoZoom.*;
+import static pixelitor.utils.Keys.*;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The zoom menu
@@ -59,13 +49,13 @@ public class ZoomMenu extends PMenu {
     private static final String ACTION_MAP_KEY_ACTUAL_PIXELS = "actual pixels";
     private static final String ACTION_MAP_KEY_FIT_SPACE = "fit space";
 
-    private static final Action ZOOM_IN_ACTION = new AbstractAction("Zoom In") {
+    private static final Action ZOOM_IN_ACTION = new AbstractAction(i18n("zoom_in")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             OpenImages.onActiveView(View::increaseZoom);
         }
     };
-    private static final Action ZOOM_OUT_ACTION = new AbstractAction("Zoom Out") {
+    private static final Action ZOOM_OUT_ACTION = new AbstractAction(i18n("zoom_out")) {
         @Override
         public void actionPerformed(ActionEvent e) {
             OpenImages.onActiveView(View::decreaseZoom);
@@ -76,7 +66,7 @@ public class ZoomMenu extends PMenu {
     public static final ZoomMenu INSTANCE = new ZoomMenu();
 
     private ZoomMenu() {
-        super("Zoom");
+        super(i18n("zoom"));
 
         setupZoomKeys(this);
 

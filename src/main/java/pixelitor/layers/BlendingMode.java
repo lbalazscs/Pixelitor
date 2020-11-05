@@ -17,6 +17,7 @@
 package pixelitor.layers;
 
 import com.jhlabs.composite.*;
+import pixelitor.gui.GUIText;
 
 import java.awt.AlphaComposite;
 import java.awt.Composite;
@@ -103,25 +104,25 @@ public enum BlendingMode {
 //            return BlendComposite.Exclusion;
             return new ExclusionComposite(opacity);
         }
-    }, HUE("Hue", "svg:hue") {
+    }, HUE(GUIText.HUE, "svg:hue") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Hue;
             return new HueComposite(opacity);
         }
-    }, SATURATION("Saturation", "svg:saturation") {
+    }, SATURATION(GUIText.SATURATION, "svg:saturation") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Saturation;
             return new SaturationComposite(opacity);
         }
-    }, COLOR("Color", "svg:color") {
+    }, COLOR(GUIText.COLOR, "svg:color") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Color;
             return new ColorComposite(opacity);
         }
-    }, LUMINOSITY("Value", "svg:luminosity") {
+    }, LUMINOSITY(GUIText.BRIGHTNESS, "svg:luminosity") {
         @Override
         public Composite getComposite(float opacity) {
 //            return BlendComposite.Luminosity;

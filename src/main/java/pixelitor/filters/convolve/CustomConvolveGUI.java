@@ -18,6 +18,7 @@
 package pixelitor.filters.convolve;
 
 import pixelitor.filters.gui.FilterGUI;
+import pixelitor.filters.gui.FilterMenuBar;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
@@ -124,7 +125,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void initPresetBox() {
         presetsBox = Box.createVerticalBox();
-        presetsBox.setBorder(createTitledBorder("Presets"));
+        presetsBox.setBorder(createTitledBorder(FilterMenuBar.PRESETS));
 
         if (size == 3) {
             init3x3Presets();

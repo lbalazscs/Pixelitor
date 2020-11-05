@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,16 +23,18 @@ import pixelitor.utils.Cursors;
 
 import java.awt.Point;
 
+import static pixelitor.gui.GUIText.ZOOM;
+
 /**
  * The Zoom Tool
  */
 public class ZoomTool extends Tool {
     ZoomTool() {
-        super("Zoom", 'Z', "zoom_tool_icon.png",
-                "<b>click</b> to zoom in, " +
-                        "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
-                Cursors.HAND, false,
-                true, ClipStrategy.CANVAS);
+        super(ZOOM, 'Z', "zoom_tool_icon.png",
+            "<b>click</b> to zoom in, " +
+                "<b>right-click</b> (or <b>Alt-click</b>) to zoom out.",
+            Cursors.HAND, false,
+            true, ClipStrategy.CANVAS);
     }
 
     @Override

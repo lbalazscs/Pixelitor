@@ -64,7 +64,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     private static JPanel createPresetsPanel(Action[] actions) {
         var rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
-        rightPanel.setBorder(createTitledBorder("Presets"));
+        rightPanel.setBorder(createTitledBorder(FilterMenuBar.PRESETS));
         for (Action action : actions) {
             JComponent b = new JButton(action);
             b.setAlignmentX(LEFT_ALIGNMENT);

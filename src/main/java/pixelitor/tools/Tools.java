@@ -81,13 +81,16 @@ public class Tools {
     public static void setDefaultTool() {
         String lastToolName = AppPreferences.loadLastToolName();
 
-        // the linear search is probably the fastest, because
-        // it requires no preparation, and anyway it runs only once
+        boolean found = false;
         for (Tool tool : allTools) {
             if (tool.getName().equals(lastToolName)) {
+                found = true;
                 changeToProgrammatically(tool);
                 break;
             }
+        }
+        if (!found) { // ui language changed
+            changeToProgrammatically(BRUSH);
         }
     }
 

@@ -19,11 +19,8 @@ package pixelitor.filters;
 
 import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.geom.Point2D;
@@ -36,7 +33,7 @@ public class BlurredShapeTester extends ParametrizedFilter {
     public static final String NAME = "Blurred Shape Tester";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
+    private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 99);
     private final IntChoiceParam shape = BlurredShape.getChoices();
 

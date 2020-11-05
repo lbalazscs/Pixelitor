@@ -87,6 +87,7 @@ import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.MOTION_BLUR;
 import static pixelitor.filters.jhlabsproxies.JHMotionBlur.Mode.SPIN_ZOOM_BLUR;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.layers.LayerMaskAddType.*;
+import static pixelitor.layers.LayerMoveAction.*;
 import static pixelitor.menus.EnabledIf.*;
 import static pixelitor.menus.MenuAction.AllowedOnLayerType.HAS_LAYER_MASK;
 import static pixelitor.menus.MenuAction.AllowedOnLayerType.IS_TEXT_LAYER;
@@ -103,18 +104,18 @@ public class MenuBar extends JMenuBar {
 
         add(createFileMenu(pw, texts));
         add(createEditMenu(texts));
-        add(createLayerMenu(pw));
-        add(createSelectMenu());
-        add(createImageMenu());
-        add(createColorMenu());
-        add(createFilterMenu());
-        add(createViewMenu(pw));
+        add(createLayerMenu(pw, texts));
+        add(createSelectMenu(texts));
+        add(createImageMenu(texts));
+        add(createColorMenu(texts));
+        add(createFilterMenu(texts));
+        add(createViewMenu(pw, texts));
 
         if (RunContext.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
-        add(createHelpMenu(pw));
+        add(createHelpMenu(pw, texts));
     }
 
     private static JMenu createFileMenu(PixelitorWindow pw, ResourceBundle texts) {
@@ -127,7 +128,7 @@ public class MenuBar extends JMenuBar {
             .withKey(CTRL_N)
             .add();
 
-        fileMenu.buildAction(new MenuAction("Open...") {
+        fileMenu.buildAction(new MenuAction(texts.getString("open") + "...") {
             @Override
             public void onClick() {
                 FileChoosers.openAsync();
@@ -221,7 +222,8 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
 
         // exit
-        String exitName = JVM.isMac ? "Quit" : "Exit";
+        String exitName = JVM.isMac ?
+            texts.getString("exit_mac") : texts.getString("exit");
         fileMenu.add(new MenuAction(exitName) {
             @Override
             public void onClick() {
@@ -314,7 +316,7 @@ public class MenuBar extends JMenuBar {
         editMenu.addSeparator();
 
         // preferences
-        String prefsMenuName = texts.getString("preferences");
+        String prefsMenuName = texts.getString("preferences") + "...";
         Action preferencesAction = new MenuAction(prefsMenuName) {
             @Override
             public void onClick() {
@@ -326,8 +328,8 @@ public class MenuBar extends JMenuBar {
         return editMenu;
     }
 
-    private static JMenu createLayerMenu(PixelitorWindow pw) {
-        PMenu layersMenu = new PMenu("Layer", 'L');
+    private static JMenu createLayerMenu(PixelitorWindow pw, ResourceBundle texts) {
+        var layersMenu = new PMenu(texts.getString("layer"), 'L');
 
         layersMenu.add(AddNewLayerAction.INSTANCE);
         layersMenu.add(DeleteActiveLayerAction.INSTANCE);
@@ -335,30 +337,39 @@ public class MenuBar extends JMenuBar {
 
         layersMenu.addSeparator();
 
-        layersMenu.addActionWithKey(new MenuAction("Merge Down") {
+        // merge down
+        var mergeDown = new MenuAction(GUIText.MERGE_DOWN) {
             @Override
             public void onClick() {
                 getActiveComp().mergeActiveLayerDown();
             }
-        }, CTRL_E);
+        };
+        mergeDown.setToolTip(GUIText.MERGE_DOWN_TT);
+        layersMenu.addActionWithKey(mergeDown, CTRL_E);
 
-        layersMenu.addAction(new MenuAction("Flatten Image") {
+        // flatten image
+        var flattenImage = new MenuAction(texts.getString("flatten_image")) {
             @Override
             public void onClick() {
                 getActiveComp().flattenImage();
             }
-        });
+        };
+        flattenImage.setToolTip(texts.getString("flatten_image_tt"));
+        layersMenu.addAction(flattenImage);
 
-        layersMenu.addActionWithKey(new MenuAction("New Layer from Composite") {
+        // new layer from visible
+        var newFromVisible = new MenuAction(texts.getString("new_from_visible")) {
             @Override
             public void onClick() {
                 getActiveComp().addNewLayerFromComposite();
             }
-        }, CTRL_SHIFT_ALT_E);
+        };
+        newFromVisible.setToolTip(texts.getString("new_from_visible_tt"));
+        layersMenu.addActionWithKey(newFromVisible, CTRL_SHIFT_ALT_E);
 
-        layersMenu.add(createLayerStackSubmenu());
-        layersMenu.add(createLayerMaskSubmenu());
-        layersMenu.add(createTextLayerSubmenu(pw));
+        layersMenu.add(createLayerStackSubmenu(texts));
+        layersMenu.add(createLayerMaskSubmenu(texts));
+        layersMenu.add(createTextLayerSubmenu(pw, texts));
 
         if (RunContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
@@ -367,49 +378,60 @@ public class MenuBar extends JMenuBar {
         return layersMenu;
     }
 
-    private static JMenu createLayerStackSubmenu() {
-        PMenu sub = new PMenu("Layer Stack");
+    private static JMenu createLayerStackSubmenu(ResourceBundle texts) {
+        var sub = new PMenu(texts.getString("layer_stack"));
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_UP, CTRL_ALT_R);
+        sub.addActionWithKey(MOVE_LAYER_UP, CTRL_ALT_R);
 
-        sub.addActionWithKey(LayerMoveAction.INSTANCE_DOWN, CTRL_ALT_L);
+        sub.addActionWithKey(MOVE_LAYER_DOWN, CTRL_ALT_L);
 
-        sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_TOP) {
+        // layer to top
+        var layerToTop = new MenuAction(LAYER_TO_TOP) {
             @Override
             public void onClick() {
                 getActiveComp().moveActiveLayerToTop();
             }
-        }, CTRL_SHIFT_ALT_R);
+        };
+        layerToTop.setToolTip(texts.getString("layer_to_top_tt"));
+        sub.addActionWithKey(layerToTop, CTRL_SHIFT_ALT_R);
 
-        sub.addActionWithKey(new MenuAction(LayerMoveAction.LAYER_TO_BOTTOM) {
+        // layer_to_bottom
+        var layerToBottom = new MenuAction(LAYER_TO_BOTTOM) {
             @Override
             public void onClick() {
                 getActiveComp().moveActiveLayerToBottom();
             }
-        }, CTRL_SHIFT_ALT_L);
+        };
+        layerToBottom.setToolTip(texts.getString("layer_to_bottom_tt"));
+        sub.addActionWithKey(layerToBottom, CTRL_SHIFT_ALT_L);
 
         sub.addSeparator();
 
-        sub.addActionWithKey(new MenuAction(LayerMoveAction.RAISE_LAYER_SELECTION) {
+        // raise layer selection
+        var raiseLayerSelection = new MenuAction(RAISE_LAYER_SELECTION) {
             @Override
             public void onClick() {
                 var comp = getActiveComp();
                 comp.moveLayerSelectionUp();
             }
-        }, CTRL_SHIFT_R);
+        };
+        raiseLayerSelection.setToolTip(texts.getString("raise_layer_selection_tt"));
+        sub.addActionWithKey(raiseLayerSelection, CTRL_SHIFT_R);
 
-        sub.addActionWithKey(new MenuAction(LayerMoveAction.LOWER_LAYER_SELECTION) {
+        var lowerLayerSelection = new MenuAction(LOWER_LAYER_SELECTION) {
             @Override
             public void onClick() {
                 getActiveComp().moveLayerSelectionDown();
             }
-        }, CTRL_SHIFT_L);
+        };
+        lowerLayerSelection.setToolTip(texts.getString("lower_layer_selection_tt"));
+        sub.addActionWithKey(lowerLayerSelection, CTRL_SHIFT_L);
 
         return sub;
     }
 
-    private static JMenu createLayerMaskSubmenu() {
-        PMenu sub = new PMenu("Layer Mask");
+    private static JMenu createLayerMaskSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("layer_mask"));
 
         sub.addAction(new MenuAction("Add White (Reveal All)") {
             @Override
@@ -490,8 +512,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createTextLayerSubmenu(PixelitorWindow pw) {
-        PMenu sub = new PMenu("Text Layer");
+    private static JMenu createTextLayerSubmenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("text_layer"));
 
         sub.addActionWithKey(new MenuAction("New...") {
             @Override
@@ -538,8 +560,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createSelectMenu() {
-        PMenu selectMenu = new PMenu("Select", 'S');
+    private static JMenu createSelectMenu(ResourceBundle texts) {
+        PMenu selectMenu = new PMenu(texts.getString("select"), 'S');
 
         selectMenu.buildAction(SelectionActions.getDeselect())
             .enableIf(ACTION_ENABLED)
@@ -568,8 +590,8 @@ public class MenuBar extends JMenuBar {
         return selectMenu;
     }
 
-    private static JMenu createImageMenu() {
-        PMenu imageMenu = new PMenu("Image", 'I');
+    private static JMenu createImageMenu(ResourceBundle texts) {
+        PMenu imageMenu = new PMenu(texts.getString("image"), 'I');
 
         // crop
         imageMenu.buildAction(SelectionActions.getCrop())
@@ -594,12 +616,14 @@ public class MenuBar extends JMenuBar {
 
         imageMenu.addAction(EnlargeCanvas.getAction());
 
-        imageMenu.addAction(new MenuAction("Fit Canvas to Layers") {
+        var fitCanvasToLayers = new MenuAction(texts.getString("fit_canvas_to_layers")) {
             @Override
             public void onClick() {
                 getActiveComp().fitCanvasToLayers();
             }
-        });
+        };
+        fitCanvasToLayers.setToolTip(texts.getString("fit_canvas_to_layers_tt"));
+        imageMenu.addAction(fitCanvasToLayers);
 
         imageMenu.addAction(new MenuAction("Layer to Canvas Size") {
             @Override
@@ -624,17 +648,17 @@ public class MenuBar extends JMenuBar {
         return imageMenu;
     }
 
-    private static JMenu createColorMenu() {
-        PMenu colorsMenu = new PMenu("Color", 'C');
+    private static JMenu createColorMenu(ResourceBundle texts) {
+        PMenu colorsMenu = new PMenu(GUIText.COLOR, 'C');
 
-        colorsMenu.buildFilter("Color Balance", ColorBalance::new)
+        colorsMenu.buildFilter(ColorBalance.NAME, ColorBalance::new)
             .withKey(CTRL_B)
             .add();
         colorsMenu.buildFilter(HueSat.NAME, HueSat::new)
             .withKey(CTRL_U)
             .add();
         colorsMenu.addFilter(Colorize.NAME, Colorize::new);
-        colorsMenu.buildFilter("Levels", Levels::new)
+        colorsMenu.buildFilter(Levels.NAME, Levels::new)
             .withKey(CTRL_L)
             .add();
         colorsMenu.buildFilter(ToneCurvesFilter.NAME, ToneCurvesFilter::new)
@@ -643,7 +667,7 @@ public class MenuBar extends JMenuBar {
         colorsMenu.addFilter(BrightnessContrast.NAME, BrightnessContrast::new);
         colorsMenu.addFilter(Solarize.NAME, Solarize::new);
         colorsMenu.addFilter(Sepia.NAME, Sepia::new);
-        colorsMenu.buildFilter("Invert", Invert::new)
+        colorsMenu.buildFilter(Invert.NAME, Invert::new)
             .noGUI()
             .withKey(CTRL_I)
             .add();
@@ -652,7 +676,7 @@ public class MenuBar extends JMenuBar {
 
         colorsMenu.add(createExtractChannelsSubmenu());
         colorsMenu.add(createReduceColorsSubmenu());
-        colorsMenu.add(createFillSubmenu());
+        colorsMenu.add(createFillSubmenu(texts));
 
         return colorsMenu;
     }
@@ -701,8 +725,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createFillSubmenu() {
-        PMenu sub = new PMenu("Fill with");
+    private static JMenu createFillSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(GUIText.FILL_WITH);
 
         sub.buildFilter(FOREGROUND.asFillFilterAction())
             .withKey(ALT_BACKSPACE)
@@ -721,8 +745,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createFilterMenu() {
-        PMenu filterMenu = new PMenu("Filter", 'T');
+    private static JMenu createFilterMenu(ResourceBundle texts) {
+        PMenu filterMenu = new PMenu(texts.getString("filter"), 'T');
 
         filterMenu.addActionWithKey(new MenuAction("Filter Search...") {
             @Override
@@ -738,15 +762,15 @@ public class MenuBar extends JMenuBar {
 
         filterMenu.addSeparator();
 
-        filterMenu.add(createBlurSharpenSubmenu());
-        filterMenu.add(createDistortSubmenu());
-        filterMenu.add(createDislocateSubmenu());
-        filterMenu.add(createLightSubmenu());
-        filterMenu.add(createNoiseSubmenu());
-        filterMenu.add(createRenderSubmenu());
-        filterMenu.add(createArtisticSubmenu());
-        filterMenu.add(createFindEdgesSubmenu());
-        filterMenu.add(createOtherSubmenu());
+        filterMenu.add(createBlurSharpenSubmenu(texts));
+        filterMenu.add(createDistortSubmenu(texts));
+        filterMenu.add(createDisplaceSubmenu(texts));
+        filterMenu.add(createLightSubmenu(texts));
+        filterMenu.add(createNoiseSubmenu(texts));
+        filterMenu.add(createRenderSubmenu(texts));
+        filterMenu.add(createArtisticSubmenu(texts));
+        filterMenu.add(createFindEdgesSubmenu(texts));
+        filterMenu.add(createOtherSubmenu(texts));
 
         // the text as filter is still useful for batch operations
         filterMenu.addFilter("Text", TextFilter::new);
@@ -754,8 +778,9 @@ public class MenuBar extends JMenuBar {
         return filterMenu;
     }
 
-    private static JMenu createBlurSharpenSubmenu() {
-        PMenu sub = new PMenu("Blur/Sharpen");
+    private static JMenu createBlurSharpenSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("blur")
+            + "/" + texts.getString("sharpen"));
 
         sub.addFilter(JHBoxBlur.NAME, JHBoxBlur::new);
         sub.addFilter(JHFocus.NAME, JHFocus::new);
@@ -770,8 +795,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createDistortSubmenu() {
-        PMenu sub = new PMenu("Distort");
+    private static JMenu createDistortSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("distort"));
 
         sub.addFilter(JHSwirlPinchBulge.NAME, JHSwirlPinchBulge::new);
         sub.addFilter(CircleToSquare.NAME, CircleToSquare::new);
@@ -806,8 +831,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createDislocateSubmenu() {
-        PMenu sub = new PMenu("Dislocate");
+    private static JMenu createDisplaceSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("displace"));
 
         sub.addFilter(DrunkVision.NAME, DrunkVision::new);
         sub.addFilter(JHKaleidoscope.NAME, JHKaleidoscope::new);
@@ -819,8 +844,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createLightSubmenu() {
-        PMenu sub = new PMenu("Light");
+    private static JMenu createLightSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("light"));
 
         sub.addFilter(Flashlight.NAME, Flashlight::new);
         sub.addFilter(JHGlint.NAME, JHGlint::new);
@@ -831,8 +856,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createNoiseSubmenu() {
-        PMenu sub = new PMenu("Noise");
+    private static JMenu createNoiseSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("noise"));
 
         sub.buildFilter(JHReduceNoise.NAME, JHReduceNoise::new)
             .noGUI()
@@ -849,8 +874,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createRenderSubmenu() {
-        PMenu sub = new PMenu("Render");
+    private static JMenu createRenderSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("render"));
 
         sub.addFilter(Clouds.NAME, Clouds::new);
         sub.addFilter(JHPlasma.NAME, JHPlasma::new);
@@ -867,7 +892,7 @@ public class MenuBar extends JMenuBar {
 
         sub.addSeparator();
 
-        sub.add(createRenderFractalsSubmenu());
+        sub.add(createRenderFractalsSubmenu(texts));
         sub.add(createRenderGeometrySubmenu());
         sub.add(createRenderShapesSubmenu());
 
@@ -888,8 +913,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createRenderFractalsSubmenu() {
-        PMenu sub = new PMenu("Fractals");
+    private static JMenu createRenderFractalsSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("fractals"));
 
         sub.addFilter(ChaosGame.NAME, ChaosGame::new);
         sub.addFilter(FractalTree.NAME, FractalTree::new);
@@ -908,8 +933,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createArtisticSubmenu() {
-        PMenu sub = new PMenu("Artistic");
+    private static JMenu createArtisticSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("artistic"));
 
         sub.addFilter(JHCrystallize.NAME, JHCrystallize::new);
         sub.addFilter(JHEmboss.NAME, JHEmboss::new);
@@ -938,8 +963,8 @@ public class MenuBar extends JMenuBar {
     }
 
 
-    private static JMenu createFindEdgesSubmenu() {
-        PMenu sub = new PMenu("Find Edges");
+    private static JMenu createFindEdgesSubmenu(ResourceBundle texts) {
+        PMenu sub = new PMenu(texts.getString("find_edges"));
 
         sub.addFilter(JHConvolutionEdge.NAME, JHConvolutionEdge::new);
         sub.addAction(new FilterAction(JHLaplacian.NAME, JHLaplacian::new)
@@ -950,7 +975,7 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createOtherSubmenu() {
+    private static JMenu createOtherSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu("Other");
 
         sub.addFilter(JHDropShadow.NAME, JHDropShadow::new);
@@ -974,8 +999,8 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createViewMenu(PixelitorWindow pw) {
-        PMenu viewMenu = new PMenu("View", 'V');
+    private static JMenu createViewMenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu viewMenu = new PMenu(texts.getString("view"), 'V');
 
         viewMenu.add(ZoomMenu.INSTANCE);
 
@@ -1416,10 +1441,11 @@ public class MenuBar extends JMenuBar {
         return sub;
     }
 
-    private static JMenu createHelpMenu(PixelitorWindow pw) {
-        PMenu helpMenu = new PMenu("Help", 'H');
+    private static JMenu createHelpMenu(PixelitorWindow pw, ResourceBundle texts) {
+        PMenu helpMenu = new PMenu(texts.getString("help"), 'H');
 
-        helpMenu.add(new MenuAction("Tip of the Day") {
+        String tipOfTheDayText = texts.getString("tip_of_the_day");
+        helpMenu.add(new MenuAction(tipOfTheDayText) {
             @Override
             public void onClick() {
                 TipsOfTheDay.showTips(pw, true);
@@ -1445,10 +1471,11 @@ public class MenuBar extends JMenuBar {
             }
         });
 
-        helpMenu.add(new MenuAction("About") {
+        String aboutText = texts.getString("about");
+        helpMenu.add(new MenuAction(aboutText) {
             @Override
             public void onClick() {
-                AboutDialog.showDialog();
+                AboutDialog.showDialog(aboutText);
             }
         });
 

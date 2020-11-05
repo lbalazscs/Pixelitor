@@ -19,6 +19,7 @@ package pixelitor.colors;
 
 import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.ColorIcon;
@@ -263,14 +264,14 @@ public class FgBgColorSelector extends JLayeredPane {
 
     private void fgButtonPressed() {
         Color selectedColor = layerMaskEditing ? maskFgColor : fgColor;
-        selectColorWithDialog(pw, "Foreground Color",
+        selectColorWithDialog(pw, GUIText.FG_COLOR,
             selectedColor, false,
             color -> setFgColor(color, true));
     }
 
     private void bgButtonPressed() {
         Color selectedColor = layerMaskEditing ? maskBgColor : bgColor;
-        selectColorWithDialog(pw, "Background Color",
+        selectColorWithDialog(pw, GUIText.BG_COLOR,
             selectedColor, false,
             color -> setBgColor(color, true));
     }

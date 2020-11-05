@@ -36,6 +36,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Renders value noise
@@ -52,7 +53,7 @@ public class ValueNoise extends ParametrizedFilter {
         reseed();
     }
 
-    private final RangeParam scale = new RangeParam("Zoom", 5, 100, 300);
+    private final RangeParam scale = new RangeParam(ZOOM, 5, 100, 300);
     private final RangeParam details = new RangeParam("Octaves (Details)", 1, 5, 8);
     private final RangeParam persistenceParam =
         new RangeParam("Roughness (%)", 0, 60, 100);

@@ -24,7 +24,6 @@ import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Texts;
 import pixelitor.utils.Utils;
 
 import javax.swing.*;
@@ -34,12 +33,13 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The {@link Action} for creating a screen capture.
  */
 public class ScreenCaptureAction extends AbstractAction {
-    public static final String SCREEN_CAPTURE_STRING = Texts.get("screen_capture");
+    public static final String SCREEN_CAPTURE_STRING = i18n("screen_capture");
     private JCheckBox hidePixelitorCB;
     private static int captureCount = 1;
 

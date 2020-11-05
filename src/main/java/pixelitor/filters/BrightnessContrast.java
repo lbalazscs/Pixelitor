@@ -24,21 +24,25 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.gui.GUIText.BRIGHTNESS;
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * The Brightness/Contrast filter
  */
 public class BrightnessContrast extends ParametrizedFilter {
-    public static final String NAME = "Brightness/Contrast";
+    public static final String CONTRAST = i18n("contrast");
+    public static final String NAME = BRIGHTNESS + "/" + CONTRAST;
 
-    private final RangeParam brightnessParam = new RangeParam("Brightness", -100, 0, 100);
-    private final RangeParam contrastParam = new RangeParam("Contrast", -100, 0, 100);
+    private final RangeParam brightnessParam = new RangeParam(BRIGHTNESS, -100, 0, 100);
+    private final RangeParam contrastParam = new RangeParam(CONTRAST, -100, 0, 100);
 
     public BrightnessContrast() {
         super(ShowOriginal.YES);
 
         setParams(
-                brightnessParam,
-                contrastParam
+            brightnessParam,
+            contrastParam
         );
     }
 

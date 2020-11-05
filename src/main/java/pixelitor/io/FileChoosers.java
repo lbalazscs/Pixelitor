@@ -34,6 +34,7 @@ import java.io.File;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
+import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -112,7 +113,7 @@ public class FileChoosers {
     private static void createSaveChooser(File lastSaveDir) {
         saveChooser = new SaveFileChooser(lastSaveDir);
         saveChooser.setName("save");
-        saveChooser.setDialogTitle("Save As");
+        saveChooser.setDialogTitle(i18n("save_as"));
 
         setDefaultSaveExtensions();
     }

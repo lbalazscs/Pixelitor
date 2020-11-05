@@ -17,12 +17,7 @@
 
 package pixelitor.tools.transform;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -31,17 +26,20 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
+import static java.awt.event.MouseEvent.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.utils.AngleUnit.INTUITIVE_DEGREES;
 
 @DisplayName("TransformBox tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class TransformBoxTest {
+class TransformBoxTest {
     private final Rectangle originalRect = new Rectangle(200, 100, 200, 100);
     private View view;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

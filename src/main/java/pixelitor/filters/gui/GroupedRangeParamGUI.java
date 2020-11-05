@@ -25,6 +25,7 @@ import java.awt.GridBagLayout;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * GUI for a GroupedRangeParam
@@ -65,7 +66,7 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private void addLinkCheckBox() {
         JCheckBox linkedCB = new JCheckBox();
         linkedCB.setModel(model.getCheckBoxModel());
-        gbh.addLabelAndControl("Linked:", linkedCB, numParams);
+        gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numParams);
         linkedCB.addActionListener(e -> model.setLinked(linkedCB.isSelected()));
     }
 

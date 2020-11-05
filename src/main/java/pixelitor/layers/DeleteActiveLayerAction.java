@@ -29,6 +29,8 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * An {@link Action} that deletes the active layer from the active composition.
  */
@@ -38,7 +40,7 @@ public class DeleteActiveLayerAction extends NamedAction
     public static final DeleteActiveLayerAction INSTANCE = new DeleteActiveLayerAction();
 
     private DeleteActiveLayerAction() {
-        super("Delete Layer", Icons.load("delete_layer.gif"));
+        super(i18n("delete_layer"), Icons.load("delete_layer.gif"));
         setToolTip("Deletes the active layer.");
         setEnabled(false);
         OpenImages.addActivationListener(this);

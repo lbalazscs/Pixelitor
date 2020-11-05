@@ -18,12 +18,9 @@
 package pixelitor.tools.crop;
 
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatcher;
+import pixelitor.TestHelper;
 import pixelitor.guides.GuidesRenderer;
 
 import java.awt.Graphics2D;
@@ -36,26 +33,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.refEq;
-import static org.mockito.Mockito.verify;
-import static pixelitor.tools.crop.CompositionGuideType.DIAGONALS;
-import static pixelitor.tools.crop.CompositionGuideType.GOLDEN_SECTIONS;
-import static pixelitor.tools.crop.CompositionGuideType.GOLDEN_SPIRAL;
-import static pixelitor.tools.crop.CompositionGuideType.GRID;
-import static pixelitor.tools.crop.CompositionGuideType.NONE;
-import static pixelitor.tools.crop.CompositionGuideType.RULE_OF_THIRDS;
-import static pixelitor.tools.crop.CompositionGuideType.TRIANGLES;
+import static org.mockito.Mockito.*;
+import static pixelitor.tools.crop.CompositionGuideType.*;
 
 @DisplayName("CompositionGuide tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class CompositionGuideTest {
+class CompositionGuideTest {
     private Graphics2D g2;
     private GuidesRenderer guidesRenderer;
     private CompositionGuide compositionGuide;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

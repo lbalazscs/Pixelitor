@@ -45,6 +45,7 @@ import java.util.List;
 import static java.awt.BorderLayout.*;
 import static java.awt.Desktop.Action.*;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The main application window.
@@ -109,7 +110,7 @@ public class PixelitorWindow extends JFrame {
         if (Desktop.isDesktopSupported()) {
             Desktop desktop = Desktop.getDesktop();
             if (desktop.isSupported(APP_ABOUT)) {
-                desktop.setAboutHandler(e -> AboutDialog.showDialog());
+                desktop.setAboutHandler(e -> AboutDialog.showDialog(i18n("about")));
             }
             if (desktop.isSupported(APP_PREFERENCES)) {
                 desktop.setPreferencesHandler(e -> PreferencesPanel.showInDialog());

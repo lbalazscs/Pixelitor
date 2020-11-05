@@ -26,25 +26,27 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Posterize filter
  */
 public class Posterize extends ParametrizedFilter {
-    public static final String NAME = "Posterize";
+    public static final String NAME = i18n("posterize");
 
-    private final RangeParam redLevels = new RangeParam("Red", 2, 2, 50);
-    private final RangeParam greenLevels = new RangeParam("Green", 2, 2, 50);
-    private final RangeParam blueLevels = new RangeParam("Blue", 2, 2, 50);
+    private final RangeParam redLevels = new RangeParam(i18n("red"), 2, 2, 50);
+    private final RangeParam greenLevels = new RangeParam(i18n("green"), 2, 2, 50);
+    private final RangeParam blueLevels = new RangeParam(i18n("blue"), 2, 2, 50);
 
     public Posterize() {
         super(ShowOriginal.YES);
 
         var levels = new GroupedRangeParam("Levels",
-                new RangeParam[]{
-                        redLevels,
-                        greenLevels,
-                        blueLevels
-                }, true);
+            new RangeParam[]{
+                redLevels,
+                greenLevels,
+                blueLevels
+            }, true);
 
         setParams(levels);
     }

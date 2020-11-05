@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.ResizingFilterHelper.ScaleUpQuality.BILINEAR_FAST;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.gui.GUIText.OPACITY;
 
 /**
  * Rays filter based on the JHLabs RaysFilter
@@ -43,7 +44,7 @@ public class JHRays extends ParametrizedFilter {
     private final ImagePositionParam center = new ImagePositionParam("Light Source");
     private final RangeParam rotation = new RangeParam("Twirl", -90, 0, 90);
     private final RangeParam length = new RangeParam("Length", 0, 20, 200);
-    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 80, 100);
+    private final RangeParam opacity = new RangeParam(OPACITY, 0, 80, 100);
     private final RangeParam strength = new RangeParam("Strength", 0, 200, 500);
     private final RangeParam threshold = new RangeParam("Threshold (%)", 0, 25, 100);
     private final BooleanParam raysOnly = new BooleanParam("Rays Only", false, IGNORE_RANDOMIZE);

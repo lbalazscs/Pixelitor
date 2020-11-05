@@ -20,7 +20,9 @@ package pixelitor.layers;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.RunContext;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.history.*;
 import pixelitor.tools.Tools;
 import pixelitor.utils.ImageUtils;
@@ -663,12 +665,14 @@ public abstract class Layer implements Serializable {
     public JPopupMenu createLayerIconPopupMenu() {
         if (comp.canMergeDown(this)) {
             JPopupMenu popup = new JPopupMenu();
-            popup.add(new AbstractAction("Merge Down") {
+            var mergeDownAction = new NamedAction(GUIText.MERGE_DOWN) {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     comp.mergeDown(Layer.this);
                 }
-            });
+            };
+            mergeDownAction.setToolTip(GUIText.MERGE_DOWN_TT);
+            popup.add(mergeDownAction);
             return popup;
         }
         return null;

@@ -44,6 +44,7 @@ import java.util.Map;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
  * Customization panel for the text filter and for text layers
@@ -236,7 +237,7 @@ public class TextSettingsPanel extends FilterGUI
                 .content(advancedSettingsPanel)
                 .title("Advanced Text Settings")
                 .noCancelButton()
-                .okText("Close")
+                .okText(CLOSE_DIALOG)
                 .build();
         }
         GUIUtils.showDialog(advancedSettingsDialog);

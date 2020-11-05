@@ -20,6 +20,7 @@ package pixelitor.tools.gradient;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.BlendingModePanel;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
@@ -98,8 +99,8 @@ public class GradientTool extends DragTool {
         typeCB = new JComboBox<>(GradientType.values());
         typeCB.addActionListener(e -> regenerateGradient(
                 true, "Change Gradient Type"));
-        settingsPanel.addComboBox("Type: ",
-                typeCB, "typeCB");
+        settingsPanel.addComboBox(GUIText.TYPE + ": ",
+            typeCB, "typeCB");
     }
 
     private void addCycleMethodSelector() {

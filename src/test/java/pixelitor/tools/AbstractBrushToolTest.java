@@ -54,24 +54,27 @@ public class AbstractBrushToolTest {
     private Drawable dr;
     private View view;
 
+    @BeforeClass
+    public static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Parameters(name = "{index}: {0} Tool")
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+        // this method runs before beforeAllTests
+        TestHelper.setUnitTestingMode();
+
         Tool[] tools = {BRUSH, ERASER, CLONE, SMUDGE};
         for (Tool tool : tools) {
             TestHelper.initTool(tool);
         }
 
         return Arrays.asList(new Object[][]{
-                {BRUSH},
-                {ERASER},
-                {CLONE},
-                {SMUDGE},
+            {BRUSH},
+            {ERASER},
+            {CLONE},
+            {SMUDGE},
         });
-    }
-
-    @BeforeClass
-    public static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
     }
 
     @Before

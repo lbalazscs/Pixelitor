@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
+import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_DOWN;
+import static pixelitor.layers.LayerMoveAction.MOVE_LAYER_UP;
 
 /**
  * The GUI container for {@link LayerButton} objects.
@@ -161,8 +163,8 @@ public class LayersPanel extends JLayeredPane {
 
         // notify the raise/lower layer menu items
         var comp = OpenImages.getActiveComp();
-        LayerMoveAction.INSTANCE_UP.enableDisable(comp);
-        LayerMoveAction.INSTANCE_DOWN.enableDisable(comp);
+        MOVE_LAYER_UP.enableDisable(comp);
+        MOVE_LAYER_DOWN.enableDisable(comp);
     }
 
     @Override

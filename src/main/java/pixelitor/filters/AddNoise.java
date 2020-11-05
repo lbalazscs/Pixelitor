@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static pixelitor.gui.GUIText.OPACITY;
 
 /**
  * Add Noise filter
@@ -41,7 +42,7 @@ public class AddNoise extends ParametrizedFilter {
     private static final int METHOD_FASTER = 1;
     private static final int METHOD_COVERAGE_ANIM = 2;
 
-    private final RangeParam opacityParam = new RangeParam("Opacity (%)", 0, 100, 100);
+    private final RangeParam opacityParam = new RangeParam(OPACITY, 0, 100, 100);
     private final RangeParam coverageParam = new RangeParam("Coverage (%)", 0, 50, 100);
     private final RangeParam saturationParam = new RangeParam("Saturation (%)", 0, 100, 100);
     private final IntChoiceParam method = new IntChoiceParam("Method", new Item[]{

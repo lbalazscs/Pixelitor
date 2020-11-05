@@ -22,11 +22,13 @@ import com.jhlabs.math.Noise;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.CachedFloatRandom;
 
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Cells filter based on the JHLabs CellularFilter
@@ -41,13 +43,13 @@ public class JHCells extends ParametrizedFilter {
     private final GradientParam gradient =
         GradientParam.createBlackToWhite("Colors");
 
-    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam scale = new RangeParam(ZOOM, 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch (%)", 100, 100, 999);
 
     private final RangeParam gridRandomness = new RangeParam("Grid Randomness", 1, 1, 100);
     private final IntChoiceParam gridType = IntChoiceParam.forGridType("Grid Type", gridRandomness);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Cells", TYPE_CELLS),
         new Item("Grid", TYPE_GRID),
         new Item("Grid 2", TYPE_STRANGE),

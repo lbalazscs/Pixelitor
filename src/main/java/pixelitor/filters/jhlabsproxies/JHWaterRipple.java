@@ -22,6 +22,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -33,7 +34,7 @@ public class JHWaterRipple extends ParametrizedFilter {
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
-    private final RangeParam radius = new RangeParam("Radius", 1, 300, 999);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 300, 999);
     private final RangeParam wavelength = new RangeParam("Wavelength", 1, 25, 250);
     private final RangeParam amplitude = new RangeParam("Amplitude", 0, 50, 100);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);

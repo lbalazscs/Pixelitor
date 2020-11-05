@@ -17,25 +17,23 @@
 
 package pixelitor.filters;
 
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.LittlePlanetFilter;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.gui.GUIText.ZOOM;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * "Little Planet" filter
  */
 public class LittlePlanet extends ParametrizedFilter {
-    public static final String NAME = "Little Planet";
+    public static final String NAME = i18n("little_planet");
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final AngleParam rotateResult = new AngleParam("Rotate Result", -Math.PI / 2);
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 301);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 301);
     private final RangeParam innerZoom = new RangeParam("Inner Zoom (%)", 30, 100, 170);
     private final BooleanParam invert = new BooleanParam("Invert", false);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);

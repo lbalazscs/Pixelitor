@@ -21,6 +21,7 @@ import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -38,7 +39,7 @@ public class Solarize extends ParametrizedFilter {
     private final RangeParam greenThreshold = new RangeParam("Green Threshold", 0, 128, 255);
     private final RangeParam blueThreshold = new RangeParam("Blue Threshold", 0, 128, 255);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Classic", TYPE_CLASSIC),
         new Item("Inverted", TYPE_INVERTED)
     });

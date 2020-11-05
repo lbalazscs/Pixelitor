@@ -26,7 +26,8 @@ import java.util.Locale;
 public enum Language {
     ENGLISH("English", "en") {},
     GERMAN("German", "de") {},
-    SPANISH("Spanish", "es") {};
+    SPANISH("Spanish", "es") {},
+    FRENCH("French", "fr") {};
 
     private final String guiName;
     private final String code;

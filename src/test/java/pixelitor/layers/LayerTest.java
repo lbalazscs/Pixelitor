@@ -63,13 +63,16 @@ public class LayerTest {
 
     @Parameters(name = "{index}: {0}, mask = {1}")
     public static Collection<Object[]> instancesToTest() {
+        // this method runs before beforeAllTests
+        TestHelper.setUnitTestingMode();
+
         return Arrays.asList(new Object[][]{
-                {ImageLayer.class, WithMask.NO},
-                {ImageLayer.class, WithMask.YES},
-                {TextLayer.class, WithMask.NO},
-                {TextLayer.class, WithMask.YES},
-                {AdjustmentLayer.class, WithMask.NO},
-                {AdjustmentLayer.class, WithMask.YES},
+            {ImageLayer.class, WithMask.NO},
+            {ImageLayer.class, WithMask.YES},
+            {TextLayer.class, WithMask.NO},
+            {TextLayer.class, WithMask.YES},
+            {AdjustmentLayer.class, WithMask.NO},
+            {AdjustmentLayer.class, WithMask.YES},
         });
     }
 

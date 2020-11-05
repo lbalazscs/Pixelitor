@@ -17,28 +17,28 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 
 @DisplayName("RangeParam tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class RangeParamTest {
+class RangeParamTest {
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Test
     @DisplayName("is IGNORE_RANDOMIZE working")
     void isIgnoreRandomizeWorking() {
         var param = new RangeParam("Test", 0, 100, 1000,
-                true, NONE, IGNORE_RANDOMIZE);
+            true, NONE, IGNORE_RANDOMIZE);
         for (int i = 0; i < 5; i++) {
             param.randomize();
             assertThat(param.getValue()).isEqualTo(100);

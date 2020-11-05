@@ -23,6 +23,7 @@ import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
 import pixelitor.tools.BrushType;
@@ -340,9 +341,9 @@ public class WorkflowTest {
         pw.button("toSelectionButton").requireEnabled();
 
         findButtonByText(pw, "Stroke with Current Brush")
-                .requireEnabled()
-                .click();
-        keyboard.undoRedo("Brush");
+            .requireEnabled()
+            .click();
+        keyboard.undoRedo(GUIText.BRUSH);
     }
 
     private void pathToSelection() {

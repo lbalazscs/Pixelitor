@@ -27,6 +27,8 @@ import java.awt.GridBagLayout;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import static pixelitor.gui.GUIText.ZOOM;
+
 public class LogRangeGUI extends JPanel implements ParamGUI {
     private final LogZoomParam model;
     private final JLabel valueLabel;
@@ -34,7 +36,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
 
     @SuppressWarnings("NonFinalStaticVariableUsedInClassInitialization")
     private static final NumberFormat format = NumberFormat.getIntegerInstance(
-            Pixelitor.SYS_LOCALE == null ? Locale.getDefault() : Pixelitor.SYS_LOCALE);
+        Pixelitor.SYS_LOCALE == null ? Locale.getDefault() : Pixelitor.SYS_LOCALE);
 
     public LogRangeGUI(LogZoomParam model) {
         this.model = model;
@@ -50,7 +52,7 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
         updateValueLabel();
         gbh.addLabelAndControl("Value:", valueLabel);
 
-        setBorder(BorderFactory.createTitledBorder("Zoom"));
+        setBorder(BorderFactory.createTitledBorder(ZOOM));
     }
 
     private void updateValueLabel() {

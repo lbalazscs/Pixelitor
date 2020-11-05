@@ -21,35 +21,39 @@ import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
 import pixelitor.gui.View;
+import pixelitor.gui.utils.NamedAction;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ViewActivationListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * An {@link Action} that moves the active layer of the active composition
  * up or down in the layer stack
  */
-public class LayerMoveAction extends AbstractAction
+public class LayerMoveAction extends NamedAction
     implements ViewActivationListener, ActiveCompositionListener {
 
-    public static final LayerMoveAction INSTANCE_UP = new LayerMoveAction(true);
-    public static final LayerMoveAction INSTANCE_DOWN = new LayerMoveAction(false);
-
     // menu and history names (also for selection movements)
-    public static final String RAISE_LAYER = "Raise Layer";
-    public static final String LOWER_LAYER = "Lower Layer";
-    public static final String LAYER_TO_TOP = "Layer to Top";
-    public static final String LAYER_TO_BOTTOM = "Layer to Bottom";
-    public static final String LOWER_LAYER_SELECTION = "Lower Layer Selection";
-    public static final String RAISE_LAYER_SELECTION = "Raise Layer Selection";
+    public static final String RAISE_LAYER = i18n("raise_layer");
+    public static final String LOWER_LAYER = i18n("lower_layer");
+    public static final String LAYER_TO_TOP = i18n("layer_to_top");
+    public static final String LAYER_TO_BOTTOM = i18n("layer_to_bottom");
+    public static final String LOWER_LAYER_SELECTION = i18n("lower_layer_selection");
+    public static final String RAISE_LAYER_SELECTION = i18n("raise_layer_selection");
+
+    public static final LayerMoveAction MOVE_LAYER_UP = new LayerMoveAction(true);
+    public static final LayerMoveAction MOVE_LAYER_DOWN = new LayerMoveAction(false);
 
     private final boolean up;
 
     private LayerMoveAction(boolean up) {
         super(getName(up), getIcon(up));
         this.up = up;
+        setToolTip(up ? i18n("raise_layer_tt") : i18n("lower_layer_tt"));
         setEnabled(false);
         OpenImages.addActivationListener(this);
         Layers.addCompositionListener(this);

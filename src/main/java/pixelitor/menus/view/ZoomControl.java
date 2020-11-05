@@ -29,6 +29,7 @@ import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.gui.AutoZoom.ACTUAL_PIXELS_ACTION;
 import static pixelitor.gui.AutoZoom.FIT_SPACE_ACTION;
+import static pixelitor.gui.GUIText.ZOOM;
 import static pixelitor.menus.view.ZoomMenu.ACTUAL_PIXELS_TOOLTIP;
 import static pixelitor.menus.view.ZoomMenu.FIT_SPACE_TOOLTIP;
 
@@ -65,7 +66,7 @@ public class ZoomControl extends JPanel implements ViewActivationListener {
         zoomSlider.addChangeListener(e ->
             OpenImages.onActiveView(this::zoomAccordingToTheSlider));
 
-        zoomLabel = new JLabel("  Zoom: ");
+        zoomLabel = new JLabel("  " + ZOOM + ": ");
 
         add(zoomLabel);
         add(zoomSlider);

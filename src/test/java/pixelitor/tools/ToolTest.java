@@ -62,8 +62,16 @@ public class ToolTest {
     @Parameter(value = 4)
     public MouseButton mouseButton;
 
+    @BeforeClass
+    public static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Parameters(name = "{index}: tool = {0} Tool, alt = {1}, ctrl = {2}, shift = {3}, mouseButton = {4}")
     public static Collection<Object[]> instancesToTest() throws InvocationTargetException, InterruptedException {
+        // this method runs before beforeAllTests
+        TestHelper.setUnitTestingMode();
+
         Tools.CLONE.setState(CloneTool.State.CLONING);
 
         Tool[] tools = Tools.getAll();
@@ -86,11 +94,6 @@ public class ToolTest {
         }
 
         return instances;
-    }
-
-    @BeforeClass
-    public static void beforeAllTests() {
-        TestHelper.setUnitTestingMode();
     }
 
     @Before

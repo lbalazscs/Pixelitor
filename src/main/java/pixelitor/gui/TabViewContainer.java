@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 
 import static java.awt.BorderLayout.CENTER;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * A {@link ViewContainer} used in the tabs UI.
@@ -103,7 +104,7 @@ public class TabViewContainer extends JComponent implements ViewContainer {
         JPopupMenu popup = new JPopupMenu();
 
         // close the clicked one, even if it is not the active!
-        popup.add(new AbstractAction("Close") {
+        popup.add(new AbstractAction(i18n("close")) {
             @Override
             public void actionPerformed(ActionEvent e) {
                 OpenImages.warnAndClose(view);

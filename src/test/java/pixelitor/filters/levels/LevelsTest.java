@@ -17,28 +17,27 @@
 
 package pixelitor.filters.levels;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
+import pixelitor.TestHelper;
 import pixelitor.filters.gui.PreviewExecutor;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @DisplayName("Levels tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class LevelsTest {
+class LevelsTest {
     private Levels levels;
     private ArgumentCaptor<RGBLookup> captor;
     private LevelsModel model;
     private PreviewExecutor executor;
     private OneChannelLevelsModel rgbPage;
     private OneChannelLevelsModel rPage;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

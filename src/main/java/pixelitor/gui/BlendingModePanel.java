@@ -27,12 +27,15 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
 import static java.awt.FlowLayout.LEFT;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * A GUI selector for opacity and blending mode.
  * Used by tools and layers.
  */
 public class BlendingModePanel extends JPanel {
+    public static final String OPACITY = i18n("opacity") + ":";
+
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> bmCombo;
     private final JLabel opacityLabel;
@@ -40,7 +43,7 @@ public class BlendingModePanel extends JPanel {
 
     public BlendingModePanel(boolean forTools) {
         setLayout(new FlowLayout(LEFT));
-        opacityLabel = new JLabel("Opacity:");
+        opacityLabel = new JLabel(OPACITY);
         add(opacityLabel);
         opacityDDSlider = new DropDownSlider(0, 100, 100, true);
 

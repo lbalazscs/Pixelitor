@@ -17,11 +17,8 @@
 
 package pixelitor.guides;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
@@ -29,15 +26,18 @@ import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @DisplayName("GuidesRenderer tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class GuidesRendererTest {
+class GuidesRendererTest {
     private GuideStyle guideStyle;
     private GuidesRenderer guidesRenderer;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

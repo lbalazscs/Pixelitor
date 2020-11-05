@@ -160,7 +160,7 @@ public class AssertJSwingTest {
 
         boolean testOneMethodSlowly = false;
         if (testOneMethodSlowly) {
-            app.delayBetweenEvents(AppRunner.ROBOT_DELAY_SLOW);
+            app.runSlowly();
 
             //test.stressTestFilterWithDialog("Marble...", Randomize.YES, Reseed.YES, true);
             testShapesTool();
@@ -176,7 +176,6 @@ public class AssertJSwingTest {
                 runTests(mode, target);
 
                 if (i < maskModes.length - 1) {
-                    // we have another round to go
                     resetState();
                 }
             }
@@ -185,11 +184,11 @@ public class AssertJSwingTest {
         long totalTimeMillis = System.currentTimeMillis() - startMillis;
         System.out.printf("AssertJSwingTest: finished at %s after %s, exiting in ",
             getCurrentTimeHM(), Utils.formatMillis(totalTimeMillis));
-        int secondsToWait = 5;
+        final int secondsToWait = 5;
         int remainingSeconds = secondsToWait;
         do {
             System.out.print(remainingSeconds + "...");
-            GUIUtils.showTaskbarProgress((int) (100 * (5 - remainingSeconds) / (double) secondsToWait));
+            GUIUtils.showTaskbarProgress((int) (100 * (secondsToWait - remainingSeconds) / (double) secondsToWait));
             Utils.sleep(1, SECONDS);
         } while (--remainingSeconds > 0);
 
@@ -495,8 +494,8 @@ public class AssertJSwingTest {
     }
 
     private void testLayerMenusChangingTheNumLayers() {
-        runMenuCommand("New Layer from Composite");
-        keyboard.undoRedo("New Layer from Composite");
+        runMenuCommand("New from Visible");
+        keyboard.undoRedo("New Layer from Visible");
         maskMode.set(this);
 
         runMenuCommand("Merge Down");
@@ -506,7 +505,7 @@ public class AssertJSwingTest {
         keyboard.undoRedo("Duplicate Layer");
         maskMode.set(this);
 
-        runMenuCommand("Add New Layer");
+        runMenuCommand("New Layer");
         keyboard.undoRedo("New Empty Layer");
         maskMode.set(this);
 
@@ -758,7 +757,7 @@ public class AssertJSwingTest {
     }
 
     private void testAbout() {
-        runMenuCommand("About");
+        runMenuCommand("About Pixelitor");
         var dialog = findDialogByTitle("About Pixelitor");
 
         var tabbedPane = dialog.tabbedPane();
@@ -1689,8 +1688,8 @@ public class AssertJSwingTest {
         testFilterWithDialog("Tritone", Randomize.YES, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Gradient Map", Randomize.NO, Reseed.NO, ShowOriginal.YES);
         testFilterWithDialog("Dither", Randomize.YES, Reseed.NO, ShowOriginal.YES);
-        testNoDialogFilter("Foreground Color");
-        testNoDialogFilter("Background Color");
+        testNoDialogFilter(GUIText.FG_COLOR);
+        testNoDialogFilter(GUIText.BG_COLOR);
         testNoDialogFilter("Transparent");
         testFilterWithDialog("Color Wheel", Randomize.YES, Reseed.NO, ShowOriginal.NO);
         testFilterWithDialog("Four Color Gradient", Randomize.YES, Reseed.NO, ShowOriginal.NO);
@@ -2200,7 +2199,7 @@ public class AssertJSwingTest {
         findButtonByText(pw, "Stroke with Current Brush")
             .requireEnabled()
             .click();
-        keyboard.undoRedo("Brush");
+        keyboard.undoRedo(GUIText.BRUSH);
     }
 
     private void testPenToolTransformMode() {
@@ -2367,7 +2366,7 @@ public class AssertJSwingTest {
             }
         }
         if (tested) {
-            keyboard.undoRedo(tool == Tools.BRUSH ? "Brush" : "Eraser");
+            keyboard.undoRedo(tool == Tools.BRUSH ? GUIText.BRUSH : "Eraser");
         }
     }
 
@@ -2889,11 +2888,11 @@ public class AssertJSwingTest {
 
         var fgButton = pw.button(FgBgColorSelector.FG_BUTTON_NAME);
         fgButton.click();
-        testColorSelectorDialog("Foreground Color");
+        testColorSelectorDialog(GUIText.FG_COLOR);
 
         var bgButton = pw.button(FgBgColorSelector.BG_BUTTON_NAME);
         bgButton.click();
-        testColorSelectorDialog("Background Color");
+        testColorSelectorDialog(GUIText.BG_COLOR);
 
         if (!quick) {
             testColorSelectorPopup(fgButton, true);

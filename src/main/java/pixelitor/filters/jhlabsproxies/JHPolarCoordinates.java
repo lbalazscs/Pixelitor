@@ -20,14 +20,18 @@ import com.jhlabs.image.PolarFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.gui.GUIText.ZOOM;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Polar Coordinates filter based on the JHLabs PolarFilter
  */
 public class JHPolarCoordinates extends ParametrizedFilter {
-    public static final String NAME = "Polar Coordinates";
+    public static final String NAME = i18n("polar_coordinates");
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
 
@@ -36,10 +40,10 @@ public class JHPolarCoordinates extends ParametrizedFilter {
         new Item("Polar to Rectangular", PolarFilter.POLAR_TO_RECT),
         new Item("Invert in Circle", PolarFilter.INVERT_IN_CIRCLE),
     };
-    private final IntChoiceParam type = new IntChoiceParam("Type", gridTypeChoices);
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, gridTypeChoices);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final AngleParam angle = new AngleParam("Angle", 0);
 
     private PolarFilter filter;

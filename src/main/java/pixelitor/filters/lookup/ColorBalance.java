@@ -30,11 +30,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ShortLookupTable;
 
 import static java.awt.Color.*;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Color balance filter
  */
 public class ColorBalance extends ParametrizedFilter {
+    public static final String NAME = i18n("color_balance");
+
     private static final int EVERYTHING = 0;
     private static final int SHADOWS = 1;
     private static final int MIDTONES = 2;
@@ -47,18 +50,21 @@ public class ColorBalance extends ParametrizedFilter {
         new Item("Highlights", HIGHLIGHTS),
     });
 
-    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED, "Cyan-Red", -100, 0, 100);
-    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN, "Magenta-Green", -100, 0, 100);
-    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE, "Yellow-Blue", -100, 0, 100);
+    private final RangeParam cyanRed = new RangeWithColorsParam(CYAN, RED,
+        i18n("cyan") + "-" + i18n("red"), -100, 0, 100);
+    private final RangeParam magentaGreen = new RangeWithColorsParam(MAGENTA, GREEN,
+        i18n("magenta") + "-" + i18n("green"), -100, 0, 100);
+    private final RangeParam yellowBlue = new RangeWithColorsParam(YELLOW, BLUE,
+        i18n("yellow") + "-" + i18n("blue"), -100, 0, 100);
 
     public ColorBalance() {
         super(ShowOriginal.YES);
 
         setParams(
-                affect,
-                cyanRed,
-                magentaGreen,
-                yellowBlue
+            affect,
+            cyanRed,
+            magentaGreen,
+            yellowBlue
         );
     }
 

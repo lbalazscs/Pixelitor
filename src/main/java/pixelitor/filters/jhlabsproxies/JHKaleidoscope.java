@@ -18,19 +18,18 @@ package pixelitor.filters.jhlabsproxies;
 
 import com.jhlabs.image.KaleidoscopeFilter;
 import pixelitor.filters.ParametrizedFilter;
-import pixelitor.filters.gui.AngleParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
+import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
+
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * A kaleidoscope filter based on the JHLabs KaleidoscopeFilter
  */
 public class JHKaleidoscope extends ParametrizedFilter {
-    public static final String NAME = "Kaleidoscope";
+    public static final String NAME = Texts.i18n("kaleidoscope");
 
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final AngleParam rotateResult = new AngleParam("Rotate Result", 0);
@@ -38,7 +37,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
     private final RangeParam sides = new RangeParam("Sides", 0, 3, 10);
 //    private final RangeParam radius = new RangeParam("Radius", 0, 999, 0);
 
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 501);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 501);
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction(true);
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();
 

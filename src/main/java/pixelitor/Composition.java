@@ -341,7 +341,7 @@ public class Composition implements Serializable {
             getCompositeImage(), "Composite");
 
         new LayerAdder(this)
-            .withHistory("New Layer from Composite")
+            .withHistory("New Layer from Visible")
             .noRefresh()
             .atIndex(layerList.size())
             .add(newLayer);

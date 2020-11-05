@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -50,7 +51,7 @@ public class PhotoCollage extends ParametrizedFilter {
     private final RangeParam numImagesParam = new RangeParam("Number of Images", 1, 10, 101);
     private final RangeParam randomRotation = new RangeParam("Random Rotation Amount (%)", 0, 100, 100);
     private final BooleanParam allowOutside = new BooleanParam("Allow Outside", true);
-    private final ColorParam bgColor = new ColorParam("Background Color", BLACK, USER_ONLY_TRANSPARENCY);
+    private final ColorParam bgColor = new ColorParam(GUIText.BG_COLOR, BLACK, USER_ONLY_TRANSPARENCY);
     private final ColorParam marginColor = new ColorParam("Margin Color", WHITE, NO_TRANSPARENCY);
     private final RangeParam shadowOpacityParam = new RangeParam("Shadow Opacity (%)", 0, 80, 100);
     private final AngleParam shadowAngleParam = new AngleParam("Shadow Angle", 0.7);

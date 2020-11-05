@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.menus.help.AboutDialog.HOME_PAGE;
 import static pixelitor.utils.Utils.getJavaMainVersion;
 
@@ -88,7 +89,7 @@ public class UpdatesCheck {
                 requiredJavaVersion, getJavaMainVersion());
         }
         String title = "Pixelitor is not up to date";
-        Object[] options = {"Go to the Pixelitor homepage", "Close"};
+        Object[] options = {"Go to the Pixelitor homepage", CLOSE_DIALOG};
         if (Dialogs.showOKCancelWarningDialog(msg, title, options, 0)) {
             new OpenInBrowserAction(null, HOME_PAGE).actionPerformed(null);
         }

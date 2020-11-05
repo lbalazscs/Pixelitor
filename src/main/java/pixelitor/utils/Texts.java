@@ -25,7 +25,8 @@ import java.util.ResourceBundle;
  */
 public class Texts {
     // this locale is used in the tests, the GUI replaces it
-    private static ResourceBundle resources = ResourceBundle.getBundle("texts", Locale.US);
+//    private static ResourceBundle resources = ResourceBundle.getBundle("texts", Locale.US);
+    private static ResourceBundle resources;
 
     private Texts() {
     }
@@ -34,7 +35,7 @@ public class Texts {
         return resources;
     }
 
-    public static String get(String key) {
+    public static String i18n(String key) {
         return resources.getString(key);
     }
 

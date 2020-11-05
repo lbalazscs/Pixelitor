@@ -24,16 +24,19 @@ import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.filters.util.FilterUtils;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.BORDER;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The Threshold filter
  */
 public class Threshold extends ParametrizedFilter {
-    public static final String NAME = "Threshold";
+    private static final String THRESHOLD = i18n("threshold");
+    public static final String NAME = THRESHOLD;
 
     private static final int LUMINOSITY = 1;
     private static final int RED = 2;
@@ -41,7 +44,7 @@ public class Threshold extends ParametrizedFilter {
     private static final int BLUE = 4;
     private static final int SATURATION = 5;
 
-    private final RangeParam threshold = new RangeParam("Threshold", 0,
+    private final RangeParam threshold = new RangeParam(THRESHOLD, 0,
         128, 255, false, BORDER);
 
     private final IntChoiceParam criterion = new IntChoiceParam("Based on", new Item[]{
@@ -49,7 +52,7 @@ public class Threshold extends ParametrizedFilter {
         new Item("Red Channel", RED),
         new Item("Green Channel", GREEN),
         new Item("Blue Channel", BLUE),
-        new Item("Saturation", SATURATION),
+        new Item(GUIText.SATURATION, SATURATION),
     });
 
     public Threshold() {

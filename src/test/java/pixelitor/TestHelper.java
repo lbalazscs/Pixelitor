@@ -34,6 +34,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.gui.ToolSettingsPanel;
 import pixelitor.tools.gui.ToolSettingsPanelContainer;
 import pixelitor.tools.util.PMouseEvent;
+import pixelitor.utils.Language;
 import pixelitor.utils.Messages;
 import pixelitor.utils.TestMessageHandler;
 import pixelitor.utils.Utils;
@@ -393,6 +394,7 @@ public class TestHelper {
             return;
         }
 
+        Language.setCurrent(Language.ENGLISH);
         RunContext.setUnitTestingMode();
         Messages.setMsgHandler(new TestMessageHandler());
 

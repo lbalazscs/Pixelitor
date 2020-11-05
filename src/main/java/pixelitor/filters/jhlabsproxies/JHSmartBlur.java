@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -32,7 +33,7 @@ import java.awt.image.BufferedImage;
 public class JHSmartBlur extends ParametrizedFilter {
     public static final String NAME = "Smart Blur";
 
-    private final RangeParam radiusParam = new RangeParam("Radius", 0, 5, 100);
+    private final RangeParam radiusParam = new RangeParam(GUIText.RADIUS, 0, 5, 100);
     private final RangeParam threshold = new RangeParam("Threshold", 0, 10, 256);
     private final BooleanParam hpSharpening = BooleanParam.forHPSharpening();
 

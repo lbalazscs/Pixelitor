@@ -22,7 +22,6 @@ import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Result;
-import pixelitor.utils.Texts;
 import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.*;
@@ -33,6 +32,8 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RasterFormatException;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Copies the image given by the {@link CopySource}
  * to the system clipboard
@@ -41,7 +42,7 @@ public class CopyAction extends AbstractAction {
     private final CopySource source;
 
     public CopyAction(CopySource source) {
-        super(Texts.get(source.toResourceKey()));
+        super(i18n(source.toResourceKey()));
         this.source = source;
     }
 

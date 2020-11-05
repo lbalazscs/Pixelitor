@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 import pixelitor.filters.ParamTest;
 import pixelitor.utils.ReseedSupport;
 
@@ -28,10 +29,15 @@ import static org.mockito.Mockito.*;
 
 @DisplayName("ParamSet tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class ParamSetTest {
+class ParamSetTest {
     private ParamSet params;
     private ParamAdjustmentListener adjustmentListener;
     private RangeParam extraParam;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

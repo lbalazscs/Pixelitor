@@ -19,9 +19,12 @@ package pixelitor.filters;
 
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
+import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Extracts a channel from the image
@@ -85,7 +88,7 @@ public class ExtractChannelFilter extends Filter {
 
             return a << 24 | r << 16 | g << 8 | b;
         };
-        return rgbOp.toFilterAction("Desaturate");
+        return rgbOp.toFilterAction(i18n("desaturate"));
     }
 
     public static FilterAction getSaturationChannelFA() {
@@ -110,7 +113,7 @@ public class ExtractChannelFilter extends Filter {
 
             return a << 24 | r << 16 | g << 8 | b;
         };
-        return rgbOp.toFilterAction("Saturation");
+        return rgbOp.toFilterAction(i18n("saturation"));
     }
 
     public static FilterAction getHueChannelFA() {
@@ -131,7 +134,7 @@ public class ExtractChannelFilter extends Filter {
                 return a << 24 | r << 16 | g << 8 | b;
             }
         };
-        return rgbOp.toFilterAction("Hue");
+        return rgbOp.toFilterAction(GUIText.HUE);
     }
 
     public static FilterAction getHueInColorsChannelFA() {

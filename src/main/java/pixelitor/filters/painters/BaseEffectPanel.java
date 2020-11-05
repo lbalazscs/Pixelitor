@@ -35,6 +35,7 @@ import java.awt.GridBagLayout;
 import java.util.Objects;
 
 import static javax.swing.BorderFactory.createTitledBorder;
+import static pixelitor.gui.GUIText.OPACITY;
 
 /**
  * A GUI for configuring an area effect
@@ -65,7 +66,7 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
 
         setBorder(createTitledBorder('"' + effectName + "\" Configuration"));
 
-        opacityRange = new RangeParam("Opacity", 1, defaultOpacityInt, 100);
+        opacityRange = new RangeParam(OPACITY, 1, defaultOpacityInt, 100);
         var opacitySlider = SliderSpinner.from(opacityRange);
 
         enabledCB = new JCheckBox();
@@ -86,7 +87,7 @@ public abstract class BaseEffectPanel extends JPanel implements Resettable {
         gbh = new GridBagHelper(this);
         gbh.addLabelAndControl("Enabled:", enabledCB);
         gbh.addLabelAndControlNoStretch("Color:", colorSwatch);
-        gbh.addLabelAndControl("Opacity:", opacitySlider);
+        gbh.addLabelAndControl(opacityRange.getName() + ":", opacitySlider);
     }
 
     public void setTabEnabled(boolean enabled) {

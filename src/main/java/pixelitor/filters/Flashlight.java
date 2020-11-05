@@ -21,6 +21,7 @@ import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.geom.Point2D;
@@ -35,7 +36,7 @@ public class Flashlight extends ParametrizedFilter {
     public static final String NAME = "Flashlight";
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final GroupedRangeParam radius = new GroupedRangeParam("Radius", 1, 200, 1000, false);
+    private final GroupedRangeParam radius = new GroupedRangeParam(GUIText.RADIUS, 1, 200, 1000, false);
     private final RangeParam softness = new RangeParam("Softness", 0, 20, 100);
     private final IntChoiceParam shape = BlurredShape.getChoices();
     private final IntChoiceParam bg = new IntChoiceParam("Background", new Item[]{

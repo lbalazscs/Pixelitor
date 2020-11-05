@@ -18,23 +18,25 @@ package pixelitor.colors;
 
 import pixelitor.filters.Fill;
 import pixelitor.filters.util.FilterAction;
+import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 
 import static pixelitor.colors.Colors.TRANSPARENT_COLOR;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * A fill color with a string description
  */
 public enum FillType {
-    WHITE("White") {
+    WHITE(i18n("white")) {
         @Override
         public Color getColor() {
             return Color.WHITE;
         }
-    }, BLACK("Black") {
+    }, BLACK(i18n("black")) {
         @Override
         public Color getColor() {
             return Color.BLACK;
@@ -44,12 +46,12 @@ public enum FillType {
         public Color getColor() {
             return TRANSPARENT_COLOR;
         }
-    }, FOREGROUND("Foreground Color") {
+    }, FOREGROUND(GUIText.FG_COLOR) {
         @Override
         public Color getColor() {
             return getFGColor();
         }
-    }, BACKGROUND("Background Color") {
+    }, BACKGROUND(GUIText.BG_COLOR) {
         @Override
         public Color getColor() {
             return getBGColor();

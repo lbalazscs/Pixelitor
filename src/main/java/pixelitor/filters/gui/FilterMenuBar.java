@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.utils.OpenInBrowserAction;
+import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Desktop;
@@ -30,6 +31,8 @@ import java.util.List;
 import static pixelitor.filters.gui.UserPreset.*;
 
 public class FilterMenuBar extends JMenuBar {
+    public static final String PRESETS = Texts.i18n("presets");
+
     private final FilterWithGUI filter;
     private JMenu presetsMenu;
     private int numUserPresets = 0;
@@ -51,7 +54,7 @@ public class FilterMenuBar extends JMenuBar {
     }
 
     private void addPresetsMenu() {
-        presetsMenu = new JMenu("Presets");
+        presetsMenu = new JMenu(PRESETS);
 
         if (filter.hasBuiltinPresets()) {
             JMenu builtinPresets = new JMenu("Built-in Presets");

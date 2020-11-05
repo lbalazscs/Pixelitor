@@ -49,6 +49,7 @@ import static pixelitor.utils.Threads.threadName;
  * Static utility methods related to dialogs
  */
 public class Dialogs {
+
     private static boolean mainWindowInitialized = false;
 
     private Dialogs() { // should not be instantiated

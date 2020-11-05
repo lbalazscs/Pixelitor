@@ -22,6 +22,7 @@ import pixelitor.filters.Fade;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.SimpleForwardingFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.history.History;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
@@ -94,7 +95,7 @@ public class FilterAction extends DrawableAction {
     }
 
     public FilterAction withFillListName() {
-        return withListNamePrefix("Fill with ");
+        return withListNamePrefix(GUIText.FILL_WITH + " ");
     }
 
     public FilterAction withExtractChannelListName() {

@@ -24,25 +24,27 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Color Threshold filter
  */
 public class ColorThreshold extends ParametrizedFilter {
     public static final String NAME = "Color Threshold";
 
-    private final RangeParam redThreshold = new RangeParam("Red", 0, 128, 256);
-    private final RangeParam greenThreshold = new RangeParam("Green", 0, 128, 256);
-    private final RangeParam blueThreshold = new RangeParam("Blue", 0, 128, 256);
+    private final RangeParam redThreshold = new RangeParam(i18n("red"), 0, 128, 256);
+    private final RangeParam greenThreshold = new RangeParam(i18n("green"), 0, 128, 256);
+    private final RangeParam blueThreshold = new RangeParam(i18n("blue"), 0, 128, 256);
 
     public ColorThreshold() {
         super(ShowOriginal.YES);
 
-        var threshold = new GroupedRangeParam("Threshold",
-                new RangeParam[]{
-                        redThreshold,
-                        greenThreshold,
-                        blueThreshold
-                }, false);
+        var threshold = new GroupedRangeParam(i18n("threshold"),
+            new RangeParam[]{
+                redThreshold,
+                greenThreshold,
+                blueThreshold
+            }, false);
 
         setParams(threshold);
     }

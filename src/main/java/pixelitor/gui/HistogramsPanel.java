@@ -35,6 +35,7 @@ import static java.awt.BorderLayout.NORTH;
 import static java.awt.Color.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The panel that shows the histograms
@@ -78,11 +79,11 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         typeChooser.addActionListener(e -> typeChanged());
 
         JPanel northPanel = new JPanel(new FlowLayout(LEFT));
-        northPanel.add(new JLabel("Type:"));
+        northPanel.add(new JLabel(GUIText.TYPE + ":"));
         northPanel.add(typeChooser);
         add(northPanel, NORTH);
 
-        setBorder(createTitledBorder("Histograms"));
+        setBorder(createTitledBorder(i18n("histograms")));
         var scrollPane = new JScrollPane(painters);
         add(scrollPane, CENTER);
     }

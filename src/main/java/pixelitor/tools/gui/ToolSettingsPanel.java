@@ -19,6 +19,7 @@ package pixelitor.tools.gui;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.gui.AutoZoom;
+import pixelitor.gui.GUIText;
 import pixelitor.tools.brushes.CopyBrushType;
 import pixelitor.tools.brushes.CopyBrushTypeChangedListener;
 import pixelitor.utils.ToolSettingsLayout;
@@ -102,7 +103,7 @@ public class ToolSettingsPanel extends JPanel {
         @SuppressWarnings("unchecked")
         var typeCB = new JComboBox<CopyBrushType>(typeModel);
 
-        addComboBox("Brush:", typeCB, "typeCB");
+        addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
         typeCB.addActionListener(e -> {
             CopyBrushType brushType = (CopyBrushType) typeCB.getSelectedItem();
             listener.copyBrushTypeChanged(brushType);

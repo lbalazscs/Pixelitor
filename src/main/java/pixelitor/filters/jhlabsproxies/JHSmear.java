@@ -29,6 +29,8 @@ import pixelitor.utils.ReseedSupport;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
+import static pixelitor.gui.GUIText.OPACITY;
+
 /**
  * Smear filter based on the JHLabs SmearFilter
  */
@@ -38,7 +40,7 @@ public class JHSmear extends ParametrizedFilter {
     private final RangeParam distance = new RangeParam("Distance", 0, 15, 100);
     private final RangeParam density = new RangeParam("Density (%)", 0, 50, 100);
     private final AngleParam angle = new AngleParam("Angle (only for lines)", 0);
-    private final RangeParam mix = new RangeParam("Opacity (%)", 0, 50, 100);
+    private final RangeParam mix = new RangeParam(OPACITY, 0, 50, 100);
 
     private static final Item[] shapeChoices = {
         new Item("Lines", SmearFilter.LINES),

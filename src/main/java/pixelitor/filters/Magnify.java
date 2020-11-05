@@ -16,13 +16,9 @@
  */
 package pixelitor.filters;
 
-import pixelitor.filters.gui.BooleanParam;
-import pixelitor.filters.gui.GroupedRangeParam;
-import pixelitor.filters.gui.ImagePositionParam;
-import pixelitor.filters.gui.IntChoiceParam;
-import pixelitor.filters.gui.RangeParam;
-import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.filters.gui.*;
 import pixelitor.filters.impl.MagnifyFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.BlurredShape;
 
 import java.awt.image.BufferedImage;
@@ -34,7 +30,7 @@ public class Magnify extends ParametrizedFilter {
     public static final String NAME = "Magnify";
 
     private final RangeParam magnification = new RangeParam("Magnification (%)", 1, 150, 501);
-    private final GroupedRangeParam outerRadius = new GroupedRangeParam("Radius", 0, 200, 999);
+    private final GroupedRangeParam outerRadius = new GroupedRangeParam(GUIText.RADIUS, 0, 200, 999);
     private final RangeParam outerInnerRadiusRatio = new RangeParam("Softness", 0, 100, 1000);
     private final ImagePositionParam center = new ImagePositionParam("Center");
     private final IntChoiceParam shape = BlurredShape.getChoices();

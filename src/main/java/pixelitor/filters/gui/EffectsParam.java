@@ -25,6 +25,7 @@ import javax.swing.*;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
  * A {@link FilterParam} for shape effects in a dialog
@@ -75,7 +76,7 @@ public class EffectsParam extends AbstractFilterParam {
             .title("Effects")
             .content(effectsPanel)
             .withScrollbars()
-            .okText("Close")
+            .okText(CLOSE_DIALOG)
             .noCancelButton()
             .build();
     }

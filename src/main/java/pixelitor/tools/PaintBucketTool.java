@@ -18,6 +18,7 @@
 package pixelitor.tools;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.SliderSpinner;
 import pixelitor.history.History;
 import pixelitor.history.PartialImageEdit;
@@ -47,18 +48,18 @@ public class PaintBucketTool extends Tool {
     private static final String ACTION_LOCAL = "Local";
     private static final String ACTION_GLOBAL = "Global";
 
-    private static final String FILL_FOREGROUND = "Foreground Color";
-    private static final String FILL_BACKGROUND = "Background Color";
+    private static final String FILL_FOREGROUND = GUIText.FG_COLOR;
+    private static final String FILL_BACKGROUND = GUIText.BG_COLOR;
     private static final String FILL_TRANSPARENT = "Transparent";
     private static final String FILL_CLICKED = "Clicked Pixel Color";
 
     private final RangeParam toleranceParam = new RangeParam("Tolerance", 0, 20, 255);
     private final JComboBox<String> fillCB = new JComboBox<>(
-            new String[]{FILL_FOREGROUND, FILL_BACKGROUND,
-                    FILL_TRANSPARENT, FILL_CLICKED}
+        new String[]{FILL_FOREGROUND, FILL_BACKGROUND,
+            FILL_TRANSPARENT, FILL_CLICKED}
     );
     private final JComboBox<String> actionCB = new JComboBox<>(
-            new String[]{ACTION_LOCAL, ACTION_GLOBAL});
+        new String[]{ACTION_LOCAL, ACTION_GLOBAL});
 
     public PaintBucketTool() {
         super("Paint Bucket", 'N',
@@ -72,7 +73,7 @@ public class PaintBucketTool extends Tool {
     public void initSettingsPanel() {
         settingsPanel.add(new SliderSpinner(toleranceParam, WEST, false));
 
-        settingsPanel.addComboBox("Fill With:", fillCB, "fillCB");
+        settingsPanel.addComboBox(GUIText.FILL_WITH + ":", fillCB, "fillCB");
         settingsPanel.addComboBox("Action:", actionCB, "actionCB");
     }
 
@@ -119,13 +120,19 @@ public class PaintBucketTool extends Tool {
 
         String fill = (String) fillCB.getSelectedItem();
         int rgbAtMouse = workingImage.getRGB(x, y);
-        int fillRGB = switch (fill) {
-            case FILL_FOREGROUND -> getFGColor().getRGB();
-            case FILL_BACKGROUND -> getBGColor().getRGB();
-            case FILL_TRANSPARENT -> 0x00000000;
-            case FILL_CLICKED -> rgbAtMouse;
-            default -> throw new IllegalStateException("fill = " + fill);
-        };
+
+        int fillRGB;
+        if (fill.equals(FILL_FOREGROUND)) {
+            fillRGB = getFGColor().getRGB();
+        } else if (fill.equals(FILL_BACKGROUND)) {
+            fillRGB = getBGColor().getRGB();
+        } else if (fill.equals(FILL_TRANSPARENT)) {
+            fillRGB = 0x00000000;
+        } else if (fill.equals(FILL_CLICKED)) {
+            fillRGB = rgbAtMouse;
+        } else {
+            throw new IllegalStateException("fill = " + fill);
+        }
 
         String action = (String) actionCB.getSelectedItem();
         int tolerance = toleranceParam.getValue();

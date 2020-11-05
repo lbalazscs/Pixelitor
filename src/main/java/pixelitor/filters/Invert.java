@@ -21,12 +21,16 @@ import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * Invert filter
  */
 public class Invert extends Filter {
     // for compatibility with older adjustment layer tests
     private static final long serialVersionUID = -6279018636064203421L;
+
+    public static final String NAME = i18n("invert");
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {

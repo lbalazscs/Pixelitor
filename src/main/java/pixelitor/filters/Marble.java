@@ -21,6 +21,7 @@ import com.jhlabs.image.Colormap;
 import com.jhlabs.image.PointFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -29,6 +30,7 @@ import static com.jhlabs.image.WaveType.wave;
 import static com.jhlabs.math.Noise.*;
 import static net.jafama.FastMath.*;
 import static pixelitor.filters.gui.ReseedActions.reseedNoise;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Marble filter
@@ -36,7 +38,7 @@ import static pixelitor.filters.gui.ReseedActions.reseedNoise;
 public class Marble extends ParametrizedFilter {
     public static final String NAME = "Marble";
 
-    private final RangeParam zoom = new RangeParam("Zoom", 1, 10, 200);
+    private final RangeParam zoom = new RangeParam(ZOOM, 1, 10, 200);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam distortion = new RangeParam("Distortion", 0, 25, 100);
     private final RangeParam time = new RangeParam("Time (Phase)", 0, 0, 100);
@@ -44,7 +46,7 @@ public class Marble extends ParametrizedFilter {
     private final RangeParam detailsLevel = new RangeParam("Level", 0, 3, 8);
     private final RangeParam detailsStrength = new RangeParam("Strength", 0, 12, 48);
 
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Lines", Impl.TYPE_LINES),
         new Item("Rings", Impl.TYPE_RINGS),
         new Item("Grid", Impl.TYPE_GRID),

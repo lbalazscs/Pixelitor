@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.selection;
 
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.gui.GUIText;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -70,7 +71,7 @@ public enum SelectionModifyType {
     public abstract Shape modify(Area previous, Area outlineShape);
 
     public static EnumParam<SelectionModifyType> asParam() {
-        return new EnumParam<>("Type", SelectionModifyType.class);
+        return new EnumParam<>(GUIText.TYPE, SelectionModifyType.class);
     }
 
     @Override

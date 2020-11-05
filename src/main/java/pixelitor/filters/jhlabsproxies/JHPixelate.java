@@ -25,6 +25,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BrickBlockFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
@@ -48,7 +49,7 @@ public class JHPixelate extends ParametrizedFilter {
     private static final int TYPE_SQUARE = 0;
     private static final int TYPE_BRICK = 1;
 
-    private final IntChoiceParam typeParam = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam typeParam = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Squares", TYPE_SQUARE),
         new Item("Brick Wall", TYPE_BRICK),
     });

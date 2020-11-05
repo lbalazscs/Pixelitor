@@ -17,10 +17,8 @@
 
 package pixelitor.filters.gui;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import static org.mockito.Mockito.*;
@@ -29,7 +27,12 @@ import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
 
 @DisplayName("IntChoiceParam tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class IntChoiceParamTest {
+class IntChoiceParamTest {
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Test
     @DisplayName("is IGNORE_RANDOMIZE working")
     void isIgnoreRandomizeWorking() {

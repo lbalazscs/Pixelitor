@@ -19,6 +19,7 @@ package pixelitor.tools.pen;
 
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.StrokeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.Drawable;
@@ -58,10 +59,10 @@ public class TracePathPanel extends JPanel {
         strokeRB.setSelected(true);
 
         paintToolCB = new JComboBox<>(new String[]{
-                "Brush",
-                "Eraser",
-                "Smudge",
-                "Clone Stamp",
+            GUIText.BRUSH,
+            "Eraser",
+            "Smudge",
+            "Clone Stamp",
         });
         paintToolCB.addActionListener(e -> trace());
 
@@ -69,9 +70,9 @@ public class TracePathPanel extends JPanel {
         showStrokeSettingsButton.addActionListener(e -> showStrokeSettingsDialog());
 
         GridBagConstraints gbc = new GridBagConstraints(
-                0, 0, 1, 1,
-                1.0, 1.0, WEST, HORIZONTAL,
-                new Insets(2, 2, 2, 2), 0, 0);
+            0, 0, 1, 1,
+            1.0, 1.0, WEST, HORIZONTAL,
+            new Insets(2, 2, 2, 2), 0, 0);
         add(strokeRB, gbc);
         gbc.gridx = 1;
         add(showStrokeSettingsButton, gbc);
@@ -111,11 +112,11 @@ public class TracePathPanel extends JPanel {
         Shape shape = path.toImageSpaceShape();
         if (strokeRB.isSelected()) {
             System.out.println("TracePathPanel::trace: tracing with stroke, width = "
-                    + strokeParam.getStrokeWidth());
+                + strokeParam.getStrokeWidth());
 
         } else {
             System.out.println("TracePathPanel::trace: tracing with the tool "
-                    + paintToolCB.getSelectedItem());
+                + paintToolCB.getSelectedItem());
             Tools.BRUSH.trace(dr, shape);
         }
     }
@@ -131,12 +132,12 @@ public class TracePathPanel extends JPanel {
     public static void showInDialog(Path path) {
         TracePathPanel p = new TracePathPanel(path, OpenImages.getActiveDrawable());
         JDialog d = new DialogBuilder()
-                .title("Trace Path")
-                .content(p)
-                .okText("Close")
-                .okAction(p::dialogAccepted)
-                .cancelAction(p::dialogCanceled)
-                .build();
+            .title("Trace Path")
+            .content(p)
+            .okText(GUIText.CLOSE_DIALOG)
+            .okAction(p::dialogAccepted)
+            .cancelAction(p::dialogCanceled)
+            .build();
         p.setOwner(d);
         GUIUtils.showDialog(d);
     }

@@ -23,6 +23,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -32,8 +33,8 @@ import java.awt.image.BufferedImage;
 public class JHDifferenceOfGaussians extends ParametrizedFilter {
     public static final String NAME = "Difference of Gaussians";
 
-    private final RangeParam radius1 = new RangeParam("Radius 1", 0, 0, 10);
-    private final RangeParam radius2 = new RangeParam("Radius 2", 0, 4, 10);
+    private final RangeParam radius1 = new RangeParam(GUIText.RADIUS + " 1", 0, 0, 10);
+    private final RangeParam radius2 = new RangeParam(GUIText.RADIUS + " 2", 0, 4, 10);
     private final BooleanParam normalize = new BooleanParam("Maximize Contrast", true);
     private final BooleanParam invert = new BooleanParam("Invert", false);
 

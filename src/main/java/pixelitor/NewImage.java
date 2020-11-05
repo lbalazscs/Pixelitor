@@ -22,7 +22,6 @@ import pixelitor.filters.Fill;
 import pixelitor.gui.utils.*;
 import pixelitor.utils.AppPreferences;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -36,12 +35,13 @@ import static java.lang.String.format;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.colors.FillType.TRANSPARENT;
 import static pixelitor.utils.MemoryInfo.ONE_MEGABYTE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Static methods for creating new images
  */
 public final class NewImage {
-    private static final String NEW_IMAGE_STRING = Texts.get("new_image");
+    private static final String NEW_IMAGE_STRING = i18n("new_image");
     private static int untitledCount = 1;
 
     private static final Dimension lastSize = AppPreferences.getNewImageSize();

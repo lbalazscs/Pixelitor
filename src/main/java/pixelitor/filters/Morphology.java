@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.MorphologyFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.StatusBarProgressTracker;
 
 import java.awt.image.BufferedImage;
@@ -38,7 +39,7 @@ public class Morphology extends ParametrizedFilter {
     private static final int OP_OPEN = 10;
     private static final int OP_CLOSE = 11;
 
-    private final RangeParam radius = new RangeParam("Radius", 1, 1, 21);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 1, 21);
     private final IntChoiceParam kernel = new IntChoiceParam("Kernel Shape", new Item[]{
         new Item("Diamond", MorphologyFilter.KERNEL_DIAMOND),
         new Item("Square", MorphologyFilter.KERNEL_SQUARE),

@@ -22,6 +22,7 @@ import pixelitor.OpenImages;
 import pixelitor.compactions.Crop;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
@@ -41,6 +42,7 @@ import java.awt.event.ActionEvent;
 
 import static pixelitor.OpenImages.getActiveComp;
 import static pixelitor.OpenImages.getActiveSelection;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.pen.PenToolMode.EDIT;
 
 /**
@@ -135,13 +137,13 @@ public final class SelectionActions {
             EnumParam<SelectionModifyType> type = SelectionModifyType.asParam();
 
             gbh.addLabelAndControl("Amount", amount.createGUI("amount"));
-            gbh.addLabelAndControl("Type", type.createGUI("type"));
+            gbh.addLabelAndControl(GUIText.TYPE, type.createGUI("type"));
 
             new DialogBuilder()
                 .content(panel)
                 .title("Modify Selection")
                 .okText("Change!")
-                .cancelText("Close")
+                .cancelText(CLOSE_DIALOG)
                 .validator(d -> {
                     modifySelection(type, amount);
 

@@ -34,8 +34,13 @@ import static pixelitor.tools.pen.AnchorPointType.SYMMETRIC;
 
 @DisplayName("Shapes tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class ShapesTest {
+class ShapesTest {
     private View view;
+
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
 
     @BeforeEach
     void beforeEachTest() {

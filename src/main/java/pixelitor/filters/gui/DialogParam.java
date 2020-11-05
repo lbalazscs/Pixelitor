@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 /**
  * A composite {@link FilterParam} which
@@ -64,7 +65,7 @@ public class DialogParam extends AbstractFilterParam {
             .content(p)
             .title(getName())
             .withScrollbars()
-            .okText("Close")
+            .okText(CLOSE_DIALOG)
             .noCancelButton()
             .build();
         return d;

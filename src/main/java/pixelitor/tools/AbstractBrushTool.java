@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.RunContext;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.*;
 import pixelitor.history.History;
@@ -48,6 +49,7 @@ import static java.awt.geom.PathIterator.*;
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static pixelitor.Composition.ImageChangeActions.HISTOGRAM;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.APP_LOGIC;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.WEST;
 
 /**
@@ -69,8 +71,8 @@ public abstract class AbstractBrushTool extends Tool {
     private JDialog lazyMouseDialog;
 
     protected Graphics2D graphics;
-    private final RangeParam brushRadiusParam = new RangeParam("Radius",
-            MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
+    private final RangeParam brushRadiusParam = new RangeParam(GUIText.RADIUS,
+        MIN_BRUSH_RADIUS, DEFAULT_BRUSH_RADIUS, MAX_BRUSH_RADIUS, false, WEST);
 
     private EnumComboBoxModel<Symmetry> symmetryModel;
 
@@ -134,7 +136,7 @@ public abstract class AbstractBrushTool extends Tool {
     protected void addTypeSelector() {
         var brushTypes = BrushType.values();
         typeCB = new JComboBox<>(brushTypes);
-        settingsPanel.addComboBox("Brush:", typeCB, "typeCB");
+        settingsPanel.addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
         typeCB.addActionListener(e -> brushTypeChanged());
 
         // make sure all values are visible without a scrollbar
@@ -162,9 +164,9 @@ public abstract class AbstractBrushTool extends Tool {
         @SuppressWarnings("unchecked")
         var symmetryCB = new JComboBox<Symmetry>(symmetryModel);
 
-        settingsPanel.addComboBox("Mirror:", symmetryCB, "symmetrySelector");
+        settingsPanel.addComboBox(GUIText.MIRROR + ":", symmetryCB, "symmetrySelector");
         symmetryCB.addActionListener(e -> symmetryBrush.symmetryChanged(
-                getSymmetry(), getRadius()));
+            getSymmetry(), getRadius()));
     }
 
     protected void addBrushSettingsButton() {
@@ -178,11 +180,11 @@ public abstract class AbstractBrushTool extends Tool {
     private void brushSettingsButtonPressed() {
         var brushType = getBrushType();
         settingsDialog = new DialogBuilder()
-                .content(brushType.getConfigPanel(this))
-                .title("Settings for the " + brushType + " Brush")
-                .notModal()
-                .withScrollbars()
-                .okText("Close")
+            .content(brushType.getConfigPanel(this))
+            .title("Settings for the " + brushType + " Brush")
+            .notModal()
+            .withScrollbars()
+            .okText(CLOSE_DIALOG)
                 .noCancelButton()
                 .show();
     }
@@ -226,11 +228,11 @@ public abstract class AbstractBrushTool extends Tool {
         });
 
         lazyMouseDialog = new DialogBuilder()
-                .content(p)
-                .title("Lazy Mouse Settings")
-                .notModal()
-                .willBeShownAgain()
-                .okText("Close")
+            .content(p)
+            .title("Lazy Mouse Settings")
+            .notModal()
+            .willBeShownAgain()
+            .okText(CLOSE_DIALOG)
                 .noCancelButton()
                 .show();
     }

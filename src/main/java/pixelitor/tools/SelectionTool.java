@@ -22,6 +22,7 @@ import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
 import pixelitor.RunContext;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.selection.*;
 import pixelitor.tools.util.ArrowKey;
@@ -78,7 +79,7 @@ public class SelectionTool extends DragTool {
     public void initSettingsPanel() {
         var typeCB = new JComboBox<SelectionType>(typeModel);
         typeCB.addActionListener(e -> selectionTypeChanged());
-        settingsPanel.addComboBox("Type:", typeCB, "typeCB");
+        settingsPanel.addComboBox(GUIText.TYPE + ":", typeCB, "typeCB");
 
         settingsPanel.addSeparator();
 

@@ -17,11 +17,7 @@
 
 package pixelitor.tools.gradient;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
 import pixelitor.gui.View;
 
@@ -31,7 +27,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("GradientHandles tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class GradientHandlesTest {
+class GradientHandlesTest {
     private static final int START_X_FOR_END = 30;
     private static final int START_Y_FOR_END = 50;
     private static final int START_X_FOR_START = 10;
@@ -44,12 +40,17 @@ public class GradientHandlesTest {
     private GradientCenterPoint middle;
     private GradientHandles handles;
 
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @BeforeEach
     void beforeEachTest() {
         View view = TestHelper.createMockViewWithoutComp();
         handles = new GradientHandles(
-                START_X_FOR_START, START_Y_FOR_START,
-                START_X_FOR_END, START_Y_FOR_END, view);
+            START_X_FOR_START, START_Y_FOR_START,
+            START_X_FOR_END, START_Y_FOR_END, view);
         start = handles.getStart();
         end = handles.getEnd();
         middle = handles.getMiddle();

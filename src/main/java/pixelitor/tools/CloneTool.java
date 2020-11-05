@@ -37,6 +37,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
 import static pixelitor.tools.CloneTool.State.*;
 
@@ -98,7 +99,7 @@ public class CloneTool extends BlendingModeBrushTool {
             .title("Clone Transform")
             .content(transformPanel)
             .notModal()
-            .okText("Close")
+            .okText(CLOSE_DIALOG)
             .noCancelButton()
             .show();
     }

@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ReseedActions.reseedNoise;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Renders wood texture based on the JHLabs WoodFilter
@@ -36,7 +37,7 @@ public class JHWood extends ParametrizedFilter {
     public static final String NAME = "Wood";
 
     private final RangeParam rings = new RangeParam("Rings", 1, 50, 100);
-    private final RangeParam scale = new RangeParam("Zoom", 1, 100, 500);
+    private final RangeParam scale = new RangeParam(ZOOM, 1, 100, 500);
     private final RangeParam stretch = new RangeParam("Stretch", 0, 10, 50);
     private final AngleParam angle = new AngleParam("Angle", 0);
     private final RangeParam turbulence = new RangeParam("Turbulence", 0, 0, 100);

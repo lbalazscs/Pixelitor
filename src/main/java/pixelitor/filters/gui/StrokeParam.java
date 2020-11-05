@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static pixelitor.filters.gui.RandomizePolicy.ALLOW_RANDOMIZE;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.tools.shapes.StrokeType.*;
 
 /**
@@ -122,7 +123,7 @@ public class StrokeParam extends AbstractFilterParam {
             .content(new StrokeSettingsPanel(param))
             .withScrollbars()
             .noCancelButton()
-            .okText("Close")
+            .okText(CLOSE_DIALOG)
             .build();
     }
 

@@ -35,6 +35,7 @@ import static java.awt.BorderLayout.*;
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
 import static pixelitor.io.DropListener.Destination.NEW_LAYERS;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The part of the GUI that manages the layers of a composition.
@@ -56,7 +57,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         JPanel southPanel = initSouthPanel();
         add(southPanel, SOUTH);
 
-        setBorder(createTitledBorder("Layers"));
+        setBorder(createTitledBorder(i18n("layers")));
 
         OpenImages.addActivationListener(this);
 

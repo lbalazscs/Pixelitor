@@ -35,6 +35,7 @@ import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.USER_ONLY_TRANSPARENCY;
 import static pixelitor.filters.gui.ReseedActions.reseedByCalling;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Clouds filter based on multiple Perlin noise iterations, inspired by the Paint.net clouds
@@ -48,7 +49,7 @@ public class Clouds extends ParametrizedFilter {
         reseed();
     }
 
-    private final RangeParam scaleParam = new RangeParam("Zoom", 3, 100, 300);
+    private final RangeParam scaleParam = new RangeParam(ZOOM, 3, 100, 300);
     private final RangeParam roughnessParam = new RangeParam("Roughness (%)", 0, 50, 100);
 
     private final ColorParam color1 = new ColorParam("Color 1", BLACK, USER_ONLY_TRANSPARENCY);

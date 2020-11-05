@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.impl.BricTransitionFilter;
+import pixelitor.gui.GUIText;
 
 import java.awt.image.BufferedImage;
 
@@ -35,7 +36,7 @@ public class Transition2D extends ParametrizedFilter {
     public static final String NAME = "2D Transitions";
 
     private final RangeParam progress = new RangeParam("Progress (%)", 0, 0, 100);
-    private final IntChoiceParam type = new IntChoiceParam("Type", new Item[]{
+    private final IntChoiceParam type = new IntChoiceParam(GUIText.TYPE, new Item[]{
         new Item("Box In", BOX_IN),
         new Item("Box Out", BOX_OUT),
         new Item("Bars (Horizontal)", BARS_HORIZONTAL),

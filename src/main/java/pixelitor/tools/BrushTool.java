@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.gui.GUIText;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PPoint;
@@ -33,7 +34,7 @@ import static pixelitor.colors.FgBgColors.getFGColor;
  * The brush tool
  */
 public class BrushTool extends BlendingModeBrushTool {
-    public static final String NAME = "Brush";
+    public static final String NAME = GUIText.BRUSH;
     private Color drawingColor;
 
     public BrushTool() {

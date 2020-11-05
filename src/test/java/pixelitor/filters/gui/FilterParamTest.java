@@ -18,11 +18,13 @@
 package pixelitor.filters.gui;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import pixelitor.TestHelper;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 
 import javax.swing.*;
@@ -43,6 +45,11 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_
  */
 @RunWith(Parameterized.class)
 public class FilterParamTest {
+    @BeforeClass
+    public static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Parameter
     public FilterParam param;
 
@@ -56,6 +63,9 @@ public class FilterParamTest {
 
     @Parameters(name = "{index}: param = {0}")
     public static Collection<Object[]> instancesToTest() {
+        // this method runs before beforeAllTests
+        TestHelper.setUnitTestingMode();
+
         return Arrays.asList(new Object[][]{
             {new RangeParam("Param Name", 0, 0, 10)},
             {new RangeWithColorsParam(CYAN, RED, "Param Name", -100, 0, 100)},

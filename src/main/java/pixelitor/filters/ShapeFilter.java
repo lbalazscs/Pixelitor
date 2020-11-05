@@ -24,6 +24,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.painters.AreaEffects;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.*;
@@ -61,14 +62,14 @@ public abstract class ShapeFilter extends ParametrizedFilter {
         new Item("Black", BG_BLACK),
         new Item("Original Image", BG_ORIGINAL),
         new Item("Transparent", BG_TRANSPARENT),
-        new Item("Background Color", BG_TOOL),
+        new Item(GUIText.BG_COLOR, BG_TOOL),
     }, IGNORE_RANDOMIZE);
 
     private final IntChoiceParam foreground = new IntChoiceParam("Foreground", new Item[]{
         new Item("White", FG_WHITE),
         new Item("Black", FG_BLACK),
         new Item("Radial Gradient", FG_GRADIENT),
-        new Item("Foreground Color", FG_TOOL),
+        new Item(GUIText.FG_COLOR, FG_TOOL),
         new Item("Transparent", FG_TRANSPARENT),
     }, IGNORE_RANDOMIZE);
 

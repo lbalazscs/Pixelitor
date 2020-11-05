@@ -29,10 +29,13 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
 import java.util.Objects;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * The Levels filter
  */
 public class Levels extends FilterWithGUI {
+    public static String NAME = i18n("levels");
     private RGBLookup rgbLookup;
 
     public Levels() {

@@ -19,7 +19,6 @@ package pixelitor.menus.edit;
 
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -33,6 +32,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Pastes an image from the system clipboard
@@ -41,7 +41,7 @@ public class PasteAction extends AbstractAction {
     private final PasteDestination destination;
 
     public PasteAction(PasteDestination destination) {
-        super(Texts.get(destination.toResourceKey()));
+        super(i18n(destination.toResourceKey()));
 
         this.destination = destination;
     }

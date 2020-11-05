@@ -27,27 +27,30 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
+import static pixelitor.gui.GUIText.BRIGHTNESS;
+import static pixelitor.gui.GUIText.COLOR;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * Colorize
  */
 public class Colorize extends ParametrizedFilter {
-    public static final String NAME = "Colorize";
+    public static final String NAME = i18n("colorize");
 
     private final RangeParam adjustBrightness = new RangeParam(
-            "Adjust Brightness", -100, 0, 100);
+        BRIGHTNESS, -100, 0, 100);
     private final ColorParam colorParam = new ColorParam(
-            "Color", new Color(255, 207, 119), NO_TRANSPARENCY);
+        COLOR, new Color(255, 207, 119), NO_TRANSPARENCY);
     private final RangeParam opacityParam = new RangeParam(
-            "Amount (%)", 0, 100, 100);
+        "Amount (%)", 0, 100, 100);
 
     public Colorize() {
         super(ShowOriginal.YES);
 
         setParams(
-                colorParam,
-                adjustBrightness,
-                opacityParam
+            colorParam,
+            adjustBrightness,
+            opacityParam
         );
     }
 

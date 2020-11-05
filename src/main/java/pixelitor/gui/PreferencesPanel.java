@@ -38,6 +38,8 @@ import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
 import static javax.swing.SwingConstants.LEFT;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The GUI for the preferences dialog
@@ -285,8 +287,8 @@ public class PreferencesPanel extends JPanel {
         new DialogBuilder()
             .content(prefPanel)
             .noCancelButton()
-            .title("Preferences")
-            .okText("Close")
+            .title(i18n("preferences"))
+            .okText(CLOSE_DIALOG)
             .validator(prefPanel::validate)
             .validateWhenCanceled()
             .show();

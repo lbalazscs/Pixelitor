@@ -27,6 +27,9 @@ import pixelitor.utils.ViewActivationListener;
 import javax.swing.*;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
+import java.text.MessageFormat;
+
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The Fade menu item. It is enabled only if fading is possible.
@@ -51,9 +54,12 @@ public class FadeMenuItem extends JMenuItem implements UndoableEditListener, Vie
         setEnabled(canFade);
         Action action = getAction();
         if (canFade) {
-            action.putValue(Action.NAME, "Fade " + History.getLastEditName() + "...");
+            MessageFormat formatter = new MessageFormat(i18n("fade_filter"));
+            Object[] msgArguments = {History.getLastEditName()};
+            String menuName = formatter.format(msgArguments) + "...";
+            action.putValue(Action.NAME, menuName);
         } else {
-            action.putValue(Action.NAME, "Fade...");
+            action.putValue(Action.NAME, Fade.NAME + "...");
         }
     }
 

@@ -35,6 +35,7 @@ import static java.awt.BasicStroke.JOIN_ROUND;
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.filters.gui.RandomizePolicy.IGNORE_RANDOMIZE;
+import static pixelitor.gui.GUIText.ZOOM;
 
 /**
  * Renders a fractal tree
@@ -57,7 +58,7 @@ public class FractalTree extends ParametrizedFilter {
         },
         false);
 
-    private final RangeParam zoom = new RangeParam("Zoom", 1, 100, 301);
+    private final RangeParam zoom = new RangeParam(ZOOM, 1, 100, 301);
     private final RangeParam curvedness = new RangeParam("Curvedness", 0, 10, 48);
     private final GroupedRangeParam physics = new GroupedRangeParam("Physics",
         "Gravity", "Wind", -100, 0, 100, false);

@@ -39,7 +39,7 @@ public class AboutDialog {
         // should not be instantiated
     }
 
-    public static void showDialog() {
+    public static void showDialog(String aboutText) {
         createAboutBox();
 
         var tabbedPane = new JTabbedPane();
@@ -49,7 +49,7 @@ public class AboutDialog {
         tabbedPane.add("System Info", new SystemInfoPanel());
 
         new DialogBuilder()
-            .title("About Pixelitor")
+            .title(aboutText)
             .content(tabbedPane)
             .withScrollbars()
             .noCancelButton()

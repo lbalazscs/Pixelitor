@@ -29,12 +29,13 @@ import java.awt.image.BufferedImage;
 import java.util.function.BooleanSupplier;
 
 import static pixelitor.gui.utils.SliderSpinner.TextPosition.NONE;
+import static pixelitor.utils.Texts.i18n;
 
 /**
  * The Channel Mixer filter
  */
 public class ChannelMixer extends ParametrizedFilter {
-    public static final String NAME = "Channel Mixer";
+    public static final String NAME = i18n("channel_mixer");
 
     private static final int MIN_PERCENT = -200;
     private static final int MAX_PERCENT = 200;

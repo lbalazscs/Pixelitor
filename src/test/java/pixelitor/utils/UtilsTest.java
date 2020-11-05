@@ -18,11 +18,18 @@
 package pixelitor.utils;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import pixelitor.TestHelper;
 
 @DisplayName("Utils tests")
-public class UtilsTest {
+class UtilsTest {
+    @BeforeAll
+    static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+    }
+
     @Test
     void angleFunctions() {
         for (double a = -Math.PI; a < Math.PI; a += 0.1) {

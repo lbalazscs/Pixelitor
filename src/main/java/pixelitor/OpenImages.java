@@ -31,7 +31,10 @@ import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.tools.Tools;
 import pixelitor.tools.pen.Path;
-import pixelitor.utils.*;
+import pixelitor.utils.Messages;
+import pixelitor.utils.Rnd;
+import pixelitor.utils.ViewActivationListener;
+import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.test.RandomGUITest;
 
 import java.awt.Cursor;
@@ -49,6 +52,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
+import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.onEDT;
 
 /**
@@ -60,14 +64,14 @@ public class OpenImages {
     private static final List<ViewActivationListener> activationListeners
         = new ArrayList<>();
 
-    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(Texts.get("close_all")) {
+    public static final MenuAction CLOSE_ALL_ACTION = new MenuAction(i18n("close_all")) {
         @Override
         public void onClick() {
             warnAndCloseAll();
         }
     };
 
-    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(Texts.get("close")) {
+    public static final MenuAction CLOSE_ACTIVE_ACTION = new MenuAction(i18n("close")) {
         @Override
         public void onClick() {
             warnAndCloseActive();

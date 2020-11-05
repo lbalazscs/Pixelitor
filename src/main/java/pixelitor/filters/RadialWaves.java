@@ -25,6 +25,8 @@ import pixelitor.filters.impl.RadialWavesFilter;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.gui.GUIText.ZOOM;
+
 /**
  * Radial waves in a polar coordinate system
  */
@@ -35,7 +37,7 @@ public class RadialWaves extends ParametrizedFilter {
     private final RangeParam radialAmplitude = new RangeParam("Radial Amplitude (Amount)", 0, 20, 100);
     private final RangeParam phase = new RangeParam("Phase (Time)", 0, 0, 360);
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final RangeParam zoom = new RangeParam("Zoom (%)", 1, 100, 500);
+    private final RangeParam zoom = new RangeParam(ZOOM + " (%)", 1, 100, 500);
     private final IntChoiceParam waveType = IntChoiceParam.forWaveType();
     private final IntChoiceParam edgeAction = IntChoiceParam.forEdgeAction();
     private final IntChoiceParam interpolation = IntChoiceParam.forInterpolation();

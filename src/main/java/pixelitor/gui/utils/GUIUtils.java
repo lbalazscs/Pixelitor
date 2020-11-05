@@ -47,6 +47,7 @@ import static java.awt.Taskbar.Feature.PROGRESS_VALUE_WINDOW;
 import static javax.swing.JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 import static pixelitor.gui.utils.Screens.Align.SCREEN_CENTER;
 import static pixelitor.utils.Cursors.BUSY;
 import static pixelitor.utils.Cursors.DEFAULT;
@@ -76,7 +77,7 @@ public final class GUIUtils {
                                                      String title) {
         new DialogBuilder()
             .okText("Copy as Text to the Clipboard")
-            .cancelText("Close")
+            .cancelText(CLOSE_DIALOG)
             .validator(d -> {
                 Utils.copyStringToClipboard(text);
                 return false; // prevents the dialog from closing

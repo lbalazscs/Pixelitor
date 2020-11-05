@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
 import pixelitor.tools.util.ImDrag;
 import pixelitor.utils.ImageUtils;
@@ -40,7 +41,7 @@ public class JHConcentricHalftone extends JHMaskedHalftone {
     private static final int TYPE_SPIRAL_CCW = 3;
 
     private final ImagePositionParam center = new ImagePositionParam("Center");
-    private final IntChoiceParam gradientType = new IntChoiceParam("Type",
+    private final IntChoiceParam gradientType = new IntChoiceParam(GUIText.TYPE,
         new Item[]{
             new Item("Concentric", TYPE_CONCENTRIC),
             new Item("Spiral CW", TYPE_SPIRAL_CW),

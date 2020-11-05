@@ -18,6 +18,7 @@
 package pixelitor.history;
 
 import pixelitor.Composition;
+import pixelitor.gui.GUIText;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
@@ -42,7 +43,7 @@ public class MergeDownEdit extends PixelitorEdit {
                          BufferedImage backupImage,
                          MaskViewMode maskViewMode,
                          int activeIndex) {
-        super("Merge Down", comp);
+        super(GUIText.MERGE_DOWN, comp);
 
         this.layer = layer;
         this.maskViewMode = maskViewMode;

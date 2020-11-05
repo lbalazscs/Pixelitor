@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
@@ -36,7 +37,7 @@ public class FlowerOfLife extends ShapeFilter {
 
     private static final double SQRT_2 = 1.4142135623730951;
 
-    private final RangeParam radius = new RangeParam("Radius", 1, 50, 100);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 1, 50, 100);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 10);
     private final IntChoiceParam grid = new IntChoiceParam("Grid Type", new Item[]{
         new Item("Triangular", GRID_TYPE_TRIANGULAR),

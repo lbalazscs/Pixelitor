@@ -19,6 +19,7 @@ package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.gui.GUIText;
 import pixelitor.utils.ReseedSupport;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.StatusBarProgressTracker;
@@ -32,6 +33,7 @@ import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
+import static pixelitor.gui.GUIText.OPACITY;
 
 /**
  * Fills the image with random circles
@@ -44,7 +46,7 @@ public class RandomSpheres extends ParametrizedFilter {
     private static final int COLORS_SAMPLE_IMAGE = 1;
     private static final int COLORS_FG_BG = 2;
 
-    private final RangeParam radius = new RangeParam("Radius", 2, 10, 100);
+    private final RangeParam radius = new RangeParam(GUIText.RADIUS, 2, 10, 100);
     private final RangeParam density = new RangeParam("Density (%)", 1, 50, 221);
 
     private final IntChoiceParam colorSource = new IntChoiceParam("Colors Source",
@@ -59,7 +61,7 @@ public class RandomSpheres extends ParametrizedFilter {
     private final ElevationAngleParam highlightElevationSelector = new ElevationAngleParam(
         "Highlight Elevation (Degrees)", INTUITIVE_RADIANS_45);
 
-    private final RangeParam opacity = new RangeParam("Opacity (%)", 0, 100, 100);
+    private final RangeParam opacity = new RangeParam(OPACITY, 0, 100, 100);
 
     public RandomSpheres() {
         super(ShowOriginal.YES);

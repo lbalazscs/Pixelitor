@@ -33,7 +33,6 @@ import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
-import pixelitor.utils.Texts;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -47,6 +46,7 @@ import static java.lang.String.format;
 import static pixelitor.colors.FgBgColors.*;
 import static pixelitor.gui.utils.TextFieldValidator.createPositiveIntLayer;
 import static pixelitor.tools.Tools.*;
+import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.calledOnEDT;
 import static pixelitor.utils.Threads.threadInfo;
 
@@ -65,7 +65,7 @@ public class AutoPaint {
         var configPanel = new ConfigPanel();
         new DialogBuilder()
             .validatedContent(configPanel)
-            .title(Texts.get("auto_paint"))
+            .title(i18n("auto_paint"))
             .okAction(() -> paintStrokes(dr, configPanel.getSettings()))
             .show();
     }

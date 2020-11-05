@@ -24,6 +24,7 @@ import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
+import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.Dialogs;
@@ -276,7 +277,7 @@ public class ShapesTool extends DragTool {
             .withScrollbars()
             .content(configPanel)
             .noCancelButton()
-            .okText("Close")
+            .okText(GUIText.CLOSE_DIALOG)
             .show();
     }
 

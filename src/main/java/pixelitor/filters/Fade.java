@@ -21,22 +21,22 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.gui.ShowOriginal;
+import pixelitor.gui.GUIText;
 import pixelitor.history.History;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 
+import static pixelitor.utils.Texts.i18n;
+
 /**
  * The Fade filter
  */
 public class Fade extends ParametrizedFilter {
-    public static final String NAME = "Fade";
-    private static final int FADE_MIN = 0;
-    private static final int FADE_MAX = 100;
-    private static final int FADE_INIT = 100;
+    public static final String NAME = i18n("fade");
 
-    private final RangeParam opacityParam = new RangeParam("Opacity (%)", FADE_MIN, FADE_INIT, FADE_MAX
-    );
+    private final RangeParam opacityParam =
+        new RangeParam(GUIText.OPACITY, 0, 100, 100);
 //    private BlendingModeParam blendingModeParam = new BlendingModeParam(BlendingMode.values());
 
     public Fade() {

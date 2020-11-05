@@ -33,23 +33,16 @@ import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
+import java.awt.dnd.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.EAST;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.WEST;
+import static java.awt.BorderLayout.*;
 import static java.awt.FlowLayout.LEFT;
 import static java.lang.String.format;
+import static pixelitor.gui.GUIText.CLOSE_DIALOG;
 
 public class MetaDataPanel extends JPanel implements DropTargetListener {
     private final JXTreeTable treeTable;
@@ -217,9 +210,9 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         MetaDataTreeTableModel model = new MetaDataTreeTableModel(metadata);
         MetaDataPanel panel = new MetaDataPanel(model);
         new DialogBuilder()
-                .title("Metadata for " + file.getName())
-                .content(panel)
-                .okText("Close")
+            .title("Metadata for " + file.getName())
+            .content(panel)
+            .okText(CLOSE_DIALOG)
                 .noCancelButton()
                 .show();
     }

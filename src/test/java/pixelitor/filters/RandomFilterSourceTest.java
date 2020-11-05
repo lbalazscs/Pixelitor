@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import org.junit.jupiter.api.*;
+import pixelitor.TestHelper;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 
@@ -28,11 +29,13 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("RandomFilterSource tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class RandomFilterSourceTest {
+class RandomFilterSourceTest {
     private RandomFilterSource source;
 
     @BeforeAll
     static void beforeAllTests() {
+        TestHelper.setUnitTestingMode();
+
         // generate mock filters with the names "A", "B" ... "Z"
         for (int i = 'A'; i < 'Z' + 1; i++) {
             char[] charsInFilterName = {(char) i};
