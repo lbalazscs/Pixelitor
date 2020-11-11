@@ -29,7 +29,7 @@ import pixelitor.utils.ProgressPanel;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.io.File;
 
 import static java.awt.BorderLayout.CENTER;
@@ -127,10 +127,10 @@ public class FileChoosers {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = openChooser.getSelectedFile();
-            String fileName = selectedFile.getName();
 
             Dirs.setLastOpen(selectedFile.getParentFile());
 
+            String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
                 IO.openFileAsync(selectedFile);
             } else { // unsupported extension
@@ -245,7 +245,6 @@ public class FileChoosers {
     }
 
     public static File selectSaveFileForSpecificFormat(FileFilter fileFilter) {
-        File selectedFile = null;
         try {
             initSaveChooser();
             setupFilterToOnlyOneFormat(saveChooser, fileFilter);
@@ -254,6 +253,7 @@ public class FileChoosers {
             int status = saveChooser.showSaveDialog(PixelitorWindow.get());
             GlobalEvents.dialogClosed("Save");
 
+            File selectedFile = null;
             if (status == JFileChooser.APPROVE_OPTION) {
                 selectedFile = saveChooser.getSelectedFile();
                 Dirs.setLastSave(selectedFile.getParentFile());

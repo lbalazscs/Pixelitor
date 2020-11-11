@@ -122,12 +122,11 @@ public class ToneCurves {
     private void drawGrid() {
         Path2D lightPath2D = new Path2D.Float();
         Path2D darkPath2D = new Path2D.Float();
-        Path2D path2D;
 
         float gridWidth = (float) curveWidth / GRID_DENSITY;
         float gridHeight = (float) curveHeight / GRID_DENSITY;
         for (int i = 0; i <= GRID_DENSITY; i++) {
-            path2D = i % 2 == 0 ? darkPath2D : lightPath2D;
+            Path2D path2D = i % 2 == 0 ? darkPath2D : lightPath2D;
             // horizontal
             path2D.moveTo(0, i * gridHeight);
             path2D.lineTo(curveWidth, i * gridHeight);

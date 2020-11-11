@@ -22,8 +22,7 @@ import pixelitor.tools.DragTool;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Point2D;
 
 import static java.lang.String.format;
@@ -332,10 +331,8 @@ public class UserDrag {
         DragDisplay dd = new DragDisplay(g, displayBgWidth);
 
         int dragAngle = (int) Math.toDegrees(calcIntuitiveAngle());
-        String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
 
         int dragDistance = (int) calcImDist();
-        String distInfo = "d = " + dragDistance + " px";
 
         double coDx = coEndX - coStartX;
         double coDy = coEndY - coStartY;
@@ -355,13 +352,14 @@ public class UserDrag {
                     + ((displayBgWidth / 2.0 + MOUSE_DISPLAY_DISTANCE)
                     * coDx / displayBgWidth);
         }
-        double y;
         int yInterpolationLimit = DragDisplay.TWO_LINER_BG_HEIGHT;
         if (xDistIsSmall) {
             // if the x distance is small, don't try to smoothly interpolate
             // the y position, because the drag display might cover the shape
             yInterpolationLimit = 0;
         }
+
+        double y;
         if (coDy <= -yInterpolationLimit) {
             // display it above the mouse
             y = coEndY - MOUSE_DISPLAY_DISTANCE;
@@ -374,6 +372,9 @@ public class UserDrag {
                     + ((DragDisplay.TWO_LINER_BG_HEIGHT / 2.0 + MOUSE_DISPLAY_DISTANCE)
                     * coDy / DragDisplay.TWO_LINER_BG_HEIGHT);
         }
+
+        String angleInfo = "\u2221 = " + dragAngle + " \u00b0";
+        String distInfo = "d = " + dragDistance + " px";
         dd.drawTwoLines(angleInfo, distInfo, (float) x, (float) y);
 
         dd.finish();

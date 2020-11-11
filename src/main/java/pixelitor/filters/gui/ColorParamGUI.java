@@ -22,8 +22,7 @@ import pixelitor.colors.Colors;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.*;
 
 import static java.awt.FlowLayout.LEFT;
 
@@ -42,12 +41,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     public ColorParamGUI(ColorParam model, FilterButtonModel action, boolean addDefaultButton) {
         this.model = model;
         setLayout(new FlowLayout(LEFT));
-
-//        button = new JButton();
-//        button.setPreferredSize(new Dimension(BUTTON_SIZE, BUTTON_SIZE));
-//        button.setBackground(model.getColor());
-//        button.addActionListener(e -> showColorDialog());
-//        add(button);
 
         Color color = model.getColor();
         colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
@@ -76,9 +69,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
     }
 
     private void updateColor(Color color) {
-        //            button.setBackground(color);
-//            button.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-
         colorSwatch.setForeground(color);
         colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
 

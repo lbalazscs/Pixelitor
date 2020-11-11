@@ -33,8 +33,7 @@ import pixelitor.layers.LayerMaskActions.EnableDisableMaskAction;
 import pixelitor.layers.LayerMaskActions.LinkUnlinkMaskAction;
 import pixelitor.testutils.WithMask;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -149,13 +148,13 @@ public class LayerTest {
 
     @Test
     public void duplicating() {
-        Layer copy = layer.duplicate();
+        Layer copy = layer.duplicate(false);
         checkCopy(copy, "layer 1 copy");
 
-        Layer copy2 = copy.duplicate();
+        Layer copy2 = copy.duplicate(false);
         checkCopy(copy2, "layer 1 copy 2");
 
-        Layer copy3 = copy2.duplicate();
+        Layer copy3 = copy2.duplicate(false);
         checkCopy(copy3, "layer 1 copy 3");
 
         // in this case the name shouldn't change

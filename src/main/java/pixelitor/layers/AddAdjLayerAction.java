@@ -46,7 +46,7 @@ public class AddAdjLayerAction extends NamedAction
     @Override
     public void actionPerformed(ActionEvent e) {
         var comp = OpenImages.getActiveComp();
-        var adjustmentLayer = new AdjustmentLayer(comp, "Invert", new Invert());
+        var adjustmentLayer = new AdjustmentLayer(comp, Invert.NAME, new Invert());
 
         new LayerAdder(comp)
                 .withHistory("New Adjustment Layer")

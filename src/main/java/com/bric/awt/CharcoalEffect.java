@@ -22,15 +22,14 @@ package com.bric.awt;
 import com.bric.geom.GeneralPathWriter;
 import com.bric.geom.MeasuredShape;
 import com.bric.geom.PathWriter;
+import net.jafama.FastMath;
 
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Random;
 
 import static java.lang.Math.PI;
-import static net.jafama.FastMath.cos;
-import static net.jafama.FastMath.sin;
 
 /**
  * This applies a charcoal effect to a shape.
@@ -144,11 +143,11 @@ public class CharcoalEffect {
         for (MeasuredShape measuredShape : m) {
             float orig = measuredShape.getOriginalDistance();
             float total = measuredShape.getClosedDistance();
-            float distance = 0;
-            float pendingGap = 0;
 
             writer.moveTo(measuredShape.getMoveToX(), measuredShape.getMoveToY());
 
+            float distance = 0;
+            float pendingGap = 0;
             while (distance < orig) {
                 pendingGap += (0.05f + 0.95f * random.nextFloat()) * 20 * (0.05f + 0.95f * (1 - 0.9f * size));
 
@@ -182,8 +181,10 @@ public class CharcoalEffect {
                             //float angle = m[a].getTangentSlope(distance+pendingGap);
                             //or
                             //float angle = m[a].getTangentSlope(distance+pendingGap)-(float)Math.PI/4;
-                            while (s.contains(center.getX() + width * cos(angle + mult * PI / 2),
-                                    center.getY() + width * sin(angle + mult * PI / 2)) && width < maxDepth) {
+                            double cos = FastMath.cosQuick(angle + mult * PI / 2);
+                            double sin = FastMath.sinQuick(angle + mult * PI / 2);
+                            while (s.contains(center.getX() + width * cos,
+                                    center.getY() + width * sin) && width < maxDepth) {
                                 width++;
                             }
                             //or to make something spikey, try:
@@ -220,8 +221,8 @@ public class CharcoalEffect {
                                     measuredShape
                                             .writeShape(distance / total, (pendingGap - crackWidth / 2) / total, writer, false);
                                     writer.lineTo(
-                                            (float) (center.getX() + depth * cos(angle + mult * PI / 2)),
-                                            (float) (center.getY() + depth * sin(angle + mult * PI / 2))
+                                            (float) (center.getX() + depth * cos),
+                                            (float) (center.getY() + depth * sin)
                                     );
                                     writer.lineTo((float) rightSide.getX(), (float) rightSide.getY());
 

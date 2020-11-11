@@ -48,10 +48,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,6 +70,7 @@ import static pixelitor.utils.Utils.createCopyName;
  */
 public class Composition implements Serializable {
     // serialization is used for saving in the pxc format
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String name;
@@ -197,6 +195,7 @@ public class Composition implements Serializable {
         }
     }
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // init transient variables
         compositeImage = null; // will be set when needed
@@ -348,7 +347,7 @@ public class Composition implements Serializable {
     }
 
     public void duplicateActiveLayer() {
-        Layer duplicate = activeLayer.duplicate();
+        Layer duplicate = activeLayer.duplicate(false);
         if (duplicate == null) {
             // there was an out of memory error
             return;
@@ -972,13 +971,13 @@ public class Composition implements Serializable {
      * existing selections
      */
     public PixelitorEdit changeSelection(Shape newShape) {
-        PixelitorEdit edit;
         newShape = clipToCanvasBounds(newShape);
         if (newShape.getBounds().isEmpty()) {
             // the new selection would be outside the canvas
             return null;
         }
 
+        PixelitorEdit edit;
         if (selection != null) {
             int answer = Dialogs.showYesNoCancelDialog("Existing Selection",
                 "<html>There is already a selection on " + getName() +

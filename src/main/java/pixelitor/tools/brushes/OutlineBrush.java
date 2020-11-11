@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -50,13 +50,6 @@ public abstract class OutlineBrush extends StrokeBrush {
         if (settings.dependsOnSpeed()) {
             double dist = previous.coDist(p);
 
-//            double scaledRadius = origRadius / Math.sqrt(dist);
-//            double scaledRadius = origRadius + 1 - dist;
-//            if (scaledRadius < 1) {
-//                scaledRadius = 1;
-//            }
-            double scaledRadius;
-
             long timeNow = System.nanoTime();
             long timeDiff = timeNow - prevTime;
             if (timeDiff == 0) {
@@ -68,6 +61,7 @@ public abstract class OutlineBrush extends StrokeBrush {
             // pixels/second
             double speed = 1_000_000_000.0 * dist / timeDiff;
 
+            double scaledRadius;
             if (speed < MIN_SPEED_THRESHOLD) {
                 scaledRadius = origRadius;
             } else if (speed < MAX_SPEED_THRESHOLD) {

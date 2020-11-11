@@ -16,9 +16,7 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WaveType;
-import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.filters.RadialWaves;
 
@@ -56,13 +54,8 @@ public class RadialWavesFilter extends CenteredTransformFilter {
 
 //        double angularWL = 1.0 / angularDivision;
         double nr = angle * angularDivision - phase;
-        double fr = switch (waveType) {
-            case WaveType.SINE -> FastMath.sin(nr);
-            case WaveType.SAWTOOTH -> ImageMath.sinLikeSawtooth(nr);
-            case WaveType.TRIANGLE -> ImageMath.sinLikeTriangle(nr);
-            case WaveType.NOISE -> Noise.sinLikeNoise1((float) nr);
-            default -> throw new IllegalStateException("waveType = " + waveType);
-        };
+
+        double fr = WaveType.wave(nr, waveType);
 
         r += fr * radialAmplitude * r / maxSize;
 

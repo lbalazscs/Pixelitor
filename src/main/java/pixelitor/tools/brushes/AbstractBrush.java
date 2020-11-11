@@ -22,7 +22,7 @@ import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 /**
  * An abstract base class for the brushes that are
@@ -37,7 +37,7 @@ public abstract class AbstractBrush implements Brush {
     protected PPoint previous;
 
     // true when the mouse is down
-    protected boolean drawing;
+    private boolean drawing;
 
     protected AbstractBrush(double radius) {
         setRadius(radius);

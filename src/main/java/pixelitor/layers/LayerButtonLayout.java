@@ -21,10 +21,7 @@ import pixelitor.OpenImages;
 import pixelitor.utils.AppPreferences;
 
 import javax.swing.*;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.LayoutManager;
+import java.awt.*;
 
 /**
  * The layout manager for a {@link LayerButton}
@@ -78,7 +75,11 @@ public class LayerButtonLayout implements LayoutManager {
     @Override
     public void removeLayoutComponent(Component comp) {
         if (comp == maskLabel) {
-            maskLabel = null;
+            synchronized (comp.getTreeLock()) {
+                maskLabel = null;
+            }
+        } else {
+            throw new IllegalStateException();
         }
     }
 

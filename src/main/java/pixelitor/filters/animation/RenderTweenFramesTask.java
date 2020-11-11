@@ -84,7 +84,6 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         ParametrizedFilter filter = animation.getFilter();
 
         AnimationWriter animationWriter = animation.createAnimationWriter();
-        boolean canceled = false;
 
         dr.tweenCalculatingStarted();
 
@@ -94,6 +93,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
             numTotalFrames = 2 * numFrames - 2;
         }
 
+        boolean canceled = false;
         for (int frameNr = 0; frameNr < numTotalFrames; frameNr++) {
             if (isCancelled()) {
                 canceled = true;

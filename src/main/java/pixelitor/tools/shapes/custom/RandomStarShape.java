@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,13 +21,8 @@ import net.jafama.FastMath;
 import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Rnd;
 
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
+import java.awt.geom.*;
 
 /**
  * A random star, inspired by http://tips4java.wordpress.com/2013/05/13/playing-with-shapes/
@@ -68,8 +63,6 @@ public class RandomStarShape implements Shape {
     }
 
     public RandomStarShape(double x, double y, double width, double height) {
-        double centerX = x + width / 2.0;
-        double centerY = y + height / 2.0;
         double[] radii = new double[numRadius];
         double maxRadius = 1 + width / 2;
 
@@ -79,6 +72,8 @@ public class RandomStarShape implements Shape {
         }
         double heightToWidthRatio = height / width;
 
+        double centerX = x + width / 2.0;
+        double centerY = y + height / 2.0;
         for (int i = 0; i < numPoints; i++) {
             double angle = initialAngle + i * unitAngle;
             int radiusIndex = i % radii.length;
@@ -88,7 +83,7 @@ public class RandomStarShape implements Shape {
             double relX = centerX + circleX;
             double relY = centerY + heightToWidthRatio * circleY;
 
-            if(delegate == null) {
+            if (delegate == null) {
                 delegate = new GeneralPath();
                 delegate.moveTo(relX, relY);
             } else {

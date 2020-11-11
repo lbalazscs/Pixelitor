@@ -21,8 +21,7 @@ import com.bric.awt.CalligraphyStroke;
 import pixelitor.tools.shapes.StrokeType;
 import pixelitor.tools.util.PPoint;
 
-import java.awt.BasicStroke;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.Line2D;
 
 /**
@@ -52,6 +51,8 @@ public class CalligraphyBrush extends StrokeBrush {
 
     @Override
     protected void drawStartShape(PPoint p) {
+        targetG.setStroke(pointStroke);
+
         double angle = settings.getAngle();
 
         // 2.0 is an experimentally found value for the best gap-filling...
@@ -66,11 +67,7 @@ public class CalligraphyBrush extends StrokeBrush {
         double endX = x - dx;
         double endY = y - dy;
 
-        targetG.setStroke(pointStroke);
-
-        var line = new Line2D.Double(startX, startY, endX, endY);
-
-        targetG.draw(line);
+        targetG.draw(new Line2D.Double(startX, startY, endX, endY));
 
         if (currentStroke != null) {
             targetG.setStroke(currentStroke);

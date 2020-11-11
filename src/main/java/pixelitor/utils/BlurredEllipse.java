@@ -71,9 +71,9 @@ public class BlurredEllipse implements BlurredShape {
     public double isOutside(int x, int y) {
         double dx = x - center.getX();
         double dy = y - center.getY();
-        double dist2 = dx * dx + dy * dy;
 
         if (linkedRadius) {
+            double dist2 = dx * dx + dy * dy;
             return isOutsideCircle(dist2);
         } else {
             return isOutsideEllipsis(dx, dy);

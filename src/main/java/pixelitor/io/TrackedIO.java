@@ -164,7 +164,6 @@ public class TrackedIO {
                                             ProgressTracker tracker) throws IOException {
         assert calledOutsideEDT() : "on EDT";
 
-        BufferedImage image;
         Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 
         if (!readers.hasNext()) {
@@ -173,6 +172,7 @@ public class TrackedIO {
 
         ImageReader reader = readers.next();
 
+        BufferedImage image;
         try {
             reader.setInput(iis);
 

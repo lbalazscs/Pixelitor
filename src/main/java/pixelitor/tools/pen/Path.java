@@ -28,12 +28,11 @@ import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +49,7 @@ import static pixelitor.tools.pen.BuildState.*;
  * {@link SubPath} objects (typically only one).
  */
 public class Path implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final List<SubPath> subPaths = new ArrayList<>();

@@ -81,17 +81,6 @@ public enum BrushType {
                     shapeType
             );
         }
-
-        //    }, ARROW("Image-Based Arrow") {
-//        @Override
-//        public Brush createBrush(Tool tool, double radius) {
-//            return new ImageDabsBrush(radius, ImageBrushType.ARROW, 2.5, true);
-//        }
-//    }, GREEK("Image-Based Greek") {
-//        @Override
-//        public Brush createBrush(Tool tool, double radius) {
-//            return new ImageDabsBrush(radius, ImageBrushType.GREEK, 2.0, true);
-//        }
     }, SPRAY("Spray Shapes", true) {
         @Override
         public Brush createBrush(Tool tool, double radius) {

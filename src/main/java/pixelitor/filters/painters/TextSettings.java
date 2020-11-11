@@ -28,10 +28,9 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.io.Serializable;
 
 import static java.awt.Color.BLACK;
@@ -43,6 +42,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
  * Edited by the {@link TextSettingsPanel}.
  */
 public class TextSettings implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String DEFAULT_TEXT = "Pixelitor";

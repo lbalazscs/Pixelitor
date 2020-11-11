@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class DodgeComposite extends RGBComposite {
@@ -48,11 +47,10 @@ public final class DodgeComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = clamp((sr << 8) / (256 - dir));
-                dog = clamp((sg << 8) / (256 - dig));
-                dob = clamp((sb << 8) / (256 - dib));
+                int dor = clamp((sr << 8) / (256 - dir));
+                int dog = clamp((sg << 8) / (256 - dig));
+                int dob = clamp((sb << 8) / (256 - dib));
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

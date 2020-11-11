@@ -396,7 +396,6 @@ public class Debug {
 
     public static void showInternalState() {
         AppNode node = new AppNode();
-        String title = "Internal State";
 
         JTree tree = new JTree(node);
 
@@ -410,7 +409,7 @@ public class Debug {
         form.add(new JScrollPane(tree), CENTER);
 
         String text = node.toDetailedString();
-
+        String title = "Internal State";
         GUIUtils.showCopyTextToClipboardDialog(form, text, title);
     }
 }

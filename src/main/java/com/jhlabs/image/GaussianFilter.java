@@ -87,13 +87,13 @@ public class GaussianFilter extends ConvolveFilter {
         }
 
         int[] inPixels = new int[width * height];
-        int[] outPixels = new int[width * height];
 
 //        src.getRGB(0, 0, width, height, inPixels, 0, width);
 //        int[] inPixels = ImageUtils.getPixelsAsArray( src);
         getRGB(src, 0, 0, width, height, inPixels);
 
         if (radius > 0) {
+            int[] outPixels = new int[width * height];
             convolveAndTranspose(kernel, inPixels, outPixels, width, height, alpha, alpha && premultiplyAlpha, false, CLAMP_EDGES, pt);
             convolveAndTranspose(kernel, outPixels, inPixels, height, width, alpha, false, alpha && premultiplyAlpha, CLAMP_EDGES, pt);
         }

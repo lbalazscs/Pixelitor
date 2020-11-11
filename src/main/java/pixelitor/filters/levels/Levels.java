@@ -35,7 +35,7 @@ import static pixelitor.utils.Texts.i18n;
  * The Levels filter
  */
 public class Levels extends FilterWithGUI {
-    public static String NAME = i18n("levels");
+    public static final String NAME = i18n("levels");
     private RGBLookup rgbLookup;
 
     public Levels() {

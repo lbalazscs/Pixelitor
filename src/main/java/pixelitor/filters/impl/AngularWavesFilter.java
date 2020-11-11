@@ -16,9 +16,7 @@
  */
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WaveType;
-import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.filters.AngularWaves;
 
@@ -45,13 +43,8 @@ public class AngularWavesFilter extends CenteredTransformFilter {
         double angle = FastMath.atan2(dy, dx);
 
         double na = r / radialWL - phase;
-        double fa = switch (waveType) {
-            case WaveType.SINE -> FastMath.sin(na);
-            case WaveType.SAWTOOTH -> ImageMath.sinLikeSawtooth(na);
-            case WaveType.TRIANGLE -> ImageMath.sinLikeTriangle(na);
-            case WaveType.NOISE -> Noise.sinLikeNoise1((float) na);
-            default -> throw new IllegalStateException("waveType = " + waveType);
-        };
+
+        double fa = WaveType.wave(na, waveType);
 
         angle += fa * amount;
 

@@ -20,6 +20,7 @@ import com.jhlabs.image.PixelUtils;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -28,6 +29,7 @@ import static pixelitor.utils.Texts.i18n;
  */
 public class Invert extends Filter {
     // for compatibility with older adjustment layer tests
+    @Serial
     private static final long serialVersionUID = -6279018636064203421L;
 
     public static final String NAME = i18n("invert");

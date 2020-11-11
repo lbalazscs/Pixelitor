@@ -23,6 +23,7 @@ import pixelitor.Canvas;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 
 import static java.awt.RenderingHints.*;
 
@@ -32,6 +33,7 @@ import static java.awt.RenderingHints.*;
  * It also supports the rotation of the text.
  */
 public class TransformedTextPainter extends TextPainter {
+    @Serial
     private static final long serialVersionUID = -2064757977654857961L;
 
     private int translationX = 0;

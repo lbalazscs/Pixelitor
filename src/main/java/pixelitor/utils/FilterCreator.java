@@ -22,9 +22,7 @@ import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 
 import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -298,7 +296,6 @@ public class FilterCreator extends JPanel {
     }
 
     private static String addSuperClass(FilterDescription desc) {
-        String retVal = "";
         String superClassName1;
         if (desc.isGui()) {
             if (desc.isParametrizedGui()) {
@@ -311,7 +308,7 @@ public class FilterCreator extends JPanel {
         }
         String superClassName = superClassName1;
 
-        retVal += "public class " + desc.getClassName();
+        String retVal = "public class " + desc.getClassName();
         retVal += " extends " + superClassName;
         retVal += " {\n";
         return retVal;

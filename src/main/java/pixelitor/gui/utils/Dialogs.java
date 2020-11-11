@@ -163,10 +163,8 @@ public class Dialogs {
     }
 
     public static String getTextDialog(Component parent, String title, String msg) {
-        String userInput;
-
         GlobalEvents.dialogOpened(title);
-        userInput = showInputDialog(parent, msg, title, QUESTION_MESSAGE);
+        String userInput = showInputDialog(parent, msg, title, QUESTION_MESSAGE);
         GlobalEvents.dialogClosed(title);
 
         return userInput;

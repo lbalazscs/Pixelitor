@@ -22,23 +22,12 @@ package com.bric.plaf;
 import com.bric.util.JVM;
 
 import javax.swing.*;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.Shape;
-import java.awt.TexturePaint;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.RenderingHints.KEY_ANTIALIASING;
-import static java.awt.RenderingHints.KEY_STROKE_CONTROL;
-import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-import static java.awt.RenderingHints.VALUE_STROKE_NORMALIZE;
-import static java.awt.RenderingHints.VALUE_STROKE_PURE;
+import static java.awt.RenderingHints.*;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
@@ -106,11 +95,10 @@ public class PlafPaintUtils {
                     new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(), 130),
                     new Color(focusColor.getRed(), focusColor.getGreen(), focusColor.getBlue(), 80)
             };
+            g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
             if (JVM.usingQuartz) {
-                g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_PURE);
             } else {
-                g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
                 g.setRenderingHint(KEY_STROKE_CONTROL, VALUE_STROKE_NORMALIZE);
             }
 

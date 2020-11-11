@@ -21,7 +21,7 @@ import pixelitor.Composition;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
-import java.awt.Shape;
+import java.awt.*;
 import java.util.Objects;
 
 /**
@@ -52,18 +52,14 @@ public class SelectionShapeChangeEdit extends PixelitorEdit {
     }
 
     private void swapShapes() {
-        Shape tmp;
-
         var selection = comp.getSelection();
         if (selection == null) {
             throw new IllegalStateException(
                     "no selection in " + comp.getName());
         }
 
-        tmp = selection.getShape();
-
+        Shape tmp = selection.getShape();
         selection.setShape(backupShape);
-
         backupShape = tmp;
     }
 

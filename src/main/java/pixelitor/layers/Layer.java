@@ -35,6 +35,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,7 @@ import static pixelitor.utils.Threads.calledOnEDT;
  * The abstract superclass of all layer classes
  */
 public abstract class Layer implements Serializable {
+    @Serial
     private static final long serialVersionUID = 2L;
 
     // the composition to which this layer belongs
@@ -103,6 +105,7 @@ public abstract class Layer implements Serializable {
     }
 
     // can be called on any thread
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
         maskEditing = false;
@@ -116,7 +119,12 @@ public abstract class Layer implements Serializable {
         if (hasUI()) {
             return ui;
         }
+
         ui = uiFactory.apply(this);
+        if (hasMask()) {
+            mask.ui = ui;
+        }
+
         return ui;
     }
 
@@ -131,10 +139,6 @@ public abstract class Layer implements Serializable {
     public void activateUI() {
         assert RunContext.isUnitTesting() || calledOnEDT();
         ui.setSelected(true);
-    }
-
-    public Layer duplicate() {
-        return duplicate(false);
     }
 
     public abstract Layer duplicate(boolean compCopy);

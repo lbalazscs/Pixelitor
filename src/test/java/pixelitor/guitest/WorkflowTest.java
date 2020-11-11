@@ -22,6 +22,7 @@ import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
+import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.guitest.AppRunner.Randomize;
@@ -38,7 +39,6 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static pixelitor.assertions.PixelitorAssertions.assertThat;
 import static pixelitor.guitest.AJSUtils.findButtonByText;
 import static pixelitor.selection.SelectionModifyType.EXPAND;
 import static pixelitor.tools.move.MoveMode.MOVE_SELECTION_ONLY;
@@ -88,6 +88,8 @@ public class WorkflowTest {
         enlargeCanvas();
         addLayerBellow();
         renderCaustics();
+        selectWoodLayer();
+        addHeartShapedHoleToTheWoodLayer();
         addDropShadowToTheWoodLayer();
         mergeDown();
         createEllipseSelection();
@@ -279,10 +281,32 @@ public class WorkflowTest {
         keyboard.undoRedo("Caustics");
     }
 
-    private void addDropShadowToTheWoodLayer() {
+    private void selectWoodLayer() {
         app.runMenuCommand("Raise Layer Selection");
         keyboard.undoRedo("Raise Layer Selection");
+    }
 
+    private void addHeartShapedHoleToTheWoodLayer() {
+        pw.button("addLayerMask").requireEnabled().click();
+        app.clickTool(Tools.SHAPES);
+        EDT.run(FgBgColors::setDefaultColors);
+
+        pw.comboBox("shapeTypeCB").selectItem(ShapeType.HEART.toString());
+        pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.FOREGROUND.toString());
+        pw.comboBox("strokePaintCB").selectItem(TwoPointPaintType.NONE.toString());
+        mouse.moveToCanvas(340, 100);
+        mouse.dragToCanvas(440, 200);
+        keyboard.undoRedo("Create Shape");
+        keyboard.pressEsc(); // finalize the shape
+
+        app.runMenuCommand("Delete");
+        keyboard.undoRedoUndo("Delete Layer Mask");
+
+        app.runMenuCommand("Apply");
+        keyboard.undoRedo("Apply Layer Mask");
+    }
+
+    private void addDropShadowToTheWoodLayer() {
         app.runFilterWithDialog("Drop Shadow", Randomize.NO, Reseed.NO, ShowOriginal.NO);
         keyboard.undoRedo("Drop Shadow");
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -40,7 +40,6 @@ public class PolarTilesFilter extends CenteredTransformFilter {
     protected void transformInverse(int x, int y, float[] out) {
         float dx = x - cx;
         float dy = y - cy;
-        double r = Math.sqrt(dx * dx + dy * dy);
         double angle = FastMath.atan2(dy, dx);
 
         float randomShift = 0;
@@ -48,6 +47,7 @@ public class PolarTilesFilter extends CenteredTransformFilter {
             randomShift = randomness * Noise.noise2(dx / srcWidth, dy / srcHeight);
         }
 
+        double r = Math.sqrt(dx * dx + dy * dy);
         if (numADivisions > 0) {
             double tan = FastMath.tan(randomShift + t + angle * numADivisions / 2);
             double angleShift = tan * curvature * (numADivisions / 4.0) / r;

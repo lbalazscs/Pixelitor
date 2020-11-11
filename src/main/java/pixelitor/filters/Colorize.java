@@ -23,7 +23,7 @@ import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.filters.lookup.LuminanceLookup;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.filters.gui.ColorParam.TransparencyPolicy.NO_TRANSPARENCY;
@@ -66,8 +66,6 @@ public class Colorize extends ParametrizedFilter {
 
     public static BufferedImage colorize(BufferedImage src, BufferedImage dest,
                                          Color color, float briShift, float opacity) {
-        float translucence = 1 - opacity;
-
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
@@ -88,9 +86,9 @@ public class Colorize extends ParametrizedFilter {
 
         int length = srcData.length;
 
+        float translucence = 1 - opacity;
         for (int i = 0; i < length; i++) {
             int srcRGB = srcData[i];
-            int a = srcRGB & 0xFF000000;
             float lum = LuminanceLookup.from(srcRGB);
             if (briShift > 0) {
                 lum = lum * (1.0f - briShift);
@@ -115,6 +113,7 @@ public class Colorize extends ParametrizedFilter {
                 destBlue = (int) (destBlue * opacity + srcB * translucence);
             }
 
+            int a = srcRGB & 0xFF000000;
             destData[i] = a | destRed << 16 | destGreen << 8 | destBlue;
         }
 

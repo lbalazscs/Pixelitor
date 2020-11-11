@@ -23,7 +23,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.WaveType.wave;
@@ -233,11 +233,9 @@ public class Marble extends ParametrizedFilter {
         }
 
         private float calcStarColor(double dy, double dx, float f) {
-            float c;
             float pixelAngle = (float) atan2(dy, dx);
             f += (pixelAngle - rotAngle) * 10.0f;
-            c = (float) ((1 + wave(f, waveType)) / 2);
-            return c;
+            return (float) ((1 + wave(f, waveType)) / 2);
         }
 
         public void setColormap(Colormap colormap) {

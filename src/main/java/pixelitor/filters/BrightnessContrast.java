@@ -31,7 +31,7 @@ import static pixelitor.utils.Texts.i18n;
  * The Brightness/Contrast filter
  */
 public class BrightnessContrast extends ParametrizedFilter {
-    public static final String CONTRAST = i18n("contrast");
+    private static final String CONTRAST = i18n("contrast");
     public static final String NAME = BRIGHTNESS + "/" + CONTRAST;
 
     private final RangeParam brightnessParam = new RangeParam(BRIGHTNESS, -100, 0, 100);
@@ -86,13 +86,14 @@ public class BrightnessContrast extends ParametrizedFilter {
 
 //            int a = (rgb >>> 24) & 0xFF;
             int a = rgb & 0xFF000000;
-            int r = (rgb >>> 16) & 0xFF;
-            int g = (rgb >>> 8) & 0xFF;
-            int b = rgb & 0xFF;
 
             if (a == 0) {
                 destData[i] = 0; // for premultiplied images
             } else {
+                int r = (rgb >>> 16) & 0xFF;
+                int g = (rgb >>> 8) & 0xFF;
+                int b = rgb & 0xFF;
+
                 r = lookup[r];
                 g = lookup[g];
                 b = lookup[b];

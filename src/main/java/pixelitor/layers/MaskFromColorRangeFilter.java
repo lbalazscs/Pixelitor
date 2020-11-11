@@ -20,7 +20,7 @@ package pixelitor.layers;
 import com.jhlabs.image.PointFilter;
 import net.jafama.FastMath;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * A filter used internally by the "Mask from Color Range".
@@ -104,12 +104,11 @@ class MaskFromColorRangeFilter extends PointFilter {
     }
 
     private double calcDistance(int rgb) {
-        double dist;
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
 
-        dist = switch (distType) {
+        double dist = switch (distType) {
             case RGB -> calcRGBDistance(r, g, b);
             case HSB -> calcHSBDistance(r, g, b);
             case HUE -> calcHueDistance(r, g, b);

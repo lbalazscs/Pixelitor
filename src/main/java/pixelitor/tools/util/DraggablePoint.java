@@ -25,16 +25,10 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Cursor;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 import java.util.Optional;
 
 import static java.lang.Double.isNaN;
@@ -50,6 +44,7 @@ import static java.lang.String.format;
  * or when shape handles are rotated.
  */
 public class DraggablePoint extends Point2D.Double {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final int HANDLE_RADIUS = 5;
@@ -175,9 +170,10 @@ public class DraggablePoint extends Point2D.Double {
     private void setShapes() {
         double shapeStartX = x - HANDLE_RADIUS;
         double shapeStartY = y - HANDLE_RADIUS;
+        shape = createShape(shapeStartX, shapeStartY, HANDLE_DIAMETER);
+
         double shadowStartX = shapeStartX + SHADOW_OFFSET;
         double shadowStartY = shapeStartY + SHADOW_OFFSET;
-        shape = createShape(shapeStartX, shapeStartY, HANDLE_DIAMETER);
         shadow = createShape(shadowStartX, shadowStartY, HANDLE_DIAMETER);
     }
 

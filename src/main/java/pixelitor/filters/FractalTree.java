@@ -175,7 +175,6 @@ public class FractalTree extends ParametrizedFilter {
             return;
         }
 
-        int nextDepth = depth - 1;
         c = -c; // change the direction of the curvature in each iteration
 
         if (doPhysics) {
@@ -187,6 +186,7 @@ public class FractalTree extends ParametrizedFilter {
         double y2 = y1 + FastMath.sin(angleRad) * depth * genRandomLength(rand);
 
         g.setStroke(widthLookup[depth]);
+        int nextDepth = depth - 1;
         if (quality.getValue() == QUALITY_BETTER) {
             if (depth == 1) {
                 g.setColor(colorLookup[depth]);

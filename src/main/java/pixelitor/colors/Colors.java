@@ -29,10 +29,7 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Toolkit;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
@@ -197,7 +194,6 @@ public class Colors {
     }
 
     public static float calcSaturation(int r, int g, int b) {
-        float sat;
         int cMax = Math.max(r, g);
         if (b > cMax) {
             cMax = b;
@@ -207,6 +203,7 @@ public class Colors {
             cMin = b;
         }
 
+        float sat;
         if (cMax != 0) {
             sat = (cMax - cMin) / (float) cMax;
         } else {

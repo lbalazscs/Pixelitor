@@ -32,11 +32,12 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,7 @@ import static pixelitor.tools.pen.BuildState.*;
  * https://en.wikipedia.org/wiki/Composite_B%C3%A9zier_curve
  */
 public class SubPath implements Serializable, Transformable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static long nextId = 0;

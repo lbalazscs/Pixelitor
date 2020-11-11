@@ -22,12 +22,12 @@ import pixelitor.filters.Filter;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.utils.Utils;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -37,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
  * Most importantly the editing of filter parameters is missing)
  */
 public class AdjustmentLayer extends Layer {
+    @Serial
     private static final long serialVersionUID = 2L;
 
     private final Filter filter;
@@ -47,6 +48,7 @@ public class AdjustmentLayer extends Layer {
         isAdjustment = true;
     }
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = true;

@@ -68,8 +68,7 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import java.awt.Dimension;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -323,16 +322,16 @@ public class AssertJSwingTest {
 
         testChangeLayerOpacityAndBM();
 
-        testAddLayerWithButton();
-        testDeleteLayerWithButton();
-        testDuplicateLayerWithButton();
+        testAddLayer();
+        testDeleteLayer();
+        testDuplicateLayer();
 
-        testLayerVisibilityChangeWithTheEye();
+        testLayerVisibilityChange();
 
         testLayerOrderChangeFromMenu();
         testActiveLayerChangeFromMenu();
         testLayerToCanvasSize();
-        testLayerMenusChangingTheNumLayers();
+        testLayerMenusChangingNumLayers();
 
         testLayerMasks();
         testTextLayers();
@@ -345,7 +344,9 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-    private void testAddLayerWithButton() {
+    private void testAddLayer() {
+        log(1, "add layer");
+
         app.checkNumLayersIs(1);
         var layer1Button = findLayerButton("layer 1");
         layer1Button.requireSelected();
@@ -369,17 +370,19 @@ public class AssertJSwingTest {
         layer2Button.requireSelected();
         maskMode.set(this);
 
-        addSomeContent();
+        addSomeContent(false);
     }
 
     private void testChangeLayerOpacityAndBM() {
+        log(1, "change layer opacity and blending mode");
+
         // test change opacity
         pw.textBox("layerOpacity")
-            .requireText("100")
-            .deleteText()
-            .enterText("75")
-            .pressKey(VK_ENTER)
-            .releaseKey(VK_ENTER);
+                .requireText("100")
+                .deleteText()
+                .enterText("75")
+                .pressKey(VK_ENTER)
+                .releaseKey(VK_ENTER);
         keyboard.undo("Layer Opacity Change");
         pw.textBox("layerOpacity").requireText("100");
         keyboard.redo("Layer Opacity Change");
@@ -388,8 +391,8 @@ public class AssertJSwingTest {
 
         // test change blending mode
         pw.comboBox("layerBM")
-            .requireSelection(0)
-            .selectItem(2); // multiply
+                .requireSelection(0)
+                .selectItem(2); // multiply
         keyboard.undo("Blending Mode Change");
         pw.comboBox("layerBM").requireSelection(0);
         keyboard.redo("Blending Mode Change");
@@ -397,7 +400,9 @@ public class AssertJSwingTest {
         checkConsistency();
     }
 
-    private void testDeleteLayerWithButton() {
+    private void testDeleteLayer() {
+        log(1, "delete layer");
+
         var layer1Button = findLayerButton("layer 1");
         var layer2Button = findLayerButton("layer 2");
 
@@ -406,7 +411,7 @@ public class AssertJSwingTest {
 
         // delete layer 2
         pw.button("deleteLayer")
-            .requireEnabled()
+                .requireEnabled()
             .click();
         app.checkNumLayersIs(1);
         layer1Button.requireSelected();
@@ -426,7 +431,9 @@ public class AssertJSwingTest {
         maskMode.set(this);
     }
 
-    private void testDuplicateLayerWithButton() {
+    private void testDuplicateLayer() {
+        log(1, "duplicate layer");
+
         app.checkNumLayersIs(1);
         pw.button("duplicateLayer").click();
 
@@ -445,7 +452,9 @@ public class AssertJSwingTest {
         maskMode.set(this);
     }
 
-    private void testLayerVisibilityChangeWithTheEye() {
+    private void testLayerVisibilityChange() {
+        log(1, "layer visibility change");
+
         var layer1CopyButton = findLayerButton("layer 1 copy");
         layer1CopyButton.requireOpenEye();
 
@@ -463,6 +472,8 @@ public class AssertJSwingTest {
     }
 
     private void testLayerOrderChangeFromMenu() {
+        log(1, "layer order change from menu");
+
         runMenuCommand("Lower Layer");
         keyboard.undoRedo("Lower Layer");
 
@@ -477,6 +488,8 @@ public class AssertJSwingTest {
     }
 
     private void testActiveLayerChangeFromMenu() {
+        log(1, "active layer change from menu");
+
         runMenuCommand("Lower Layer Selection");
         keyboard.undoRedo("Lower Layer Selection");
 
@@ -485,6 +498,8 @@ public class AssertJSwingTest {
     }
 
     private void testLayerToCanvasSize() {
+        log(1, "layer to canvas size");
+
         // add a translation to make it a big layer,
         // otherwise "layer to canvas size" has no effect
         addTranslation();
@@ -493,7 +508,9 @@ public class AssertJSwingTest {
         keyboard.undoRedo("Layer to Canvas Size");
     }
 
-    private void testLayerMenusChangingTheNumLayers() {
+    private void testLayerMenusChangingNumLayers() {
+        log(1, "layer menus changing the number of layers");
+
         runMenuCommand("New from Visible");
         keyboard.undoRedo("New Layer from Visible");
         maskMode.set(this);
@@ -519,6 +536,8 @@ public class AssertJSwingTest {
     }
 
     private void testLayerMasks() {
+        log(1, "layer masks");
+
         boolean allowExistingMask = maskMode != NO_MASK;
         addLayerMask(allowExistingMask);
 
@@ -567,6 +586,7 @@ public class AssertJSwingTest {
         if (maskFromColorRangeTested && Rnd.nextDouble() > 0.05) {
             return;
         }
+        log(1, "mask from color range");
 
         runMenuCommand("Add/Replace from Color Range...");
 
@@ -593,6 +613,8 @@ public class AssertJSwingTest {
     }
 
     private void testTextLayers() {
+        log(1, "text layers");
+
         checkConsistency();
 
         String text = addTextLayer();
@@ -650,6 +672,8 @@ public class AssertJSwingTest {
     }
 
     private void testAdjLayers() {
+        log(1, "adj. layers");
+
         addAdjustmentLayer();
 
         checkConsistency();
@@ -1020,7 +1044,7 @@ public class AssertJSwingTest {
         dialog.requireNotVisible();
 
         String activeCompName = EDT.active(Composition::getName);
-        assertThat(activeCompName).isEqualTo("Untitled1");
+        assertThat(activeCompName).startsWith("Untitled");
 
         runMenuCommand("Close");
     }
@@ -3016,14 +3040,18 @@ public class AssertJSwingTest {
                 .click()
                 .requireDisabled();
             assert EDT.activeLayerHasMask();
-            addSomeContent();
+            addSomeContent(true);
         }
     }
 
-    private void addSomeContent() {
+    private void addSomeContent(boolean forLayerMask) {
         // draw a radial gradient
         pw.toggleButton("Gradient Tool Button").click();
-        pw.comboBox("typeCB").selectItem(GradientType.RADIAL.toString());
+        if (forLayerMask) {
+            pw.comboBox("typeCB").selectItem(GradientType.RADIAL.toString());
+        } else {
+            pw.comboBox("typeCB").selectItem(GradientType.SPIRAL_CW.toString());
+        }
         pw.checkBox("revertCB").check();
 
         if (EDT.getZoomLevelOfActive() != ZoomLevel.Z100) {

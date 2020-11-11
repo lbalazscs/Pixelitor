@@ -124,11 +124,10 @@ public class InnerGlowPathEffect extends AbstractAreaEffect {
     @Override
     protected void paintBorderGlow(Graphics2D g2,
                                    Shape clipShape, int width, int height) {
+        g2.setPaint(getBrushColor());
 
         int steps = getBrushSteps();
         float brushAlpha = 1.0f / steps;
-
-        g2.setPaint(getBrushColor());
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, brushAlpha));
 
         // draw the effect

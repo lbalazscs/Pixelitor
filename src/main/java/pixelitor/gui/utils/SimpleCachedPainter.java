@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,7 @@
 package pixelitor.gui.utils;
 
 import javax.swing.*;
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.image.VolatileImage;
 import java.lang.ref.SoftReference;
 
@@ -93,10 +90,6 @@ public abstract class SimpleCachedPainter implements Painter<Object> {
                                                     int width, int height) {
         VolatileImage img = gc.createCompatibleVolatileImage(width, height, transparency);
         renderAndUseCachedImage(img, g, width, height);
-
-        // Utils.debugImage(img, "img" + debugCounter++);
-//        System.out.println("SimpleCachedPainter: " +
-//                "volatile image created, width = " + width + ", height = " + height);
 
         return img;
     }

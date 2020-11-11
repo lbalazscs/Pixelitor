@@ -22,8 +22,7 @@ import pixelitor.layers.BlendingMode;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.Composite;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 import static java.awt.FlowLayout.LEFT;
@@ -34,7 +33,7 @@ import static pixelitor.utils.Texts.i18n;
  * Used by tools and layers.
  */
 public class BlendingModePanel extends JPanel {
-    public static final String OPACITY = i18n("opacity") + ":";
+    private static final String OPACITY = i18n("opacity") + ":";
 
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> bmCombo;

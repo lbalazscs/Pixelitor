@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class DarkenComposite extends RGBComposite {
@@ -48,11 +47,10 @@ public final class DarkenComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = dir < sr ? dir : sr;
-                dog = dig < sg ? dig : sg;
-                dob = dib < sb ? dib : sb;
+                int dor = dir < sr ? dir : sr;
+                int dog = dig < sg ? dig : sg;
+                int dob = dib < sb ? dib : sb;
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

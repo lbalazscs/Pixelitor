@@ -25,9 +25,7 @@ import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.ProgressTracker;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -74,8 +72,8 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
             return;
         }
 
-        String filePath = file.getAbsolutePath();
         if (FileUtils.hasSupportedInputExt(file)) {
+            String filePath = file.getAbsolutePath();
             createThumbImage(file, filePath);
             repaint();
         }

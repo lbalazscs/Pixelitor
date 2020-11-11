@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class SubtractComposite extends RGBComposite {
@@ -48,17 +47,18 @@ public final class SubtractComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = dir - sr;
+                int dor = dir - sr;
                 if (dor < 0) {
                     dor = 0;
                 }
-                dog = dig - sg;
+
+                int dog = dig - sg;
                 if (dog < 0) {
                     dog = 0;
                 }
-                dob = dib - sb;
+
+                int dob = dib - sb;
                 if (dob < 0) {
                     dob = 0;
                 }

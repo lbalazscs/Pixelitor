@@ -224,8 +224,8 @@ public class CheckFilter extends PointFilter {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;
         if (distortion > 0) {
-            nx += distortion * FastMath.sin(ny + phase);
-            ny += distortion * FastMath.sin(nx + phase);
+            nx += distortion * FastMath.sinQuick(ny + phase);
+            ny += distortion * FastMath.sinQuick(nx + phase);
         }
 
         // guaranteed to be positive
@@ -308,8 +308,8 @@ public class CheckFilter extends PointFilter {
         float nx = (m00 * x + m01 * y) / xScale;
         float ny = (m10 * x + m11 * y) / yScale;
         if (distortion > 0) {
-            nx += distortion * FastMath.sin(ny + phase);
-            ny += distortion * FastMath.sin(nx + phase);
+            nx += distortion * FastMath.sinQuick(ny + phase);
+            ny += distortion * FastMath.sinQuick(nx + phase);
         }
 
         // guaranteed to be positive

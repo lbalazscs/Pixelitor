@@ -22,7 +22,7 @@ import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 import pixelitor.utils.CachedFloatRandom;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.concurrent.Future;
 
 /**
@@ -345,13 +345,13 @@ public class CellularFilter extends WholeImageFilter implements Function2D {
             float checkCube(float x, float y, int cubeX, int cubeY, Point[] results, float randomness) {
                 CachedFloatRandom random = randomTL.get();
                 random.setSeed(571 * cubeX + 23 * cubeY);
-                float weight = 1.0f;
                 float px = 0.5f;
                 float py = 0.5f;
                 if (randomness != 0) {
                     px = (float) (px + randomness * (random.nextFloat() - 0.5));
                     py = (float) (py + randomness * (random.nextFloat() - 0.5));
                 }
+                float weight = 1.0f;
                 insertionSort(x, y, cubeX, cubeY, results, px, py, weight);
                 return results[2].distance;
             }

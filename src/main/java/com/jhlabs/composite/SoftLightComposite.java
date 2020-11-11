@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class SoftLightComposite extends RGBComposite {
@@ -48,15 +47,13 @@ public final class SoftLightComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                int d;
-                d = multiply255(sr, dir);
-                dor = d + multiply255(dir, 255 - multiply255(255 - dir, 255 - sr) - d);
+                int d = multiply255(sr, dir);
+                int dor = d + multiply255(dir, 255 - multiply255(255 - dir, 255 - sr) - d);
                 d = multiply255(sg, dig);
-                dog = d + multiply255(dig, 255 - multiply255(255 - dig, 255 - sg) - d);
+                int dog = d + multiply255(dig, 255 - multiply255(255 - dig, 255 - sg) - d);
                 d = multiply255(sb, dib);
-                dob = d + multiply255(dib, 255 - multiply255(255 - dib, 255 - sb) - d);
+                int dob = d + multiply255(dib, 255 - multiply255(255 - dib, 255 - sb) - d);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

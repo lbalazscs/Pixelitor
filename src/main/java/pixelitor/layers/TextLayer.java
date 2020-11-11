@@ -40,6 +40,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment.CENTER;
@@ -51,7 +52,9 @@ import static pixelitor.utils.Keys.CTRL_T;
  * A text layer
  */
 public class TextLayer extends ContentLayer {
+    @Serial
     private static final long serialVersionUID = 2L;
+
     private transient TransformedTextPainter painter;
     private TextSettings settings;
 
@@ -66,6 +69,7 @@ public class TextLayer extends ContentLayer {
         setSettings(new TextSettings());
     }
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         isAdjustment = settings.isWatermark();

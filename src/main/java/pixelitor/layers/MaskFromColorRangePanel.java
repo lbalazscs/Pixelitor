@@ -222,11 +222,6 @@ public class MaskFromColorRangePanel extends JPanel {
         gbh.addLabelAndControlNoStretch(softness.getName(), softnessSlider);
         gbh.addLabelAndControl("Invert:", invertCheckBox);
 
-//        southCenterPanel.add(toleranceSlider);
-//        southCenterPanel.add(softnessSlider);
-//        southCenterPanel.add(new JLabel("   Invert:"));
-//        southCenterPanel.add(invertCheckBox);
-
         southEastPanel.add(new JLabel("   Distance:"));
         southEastPanel.add(distTypeCombo);
 

@@ -30,8 +30,9 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
-import java.awt.Component;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.io.Serializable;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
@@ -41,6 +42,7 @@ import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
  * The superclass of all Pixelitor filters and color adjustments
  */
 public abstract class Filter implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private transient FilterAction filterAction;
@@ -93,15 +95,13 @@ public abstract class Filter implements Serializable {
     }
 
     private void transformAndHandleExceptions(Drawable dr, ChangeReason cr) {
-        BufferedImage dest;
-
         try {
             if (dr == null) {
                 throw new IllegalStateException("not image layer or mask");
             }
 
             BufferedImage src = dr.getFilterSourceImage();
-            dest = transformImage(src);
+            BufferedImage dest = transformImage(src);
 
             assert dest != null;
 

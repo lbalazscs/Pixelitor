@@ -66,10 +66,4 @@ public class SliceFilter extends RotatedEffectFilter {
     public void setSize(int size) {
         this.size = size;
     }
-
-//    public void setAngle(double angle) {
-//        this.angle = angle;
-//        sin = Math.sin(angle);
-//        cos = Math.cos(angle);
-//    }
 }

@@ -123,10 +123,10 @@ public class ImageMath {
                 return 1.0f;
             }
             x = (x - b1) / (b2 - b1);
-            return 1.0f - (x * x * (3.0f - 2.0f * x));
+            return 1.0f - smoothStep01(x);
         }
         x = (x - a1) / (a2 - a1);
-        return x * x * (3.0f - 2.0f * x);
+        return smoothStep01(x);
     }
 
     /**
@@ -151,7 +151,7 @@ public class ImageMath {
     // cubic smooth step for floats assuming that
     // the input is already in the 0..1 range
     public static float smoothStep01(float x) {
-        return x * x * (3 - 2 * x);
+        return x * x * (3.0f - 2.0f * x);
     }
 
     // quintic smooth step for floats assuming that
@@ -175,7 +175,7 @@ public class ImageMath {
     // cubic smooth step for doubles assuming that
     // the input is already in the 0..1 range
     public static double smoothStep01(double x) {
-        return x * x * (3 - 2 * x);
+        return x * x * (3.0 - 2.0 * x);
     }
 
     // quintic smooth step for doubles assuming that
@@ -214,11 +214,11 @@ public class ImageMath {
      * @return the clamped value
      */
     public static float clamp(float input, float a, float b) {
-        return (input < a) ? a : Math.min(input, b);
+        return (input < a) ? a : (input > b) ? b : input;
     }
 
     public static float clamp01(float input) {
-        return (input < 0.0f) ? 0.0f : Math.min(input, 1.0f);
+        return (input < 0.0f) ? 0.0f : (input > 1.0f) ? 1.0f : input;
     }
 
     /**
@@ -321,12 +321,10 @@ public class ImageMath {
      * A triangle function with a period of 2 PI and values between -1 and 1
      */
     public static float sinLikeTriangle(float x) {
-        // TODO optimize
         return 2 * triangle(x / (2 * ImageMath.PI)) - 1;
     }
 
     public static double sinLikeTriangle(double x) {
-        // TODO optimize
         return 2 * triangle(x / (2 * Math.PI)) - 1;
     }
 
@@ -334,13 +332,11 @@ public class ImageMath {
      * A sawtooth function with a period of 2 PI and values between -1 and 1
      */
     public static float sinLikeSawtooth(float x) {
-        // TODO optimize - fpr example for positive numbers % is enogh
-        return 2 * ImageMath.mod(x / (2 * ImageMath.PI), 1) - 1;
+        return 2 * mod(x / (2 * PI), 1) - 1;
     }
 
     public static double sinLikeSawtooth(double x) {
-        // TODO optimize - fpr example for positive numbers % is enogh
-        return 2 * ImageMath.mod(x / (2 * Math.PI), 1) - 1;
+        return 2 * mod(x / (2 * Math.PI), 1) - 1;
     }
 
     /**

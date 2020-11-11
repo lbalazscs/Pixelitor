@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import net.jafama.FastMath;
 import pixelitor.ThreadPool;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.util.concurrent.Callable;
@@ -234,7 +234,6 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         int outWidth = width;
         int outHeight = height;
 
-        int srcX, srcY;
         int[] outPixels = new int[outWidth];
 
 //		int[] rgb = new int[4];
@@ -243,8 +242,8 @@ public abstract class TransformFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < outHeight; y++) {
             for (int x = 0; x < outWidth; x++) {
                 transformInverse(x, y, out);
-                srcX = (int) out[0];
-                srcY = (int) out[1];
+                int srcX = (int) out[0];
+                int srcY = (int) out[1];
                 // int casting rounds towards zero, so we check out[0] < 0, not srcX < 0
                 outPixels[x] = getPixelNN(inPixels, srcWidth, srcHeight, srcX, srcY, out);
             }

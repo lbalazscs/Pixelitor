@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class MultiplyComposite extends RGBComposite {
@@ -48,14 +47,13 @@ public final class MultiplyComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
                 int t = dir * sr + 0x80;
-                dor = ((t >> 8) + t) >> 8;
+                int dor = ((t >> 8) + t) >> 8;
                 t = dig * sg + 0x80;
-                dog = ((t >> 8) + t) >> 8;
+                int dog = ((t >> 8) + t) >> 8;
                 t = dib * sb + 0x80;
-                dob = ((t >> 8) + t) >> 8;
+                int dob = ((t >> 8) + t) >> 8;
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

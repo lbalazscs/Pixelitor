@@ -21,12 +21,11 @@ import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -49,7 +48,7 @@ public class Canvas implements Serializable {
     private int zoomedWidth;
     private int zoomedHeight;
 
-    // for compatibility with Pixelitor 2.1.0
+    @Serial
     private static final long serialVersionUID = -1459254568616232274L;
 
     public Canvas(int imWidth, int imHeight) {

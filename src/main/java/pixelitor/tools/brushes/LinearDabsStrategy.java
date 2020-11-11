@@ -66,18 +66,16 @@ public class LinearDabsStrategy implements DabsStrategy {
         double prevX = prev.getImX();
         double prevY = prev.getImY();
 
-        double dx = endX - prevX;
-        double dy = endY - prevY;
         double lineDist = end.imDist(prev);
 
         double spacing = spacingStrategy.getSpacing(brush.getRadius());
         assert spacing >= SpacingStrategy.MIN_SPACING;
 
-        double relativeSpacingDist = spacing / lineDist;
-
         double initialRelativeSpacingDist = (spacing - distFromLastDab) / lineDist;
 
         double theta = 0;
+        double dx = endX - prevX;
+        double dy = endY - prevY;
         if (angleSettings.isAngleAware()) {
             theta = Math.atan2(dy, dx);
         }
@@ -87,6 +85,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         int steps = 0;
 
+        double relativeSpacingDist = spacing / lineDist;
         for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
             if (steps++ > 1_000 && RandomGUITest.isRunning()) {
                 // crazy big shapes can appear during

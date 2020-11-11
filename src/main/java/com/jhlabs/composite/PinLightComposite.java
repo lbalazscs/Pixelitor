@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class PinLightComposite extends RGBComposite {
@@ -48,11 +47,10 @@ public final class PinLightComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = sr > 127 ? Math.max(sr, dir) : Math.min(sr, dir);
-                dog = sg > 127 ? Math.max(sg, dig) : Math.min(sg, dig);
-                dob = sb > 127 ? Math.max(sb, dib) : Math.min(sb, dib);
+                int dor = sr > 127 ? Math.max(sr, dir) : Math.min(sr, dir);
+                int dog = sg > 127 ? Math.max(sg, dig) : Math.min(sg, dig);
+                int dob = sb > 127 ? Math.max(sb, dib) : Math.min(sb, dib);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

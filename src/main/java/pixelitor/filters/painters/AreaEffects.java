@@ -22,10 +22,9 @@ import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
 import pixelitor.filters.gui.UserPreset;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,9 @@ import java.util.Objects;
  * It also functions as the {@link ParamState} of {@link EffectsParam}
  */
 public class AreaEffects implements Serializable, ParamState<AreaEffects> {
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final AreaEffect[] EMPTY_ARRAY = new AreaEffect[0];
 
     // must not be renamed (serialized fields)

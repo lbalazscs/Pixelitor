@@ -69,12 +69,9 @@ import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
-import java.awt.GraphicsConfiguration;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.lang.management.ManagementFactory;
 import java.util.ResourceBundle;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -1195,15 +1192,6 @@ public class MenuBar extends JMenuBar {
             @Override
             public void onClick() {
                 Events.dumpAll();
-            }
-        });
-
-        developMenu.addAction(new MenuAction("Debug PID") {
-            @Override
-            public void onClick() {
-                String vmRuntimeInfo = ManagementFactory.getRuntimeMXBean().getName();
-                System.out.printf("MenuBar::onClick: vmRuntimeInfo = '%s'%n",
-                    vmRuntimeInfo);
             }
         });
 

@@ -181,13 +181,9 @@ public class ImageUtils {
             progressiveBilinear = false;
         }
 
-//        int type = (img.getTransparency() == Transparency.OPAQUE) ?
-//                BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
         int type = img.getType();
 
         BufferedImage ret = img;
-        BufferedImage scratchImage = null;
-        Graphics2D g2 = null;
         int w, h;
         boolean isTranslucent = img.getTransparency() != Transparency.OPAQUE;
 
@@ -204,6 +200,8 @@ public class ImageUtils {
             h = targetHeight;
         }
 
+        BufferedImage scratchImage = null;
+        Graphics2D g2 = null;
         do {
             if (progressiveBilinear && w > targetWidth) {
                 w /= 2;

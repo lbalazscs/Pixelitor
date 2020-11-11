@@ -79,6 +79,6 @@ public class StrokeSettings implements ParamState<StrokeSettings> {
 
     @Override
     public String toSaveString() {
-        return "TODO";
+        throw new UnsupportedOperationException();
     }
 }

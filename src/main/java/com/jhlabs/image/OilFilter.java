@@ -18,7 +18,7 @@ package com.jhlabs.image;
 
 import pixelitor.ThreadPool;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.concurrent.Future;
 
 /**
@@ -101,9 +101,8 @@ public class OilFilter extends WholeImageFilter {
             // For each pixel, all pixels within the brush size will have to be examined.
             for (int row = -rangeY; row <= rangeY; row++) {
                 int iy = y + row;
-                int ioffset;
                 if (0 <= iy && iy < height) {
-                    ioffset = iy * width;
+                    int ioffset = iy * width;
                     for (int col = -rangeX; col <= rangeX; col++) {
                         int ix = x + col;
                         if (0 <= ix && ix < width) {

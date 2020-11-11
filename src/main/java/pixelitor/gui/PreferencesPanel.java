@@ -32,9 +32,7 @@ import pixelitor.utils.Language;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.GridBagLayout;
+import java.awt.*;
 
 import static java.lang.Integer.parseInt;
 import static javax.swing.SwingConstants.LEFT;
@@ -68,12 +66,12 @@ public class PreferencesPanel extends JPanel {
         add(tabbedPane);
     }
 
-    private void setupTabSelection(JTabbedPane tabbedPane) {
+    private static void setupTabSelection(JTabbedPane tabbedPane) {
         if (lastSelectedTabIndex != 0) {
             tabbedPane.setSelectedIndex(lastSelectedTabIndex);
         }
         tabbedPane.addChangeListener(e ->
-            lastSelectedTabIndex = tabbedPane.getSelectedIndex());
+                lastSelectedTabIndex = tabbedPane.getSelectedIndex());
     }
 
     private JPanel createGeneralPanel() {

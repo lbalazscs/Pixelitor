@@ -45,9 +45,6 @@ public class GrayScaleLookup {
         for (int i = 0; i < lut.length; i++) {
             lut[i] = (short) PixelUtils.clamp((int) (multiplier * i + constant));
         }
-//        System.out.printf("GrayScaleLookup:: LUT: " +
-//                        "0 -> %d, 1 -> %d, 128 -> %d, 254 -> %d, 255 -> %d%n",
-//                lut[0], lut[1], lut[128], lut[254], lut[255]);
     }
 
     public short map(short input) {

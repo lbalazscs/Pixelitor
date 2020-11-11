@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class AverageComposite extends RGBComposite {
@@ -48,11 +47,10 @@ public final class AverageComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = (dir + sr) / 2;
-                dog = (dig + sg) / 2;
-                dob = (dib + sb) / 2;
+                int dor = (dir + sr) / 2;
+                int dog = (dig + sg) / 2;
+                int dob = (dib + sb) / 2;
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

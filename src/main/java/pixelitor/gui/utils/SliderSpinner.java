@@ -25,10 +25,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.Hashtable;
 
@@ -223,14 +220,6 @@ public class SliderSpinner extends JPanel implements ChangeListener, ParamGUI {
         if (minorSpacing > 0) {
             slider.setMinorTickSpacing(minorSpacing);
         }
-
-//        if(showMax) {
-//            // ensure that the max value is painted, see issue #91
-//            @SuppressWarnings("unchecked")
-//            Hashtable<Integer, JLabel> labels = slider.createStandardLabels(majorSpacing);
-//            labels.put(slider.getMaximum(), new JLabel(String.valueOf(slider.getMaximum())));
-//            slider.setLabelTable(labels);
-//        }
 
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);

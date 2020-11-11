@@ -61,11 +61,10 @@ public class ChannelToTransparency extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        ChannelToTransparencyFilter filter;
         boolean invert = invertParam.isChecked();
         boolean keep = keepParam.isChecked();
 
-        filter = switch (channel.getValue()) {
+        ChannelToTransparencyFilter filter = switch (channel.getValue()) {
             case LUMINOSITY -> new ChannelToTransparencyFilter(NAME, invert, keep) {
                 @Override
                 int getChannelValue(int rgb) {

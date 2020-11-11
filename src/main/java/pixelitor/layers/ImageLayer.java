@@ -39,6 +39,7 @@ import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 import static java.awt.RenderingHints.KEY_INTERPOLATION;
@@ -64,6 +65,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         SHOW_ORIGINAL // a filter dialog is shown + "Show Original" is checked
     }
 
+    @Serial
     private static final long serialVersionUID = 2L;
 
     //
@@ -220,11 +222,13 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert image != null;
     }
 
+    @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         PXCFormat.serializeImage(out, image);
     }
 
+    @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // init transient fields
         state = NORMAL;
@@ -972,15 +976,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
     private void addToCanvasSizeToHistory(BufferedImage backupImage,
                                           TranslationEdit translationEdit) {
-        ImageEdit imageEdit;
-        String editName = "Layer to Canvas Size";
-
         boolean maskChanged = false;
         BufferedImage maskBackupImage = null;
         if (hasMask()) {
             maskBackupImage = mask.getImage();
             maskChanged = mask.toCanvasSize();
         }
+
+        ImageEdit imageEdit;
+        String editName = "Layer to Canvas Size";
         if (maskChanged) {
             imageEdit = new ImageAndMaskEdit(editName, comp, this, backupImage, maskBackupImage, false);
         } else {

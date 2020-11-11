@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.SubtaskProgressTracker;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 
@@ -112,8 +112,8 @@ public class ResizingFilterHelper {
         int resizeThreshold = 600_000;
 
         if (numPixels > resizeThreshold) {
-            int ratio = numPixels / resizeThreshold;
             resize = true;
+            int ratio = numPixels / resizeThreshold;
             resizeFactor = 1 + Math.sqrt(ratio);
         }
         return resize;
@@ -129,8 +129,6 @@ public class ResizingFilterHelper {
         assert resizeFactor > 1.0;
         assert onlyNullTrackersHaveFilterUnits(filter, filterUnits);
 
-        BufferedImage dest;
-
         // scale down
         BufferedImage smallSrc = getDownscaledSource();
         pt.unitDone();
@@ -140,7 +138,7 @@ public class ResizingFilterHelper {
         pt.unitsDone(filterUnits);
 
         // scale up
-        dest = quality.scaleUp(src, smallDest, resizeFactor, pt);
+        BufferedImage dest = quality.scaleUp(src, smallDest, resizeFactor, pt);
 
         return dest;
     }

@@ -20,9 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.LinearGradientPaint;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.BLACK;
@@ -46,9 +44,6 @@ public class JHStripedHalftone extends JHMaskedHalftone {
 
     @Override
     protected BufferedImage createMaskImage(BufferedImage src) {
-        float[] fractions = {0.0f, 1.0f};
-        Color[] colors = {BLACK, WHITE};
-
         BufferedImage stripes = ImageUtils.createImageWithSameCM(src);
         Graphics2D g = stripes.createGraphics();
         float x1 = src.getWidth() / 2.0f;
@@ -67,6 +62,8 @@ public class JHStripedHalftone extends JHMaskedHalftone {
         x2 += shiftX;
         y2 += shiftY;
 
+        float[] fractions = {0.0f, 1.0f};
+        Color[] colors = {BLACK, WHITE};
         var paint = new LinearGradientPaint(x1, y1, x2, y2,
                 fractions, colors, cycleMethod);
 

@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class ScreenComposite extends RGBComposite {
@@ -48,14 +47,13 @@ public final class ScreenComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
                 int t = (255 - dir) * (255 - sr) + 0x80;
-                dor = 255 - (((t >> 8) + t) >> 8);
+                int dor = 255 - (((t >> 8) + t) >> 8);
                 t = (255 - dig) * (255 - sg) + 0x80;
-                dog = 255 - (((t >> 8) + t) >> 8);
+                int dog = 255 - (((t >> 8) + t) >> 8);
                 t = (255 - dib) * (255 - sb) + 0x80;
-                dob = 255 - (((t >> 8) + t) >> 8);
+                int dob = 255 - (((t >> 8) + t) >> 8);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

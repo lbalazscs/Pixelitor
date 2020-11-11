@@ -129,21 +129,25 @@ public abstract class ShapeFilter extends ParametrizedFilter {
 
                 // http://stackoverflow.com/questions/17113234/affine-transform-scale-around-a-point
                 var at = AffineTransform.getTranslateInstance
-                    (cx - scaleX * cx, cy - scaleY * cy);
+                        (cx - scaleX * cx, cy - scaleY * cy);
                 at.scale(scaleX, scaleY);
 
                 shape = at.createTransformedShape(shape);
             }
 
+            AreaEffects effects = effectsParam.getEffects();
+//            if (effects.getInnerGlow() != null) {
             // work with the outline so that we can have "inner glow"
             shape = stroke.createStrokedShape(shape);
-
             g2.fill(shape);
+//            } else {
+//                g2.setStroke(stroke);
+//                g2.draw(shape);
+//            }
 
             // If there are effects and the foreground is set to transparent,
             // then the effects have to be run on a temporary image, because
             // they also set the composite. Also inner glow is ignored.
-            AreaEffects effects = effectsParam.getEffects();
             if (!effects.isEmpty()) {
                 if (!watermarking && foreground.getValue() == FG_TRANSPARENT) {
                     drawEffectsWithTransparency(effects, g2, shape, srcWidth, srcHeight);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,14 @@ import pixelitor.Composition;
 import pixelitor.gui.View;
 
 import java.awt.geom.AffineTransform;
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * All the {@link Path} objects that belong to a {@link Composition}
  */
 public class Paths implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     // currently there can be only one path, which is called activePath

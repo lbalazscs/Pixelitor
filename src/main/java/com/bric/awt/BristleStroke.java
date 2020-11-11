@@ -20,9 +20,9 @@
 package com.bric.awt;
 
 import com.bric.geom.MeasuredShape;
+import net.jafama.FastMath;
 
-import java.awt.Shape;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Random;
@@ -140,8 +140,9 @@ public class BristleStroke implements Stroke {
             float k2 = (k1 - 0.5f) * 2; //range from [-1,1]
 
             float k3 = thickness;
-            float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
-            float maxGapDistance = (40 + 10 * k3) / (1 + 9 * spacing);
+            final float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
+            final float maxGapDistance = (40 + 10 * k3) / (1 + 9 * spacing);
+            float dd = minGapDistance * (1 + 20 * (1 - thickness) * Math.abs(k2 * k2));
 
             Point2D p2 = new Point2D.Float();
             float x, y;
@@ -150,14 +151,14 @@ public class BristleStroke implements Stroke {
                 r.setSeed(randomSeed + 1000 * a + 10000 * b);
 
                 float d = r.nextFloat() * (maxGapDistance - minGapDistance)
-                        + minGapDistance * (1 + 20 * (1 - thickness) * Math.abs(k2 * k2));
+                        + dd;
                 while (d < paths[b].getOriginalDistance()) {
                     float gapDistance = r.nextFloat() * (maxGapDistance - minGapDistance)
-                            + minGapDistance * (1 + 20 * (1 - thickness) * Math.abs(k2 * k2));
+                            + dd;
                     paths[b].getPoint(d, p2);
-                    float angle = paths[b].getTangentSlope(d);
-                    float dx = (float) (k2 * width * cos(angle + PI / 2) / 2.0);
-                    float dy = (float) (k2 * width * sin(angle + PI / 2) / 2.0);
+                    double angle = paths[b].getTangentSlope(d) + PI / 2.0;
+                    float dx = (float) (k2 * width * FastMath.cosQuick(angle) / 2.0);
+                    float dy = (float) (k2 * width * FastMath.sinQuick(angle) / 2.0);
 
                     p2.setLocation(p2.getX() + dx, p2.getY() + dy);
 

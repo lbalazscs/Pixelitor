@@ -21,11 +21,13 @@ import pixelitor.filters.Filter;
 import pixelitor.utils.Icons;
 import pixelitor.utils.Utils;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
+import static java.util.Locale.Category.FORMAT;
 import static pixelitor.filters.gui.FilterSetting.EnabledReason.FINAL_ANIMATION_SETTING;
 
 /**
@@ -279,9 +281,17 @@ public class ParamSet {
 
     public UserPreset toUserPreset(String filterName, String presetName) {
         UserPreset p = new UserPreset(presetName, filterName);
-        for (FilterParam param : paramList) {
-            param.saveStateTo(p);
+
+        Locale locale = Locale.getDefault(FORMAT);
+        try {
+            Locale.setDefault(FORMAT, Locale.US);
+            for (FilterParam param : paramList) {
+                param.saveStateTo(p);
+            }
+        } finally {
+            Locale.setDefault(FORMAT, locale);
         }
+
         return p;
     }
 

@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class BurnComposite extends RGBComposite {
@@ -48,18 +47,22 @@ public final class BurnComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
+                int dor;
                 if (dir != 255) {
                     dor = clamp(255 - (((255 - sr) << 8) / (dir + 1)));
                 } else {
                     dor = sr;
                 }
+
+                int dog;
                 if (dig != 255) {
                     dog = clamp(255 - (((255 - sg) << 8) / (dig + 1)));
                 } else {
                     dog = sg;
                 }
+
+                int dob;
                 if (dib != 255) {
                     dob = clamp(255 - (((255 - sb) << 8) / (dib + 1)));
                 } else {

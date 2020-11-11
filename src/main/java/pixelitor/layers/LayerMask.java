@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.io.Serial;
 
 import static java.awt.AlphaComposite.DstIn;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
@@ -37,6 +38,7 @@ import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
  * A layer mask.
  */
 public class LayerMask extends ImageLayer {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private transient BufferedImage transparencyImage;
@@ -56,11 +58,10 @@ public class LayerMask extends ImageLayer {
                 lookup); // alpha
 
         byte[] invertedLookup = new byte[256];
-        byte[] allZeroLookup = new byte[256];
-
         for (int i = 0; i < 256; i++) {
             invertedLookup[i] = (byte) (255 - i);
         }
+        byte[] allZeroLookup = new byte[256];
 
         RUBYLITH_COLOR_MODEL = new IndexColorModel(8, 256,
                 invertedLookup,  // red

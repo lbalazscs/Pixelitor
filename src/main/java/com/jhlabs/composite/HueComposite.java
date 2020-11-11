@@ -16,9 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.Color;
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class HueComposite extends RGBComposite {
@@ -52,7 +50,6 @@ public final class HueComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
                 Color.RGBtoHSB(sr, sg, sb, sHSB);
                 Color.RGBtoHSB(dir, dig, dib, dHSB);
@@ -60,9 +57,9 @@ public final class HueComposite extends RGBComposite {
                 dHSB[0] = sHSB[0];
 
                 int doRGB = Color.HSBtoRGB(dHSB[0], dHSB[1], dHSB[2]);
-                dor = (doRGB & 0xff0000) >> 16;
-                dog = (doRGB & 0xff00) >> 8;
-                dob = (doRGB & 0xff);
+                int dor = (doRGB & 0xff0000) >> 16;
+                int dog = (doRGB & 0xff00) >> 8;
+                int dob = (doRGB & 0xff);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

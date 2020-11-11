@@ -177,7 +177,6 @@ public class GlintFilter extends AbstractBufferedImageOp {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         int width = src.getWidth();
         int height = src.getHeight();
-        int[] pixels = new int[width];
 
         if (blur != 0) {
             // width+height for the Gaussian, then height again for further processing
@@ -215,6 +214,7 @@ public class GlintFilter extends AbstractBufferedImageOp {
         BufferedImage mask = new BufferedImage(width, height, TYPE_INT_ARGB);
 
         int threshold3 = (int) (threshold * 3 * 255);
+        int[] pixels = new int[width];
         for (int y = 0; y < height; y++) {
             getRGB(src, 0, y, width, 1, pixels);
             for (int x = 0; x < width; x++) {

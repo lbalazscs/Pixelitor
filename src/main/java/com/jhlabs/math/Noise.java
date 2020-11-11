@@ -39,11 +39,6 @@ public class Noise implements Function1D, Function2D, Function3D {
     static final float[][] g3 = new float[B + B + 2][3];
     static final float[][] g2 = new float[B + B + 2][2];
     static final float[] g1 = new float[B + B + 2];
-//    static boolean start = true;
-
-    private static float sCurve(float t) {
-        return t * t * (3.0f - 2.0f * t);
-    }
 
     static {
         init();
@@ -118,24 +113,16 @@ public class Noise implements Function1D, Function2D, Function3D {
      * @return noise value at x in the range -1..1
      */
     public static float noise1(float x) {
-        int bx0, bx1;
-        float rx0, rx1, sx, t, u, v;
+        float t = x + N;
+        int bx0 = ((int) t) & BM;
+        int bx1 = (bx0 + 1) & BM;
+        float rx0 = t - (int) t;
+        float rx1 = rx0 - 1.0f;
 
-//        if (start) {
-//            start = false;
-//            init();
-//        }
+        float sx = ImageMath.smoothStep01(rx0);
 
-        t = x + N;
-        bx0 = ((int) t) & BM;
-        bx1 = (bx0 + 1) & BM;
-        rx0 = t - (int) t;
-        rx1 = rx0 - 1.0f;
-
-        sx = sCurve(rx0);
-
-        u = rx0 * g1[p[bx0]];
-        v = rx1 * g1[p[bx1]];
+        float u = rx0 * g1[p[bx0]];
+        float v = rx1 * g1[p[bx1]];
         return 2.3f * lerp(sx, u, v);
     }
 
@@ -154,51 +141,40 @@ public class Noise implements Function1D, Function2D, Function3D {
      * @return noise value at (x,y) - a value between -1 and 1, but it can be a bit smaller like -1.0362637
      */
     public static float noise2(float x, float y) {
-        int bx0, bx1, by0, by1, b00, b10, b01, b11;
-        float rx0, rx1, ry0, ry1;
-        float[] q;
-        float sx, sy, a, b, t, u, v;
-        int i, j;
-
-//        if (start) {
-//            start = false;
-//            init();
-//        }
-
-        t = x + N;
-        bx0 = ((int) t) & BM;
-        bx1 = (bx0 + 1) & BM;
-        rx0 = t - (int) t;
-        rx1 = rx0 - 1.0f;
+        float t = x + N;
+        int bx0 = ((int) t) & BM;
+        int bx1 = (bx0 + 1) & BM;
+        float rx0 = t - (int) t;
+        float rx1 = rx0 - 1.0f;
 
         t = y + N;
-        by0 = ((int) t) & BM;
-        by1 = (by0 + 1) & BM;
-        ry0 = t - (int) t;
-        ry1 = ry0 - 1.0f;
+        int by0 = ((int) t) & BM;
+        int by1 = (by0 + 1) & BM;
+        float ry0 = t - (int) t;
+        float ry1 = ry0 - 1.0f;
 
-        i = p[bx0];
-        j = p[bx1];
+        int i = p[bx0];
+        int j = p[bx1];
 
-        b00 = p[i + by0];
-        b10 = p[j + by0];
-        b01 = p[i + by1];
-        b11 = p[j + by1];
+        int b00 = p[i + by0];
+        int b10 = p[j + by0];
+        int b01 = p[i + by1];
+        int b11 = p[j + by1];
 
-        sx = sCurve(rx0);
-        sy = sCurve(ry0);
+        float sx = ImageMath.smoothStep01(rx0);
+        float sy = ImageMath.smoothStep01(ry0);
 
-        q = g2[b00];
-        u = rx0 * q[0] + ry0 * q[1];
+        float[] q = g2[b00];
+        float u = rx0 * q[0] + ry0 * q[1];
         q = g2[b10];
-        v = rx1 * q[0] + ry0 * q[1];
-        a = lerp(sx, u, v);
+        float v = rx1 * q[0] + ry0 * q[1];
+        float a = lerp(sx, u, v);
 
         q = g2[b01];
         u = rx0 * q[0] + ry1 * q[1];
         q = g2[b11];
         v = rx1 * q[0] + ry1 * q[1];
-        b = lerp(sx, u, v);
+        float b = lerp(sx, u, v);
 
         float rv = 1.5f * lerp(sy, a, b);
         if (Float.isNaN(rv)) {
@@ -220,59 +196,49 @@ public class Noise implements Function1D, Function2D, Function3D {
      * @return noise value at (x,y,z)
      */
     public static float noise3(float x, float y, float z) {
-        int bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
-        float rx0, rx1, ry0, ry1, rz0, rz1, sy, sz, a, b, c, d, t, u, v;
-        float[] q;
-        int i, j;
-
-//        if (start) {
-//            start = false;
-//            init();
-//        }
-
-        t = x + N;
-        bx0 = ((int) t) & BM;
-        bx1 = (bx0 + 1) & BM;
-        rx0 = t - (int) t;
-        rx1 = rx0 - 1.0f;
+        float t = x + N;
+        int bx0 = ((int) t) & BM;
+        int bx1 = (bx0 + 1) & BM;
+        float rx0 = t - (int) t;
+        float rx1 = rx0 - 1.0f;
 
         t = y + N;
-        by0 = ((int) t) & BM;
-        by1 = (by0 + 1) & BM;
-        ry0 = t - (int) t;
-        ry1 = ry0 - 1.0f;
+        int by0 = ((int) t) & BM;
+        int by1 = (by0 + 1) & BM;
+        float ry0 = t - (int) t;
+        float ry1 = ry0 - 1.0f;
 
         t = z + N;
-        bz0 = ((int) t) & BM;
-        bz1 = (bz0 + 1) & BM;
-        rz0 = t - (int) t;
-        rz1 = rz0 - 1.0f;
+        int bz0 = ((int) t) & BM;
+        int bz1 = (bz0 + 1) & BM;
+        float rz0 = t - (int) t;
+        float rz1 = rz0 - 1.0f;
 
-        i = p[bx0];
-        j = p[bx1];
+        int i = p[bx0];
+        int j = p[bx1];
 
-        b00 = p[i + by0];
-        b10 = p[j + by0];
-        b01 = p[i + by1];
-        b11 = p[j + by1];
+        int b00 = p[i + by0];
+        int b10 = p[j + by0];
+        int b01 = p[i + by1];
+        int b11 = p[j + by1];
 
-        t = sCurve(rx0);
-        sy = sCurve(ry0);
-        sz = sCurve(rz0);
+        t = ImageMath.smoothStep01(rx0);
+        float sy = ImageMath.smoothStep01(ry0);
+        float sz = ImageMath.smoothStep01(rz0);
 
-        q = g3[b00 + bz0];
-        u = rx0 * q[0] + ry0 * q[1] + rz0 * q[2];
+        float[] q = g3[b00 + bz0];
+        float u = rx0 * q[0] + ry0 * q[1] + rz0 * q[2];
         q = g3[b10 + bz0];
-        v = rx1 * q[0] + ry0 * q[1] + rz0 * q[2];
-        a = lerp(t, u, v);
+        float v = rx1 * q[0] + ry0 * q[1] + rz0 * q[2];
+        float a = lerp(t, u, v);
 
         q = g3[b01 + bz0];
         u = rx0 * q[0] + ry1 * q[1] + rz0 * q[2];
         q = g3[b11 + bz0];
         v = rx1 * q[0] + ry1 * q[1] + rz0 * q[2];
-        b = lerp(t, u, v);
+        float b = lerp(t, u, v);
 
-        c = lerp(sy, a, b);
+        float c = lerp(sy, a, b);
 
         q = g3[b00 + bz1];
         u = rx0 * q[0] + ry0 * q[1] + rz1 * q[2];
@@ -286,7 +252,7 @@ public class Noise implements Function1D, Function2D, Function3D {
         v = rx1 * q[0] + ry1 * q[1] + rz1 * q[2];
         b = lerp(t, u, v);
 
-        d = lerp(sy, a, b);
+        float d = lerp(sy, a, b);
 
         return 1.5f * lerp(sz, c, d);
     }
@@ -313,7 +279,7 @@ public class Noise implements Function1D, Function2D, Function3D {
     }
 
     private static void init() {
-        int i, j, k;
+        int i, j;
 
         for (i = 0; i < B; i++) {
             p[i] = i;
@@ -332,7 +298,7 @@ public class Noise implements Function1D, Function2D, Function3D {
         }
 
         for (i = B - 1; i >= 0; i--) {
-            k = p[i];
+            int k = p[i];
             p[i] = p[j = random() % B];
             p[j] = k;
         }

@@ -28,14 +28,14 @@ import pixelitor.filters.impl.BrickBlockFilter;
 import pixelitor.gui.GUIText;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static java.awt.Color.GRAY;
 import static java.awt.Color.WHITE;
 
 /**
- * Pixelate filter based on the JHLabs BlockFilter
+ * Pixelate filter based on the JHLabs {@link BlockFilter}
  * (or alternatively on {@link BrickBlockFilter})
  */
 public class JHPixelate extends ParametrizedFilter {

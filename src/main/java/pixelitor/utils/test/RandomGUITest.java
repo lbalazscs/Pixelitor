@@ -92,9 +92,6 @@ public class RandomGUITest {
     private static final Tool preferredTool = null;
 
     // set to null to select random filters
-//    private static final Filter preferredFilter = new Magnify();
-//    private static final ParametrizedFilter preferredTweenFilter
-//      = (ParametrizedFilter) preferredFilter;
     private static final Filter preferredFilter = null;
     private static final ParametrizedFilter preferredTweenFilter = null;
 

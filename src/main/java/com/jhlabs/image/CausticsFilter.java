@@ -19,7 +19,7 @@ package com.jhlabs.image;
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
 
-import java.awt.Rectangle;
+import java.awt.*;
 import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
@@ -262,10 +262,9 @@ public class CausticsFilter extends WholeImageFilter {
                 float sy = y + random.nextFloat();
                 float nx = sx * rs;
                 float ny = sy * rs;
-                float xDisplacement, yDisplacement;
                 float focus = 0.1f + amount;
-                xDisplacement = evaluate(nx - d, ny) - evaluate(nx + d, ny);
-                yDisplacement = evaluate(nx, ny + d) - evaluate(nx, ny - d);
+                float xDisplacement = evaluate(nx - d, ny) - evaluate(nx + d, ny);
+                float yDisplacement = evaluate(nx, ny + d) - evaluate(nx, ny - d);
 
                 if (dispersion > 0) {
                     for (int c = 0; c < 3; c++) {
@@ -373,9 +372,6 @@ public class CausticsFilter extends WholeImageFilter {
 //    }
 
     private static float turbulence2(float x, float y, float time, float octaves) {
-        float value = 0.0f;
-        float remainder;
-        float lacunarity = 2.0f;
         float f = 1.0f;
         int i;
 
@@ -383,6 +379,8 @@ public class CausticsFilter extends WholeImageFilter {
         x += 371;
         y += 529;
 
+        float value = 0.0f;
+        float lacunarity = 2.0f;
         for (i = 0; i < (int) octaves; i++) {
             value += Noise.noise3(x, y, time) / f;
             x *= lacunarity;
@@ -390,7 +388,7 @@ public class CausticsFilter extends WholeImageFilter {
             f *= 2;
         }
 
-        remainder = octaves - (int) octaves;
+        float remainder = octaves - (int) octaves;
         if (remainder != 0) {
             value += remainder * Noise.noise3(x, y, time) / f;
         }

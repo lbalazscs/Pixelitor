@@ -16,8 +16,7 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.CompositeContext;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.ColorModel;
 
 public final class NegationComposite extends RGBComposite {
@@ -48,11 +47,10 @@ public final class NegationComposite extends RGBComposite {
                 int dib = dst[i + 2];
                 int sa = src[i + 3];
                 int dia = dst[i + 3];
-                int dor, dog, dob;
 
-                dor = 255 - Math.abs(255 - sr - dir);
-                dog = 255 - Math.abs(255 - sg - dig);
-                dob = 255 - Math.abs(255 - sb - dib);
+                int dor = 255 - Math.abs(255 - sr - dir);
+                int dog = 255 - Math.abs(255 - sg - dig);
+                int dob = 255 - Math.abs(255 - sb - dib);
 
                 float a = alpha * sa / 255.0f;
                 float ac = 1 - a;

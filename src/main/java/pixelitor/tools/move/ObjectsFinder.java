@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.MaskViewMode;
 
-import java.awt.Point;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.util.List;
 import java.util.ListIterator;
@@ -42,10 +42,8 @@ public class ObjectsFinder {
     }
 
     public static ObjectsSelection findObjectAtPoint(Point2D p, Composition stage) {
-        ObjectsSelection result;
-
         // search layers
-        result = findLayerAtPoint(p, stage);
+        ObjectsSelection result = findLayerAtPoint(p, stage);
         if (!result.isEmpty()) {
             return result;
         }

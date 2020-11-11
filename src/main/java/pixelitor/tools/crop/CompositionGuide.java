@@ -19,8 +19,7 @@ package pixelitor.tools.crop;
 
 import pixelitor.guides.GuidesRenderer;
 
-import java.awt.Graphics2D;
-import java.awt.Shape;
+import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -91,14 +90,13 @@ public class CompositionGuide {
     private void drawSections(Rectangle2D rect, double phi) {
         double sectionWidth = rect.getWidth() / phi;
         double sectionHeight = rect.getHeight() / phi;
-        double x1, x2, y1, y2;
-        Line2D[] lines = new Line2D.Double[4];
 
         // vertical lines
-        x1 = rect.getX() + sectionWidth;
-        x2 = rect.getX() + rect.getWidth() - sectionWidth;
-        y1 = rect.getY();
-        y2 = rect.getY() + rect.getHeight();
+        double x1 = rect.getX() + sectionWidth;
+        double x2 = rect.getX() + rect.getWidth() - sectionWidth;
+        double y1 = rect.getY();
+        double y2 = rect.getY() + rect.getHeight();
+        Line2D[] lines = new Line2D.Double[4];
         lines[0] = new Line2D.Double(x1, y1, x1, y2);
         lines[1] = new Line2D.Double(x2, y1, x2, y2);
 
@@ -222,7 +220,6 @@ public class CompositionGuide {
     }
 
     private void drawTriangles(Rectangle2D rect) {
-        Line2D[] lines = new Line2D.Double[3];
         double x1, x2, y1, y2;
 
         if (orientation % 2 == 0) {
@@ -239,6 +236,7 @@ public class CompositionGuide {
             y2 = rect.getY();
         }
 
+        Line2D[] lines = new Line2D.Double[3];
         lines[0] = new Line2D.Double(x1, y1, x2, y2);
         lines[1] = getOrthogonalLineThroughPoint(lines[0], new Point2D.Double(x1, y2));
         lines[2] = getOrthogonalLineThroughPoint(lines[0], new Point2D.Double(x2, y1));
@@ -262,20 +260,18 @@ public class CompositionGuide {
     }
 
     private static void drawSpiral0(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
-        double angle;
-        Point2D.Double center;
-        angle = 180;
-        center = new Point2D.Double(rect.getX() + arcWidth, rect.getY() + arcHeight);
+        double angle = 180;
+        Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY() + arcHeight);
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                center.getX() - arcWidth,
-                center.getY() - arcHeight,
-                arcWidth * 2,
-                arcHeight * 2,
-                angle,
-                -90,
-                Arc2D.OPEN);
+                    center.getX() - arcWidth,
+                    center.getY() - arcHeight,
+                    arcWidth * 2,
+                    arcHeight * 2,
+                    angle,
+                    -90,
+                    Arc2D.OPEN);
 
             angle -= 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -288,20 +284,18 @@ public class CompositionGuide {
     }
 
     private static void drawSpiral1(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
-        double angle;
-        Point2D.Double center;
-        angle = 180;
-        center = new Point2D.Double(rect.getX() + arcWidth, rect.getY());
+        double angle = 180;
+        Point2D center = new Point2D.Double(rect.getX() + arcWidth, rect.getY());
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                center.getX() - arcWidth,
-                center.getY() - arcHeight,
-                arcWidth * 2,
-                arcHeight * 2,
-                angle,
-                90,
-                Arc2D.OPEN);
+                    center.getX() - arcWidth,
+                    center.getY() - arcHeight,
+                    arcWidth * 2,
+                    arcHeight * 2,
+                    angle,
+                    90,
+                    Arc2D.OPEN);
 
             angle += 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -314,20 +308,18 @@ public class CompositionGuide {
     }
 
     private static void drawSpiral2(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
-        double angle;
-        Point2D.Double center;
-        angle = 0;
-        center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY() + rect.getHeight());
+        double angle = 0;
+        Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY() + rect.getHeight());
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                center.getX() - arcWidth,
-                center.getY() - arcHeight,
-                arcWidth * 2,
-                arcHeight * 2,
-                angle,
-                90,
-                Arc2D.OPEN);
+                    center.getX() - arcWidth,
+                    center.getY() - arcHeight,
+                    arcWidth * 2,
+                    arcHeight * 2,
+                    angle,
+                    90,
+                    Arc2D.OPEN);
 
             angle += 90;
             arcWidth = arcWidth / GOLDEN_RATIO;
@@ -340,20 +332,18 @@ public class CompositionGuide {
     }
 
     private static void drawSpiral3(Rectangle2D rect, Shape[] arc2D, double arcWidth, double arcHeight) {
-        double angle;
-        Point2D.Double center;
-        angle = 0;
-        center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY());
+        double angle = 0;
+        Point2D center = new Point2D.Double(rect.getX() + (rect.getWidth() - arcWidth), rect.getY());
 
         for (int i = 0; i < NUM_SPIRAL_SEGMENTS; i++) {
             arc2D[i] = new Arc2D.Double(
-                center.getX() - arcWidth,
-                center.getY() - arcHeight,
-                arcWidth * 2,
-                arcHeight * 2,
-                angle,
-                -90,
-                Arc2D.OPEN);
+                    center.getX() - arcWidth,
+                    center.getY() - arcHeight,
+                    arcWidth * 2,
+                    arcHeight * 2,
+                    angle,
+                    -90,
+                    Arc2D.OPEN);
 
             angle -= 90;
             arcWidth = arcWidth / GOLDEN_RATIO;

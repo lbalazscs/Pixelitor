@@ -24,15 +24,16 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.io.Serial;
 
 /**
  * A layer with a content (text or image layer) that
  * can be moved/rotated.
  */
 public abstract class ContentLayer extends Layer {
+    @Serial
     private static final long serialVersionUID = 2L;
 
     // used only while dragging

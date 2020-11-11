@@ -32,9 +32,7 @@ import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -135,9 +133,6 @@ public class CloneTool extends BlendingModeBrushTool {
 
     @Override
     public void mousePressed(PMouseEvent e) {
-//        double x = e.getImX();
-//        double y = e.getImY();
-
         if (e.isAltDown() || e.isRight()) {
             setCloningSource(e);
         } else {

@@ -20,7 +20,7 @@ package pixelitor.filters.gui;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,13 +60,12 @@ public class BooleanParam extends AbstractFilterParam {
         setGUIEnabledState();
 
         if (itemListeners != null) {
-            // some action listeners for the GUI
-            // were temporarily stored here
-
+            // The item listeners for the GUI were temporarily stored here.
+            // This is also necessary because currently createGUI() is called
+            // for each new filter invocation => the new GUI has to be set up.
             for (ItemListener listener : itemListeners) {
                 gui.addItemListener(listener);
             }
-            itemListeners.clear();
         }
 
         return gui;

@@ -20,7 +20,7 @@ package pixelitor.filters.impl;
 import com.jhlabs.image.WholeImageFilter;
 import pixelitor.filters.Morphology;
 
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * The implementation of the {@link Morphology} filter.
@@ -54,7 +54,6 @@ public class MorphologyFilter extends WholeImageFilter {
 
     @Override
     protected int[] filterPixels(int width, int height, int[] inPixels, Rectangle transformedSpace) {
-        int[] outPixels = new int[width * height];
         int numPixels = inPixels.length;
         short[] inA = new short[numPixels];
         short[] inR = new short[numPixels];
@@ -62,6 +61,7 @@ public class MorphologyFilter extends WholeImageFilter {
         short[] inB = new short[numPixels];
 
         pt = createProgressTracker(iterations);
+        int[] outPixels = new int[width * height];
         for (int it = 0; it < iterations; it++) {
             if (it > 0) {
                 System.arraycopy(outPixels, 0, inPixels, 0, numPixels);

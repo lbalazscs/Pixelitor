@@ -129,12 +129,13 @@ public class Automate {
 
         var format = FileFormat.getLastOutput();
         File file = calcOutputFile(comp, lastSaveDir, format);
-        CompletableFuture<Void> retVal = null;
 
         // so that it doesn't ask to save again after we just saved it
         comp.setDirty(false);
 
         var saveSettings = new SaveSettings(format, file);
+        CompletableFuture<Void> retVal = null;
+
         if (file.exists() && !overwriteAll) {
             String answer = showOverwriteWarningDialog(file);
 

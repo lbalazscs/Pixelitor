@@ -209,12 +209,9 @@ public class AbstractAreaEffect implements AreaEffect {
                                    Shape clipShape, int width, int height) {
 
         int steps = getBrushSteps();
-        float brushAlpha = 1f / steps;
-
         boolean inside = isRenderInsideShape();
 
         g2.setPaint(getBrushColor());
-
         g2.translate(offset.getX(), offset.getY());
 
         if (isShouldFillShape()) {
@@ -232,7 +229,6 @@ public class AbstractAreaEffect implements AreaEffect {
                 g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 1f));
                 g2.fill(clipShape);
             }
-
         }
 
         // set the inside/outside mode
@@ -242,6 +238,7 @@ public class AbstractAreaEffect implements AreaEffect {
         } else {
             g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, brushAlpha));
         }*/
+        float brushAlpha = 1.0f / steps;
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, brushAlpha));
 
         // draw the effect

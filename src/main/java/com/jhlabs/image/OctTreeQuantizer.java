@@ -135,7 +135,6 @@ public class OctTreeQuantizer implements Quantizer {
         OctTreeNode node = root;
 
         for (int level = 0; level <= MAX_LEVEL; level++) {
-            OctTreeNode child;
             int bit = 0x80 >> level;
 
             int index = 0;
@@ -149,7 +148,7 @@ public class OctTreeQuantizer implements Quantizer {
                 index += 1;
             }
 
-            child = node.leaf[index];
+            OctTreeNode child = node.leaf[index];
 
             if (child == null) {
                 return node.index;
@@ -172,7 +171,6 @@ public class OctTreeQuantizer implements Quantizer {
 
 //		System.out.println("insertColor="+Integer.toHexString(rgb));
         for (int level = 0; level <= MAX_LEVEL; level++) {
-            OctTreeNode child;
             int bit = 0x80 >> level;
 
             int index = 0;
@@ -186,7 +184,7 @@ public class OctTreeQuantizer implements Quantizer {
                 index += 1;
             }
 
-            child = node.leaf[index];
+            OctTreeNode child = node.leaf[index];
 
             if (child == null) {
                 node.children++;
