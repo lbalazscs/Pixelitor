@@ -22,7 +22,9 @@ import pixelitor.filters.gui.EffectsParam;
 import pixelitor.filters.gui.ParamState;
 import pixelitor.filters.gui.UserPreset;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.Point2D;
 import java.io.Serial;
 import java.io.Serializable;
@@ -278,11 +280,10 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
 
     @Override
     public String toString() {
-        String sb = "AreaEffects{glow=" + (glowEffect == null ? "null" : "not null") +
+        return "AreaEffects{glow=" + (glowEffect == null ? "null" : "not null") +
             ", innerGlow=" + (innerGlowEffect == null ? "null" : "not null") +
             ", neonBorder=" + (neonBorderEffect == null ? "null" : "not null") +
             ", dropShadow=" + (dropShadowEffect == null ? "null" : "not null") +
             '}';
-        return sb;
     }
 }

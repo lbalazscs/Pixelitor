@@ -32,19 +32,8 @@ import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.html.HTMLDocument;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Locale;
@@ -129,38 +118,32 @@ public class BasicTipOfTheDayUI extends TipOfTheDayUI {
       buttons.add(previousTipButton);
       previousTipButton.addActionListener(getActionMap().get("previousTip"));
     }
-    
+
     JButton nextTipButton = new JButton(UIManagerExt
-      .getString("TipOfTheDay.nextTipText", locale));
+        .getString("TipOfTheDay.nextTipText", locale));
     buttons.add(nextTipButton);
     nextTipButton.addActionListener(getActionMap().get("nextTip"));
-    
+
     JButton closeButton = new JButton(UIManagerExt
-      .getString("TipOfTheDay.closeText", locale));
+        .getString("TipOfTheDay.closeText", locale));
     buttons.add(closeButton);
-    
-    final ActionListener saveChoice = new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        if (choice != null) {
-          choice.setShowingOnStartup(showOnStartupBox.isSelected());
-        }
-        dialog.setVisible(false);
+
+    final ActionListener saveChoice = e -> {
+      if (choice != null) {
+        choice.setShowingOnStartup(showOnStartupBox.isSelected());
       }
+      dialog.setVisible(false);
     };
 
-    closeButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        dialog.setVisible(false);
-        saveChoice.actionPerformed(null);
-      }
+    closeButton.addActionListener(e -> {
+      dialog.setVisible(false);
+      saveChoice.actionPerformed(null);
     });
+
     dialog.getRootPane().setDefaultButton(closeButton);
-    
     dialog.addWindowListener(new WindowAdapter() {
       @Override
-    public void windowClosing(WindowEvent e) {
+      public void windowClosing(WindowEvent e) {
         saveChoice.actionPerformed(null);
       }
     });

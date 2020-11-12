@@ -73,9 +73,6 @@ public class UnicodeShapes {
 
     // works incorrectly on Linux, returns true for undisplayed characters
     public static boolean isSupported(int codePoint) {
-        boolean ok = font.canDisplay(codePoint);
-//        System.out.printf("UnicodeShapes::isSupported: codePoint = 0x%x, ok = %s%n",
-//                codePoint, ok);
-        return ok;
+        return font.canDisplay(codePoint);
     }
 }

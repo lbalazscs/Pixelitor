@@ -47,8 +47,8 @@ public class RotationHandle extends DraggablePoint {
     }
 
     @Override
-    protected Shape createShape(double startX, double startY, double size) {
-        return new Ellipse2D.Double(startX, startY, size, size);
+    protected Shape createShape(double startX, double startY) {
+        return new Ellipse2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     @Override

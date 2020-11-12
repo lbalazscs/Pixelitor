@@ -84,17 +84,9 @@ public class LayerMoveAction extends NamedAction
             int activeLayerIndex = comp.getActiveLayerIndex();
             if (up) {
                 int numLayers = comp.getNumLayers();
-                if (activeLayerIndex < numLayers - 1) {
-                    setEnabled(true);
-                } else {
-                    setEnabled(false);
-                }
+                setEnabled(activeLayerIndex < numLayers - 1);
             } else {
-                if (activeLayerIndex > 0) {
-                    setEnabled(true);
-                } else {
-                    setEnabled(false);
-                }
+                setEnabled(activeLayerIndex > 0);
             }
         }
     }

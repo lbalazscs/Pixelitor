@@ -130,8 +130,7 @@ public class ImDrag {
 
     public ImDrag getCenterDrag() {
         Point2D center = getCenterPoint();
-        ImDrag rv = new ImDrag(center.getX(), center.getY(), getEndX(), getEndY());
-        return rv;
+        return new ImDrag(center.getX(), center.getY(), getEndX(), getEndY());
     }
 
     public double getEndX() {

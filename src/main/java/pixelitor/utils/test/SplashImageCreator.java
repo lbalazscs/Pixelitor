@@ -38,7 +38,6 @@ import pixelitor.io.Dirs;
 import pixelitor.io.FileFormat;
 import pixelitor.io.FileUtils;
 import pixelitor.io.SaveSettings;
-import pixelitor.layers.BlendingMode;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.TextLayer;
@@ -50,9 +49,7 @@ import pixelitor.utils.ProgressHandler;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 
-import java.awt.Color;
 import java.awt.Font;
-import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.util.HashMap;
@@ -134,12 +131,11 @@ public class SplashImageCreator {
 
         for (int i = 0; i < 3; i++) {
             GradientType gradientType = Rnd.chooseFrom(GradientType.values());
-            CycleMethod cycleMethod = REFLECT;
 
             ImDrag randomDrag = ImDrag.createRandom(
                 SPLASH_WIDTH, SPLASH_HEIGHT, SPLASH_HEIGHT / 2);
             Gradient gradient = new Gradient(randomDrag,
-                gradientType, cycleMethod, FG_TO_BG,
+                gradientType, REFLECT, FG_TO_BG,
                 false, MULTIPLY, 1.0f);
             gradient.drawOn(layer);
         }
@@ -173,7 +169,7 @@ public class SplashImageCreator {
         layer.setBlendingMode(SCREEN, true);
 
         layer = addNewLayer(comp, "Gradient");
-        addBWGradientTo(layer, GradientType.RADIAL);
+        addBWGradientTo(layer);
         layer.setOpacity(0.4f, true);
         layer.setBlendingMode(LUMINOSITY, true);
 
@@ -185,21 +181,21 @@ public class SplashImageCreator {
     private static void addTextLayers(Composition comp) {
         FgBgColors.setFGColor(WHITE);
 
-        Font font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 20);
-        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER, WHITE,
-            font, 50, NORMAL, 1.0f, true);
+        Font font = createSplashFont(SPLASH_SMALL_FONT, 20);
+        addTextLayer(comp, "version " + Pixelitor.VERSION_NUMBER,
+            font, 50);
 
-        font = createSplashFont(SPLASH_MAIN_FONT, Font.PLAIN, MAIN_FONT_SIZE);
-        addTextLayer(comp, "Pixelitor", WHITE,
-            font, -17, NORMAL, 1.0f, true);
+        font = createSplashFont(SPLASH_MAIN_FONT, MAIN_FONT_SIZE);
+        addTextLayer(comp, "Pixelitor",
+            font, -17);
 
-        font = createSplashFont(SPLASH_SMALL_FONT, Font.PLAIN, 22);
-        addTextLayer(comp, "Loading...", WHITE,
-            font, -70, NORMAL, 1.0f, true);
+        font = createSplashFont(SPLASH_SMALL_FONT, 22);
+        addTextLayer(comp, "Loading...",
+            font, -70);
     }
 
-    private static Font createSplashFont(String name, int style, int size) {
-        Font font = new Font(name, style, size);
+    private static Font createSplashFont(String name, int size) {
+        Font font = new Font(name, Font.PLAIN, size);
 
         // check that the font exists
         assert font.getName().equals(name) : font.getName();
@@ -233,17 +229,12 @@ public class SplashImageCreator {
     }
 
     private static void addTextLayer(Composition comp, String text,
-                                     Color textColor, Font font,
-                                     int translationY, BlendingMode blendingMode,
-                                     float opacity, boolean dropShadow) {
+                                     Font font,
+                                     int translationY) {
         TextLayer layer = addNewTextLayer(comp, text);
+        AreaEffects effects = createDropShadowEffect();
 
-        AreaEffects effects = null;
-        if (dropShadow) {
-            effects = createDropShadowEffect();
-        }
-
-        var settings = new TextSettings(text, font, textColor, effects,
+        var settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER,
             VerticalAlignment.CENTER, false, 0);
 
@@ -252,9 +243,6 @@ public class SplashImageCreator {
         layer.startMovement();
         layer.moveWhileDragging(0, translationY);
         layer.endMovement();
-
-        layer.setOpacity(opacity, true);
-        layer.setBlendingMode(blendingMode, true);
     }
 
     private static AreaEffects createDropShadowEffect() {
@@ -266,7 +254,7 @@ public class SplashImageCreator {
         return effects;
     }
 
-    private static void addBWGradientTo(Drawable dr, GradientType gradientType) {
+    private static void addBWGradientTo(Drawable dr) {
         Canvas canvas = dr.getComp().getCanvas();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
@@ -284,7 +272,7 @@ public class SplashImageCreator {
 
         Gradient gradient = new Gradient(
             new ImDrag(startX, startY, endX, endY),
-            gradientType, REFLECT, BLACK_TO_WHITE,
+            GradientType.RADIAL, REFLECT, BLACK_TO_WHITE,
             false, NORMAL, 1.0f);
         gradient.drawOn(dr);
     }

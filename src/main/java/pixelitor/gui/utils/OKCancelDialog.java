@@ -44,18 +44,18 @@ public abstract class OKCancelDialog extends JDialog {
     private final JButton okButton;
 
     protected OKCancelDialog(JComponent form, Frame owner,
-                             String title, String okText, String cancelText) {
+                             String title, String okText) {
         super(owner, title, true);
         assert calledOnEDT() : threadInfo();
 
         formPanel = form;
 
         setLayout(new BorderLayout());
-        addForm(form, true);
+        addForm(form);
 
         JPanel southPanel = new JPanel();
         okButton = new JButton(okText);
-        JButton cancelButton = new JButton(cancelText);
+        JButton cancelButton = new JButton("Cancel");
         cancelButton.setName("cancel");
 
         GlobalEvents.dialogOpened(getTitle());
@@ -131,20 +131,15 @@ public abstract class OKCancelDialog extends JDialog {
             remove(formPanel);
         }
         formPanel = form;
-        addForm(formPanel, true);
+        addForm(formPanel);
         revalidate();
     }
 
-    private void addForm(JComponent form, boolean addScrollBars) {
-        if (addScrollBars) {
-            scrollPane = new JScrollPane(form,
-                VERTICAL_SCROLLBAR_AS_NEEDED,
-                HORIZONTAL_SCROLLBAR_NEVER);
-            add(scrollPane, CENTER);
-        } else {
-            add(form, CENTER);
-            scrollPane = null; // so that we later know that we have to remove from the root
-        }
+    private void addForm(JComponent form) {
+        scrollPane = new JScrollPane(form,
+            VERTICAL_SCROLLBAR_AS_NEEDED,
+            HORIZONTAL_SCROLLBAR_NEVER);
+        add(scrollPane, CENTER);
     }
 
     public JButton getOkButton() {

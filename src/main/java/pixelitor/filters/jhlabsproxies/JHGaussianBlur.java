@@ -52,10 +52,6 @@ public class JHGaussianBlur extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-//        if (radius.isFloatingZero()) {
-//            return src;
-//        }
-
         if (filter == null) {
             filter = new GaussianFilter(NAME);
         }

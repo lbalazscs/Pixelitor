@@ -92,8 +92,7 @@ public class ColorHistory {
         int numColors = colors.size();
         int colorsInRow = 10;
         int rows = 1 + (numColors - 1) / colorsInRow;
-        int cols = colorsInRow;
-        var panel = new JPanel(new GridLayout(rows, cols, 2, 2));
+        var panel = new JPanel(new GridLayout(rows, colorsInRow, 2, 2));
         panel.setBorder(createEmptyBorder(2, 2, 2, 2));
         for (Color color : colors) {
             panel.add(new ColorSwatchButton(color, clickHandler, 0, 0));

@@ -104,8 +104,6 @@ public class DebugNode extends DefaultMutableTreeNode {
 
     private static void indent(StringBuilder sb, int indentLevel) {
         sb.append('\n');
-        for (int i = 0; i < indentLevel; i++) {
-            sb.append("  ");
-        }
+        sb.append("  ".repeat(indentLevel));
     }
 }

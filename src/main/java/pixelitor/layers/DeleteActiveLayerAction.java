@@ -60,20 +60,12 @@ public class DeleteActiveLayerAction extends NamedAction
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        if (newView.getComp().getNumLayers() <= 1) { // no more deletion is possible
-            setEnabled(false);
-        } else {
-            setEnabled(true);
-        }
+        setEnabled(newView.getComp().getNumLayers() > 1);
     }
 
     @Override
     public void numLayersChanged(Composition comp, int newLayerCount) {
-        if (newLayerCount <= 1) {
-            setEnabled(false);
-        } else {
-            setEnabled(true);
-        }
+        setEnabled(newLayerCount > 1);
     }
 
     @Override

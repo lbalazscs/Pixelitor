@@ -85,7 +85,7 @@ public class NeonBorderEffect extends AbstractAreaEffect {
         * // then stroke again with slightly less wide one, then don't fill the middle
        for(int i=0; i<2; i++) {
            float brushWidth = (2-i)*5;
-           p("widdth = " + brushWidth);
+           p("width = " + brushWidth);
            gfx.setPaint(interpolateColor((float)(1-i), Color.BLACK, Color.WHITE));
            gfx.setStroke(new BasicStroke(brushWidth));
            gfx.draw(clipShape);
@@ -98,10 +98,9 @@ public class NeonBorderEffect extends AbstractAreaEffect {
             steps = steps / 2;
         }
         for (int i = 0; i < steps; i++) {
-
             // make the brush width smaller each time until there is nothing left
             float brushWidth = steps + 1 - i;
-            float half = steps / 2;
+            float half = steps / 2.0f;
 
             if (borderPosition == BorderPosition.Centered) {
                 gfx.setPaint(interpolateColor((float) (steps - i) / steps, getEdgeColor(), getCenterColor()));

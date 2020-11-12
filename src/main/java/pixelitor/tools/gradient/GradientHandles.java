@@ -94,8 +94,7 @@ public class GradientHandles implements ToolWidget {
         double endX = view.componentXToImageSpace(end.x);
         double endY = view.componentYToImageSpace(end.y);
 
-        ImDrag imDrag = new ImDrag(startX, startY, endX, endY);
-        return imDrag;
+        return new ImDrag(startX, startY, endX, endY);
     }
 
     public UserDrag toUserDrag(GradientDefiningPoint movingPoint) {

@@ -113,7 +113,6 @@ public final class ConsistencyChecks {
         if (comp.hasSelection()) {
             if (!SelectionActions.areEnabled()) {
                 selectionActionsInconsistency(comp);
-                return;
             }
         } else { // no selection
             if (SelectionActions.areEnabled()) {

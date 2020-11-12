@@ -23,7 +23,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.gui.GUIText;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.WaveType.wave;
@@ -89,7 +89,7 @@ public class Marble extends ParametrizedFilter {
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
         if (filter == null) {
-            filter = new Impl(NAME);
+            filter = new Impl();
         }
 
         filter.setType(type.getValue());
@@ -133,8 +133,8 @@ public class Marble extends ParametrizedFilter {
         private boolean smoothDetails;
         private float time;
 
-        protected Impl(String filterName) {
-            super(filterName);
+        protected Impl() {
+            super(NAME);
         }
 
         public void setDetailsStrength(float f) {

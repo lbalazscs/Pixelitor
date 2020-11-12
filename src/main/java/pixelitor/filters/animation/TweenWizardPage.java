@@ -186,11 +186,7 @@ public enum TweenWizardPage implements WizardPage {
             TweenAnimation animation = getAnimation(wizard);
             outputSettingsPanel.copySettingsInto(animation);
 
-            if (!animation.checkOverwrite(dialogParent)) {
-                return false;
-            }
-
-            return true;
+            return animation.checkOverwrite(dialogParent);
         }
 
         @Override

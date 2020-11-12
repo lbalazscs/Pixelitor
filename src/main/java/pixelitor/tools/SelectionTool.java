@@ -225,7 +225,9 @@ public class SelectionTool extends DragTool {
     }
 
     private void cancelSelection(Composition comp) {
-        deselect(comp, true);
+        if (comp.hasSelection() || comp.hasBuiltSelection()) {
+            comp.deselect(true);
+        }
         assert !comp.hasBuiltSelection() : "built selection is = " + comp.getBuiltSelection();
         assert !comp.hasSelection() : "selection is = " + comp.getSelection();
 
@@ -233,12 +235,6 @@ public class SelectionTool extends DragTool {
 
         if (RunContext.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
-        }
-    }
-
-    private static void deselect(Composition comp, boolean addToHistory) {
-        if (comp.hasSelection() || comp.hasBuiltSelection()) {
-            comp.deselect(addToHistory);
         }
     }
 

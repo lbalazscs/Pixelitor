@@ -375,7 +375,7 @@ public class Composition implements Serializable {
             .add(flattened);
 
         for (int i = numLayers - 1; i >= 0; i--) { // delete the rest
-            deleteLayer(i, false);
+            deleteLayer(layerList.get(i), false);
         }
 
         Layers.numLayersChanged(this, 1);
@@ -442,11 +442,6 @@ public class Composition implements Serializable {
 
         History.add(new MergeDownEdit(this, layer,
             bellowLayer, imageBefore, maskViewModeBefore, layerIndex));
-    }
-
-    private void deleteLayer(int layerIndex, boolean addToHistory) {
-        Layer layer = layerList.get(layerIndex);
-        deleteLayer(layer, addToHistory);
     }
 
     public void deleteActiveLayer(boolean addToHistory) {

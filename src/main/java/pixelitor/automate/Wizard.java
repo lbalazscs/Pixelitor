@@ -61,7 +61,7 @@ public abstract class Wizard {
     private void showDialog(JFrame dialogParent, String title) {
         assert dialog == null; // this should be called once per object
 
-        dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next", "Cancel") {
+        dialog = new OKCancelDialog(currentPage.createPanel(this, dr), dialogParent, title, "Next") {
             @Override
             protected void cancelAction() {
                 currentPage.onWizardCanceled(dr);

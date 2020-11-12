@@ -294,10 +294,7 @@ public class Shapes {
             it2.next();
         }
 
-        if (!it2.isDone()) {
-            return false;
-        }
-        return true;
+        return it2.isDone();
     }
 
     /**

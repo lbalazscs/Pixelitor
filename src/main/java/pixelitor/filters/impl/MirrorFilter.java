@@ -43,36 +43,32 @@ public class MirrorFilter extends CenteredTransformFilter {
             case LEFT_OVER_RIGHT:
                 if (x < cx) {
                     out[0] = x;
-                    out[1] = y;
                 } else {
                     out[0] = cx + cx - x;
-                    out[1] = y;
                 }
+                out[1] = y;
                 break;
             case RIGHT_OVER_LEFT:
                 if (x > cx) {
                     out[0] = x;
-                    out[1] = y;
                 } else {
                     out[0] = cx + cx - x;
-                    out[1] = y;
                 }
+                out[1] = y;
                 break;
             case TOP_OVER_BOTTOM:
+                out[0] = x;
                 if (y < cy) {
-                    out[0] = x;
                     out[1] = y;
                 } else {
-                    out[0] = x;
                     out[1] = cy + cy - y;
                 }
                 break;
             case BOTTOM_OVER_TOP:
+                out[0] = x;
                 if (y > cy) {
-                    out[0] = x;
                     out[1] = y;
                 } else {
-                    out[0] = x;
                     out[1] = cy + cy - y;
                 }
                 break;

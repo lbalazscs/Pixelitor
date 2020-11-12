@@ -41,19 +41,17 @@ class OpenSaveDirsPanel extends ValidatedPanel {
     private final BrowseFilesSupport outputChooser
             = new BrowseFilesSupport(Dirs.getLastSavePath(),
             "Select Output Folder", DIRECTORY);
-    private final boolean allowSameDirs;
 
     private final FileFormatSelector outputFormatSelector;
 
-    OpenSaveDirsPanel(boolean allowSameDirs, FileFormat saveFormat) {
-        this.allowSameDirs = allowSameDirs;
+    OpenSaveDirsPanel() {
         setLayout(new GridBagLayout());
         var gbh = new GridBagHelper(this);
 
         addDirChooser("Input Folder:", inputChooser, gbh);
         addDirChooser("Output Folder:", outputChooser, gbh);
 
-        outputFormatSelector = new FileFormatSelector(saveFormat);
+        outputFormatSelector = new FileFormatSelector(FileFormat.getLastOutput());
         gbh.addLabelAndControlNoStretch("Output Format:", outputFormatSelector);
     }
 
@@ -81,9 +79,9 @@ class OpenSaveDirsPanel extends ValidatedPanel {
         retVal = addDirExistenceCheck(retVal, inputDir, "input");
         retVal = addDirExistenceCheck(retVal, outputDir, "output");
 
-        if (!allowSameDirs && inputDir.equals(outputDir)) {
+        if (inputDir.equals(outputDir)) {
             ValidationResult err = ValidationResult.error(
-                    "The input and output folders must be different.");
+                "The input and output folders must be different.");
             return retVal.and(err);
         }
         return retVal;

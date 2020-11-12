@@ -135,11 +135,7 @@ public class LayerMask extends ImageLayer {
      */
     public LayerMask duplicate(Layer owner) {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
-
-        LayerMask d = new LayerMask(comp, maskImageCopy, owner,
-                getTx(), getTy());
-
-        return d;
+        return new LayerMask(comp, maskImageCopy, owner, getTx(), getTy());
     }
 
     public boolean isLinked() {

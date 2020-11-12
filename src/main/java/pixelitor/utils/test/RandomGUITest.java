@@ -181,7 +181,7 @@ public class RandomGUITest {
             randomCopy(); // ensure an image is on the clipboard
         }
 
-        SwingWorker<Void, Void> worker = createSwingWorker(r, true);
+        SwingWorker<Void, Void> worker = createSwingWorker(r);
         worker.execute();
     }
 
@@ -199,20 +199,20 @@ public class RandomGUITest {
         }
     }
 
-    private static SwingWorker<Void, Void> createSwingWorker(Robot r,
-                                                             boolean forever) {
+    private static SwingWorker<Void, Void> createSwingWorker(Robot r) {
         return new SwingWorker<>() {
             @Override
             public Void doInBackground() {
-                return backgroundRunner(forever, r);
+                return backgroundRunner(r);
             }
         };
     }
 
-    private static Void backgroundRunner(boolean forever, Robot r) {
+    private static Void backgroundRunner(Robot r) {
         int numTests = 8000;  // must be > 100
         int onePercent = numTests / 100;
 
+        boolean forever = true;
         int max = forever ? Integer.MAX_VALUE : numTests;
 
         for (int roundNr = 0; roundNr < max; roundNr++) {
@@ -1205,12 +1205,6 @@ public class RandomGUITest {
 
         weightedCaller.registerCallback(7, RandomGUITest::randomSetLayerMaskEditMode);
         weightedCaller.registerCallback(20, RandomGUITest::randomLayerMaskAction);
-
-        // Not called now:
-//        randomCloseImageWOSaving();
-//        randomLoadImage();
-//        randomSaveInAllFormats();
-//        randomException();
     }
 }
 

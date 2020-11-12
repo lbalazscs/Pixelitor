@@ -140,9 +140,8 @@ public class History {
         // we could also intersect with the selection bounds,
         // but typically the extra savings would be minimal
 
-        var edit = new PartialImageEdit(editName, comp,
+        return new PartialImageEdit(editName, comp,
             dr, origImage, rect, false);
-        return edit;
     }
 
     public static String getUndoPresentationName() {

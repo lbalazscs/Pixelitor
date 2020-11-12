@@ -54,7 +54,6 @@ class RectangleSettings extends ShapeTypeSettings {
 
     @Override
     public RectangleSettings copy() {
-        RectangleSettings copy = new RectangleSettings(radius.copy());
-        return copy;
+        return new RectangleSettings(radius.copy());
     }
 }

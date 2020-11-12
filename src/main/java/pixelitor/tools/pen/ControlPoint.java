@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2020 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,8 +45,8 @@ public class ControlPoint extends DraggablePoint {
     }
 
     @Override
-    protected Shape createShape(double startX, double startY, double size) {
-        return new Ellipse2D.Double(startX, startY, size, size);
+    protected Shape createShape(double startX, double startY) {
+        return new Ellipse2D.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     public void setSibling(ControlPoint sibling) {

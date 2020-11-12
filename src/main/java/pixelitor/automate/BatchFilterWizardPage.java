@@ -23,7 +23,6 @@ import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterSearchPanel;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.utils.OKCancelDialog;
-import pixelitor.io.FileFormat;
 import pixelitor.layers.Drawable;
 
 import javax.swing.*;
@@ -61,8 +60,7 @@ public enum BatchFilterWizardPage implements WizardPage {
             var mainPanel = new JPanel(new VerticalLayout());
             mainPanel.add(searchPanel);
             if (openSaveDirsPanel == null) {
-                openSaveDirsPanel = new OpenSaveDirsPanel(
-                    false, FileFormat.getLastOutput());
+                openSaveDirsPanel = new OpenSaveDirsPanel();
             }
             mainPanel.add(openSaveDirsPanel);
 

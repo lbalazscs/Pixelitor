@@ -48,7 +48,7 @@ public class DraggablePoint extends Point2D.Double {
     private static final long serialVersionUID = 1L;
 
     public static final int HANDLE_RADIUS = 5;
-    private static final int HANDLE_DIAMETER = 2 * HANDLE_RADIUS;
+    protected static final int HANDLE_SIZE = 2 * HANDLE_RADIUS;
     private static final int SHADOW_OFFSET = 1;
 
     private final String name; // used only for debugging
@@ -170,15 +170,15 @@ public class DraggablePoint extends Point2D.Double {
     private void setShapes() {
         double shapeStartX = x - HANDLE_RADIUS;
         double shapeStartY = y - HANDLE_RADIUS;
-        shape = createShape(shapeStartX, shapeStartY, HANDLE_DIAMETER);
+        shape = createShape(shapeStartX, shapeStartY);
 
         double shadowStartX = shapeStartX + SHADOW_OFFSET;
         double shadowStartY = shapeStartY + SHADOW_OFFSET;
-        shadow = createShape(shadowStartX, shadowStartY, HANDLE_DIAMETER);
+        shadow = createShape(shadowStartX, shadowStartY);
     }
 
-    protected Shape createShape(double startX, double startY, double size) {
-        return new Rectangle.Double(startX, startY, size, size);
+    protected Shape createShape(double startX, double startY) {
+        return new Rectangle.Double(startX, startY, HANDLE_SIZE, HANDLE_SIZE);
     }
 
     /**
@@ -388,20 +388,18 @@ public class DraggablePoint extends Point2D.Double {
     }
 
     public String toColoredString() {
-        String sb = format("\u001B[32m%s\u001B[0m " +
-                        "{x = \u001B[33m%.2f\u001B[0m, " +
-                        "y = \u001B[33m%.2f\u001B[0m}" +
-                        "{imX = \u001B[36m%.1f\u001B[0m, " +
-                        "imY = \u001B[36m%.1f\u001B[0m}",
-                name, x, y, imX, imY);
-        return sb;
+        return format("\u001B[32m%s\u001B[0m " +
+                "{x = \u001B[33m%.2f\u001B[0m, " +
+                "y = \u001B[33m%.2f\u001B[0m}" +
+                "{imX = \u001B[36m%.1f\u001B[0m, " +
+                "imY = \u001B[36m%.1f\u001B[0m}",
+            name, x, y, imX, imY);
     }
 
     @Override
     public String toString() {
-        String sb = format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
-                name, x, y, imX, imY);
-        return sb;
+        return format("%s {x = %.2f, y = %.2f}{imX = %.1f, imY = %.1f}",
+            name, x, y, imX, imY);
     }
 
     public DebugNode getDebugNode() {

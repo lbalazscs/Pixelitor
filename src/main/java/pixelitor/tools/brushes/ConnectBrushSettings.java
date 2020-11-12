@@ -93,8 +93,7 @@ public class ConnectBrushSettings extends BrushSettings {
         }
 
         public static EnumParam<Style> asParam() {
-            EnumParam<Style> param = new EnumParam<>("Length", Style.class);
-            return param;
+            return new EnumParam<>("Length", Style.class);
         }
     }
 }

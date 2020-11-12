@@ -48,12 +48,6 @@ public enum NoiseInterpolation {
         this.guiName = guiName;
     }
 
-    /**
-     * Transforms the normalized time into the normalized animation progress
-     *
-     * @param time a value between 0 and 1
-     * @return a value between 0 and 1
-     */
     public abstract float step(float x);
 
     @Override

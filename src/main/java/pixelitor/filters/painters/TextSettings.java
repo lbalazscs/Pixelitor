@@ -28,7 +28,9 @@ import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
 import pixelitor.utils.VisibleForTesting;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
@@ -173,8 +175,7 @@ public class TextSettings implements Serializable {
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
         BufferedImage bumpImage = createBumpMapImage(
                 textPainter, src.getWidth(), src.getHeight());
-        BufferedImage dest = ImageUtils.bumpMap(src, bumpImage, "Watermarking");
-        return dest;
+        return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
     }
 
     // the bump map image has white text on a black background

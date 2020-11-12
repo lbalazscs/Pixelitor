@@ -165,8 +165,7 @@ public class Rnd {
             attributes.put(UNDERLINE, UNDERLINE_ON);
         }
 
-        Font font = new Font(attributes);
-        return font;
+        return new Font(attributes);
     }
 
     public static boolean withProbability(double p, Runnable task) {

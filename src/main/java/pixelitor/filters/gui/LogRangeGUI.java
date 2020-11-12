@@ -63,8 +63,6 @@ public class LogRangeGUI extends JPanel implements ParamGUI {
 
     private void sliderChanged() {
         updateValueLabel();
-//        model.setValueIsAdjusting(slider.getValueIsAdjusting());
-//        model.setValue(slider.getValue(), !slider.getValueIsAdjusting());
     }
 
     @Override

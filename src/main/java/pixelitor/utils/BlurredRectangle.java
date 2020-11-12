@@ -71,14 +71,6 @@ public class BlurredRectangle implements BlurredShape {
                 double xRatio = xDist / maxXDist;
                 if (y <= minInnerY) { // top right corner
                     yDist = cy - y - innerRadiusY;
-//                    double dist = Math.sqrt(xDist*xDist + yDist*yDist);
-//                    double maxDist = (xDist * maxXDist + yDist * maxYDist) / (xDist + yDist);
-//
-//                    if(dist > maxDist) {
-//                        return 1.0;
-//                    }
-//                    return dist / maxDist;
-
                     double yRatio = yDist / maxYDist;
                     return Math.max(xRatio, yRatio);
                 } else if (y > maxInnerY) { // bottom right corner

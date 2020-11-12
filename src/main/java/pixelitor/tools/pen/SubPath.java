@@ -32,7 +32,7 @@ import pixelitor.tools.util.DraggablePoint;
 import pixelitor.utils.VisibleForTesting;
 import pixelitor.utils.debug.Ansi;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
@@ -414,7 +414,7 @@ public class SubPath implements Serializable, Transformable {
      * Checks whether all the objects are wired together correctly
      */
     @SuppressWarnings("SameReturnValue")
-    private boolean checkWiring() {
+    private void checkWiring() {
         int numPoints = anchorPoints.size();
         for (int i = 0; i < numPoints; i++) {
             AnchorPoint point = anchorPoints.get(i);
@@ -441,7 +441,6 @@ public class SubPath implements Serializable, Transformable {
                 throw new IllegalStateException("same controls in point " + i);
             }
         }
-        return true;
     }
 
     @SuppressWarnings("SameReturnValue")

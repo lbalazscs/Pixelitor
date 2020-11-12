@@ -97,8 +97,8 @@ public class GradientTool extends DragTool {
 
     private void addTypeSelector() {
         typeCB = new JComboBox<>(GradientType.values());
-        typeCB.addActionListener(e -> regenerateGradient(
-                true, "Change Gradient Type"));
+        typeCB.addActionListener(e ->
+            regenerateGradient("Change Gradient Type"));
         settingsPanel.addComboBox(GUIText.TYPE + ": ",
             typeCB, "typeCB");
     }
@@ -107,24 +107,24 @@ public class GradientTool extends DragTool {
         // cycle methods can't be put directly in the JComboBox,
         // because they would be all uppercase
         cycleMethodCB = new JComboBox<>(CYCLE_METHODS);
-        cycleMethodCB.addActionListener(e -> regenerateGradient(
-                true, "Change Gradient Cycling"));
+        cycleMethodCB.addActionListener(e ->
+            regenerateGradient("Change Gradient Cycling"));
         settingsPanel.addComboBox("Cycling: ",
-                cycleMethodCB, "cycleMethodCB");
+            cycleMethodCB, "cycleMethodCB");
     }
 
     private void addColorTypeSelector() {
         colorTypeCB = new JComboBox<>(GradientColorType.values());
-        colorTypeCB.addActionListener(e -> regenerateGradient(
-                true, "Change Gradient Colors"));
+        colorTypeCB.addActionListener(e ->
+            regenerateGradient("Change Gradient Colors"));
         settingsPanel.addComboBox("Color: ",
-                colorTypeCB, "colorTypeCB");
+            colorTypeCB, "colorTypeCB");
     }
 
     private void addRevertCheckBox() {
         revertCB = new JCheckBox();
-        revertCB.addActionListener(e -> regenerateGradient(
-                true, "Change Gradient Direction"));
+        revertCB.addActionListener(e ->
+            regenerateGradient("Change Gradient Direction"));
         settingsPanel.addWithLabel("Revert: ", revertCB, "revertCB");
     }
 
@@ -141,10 +141,10 @@ public class GradientTool extends DragTool {
         } else {
             editName = "Change Gradient Opacity";
         }
-        regenerateGradient(true, editName);
+        regenerateGradient(editName);
     }
 
-    private void regenerateGradient(boolean addToHistory, String editName) {
+    private void regenerateGradient(String editName) {
         if (ignoreRegenerate) {
             return;
         }
@@ -153,7 +153,7 @@ public class GradientTool extends DragTool {
         }
 
         DrawableAction.run(editName,
-                dr -> regenerateOnDrawable(addToHistory, dr, editName));
+            dr -> regenerateOnDrawable(true, dr, editName));
     }
 
     private void regenerateOnDrawable(boolean addToHistory, Drawable dr, String editName) {
@@ -270,7 +270,7 @@ public class GradientTool extends DragTool {
 
     @Override
     public void fgBgColorsChanged() {
-        regenerateGradient(true, "Change Gradient Colors");
+        regenerateGradient("Change Gradient Colors");
     }
 
     @Override
@@ -453,11 +453,7 @@ public class GradientTool extends DragTool {
 
     @Override
     public void setupMaskEditing(boolean editMask) {
-        if (editMask) {
-            blendingModePanel.setEnabled(false);
-        } else {
-            blendingModePanel.setEnabled(true);
-        }
+        blendingModePanel.setEnabled(!editMask);
     }
 
     // called only by history edits

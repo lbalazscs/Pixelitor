@@ -313,9 +313,8 @@ public class MaskFromColorRangePanel extends JPanel {
         MaskFromColorRangeFilter filter = createFilterFromSettings(lastColor);
 
         BufferedImage rgbMask = filter.filter(srcImage, null);
-        BufferedImage grayMask = convertToGrayScaleImage(rgbMask);
 
-        return grayMask;
+        return convertToGrayScaleImage(rgbMask);
     }
 
     private Color getLastColor() {

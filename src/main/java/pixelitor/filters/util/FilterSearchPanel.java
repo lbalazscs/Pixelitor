@@ -173,9 +173,9 @@ public class FilterSearchPanel extends JPanel {
     private void searchTermChanged() {
         String filterText = searchTF.getText().trim().toLowerCase();
 
-        filtersList.setRowFilter(new RowFilter<ListModel, Integer>() {
+        filtersList.setRowFilter(new RowFilter<ListModel<FilterAction>, Integer>() {
             @Override
-            public boolean include(Entry<? extends ListModel, ? extends Integer> entry) {
+            public boolean include(Entry<? extends ListModel<FilterAction>, ? extends Integer> entry) {
                 String filterName = entry.getStringValue(0).toLowerCase();
                 return filterText.isEmpty() || filterName.contains(filterText);
             }

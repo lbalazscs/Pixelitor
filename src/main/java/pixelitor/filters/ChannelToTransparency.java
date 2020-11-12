@@ -65,31 +65,28 @@ public class ChannelToTransparency extends ParametrizedFilter {
         boolean keep = keepParam.isChecked();
 
         ChannelToTransparencyFilter filter = switch (channel.getValue()) {
-            case LUMINOSITY -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+            case LUMINOSITY -> new ChannelToTransparencyFilter(invert, keep) {
                 @Override
                 int getChannelValue(int rgb) {
                     return (int) LuminanceLookup.from(rgb);
                 }
             };
-            case RED -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+            case RED -> new ChannelToTransparencyFilter(invert, keep) {
                 @Override
                 int getChannelValue(int rgb) {
-                    int r = (rgb >>> 16) & 0xFF;
-                    return r;
+                    return (rgb >>> 16) & 0xFF;
                 }
             };
-            case GREEN -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+            case GREEN -> new ChannelToTransparencyFilter(invert, keep) {
                 @Override
                 int getChannelValue(int rgb) {
-                    int g = (rgb >>> 8) & 0xFF;
-                    return g;
+                    return (rgb >>> 8) & 0xFF;
                 }
             };
-            case BLUE -> new ChannelToTransparencyFilter(NAME, invert, keep) {
+            case BLUE -> new ChannelToTransparencyFilter(invert, keep) {
                 @Override
                 int getChannelValue(int rgb) {
-                    int b = rgb & 0xFF;
-                    return b;
+                    return rgb & 0xFF;
                 }
             };
             default -> throw new IllegalStateException("unexpected value " + channel.getValue());
@@ -107,8 +104,8 @@ public class ChannelToTransparency extends ParametrizedFilter {
         private final boolean invert;
         private final boolean keep;
 
-        protected ChannelToTransparencyFilter(String filterName, boolean invert, boolean keep) {
-            super(filterName);
+        protected ChannelToTransparencyFilter(boolean invert, boolean keep) {
+            super(NAME);
             this.invert = invert;
             this.keep = keep;
         }

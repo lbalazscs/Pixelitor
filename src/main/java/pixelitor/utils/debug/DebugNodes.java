@@ -105,10 +105,6 @@ public class DebugNodes {
         node.addInt("zoomed canvas width", zoomedCanvasWidth);
         int zoomedCanvasHeight = canvas.getCoHeight();
         node.addInt("zoomed canvas height", zoomedCanvasHeight);
-//        boolean bigCanvas = view.isBigCanvas();
-//        node.addBooleanChild("bigCanvas", bigCanvas);
-//        boolean optimizedDrawingEnabled = view.getViewContainer().isOptimizedDrawingEnabled();
-//        node.addBoolean("optimizedDrawingEnabled", optimizedDrawingEnabled);
 
         return node;
     }

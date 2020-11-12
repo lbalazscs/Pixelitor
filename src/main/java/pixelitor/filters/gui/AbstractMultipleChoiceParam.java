@@ -51,7 +51,7 @@ public abstract class AbstractMultipleChoiceParam<E>
     @Override
     @SuppressWarnings("unchecked")
     public ChoiceParamState<E> copyState() {
-        return new ChoiceParamState<E>((E) getSelectedItem());
+        return new ChoiceParamState<>((E) getSelectedItem());
     }
 
     @Override

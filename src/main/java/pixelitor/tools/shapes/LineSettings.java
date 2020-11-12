@@ -46,8 +46,7 @@ class LineSettings extends ShapeTypeSettings {
 
     @Override
     protected JPanel createConfigPanel() {
-        JPanel p = GUIUtils.arrangeVertically(List.of(width, cap));
-        return p;
+        return GUIUtils.arrangeVertically(List.of(width, cap));
     }
 
     public Stroke getStroke() {
@@ -67,8 +66,7 @@ class LineSettings extends ShapeTypeSettings {
         EnumParam<BasicStrokeCap> capCopy = BasicStrokeCap.asParam(); // same default
         capCopy.setSelectedItem(cap.getSelected(), false); // different value
 
-        LineSettings copy = new LineSettings(width.copy(), capCopy);
-        return copy;
+        return new LineSettings(width.copy(), capCopy);
     }
 
     @Override
