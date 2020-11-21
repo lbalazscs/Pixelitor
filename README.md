@@ -4,8 +4,20 @@ This is the source code of [Pixelitor](https://pixelitor.sourceforge.io/) - an a
 
 Contributions are welcome!
 
-[Building information](Developing.md).
+## Starting Pixelitor in an IDE
 
-[Translating](Translating.md).
+Pixelitor requires Java 15+ to compile.
+When you start the program from an IDE, use **pixelitor.Pixelitor** as the main class.
+
+## Building the Pixelitor jar file from the command line
+
+1. OpenJDK 15+ has to be installed, and the environment variable JAVA_HOME must point to the OpenJDK installation directory. 
+2. Install [Maven](https://maven.apache.org/install.html)
+3. Check the Maven installation with `mvn --version`
+4. Execute `mvn clean package` in the main directory (where the pom.xml file is), this will create an executable jar in the `target` subdirectory. If you didn't change anything, or if you only changed translations/icons, then you can skip the tests by running `mvn clean package -Dmaven.test.skip=true` instead.  
+
+## Translating the Pixelitor user interface
+
+See [Translating](Translating.md).
 
 
