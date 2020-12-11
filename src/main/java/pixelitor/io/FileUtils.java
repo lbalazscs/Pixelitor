@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class FileUtils {
     private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(
-            "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff");
+        "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff", "tga");
 
     private FileUtils() {
     }
@@ -56,10 +56,14 @@ public class FileUtils {
         return hasTheExtension(fileName, "gif");
     }
 
+    public static boolean hasTGAExtension(String fileName) {
+        return hasTheExtension(fileName, "tga");
+    }
+
     private static boolean hasTheExtension(String fileName, String ext) {
         return findExtension(fileName)
-                .filter(s -> s.equalsIgnoreCase(ext))
-                .isPresent();
+            .filter(s -> s.equalsIgnoreCase(ext))
+            .isPresent();
     }
 
     public static String stripExtension(String fileName) {

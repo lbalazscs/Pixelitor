@@ -17,15 +17,18 @@
 
 package pixelitor.gui.utils;
 
+import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.io.FileUtils;
 import pixelitor.io.TrackedIO;
 import pixelitor.utils.JProgressBarTracker;
-import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressPanel;
 import pixelitor.utils.ProgressTracker;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -86,15 +89,25 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         }
 
         // TODO A problem is that ora and pxc files are reported as "Unrecognized"
+        int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
+        int availableHeight = getHeight();
         try {
-            int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
-            int availableHeight = getHeight();
-
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
             thumbInfo = TrackedIO.readSubsampledThumb(file, availableWidth, availableHeight, pt);
             thumbsCache.put(filePath, thumbInfo);
         } catch (Exception ex) {
-            Messages.showException(ex);
+            // try to recover by adding a white image
+            BufferedImage img = new BufferedImage(availableWidth, availableHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2 = img.createGraphics();
+            g2.setColor(WHITE);
+            g2.fillRect(0, 0, availableWidth, availableHeight);
+            new TextPainter("No preview", getFont(), Color.RED)
+                .paint(g2, null, availableWidth, availableHeight);
+            g2.dispose();
+            thumbInfo = new ThumbInfo(img, availableWidth, availableHeight);
+            thumbsCache.put(filePath, thumbInfo);
+
+            ex.printStackTrace();
         }
     }
 

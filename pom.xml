@@ -62,10 +62,6 @@
                                 <filter>
                                     <artifact>org.swinglabs.swingx:swingx-all</artifact>
                                     <excludes>
-                                        <!-- META-INF/services is needed -->
-                                        <exclude>META-INF/maven/**</exclude>
-                                        <exclude>META-INF/MANIFEST.MF</exclude>
-
                                         <!-- Pixelitor has its own modified version for these -->
                                         <exclude>org/jdesktop/swingx/graphics/BlendComposite*</exclude>
                                         <exclude>org/jdesktop/swingx/painter/AbstractPainter*</exclude>
@@ -77,15 +73,19 @@
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.adobe.xmp:xmpcore</artifact>
+                                    <artifact>com.*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/**</exclude>
+                                        <!-- META-INF/services is needed for twelve monkeys -->
+                                        <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
-                                    <artifact>com.drewnoakes:metadata-extractor</artifact>
+                                    <artifact>org.*:*</artifact>
                                     <excludes>
-                                        <exclude>META-INF/**</exclude>
+                                        <!-- META-INF/services is needed for swingx -->
+                                        <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>
                                 </filter>
                                 <filter>
@@ -146,6 +146,12 @@
             <groupId>net.jafama</groupId>
             <artifactId>jafama</artifactId>
             <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-tga</artifactId>
+            <version>3.6.1</version>
         </dependency>
 
         <!--from here test dependencies-->

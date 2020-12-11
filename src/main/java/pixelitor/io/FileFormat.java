@@ -37,6 +37,7 @@ public enum FileFormat {
     }, TIFF(false, true) {
     }, GIF(false, true) {
     }, BMP(false, false) {
+    }, TGA(false, true) {
     }, PXC(true, true) {
         @Override
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
@@ -119,6 +120,7 @@ public enum FileFormat {
             case "gif" -> Optional.of(GIF);
             case "pxc" -> Optional.of(PXC);
             case "ora" -> Optional.of(ORA);
+            case "tga" -> Optional.of(TGA);
             case "tif", "tiff" -> Optional.of(TIFF);
             default -> Optional.empty();
         };

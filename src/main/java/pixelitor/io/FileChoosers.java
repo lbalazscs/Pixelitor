@@ -29,7 +29,7 @@ import pixelitor.utils.ProgressPanel;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.io.File;
 
 import static java.awt.BorderLayout.CENTER;
@@ -50,12 +50,13 @@ public class FileChoosers {
     private static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
     public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
     private static final FileFilter tiffFilter = new FileNameExtensionFilter("TIFF files", "tiff", "tif");
+    private static final FileFilter tgaFilter = new FileNameExtensionFilter("TGA files", "tga");
     private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
     private static final FileFilter[] OPEN_SAVE_FILTERS = {
         bmpFilter, gifFilter, jpegFilter, oraFilter,
-        pngFilter, pxcFilter, tiffFilter};
+        pngFilter, pxcFilter, tiffFilter, tgaFilter};
 
     private FileChoosers() {
     }
@@ -206,6 +207,7 @@ public class FileChoosers {
             case "bmp" -> bmpFilter;
             case "gif" -> gifFilter;
             case "pxc" -> pxcFilter;
+            case "tga" -> tgaFilter;
             case "tif", "tiff" -> tiffFilter;
             default -> jpegFilter;
         };
