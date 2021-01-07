@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,12 +22,7 @@ import pixelitor.tools.gradient.paints.DiamondGradientPaint;
 import pixelitor.tools.gradient.paints.SpiralGradientPaint;
 import pixelitor.tools.util.ImDrag;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.RadialGradientPaint;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
@@ -39,56 +34,13 @@ import static pixelitor.colors.FgBgColors.getBGColor;
 import static pixelitor.colors.FgBgColors.getFGColor;
 
 /**
- * A Paint type based on two endpoints of a UserDrag.
- * Used as a fill type in the Shapes Tool.
+ * A Paint type based on two endpoints.
  */
 public enum TwoPointPaintType {
     NONE("None") {
         @Override
         protected Paint createPaint(ImDrag imDrag) {
             throw new UnsupportedOperationException();
-        }
-    }, LINEAR_GRADIENT("Linear Gradient") {
-        @Override
-        protected Paint createPaint(ImDrag imDrag) {
-            return new GradientPaint(
-                    (float) imDrag.getStartXFromCenter(),
-                    (float) imDrag.getStartYFromCenter(),
-                    getFGColor(),
-                    (float) imDrag.getEndX(),
-                    (float) imDrag.getEndY(),
-                    getBGColor());
-        }
-    }, RADIAL_GRADIENT("Radial Gradient") {
-        private final float[] FRACTIONS = {0.0f, 1.0f};
-        private final AffineTransform gradientTransform = new AffineTransform();
-
-        @Override
-        protected Paint createPaint(ImDrag imDrag) {
-            Point2D center = imDrag.getCenterPoint();
-            float distance = (float) imDrag.getDistance();
-
-            return new RadialGradientPaint(center, distance / 2, center, FRACTIONS,
-                    new Color[]{getFGColor(), getBGColor()},
-                    NO_CYCLE, SRGB, gradientTransform);
-        }
-    }, ANGLE_GRADIENT("Angle Gradient") {
-        @Override
-        protected Paint createPaint(ImDrag imDrag) {
-            return new AngleGradientPaint(imDrag.getCenterDrag(),
-                    getFGColor(), getBGColor(), NO_CYCLE);
-        }
-    }, SPIRAL_GRADIENT("Spiral Gradient") {
-        @Override
-        protected Paint createPaint(ImDrag imDrag) {
-            return new SpiralGradientPaint(true, imDrag.getCenterDrag(),
-                    getFGColor(), getBGColor(), NO_CYCLE);
-        }
-    }, DIAMOND_GRADIENT("Diamond Gradient") {
-        @Override
-        protected Paint createPaint(ImDrag imDrag) {
-            return new DiamondGradientPaint(imDrag.getCenterDrag(),
-                    getFGColor(), getBGColor(), NO_CYCLE);
         }
     }, FOREGROUND("Foreground") {
         @Override
@@ -114,6 +66,48 @@ public enum TwoPointPaintType {
         @Override
         public void finish(Graphics2D g) {
             g.setComposite(AlphaComposite.getInstance(SRC_OVER));
+        }
+    }, LINEAR_GRADIENT("Linear Gradient") {
+        @Override
+        protected Paint createPaint(ImDrag imDrag) {
+            return new GradientPaint(
+                (float) imDrag.getStartXFromCenter(),
+                (float) imDrag.getStartYFromCenter(),
+                getFGColor(),
+                (float) imDrag.getEndX(),
+                (float) imDrag.getEndY(),
+                getBGColor());
+        }
+    }, RADIAL_GRADIENT("Radial Gradient") {
+        private final float[] FRACTIONS = {0.0f, 1.0f};
+        private final AffineTransform gradientTransform = new AffineTransform();
+
+        @Override
+        protected Paint createPaint(ImDrag imDrag) {
+            Point2D center = imDrag.getCenterPoint();
+            float distance = (float) imDrag.getDistance();
+
+            return new RadialGradientPaint(center, distance / 2, center, FRACTIONS,
+                new Color[]{getFGColor(), getBGColor()},
+                NO_CYCLE, SRGB, gradientTransform);
+        }
+    }, ANGLE_GRADIENT("Angle Gradient") {
+        @Override
+        protected Paint createPaint(ImDrag imDrag) {
+            return new AngleGradientPaint(imDrag.getCenterDrag(),
+                getFGColor(), getBGColor(), NO_CYCLE);
+        }
+    }, SPIRAL_GRADIENT("Spiral Gradient") {
+        @Override
+        protected Paint createPaint(ImDrag imDrag) {
+            return new SpiralGradientPaint(true, imDrag.getCenterDrag(),
+                getFGColor(), getBGColor(), NO_CYCLE);
+        }
+    }, DIAMOND_GRADIENT("Diamond Gradient") {
+        @Override
+        protected Paint createPaint(ImDrag imDrag) {
+            return new DiamondGradientPaint(imDrag.getCenterDrag(),
+                getFGColor(), getBGColor(), NO_CYCLE);
         }
     };
 

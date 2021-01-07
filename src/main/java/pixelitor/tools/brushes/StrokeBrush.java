@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,6 @@ public abstract class StrokeBrush extends AbstractBrush {
         super.startAt(p);
         drawStartShape(p);
         repaintComp(p);
-//        rememberPrevious(p);
     }
 
     @Override
@@ -75,10 +74,9 @@ public abstract class StrokeBrush extends AbstractBrush {
      * Connects the two points with a line, using the stroke
      */
     protected void drawLine(PPoint start, PPoint end) {
-        double thickness = 2 * radius;
-        if(thickness != lastDiameter) {
-            currentStroke = createStroke((float) thickness);
-            lastDiameter = thickness;
+        if (diameter != lastDiameter) {
+            currentStroke = createStroke((float) diameter);
+            lastDiameter = diameter;
         }
 
         targetG.setStroke(currentStroke);
@@ -90,16 +88,16 @@ public abstract class StrokeBrush extends AbstractBrush {
     }
 
     @Override
+    public double getPreferredSpacing() {
+        return 0;
+    }
+
+    @Override
     public DebugNode getDebugNode() {
         var node = super.getDebugNode();
 
         node.addString("stroke type", strokeType.toString());
 
         return node;
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return 0;
     }
 }

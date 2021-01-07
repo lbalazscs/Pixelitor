@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2020 Laszlo Balazs-Csiki and Contributors
+  ~ Copyright 2021 Laszlo Balazs-Csiki and Contributors
   ~
   ~ This file is part of Pixelitor. Pixelitor is free software: you
   ~ can redistribute it and/or modify it under the terms of the GNU
@@ -58,6 +58,10 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                             <filters>
                                 <filter>
                                     <artifact>org.swinglabs.swingx:swingx-all</artifact>
@@ -146,6 +150,12 @@
             <groupId>net.jafama</groupId>
             <artifactId>jafama</artifactId>
             <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-jpeg</artifactId>
+            <version>3.6.1</version>
         </dependency>
 
         <dependency>

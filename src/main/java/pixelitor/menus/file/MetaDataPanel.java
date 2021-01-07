@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -96,13 +96,13 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
 
     private void showHelp() {
         String txt = "<html>You can drag external multimedia files on the Metadata window " +
-                "to see their Exif, IPTC, etc. information." +
-                "<br>It can read a different set of files than the rest of Pixelitor." +
-                "<p><br>Supported file types: <b>JPEG, TIFF, WebP, WAV, AVI, PSD, PNG, BMP, GIF, " +
-                "ICO, PCX, QuickTime, MP4</b>." +
-                "<br>Supported Camera Raw file types: <b>NEF</b> (Nikon), <b>CR2</b> (Canon), " +
-                "<b>ORF</b> (Olympus), <b>ARW</b> (Sony), <br><b>RW2</b> (Panasonic), " +
-                "<b>RWL</b> (Leica), <b>SRW</b> (Samsung).";
+            "to see their Exif, IPTC, etc. information." +
+            "<br>It can read a different set of files than the rest of Pixelitor." +
+            "<p><br>Supported file types: <b>JPEG, TIFF, WebP, PNG, BMP, GIF, HEIC, PSD, " +
+            "ICO, PCX, MP3, WAV, QuickTime, MP4, AVI</b>." +
+            "<br>Supported Camera Raw file types: <b>NEF</b> (Nikon), <b>CR2</b> (Canon), " +
+            "<b>ORF</b> (Olympus), <b>ARW</b> (Sony), <br><b>RW2</b> (Panasonic), " +
+            "<b>RWL</b> (Leica), <b>SRW</b> (Samsung).";
         Dialogs.showInfoDialog(this, "Show Metadata Help", txt);
     }
 
@@ -194,8 +194,8 @@ public class MetaDataPanel extends JPanel implements DropTargetListener {
         File file = comp.getFile();
         if (file == null) {
             Dialogs.showInfoDialog(pw, "No file", format(
-                    "<html>There is no file for <b>%s</b>.",
-                    comp.getName()));
+                "<html>There is no file for <b>%s</b>.",
+                comp.getName()));
             return;
         }
         if (!file.exists()) {

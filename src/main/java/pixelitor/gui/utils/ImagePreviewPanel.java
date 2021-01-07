@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.gui.utils;
 
-import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.io.FileUtils;
 import pixelitor.io.TrackedIO;
 import pixelitor.utils.JProgressBarTracker;
@@ -29,31 +28,23 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
-
-import static java.awt.Color.BLACK;
-import static java.awt.Color.WHITE;
 
 /**
  * Image preview panel for the open file chooser
  */
 public class ImagePreviewPanel extends JPanel implements PropertyChangeListener {
     private static final int SIZE = 200;
-    private static final int EMPTY_SPACE_AT_LEFT = 5;
+    public static final int EMPTY_SPACE_AT_LEFT = 5;
 
     private final Color backgroundColor;
+    private final Map<String, SoftReference<ThumbInfo>> thumbsCache;
     private ThumbInfo thumbInfo;
-
-    private static final int MSG_X = 20;
-    private static final int MSG_Y = 10;
-
-    private final Map<String, ThumbInfo> thumbsCache;
-
     private final ProgressPanel progressPanel;
 
     public ImagePreviewPanel(ProgressPanel progressPanel) {
@@ -71,43 +62,46 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
         File file = getFileFromFileChooserEvent(e);
         if (file == null) {
             thumbInfo = null;
-            repaint();
-            return;
+        } else {
+            if (FileUtils.hasSupportedInputExt(file)) {
+                String filePath = file.getAbsolutePath();
+                thumbInfo = getOrCreateThumb(file, filePath);
+            } else {
+                thumbInfo = null;
+            }
         }
-
-        if (FileUtils.hasSupportedInputExt(file)) {
-            String filePath = file.getAbsolutePath();
-            createThumbImage(file, filePath);
-            repaint();
-        }
+        repaint();
     }
 
-    private void createThumbImage(File file, String filePath) {
+    private ThumbInfo getOrCreateThumb(File file, String filePath) {
         if (thumbsCache.containsKey(filePath)) {
-            thumbInfo = thumbsCache.get(filePath);
-            return;
+            SoftReference<ThumbInfo> thumbRef = thumbsCache.get(filePath);
+            ThumbInfo cachedInfo = thumbRef.get();
+            if (cachedInfo != null) {
+                return cachedInfo;
+            }
         }
 
-        // TODO A problem is that ora and pxc files are reported as "Unrecognized"
+        // Currently no thumb extraction is attempted for ora and pxc files.
+        if (FileUtils.hasMultiLayerExtension(file)) {
+            ThumbInfo fakeThumbInfo = ThumbInfo.failure(ThumbInfo.NO_PREVIEW);
+            thumbsCache.put(filePath, new SoftReference<>(fakeThumbInfo));
+            return fakeThumbInfo;
+        }
+
         int availableWidth = getWidth() - EMPTY_SPACE_AT_LEFT;
         int availableHeight = getHeight();
         try {
             ProgressTracker pt = new JProgressBarTracker(progressPanel);
-            thumbInfo = TrackedIO.readSubsampledThumb(file, availableWidth, availableHeight, pt);
-            thumbsCache.put(filePath, thumbInfo);
+            ThumbInfo newThumbInfo = TrackedIO.readSubsampledThumb(file, availableWidth, availableHeight, pt);
+            thumbsCache.put(filePath, new SoftReference<>(newThumbInfo));
+            return newThumbInfo;
         } catch (Exception ex) {
-            // try to recover by adding a white image
-            BufferedImage img = new BufferedImage(availableWidth, availableHeight, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2 = img.createGraphics();
-            g2.setColor(WHITE);
-            g2.fillRect(0, 0, availableWidth, availableHeight);
-            new TextPainter("No preview", getFont(), Color.RED)
-                .paint(g2, null, availableWidth, availableHeight);
-            g2.dispose();
-            thumbInfo = new ThumbInfo(img, availableWidth, availableHeight);
-            thumbsCache.put(filePath, thumbInfo);
+            ThumbInfo fakeThumbInfo = ThumbInfo.failure(ThumbInfo.PREVIEW_ERROR);
+            thumbsCache.put(filePath, new SoftReference<>(fakeThumbInfo));
 
             ex.printStackTrace();
+            return fakeThumbInfo;
         }
     }
 
@@ -121,27 +115,10 @@ public class ImagePreviewPanel extends JPanel implements PropertyChangeListener 
     @Override
     public void paintComponent(Graphics g) {
         g.setColor(backgroundColor);
-        int panelWidth = getWidth();
-        int panelHeight = getHeight();
-        g.fillRect(0, 0, panelWidth, panelHeight);
+        g.fillRect(0, 0, getWidth(), getHeight());
 
         if (thumbInfo != null) {
-            BufferedImage thumb = thumbInfo.getThumb();
-            int x = (panelWidth - thumb.getWidth()) / 2 + EMPTY_SPACE_AT_LEFT;
-            int y = (panelHeight - thumb.getHeight()) / 2;
-            g.drawImage(thumb, x, y, this);
-
-            int imgWidth = thumbInfo.getOrigWidth();
-            int imgHeight = thumbInfo.getOrigHeight();
-            String msg = "Size: " + imgWidth + " x " + imgHeight + " pixels";
-            if (imgWidth == -1 || imgHeight == -1) {
-                msg = "Unrecognized!";
-            }
-
-            g.setColor(BLACK);
-            g.drawString(msg, MSG_X, MSG_Y);
-            g.setColor(WHITE);
-            g.drawString(msg, MSG_X - 1, MSG_Y - 1);
+            thumbInfo.paint((Graphics2D) g, this);
         }
     }
 }

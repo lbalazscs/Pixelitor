@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,8 +27,8 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Graphics2D;
 
 /**
- * Delegates the work to other brushes according to
- * the symmetry and brush type settings
+ * A brush that delegates the work to other brushes
+ * according to the symmetry and brush type settings.
  */
 public class SymmetryBrush implements Brush {
     private static final int MAX_BRUSHES = 4;
@@ -70,13 +70,13 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
+    public void rememberPrevious(PPoint previous) {
         throw new IllegalStateException("should not be called");
     }
 
     @Override
-    public double getEffectiveRadius() {
-        return brushes[0].getEffectiveRadius();
+    public double getMaxEffectiveRadius() {
+        return brushes[0].getMaxEffectiveRadius();
     }
 
     @Override
@@ -125,12 +125,11 @@ public class SymmetryBrush implements Brush {
     public void brushTypeChanged(BrushType brushType, double radius) {
         this.brushType = brushType;
         for (int i = 0; i < numBrushes; i++) {
-            if(brushes[i] != null) {
+            if (brushes[i] != null) {
                 brushes[i].dispose();
             }
             brushes[i] = brushType.createBrush(tool, radius);
         }
-        assert allBrushesAreDifferentInstances();
     }
 
     public void symmetryChanged(Symmetry symmetry, double radius) {
@@ -150,7 +149,7 @@ public class SymmetryBrush implements Brush {
                 // the previous coordinates to the newly created brushes
                 if (previous0 != null) {
                     PPoint generatedPrevious = symmetry.transform(previous0, i);
-                    brushes[i].setPrevious(generatedPrevious);
+                    brushes[i].rememberPrevious(generatedPrevious);
                 }
             }
         } else if (newNumBrushes < numBrushes) {
@@ -160,24 +159,11 @@ public class SymmetryBrush implements Brush {
             }
         }
         numBrushes = newNumBrushes;
-        assert allBrushesAreDifferentInstances();
-    }
-
-    // used in assertions
-    private boolean allBrushesAreDifferentInstances() {
-        for (int i = 0; i < numBrushes; i++) {
-            for (int j = 0; j < numBrushes; j++) {
-                if (i != j && brushes[i] == brushes[j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     public void startAt(int brushNo, PPoint p) {
         // the tracking of the affected area is done at this level
-        if(brushNo == 0) {
+        if (brushNo == 0) {
             affectedArea.initAt(p);
         } else {
             affectedArea.updateWith(p);
@@ -202,6 +188,11 @@ public class SymmetryBrush implements Brush {
     }
 
     @Override
+    public double getPreferredSpacing() {
+        return brushes[0].getPreferredSpacing();
+    }
+
+    @Override
     public DebugNode getDebugNode() {
         var node = new DebugNode("symmetry brush", this);
 
@@ -211,14 +202,8 @@ public class SymmetryBrush implements Brush {
 
         node.addString("type", brushType.toString());
         node.addString("symmetry", symmetry.toString());
-
         node.add(affectedArea.getDebugNode());
 
         return node;
-    }
-
-    @Override
-    public double getPreferredSpacing() {
-        return brushes[0].getPreferredSpacing();
     }
 }

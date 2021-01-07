@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ public abstract class Layer implements Serializable {
 
     // the real layer for layer masks,
     // null for real layers
-    protected final Layer owner;
+    protected Layer owner;
 
     private boolean visible = true;
     private float opacity = 1.0f;
@@ -318,8 +318,6 @@ public abstract class Layer implements Serializable {
             ui.addMaskIcon();
         }
 
-        mask.updateIconImage();
-
         if (!createEdit) {
             // history and UI update will be handled in an
             // enclosing nonrectangular selection crop
@@ -371,7 +369,6 @@ public abstract class Layer implements Serializable {
             ui.addMaskIcon();
         }
         Layers.maskAddedTo(this);
-        mask.updateIconImage();
     }
 
     public void deleteMask(boolean addToHistory) {
@@ -405,7 +402,7 @@ public abstract class Layer implements Serializable {
 
         if (maskEditing != newValue) {
             maskEditing = newValue;
-            ui.updateBorders(); // sets the border around the icon
+            ui.updateSelectionState();
             Tools.editedObjectChanged(this);
         }
     }
@@ -469,6 +466,28 @@ public abstract class Layer implements Serializable {
 
     private boolean useMask() {
         return mask != null && maskEnabled;
+    }
+
+    public void transferMaskAndUITo(Layer newOwner) {
+        if (hasMask()) {
+            mask.changeOwner(newOwner);
+
+            // new, updated listeners will be added when the UI is
+            // transferred and the mask icon is recreated
+            mask.removeAllListeners();
+
+            newOwner.mask = mask;
+            newOwner.maskEnabled = maskEnabled;
+            newOwner.maskEditing = maskEditing;
+            mask = null;
+        }
+
+        newOwner.ui = this.ui;
+        if (newOwner.hasMask()) {
+            newOwner.mask.ui = ui;
+        }
+        newOwner.ui.changeLayer(newOwner);
+        this.ui = null;
     }
 
     /**
@@ -656,13 +675,22 @@ public abstract class Layer implements Serializable {
         return owner;
     }
 
+    public void changeOwner(Layer owner) {
+        this.owner = owner;
+        this.ui = owner.ui;
+    }
+
     public void addListener(LayerListener listener) {
         listeners.add(listener);
     }
 
+    public void removeAllListeners() {
+        listeners.clear();
+    }
+
     protected void notifyListeners() {
         for (LayerListener listener : listeners) {
-            listener.layerStateChanged();
+            listener.layerStateChanged(this);
         }
     }
 

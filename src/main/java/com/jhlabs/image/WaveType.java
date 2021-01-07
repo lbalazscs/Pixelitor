@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,12 +44,28 @@ public class WaveType {
     private WaveType() {
     }
 
+    /**
+     * Wave function with values between -1 and 1
+     */
     public static double wave(double in, int type) {
         return switch (type) {
             case SINE -> FastMath.sin(in);
             case SAWTOOTH -> ImageMath.sinLikeSawtooth(in);
             case TRIANGLE -> ImageMath.sinLikeTriangle(in);
             case NOISE -> Noise.sinLikeNoise1((float) in);
+            default -> throw new IllegalStateException("type == " + type);
+        };
+    }
+
+    /**
+     * Wave function with values between 0 and 1
+     */
+    public static double wave01(double in, int type) {
+        return switch (type) {
+            case SINE -> (1 + FastMath.sin(in)) / 2;
+            case SAWTOOTH -> ImageMath.mod(in / (2 * Math.PI), 1);
+            case TRIANGLE -> ImageMath.triangle(in / (2 * Math.PI));
+            case NOISE -> Noise.noise1((float) in / ImageMath.PI);
             default -> throw new IllegalStateException("type == " + type);
         };
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,6 +36,7 @@ import pixelitor.utils.debug.DebugNode;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -47,24 +48,20 @@ import java.awt.geom.AffineTransform;
  * mouse and key events and a {@link Composition}
  */
 public abstract class Tool implements KeyListener {
-    // holding the alt key down generates continuously
-    // altPressed calls, but only the first one is relevant
-    protected boolean altDown = false;
-
-    private ToolButton toolButton;
-
     private final String name;
     private final String iconFileName;
     private final String toolMessage;
-    protected Cursor cursor;
-    private final ClipStrategy clipStrategy;
-
     private final char activationKey;
-
-    protected ToolSettingsPanel settingsPanel;
-    protected boolean ended = false;
-
+    private final ClipStrategy clipStrategy;
     final ToolHandlerChain handlerChain;
+    protected Cursor cursor;
+
+    private ToolButton toolButton;
+    protected ToolSettingsPanel settingsPanel;
+
+    // holding the alt key down generates continuously
+    // altPressed calls, but only the first one is relevant
+    protected boolean altDown = false;
 
     protected Tool(String name, char activationKey, String iconFileName,
                    String toolMessage, Cursor cursor,
@@ -118,17 +115,12 @@ public abstract class Tool implements KeyListener {
     }
 
     protected void toolStarted() {
-        ended = false;
-
         GlobalEvents.setKeyListener(this);
         OpenImages.setCursorForAll(cursor);
     }
 
     protected void toolEnded() {
-        ended = true;
-
         DraggablePoint.activePoint = null;
-
         closeToolDialogs();
     }
 
@@ -152,8 +144,7 @@ public abstract class Tool implements KeyListener {
      * Paint on the {@link Composition} after all the layers have been painted.
      * The transform of the given Graphics2D is in component space.
      */
-    public void paintOverImage(Graphics2D g2, Composition comp,
-                               AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Composition comp) {
         // empty by default
     }
 
@@ -188,8 +179,8 @@ public abstract class Tool implements KeyListener {
         GUIUtils.randomizeWidgetsOn(settingsPanel);
     }
 
-    public void setClipFor(Graphics2D g, View view) {
-        clipStrategy.setClipFor(g, view);
+    public void setClip(Graphics2D g, View view, Shape originalClip) {
+        clipStrategy.setClip(g, view, originalClip);
     }
 
     @Override
@@ -303,7 +294,7 @@ public abstract class Tool implements KeyListener {
      * The change in image coords implies a change in component coords,
      * therefore the component space coordinates also have to be recalculated.
      */
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         // empty by default
     }
 

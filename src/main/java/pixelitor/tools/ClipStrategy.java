@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,8 +20,7 @@ package pixelitor.tools;
 import pixelitor.gui.View;
 
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
+import java.awt.Shape;
 
 /**
  * How the clipping shape of {@link Graphics2D} is set when painting the
@@ -31,24 +30,14 @@ import java.awt.geom.Rectangle2D;
 public enum ClipStrategy {
     /**
      * The painting is allowed to leave the canvas,
-     * but not the internal frame.
-     * Necessary because the clipping was overridden previously
-     * in {@link View}.
-     *
-     * TODO probably restoring Swing's original clip shape
-     * would have the same effect
+     * but not the internal frame/tab.
+     * This is exactly what the original Swing clip did, but
+     * that one was overridden previously in {@link View}.
      */
     FULL {
         @Override
-        public void setClipFor(Graphics2D g, View view) {
-            // Note that the internal frame might be
-            // smaller than the CompositionView when there are scrollbars,
-            // so we have to use the view rectangle:
-            Rectangle coVisiblePart = view.getVisiblePart();
-
-            // We are in image space because g has the transforms applied.
-            Rectangle2D imVisiblePart = view.componentToImageSpace(coVisiblePart);
-            g.setClip(imVisiblePart);
+        public void setClip(Graphics2D g, View view, Shape originalClip) {
+            g.setClip(originalClip);
         }
     },
     /**
@@ -58,7 +47,7 @@ public enum ClipStrategy {
      */
     CANVAS {
         @Override
-        public void setClipFor(Graphics2D g, View view) {
+        public void setClip(Graphics2D g, View view, Shape originalClip) {
             // empty: the canvas clipping has been already set
         }
     },
@@ -67,7 +56,7 @@ public enum ClipStrategy {
      */
     CUSTOM {
         @Override
-        public void setClipFor(Graphics2D g, View view) {
+        public void setClip(Graphics2D g, View view, Shape originalClip) {
             // empty: it will be set later in the tool
         }
     };
@@ -75,5 +64,5 @@ public enum ClipStrategy {
     /**
      * Called when the active {@link View} is painted
      */
-    public abstract void setClipFor(Graphics2D g, View view);
+    public abstract void setClip(Graphics2D g, View view, Shape originalClip);
 }

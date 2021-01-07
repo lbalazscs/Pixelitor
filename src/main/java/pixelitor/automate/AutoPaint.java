@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,8 +28,6 @@ import pixelitor.history.ImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.Tool;
-import pixelitor.tools.shapes.ShapesTool;
-import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressHandler;
@@ -74,13 +72,11 @@ public class AutoPaint {
         assert calledOnEDT() : threadInfo();
 
         saveOriginalFgBgColors();
+        History.setIgnoreEdits(true);
+        BufferedImage backupImage = dr.getSelectedSubImage(true);
 
         String msg = format("Auto Paint with %s Tool: ", settings.getTool());
-
         var progressHandler = Messages.startProgress(msg, settings.getNumStrokes());
-
-        BufferedImage backupImage = dr.getSelectedSubImage(true);
-        History.setIgnoreEdits(true);
 
         try {
             runStrokes(settings, dr, progressHandler);
@@ -133,7 +129,7 @@ public class AutoPaint {
         if (settings.useRandomColors()) {
             randomizeColors();
         } else if (settings.useInterpolatedColors()) {
-            Color interpolated = Colors.interpolateInRGB(
+            Color interpolated = Colors.rgbInterpolate(
                 origFg, origBg, rand.nextFloat());
             setFGColor(interpolated);
         }
@@ -165,9 +161,6 @@ public class AutoPaint {
         if (tool instanceof AbstractBrushTool) {
             AbstractBrushTool abt = (AbstractBrushTool) tool;
             abt.drawBrushStrokeProgrammatically(dr, start, end);
-        } else if (tool instanceof ShapesTool) {
-            ShapesTool st = (ShapesTool) tool;
-            st.paintDrag(dr, new ImDrag(start, end));
         } else {
             throw new IllegalStateException("tool = " + tool.getClass().getName());
         }
@@ -177,7 +170,6 @@ public class AutoPaint {
      * The GUI of the "Auto Paint" dialog
      */
     public static class ConfigPanel extends ValidatedPanel {
-
         private static final String COL_FOREGROUND = "Foreground";
         private static final String COL_INTERPOLATED = "Foreground-Background Mix";
         private static final String COL_RANDOM = "Random";

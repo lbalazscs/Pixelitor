@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,13 +42,13 @@ import static pixelitor.utils.Keys.*;
  */
 public enum MaskViewMode {
     NORMAL("Show and Edit Layer", false, false, false,
-            AllowedOnLayerType.ANY, CTRL_1) {
+        AllowedOnLayerType.ANY, CTRL_1) {
     }, SHOW_MASK("Show and Edit Mask", true, true, false,
-            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_2) {
+        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_2) {
     }, EDIT_MASK("Show Layer, but Edit Mask", false, true, false,
-            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_3) {
+        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_3) {
     }, RUBYLITH("Show Mask as Rubylith, Edit Mask", false, true, true,
-            AllowedOnLayerType.HAS_LAYER_MASK, CTRL_4) {
+        AllowedOnLayerType.HAS_LAYER_MASK, CTRL_4) {
     };
 
     private final String guiName;
@@ -75,10 +75,7 @@ public enum MaskViewMode {
         var action = new MenuAction(guiName, allowedOnLayerType) {
             @Override
             public void onClick() {
-                OpenImages.onActiveView(view -> {
-                    Layer activeLayer = view.getComp().getActiveLayer();
-                    activate(view, activeLayer);
-                });
+                OpenImages.onActiveLayer(layer -> activate(layer));
             }
         };
         sub.addActionWithKey(action, keyStroke);

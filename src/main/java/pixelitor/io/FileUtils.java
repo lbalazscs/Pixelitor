@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,6 +48,12 @@ public class FileUtils {
         return findExtension(fileName).isPresent();
     }
 
+    private static boolean hasTheExtension(String fileName, String ext) {
+        return findExtension(fileName)
+            .filter(s -> s.equalsIgnoreCase(ext))
+            .isPresent();
+    }
+
     public static boolean hasPNGExtension(String fileName) {
         return hasTheExtension(fileName, "png");
     }
@@ -60,10 +66,13 @@ public class FileUtils {
         return hasTheExtension(fileName, "tga");
     }
 
-    private static boolean hasTheExtension(String fileName, String ext) {
-        return findExtension(fileName)
-            .filter(s -> s.equalsIgnoreCase(ext))
-            .isPresent();
+    public static boolean hasMultiLayerExtension(File file) {
+        Optional<String> extOpt = findExtension(file.getName());
+        if (extOpt.isEmpty()) {
+            return false;
+        }
+        String ext = extOpt.get().toLowerCase();
+        return ext.equals("pxc") || ext.equals("ora");
     }
 
     public static String stripExtension(String fileName) {
@@ -90,9 +99,9 @@ public class FileUtils {
 
     private static boolean hasSupportedExt(String fileName) {
         return findExtension(fileName)
-                .map(String::toLowerCase)
-                .filter(SUPPORTED_EXTENSIONS::contains)
-                .isPresent();
+            .map(String::toLowerCase)
+            .filter(SUPPORTED_EXTENSIONS::contains)
+            .isPresent();
     }
 
     public static String replaceExt(String fileName, String newExt) {
@@ -106,13 +115,13 @@ public class FileUtils {
     public static List<File> listSupportedInputFilesIn(File dir) {
         FileFilter imageFilter = FileUtils::hasSupportedInputExt;
         File[] files = dir.listFiles(imageFilter);
-        if(files == null) {
+        if (files == null) {
             return Collections.emptyList();
         }
 
         // filter out crazily named directories with image file extensions
         return Stream.of(files)
-                .filter(File::isFile)
-                .collect(toList());
+            .filter(File::isFile)
+            .collect(toList());
     }
 }

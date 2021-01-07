@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,7 +47,7 @@ public class FgBgColorSelector extends JLayeredPane {
     public static final String RANDOMIZE_BUTTON_NAME = "randomizeColorsButton";
     public static final String FG_BUTTON_NAME = "fgButton";
     public static final String BG_BUTTON_NAME = "bgButton";
-    public static final String RESET_DEF_COLORS_BUTTON_NAME = "resetDefColorsButton";
+    public static final String DEFAULTS_BUTTON_NAME = "resetColorsButton";
     public static final String SWAP_BUTTON_NAME = "swapColorsButton";
     private final PixelitorWindow pw;
     private JButton fgButton;
@@ -188,7 +188,7 @@ public class FgBgColorSelector extends JLayeredPane {
         };
         JButton defaultsButton = new JButton();
         initButton(defaultsButton, "Reset Default Colors (D)",
-            SMALL_BUTTON_SIZE, 1, RESET_DEF_COLORS_BUTTON_NAME,
+            SMALL_BUTTON_SIZE, 1, DEFAULTS_BUTTON_NAME,
             resetToDefaultAction);
         defaultsButton.setLocation(0, 0);
     }

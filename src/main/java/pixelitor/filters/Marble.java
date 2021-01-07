@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import static com.jhlabs.image.WaveType.wave;
+import static com.jhlabs.image.WaveType.wave01;
 import static com.jhlabs.math.Noise.*;
 import static net.jafama.FastMath.*;
 import static pixelitor.filters.gui.ReseedActions.reseedNoise;
@@ -71,18 +72,18 @@ public class Marble extends ParametrizedFilter {
         super(ShowOriginal.NO);
 
         var details = new GroupedRangeParam("Details",
-                new RangeParam[]{detailsLevel, detailsStrength}, false);
+            new RangeParam[]{detailsLevel, detailsStrength}, false);
 
         setParams(
-                type,
-                waveType,
-                time,
-                angle,
-                zoom.withAdjustedRange(0.25),
-                distortion,
-                details.notLinkable(),
-                smoothDetails,
-                gradient
+            type,
+            waveType,
+            time,
+            angle,
+            zoom.withAdjustedRange(0.25),
+            distortion,
+            details.notLinkable(),
+            smoothDetails,
+            gradient
         ).withAction(reseedNoise());
     }
 
@@ -108,9 +109,8 @@ public class Marble extends ParametrizedFilter {
         filter.setColormap(gradient.getValue());
         filter.setSmoothDetails(smoothDetails.isChecked());
         filter.setTime(time.getValueAsFloat() / 5.0f);
-        
-        dest = filter.filter(src, dest);
-        return dest;
+
+        return filter.filter(src, dest);
     }
 
     private static class Impl extends PointFilter {
@@ -211,7 +211,7 @@ public class Marble extends ParametrizedFilter {
         }
 
         private float calcLinesColor(float nx, float f) {
-            return (float) ((1 + wave(nx + f, waveType)) / 2);
+            return (float) wave01(nx + f, waveType);
         }
 
         private float calcGridColor(float nx, float ny, float f) {
@@ -222,14 +222,14 @@ public class Marble extends ParametrizedFilter {
                 f2 += detailsStrength * turbulence2(ny * -0.2f, nx * -0.2f, octaves);
             }
 
-            return (float) (2.0f + wave(nx + f, waveType) + wave(ny + f2, waveType)) / 4.0f;
+            return (float) (wave01(nx + f, waveType) + wave01(ny + f2, waveType)) / 2.0f;
         }
 
         private float calcRingsColor(double dy, double dx, float f) {
             float dist = (float) (sqrt(dx * dx + dy * dy) / zoom);
             f += dist;
 
-            return (float) ((1 + wave(f, waveType)) / 2);
+            return (float) wave01(f, waveType);
         }
 
         private float calcStarColor(double dy, double dx, float f) {

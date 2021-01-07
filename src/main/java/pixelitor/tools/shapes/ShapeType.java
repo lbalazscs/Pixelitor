@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return new Rectangle2D.Double(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return new Rectangle2D.Double(x, y, size, size);
         }
 
         @Override
@@ -69,8 +69,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return new Ellipse2D.Double(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return new Ellipse2D.Double(x, y, size, size);
         }
 
         @Override
@@ -100,8 +100,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return createDiamond(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return createDiamond(x, y, size, size);
         }
 
         @Override
@@ -122,8 +122,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return new Rectangle2D.Double(x, y, diameter / 5.0, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return new Rectangle2D.Double(x, y, size / 5.0, size);
         }
 
         @Override
@@ -152,8 +152,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return Shapes.createHeartShape(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return Shapes.createHeartShape(x, y, size, size);
         }
     }, STAR("Star", true, false, true) {
         @Override
@@ -201,8 +201,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return createStar(7, x, y, diameter, diameter / 3.0 + 1, 0.5);
+        public Shape createShape(double x, double y, double size) {
+            return createStar(7, x, y, size, size, 0.5);
         }
 
         @Override
@@ -231,9 +231,9 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
+        public Shape createShape(double x, double y, double size) {
             RandomStarShape.randomize();
-            return new RandomStarShape(x, y, diameter, diameter);
+            return new RandomStarShape(x, y, size, size);
         }
 
         @Override
@@ -277,12 +277,12 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            double middleY = y + diameter / 2.0;
+        public Shape createShape(double x, double y, double size) {
+            double middleY = y + size / 2.0;
             ImDrag imDrag = new ImDrag(
                 x,
                 middleY,
-                x + diameter,
+                x + size,
                 middleY);
             return createShape(imDrag, null);
         }
@@ -299,8 +299,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return Shapes.createCatShape(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return Shapes.createCatShape(x, y, size, size);
         }
     }, KIWI("Kiwi", true, false, false) {
         @Override
@@ -310,8 +310,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return Shapes.createKiwiShape(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return Shapes.createKiwiShape(x, y, size, size);
         }
     }, BAT("Bat", true, false, false) {
         @Override
@@ -321,8 +321,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return Shapes.createBatShape(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return Shapes.createBatShape(x, y, size, size);
         }
     }, RABBIT("Rabbit", true, false, false) {
         @Override
@@ -332,8 +332,8 @@ public enum ShapeType {
         }
 
         @Override
-        public Shape createShape(double x, double y, double diameter) {
-            return Shapes.createRabbitShape(x, y, diameter, diameter);
+        public Shape createShape(double x, double y, double size) {
+            return Shapes.createRabbitShape(x, y, size, size);
         }
 //    }, RND_ANIMAL_FACE("Random Animal Face", true, false) {
 //        final int[] codePoints = {
@@ -444,7 +444,7 @@ public enum ShapeType {
 
     public abstract Shape createShape(ImDrag imDrag, ShapeTypeSettings settings);
 
-    public abstract Shape createShape(double x, double y, double diameter);
+    public abstract Shape createShape(double x, double y, double size);
 
     /**
      * Set the x, y, width, height coordinates so that width and height are positive

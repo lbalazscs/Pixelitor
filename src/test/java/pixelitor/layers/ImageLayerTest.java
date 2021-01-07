@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,11 +73,11 @@ public class ImageLayerTest {
     @Parameters(name = "{index}: mask = {0}, transl = {1}, sel = {2}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {WithMask.NO, WithTranslation.NO, WithSelection.NO},
-                {WithMask.YES, WithTranslation.NO, WithSelection.NO},
-                {WithMask.NO, WithTranslation.YES, WithSelection.NO},
-                {WithMask.YES, WithTranslation.YES, WithSelection.NO},
-                {WithMask.NO, WithTranslation.NO, WithSelection.YES},
+            {WithMask.NO, WithTranslation.NO, WithSelection.NO},
+            {WithMask.YES, WithTranslation.NO, WithSelection.NO},
+            {WithMask.NO, WithTranslation.YES, WithSelection.NO},
+            {WithMask.YES, WithTranslation.YES, WithSelection.NO},
+            {WithMask.NO, WithTranslation.NO, WithSelection.YES},
         });
     }
 
@@ -106,7 +106,7 @@ public class ImageLayerTest {
             layerIconUpdatesAtStart = 1;
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, layerIconUpdatesAtStart, 0);
     }
 
     @Test
@@ -161,15 +161,15 @@ public class ImageLayerTest {
         layer.onFilterDialogAccepted("filterName");
 
         assertThat(layer)
-                .stateIs(NORMAL)
-                .previewImageIs(null);
+            .stateIs(NORMAL)
+            .previewImageIs(null);
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void onDialogCanceled_Fail() {
         assertThrows(AssertionError.class, () ->
-                layer.onFilterDialogCanceled());
+            layer.onFilterDialogCanceled());
     }
 
     @Test
@@ -179,22 +179,22 @@ public class ImageLayerTest {
         layer.onFilterDialogCanceled();
 
         assertThat(layer)
-                .stateIs(NORMAL)
-                .previewImageIs(null);
+            .stateIs(NORMAL)
+            .previewImageIs(null);
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void tweenCalculatingStarted() {
         assertThat(layer)
-                .stateIs(NORMAL)
-                .previewImageIs(null);
+            .stateIs(NORMAL)
+            .previewImageIs(null);
 
         layer.tweenCalculatingStarted();
 
         assertThat(layer)
-                .stateIs(PREVIEW)
-                .previewImageIsNot(null);
+            .stateIs(PREVIEW)
+            .previewImageIsNot(null);
         iconUpdates.check(0, 0);
     }
 
@@ -202,7 +202,7 @@ public class ImageLayerTest {
     public void tweenCalculatingEnded_Fail() {
         // fails because the the tween calculation was not started
         assertThrows(AssertionError.class, () ->
-                layer.tweenCalculatingEnded());
+            layer.tweenCalculatingEnded());
     }
 
     @Test
@@ -212,15 +212,15 @@ public class ImageLayerTest {
         layer.tweenCalculatingEnded();
 
         assertThat(layer)
-                .stateIs(NORMAL)
-                .previewImageIs(null);
+            .stateIs(NORMAL)
+            .previewImageIs(null);
         iconUpdates.check(0, 0);
     }
 
     @Test
     public void changePreviewImage_Fail() {
         assertThrows(IllegalStateException.class, () ->
-                layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING));
+            layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING));
     }
 
     @Test
@@ -230,8 +230,8 @@ public class ImageLayerTest {
         layer.changePreviewImage(TestHelper.createImage(), "filterName", PREVIEWING);
 
         assertThat(layer)
-                .stateIs(PREVIEW)
-                .previewImageIsNot(null);
+            .stateIs(PREVIEW)
+            .previewImageIsNot(null);
         iconUpdates.check(0, 0);
     }
 
@@ -241,7 +241,7 @@ public class ImageLayerTest {
         BufferedImage dest = ImageUtils.copyImage(layer.getImage());
 
         layer.filterWithoutDialogFinished(dest,
-                FILTER_WITHOUT_DIALOG, "opName");
+            FILTER_WITHOUT_DIALOG, "opName");
 
         assertThat(layer).stateIs(NORMAL);
         iconUpdates.check(1, 0);
@@ -252,9 +252,9 @@ public class ImageLayerTest {
         TestHelper.setSelection(comp, new Rectangle(2, 2, 2, 2));
 
         layer.changeImageForUndoRedo(TestHelper.createImage(),
-                false);
+            false);
         layer.changeImageForUndoRedo(TestHelper.createImage(),
-                true);
+            true);
 
         iconUpdates.check(0, 0);
     }
@@ -280,15 +280,15 @@ public class ImageLayerTest {
         if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(image)
-                    .isNotNull()
-                    .isNotSameAs(layer.getImage())
-                    .widthIs(selShape.width)
-                    .heightIs(selShape.height);
+                .isNotNull()
+                .isNotSameAs(layer.getImage())
+                .widthIs(selShape.width)
+                .heightIs(selShape.height);
         } else {
             // no selection, we expect it to return the image
             assertThat(image)
-                    .isNotNull()
-                    .isSameAs(layer.getImage());
+                .isNotNull()
+                .isSameAs(layer.getImage());
         }
 
         iconUpdates.check(0, 0);
@@ -297,7 +297,7 @@ public class ImageLayerTest {
     @Test
     public void tmpDrawingLayer() {
         TmpDrawingLayer tmpDrawingLayer
-                = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
+            = layer.createTmpDrawingLayer(AlphaComposite.SrcOver, false);
         assertThat(tmpDrawingLayer).isNotNull();
         Canvas canvas = layer.getComp().getCanvas();
         assertThat(tmpDrawingLayer.getWidth()).isEqualTo(canvas.getWidth());
@@ -313,9 +313,9 @@ public class ImageLayerTest {
         BufferedImage image = canvas.createTmpImage();
 
         assertThat(image)
-                .isNotNull()
-                .widthIs(canvas.getWidth())
-                .heightIs(canvas.getHeight());
+            .isNotNull()
+            .widthIs(canvas.getWidth())
+            .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -325,9 +325,9 @@ public class ImageLayerTest {
 
         Canvas canvas = layer.getComp().getCanvas();
         assertThat(image)
-                .isNotNull()
-                .widthIs(canvas.getWidth())
-                .heightIs(canvas.getHeight());
+            .isNotNull()
+            .widthIs(canvas.getWidth())
+            .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -340,9 +340,9 @@ public class ImageLayerTest {
         if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(filterSourceImage)
-                    .isNotSameAs(layer.getImage())
-                    .widthIs(selShape.width)
-                    .heightIs(selShape.height);
+                .isNotSameAs(layer.getImage())
+                .widthIs(selShape.width)
+                .heightIs(selShape.height);
         } else {
             assertThat(filterSourceImage).isSameAs(layer.getImage());
         }
@@ -356,14 +356,14 @@ public class ImageLayerTest {
         if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageT)
-                    .isNotSameAs(layerImage)
-                    .widthIs(selShape.width)
-                    .heightIs(selShape.height);
+                .isNotSameAs(layerImage)
+                .widthIs(selShape.width)
+                .heightIs(selShape.height);
         } else {
             assertThat(imageT)
-                    .isNotSameAs(layerImage) // copy even if there is no selection
-                    .widthIs(layerImage.getWidth())
-                    .heightIs(layerImage.getHeight());
+                .isNotSameAs(layerImage) // copy even if there is no selection
+                .widthIs(layerImage.getWidth())
+                .heightIs(layerImage.getHeight());
         }
 
         BufferedImage imageF = layer.getSelectedSubImage(false);
@@ -372,14 +372,14 @@ public class ImageLayerTest {
         if (withSelection.isTrue()) {
             Rectangle selShape = WithSelection.SELECTION_SHAPE;
             assertThat(imageF)
-                    .isNotSameAs(layerImage)
-                    .widthIs(selShape.width)
-                    .heightIs(selShape.height);
+                .isNotSameAs(layerImage)
+                .widthIs(selShape.width)
+                .heightIs(selShape.height);
         } else {
             assertThat(imageF)
-                    .isSameAs(layerImage) // don't copy if there is no selection
-                    .widthIs(layerImage.getWidth())
-                    .heightIs(layerImage.getHeight());
+                .isSameAs(layerImage) // don't copy if there is no selection
+                .widthIs(layerImage.getWidth())
+                .heightIs(layerImage.getHeight());
         }
 
         iconUpdates.check(0, 0);
@@ -401,7 +401,7 @@ public class ImageLayerTest {
         // intersect because growing is disabled
         Rectangle expectedNewCanvas = cropRect.intersection(origBounds);
         checkLayerAfterCrop(0, 0,
-                5, 5, expectedNewCanvas);
+            5, 5, expectedNewCanvas);
     }
 
     @Test
@@ -418,7 +418,7 @@ public class ImageLayerTest {
 
         // then
         checkLayerAfterCrop(0, 0,
-                50, 50, cropRect);
+            50, 50, cropRect);
     }
 
     @Test
@@ -437,7 +437,7 @@ public class ImageLayerTest {
         // intersect because growing is disabled
         Rectangle expectedNewCanvas = cropRect.intersection(origImBounds);
         checkLayerAfterCrop(tx - 3, ty - 4,
-                20 - tx, 10 - ty, expectedNewCanvas);
+            20 - tx, 10 - ty, expectedNewCanvas);
     }
 
     @Test
@@ -454,7 +454,7 @@ public class ImageLayerTest {
 
         // then
         checkLayerAfterCrop(tx - 3, ty - 4,
-                53 - tx, 54 - ty, cropRect);
+            53 - tx, 54 - ty, cropRect);
     }
 
     @Test
@@ -471,7 +471,7 @@ public class ImageLayerTest {
 
         // then
         checkLayerAfterCrop(0, -3 + ty,
-                30, 10 - ty, cropRect);
+            30, 10 - ty, cropRect);
     }
 
     @Test
@@ -488,15 +488,14 @@ public class ImageLayerTest {
 
         // then
         checkLayerAfterCrop(-8 + tx, -5 + ty,
-                20 - tx, 15 - ty, cropRect);
+            20 - tx, 15 - ty, cropRect);
     }
 
     private void checkLayerAfterCrop(int expectedTx, int expectedTy,
                                      int expectedImWidth, int expectedImHeight,
                                      Rectangle expectedNewCanvas) {
-        assertThat(layer).contentBoundsIsEqualTo(
-            new Rectangle(expectedTx, expectedTy,
-                expectedImWidth, expectedImHeight));
+        assertThat(layer).contentBoundsIsEqualTo(new Rectangle(
+            expectedTx, expectedTy, expectedImWidth, expectedImHeight));
         iconUpdates.check(0, 0);
 
         comp.getCanvas().changeSize(
@@ -512,8 +511,8 @@ public class ImageLayerTest {
         Canvas canvas = layer.getComp().getCanvas();
         BufferedImage image = layer.getImage();
         assertThat(image)
-                .widthIs(canvas.getWidth())
-                .heightIs(canvas.getHeight());
+            .widthIs(canvas.getWidth())
+            .heightIs(canvas.getHeight());
         iconUpdates.check(0, 0);
     }
 
@@ -565,11 +564,11 @@ public class ImageLayerTest {
 
             History.undo("Apply Layer Mask");
             assertThat(layer).hasMask();
-            iconUpdates.check(2, 1);
+            iconUpdates.check(2, 0);
 
             History.redo("Apply Layer Mask");
             assertThat(layer).hasNoMask();
-            iconUpdates.check(3, 1);
+            iconUpdates.check(3, 0);
         }
     }
 }

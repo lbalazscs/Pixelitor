@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -73,9 +73,9 @@ public final class NewImage {
         var panel = new NewImagePanel();
         new DialogBuilder()
             .title(NEW_IMAGE_STRING)
-                .validatedContent(panel)
-                .okAction(panel::okPressedInDialog)
-                .show();
+            .validatedContent(panel)
+            .okAction(panel::okPressedInDialog)
+            .show();
     }
 
     public static Action getAction() {
@@ -108,22 +108,20 @@ public final class NewImage {
             //noinspection SuspiciousNameCombination
             setBorder(createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH));
 
-            widthTF = addTextField("widthTF", "Width:",
-                    lastSize.width, gbh);
-            heightTF = addTextField("heightTF", "Height:",
-                    lastSize.height, gbh);
+            widthTF = addTextField("widthTF", "Width:", lastSize.width, gbh);
+            heightTF = addTextField("heightTF", "Height:", lastSize.height, gbh);
 
             backgroundSelector = new JComboBox<>(FillType.values());
             gbh.addLabelAndLastControl("Fill:", backgroundSelector);
         }
 
-        private static JTextField addTextField(String name, String labelText,
+        private static JTextField addTextField(String name, String label,
                                                int value, GridBagHelper gbh) {
             var tf = new JTextField(String.valueOf(value));
             tf.setName(name);
-            gbh.addLabelAndTwoControls(labelText,
-                    TextFieldValidator.createPositiveIntLayer(labelText, tf, false),
-                    new JLabel("pixels"));
+            gbh.addLabelAndTwoControls(label,
+                TextFieldValidator.createPositiveIntLayer(label, tf, false),
+                new JLabel("pixels"));
             return tf;
         }
 
@@ -154,21 +152,21 @@ public final class NewImage {
                 if (numPixels > Integer.MAX_VALUE) {
                     // theoretical limit, as the pixels ultimately will be stored in an array
                     return retVal.addError(format(
-                            "Pixelitor doesn't support images with more than %d pixels." +
-                                    "<br>%dx%d would be %d pixels.",
-                            Integer.MAX_VALUE, width, height, numPixels));
+                        "Pixelitor doesn't support images with more than %d pixels." +
+                            "<br>%dx%d would be %d pixels.",
+                        Integer.MAX_VALUE, width, height, numPixels));
                 } else if (numPixels > 1_000_000) { // don't check for smaller images
                     Runtime rt = Runtime.getRuntime();
                     long allocatedMemory = rt.totalMemory() - rt.freeMemory();
                     long availableMemory = rt.maxMemory() - allocatedMemory;
                     if (numPixels * 4 > availableMemory) {
                         return retVal.addError(format(
-                                "The image would not fit into memory." +
-                                        "<br>An image of %dx%d pixels needs at least %d megabytes." +
-                                        "<br>Available memory is at most %d megabytes.",
-                                width, height,
-                                numPixels * 4 / ONE_MEGABYTE,
-                                availableMemory / ONE_MEGABYTE));
+                            "The image would not fit into memory." +
+                                "<br>An image of %dx%d pixels needs at least %d megabytes." +
+                                "<br>Available memory is at most %d megabytes.",
+                            width, height,
+                            numPixels * 4 / ONE_MEGABYTE,
+                            availableMemory / ONE_MEGABYTE));
                     }
                 }
             }
@@ -181,9 +179,8 @@ public final class NewImage {
             int selectedHeight = getSelectedHeight();
             FillType bg = getSelectedBackground();
 
-            String title = "Untitled" + untitledCount;
+            String title = "Untitled" + untitledCount++;
             addNewImage(bg, selectedWidth, selectedHeight, title);
-            untitledCount++;
 
             lastSize.width = selectedWidth;
             lastSize.height = selectedHeight;

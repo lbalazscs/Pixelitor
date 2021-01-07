@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -278,8 +278,7 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp,
-                               AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Composition comp) {
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
         mode.paint(g2);
     }
@@ -290,7 +289,7 @@ public class PenTool extends Tool {
         if (view == null) {
             return false;
         }
-        if (mode.arrowKeyPressed(key)) {
+        if (mode.arrowKeyPressed(key, view)) {
             view.repaint();
             return true;
         }
@@ -306,9 +305,9 @@ public class PenTool extends Tool {
     }
 
     @Override
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         if (hasPath()) {
-            mode.imCoordsChanged(at);
+            mode.imCoordsChanged(at, comp);
         }
     }
 
@@ -331,8 +330,10 @@ public class PenTool extends Tool {
 
     @Override
     public void compReplaced(Composition oldComp, Composition newComp, boolean reloaded) {
-        assert newComp.isActive();
-        setPathFromComp(newComp);
+        if (newComp.isActive()) {
+            // reloading is asynchronous, the view might not be active anymore
+            setPathFromComp(newComp);
+        }
     }
 
     @Override

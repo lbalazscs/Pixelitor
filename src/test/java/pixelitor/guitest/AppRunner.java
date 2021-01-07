@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,7 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
+import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.FilterMenuBar;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
@@ -160,7 +161,7 @@ public class AppRunner {
         }
     }
 
-    void delayBetweenEvents(int millis) {
+    private void delayBetweenEvents(int millis) {
         robot.settings().delayBetweenEvents(millis);
         robot.settings().eventPostingDelay(2 * millis);
     }
@@ -219,6 +220,18 @@ public class AppRunner {
 
         Utils.sleep(200, MILLISECONDS);
         EDT.assertActiveToolIs(tool);
+    }
+
+    public void setDefaultColors() {
+        pw.button(FgBgColorSelector.DEFAULTS_BUTTON_NAME).click();
+    }
+
+    public void swapColors() {
+        pw.button(FgBgColorSelector.SWAP_BUTTON_NAME).click();
+    }
+
+    public void randomizeColors() {
+        pw.button(FgBgColorSelector.RANDOMIZE_BUTTON_NAME).click();
     }
 
     void runMenuCommand(String text) {
@@ -444,7 +457,9 @@ public class AppRunner {
         return AJSUtils.findButtonByText(pw, text);
     }
 
-    public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed, ShowOriginal checkShowOriginal, String... extraButtonsToClick) {
+    public void runFilterWithDialog(String name, Randomize randomize, Reseed reseed,
+                                    ShowOriginal checkShowOriginal, boolean testPresets,
+                                    String... extraButtonsToClick) {
         runMenuCommand(name + "...");
         var dialog = findFilterDialog();
 
@@ -456,16 +471,8 @@ public class AppRunner {
 
         if (randomize == Randomize.YES) {
             boolean presetAdded = false;
-            JDialog realDialog = (JDialog) dialog.target();
-            JMenuBar menuBar = realDialog.getJMenuBar();
-            if (menuBar != null) {
-                if (FilterMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
-                    dialog.menuItem("savePreset").click();
-                    var pane = findJOptionPane();
-                    pane.textBox().enterText("test preset");
-                    pane.okButton().click();
-                    presetAdded = true;
-                }
+            if (testPresets) {
+                presetAdded = savePreset(dialog);
             }
 
             dialog.button("randomize").click();
@@ -491,6 +498,22 @@ public class AppRunner {
 
         dialog.button("ok").click();
         dialog.requireNotVisible();
+    }
+
+    private boolean savePreset(DialogFixture filterDialog) {
+        boolean presetAdded = false;
+        JDialog realDialog = (JDialog) filterDialog.target();
+        JMenuBar menuBar = realDialog.getJMenuBar();
+        if (menuBar != null) {
+            if (FilterMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
+                filterDialog.menuItem("savePreset").click();
+                var pane = findJOptionPane();
+                pane.textBox().enterText("test preset");
+                pane.okButton().click();
+                presetAdded = true;
+            }
+        }
+        return presetAdded;
     }
 
     void checkNumLayersIs(int expected) {

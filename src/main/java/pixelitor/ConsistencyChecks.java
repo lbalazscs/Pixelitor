@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,10 +19,7 @@ package pixelitor;
 
 import pixelitor.history.FadeableEdit;
 import pixelitor.history.History;
-import pixelitor.layers.AddLayerMaskAction;
-import pixelitor.layers.DeleteActiveLayerAction;
-import pixelitor.layers.Drawable;
-import pixelitor.layers.Layer;
+import pixelitor.layers.*;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Threads;
 import pixelitor.utils.debug.Debug;
@@ -260,19 +257,28 @@ public final class ConsistencyChecks {
         boolean addMaskEnabled = action.isEnabled();
         Layer layer = comp.getActiveLayer();
 
+        LayerUI ui = layer.getUI();
+        if (ui == null) {
+            throw new IllegalStateException("no ui, name = "
+                + layer.getName() + ", class = " + layer.getClass().getSimpleName());
+        }
         if (layer.hasMask()) {
             if (addMaskEnabled) {
-                throw new IllegalStateException(layer.getName());
+                throw new IllegalStateException("The layer " + layer.getName()
+                    + " has mask, but the add mask action is enabled");
             }
-            if (!layer.getUI().hasMaskIcon()) {
-                throw new IllegalStateException(layer.getName());
+            if (!ui.hasMaskIcon()) {
+                throw new IllegalStateException("The layer " + layer.getName()
+                    + " has mask, but no mask icon");
             }
         } else { // no mask
             if (!addMaskEnabled) {
-                throw new IllegalStateException(layer.getName());
+                throw new IllegalStateException("The layer " + layer.getName()
+                    + " has no mask, but the add mask action is not enabled");
             }
-            if (layer.getUI().hasMaskIcon()) {
-                throw new IllegalStateException(layer.getName());
+            if (ui.hasMaskIcon()) {
+                throw new IllegalStateException("The layer " + layer.getName()
+                    + " has no mask, but it has mask icon");
             }
         }
 

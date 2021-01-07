@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.RunContext;
  * The {@link LayerUI} implementation used in unit tests
  */
 public class TestLayerUI implements LayerUI {
-    private final Layer layer;
+    private Layer layer;
     private String name;
     private boolean showVisibility = true;
     private boolean hasMaskIconLabel = false;
@@ -58,7 +58,7 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public boolean isVisibilityChecked() {
+    public boolean isEyeOpen() {
         assert layer.isVisible() == showVisibility;
         return showVisibility;
     }
@@ -94,12 +94,17 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateBorders() {
+    public void updateSelectionState() {
 
     }
 
     @Override
     public void setSelected(boolean b) {
 
+    }
+
+    @Override
+    public void changeLayer(Layer newLayer) {
+        this.layer = newLayer;
     }
 }

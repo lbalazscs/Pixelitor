@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
  */
 @RunWith(Parameterized.class)
 public class ContentLayerTest {
-
     @Parameter
     public Class<?> layerClass;
 
@@ -84,7 +83,7 @@ public class ContentLayerTest {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, 0, 0);
 
         assert comp.getNumLayers() == 1 : "found " + comp.getNumLayers() + " layers";
         History.clear();
@@ -95,15 +94,12 @@ public class ContentLayerTest {
         assertThat(layer).translationIs(0, 0);
 
         layer.startMovement();
-
         assertThat(layer).translationIs(0, 0);
 
         layer.moveWhileDragging(2, 2);
-
         assertThat(layer).translationIs(2, 2);
 
         layer.moveWhileDragging(3, 3);
-
         assertThat(layer).translationIs(3, 3);
 
         // endMovement is called on the composition
@@ -111,7 +107,8 @@ public class ContentLayerTest {
         comp.endMovement(MoveMode.MOVE_LAYER_ONLY);
 
         checkTranslationAfterPositiveDrag();
-        iconUpdates.check(1, 1);
+        int expectedLayerIconUpdates = layerClass == ImageLayer.class ? 1 : 0;
+        iconUpdates.check(expectedLayerIconUpdates, 1);
 
         // start another drag to the negative direction
         layer.startMovement();
@@ -125,11 +122,13 @@ public class ContentLayerTest {
         // ImageLayer: this time the layer was not enlarged
         // TextLayer: endMovement does not change the tmpTranslation + translation sum
         checkTranslationAfterNegativeDrag();
-        iconUpdates.check(2, 2);
-
+        expectedLayerIconUpdates = layerClass == ImageLayer.class ? 2 : 0;
+        iconUpdates.check(expectedLayerIconUpdates, 2);
         History.assertNumEditsIs(2);
+
         History.undo("Move Layer");
         checkTranslationAfterPositiveDrag();
+
         History.undo("Move Layer");
         assertThat(layer).translationIs(0, 0);
 

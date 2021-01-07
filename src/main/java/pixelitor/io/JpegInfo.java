@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,14 +18,14 @@
 package pixelitor.io;
 
 /**
- *  Custom configuration JPEG images
+ * Custom configuration for JPEG images
  */
 public class JpegInfo {
     private final float quality;
     private final boolean progressive;
-    private static final float DEFAULT_JPEG_QUALITY = 0.87f;
+    private static final float DEFAULT_QUALITY = 0.87f;
 
-    public static final JpegInfo DEFAULTS = new JpegInfo(DEFAULT_JPEG_QUALITY, false);
+    public static final JpegInfo DEFAULTS = new JpegInfo(DEFAULT_QUALITY, false);
 
     public JpegInfo(float quality, boolean progressive) {
         this.quality = quality;

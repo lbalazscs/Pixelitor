@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,11 +18,13 @@
 package pixelitor.gui;
 
 import pixelitor.gui.utils.DropDownSlider;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.layers.BlendingMode;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Composite;
+import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 
 import static java.awt.FlowLayout.LEFT;
@@ -60,9 +62,8 @@ public class BlendingModePanel extends JPanel {
         add(bmLabel);
 
         BlendingMode[] blendingModes = BlendingMode.values();
-        bmCombo = new JComboBox<>(blendingModes);
+        bmCombo = GUIUtils.createComboBox(blendingModes);
         bmCombo.setFocusable(false);
-        bmCombo.setMaximumRowCount(blendingModes.length);
         if (!forTools) {
             bmCombo.setName("layerBM");
         }

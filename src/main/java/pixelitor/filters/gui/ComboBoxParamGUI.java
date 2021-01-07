@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.filters.gui;
+
+import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.Dimension;
@@ -35,17 +37,14 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
     public ComboBoxParamGUI(ComboBoxModel<E> model, FilterButtonModel action) {
         assert model instanceof Resettable;
 
-        comboBox = new JComboBox<>(model);
-        // make sure all values are visible without a scrollbar
-        comboBox.setMaximumRowCount(model.getSize());
+        defaultButton = new DefaultButton((Resettable) model);
+        comboBox = GUIUtils.createComboBox(model, e -> defaultButton.updateIcon());
 
         // workaround for nimbus bug
         var origPS = comboBox.getPreferredSize();
         comboBox.setPreferredSize(new Dimension(
-                origPS.width + 3,
-                origPS.height));
-
-        defaultButton = new DefaultButton((Resettable) model);
+            origPS.width + 3,
+            origPS.height));
 
         if (action != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));
@@ -61,8 +60,6 @@ public class ComboBoxParamGUI<E> extends JPanel implements ParamGUI {
             add(comboBox);
             add(defaultButton);
         }
-
-        comboBox.addActionListener(e -> defaultButton.updateIcon());
     }
 
     @Override

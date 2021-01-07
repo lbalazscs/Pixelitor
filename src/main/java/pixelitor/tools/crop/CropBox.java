@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,7 @@ package pixelitor.tools.crop;
 
 import pixelitor.Composition;
 import pixelitor.gui.View;
-import pixelitor.tools.TransformHelper;
+import pixelitor.tools.ToolWidget;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.tools.util.PRectangle;
@@ -38,10 +38,9 @@ import java.util.List;
 /**
  * The cropping rectangle
  */
-public class CropBox {
-
+public class CropBox implements ToolWidget {
     private static final int MODE_NONE = 0;
-    private static final int MODE_RELOCATE = 1;
+    private static final int MODE_MOVE = 1;
     private static final int MODE_RESIZE = 2;
 
     private final CropHandle upperLeft;
@@ -60,13 +59,10 @@ public class CropBox {
     private Rectangle dragStartRect;
     private Point dragStart;
 
-    // true while the user is adjusting the handles
-    private boolean adjusting;
-
     // type of user transform
     private int transformMode = MODE_NONE;
 
-    // ratio width/height of the selected area
+    // the width/height ratio of the selected area
     private double aspectRatio = 0;
 
     public CropBox(PRectangle rect, View view) {
@@ -82,11 +78,12 @@ public class CropBox {
         lowerRight = new CropHandle("SE", Cursor.SE_RESIZE_CURSOR, view);
 
         handles = List.of(upperLeft, upperRight, lowerRight, lowerLeft,
-                right, upper, lower, left);
-        update(rect);
+            right, upper, lower, left);
+        updateHandles();
     }
 
-    public void paintHandles(Graphics2D g) {
+    @Override
+    public void paint(Graphics2D g) {
         drawRect(g);
         drawHandles(g);
     }
@@ -111,23 +108,32 @@ public class CropBox {
     }
 
     /**
-     * Iterates over all the handles and if finds one that is over the point, its cursor is set
-     * The coordinates are in image space
+     * Iterates over all the handles and if it finds one that is
+     * under the given mouse coordinates, sets the cursor accordingly.
      *
      * @return true if cursor was set on any handle, false otherwise
      */
-    public boolean setCursorForPoint(double x, double y, View view) {
-        for (CropHandle handle : handles) {
-            if (handle.handleContains(x, y)) {
-                view.setCursor(handle.getCursor());
-                return true;
-            }
+    private boolean setCursorForPoint(double x, double y, View view) {
+        CropHandle hit = handleWasHit(x, y);
+        if (hit != null) {
+            view.setCursor(hit.getCursor());
+            return true;
         }
 
         return false;
     }
 
-    public void update(PRectangle rect) {
+    @Override
+    public CropHandle handleWasHit(double x, double y) {
+        for (CropHandle handle : handles) {
+            if (handle.handleContains(x, y)) {
+                return handle;
+            }
+        }
+        return null;
+    }
+
+    private void updateHandles() {
         Rectangle r = rect.getCo();
         int horMidX = r.x + r.width / 2;
         int verMidY = r.y + r.height / 2;
@@ -149,14 +155,14 @@ public class CropBox {
         dragStart = e.getPoint();
         dragStartRect = new Rectangle(rect.getCo());
         dragStartCursorType = view.getCursor().getType();
-        aspectRatio = TransformHelper.calcAspectRatio(rect.getCo());
+        aspectRatio = calcAspectRatio(rect.getCo());
 
-        if (TransformHelper.isResizeMode(dragStartCursorType)) {
+        if (isResizeMode(dragStartCursorType)) {
             // if user clicked on the handle allow resize it
             transformMode = MODE_RESIZE;
         } else if (rect.containsCo(e.getPoint())) {
             // if user clicked inside selection allow relocate it
-            transformMode = MODE_RELOCATE;
+            transformMode = MODE_MOVE;
         } else {
             transformMode = MODE_NONE;
         }
@@ -167,38 +173,35 @@ public class CropBox {
             return;
         }
 
-        // reset rect
-        // TODO is this necessary?
         rect.getCo().setRect(dragStartRect);
         Point mouseOffset = new Point(
-                (int) (e.getCoX() - dragStart.x),
-                (int) (e.getCoY() - dragStart.y));
+            (int) (e.getCoX() - dragStart.x),
+            (int) (e.getCoY() - dragStart.y));
 
         if (transformMode == MODE_RESIZE) {
-            TransformHelper.resize(rect.getCo(), dragStartCursorType, mouseOffset);
+            resize(rect.getCo(), dragStartCursorType, mouseOffset);
 
             if (e.isShiftDown() && aspectRatio > 0) {
-                TransformHelper.keepAspectRatio(rect.getCo(), dragStartCursorType, aspectRatio);
+                keepAspectRatio(rect.getCo(), dragStartCursorType, aspectRatio);
             }
-        } else if (transformMode == MODE_RELOCATE) {
+        } else if (transformMode == MODE_MOVE) {
             rect.getCo().translate(mouseOffset.x, mouseOffset.y);
         }
 
-        adjusting = true;
-        update(rect);
+        updateHandles();
 
         rect.makeCoPositive();
         rect.recalcIm(e.getView());
     }
 
     public void mouseReleased(PMouseEvent e) {
-        // we need to ensure that after resize rectangle has
-        // positive width and height (required for Rectangle.contain testing)
+        // ensure that after resize rectangle has positive
+        // width and height (required for Rectangle.contain testing)
         rect.makeCoPositive();
-        update(rect);
+
+        updateHandles();
         setCursorForPoint(e.getCoX(), e.getCoY(), e.getView());
 
-        adjusting = false;
         transformMode = MODE_NONE;
     }
 
@@ -217,18 +220,20 @@ public class CropBox {
         return rect;
     }
 
+    @Override
     public void coCoordsChanged(View view) {
         rect.coCoordsChanged(view);
-        update(rect);
+        updateHandles();
     }
 
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
-        rect.imCoordsChanged(comp, at);
-        update(rect);
+    @Override
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
+        rect.imCoordsChanged(comp.getView(), at);
+        updateHandles();
     }
 
     /**
-     * Set size of selection in image space
+     * Sets the size of the crop box in image space.
      */
     public void setImSize(int width, int height, View view) {
         Rectangle2D imRect = rect.getIm();
@@ -236,50 +241,168 @@ public class CropBox {
 
         rect.recalcCo(view);
 
-        update(rect);
+        updateHandles();
         view.repaint();
     }
 
     /**
-     * Return true while the user is adjusting the handles
+     * Returns true while the user is adjusting the handles.
      */
     public boolean isAdjusting() {
-        return adjusting;
+        return transformMode != MODE_NONE;
     }
 
+    @Override
     public void arrowKeyPressed(ArrowKey key, View view) {
-
-        // two situation we need to take into consideration
-        // 1. user zoom level is >= 100% then we always move rect by 1px
-        //    user is in pixel perfect precision mode
-        // 2. user zoom level is < 100% then we scale up to ensure that user always see
-        //    rect movement
-
+        // Two situations have to be taken into consideration:
+        // 1. if the zoom level is >= 100%, then move the rectangle by 1px
+        // 2. if the zoom level is < 100%, then scale up to ensure
+        //    that the user always sees moving the rectangle
         double viewScale = view.getZoomLevel().getViewScale();
         int moveScale = viewScale >= 1 ? 1 : (int) Math.ceil(1 / viewScale);
 
         Rectangle2D im = rect.getIm();
         im.setRect(
-                im.getX() + key.getMoveX() * moveScale,
-                im.getY() + key.getMoveY() * moveScale,
-                im.getWidth(),
-                im.getHeight()
+            im.getX() + key.getMoveX() * moveScale,
+            im.getY() + key.getMoveY() * moveScale,
+            im.getWidth(),
+            im.getHeight()
         );
 
         rect.recalcCo(view);
-        update(rect);
+        updateHandles();
         view.repaint();
+    }
+
+    public static double calcAspectRatio(Rectangle rect) {
+        if (rect.height > 0) {
+            return (double) rect.width / rect.height;
+        } else {
+            return 0;
+        }
+    }
+
+    private static boolean isResizeMode(int cursorType) {
+        switch (cursorType) {
+            case Cursor.NW_RESIZE_CURSOR:
+            case Cursor.SE_RESIZE_CURSOR:
+            case Cursor.SW_RESIZE_CURSOR:
+            case Cursor.NE_RESIZE_CURSOR:
+            case Cursor.N_RESIZE_CURSOR:
+            case Cursor.S_RESIZE_CURSOR:
+            case Cursor.E_RESIZE_CURSOR:
+            case Cursor.W_RESIZE_CURSOR:
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Recalculates the box position and size, according to the mouse offset and direction
+     *
+     * @param rect       rectangle to adjust
+     * @param cursorType user modification direction (N,S,W,E,NW,NE,SE,SW)
+     * @param moveOffset the offset calculated as: mousePos - mouseStartPos
+     */
+    public static void resize(Rectangle rect, int cursorType, Point moveOffset) {
+        int offsetX = moveOffset.x;
+        int offsetY = moveOffset.y;
+        switch (cursorType) {
+            case Cursor.NW_RESIZE_CURSOR -> {
+                rect.width -= offsetX;
+                rect.height -= offsetY;
+                rect.x += offsetX;
+                rect.y += offsetY;
+            }
+            case Cursor.SE_RESIZE_CURSOR -> {
+                rect.width += offsetX;
+                rect.height += offsetY;
+            }
+            case Cursor.SW_RESIZE_CURSOR -> {
+                rect.width -= offsetX;
+                rect.height += offsetY;
+                rect.x += offsetX;
+            }
+            case Cursor.NE_RESIZE_CURSOR -> {
+                rect.width += offsetX;
+                rect.height -= offsetY;
+                rect.y += offsetY;
+            }
+            case Cursor.N_RESIZE_CURSOR -> {
+                rect.height -= offsetY;
+                rect.y += offsetY;
+            }
+            case Cursor.S_RESIZE_CURSOR -> rect.height += offsetY;
+            case Cursor.E_RESIZE_CURSOR -> rect.width += offsetX;
+            case Cursor.W_RESIZE_CURSOR -> {
+                rect.width -= offsetX;
+                rect.x += offsetX;
+            }
+        }
+    }
+
+    /**
+     * Adjusts the given rectangle to keep the aspect ratio.
+     * Recalculates the x,y according to the drag direction.
+     *
+     * @param rect        rectangle to adjust
+     * @param cursorType  user modification direction (N,S,W,E,NW,NE,SE,SW)
+     * @param aspectRatio aspect ratio of original rectangle. Required > 0
+     */
+    public static void keepAspectRatio(Rectangle rect, int cursorType, double aspectRatio) {
+        switch (cursorType) {
+            case Cursor.NW_RESIZE_CURSOR:
+            case Cursor.NE_RESIZE_CURSOR:
+            case Cursor.SE_RESIZE_CURSOR:
+            case Cursor.SW_RESIZE_CURSOR:
+                // To find out whether to adjust the width
+                // or the height, compare the rectangle ratios.
+                double aspectRatioNew = calcAspectRatio(rect);
+                if (aspectRatioNew > aspectRatio) {
+                    int height = (int) (rect.width / aspectRatio);
+                    if (cursorType == Cursor.NW_RESIZE_CURSOR ||
+                        cursorType == Cursor.NE_RESIZE_CURSOR) {
+                        rect.y -= (height - rect.height);
+                    }
+
+                    rect.height = height;
+                } else {
+                    int width = (int) (rect.height * aspectRatio);
+                    if (cursorType == Cursor.NW_RESIZE_CURSOR ||
+                        cursorType == Cursor.SW_RESIZE_CURSOR) {
+                        rect.x -= (width - rect.width);
+                    }
+
+                    rect.width = width;
+                }
+                break;
+            case Cursor.N_RESIZE_CURSOR:
+            case Cursor.S_RESIZE_CURSOR:
+                // adjust width and center horizontally
+                int width = (int) (rect.height * aspectRatio);
+                rect.x -= (width - rect.width) / 2;
+                rect.width = width;
+                break;
+            case Cursor.E_RESIZE_CURSOR:
+            case Cursor.W_RESIZE_CURSOR:
+                // adjust height and center vertically
+                int height = (int) (rect.width / aspectRatio);
+                rect.y -= (height - rect.height) / 2;
+                rect.height = height;
+                break;
+        }
     }
 
     @Override
     public String toString() {
         return "CropBox{ upperLeft=" + upperLeft +
-                ", lowerRight=" + lowerRight +
-                ", rect=" + rect +
-                ", adjusting=" + adjusting +
-                ", transformMode=" + transformMode +
-                ", aspectRatio=" + aspectRatio +
-                '}';
+            ", lowerRight=" + lowerRight +
+            ", rect=" + rect +
+            ", adjusting=" + isAdjusting() +
+            ", transformMode=" + transformMode +
+            ", aspectRatio=" + aspectRatio +
+            '}';
     }
 }
 

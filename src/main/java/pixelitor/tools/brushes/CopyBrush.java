@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,8 +37,8 @@ public abstract class CopyBrush extends DabsBrush {
     // can be set from the develop menu
     private static boolean debugBrushImage = false;
 
-    protected CopyBrush(double radius, CopyBrushType type, SpacingStrategy spacingStrategy) {
-        super(radius, spacingStrategy, NOT_ANGLE_AWARE, true);
+    protected CopyBrush(double radius, CopyBrushType type, Spacing spacing) {
+        super(radius, spacing, NOT_ANGLE_AWARE, true);
         this.type = type;
     }
 
@@ -57,6 +57,10 @@ public abstract class CopyBrush extends DabsBrush {
         type.setSize(diameter);
     }
 
+    public CopyBrushType getType() {
+        return type;
+    }
+
     public void debugImage() {
         if (debugBrushImage) {
             Debug.image(brushImage, "Copy Brush");
@@ -65,10 +69,6 @@ public abstract class CopyBrush extends DabsBrush {
 
     public static void setDebugBrushImage(boolean debugBrushImage) {
         CopyBrush.debugBrushImage = debugBrushImage;
-    }
-
-    public CopyBrushType getType() {
-        return type;
     }
 
     @Override

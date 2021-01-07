@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,18 +27,17 @@ import pixelitor.utils.test.RandomGUITest;
 public class LinearDabsStrategy implements DabsStrategy {
     private final DabsBrush brush;
     private double distFromLastDab = 0;
-    private SpacingStrategy spacingStrategy;
+    private Spacing spacing;
     private AngleSettings angleSettings;
     private final boolean refreshBrushForEachDab;
-
     private PPoint prev;
 
     public LinearDabsStrategy(DabsBrush brush,
-                              SpacingStrategy spacingStrategy,
+                              Spacing spacing,
                               AngleSettings angleSettings,
                               boolean refreshBrushForEachDab) {
         this.brush = brush;
-        this.spacingStrategy = spacingStrategy;
+        this.spacing = spacing;
         this.angleSettings = angleSettings;
         this.refreshBrushForEachDab = refreshBrushForEachDab;
     }
@@ -49,11 +48,11 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         prev = p;
         if (angleSettings.isAngleAware()) {
-            // For angle-aware brushes we don't draw a dab in this
-            // method because we have no angle information.
-            // However, we manipulate the distance from the last dab
-            // so that a dab is drawn soon
-            distFromLastDab = spacingStrategy.getSpacing(brush.getRadius()) * 0.8;
+            // No dab is drawn for the angle-aware brushes in this method,
+            // because there is no angle information yet.
+            // However, the distance from the last dab is set
+            // artificially, so that a dab is drawn soon.
+            distFromLastDab = spacing.getSpacing(brush.getRadius()) * 0.8;
         } else {
             brush.putDab(p, 0);
         }
@@ -67,11 +66,8 @@ public class LinearDabsStrategy implements DabsStrategy {
         double prevY = prev.getImY();
 
         double lineDist = end.imDist(prev);
-
-        double spacing = spacingStrategy.getSpacing(brush.getRadius());
-        assert spacing >= SpacingStrategy.MIN_SPACING;
-
-        double initialRelativeSpacingDist = (spacing - distFromLastDab) / lineDist;
+        double spacingDist = spacing.getSpacing(brush.getRadius());
+        double initialRelativeSpacingDist = (spacingDist - distFromLastDab) / lineDist;
 
         double theta = 0;
         double dx = endX - prevX;
@@ -85,7 +81,7 @@ public class LinearDabsStrategy implements DabsStrategy {
 
         int steps = 0;
 
-        double relativeSpacingDist = spacing / lineDist;
+        double relativeSpacingDist = spacingDist / lineDist;
         for (double t = initialRelativeSpacingDist; t < 1.0; t += relativeSpacingDist) {
             if (steps++ > 1_000 && RandomGUITest.isRunning()) {
                 // crazy big shapes can appear during
@@ -115,7 +111,7 @@ public class LinearDabsStrategy implements DabsStrategy {
             double remainingDx = endX - x;
             double remainingDy = endY - y;
             distFromLastDab = Math.sqrt(remainingDx * remainingDx
-                    + remainingDy * remainingDy);
+                + remainingDy * remainingDy);
         } else {
             distFromLastDab += lineDist;
         }
@@ -127,11 +123,11 @@ public class LinearDabsStrategy implements DabsStrategy {
     public void settingsChanged() {
         DabsBrushSettings settings = brush.getSettings();
         angleSettings = settings.getAngleSettings();
-        spacingStrategy = settings.getSpacingStrategy();
+        spacing = settings.getSpacingStrategy();
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
+    public void rememberPrevious(PPoint previous) {
         prev = previous;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,21 +33,17 @@ import static pixelitor.utils.Rnd.nextGaussian;
 
 public class SprayBrush extends AbstractBrush {
     private static final int DELAY_MILLIS = 50;
+
     private final SprayBrushSettings settings;
-    private Timer timer;
     private double minShapeRadius;
     private double maxShapeRadius;
-    private ShapeType shapeType;
-    private int numSimultaneousPoints;
-    private boolean randomOpacity;
     private double mouseX;
     private double mouseY;
     private double maxRadiusSoFar;
     private boolean isEraser;
-    private final CachedFloatRandom rnd = new CachedFloatRandom();
-
-    private float colorRandomness;
     private Color baseColor;
+    private Timer timer;
+    private final CachedFloatRandom rnd = new CachedFloatRandom();
 
     public SprayBrush(double radius, SprayBrushSettings settings) {
         super(radius);
@@ -63,9 +59,9 @@ public class SprayBrush extends AbstractBrush {
     }
 
     @Override
-    public double getEffectiveRadius() {
-        // The points have a Gaussian distribution, so the actual
-        // radius is theoretically infinite, so we return the maximum observed value
+    public double getMaxEffectiveRadius() {
+        // The points have a Gaussian distribution, the actual radius
+        // is theoretically infinite, so return the maximum observed value
         return maxShapeRadius + maxRadiusSoFar;
     }
 
@@ -77,13 +73,8 @@ public class SprayBrush extends AbstractBrush {
         float radiusVariability = settings.getRadiusVariability();
         minShapeRadius = shapeRadius - radiusVariability * shapeRadius;
         maxShapeRadius = shapeRadius + radiusVariability * shapeRadius;
-        numSimultaneousPoints = settings.getFlow();
 
-        shapeType = settings.getShapeType();
-        randomOpacity = settings.randomOpacity();
         maxRadiusSoFar = Double.MIN_VALUE;
-
-        colorRandomness = settings.getColorRandomness();
 
         timer = new Timer(DELAY_MILLIS, e -> sprayOnce());
         timer.start();
@@ -110,20 +101,25 @@ public class SprayBrush extends AbstractBrush {
         double maxX = Double.MIN_VALUE;
         double maxY = Double.MIN_VALUE;
 
-        for (int i = 0; i < numSimultaneousPoints; i++) {
+        ShapeType shapeType = settings.getShapeType();
+        boolean useRandomOpacity = settings.randomOpacity();
+        float colorRandomness = settings.getColorRandomness();
+        int numSimultaneousShapes = settings.getFlow();
+
+        for (int i = 0; i < numSimultaneousShapes; i++) {
             double dx = nextGaussian() * radius;
             double x = mouseX + dx;
             double dy = nextGaussian() * radius;
             double y = mouseY + dy;
             updateTheMaxRadius(dx, dy);
 
-            if (randomOpacity) {
-                setRandomOpacity();
+            if (useRandomOpacity) {
+                setOpacityRandomly();
             }
 
             if (!isEraser && colorRandomness > 0.0f) {
                 Color randomColor = Rnd.createRandomColor();
-                Color color = Colors.interpolateInRGB(baseColor, randomColor, colorRandomness);
+                Color color = Colors.rgbInterpolate(baseColor, randomColor, colorRandomness);
                 targetG.setColor(color);
             }
 
@@ -154,7 +150,7 @@ public class SprayBrush extends AbstractBrush {
         comp.repaintRegion(area);
     }
 
-    private void setRandomOpacity() {
+    private void setOpacityRandomly() {
         Composite composite;
         float strength = rnd.nextFloat();
         if (isEraser) {

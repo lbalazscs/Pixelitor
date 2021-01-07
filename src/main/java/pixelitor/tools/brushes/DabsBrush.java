@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,31 +24,30 @@ import pixelitor.utils.debug.DebugNode;
  * An abstract superclass for brushes that work by putting down dabs
  */
 public abstract class DabsBrush extends AbstractBrush {
-    private final SpacingStrategy spacingStrategy;
+    private final Spacing spacing;
     protected DabsBrushSettings settings;
     private final DabsStrategy dabsStrategy;
 
-    protected DabsBrush(double radius, SpacingStrategy spacingStrategy,
+    protected DabsBrush(double radius, Spacing spacing,
                         AngleSettings angleSettings, boolean refreshBrushForEachDab) {
         super(radius);
-        this.spacingStrategy = spacingStrategy;
-        settings = new DabsBrushSettings(angleSettings, spacingStrategy);
+        this.spacing = spacing;
+        settings = new DabsBrushSettings(angleSettings, spacing);
         dabsStrategy = new LinearDabsStrategy(this,
-                spacingStrategy,
-                angleSettings,
-                refreshBrushForEachDab);
+            spacing,
+            angleSettings,
+            refreshBrushForEachDab);
         settings.registerBrush(this);
     }
 
-    protected DabsBrush(double radius, DabsBrushSettings settings,
-                        boolean refreshBrushForEachDab) {
+    protected DabsBrush(double radius, DabsBrushSettings settings) {
         super(radius);
         this.settings = settings;
-        spacingStrategy = settings.getSpacingStrategy();
+        spacing = settings.getSpacingStrategy();
         dabsStrategy = new LinearDabsStrategy(this,
-                spacingStrategy,
-                settings.getAngleSettings(),
-                refreshBrushForEachDab);
+            spacing,
+            settings.getAngleSettings(),
+            false);
         settings.registerBrush(this);
     }
 
@@ -89,9 +88,9 @@ public abstract class DabsBrush extends AbstractBrush {
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
-        super.setPrevious(previous);
-        dabsStrategy.setPrevious(previous);
+    public void rememberPrevious(PPoint previous) {
+        super.rememberPrevious(previous);
+        dabsStrategy.rememberPrevious(previous);
     }
 
     @Override
@@ -109,17 +108,15 @@ public abstract class DabsBrush extends AbstractBrush {
         var node = super.getDebugNode();
 
         node.addBoolean("angle aware", settings.isAngleAware());
-
-        AngleSettings angleSettings = settings.getAngleSettings();
-        node.addBoolean("jitter aware", angleSettings.shouldJitterAngle());
-
-        node.addDouble("spacing", spacingStrategy.getSpacing(radius));
+        node.addBoolean("jitter aware",
+            settings.getAngleSettings().shouldJitterAngle());
+        node.addDouble("spacing", spacing.getSpacing(radius));
 
         return node;
     }
 
     @Override
     public double getPreferredSpacing() {
-        return spacingStrategy.getSpacing(radius);
+        return spacing.getSpacing(radius);
     }
 }

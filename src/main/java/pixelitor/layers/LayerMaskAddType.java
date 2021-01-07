@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,7 +65,7 @@ public enum LayerMaskAddType {
         BufferedImage createBWImage(Layer layer, Shape selShape) {
             return createMaskFromLayer(layer, false);
         }
-    }, PATTERN ("Pattern", false) { // only for debugging
+    }, PATTERN("Pattern", false) { // only for debugging
 
         @Override
         BufferedImage createBWImage(Layer layer, Shape selShape) {
@@ -78,9 +78,8 @@ public enum LayerMaskAddType {
             float cy = height / 2.0f;
             float radius = Math.min(cx, cy);
             float[] fractions = {0.5f, 1.0f};
-            Paint gradient = new RadialGradientPaint(cx, cy, radius, fractions, new Color[]{
-                    Color.WHITE, Color.BLACK
-            });
+            Paint gradient = new RadialGradientPaint(cx, cy, radius, fractions,
+                new Color[]{Color.WHITE, Color.BLACK});
             g.setPaint(gradient);
             g.fillRect(0, 0, width, height);
             g.dispose();
@@ -125,7 +124,7 @@ public enum LayerMaskAddType {
         } else if (layer instanceof TextLayer) {
             TextLayer textLayer = (TextLayer) layer;
             // the rasterized image is canvas-sized
-            BufferedImage rasterizedImage = textLayer.createRasterizedImage();
+            BufferedImage rasterizedImage = textLayer.createRasterizedImage(true);
             return createMaskFromImage(rasterizedImage, onlyTransparency);
         } else {
             // there is nothing better
@@ -137,7 +136,7 @@ public enum LayerMaskAddType {
     private static BufferedImage createMaskFromImage(BufferedImage image,
                                                      boolean onlyTransparency) {
         BufferedImage bwImage = new BufferedImage(
-                image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
+            image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
         Graphics2D g = bwImage.createGraphics();
 
         // fill the background with white so that transparent parts become white

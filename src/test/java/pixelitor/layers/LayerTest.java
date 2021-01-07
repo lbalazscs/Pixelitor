@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,8 @@ import pixelitor.layers.LayerMaskActions.EnableDisableMaskAction;
 import pixelitor.layers.LayerMaskActions.LinkUnlinkMaskAction;
 import pixelitor.testutils.WithMask;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -97,7 +98,7 @@ public class LayerTest {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, 0, 0);
 
         comp.setActiveLayer(layer, true, null);
 
@@ -136,14 +137,14 @@ public class LayerTest {
 
     private void checkLayerIsShown() {
         assertThat(layer)
-                .isVisible()
-                .uiIsVisible();
+            .isVisible()
+            .uiIsVisible();
     }
 
     private void checkLayerIsHidden() {
         assertThat(layer)
-                .isNotVisible()
-                .uiIsNotVisible();
+            .isNotVisible()
+            .uiIsNotVisible();
     }
 
     @Test
@@ -167,9 +168,9 @@ public class LayerTest {
     private void checkCopy(Layer copy, String expectedName) {
         copy.createUI();
         assertThat(copy)
-                .nameIs(expectedName)
-                .classIs(layer.getClass())
-                .uiIsVisible();
+            .nameIs(expectedName)
+            .classIs(layer.getClass())
+            .uiIsVisible();
 
         assertEquals(copy.hasMask(), withMask.isTrue());
     }
@@ -286,7 +287,7 @@ public class LayerTest {
                 History.assertNumEditsIs(1);
 
                 String expectedEditName = addType.needsSelection() ?
-                        "Layer Mask from Selection" : "Add Layer Mask";
+                    "Layer Mask from Selection" : "Add Layer Mask";
                 History.undo(expectedEditName);
                 assertThat(layer).hasNoMask();
 
@@ -314,11 +315,11 @@ public class LayerTest {
 
             History.undo("Delete Layer Mask");
             assertThat(layer).hasMask();
-            iconUpdates.check(0, 1);
+            iconUpdates.check(0, 0);
 
             History.redo("Delete Layer Mask");
             assertThat(layer).hasNoMask();
-            iconUpdates.check(0, 1);
+            iconUpdates.check(0, 0);
         }
     }
 

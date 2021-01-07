@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,12 +17,12 @@
 
 package pixelitor.io;
 
-import pixelitor.utils.*;
+import pixelitor.utils.Messages;
+import pixelitor.utils.ProgressTracker;
+import pixelitor.utils.StatusBarProgressTracker;
+import pixelitor.utils.SubtaskProgressTracker;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
@@ -30,9 +30,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-
-import static javax.imageio.ImageWriteParam.*;
 
 /**
  * Utility class with static methods related to writing JPEG images
@@ -49,6 +46,16 @@ public final class JpegOutput {
         var tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
         writeJPGtoStream(image, ios, config, tracker);
     }
+
+//    public static void writePNG(BufferedImage image, File file) throws IOException {
+//        ImageOutputStream ios = ImageIO.createImageOutputStream(file);
+//        if (ios == null) {
+//            TrackedIO.throwNoIOSErrorFor(file);
+//        }
+//        var tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
+//        TrackedIO.writeDetailedToStream(image, ios, tracker, "png",
+//            false, 0.0f);
+//    }
 
     public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegInfo config, ProgressTracker pt) {
         var bos = new ByteArrayOutputStream(32768);
@@ -81,36 +88,11 @@ public final class JpegOutput {
     }
 
     private static void writeJPGtoStream(BufferedImage image,
-                                         ImageInputStream ios,
+                                         ImageOutputStream ios,
                                          JpegInfo config,
                                          ProgressTracker tracker) throws IOException {
-        Iterator<ImageWriter> jpgWriters = ImageIO.getImageWritersByFormatName("jpg");
-        if (!jpgWriters.hasNext()) {
-            throw new IllegalStateException("No JPG writers found");
-        }
-        ImageWriter writer = jpgWriters.next();
-
-        ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
-
-        if (config.isProgressive()) {
-            imageWriteParam.setProgressiveMode(MODE_DEFAULT);
-        } else {
-            imageWriteParam.setProgressiveMode(MODE_DISABLED);
-        }
-
-        imageWriteParam.setCompressionMode(MODE_EXPLICIT);
-        imageWriteParam.setCompressionQuality(config.getQuality());
-
-        IIOImage iioImage = new IIOImage(image, null, null);
-
-        writer.setOutput(ios);
-        if (tracker != null) {
-            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
-        }
-        writer.write(null, iioImage, imageWriteParam);
-
-        ios.flush();
-        ios.close();
+        TrackedIO.writeDetailedToStream(image, ios, tracker, "jpg",
+            config.isProgressive(), config.getQuality());
     }
 
     static class ImageWithSize {

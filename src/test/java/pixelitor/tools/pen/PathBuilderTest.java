@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -36,7 +36,7 @@ import static pixelitor.tools.pen.PenToolMode.BUILD;
 
 @DisplayName("Pen Tool/PathBuilder tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class PathBuilderTest {
+class PathBuilderTest {
     private View view;
     private Graphics2D g;
     private PathBuilder pb;

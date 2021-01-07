@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,7 +56,10 @@ import pixelitor.io.IO;
 import pixelitor.io.OptimizedJpegSavePanel;
 import pixelitor.layers.*;
 import pixelitor.menus.edit.*;
-import pixelitor.menus.file.*;
+import pixelitor.menus.file.LayerAnimExport;
+import pixelitor.menus.file.MetaDataPanel;
+import pixelitor.menus.file.RecentFilesMenu;
+import pixelitor.menus.file.ScreenCaptureAction;
 import pixelitor.menus.help.AboutDialog;
 import pixelitor.menus.help.UpdatesCheck;
 import pixelitor.menus.view.*;
@@ -69,7 +72,9 @@ import pixelitor.utils.test.RandomGUITest;
 import pixelitor.utils.test.SplashImageCreator;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.GraphicsConfiguration;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
@@ -95,7 +100,6 @@ import static pixelitor.utils.Utils.getJavaMainVersion;
  * The menu bar of the app
  */
 public class MenuBar extends JMenuBar {
-
     public MenuBar(PixelitorWindow pw) {
         ResourceBundle texts = Texts.getResources();
 
@@ -157,13 +161,6 @@ public class MenuBar extends JMenuBar {
             public void onClick() {
                 BufferedImage image = getActiveCompositeImage();
                 OptimizedJpegSavePanel.showInDialog(image);
-            }
-        });
-
-        fileMenu.addAction(new MenuAction(texts.getString("export_open_raster") + "...") {
-            @Override
-            public void onClick() {
-                OpenRasterExportPanel.showInDialog();
             }
         });
 
@@ -234,7 +231,6 @@ public class MenuBar extends JMenuBar {
     private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle texts) {
         PMenu automateMenu = new PMenu(texts.getString("automate"));
 
-//        automateMenu.add(new MenuAction("Batch Resize...") {
         automateMenu.add(new MenuAction(texts.getString("batch_resize") + "...") {
             @Override
             public void onClick() {
@@ -249,8 +245,6 @@ public class MenuBar extends JMenuBar {
             }
         }).add();
 
-        // formats other than PNG are not supported in order
-        // to avoid problems with translucency
         automateMenu.addAction(new MenuAction(texts.getString("export_layers_to_png") + "...") {
             @Override
             public void onClick() {
@@ -753,7 +747,7 @@ public class MenuBar extends JMenuBar {
         }, F3);
 
         filterMenu.buildAction(RepeatLast.INSTANCE)
-            .enableIf(CAN_REPEAT)
+            .enableIf(ACTION_ENABLED)
             .withKey(CTRL_F)
             .add();
 
@@ -958,7 +952,6 @@ public class MenuBar extends JMenuBar {
 
         return sub;
     }
-
 
     private static JMenu createFindEdgesSubmenu(ResourceBundle texts) {
         PMenu sub = new PMenu(texts.getString("find_edges"));

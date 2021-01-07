@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public enum CopySource {
                 //   in other formats as well (as a string, as a serialized object)
                 //   and pasting into Pixelitor should choose the serialized object
                 //   There could be also an internal clipboard, to handle such cases
-                canvasSizedImage = ((TextLayer) layer).createRasterizedImage();
+                canvasSizedImage = ((TextLayer) layer).createRasterizedImage(true);
             }
 
             if (canvasSizedImage == null) {
@@ -85,7 +85,7 @@ public enum CopySource {
     };
 
     private static Result<BufferedImage, String> createImageWithSelectedPixels(
-            BufferedImage canvasSizedImage, Composition comp) {
+        BufferedImage canvasSizedImage, Composition comp) {
         if (!comp.hasSelection()) {
             return Result.ok(canvasSizedImage);
         }
@@ -104,9 +104,9 @@ public enum CopySource {
         Rectangle selBounds = selectionShape.getBounds();
 
         BufferedImage tmpImg = ImageUtils.createSysCompatibleImage(
-                selBounds.width, selBounds.height);
+            selBounds.width, selBounds.height);
         Graphics2D g2 = ImageUtils.setupForSoftSelection(
-                tmpImg, selection.getShape(), selBounds.x, selBounds.y);
+            tmpImg, selection.getShape(), selBounds.x, selBounds.y);
 
         g2.drawImage(canvasSizedImage, -selBounds.x, -selBounds.y, null);
         g2.dispose();
@@ -118,8 +118,8 @@ public enum CopySource {
                                                                        Rectangle selBounds) {
         // just to be sure that the bounds are inside the canvas
         selBounds = SwingUtilities.computeIntersection(
-                0, 0, canvas.getWidth(), canvas.getHeight(),
-                selBounds
+            0, 0, canvas.getWidth(), canvas.getHeight(),
+            selBounds
         );
         if (selBounds.isEmpty()) {
             return Result.error("the selection is outside the image");

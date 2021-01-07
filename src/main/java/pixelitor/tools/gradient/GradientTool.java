@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,13 +53,13 @@ import static pixelitor.tools.util.DraggablePoint.activePoint;
 public class GradientTool extends DragTool {
     private GradientHandles handles;
 
-    private static final String NO_CYCLE_AS_STRING = "No Cycle";
-    private static final String REFLECT_AS_STRING = "Reflect";
-    private static final String REPEAT_AS_STRING = "Repeat";
+    private static final String CYCLE_NONE = "No Cycle";
+    private static final String CYCLE_REFLECT = "Reflect";
+    private static final String CYCLE_REPEAT = "Repeat";
     public static final String[] CYCLE_METHODS = {
-            NO_CYCLE_AS_STRING,
-            REFLECT_AS_STRING,
-            REPEAT_AS_STRING};
+        CYCLE_NONE,
+        CYCLE_REFLECT,
+        CYCLE_REPEAT};
 
     private JComboBox<GradientColorType> colorTypeCB;
     private JComboBox<GradientType> typeCB;
@@ -72,11 +72,11 @@ public class GradientTool extends DragTool {
 
     public GradientTool() {
         super("Gradient", 'G', "gradient_tool_icon.png",
-                "<b>click</b> and <b>drag</b> to draw a gradient, " +
-                        "<b>Shift-drag</b> to constrain the direction. " +
-                        "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
-                Cursors.DEFAULT, true, true,
-                true, ClipStrategy.FULL);
+            "<b>click</b> and <b>drag</b> to draw a gradient, " +
+                "<b>Shift-drag</b> to constrain the direction. " +
+                "Press <b>Esc</b> or <b>click</b> outside to hide the handles.",
+            Cursors.DEFAULT, true, true,
+            true, ClipStrategy.FULL);
         spaceDragStartPoint = true;
     }
 
@@ -214,7 +214,7 @@ public class GradientTool extends DragTool {
         ImDrag imDrag;
         if (activePoint != null) { // a handle was dragged
             assert handles != null;
-            
+
             double x = e.getCoX();
             double y = e.getCoY();
             activePoint.mouseReleased(x, y, e.isShiftDown());
@@ -231,8 +231,8 @@ public class GradientTool extends DragTool {
         } else { // the initial drag just ended
             imDrag = userDrag.toImDrag();
             handles = new GradientHandles(
-                    userDrag.getCoStartX(), userDrag.getCoStartY(),
-                    userDrag.getCoEndX(), userDrag.getCoEndY(), e.getView());
+                userDrag.getCoStartX(), userDrag.getCoStartY(),
+                userDrag.getCoEndX(), userDrag.getCoEndY(), e.getView());
         }
 
         var comp = e.getComp();
@@ -247,9 +247,7 @@ public class GradientTool extends DragTool {
             // handle under the mouse
             return;
         }
-        int x = e.getX();
-        int y = e.getY();
-        DraggablePoint handle = handles.handleWasHit(x, y);
+        DraggablePoint handle = handles.handleWasHit(e.getX(), e.getY());
         if (handle != null) {
             handle.setActive(true);
             view.repaint();
@@ -281,9 +279,9 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         if (handles != null) {
-            handles.imCoordsChanged(at);
+            handles.imCoordsChanged(at, comp);
         }
     }
 
@@ -338,9 +336,12 @@ public class GradientTool extends DragTool {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (handles != null) {
-            handles.arrowKeyPressed(key);
+            View view = OpenImages.getActiveView();
+            assert view != null;
 
-            var comp = OpenImages.getActiveComp();
+            handles.arrowKeyPressed(key, view);
+
+            var comp = view.getComp();
             Drawable dr = comp.getActiveDrawable();
             if (dr == null) {
                 // It shouldn't be possible to have handles without drawable,
@@ -349,10 +350,10 @@ public class GradientTool extends DragTool {
                 return false;
             }
 
-            ImDrag imDrag = handles.toImDrag(comp.getView());
+            ImDrag imDrag = handles.toImDrag(view);
             String editName = key.isShiftDown()
-                    ? "Shift-nudge Gradient"
-                    : "Nudge Gradient";
+                ? "Shift-nudge Gradient"
+                : "Nudge Gradient";
             drawGradient(dr, imDrag, true, editName);
 
             return true;
@@ -375,10 +376,10 @@ public class GradientTool extends DragTool {
 
     private void drawGradient(Drawable dr, ImDrag imDrag, boolean addToHistory, String editName) {
         Gradient gradient = new Gradient(imDrag,
-                getType(), getCycleType(), getGradientColorType(),
-                revertCB.isSelected(),
-                blendingModePanel.getBlendingMode(),
-                blendingModePanel.getOpacity());
+            getType(), getCycleType(), getGradientColorType(),
+            revertCB.isSelected(),
+            blendingModePanel.getBlendingMode(),
+            blendingModePanel.getOpacity());
 
         if (addToHistory) {
             boolean isFirst = lastGradient == null;
@@ -395,10 +396,9 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp,
-                               AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Composition comp) {
         // the superclass draws the drag display
-        super.paintOverImage(g2, comp, imageTransform);
+        super.paintOverImage(g2, comp);
 
         if (handles != null) {
             handles.paint(g2);
@@ -422,22 +422,19 @@ public class GradientTool extends DragTool {
     }
 
     private static CycleMethod getCycleMethodFromString(String s) {
-        switch (s) {
-            case NO_CYCLE_AS_STRING:
-                return NO_CYCLE;
-            case REFLECT_AS_STRING:
-                return REFLECT;
-            case REPEAT_AS_STRING:
-                return REPEAT;
-        }
-        throw new IllegalStateException("should not get here");
+        return switch (s) {
+            case CYCLE_NONE -> NO_CYCLE;
+            case CYCLE_REFLECT -> REFLECT;
+            case CYCLE_REPEAT -> REPEAT;
+            default -> throw new IllegalStateException("should not get here");
+        };
     }
 
     private static String cycleMethodAsString(CycleMethod cm) {
         return switch (cm) {
-            case NO_CYCLE -> NO_CYCLE_AS_STRING;
-            case REFLECT -> REFLECT_AS_STRING;
-            case REPEAT -> REPEAT_AS_STRING;
+            case NO_CYCLE -> CYCLE_NONE;
+            case REFLECT -> CYCLE_REFLECT;
+            case REPEAT -> CYCLE_REPEAT;
         };
     }
 
@@ -446,7 +443,7 @@ public class GradientTool extends DragTool {
         super.toolStarted();
 
         Layer activeLayer = OpenImages.getActiveLayer();
-        if(activeLayer != null) {
+        if (activeLayer != null) {
             setupMaskEditing(activeLayer.isMaskEditing());
         }
     }
@@ -474,8 +471,7 @@ public class GradientTool extends DragTool {
 
         colorTypeCB.setSelectedItem(gradient.getColorType());
         typeCB.setSelectedItem(gradient.getType());
-        cycleMethodCB.setSelectedItem(
-                cycleMethodAsString(gradient.getCycleMethod()));
+        cycleMethodCB.setSelectedItem(cycleMethodAsString(gradient.getCycleMethod()));
         revertCB.setSelected(gradient.isReverted());
         blendingModePanel.setBlendingMode(gradient.getBlendingMode());
         blendingModePanel.setOpacity(gradient.getOpacity());
@@ -502,7 +498,7 @@ public class GradientTool extends DragTool {
         node.addBoolean("revert", revertCB.isSelected());
         node.addFloat("opacity", blendingModePanel.getOpacity());
         node.addQuotedString("blending mode",
-                blendingModePanel.getBlendingMode().toString());
+            blendingModePanel.getBlendingMode().toString());
 
         return node;
     }

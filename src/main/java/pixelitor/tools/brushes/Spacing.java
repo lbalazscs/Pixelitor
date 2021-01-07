@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,7 @@ package pixelitor.tools.brushes;
  * Determines the spacing distance between dabs.
  * Used by the {@link DabsStrategy} implementations.
  */
-public interface SpacingStrategy {
+public interface Spacing {
     double MIN_SPACING = 1.0;
 
     double getSpacing(double radius);

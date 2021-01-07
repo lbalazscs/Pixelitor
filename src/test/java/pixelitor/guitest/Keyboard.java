@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -43,7 +43,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Keyboard input for AssertJ-Swing based tests
  */
 public class Keyboard {
-    // on some Linux environments it can happen that robot key events are
+    // on some Linux environments robot key events could be
     // generated multiple times
     private static final boolean osLevelKeyEvents = !JVM.isLinux;
 
@@ -67,9 +67,6 @@ public class Keyboard {
             // press Ctrl-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_Z)
                 .releaseKey(VK_Z).releaseKey(VK_CONTROL);
-
-//        KeyPressInfo info = KeyPressInfo.keyCode(VK_Z).modifiers(ctrlOrCommand);
-//        pw.pressAndReleaseKey(info);
         } else {
             Utils.sleep(ROBOT_DELAY_DEFAULT, MILLISECONDS);
             EDT.undo(edit);
@@ -95,9 +92,6 @@ public class Keyboard {
             // press Ctrl-Shift-Z
             pw.pressKey(VK_CONTROL).pressKey(VK_SHIFT).pressKey(VK_Z)
                 .releaseKey(VK_Z).releaseKey(VK_SHIFT).releaseKey(VK_CONTROL);
-
-//        KeyPressInfo info = KeyPressInfo.keyCode(VK_Z).modifiers(VK_CONTROL, VK_SHIFT);
-//        pw.pressAndReleaseKey(info);
         } else {
             Utils.sleep(ROBOT_DELAY_DEFAULT, MILLISECONDS);
             EDT.redo(edit);
@@ -187,7 +181,7 @@ public class Keyboard {
                 pw.pressKey(VK_SHIFT).pressKey(keyCode)
                     .releaseKey(keyCode).releaseKey(VK_SHIFT);
             } else {
-                pw.pressKey(VK_RIGHT).releaseKey(VK_RIGHT);
+                pw.pressKey(keyCode).releaseKey(keyCode);
             }
         } else {
             if (key.isShiftDown()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -75,8 +75,8 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public void setPrevious(PPoint previous) {
-        delegate.setPrevious(previous);
+    public void rememberPrevious(PPoint previous) {
+        delegate.rememberPrevious(previous);
     }
 
     @Override
@@ -95,8 +95,8 @@ public abstract class BrushDecorator implements Brush {
     }
 
     @Override
-    public double getEffectiveRadius() {
-        return delegate.getEffectiveRadius();
+    public double getMaxEffectiveRadius() {
+        return delegate.getMaxEffectiveRadius();
     }
 
     @Override

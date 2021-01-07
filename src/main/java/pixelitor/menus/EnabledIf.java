@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,11 +29,6 @@ enum EnabledIf {
         @Override
         public JMenuItem createMenuItem(Action a) {
             return new OpenImageAwareMenuItem(a);
-        }
-    }, CAN_REPEAT {
-        @Override
-        public JMenuItem createMenuItem(Action a) {
-            return new RepeatMenuItem(a);
         }
     }, UNDO_POSSIBLE {
         @Override

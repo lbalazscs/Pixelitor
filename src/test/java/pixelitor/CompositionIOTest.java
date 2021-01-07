@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -34,7 +34,9 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Composition I/O tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class CompositionIOTest {
+class CompositionIOTest {
+    private static final String TEST_IMAGES_DIR = "src/test/resources/";
+
     @BeforeAll
     static void beforeAllTests() {
         TestHelper.setUnitTestingMode();
@@ -42,36 +44,32 @@ public class CompositionIOTest {
 
     @Test
     void readJPEG() {
-        File f = new File("src/test/resources/jpeg_test_input.jpg");
-        checkSingleLayerRead(f);
+        checkSingleLayerRead("jpeg_test_input.jpg");
     }
 
     @Test
     void readPNG() {
-        File f = new File("src/test/resources/png_test_input.png");
-        checkSingleLayerRead(f);
+        checkSingleLayerRead("png_test_input.png");
     }
 
     @Test
     void readBMP() {
-        File f = new File("src/test/resources/bmp_test_input.bmp");
-        checkSingleLayerRead(f);
+        checkSingleLayerRead("bmp_test_input.bmp");
     }
 
     @Test
     void readGIF() {
-        File f = new File("src/test/resources/gif_test_input.gif");
-        checkSingleLayerRead(f);
+        checkSingleLayerRead("gif_test_input.gif");
     }
 
     @Test
     void readWritePXC() {
         // read and test
         String[] fileNames = {
-            "src/test/resources/pxc_test_input.pxc",
-            "src/test/resources/pxc_file_w_layer_mask.pxc",
-            "src/test/resources/pxc_file_w_text_layer.pxc",
-            "src/test/resources/pxc_file_w_adj_layer.pxc",
+            "pxc_test_input.pxc",
+            "pxc_file_w_layer_mask.pxc",
+            "pxc_file_w_text_layer.pxc",
+            "pxc_file_w_adj_layer.pxc",
         };
 
         List<Consumer<Layer>> extraChecks = new ArrayList<>();
@@ -100,9 +98,8 @@ public class CompositionIOTest {
             .hasNoMask());
 
         for (int i = 0; i < fileNames.length; i++) {
-            String fileName = fileNames[i];
             try {
-                File f = new File(fileName);
+                File f = new File(TEST_IMAGES_DIR, fileNames[i]);
                 var comp = checkMultiLayerRead(f, extraChecks.get(i));
 
                 // write to tmp file
@@ -117,7 +114,7 @@ public class CompositionIOTest {
                     throw new IllegalStateException("could not delete " + tmp.getAbsolutePath());
                 }
             } catch (Exception e) {
-                throw new IllegalStateException("Error while testing " + fileName, e);
+                throw new IllegalStateException("Error while testing " + fileNames[i], e);
             }
         }
     }
@@ -131,11 +128,11 @@ public class CompositionIOTest {
                 .opacityIs(0.75f);
 
         // read and test
-        File f = new File("src/test/resources/gimp_ora_test_input.ora");
+        File f = new File(TEST_IMAGES_DIR, "gimp_ora_test_input.ora");
         var comp = checkMultiLayerRead(f, extraCheck);
 
         File tmp = File.createTempFile("pix_tmp", ".ora");
-        OpenRaster.write(comp, tmp, true);
+        OpenRaster.write(comp, tmp);
 
         // read back and test
         checkMultiLayerRead(tmp, extraCheck);
@@ -143,7 +140,8 @@ public class CompositionIOTest {
         tmp.delete();
     }
 
-    private static void checkSingleLayerRead(File f) {
+    private static void checkSingleLayerRead(String fileName) {
+        File f = new File(TEST_IMAGES_DIR, fileName);
         var future = IO.loadCompAsync(f);
 
         var comp = future.join();

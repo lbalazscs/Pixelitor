@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,8 +48,8 @@ public class TextLayerTest {
     @Parameters(name = "{index}: mask = {0}")
     public static Collection<Object[]> instancesToTest() {
         return Arrays.asList(new Object[][]{
-                {WithMask.NO},
-                {WithMask.YES},
+            {WithMask.NO},
+            {WithMask.YES},
         });
     }
 
@@ -71,7 +71,7 @@ public class TextLayerTest {
             mask = layer.getMask();
         }
 
-        iconUpdates = new IconUpdateChecker(layer, mask, 0, 1);
+        iconUpdates = new IconUpdateChecker(layer, mask, 0, 0);
 
         assert layer.getComp().checkInvariant();
         History.clear();
@@ -79,27 +79,48 @@ public class TextLayerTest {
 
     @Test
     public void replaceWithRasterized() {
-        assertThat(comp)
-                .numLayersIs(1)
-                .typeOfLayerNIs(0, TextLayer.class);
+        checkBeforeRasterizationState();
 
         layer.replaceWithRasterized();
-        assertThat(comp)
-                .numLayersIs(1)
-                .typeOfLayerNIs(0, ImageLayer.class);
+        checkAfterRasterizationState();
         History.assertNumEditsIs(1);
 
         History.undo("Rasterize Text Layer");
-        assertThat(comp)
-                .numLayersIs(1)
-                .typeOfLayerNIs(0, TextLayer.class);
+        checkBeforeRasterizationState();
 
         History.redo("Rasterize Text Layer");
-        assertThat(comp)
-                .numLayersIs(1)
-                .typeOfLayerNIs(0, ImageLayer.class);
+        checkAfterRasterizationState();
 
+        // the layer icon is updated when rasterizing, but not
+        // through an external updateLayerIconImageAsync call
         iconUpdates.check(0, 0);
+    }
+
+    private void checkBeforeRasterizationState() {
+        assertThat(comp)
+            .numLayersIs(1)
+            .typeOfLayerNIs(0, TextLayer.class);
+        assertThat(layer).hasUI();
+        if (withMask.isTrue()) {
+            assertThat(layer).hasMask();
+            assertThat(layer.getMask()).hasUI();
+        }
+    }
+
+    private void checkAfterRasterizationState() {
+        assertThat(comp)
+            .numLayersIs(1)
+            .typeOfLayerNIs(0, ImageLayer.class);
+        assertThat(layer)
+            .hasNoUI()
+            .hasNoMask();
+        if (withMask.isTrue()) {
+            ImageLayer raster = (ImageLayer) comp.getActiveLayer();
+            assertThat(raster)
+                .hasMask()
+                .hasUI();
+            assertThat(raster.getMask()).hasUI();
+        }
     }
 
     @Test
@@ -130,19 +151,19 @@ public class TextLayerTest {
         layer.commitSettings(oldSettings);
 
         assertThat(layer)
-                .textIs(newText)
-                .nameIs(newText);
+            .textIs(newText)
+            .nameIs(newText);
         History.assertNumEditsIs(1);
 
         History.undo("Edit Text Layer");
         assertThat(layer)
-                .textIs(oldText)
-                .nameIs(oldText);
+            .textIs(oldText)
+            .nameIs(oldText);
 
         History.redo("Edit Text Layer");
         assertThat(layer)
-                .textIs(newText)
-                .nameIs(newText);
+            .textIs(newText)
+            .nameIs(newText);
 
         iconUpdates.check(0, 0);
     }

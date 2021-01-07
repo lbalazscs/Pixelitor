@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -56,20 +56,18 @@ import static pixelitor.utils.Threads.threadInfo;
  * The GUI component that shows a {@link Composition} inside a {@link ViewContainer}.
  */
 public class View extends JComponent implements MouseListener, MouseMotionListener {
-    private double scaling = 1.0f;
+    private Composition comp;
     private Canvas canvas;
     private ZoomLevel zoomLevel = ZoomLevel.Z100;
+    private double scaling = 1.0f;
 
     private ViewContainer viewContainer = null;
+    private LayersPanel layersPanel;
+    private MaskViewMode maskViewMode;
+    private Navigator navigator;
 
     private static final CheckerboardPainter checkerBoardPainter
         = ImageUtils.createCheckerboardPainter();
-
-    private LayersPanel layersPanel;
-
-    private Composition comp;
-
-    private MaskViewMode maskViewMode;
 
     // The start coordinates of the canvas in component space,
     // (bigger than zero if the CompositionView is bigger
@@ -79,8 +77,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     private final Lazy<AffineTransform> imToCo = Lazy.of(this::createImToCoTransform);
     private final Lazy<AffineTransform> coToIm = Lazy.of(this::createCoToImTransform);
-
-    private Navigator navigator;
 
     private static boolean showPixelGrid = false;
 
@@ -116,8 +112,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             SelectionActions.setEnabled(false, newComp);
         }
 
-        String msg = format(
-            "The image <b>%s</b> was reloaded from the file <b>%s</b>.",
+        String msg = format("The image <b>%s</b> was reloaded from the file <b>%s</b>.",
             newComp.getName(), newComp.getFile().getAbsolutePath());
         Messages.showInStatusBar(msg);
     }
@@ -347,11 +342,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         Tool currentTool = Tools.getCurrent();
         // possibly allow a larger clip for the selections and tools
-        currentTool.setClipFor(g2, this);
+        currentTool.setClip(g2, this, originalClip);
 
         comp.paintSelection(g2);
-
-        AffineTransform imageTransform = g2.getTransform();
 
         // restore the original transform
         g2.setTransform(componentTransform);
@@ -361,7 +354,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         comp.drawGuides(g2);
 
         if (isActive()) {
-            currentTool.paintOverImage(g2, comp, imageTransform);
+            currentTool.paintOverImage(g2, comp);
         }
 
         g2.setClip(canvasClip);
@@ -541,6 +534,14 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
     public Canvas getCanvas() {
         return canvas;
+    }
+
+    public double getCanvasStartX() {
+        return canvasStartX;
+    }
+
+    public double getCanvasStartY() {
+        return canvasStartY;
     }
 
     public void setZoom(AutoZoom autoZoom) {
@@ -774,7 +775,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             // otherwise loading multi-layer files makes the comp dirty
             layerButton.setUserInteraction(false);
             layersPanel.addLayerButton(layerButton, newLayerIndex);
-            layerButton.updateBorders();
+            layerButton.updateSelectionState();
         } finally {
             layerButton.setUserInteraction(true);
         }

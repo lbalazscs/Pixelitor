@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,6 @@ import pixelitor.OpenImages;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.gui.utils.GridBagHelper;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -32,14 +31,13 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static pixelitor.utils.Texts.i18n;
 
 /**
  * The {@link Action} for creating a screen capture.
  */
 public class ScreenCaptureAction extends AbstractAction {
-    public static final String SCREEN_CAPTURE_STRING = i18n("screen_capture");
+    private static final String SCREEN_CAPTURE_STRING = i18n("screen_capture");
     private JCheckBox hidePixelitorCB;
     private static int captureCount = 1;
 
@@ -70,24 +68,28 @@ public class ScreenCaptureAction extends AbstractAction {
 
     private void capture() {
         try {
-            boolean hide = hidePixelitor();
-            if (hide) {
-                hideApp();
-            }
-
-            BufferedImage screenCapture = createCapturedImage();
-
-            if (hide) {
-                unHideApp();
-            }
-
-            addAsNewComp(screenCapture);
+            tryToCapture();
         } catch (Exception ex) {
             Messages.showException(ex);
         }
     }
 
-    private static BufferedImage createCapturedImage() throws AWTException {
+    private void tryToCapture() throws AWTException {
+        boolean hide = shouldHidePixelitor();
+        if (hide) {
+            hideApp();
+        }
+
+        BufferedImage screenShot = captureScreenShot();
+
+        if (hide) {
+            unHideApp();
+        }
+
+        addAsNewComp(screenShot);
+    }
+
+    private static BufferedImage captureScreenShot() throws AWTException {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return new Robot().createScreenCapture(new Rectangle(screenSize));
     }
@@ -101,19 +103,11 @@ public class ScreenCaptureAction extends AbstractAction {
         PixelitorWindow.get().deiconify();
     }
 
-    private boolean hidePixelitor() {
+    private boolean shouldHidePixelitor() {
         return hidePixelitorCB.isSelected();
     }
 
     private static void addAsNewComp(BufferedImage screenCapture) {
-        // necessary even though Composition.fromImage later calls
-        // toSysCompatibleImage, because without this, the image will
-        // be RGB, with no support for transparency
-        int type = screenCapture.getType();
-        if (type != TYPE_INT_ARGB) {
-            screenCapture = ImageUtils.convertToARGB(screenCapture, true);
-        }
-
         String name = "Screen Capture " + captureCount++;
         var comp = Composition.fromImage(screenCapture, null, name);
         comp.setDirty(true);

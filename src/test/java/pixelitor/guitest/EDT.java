@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -208,6 +208,13 @@ public class EDT {
      */
     public static <T> T activeLayer(Function<Layer, T> fun) {
         return call(() -> fun.apply(OpenImages.getActiveLayer()));
+    }
+
+    public static void assertActiveLayerTypeIs(Class expected) {
+        Class actual = activeLayer((Function<Layer, Class>) Layer::getClass);
+        if (expected != actual) {
+            throw new AssertionError("expected " + expected + ", found " + actual);
+        }
     }
 
     public static String activeLayerName() {

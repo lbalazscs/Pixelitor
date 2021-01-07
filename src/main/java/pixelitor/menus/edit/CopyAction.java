@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,9 +20,9 @@ package pixelitor.menus.edit;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Result;
-import pixelitor.utils.debug.DebugNodes;
 
 import javax.swing.*;
 import java.awt.Toolkit;
@@ -30,7 +30,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.RasterFormatException;
 
 import static pixelitor.utils.Texts.i18n;
 
@@ -63,25 +62,14 @@ public class CopyAction extends AbstractAction {
             return;
         }
         BufferedImage activeImage = result.get();
-        Transferable imageTransferable = new ImageTransferable(activeImage);
+        // make a copy, because otherwise changing the image
+        // will also change the clipboard contents
+        BufferedImage copy = ImageUtils.copySubImage(activeImage);
+        Transferable imageTransferable = new ImageTransferable(copy);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
-        try {
-            // Sun Jan 04 08:00:30 CET 2015, RandomGUITest:
-            // java.awt.image.RasterFormatException: Incorrect scanline stride: 12
-            // at sun.awt.image.ByteComponentRaster.verify(ByteComponentRaster.java:894)
-            // at sun.awt.image.ByteComponentRaster.<init>(ByteComponentRaster.java:201)
-            // https://bugs.openjdk.java.net/browse/JDK-8041558
-
-            // TODO A different issue in September 2018: OpenJDK 11 prints an
-            // exception stack trace here, but the image copied.
-            clipboard.setContents(imageTransferable, null);
-        } catch (RasterFormatException rfe) {
-            rfe.printStackTrace();
-            var node = DebugNodes.createBufferedImageNode("active image", activeImage);
-            String s = node.toDetailedString();
-            System.out.println("CopyAction: RasterFormatException in actionPerformed: " + s);
-        }
+        // TODO JDK bug? a stack trace is printed, but the image is copied.
+        clipboard.setContents(imageTransferable, null);
     }
 }
 

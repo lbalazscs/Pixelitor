@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,7 +41,6 @@ import pixelitor.tools.shapes.history.CreateBoxedShapeEdit;
 import pixelitor.tools.transform.TransformBox;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DragDisplayType;
-import pixelitor.tools.util.ImDrag;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Lazy;
@@ -107,7 +106,7 @@ public class ShapesTool extends DragTool {
     private final JComboBox<TwoPointPaintType> strokePaintCombo
         = createStrokePaintCombo();
 
-    private JButton strokeSettingsButton;
+    private Action strokeSettingsAction;
     private JDialog strokeSettingsDialog;
 
     private JDialog effectsDialog;
@@ -150,8 +149,14 @@ public class ShapesTool extends DragTool {
         settingsPanel.addComboBox("Fill:", fillPaintCombo, "fillPaintCB");
         settingsPanel.addComboBox("Stroke:", strokePaintCombo, "strokePaintCB");
 
-        strokeSettingsButton = settingsPanel.addButton("Stroke Settings...",
-            e -> initAndShowStrokeSettingsDialog(), "strokeSettingsButton",
+        strokeSettingsAction = new AbstractAction("Stroke Settings...") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                initAndShowStrokeSettingsDialog();
+            }
+        };
+        settingsPanel.addButton(strokeSettingsAction,
+            "strokeSettingsButton",
             "Configure the stroke");
 
         settingsPanel.addButton("Effects...", e -> showEffectsDialog(),
@@ -174,35 +179,22 @@ public class ShapesTool extends DragTool {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createFillPaintCombo() {
-        @SuppressWarnings("unchecked")
-        var cb = new JComboBox<TwoPointPaintType>(fillPaintModel);
-
-        cb.setMaximumRowCount(fillPaintModel.getSize());
-        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_FILL));
-
-        return cb;
+        return GUIUtils.createComboBox(fillPaintModel,
+            e -> guiChanged(CHANGE_SHAPE_FILL));
     }
 
+    @SuppressWarnings("unchecked")
     private JComboBox<TwoPointPaintType> createStrokePaintCombo() {
-        @SuppressWarnings("unchecked")
-        var cb = new JComboBox<TwoPointPaintType>(strokePaintModel);
-
-        cb.setMaximumRowCount(strokePaintModel.getSize());
-        cb.addActionListener(e -> guiChanged(CHANGE_SHAPE_STROKE));
-
-        return cb;
+        return GUIUtils.createComboBox(strokePaintModel,
+            e -> guiChanged(CHANGE_SHAPE_STROKE));
     }
 
+    @SuppressWarnings("unchecked")
     private JComboBox<ShapeType> createShapeTypeCombo() {
-        @SuppressWarnings("unchecked")
-        var shapeTypeCB = new JComboBox<ShapeType>(typeModel);
-
-        // make sure all values are visible without a scrollbar
-        shapeTypeCB.setMaximumRowCount(typeModel.getSize());
-        shapeTypeCB.addActionListener(e -> guiChanged(CHANGE_SHAPE_TYPE));
-
-        return shapeTypeCB;
+        return GUIUtils.createComboBox(typeModel,
+            e -> guiChanged(CHANGE_SHAPE_TYPE));
     }
 
     public ShapeType getSelectedType() {
@@ -326,9 +318,11 @@ public class ShapesTool extends DragTool {
 
         assert styledShape != null;
         styledShape.updateFromDrag(userDrag);
-        // this will trigger paintOverLayer, therefore the continuous drawing of the shape
-        // TODO it could be optimized not to repaint the whole image, however
-        // it is not easy as some shapes extend beyond their drag rectangle
+
+        // This will trigger paintOverActiveLayer,
+        // therefore the continuous drawing of the shape.
+        // It repaints the whole image because
+        // some shapes extend beyond their drag rectangle.
         comp.imageChanged(REPAINT);
     }
 
@@ -424,7 +418,10 @@ public class ShapesTool extends DragTool {
     @Override
     public boolean arrowKeyPressed(ArrowKey key) {
         if (transformBox != null) {
-            transformBox.arrowKeyPressed(key);
+            View view = OpenImages.getActiveView();
+            assert view != null;
+
+            transformBox.arrowKeyPressed(key, view);
             return true;
         }
         return false;
@@ -501,11 +498,10 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g, Composition comp,
-                               AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g, Composition comp) {
         if (state == INITIAL_DRAG) {
             // paint the drag display for the initial drag
-            super.paintOverImage(g, comp, imageTransform);
+            super.paintOverImage(g, comp);
         } else if (state == TRANSFORM) {
             assert transformBox != null;
             assert styledShape != null;
@@ -519,21 +515,12 @@ public class ShapesTool extends DragTool {
         return getSelectedType().getDragDisplayType();
     }
 
-    /**
-     * Programmatically draw the current shape type with the given drag
-     */
-    public void paintDrag(Drawable dr, ImDrag imDrag) {
-//        Shape shape = settings.getSelectedType().getShape(imDrag);
-//        paintShape(dr, shape);
-        // TODO create a styled shape and paint it
-    }
-
     public boolean shouldDrawOverLayer() {
         return state == INITIAL_DRAG || state == TRANSFORM;
     }
 
     private void enableStrokeSettings(boolean b) {
-        strokeSettingsButton.setEnabled(b);
+        strokeSettingsAction.setEnabled(b);
 
         if (!b) {
             closeStrokeDialog();
@@ -574,9 +561,9 @@ public class ShapesTool extends DragTool {
     }
 
     @Override
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         if (transformBox != null) {
-            transformBox.imCoordsChanged(at);
+            transformBox.imCoordsChanged(at, comp);
         }
     }
 

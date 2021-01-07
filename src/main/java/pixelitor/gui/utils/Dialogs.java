@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -252,7 +252,7 @@ public class Dialogs {
         String basicErrorMessage = """
             A program error occurred.
                         
-            Please consider reporting this error to the developers by opening a new issue on GitHub (see "Help/Report an Issue..." in the menus).
+            Please consider reporting this error to the developers by creating a new issue on GitHub (see "Help/Report an Issue..." in the menus).
             If you do, then open "Details", click "Copy to Clipboard", and paste the details into the new issue.""";
         var errorInfo = new ErrorInfo("Program Error",
             basicErrorMessage, null, null, e,

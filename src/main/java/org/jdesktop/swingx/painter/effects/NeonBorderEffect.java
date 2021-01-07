@@ -196,11 +196,11 @@ public class NeonBorderEffect extends AbstractAreaEffect {
     }
 
     public Color interpolateEdgeColor(Color endColor, float progress) {
-        return Colors.interpolateInRGB(edgeColor, endColor, progress);
+        return Colors.rgbInterpolate(edgeColor, endColor, progress);
     }
 
     public Color interpolateCenterColor(Color endColor, float progress) {
-        return Colors.interpolateInRGB(centerColor, endColor, progress);
+        return Colors.rgbInterpolate(centerColor, endColor, progress);
     }
 
     @Override

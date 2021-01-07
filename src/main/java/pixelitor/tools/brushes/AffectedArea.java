@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,7 +23,7 @@ import pixelitor.utils.debug.DebugNode;
 import java.awt.Rectangle;
 
 /**
- * Calculates the area affected by a brush for the undo.
+ * Represents the area affected by a brush. Used for the undo.
  */
 public class AffectedArea {
     // affected area coordinates (in image space)
@@ -56,14 +56,14 @@ public class AffectedArea {
     public void updateWith(PPoint p) {
         double x = p.getImX();
         double y = p.getImY();
-        if(x > maxX) {
+        if (x > maxX) {
             maxX = x;
         }
         if (x < minX) {
             minX = x;
         }
 
-        if(y > maxY) {
+        if (y > maxY) {
             maxY = y;
         }
         if (y < minY) {
@@ -75,15 +75,15 @@ public class AffectedArea {
      * Returns the rectangle affected by a brush stroke for the undo
      */
     public Rectangle asRectangle(double radius) {
-        double extraSize = 2 * radius + 2.0;
-
         double saveX = minX - radius;
         double saveY = minY - radius;
+
+        double extraSize = 2 * radius + 2.0;
         double saveWidth = maxX - minX + extraSize;
         double saveHeight = maxY - minY + extraSize;
 
         return new Rectangle((int) saveX, (int) saveY,
-                (int) saveWidth, (int) saveHeight);
+            (int) saveWidth, (int) saveHeight);
     }
 
     public DebugNode getDebugNode() {

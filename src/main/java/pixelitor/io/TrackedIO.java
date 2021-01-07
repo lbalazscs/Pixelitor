@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
 
+import static javax.imageio.ImageWriteParam.*;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
@@ -35,6 +36,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Utility methods like in ImageIO, but with progress tracking
  */
 public class TrackedIO {
+
     private TrackedIO() {
         // do not instantiate
     }
@@ -95,6 +97,38 @@ public class TrackedIO {
         } finally {
             writer.dispose();
         }
+    }
+
+    public static void writeDetailedToStream(BufferedImage image, ImageOutputStream ios,
+                                             ProgressTracker tracker, String formatName,
+                                             boolean progressive, float quality) throws IOException {
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(formatName);
+        if (!writers.hasNext()) {
+            throw new IllegalStateException("No " + formatName + " writers found");
+        }
+        ImageWriter writer = writers.next();
+
+        ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
+
+        if (progressive) {
+            imageWriteParam.setProgressiveMode(MODE_DEFAULT);
+        } else {
+            imageWriteParam.setProgressiveMode(MODE_DISABLED);
+        }
+
+        imageWriteParam.setCompressionMode(MODE_EXPLICIT);
+        imageWriteParam.setCompressionQuality(quality);
+
+        IIOImage iioImage = new IIOImage(image, null, null);
+
+        writer.setOutput(ios);
+        if (tracker != null) {
+            writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
+        }
+        writer.write(null, iioImage, imageWriteParam);
+
+        ios.flush();
+        ios.close();
     }
 
     /**
@@ -224,29 +258,38 @@ public class TrackedIO {
                 int imgWidth = reader.getWidth(0);
                 int imgHeight = reader.getHeight(0);
 
+                if (reader.readerSupportsThumbnails()) {
+                    // a thumbnail could be in the file already
+                    boolean hasThumbs = reader.hasThumbnails(0);
+                    if (hasThumbs) {
+                        // use the embedded thumbnail instead of subsampling
+                        BufferedImage thumb = reader.readThumbnail(0, 0);
+                        return ThumbInfo.success(thumb, imgWidth, imgHeight);
+                    }
+                }
+
                 if (imgWidth < 2 * thumbMaxWidth || imgHeight < 2 * thumbMaxHeight) {
                     // subsampling only makes sense when
                     // the image is shrunk by 2x or greater
                     BufferedImage image = reader.read(0);
                     BufferedImage thumb = createThumbnail(image,
                         Math.min(thumbMaxWidth, thumbMaxHeight), null);
-                    return new ThumbInfo(thumb, imgWidth, imgHeight);
+                    return ThumbInfo.success(thumb, imgWidth, imgHeight);
                 }
-
-// TODO in principle a thumbnail could be in the file already
-// see https://docs.oracle.com/javase/7/docs/technotes/guides/imageio/spec/apps.fm3.html
-//                boolean hasThumbs = reader.hasThumbnails(0);
-//                if(hasThumbs) {
-//                    BufferedImage bi = reader.readThumbnail(0, 0);
-//                }
 
                 ImageReadParam imageReaderParams = reader.getDefaultReadParam();
                 int subsampling = calcSubsamplingCols(imgWidth, imgHeight,
                     thumbMaxWidth, thumbMaxHeight);
 
                 imageReaderParams.setSourceSubsampling(subsampling, subsampling, 0, 0);
-                BufferedImage image = reader.read(0, imageReaderParams);
-                thumbInfo = new ThumbInfo(image, imgWidth, imgHeight);
+                BufferedImage image;
+                try {
+                    image = reader.read(0, imageReaderParams);
+                    thumbInfo = ThumbInfo.success(image, imgWidth, imgHeight);
+                } catch (Exception e) {
+                    // at least the image width/height could be read
+                    thumbInfo = ThumbInfo.failure(imgWidth, imgHeight, ThumbInfo.PREVIEW_ERROR);
+                }
             } finally {
                 reader.dispose();
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.ProgressTracker;
 import pixelitor.utils.SubtaskProgressTracker;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 
@@ -60,25 +60,24 @@ public class ResizingFilterHelper {
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {
                 return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
-                        VALUE_INTERPOLATION_BILINEAR, 1.2, pt);
+                    VALUE_INTERPOLATION_BILINEAR, 1.2, pt);
             }
 
             @Override
             public int getWorkUnits(double resizeFactor) {
-                return ImageUtils.getNumStepsForEnlargeSmooth(resizeFactor, 1.2);
+                return ImageUtils.calcNumStepsForEnlargeSmooth(resizeFactor, 1.2);
             }
         }, BILINEAR11 { // highest quality with 1.1 steps
-
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {
                 return ImageUtils.enlargeSmooth(smallDest, src.getWidth(), src.getHeight(),
-                        VALUE_INTERPOLATION_BILINEAR, 1.1, pt);
+                    VALUE_INTERPOLATION_BILINEAR, 1.1, pt);
             }
 
             @Override
             public int getWorkUnits(double resizeFactor) {
-                return ImageUtils.getNumStepsForEnlargeSmooth(resizeFactor, 1.1);
+                return ImageUtils.calcNumStepsForEnlargeSmooth(resizeFactor, 1.1);
             }
         };
 
@@ -148,11 +147,13 @@ public class ResizingFilterHelper {
         // in multiple steps, so this is always done the fast way.
         int smallWidth = (int) (srcWidth / resizeFactor);
         int smallHeight = (int) (srcHeight / resizeFactor);
-        BufferedImage smallSrc = ImageUtils.createSysCompatibleImage(smallWidth, smallHeight);
+        BufferedImage smallSrc = ImageUtils.createSysCompatibleImage(
+            smallWidth, smallHeight);
         Graphics2D g = smallSrc.createGraphics();
         g.scale(1.0 / resizeFactor, 1.0 / resizeFactor);
         g.drawImage(src, 0, 0, null);
         g.dispose();
+
         return smallSrc;
     }
 
@@ -176,7 +177,7 @@ public class ResizingFilterHelper {
         if (filterUnits > 0) {
             if (filter instanceof AbstractBufferedImageOp) {
                 return ((AbstractBufferedImageOp) filter).getProgressTracker()
-                        == ProgressTracker.NULL_TRACKER;
+                    == ProgressTracker.NULL_TRACKER;
             }
         }
         return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
 import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.VisibleForTesting;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -33,6 +32,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 import static javax.swing.BorderFactory.*;
@@ -73,10 +73,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         UNSELECTED {
             @Override
-            public void show(JLabel layer, JLabel mask) {
-                layer.setBorder(unselectedIconOnUnselectedLayerBorder);
-                if (mask != null) {
-                    mask.setBorder(unselectedIconOnUnselectedLayerBorder);
+            public void show(JLabel layerLabel, JLabel maskLabel) {
+                layerLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
+                if (maskLabel != null) {
+                    maskLabel.setBorder(unselectedIconOnUnselectedLayerBorder);
                 }
             }
         },
@@ -85,10 +85,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         LAYER_SELECTED {
             @Override
-            public void show(JLabel layer, JLabel mask) {
-                layer.setBorder(selectedBorder);
-                if (mask != null) {
-                    mask.setBorder(unselectedIconOnSelectedLayerBorder);
+            public void show(JLabel layerLabel, JLabel maskLabel) {
+                layerLabel.setBorder(selectedBorder);
+                if (maskLabel != null) {
+                    maskLabel.setBorder(unselectedIconOnSelectedLayerBorder);
                 }
             }
         },
@@ -97,10 +97,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
          */
         MASK_SELECTED {
             @Override
-            public void show(JLabel layer, JLabel mask) {
-                layer.setBorder(unselectedIconOnSelectedLayerBorder);
-                if (mask != null) {
-                    mask.setBorder(selectedBorder);
+            public void show(JLabel layerLabel, JLabel maskLabel) {
+                layerLabel.setBorder(unselectedIconOnSelectedLayerBorder);
+                if (maskLabel != null) {
+                    maskLabel.setBorder(selectedBorder);
                 }
             }
         };
@@ -137,12 +137,12 @@ public class LayerButton extends JToggleButton implements LayerUI {
          * Shows a selection state on a given layer and mask icon.
          * The mask argument can be null, if there is no mask.
          */
-        public abstract void show(JLabel layer, JLabel mask);
+        public abstract void show(JLabel layerLabel, JLabel maskLabel);
     }
 
     private SelectionState selectionState;
 
-    private final Layer layer;
+    private Layer layer;
     private boolean userInteraction = true;
 
     private JCheckBox visibilityCB;
@@ -175,15 +175,10 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     private void configureLayerIcon() {
+        Icon icon = createLayerIcon(layer);
+        layerIconLabel = new JLabel(icon);
         if (layer instanceof TextLayer) {
-            Icon textLayerIcon = Icons.getTextLayerIcon();
-            layerIconLabel = new JLabel(textLayerIcon);
             layerIconLabel.setToolTipText("<html><b>Double-click</b> to edit the text layer.");
-        } else if (layer instanceof AdjustmentLayer) {
-            Icon adjLayerIcon = Icons.getAdjLayerIcon();
-            layerIconLabel = new JLabel(adjLayerIcon);
-        } else {
-            layerIconLabel = new JLabel("", null, CENTER);
         }
 
         layerIconLabel.addMouseListener(new MouseAdapter() {
@@ -207,6 +202,16 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
         layerIconLabel.setName("layerIcon");
         add(layerIconLabel, LayerButtonLayout.LAYER);
+    }
+
+    private static Icon createLayerIcon(Layer layer) {
+        if (layer instanceof TextLayer) {
+            return Icons.getTextLayerIcon();
+        } else if (layer instanceof AdjustmentLayer) {
+            return Icons.getAdjLayerIcon();
+        } else {
+            return null;
+        }
     }
 
     private void layerIconClicked(MouseEvent e) {
@@ -287,7 +292,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
             // the layer was just deactivated
             nameEditor.disableEditing();
         }
-        updateBorders();
+        updateSelectionState();
     }
 
     @Override
@@ -295,7 +300,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
         visibilityCB.setSelected(newVisibility);
     }
 
-    @VisibleForTesting
+    @Override
     public boolean isEyeOpen() {
         return visibilityCB.isSelected();
     }
@@ -354,11 +359,6 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     public boolean isNameEditing() {
         return nameEditor.isEditable();
-    }
-
-    @Override
-    public boolean isVisibilityChecked() {
-        return visibilityCB.isSelected();
     }
 
     @Override
@@ -436,6 +436,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
             maskAddedBeforeDragHandler = true;
         }
 
+        layer.getMask().updateIconImage();
         revalidate();
     }
 
@@ -476,11 +477,17 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     @Override
     public void removeMaskIcon() {
-        // the two mouse listeners (left-click, right-click) could
-        // also be removed, but it is not important, because the
-        // the mask icon label is not going to be used again
+        assert maskIconLabel != null;
+
+        // the mask icon label is not going to be used again, remove all listeners
         if (dragReorderHandler != null) { // null in unit tests
             dragReorderHandler.detachFromComponent(maskIconLabel);
+        }
+
+        // remove the left-click and right-click mouse listeners
+        MouseListener[] mouseListeners = maskIconLabel.getMouseListeners();
+        for (MouseListener mouseListener : mouseListeners) {
+            maskIconLabel.removeMouseListener(mouseListener);
         }
 
         remove(maskIconLabel);
@@ -492,7 +499,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void updateBorders() {
+    public void updateSelectionState() {
         SelectionState newSelectionState;
 
         if (!isSelected()) {
@@ -509,6 +516,26 @@ public class LayerButton extends JToggleButton implements LayerUI {
             selectionState = newSelectionState;
             selectionState.show(layerIconLabel, maskIconLabel);
         }
+    }
+
+    @Override
+    public void changeLayer(Layer newLayer) {
+        this.layer = newLayer;
+        Icon icon = createLayerIcon(layer);
+        layerIconLabel.setIcon(icon);
+        if (newLayer instanceof ImageLayer) {
+            ImageLayer imageLayer = (ImageLayer) newLayer;
+            updateLayerIconImageAsync(imageLayer);
+        }
+
+        if (maskIconLabel != null) {
+            removeMaskIcon();
+        }
+        if (newLayer.hasMask()) {
+            // the mask icon is re-added because listeners reference the old layer
+            addMaskIcon();
+        }
+        selectionState.show(layerIconLabel, maskIconLabel);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,6 +20,7 @@ import pixelitor.Composition;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Utils;
 
+import javax.swing.filechooser.FileFilter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
@@ -32,13 +33,13 @@ import static pixelitor.utils.Threads.onIOThread;
  * The input and output file formats
  */
 public enum FileFormat {
-    JPG(false, false) {
-    }, PNG(false, true) {
-    }, TIFF(false, true) {
-    }, GIF(false, true) {
-    }, BMP(false, false) {
-    }, TGA(false, true) {
-    }, PXC(true, true) {
+    JPG(false, false, FileChoosers.jpegFilter) {
+    }, PNG(false, true, FileChoosers.pngFilter) {
+    }, TIFF(false, true, FileChoosers.tiffFilter) {
+    }, GIF(false, true, FileChoosers.gifFilter) {
+    }, BMP(false, false, FileChoosers.bmpFilter) {
+    }, TGA(false, true, FileChoosers.tgaFilter) {
+    }, PXC(true, true, FileChoosers.pxcFilter) {
         @Override
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
             return () -> PXCFormat.write(comp, settings.getFile());
@@ -49,10 +50,10 @@ public enum FileFormat {
             return CompletableFuture.supplyAsync(
                 Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
         }
-    }, ORA(true, true) {
+    }, ORA(true, true, FileChoosers.oraFilter) {
         @Override
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
-            return () -> OpenRaster.uncheckedWrite(comp, settings.getFile(), false);
+            return () -> OpenRaster.uncheckedWrite(comp, settings.getFile());
         }
 
         @Override
@@ -62,16 +63,18 @@ public enum FileFormat {
         }
     };
 
-    private final boolean supportsMultipleLayers;
-    private final boolean supportsAlpha;
+    private final boolean hasLayers;
+    private final boolean hasAlpha;
+    private final FileFilter fileFilter;
 
-    FileFormat(boolean layered, boolean hasAlpha) {
-        supportsMultipleLayers = layered;
-        supportsAlpha = hasAlpha;
+    FileFormat(boolean hasLayers, boolean hasAlpha, FileFilter fileFilter) {
+        this.hasLayers = hasLayers;
+        this.hasAlpha = hasAlpha;
+        this.fileFilter = fileFilter;
     }
 
     public Runnable getSaveTask(Composition comp, SaveSettings settings) {
-        assert !supportsMultipleLayers; // overwritten for multi-layered formats
+        assert !hasLayers; // overwritten for multi-layered formats
 
         return () -> saveSingleLayered(comp, settings);
     }
@@ -91,13 +94,17 @@ public enum FileFormat {
 
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
         BufferedImage img = comp.getCompositeImage();
-        if (!supportsAlpha) {
+        if (!hasAlpha) {
             // no alpha support, convert first to RGB
             img = ImageUtils.convertToRGB(img, false);
         } else if (this == GIF) {
             img = ImageUtils.convertToIndexed(img, false);
         }
         IO.saveImageToFile(img, settings);
+    }
+
+    public FileFilter getFileFilter() {
+        return fileFilter;
     }
 
     @Override

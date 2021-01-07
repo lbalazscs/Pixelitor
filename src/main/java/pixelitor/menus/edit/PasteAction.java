@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.menus.edit;
 
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
@@ -27,11 +26,9 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.util.Optional;
 
-import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -56,28 +53,9 @@ public class PasteAction extends AbstractAction {
     }
 
     private void pasteImage(BufferedImage pastedImage) {
-        // pastedImage = ImageUtils.toCompatibleImage(pastedImage);
-
-        int type = pastedImage.getType();
-        if (type != TYPE_INT_ARGB_PRE) {
-            // needs conversion in the case of
-            // images pasted from other apps
-            // TODO why not convert to sys compatible image?
-            pastedImage = ImageUtils.convertToARGB_PRE(pastedImage, true);
-        } else {
-            // if a layer was pasted from Pixelitor,
-            // then we get back here the same object reference
-            try {
-                pastedImage = ImageUtils.copyImage(pastedImage);
-            } catch (IllegalArgumentException ex) {
-                WritableRaster raster = pastedImage.getRaster();
-                int minX = raster.getMinX();
-                int minY = raster.getMinY();
-                System.out.println("PasteAction.actionPerformed minX = " + minX + ", minY = " + minY);
-                throw ex;
-            }
-        }
-
+        // the pasted image could have an unexpected type
+        // (such as RGB, without transparency ), but the
+        // later executing code is responsible for converting it.
         destination.paste(pastedImage);
     }
 

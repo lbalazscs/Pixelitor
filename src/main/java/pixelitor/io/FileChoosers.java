@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,12 +46,12 @@ public class FileChoosers {
     private static SaveFileChooser saveChooser;
 
     public static final FileFilter jpegFilter = new FileNameExtensionFilter("JPEG files", "jpg", "jpeg");
-    private static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
-    private static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
+    public static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
+    public static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
     public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
-    private static final FileFilter tiffFilter = new FileNameExtensionFilter("TIFF files", "tiff", "tif");
-    private static final FileFilter tgaFilter = new FileNameExtensionFilter("TGA files", "tga");
-    private static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
+    public static final FileFilter tiffFilter = new FileNameExtensionFilter("TIFF files", "tiff", "tif");
+    public static final FileFilter tgaFilter = new FileNameExtensionFilter("TGA files", "tga");
+    public static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
     public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
 
     private static final FileFilter[] OPEN_SAVE_FILTERS = {
@@ -200,17 +200,9 @@ public class FileChoosers {
     }
 
     private static FileFilter getFileFilterForExtension(String ext) {
-        ext = ext.toLowerCase();
-        return switch (ext) {
-            case "jpg", "jpeg" -> jpegFilter;
-            case "png" -> pngFilter;
-            case "bmp" -> bmpFilter;
-            case "gif" -> gifFilter;
-            case "pxc" -> pxcFilter;
-            case "tga" -> tgaFilter;
-            case "tif", "tiff" -> tiffFilter;
-            default -> jpegFilter;
-        };
+        return FileFormat.fromExtension(ext)
+            .orElse(FileFormat.JPG)
+            .getFileFilter();
     }
 
     private static void setDefaultOpenExtensions() {

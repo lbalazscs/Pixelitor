@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,7 +22,7 @@ import pixelitor.tools.AbstractBrushTool;
 import pixelitor.tools.util.PPoint;
 import pixelitor.utils.debug.DebugNode;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 
 /**
  * An abstract base class for the brushes that are
@@ -34,6 +34,7 @@ public abstract class AbstractBrush implements Brush {
 
     protected double radius = AbstractBrushTool.DEFAULT_BRUSH_RADIUS;
     protected double diameter;
+    private double maxRadiusDuringStroke = 0;
     protected PPoint previous;
 
     // true when the mouse is down
@@ -46,13 +47,16 @@ public abstract class AbstractBrush implements Brush {
     @Override
     public void setRadius(double radius) {
         this.radius = radius;
-        diameter = 2 * radius;
+        this.diameter = 2 * radius;
+        if (radius > maxRadiusDuringStroke) {
+            maxRadiusDuringStroke = radius;
+        }
     }
 
     @Override
-    public double getEffectiveRadius() {
+    public double getMaxEffectiveRadius() {
         // add one to make sure rounding errors don't ruin the undo
-        return radius + 1.0;
+        return maxRadiusDuringStroke + 1.0;
     }
 
     @Override
@@ -66,15 +70,11 @@ public abstract class AbstractBrush implements Brush {
         comp.repaintRegion(previous, p, diameter);
     }
 
-    // Same as setPrevious, but with a more expressive name.
+    // A simple setter, but with a more expressive name.
     // Always call it after repaintComp!
-    protected void rememberPrevious(PPoint p) {
-        previous = p;
-    }
-
     @Override
-    public void setPrevious(PPoint previous) {
-        this.previous = previous;
+    public void rememberPrevious(PPoint p) {
+        previous = p;
     }
 
     @Override
@@ -90,6 +90,9 @@ public abstract class AbstractBrush implements Brush {
         rememberPrevious(p);
 
         initDrawing(p);
+
+        // initialize at the beginning of the brush stroke
+        maxRadiusDuringStroke = radius;
     }
 
     @Override

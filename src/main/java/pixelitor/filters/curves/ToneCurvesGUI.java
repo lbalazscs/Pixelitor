@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,12 +48,11 @@ public class ToneCurvesGUI extends FilterGUI {
         JPanel chartPanel = new JPanel(new FlowLayout(LEFT));
         chartPanel.add(curvesPanel);
 
-        JPanel channelPanel = createChannelPanel(curvesPanel);
         JPanel buttonsPanel = createButtonsPanel(dr, curvesPanel);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, PAGE_AXIS));
-        mainPanel.add(channelPanel);
+        mainPanel.add(createChannelPanel(curvesPanel));
         mainPanel.add(chartPanel);
         mainPanel.add(buttonsPanel);
 
@@ -61,32 +60,40 @@ public class ToneCurvesGUI extends FilterGUI {
     }
 
     private static JPanel createChannelPanel(ToneCurvesPanel curvesPanel) {
-        var curveTypeCB = new JComboBox<>(ToneCurveType.values());
-        curveTypeCB.setMaximumRowCount(curveTypeCB.getItemCount());
-        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
-        curveTypeCB.addActionListener(e -> curvesPanel.setActiveCurve(
-            (ToneCurveType) curveTypeCB.getSelectedItem()));
-
-        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
-        resetChannel.addActionListener(e -> curvesPanel.resetActiveCurve());
-
         JPanel channelPanel = new JPanel(new FlowLayout(LEFT));
+
         channelPanel.add(new JLabel("Channel:"));
-        channelPanel.add(curveTypeCB);
-        channelPanel.add(resetChannel);
+        channelPanel.add(createTypeCombo(curvesPanel));
+        channelPanel.add(createResetChannelButton(curvesPanel));
+
         return channelPanel;
+    }
+
+    private static JComboBox<ToneCurveType> createTypeCombo(ToneCurvesPanel panel) {
+        var curveTypeCB = GUIUtils.createComboBox(ToneCurveType.values());
+        curveTypeCB.setSelectedItem(ToneCurveType.RGB);
+        curveTypeCB.addActionListener(e -> panel.setActiveCurve(
+            (ToneCurveType) curveTypeCB.getSelectedItem()));
+        return curveTypeCB;
+    }
+
+    private static JButton createResetChannelButton(ToneCurvesPanel panel) {
+        JButton resetChannel = new JButton("Reset channel", Icons.getWestArrowIcon());
+        resetChannel.addActionListener(e -> panel.resetActiveCurve());
+        return resetChannel;
     }
 
     private static JPanel createButtonsPanel(Drawable dr, ToneCurvesPanel curvesPanel) {
         JPanel buttonsPanel = new JPanel(new FlowLayout(LEFT));
+        buttonsPanel.add(createShowOriginalCB(dr));
+        buttonsPanel.add(GUIUtils.createResetAllButton(e -> curvesPanel.reset()));
+        return buttonsPanel;
+    }
 
+    private static JCheckBox createShowOriginalCB(Drawable dr) {
         JCheckBox showOriginalCB = new JCheckBox("Show Original");
         showOriginalCB.setName("show original");
         showOriginalCB.addActionListener(e -> dr.setShowOriginal(showOriginalCB.isSelected()));
-        buttonsPanel.add(showOriginalCB);
-
-        buttonsPanel.add(GUIUtils.createResetAllButton(
-            e -> curvesPanel.reset()));
-        return buttonsPanel;
+        return showOriginalCB;
     }
 }

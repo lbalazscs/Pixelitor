@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -265,11 +265,13 @@ public class OpenImages {
         }
     }
 
-    public static void activateRandomView() {
+    public static View activateRandomView() {
         View view = Rnd.chooseFrom(views);
         if (view != activeView) {
             setActiveView(view, true);
+            return view;
         }
+        return null;
     }
 
     public static void assertNumOpenImagesIs(int expected) {

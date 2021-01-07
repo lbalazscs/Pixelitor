@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -173,7 +173,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         int pastedHeight = pastedImage.getHeight();
 
         if (canvas.isFullyCoveredBy(pastedImage)) {
-            return pastedImage;
+            return ImageUtils.toSysCompatibleImage(pastedImage);
         }
 
         // the pasted image is too small: a new image is created,

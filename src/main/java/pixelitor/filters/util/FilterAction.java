@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -45,7 +45,6 @@ public class FilterAction extends DrawableAction {
         super(name, hasDialog);
 
         assert filterSupplier != null;
-
         this.filterSupplier = filterSupplier;
 
         if (!name.equals(Fade.NAME)) {
@@ -58,8 +57,8 @@ public class FilterAction extends DrawableAction {
     }
 
     /**
-     * This name appears when all filters are listed in a combo box
-     * For example "Fill with Transparent" is better than "Transparent" in this case
+     * This name appears when all filters are listed in a combo box.
+     * For example "Fill with Transparent" is better than "Transparent" in this case.
      */
     public String getListName() {
         if (listNamePrefix == null) {
@@ -68,7 +67,6 @@ public class FilterAction extends DrawableAction {
             return listNamePrefix + name;
         }
     }
-
 
     @Override
     protected void process(Drawable dr) {
@@ -89,17 +87,17 @@ public class FilterAction extends DrawableAction {
         return filter;
     }
 
-    public FilterAction withListNamePrefix(String listNamePrefix) {
-        this.listNamePrefix = listNamePrefix;
-        return this;
-    }
-
     public FilterAction withFillListName() {
         return withListNamePrefix(GUIText.FILL_WITH + " ");
     }
 
     public FilterAction withExtractChannelListName() {
         return withListNamePrefix("Extract Channel: ");
+    }
+
+    private FilterAction withListNamePrefix(String listNamePrefix) {
+        this.listNamePrefix = listNamePrefix;
+        return this;
     }
 
     // overrides the constructor parameter
@@ -128,10 +126,8 @@ public class FilterAction extends DrawableAction {
         if (!pf.getParamSet().canBeAnimated()) {
             return false;
         }
-        if (filter instanceof Fade) {
-            if (!History.canFade()) {
-                return false;
-            }
+        if (filter instanceof Fade && !History.canFade()) {
+            return false;
         }
         return true;
     }
@@ -146,7 +142,6 @@ public class FilterAction extends DrawableAction {
         }
 
         FilterAction filterAction = (FilterAction) o;
-
         if (!getName().equals(filterAction.getName())) {
             return false;
         }
@@ -158,7 +153,6 @@ public class FilterAction extends DrawableAction {
     public int hashCode() {
         return getName().hashCode();
     }
-
 
     @Override
     public String toString() {

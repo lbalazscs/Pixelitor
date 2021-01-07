@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,8 +38,8 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.FlatteningPathIterator;
 
@@ -80,8 +80,7 @@ public abstract class AbstractBrushTool extends Tool {
     private SymmetryBrush symmetryBrush;
     protected AffectedArea affectedArea;
 
-    private JButton brushSettingsButton;
-
+    private Action brushSettingsAction;
     private JDialog settingsDialog;
 
     DrawDestination drawDestination;
@@ -100,7 +99,7 @@ public abstract class AbstractBrushTool extends Tool {
     AbstractBrushTool(String name, char activationKey, String iconFileName,
                       String toolMessage, Cursor cursor, boolean canHaveSymmetry) {
         super(name, activationKey, iconFileName, toolMessage,
-                cursor, true, true, ClipStrategy.CANVAS);
+            cursor, true, true, ClipStrategy.CANVAS);
         this.canHaveSymmetry = canHaveSymmetry;
         if (canHaveSymmetry) {
             symmetryModel = new EnumComboBoxModel<>(Symmetry.class);
@@ -112,7 +111,7 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected void initBrushVariables() {
         symmetryBrush = new SymmetryBrush(
-                this, BrushType.values()[0], getSymmetry(), getRadius());
+            this, BrushType.values()[0], getSymmetry(), getRadius());
         brush = symmetryBrush;
         affectedArea = symmetryBrush.getAffectedArea();
     }
@@ -135,12 +134,9 @@ public abstract class AbstractBrushTool extends Tool {
 
     protected void addTypeSelector() {
         var brushTypes = BrushType.values();
-        typeCB = new JComboBox<>(brushTypes);
+        typeCB = GUIUtils.createComboBox(brushTypes);
         settingsPanel.addComboBox(GUIText.BRUSH + ":", typeCB, "typeCB");
         typeCB.addActionListener(e -> brushTypeChanged());
-
-        // make sure all values are visible without a scrollbar
-        typeCB.setMaximumRowCount(brushTypes.length);
     }
 
     private void brushTypeChanged() {
@@ -149,7 +145,7 @@ public abstract class AbstractBrushTool extends Tool {
         var brushType = getBrushType();
         symmetryBrush.brushTypeChanged(brushType, getRadius());
         brushRadiusParam.setEnabled(brushType.sizeCanBeSet(), APP_LOGIC);
-        brushSettingsButton.setEnabled(brushType.hasSettings());
+        brushSettingsAction.setEnabled(brushType.hasSettings());
     }
 
     protected void addSizeSelector() {
@@ -165,16 +161,21 @@ public abstract class AbstractBrushTool extends Tool {
         var symmetryCB = new JComboBox<Symmetry>(symmetryModel);
 
         settingsPanel.addComboBox(GUIText.MIRROR + ":", symmetryCB, "symmetrySelector");
-        symmetryCB.addActionListener(e -> symmetryBrush.symmetryChanged(
-            getSymmetry(), getRadius()));
+        symmetryCB.addActionListener(e ->
+            symmetryBrush.symmetryChanged(getSymmetry(), getRadius()));
     }
 
     protected void addBrushSettingsButton() {
-        brushSettingsButton = settingsPanel.addButton(
-                "Settings...", e -> brushSettingsButtonPressed(),
-                "brushSettingsDialogButton", "Configure the selected brush");
+        brushSettingsAction = new AbstractAction("Settings...") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                brushSettingsButtonPressed();
+            }
+        };
+        settingsPanel.addButton(brushSettingsAction,
+            "brushSettingsDialogButton", "Configure the selected brush");
 
-        brushSettingsButton.setEnabled(false);
+        brushSettingsAction.setEnabled(false);
     }
 
     private void brushSettingsButtonPressed() {
@@ -185,14 +186,14 @@ public abstract class AbstractBrushTool extends Tool {
             .notModal()
             .withScrollbars()
             .okText(CLOSE_DIALOG)
-                .noCancelButton()
-                .show();
+            .noCancelButton()
+            .show();
     }
 
     protected void addLazyMouseDialogButton() {
         settingsPanel.addButton("Lazy Mouse...",
-                e -> showLazyMouseDialog(),
-                "lazyMouseDialogButton", "Configure brush smoothing");
+            e -> showLazyMouseDialog(),
+            "lazyMouseDialogButton", "Configure brush smoothing");
     }
 
     private void showLazyMouseDialog() {
@@ -233,8 +234,8 @@ public abstract class AbstractBrushTool extends Tool {
             .notModal()
             .willBeShownAgain()
             .okText(CLOSE_DIALOG)
-                .noCancelButton()
-                .show();
+            .noCancelButton()
+            .show();
     }
 
     @Override
@@ -368,30 +369,28 @@ public abstract class AbstractBrushTool extends Tool {
 
     private void finishBrushStroke(Drawable dr) {
         brush.finishBrushStroke();
-
         addBrushStrokeToHistory(dr);
 
         if (graphics != null) {
             graphics.dispose();
         }
         graphics = null;
-
         drawDestination.finishBrushStroke(dr);
 
         dr.updateIconImage();
-
         dr.getComp().imageChanged(HISTOGRAM);
     }
 
     private void addBrushStrokeToHistory(Drawable dr) {
         var originalImage = drawDestination.getOriginalImage(dr, this);
 
-        double brushRadius = brush.getEffectiveRadius();
-        var affectedRect = affectedArea.asRectangle(brushRadius);
-        assert !affectedRect.isEmpty() : "brush radius = " + brushRadius + ", affected area = " + affectedArea;
+        double maxBrushRadius = brush.getMaxEffectiveRadius();
+        var affectedRect = affectedArea.asRectangle(maxBrushRadius);
+        assert !affectedRect.isEmpty() : "brush radius = " + maxBrushRadius
+            + ", affected area = " + affectedArea;
 
-        var imageEdit = History.createPartialImageEdit(affectedRect, originalImage, dr,
-                false, getName());
+        var imageEdit = History.createPartialImageEdit(
+            affectedRect, originalImage, dr, false, getName());
         if (imageEdit != null) {
             if (typeCB != null && getBrushType() == BrushType.CONNECT) {
                 var comp = dr.getComp();
@@ -426,11 +425,11 @@ public abstract class AbstractBrushTool extends Tool {
 
         // when editing masks, no tmp drawing layer should be used
         assert !(dr instanceof LayerMask)
-                || drawDestination == DrawDestination.DIRECT :
-                        "dr is " + dr.getClass().getSimpleName()
-                        + ", comp = " + comp.getName()
-                        + ", tool = " + getClass().getSimpleName()
-                        + ", drawDestination = " + drawDestination;
+            || drawDestination == DrawDestination.DIRECT :
+            "dr is " + dr.getClass().getSimpleName()
+                + ", comp = " + comp.getName()
+                + ", tool = " + getClass().getSimpleName()
+                + ", drawDestination = " + drawDestination;
 
         var g = drawDestination.createGraphics(dr, composite);
         g.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
@@ -580,7 +579,7 @@ public abstract class AbstractBrushTool extends Tool {
         PPoint startingPoint = null;
 
         var fpi = new FlatteningPathIterator(
-                shape.getPathIterator(null), 1.0);
+            shape.getPathIterator(null), 1.0);
 
 //        MeasuredShape[] subpaths = MeasuredShape.getSubpaths(shape, 3.0f);
 //        GeneralPath gp = new GeneralPath();
@@ -665,8 +664,7 @@ public abstract class AbstractBrushTool extends Tool {
     }
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp,
-                               AffineTransform imageTransform) {
+    public void paintOverImage(Graphics2D g2, Composition comp) {
         if (paintBrushOutline) {
             outlinePainter.paint(g2, outlineCoX, outlineCoY);
         }
@@ -690,7 +688,6 @@ public abstract class AbstractBrushTool extends Tool {
             node.addString("brush type", getBrushType().toString());
         }
         node.addInt("radius", getRadius());
-
         node.add(brush.getDebugNode());
 
         if (symmetryBrush != null) { // can be null, for example in Clone
@@ -715,10 +712,10 @@ public abstract class AbstractBrushTool extends Tool {
         }
         if (lazyMouse) {
             sb.append(", (lazy " + UNICODE_MOUSE_SYMBOL + " d=")
-                    .append(lazyMouseDist.getValue())
-                    .append(", sp=")
-                    .append(lazyMouseSpacing.getValue())
-                    .append(")");
+                .append(lazyMouseDist.getValue())
+                .append(", sp=")
+                .append(lazyMouseSpacing.getValue())
+                .append(")");
         } else {
             sb.append(", eager ");
             sb.append(UNICODE_MOUSE_SYMBOL);

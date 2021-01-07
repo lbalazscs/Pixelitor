@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * and the mask icon images are updated the correct number of times.
  */
 public class IconUpdateChecker {
-    private final Layer layer;
+    private final TestLayerUI ui;
     private final LayerMask mask;
 
     private final int layerIconUpdatesAtStart;
@@ -33,7 +33,7 @@ public class IconUpdateChecker {
     public IconUpdateChecker(Layer layer, LayerMask mask,
                              int layerIconUpdatesAtStart,
                              int maskIconUpdatesAtStart) {
-        this.layer = layer;
+        this.ui = (TestLayerUI) layer.getUI();
         this.mask = mask;
         this.layerIconUpdatesAtStart = layerIconUpdatesAtStart;
         this.maskIconUpdatesAtStart = maskIconUpdatesAtStart;
@@ -48,13 +48,7 @@ public class IconUpdateChecker {
     }
 
     private void checkLayer(int num) {
-        var ui = (TestLayerUI) layer.getUI();
-        if (layer instanceof ImageLayer) {
-            assertThat(ui.getNumLayerIconUpdates()).isEqualTo(layerIconUpdatesAtStart + num);
-        } else {
-            // only image layer icons are updated
-            assertThat(ui.getNumLayerIconUpdates()).isZero();
-        }
+        assertThat(ui.getNumLayerIconUpdates()).isEqualTo(layerIconUpdatesAtStart + num);
     }
 
     private void checkMask(int num) {
@@ -62,7 +56,6 @@ public class IconUpdateChecker {
             // this was a test without a mask
             return;
         }
-        var ui = (TestLayerUI) mask.getUI();
         assertThat(ui.getNumMaskIconUpdates()).isEqualTo(maskIconUpdatesAtStart + num);
     }
 }

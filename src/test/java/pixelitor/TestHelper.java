@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -65,13 +65,6 @@ public class TestHelper {
     private static Selection currentSel;
 
     private TestHelper() {
-    }
-
-    public static TextLayer createTextLayer(Composition comp, String name) {
-        var textLayer = new TextLayer(comp, name);
-        textLayer.randomizeSettings();
-        textLayer.createUI();
-        return textLayer;
     }
 
     public static Composition createEmptyComp() {
@@ -142,14 +135,6 @@ public class TestHelper {
         return comp;
     }
 
-    public static BufferedImage createImage() {
-        return new BufferedImage(TEST_WIDTH, TEST_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-    }
-
-    public static Graphics2D createGraphics() {
-        return createImage().createGraphics();
-    }
-
     public static Layer createLayerOfClass(Class<?> layerClass, Composition comp) {
         Layer layer;
         if (layerClass.equals(ImageLayer.class)) {
@@ -161,12 +146,6 @@ public class TestHelper {
         } else {
             throw new IllegalStateException();
         }
-        return layer;
-    }
-
-    public static AdjustmentLayer createAdjustmentLayer(Composition comp, String name, Filter filter) {
-        var layer = new AdjustmentLayer(comp, name, filter);
-        layer.createUI();
         return layer;
     }
 
@@ -182,32 +161,25 @@ public class TestHelper {
         return layer;
     }
 
-    public static PMouseEvent createPEvent(int x, int y, int id,
-                                           View view) {
-        return createPEvent(x, y, id, KeyModifiers.NONE, MouseButton.LEFT, view);
+    public static TextLayer createTextLayer(Composition comp, String name) {
+        var textLayer = new TextLayer(comp, name);
+        textLayer.randomizeSettings();
+        textLayer.createUI();
+        return textLayer;
     }
 
-    public static PMouseEvent createPEvent(int x, int y, int id,
-                                           KeyModifiers keys,
-                                           MouseButton mouseButton, View view) {
-        MouseEvent e = createEvent(x, y, id, keys, mouseButton, view);
-        return new PMouseEvent(e, view);
+    public static AdjustmentLayer createAdjustmentLayer(Composition comp, String name, Filter filter) {
+        var layer = new AdjustmentLayer(comp, name, filter);
+        layer.createUI();
+        return layer;
     }
 
-    public static MouseEvent createEvent(int x, int y, int id,
-                                         KeyModifiers keys,
-                                         MouseButton mouseButton,
-                                         View view) {
-        int modifiers = 0;
-        modifiers = keys.modify(modifiers);
-        modifiers = mouseButton.modify(modifiers);
-        boolean popupTrigger = false;
-        if (mouseButton == MouseButton.RIGHT) {
-            popupTrigger = true;
-        }
-        //noinspection MagicConstant
-        return new MouseEvent(view, id, System.currentTimeMillis(),
-            modifiers, x, y, 1, popupTrigger);
+    public static BufferedImage createImage() {
+        return new BufferedImage(TEST_WIDTH, TEST_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    public static Graphics2D createGraphics() {
+        return createImage().createGraphics();
     }
 
     public static View setupMockViewFor(Composition comp) {
@@ -330,6 +302,34 @@ public class TestHelper {
         if (activeLayerChanged) {
             comp.setActiveLayer(activeLayerBefore);
         }
+    }
+
+    public static PMouseEvent createPEvent(int x, int y, int id,
+                                           View view) {
+        return createPEvent(x, y, id, KeyModifiers.NONE, MouseButton.LEFT, view);
+    }
+
+    public static PMouseEvent createPEvent(int x, int y, int id,
+                                           KeyModifiers keys,
+                                           MouseButton mouseButton, View view) {
+        MouseEvent e = createEvent(x, y, id, keys, mouseButton, view);
+        return new PMouseEvent(e, view);
+    }
+
+    public static MouseEvent createEvent(int x, int y, int id,
+                                         KeyModifiers keys,
+                                         MouseButton mouseButton,
+                                         View view) {
+        int modifiers = 0;
+        modifiers = keys.modify(modifiers);
+        modifiers = mouseButton.modify(modifiers);
+        boolean popupTrigger = false;
+        if (mouseButton == MouseButton.RIGHT) {
+            popupTrigger = true;
+        }
+        //noinspection MagicConstant
+        return new MouseEvent(view, id, System.currentTimeMillis(),
+            modifiers, x, y, 1, popupTrigger);
     }
 
     public static void press(int x, int y, View view) {

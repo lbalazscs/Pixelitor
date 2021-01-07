@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,6 @@ import java.util.function.Predicate;
 
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB_PRE;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static pixelitor.Composition.ImageChangeActions.FULL;
 import static pixelitor.Composition.LayerAdder.Position.*;
 import static pixelitor.io.FileUtils.stripExtension;
@@ -481,6 +480,23 @@ public class Composition implements Serializable {
         }
     }
 
+    /**
+     * Replaces a layer with another, while keeping its position, mask, ui
+     */
+    public void replaceLayer(Layer before, Layer after) {
+        boolean wasActive = before == activeLayer;
+
+        before.transferMaskAndUITo(after);
+
+        int layerIndex = layerList.indexOf(before);
+        assert layerIndex != -1;
+        layerList.set(layerIndex, after);
+
+        if (wasActive) {
+            activeLayer = after;
+        }
+    }
+
     public void setActiveLayer(Layer newActiveLayer) {
         setActiveLayer(newActiveLayer, false, null);
     }
@@ -581,21 +597,6 @@ public class Composition implements Serializable {
 
     public void updateAllIconImages() {
         forEachDrawable(Drawable::updateIconImage);
-    }
-
-    public void rasterizeAllTextLayers() {
-        assert view == null;
-
-        // create a separate copy to avoid modification
-        // of the original list while iterating
-        List<TextLayer> textLayers = layerList.stream()
-            .filter(layer -> layer instanceof TextLayer)
-            .map(layer -> (TextLayer) layer)
-            .collect(toList());
-
-        for (TextLayer textLayer : textLayers) {
-            textLayer.replaceWithRasterized(false);
-        }
     }
 
     public boolean activeIsDrawable() {

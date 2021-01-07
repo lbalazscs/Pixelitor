@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ import static pixelitor.assertions.PixelitorAssertions.assertThat;
 
 @DisplayName("Path tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class PathTest {
+class PathTest {
     private View view;
 
     @BeforeAll
@@ -72,13 +72,13 @@ public class PathTest {
     @Test
     void conversionsForRectangle() {
         testConversionsFor(
-                new Rectangle(20, 20, 40, 10));
+            new Rectangle(20, 20, 40, 10));
     }
 
     @Test
     void conversionsForEllipse() {
         testConversionsFor(
-                new Ellipse2D.Double(20, 20, 40, 10));
+            new Ellipse2D.Double(20, 20, 40, 10));
     }
 
     @Test

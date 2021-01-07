@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,8 +31,8 @@ import pixelitor.TestHelper;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.tools.pen.PenTool;
-import pixelitor.tools.util.PMouseEvent;
 
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,6 +101,7 @@ public class ToolTest {
         PenTool.path = null;
         Composition comp = TestHelper.create2LayerComp(true);
         view = comp.getView();
+        Tools.setCurrentTool(tool);
         tool.toolStarted();
     }
 
@@ -143,17 +144,17 @@ public class ToolTest {
     }
 
     private void press(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_PRESSED, keys, mouseButton, view);
-        tool.handlerChain.handleMousePressed(e);
+        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_PRESSED, keys, mouseButton, view);
+        Tools.EventDispatcher.mousePressed(e, view);
     }
 
     private void drag(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_DRAGGED, keys, mouseButton, view);
-        tool.handlerChain.handleMouseDragged(e);
+        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_DRAGGED, keys, mouseButton, view);
+        Tools.EventDispatcher.mouseDragged(e, view);
     }
 
     private void release(KeyModifiers keys, MouseButton mouseButton, int x, int y) {
-        PMouseEvent e = TestHelper.createPEvent(x, y, MOUSE_RELEASED, keys, mouseButton, view);
-        tool.handlerChain.handleMouseReleased(e);
+        MouseEvent e = TestHelper.createEvent(x, y, MOUSE_RELEASED, keys, mouseButton, view);
+        Tools.EventDispatcher.mouseReleased(e, view);
     }
 }

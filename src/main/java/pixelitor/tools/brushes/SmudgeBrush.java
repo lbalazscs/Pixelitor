@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -39,7 +39,7 @@ public class SmudgeBrush extends CopyBrush {
     private PPoint last;
 
     /**
-     * The strength in the GUI, actually the opacity of the brush
+     * The opacity of the brush (strength in the GUI).
      */
     private float strength;
 
@@ -76,11 +76,11 @@ public class SmudgeBrush extends CopyBrush {
             int size = (int) diameter;
             g.fillRect(0, 0, size, size);
         } else {
-            // samples the source image at lastX, lastY into the brush image
+            // samples the source image at the last point into the brush image
             g.drawImage(sourceImage,
-                    AffineTransform.getTranslateInstance(
-                            -last.getImX() + radius,
-                            -last.getImY() + radius), null);
+                AffineTransform.getTranslateInstance(
+                    -last.getImX() + radius,
+                    -last.getImY() + radius), null);
         }
 
         type.afterDrawImage(g);
@@ -93,24 +93,17 @@ public class SmudgeBrush extends CopyBrush {
     @Override
     public void putDab(PPoint p, double theta) {
         var transform = AffineTransform.getTranslateInstance(
-                p.getImX() - radius,
-                p.getImY() - radius
+            p.getImX() - radius,
+            p.getImY() - radius
         );
 
-        // TODO SrcOver allows to smudge into transparent areas, but transparency
-        // can't be smudged into non-transparent areas
-        // DstOver allows only smudging into transparent
+        // SrcOver allows to smudge into transparent areas, but transparency
+        // can't be smudged into non-transparent areas.
+        // DstOver allows only smudging into transparent.
         targetG.setComposite(AlphaComposite.SrcOver.derive(strength));
 
-// SrcAtop: can't smudge into transparent areas
-//        targetG.setComposite(AlphaComposite.SrcAtop.derive(strength));
-
-//        targetG.setComposite(BlendComposite.CrossFade.derive(strength));
-
         targetG.drawImage(brushImage, transform, null);
-
         last = p;
-
         repaintComp(p);
     }
 
@@ -122,7 +115,7 @@ public class SmudgeBrush extends CopyBrush {
     public DebugNode getDebugNode() {
         var node = super.getDebugNode();
 
-        if(last != null) {
+        if (last != null) {
             node.addDouble("last x", last.getImX());
             node.addDouble("last y", last.getImY());
         } else {

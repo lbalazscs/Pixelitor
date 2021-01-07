@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package pixelitor.layers;
 
+import pixelitor.utils.VisibleForTesting;
+
 /**
  * The user interface of a {@link Layer}
  */
@@ -29,7 +31,8 @@ public interface LayerUI {
 
     void setOpenEye(boolean newVisibility);
 
-    boolean isVisibilityChecked();
+    @VisibleForTesting
+    boolean isEyeOpen();
 
     void addMaskIcon();
 
@@ -37,7 +40,12 @@ public interface LayerUI {
 
     void updateLayerIconImageAsync(ImageLayer imageLayer);
 
-    void updateBorders();
+    /**
+     * Sets the border around the icon according to the selection state
+     */
+    void updateSelectionState();
 
     void setSelected(boolean b);
+
+    void changeLayer(Layer newLayer);
 }

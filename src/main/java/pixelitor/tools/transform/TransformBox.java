@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,7 +18,6 @@
 package pixelitor.tools.transform;
 
 import pixelitor.Composition;
-import pixelitor.OpenImages;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.DDimension;
 import pixelitor.history.History;
@@ -117,29 +116,29 @@ public class TransformBox implements ToolWidget {
 
         // initialize the corner handles
         nw = new CornerHandle("NW", this, true,
-                nwLoc, view, Color.WHITE, NW_OFFSET, NW_OFFSET_IO);
+            nwLoc, view, Color.WHITE, NW_OFFSET, NW_OFFSET_IO);
         ne = new CornerHandle("NE", this, true,
-                neLoc, view, Color.WHITE, NE_OFFSET, NE_OFFSET_IO);
+            neLoc, view, Color.WHITE, NE_OFFSET, NE_OFFSET_IO);
         se = new CornerHandle("SE", this, false,
-                seLoc, view, Color.WHITE, SE_OFFSET, SE_OFFSET_IO);
+            seLoc, view, Color.WHITE, SE_OFFSET, SE_OFFSET_IO);
         sw = new CornerHandle("SW", this, false,
-                swLoc, view, Color.WHITE, SW_OFFSET, SW_OFFSET_IO);
+            swLoc, view, Color.WHITE, SW_OFFSET, SW_OFFSET_IO);
 
         // initialize the rotation handle
         Point2D center = Shapes.calcCenter(ne, sw);
         rot = new RotationHandle("rot", this,
-                new Point2D.Double(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE),
-                view);
+            new Point2D.Double(center.getX(), ne.getY() - ROT_HANDLE_DISTANCE),
+            view);
 
         // initialize the edge handles
         EdgeHandle n = new EdgeHandle("N", this, nw, ne,
-                Color.WHITE, true, N_OFFSET, N_OFFSET_IO);
+            Color.WHITE, true, N_OFFSET, N_OFFSET_IO);
         EdgeHandle e = new EdgeHandle("E", this, ne, se,
-                Color.WHITE, false, E_OFFSET, E_OFFSET_IO);
+            Color.WHITE, false, E_OFFSET, E_OFFSET_IO);
         EdgeHandle w = new EdgeHandle("W", this, nw, sw,
-                Color.WHITE, false, W_OFFSET, W_OFFSET_IO);
+            Color.WHITE, false, W_OFFSET, W_OFFSET_IO);
         EdgeHandle s = new EdgeHandle("S", this, sw, se,
-                Color.WHITE, true, S_OFFSET, S_OFFSET_IO);
+            Color.WHITE, true, S_OFFSET, S_OFFSET_IO);
 
         // set up the neighboring relations between the corner handles
         nw.setVerNeighbor(sw, w, true);
@@ -204,22 +203,8 @@ public class TransformBox implements ToolWidget {
         double scaleX = calcScaleX();
         double scaleY = calcScaleY();
         at.scale(scaleX, scaleY);
-//        at.translate(-nw.imX, -nw.imY);
-//
-//        // translate
-//        double tx = nw.imX - origImRect.getX();
-//        double ty = nw.imY - origImRect.getY();
-//        at.translate(tx, ty);
 
-        // the two commented out translates above merged into one
         at.translate(-origImRect.getX(), -origImRect.getY());
-
-        assert !Double.isNaN(at.getTranslateX()) : "box = " + this + ", origImRect = " + origImRect;
-        assert !Double.isNaN(at.getTranslateY()) : "box = " + this + ", origImRect = " + origImRect;
-        assert !Double.isNaN(at.getScaleX()) : "box = " + this + ", origImRect = " + origImRect;
-        assert !Double.isNaN(at.getScaleY()) : "box = " + this + ", origImRect = " + origImRect;
-        assert !Double.isNaN(at.getShearX()) : "box = " + this + ", origImRect = " + origImRect;
-        assert !Double.isNaN(at.getShearY()) : "box = " + this + ", origImRect = " + origImRect;
 
         return at;
     }
@@ -452,7 +437,7 @@ public class TransformBox implements ToolWidget {
         assert editName != null;
         Memento afterMovement = copyState();
         History.add(new TransformBoxChangedEdit(editName, comp,
-                this, beforeMovement, afterMovement, false));
+            this, beforeMovement, afterMovement, false));
     }
 
     void updateDirections() {
@@ -482,17 +467,17 @@ public class TransformBox implements ToolWidget {
 
     private void moveWholeBoxBy(double dx, double dy, Composition comp) {
         nw.setLocation(
-                beforeMovement.nw.getX() + dx,
-                beforeMovement.nw.getY() + dy);
+            beforeMovement.nw.getX() + dx,
+            beforeMovement.nw.getY() + dy);
         ne.setLocation(
-                beforeMovement.ne.getX() + dx,
-                beforeMovement.ne.getY() + dy);
+            beforeMovement.ne.getX() + dx,
+            beforeMovement.ne.getY() + dy);
         se.setLocation(
-                beforeMovement.se.getX() + dx,
-                beforeMovement.se.getY() + dy);
+            beforeMovement.se.getX() + dx,
+            beforeMovement.se.getY() + dy);
         sw.setLocation(
-                beforeMovement.sw.getX() + dx,
-                beforeMovement.sw.getY() + dy);
+            beforeMovement.sw.getX() + dx,
+            beforeMovement.sw.getY() + dy);
 
         cornerHandlesMoved();
 
@@ -514,7 +499,7 @@ public class TransformBox implements ToolWidget {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         // rotate the corners
         for (CornerHandle corner : corners) {
             corner.imTransformOnlyThis(at, false);
@@ -532,17 +517,17 @@ public class TransformBox implements ToolWidget {
     }
 
     @Override
-    public void arrowKeyPressed(ArrowKey key) {
+    public void arrowKeyPressed(ArrowKey key, View view) {
         saveState();
 
         double dx = key.getMoveX();
         double dy = key.getMoveY();
-        var comp = OpenImages.getActiveComp();
+        var comp = view.getComp();
         moveWholeBoxBy(dx, dy, comp);
 
         String editName = key.isShiftDown()
-                ? "Shift-nudge Transform Box"
-                : "Nudge Transform Box";
+            ? "Shift-nudge Transform Box"
+            : "Nudge Transform Box";
         addMovementToHistory(comp, editName);
     }
 
@@ -556,7 +541,7 @@ public class TransformBox implements ToolWidget {
         sin = Math.sin(angle);
 
         angleDegrees = (int) Math.toDegrees(
-                Utils.atan2AngleToIntuitive(angle));
+            Utils.atan2AngleToIntuitive(angle));
         cursorOffset = calcCursorOffset(angleDegrees);
     }
 
@@ -653,7 +638,7 @@ public class TransformBox implements ToolWidget {
     @Override
     public String toString() {
         return format("Transform Box, corners = (%s, %s, %s, %s)",
-                nw, ne, se, sw);
+            nw, ne, se, sw);
     }
 
     public void saveState() {

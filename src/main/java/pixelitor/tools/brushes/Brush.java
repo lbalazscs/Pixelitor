@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -71,7 +71,8 @@ public interface Brush {
     /**
      * Manually free the resources used by this brush.
      */
-    default void dispose() {}
+    default void dispose() {
+    }
 
     /**
      * Returns the previous position of the brush.
@@ -81,7 +82,7 @@ public interface Brush {
     /**
      * Forces the given previous point on the brush
      */
-    void setPrevious(PPoint previous);
+    void rememberPrevious(PPoint previous);
 
     /**
      * Returns true if the brush has a previous position,
@@ -106,8 +107,10 @@ public interface Brush {
      * Used to determine the area saved for the undo.
      * Note that this can be bigger than the radius, because
      * some brushes use randomness and paint outside their radius.
+     * Since the radius can change during a brush stroke (vie keyboard),
+     * the maximum value must be returned.
      */
-    double getEffectiveRadius();
+    double getMaxEffectiveRadius();
 
     /**
      * Returns the space between the dabs.

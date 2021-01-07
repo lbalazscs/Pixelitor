@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,7 +33,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  */
 public class ShapeDabsBrush extends DabsBrush {
     public ShapeDabsBrush(double radius, ShapeDabsBrushSettings settings) {
-        super(radius, settings, false);
+        super(radius, settings);
     }
 
     @Override
@@ -46,12 +46,12 @@ public class ShapeDabsBrush extends DabsBrush {
     public void putDab(PPoint p, double theta) {
         double x = p.getImX();
         double y = p.getImY();
-        ShapeType shapeType = ((ShapeDabsBrushSettings)settings).getShapeType();
+        ShapeType shapeType = ((ShapeDabsBrushSettings) settings).getShapeType();
         if (theta != 0) {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
             var rotTx = AffineTransform.getRotateInstance(theta, x, y);
-            Shape transformedShape = rotTx.createTransformedShape(shape);
-            targetG.fill(transformedShape);
+            Shape rotatedShape = rotTx.createTransformedShape(shape);
+            targetG.fill(rotatedShape);
         } else {
             Shape shape = shapeType.createShape(x - radius, y - radius, diameter);
             targetG.fill(shape);

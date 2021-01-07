@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -84,7 +84,7 @@ import static pixelitor.gui.ImageArea.Mode.TABS;
  * can control other apps as well if they escape.
  */
 public class RandomGUITest {
-    public static final char EXIT_KEY_CHAR = 'J';
+    public static final char EXIT_KEY_CHAR = 'Q';
     public static final char PAUSE_KEY_CHAR = 'A';
     private static final Random rand = new Random();
 
@@ -556,31 +556,31 @@ public class RandomGUITest {
     private static void randomFitTo() {
         double r = Math.random();
         if (r > 0.75) {
-            log("fitActiveTo SPACE");
+            log("fit active to space");
             OpenImages.fitActive(AutoZoom.FIT_SPACE);
         } else if (r > 0.5) {
-            log("fitActiveTo WIDTH");
+            log("fit active to width");
             OpenImages.fitActive(AutoZoom.FIT_WIDTH);
         } else if (r > 0.25) {
-            log("fitActiveTo HEIGHT");
+            log("fit active to height");
             OpenImages.fitActive(AutoZoom.FIT_HEIGHT);
         } else {
-            log("fitActiveToActualPixels");
+            log("fit active to actual pixels");
             OpenImages.fitActive(AutoZoom.ACTUAL_PIXELS);
         }
     }
 
-    private static final int[] keyEvents = {VK_1,
+    private static final int[] keyCodes = {VK_1,
         VK_ENTER, VK_ESCAPE, VK_BACK_SPACE,
         // skip A, because it is the stop keystroke
         VK_B, VK_C,
         VK_D, VK_E, VK_F,
         VK_G, VK_H, VK_I,
-        // skip J, because it is the exit keystroke
-        VK_K, VK_L,
+        VK_J, VK_K, VK_L,
         VK_M, VK_N, VK_O,
-        VK_P, VK_Q, VK_R,
-        VK_S,
+        VK_P,
+        // skip Q, because it is the exit keystroke
+        VK_R, VK_S,
         // skip T, because it brings up the text layer dialog
         VK_U,
         // skip V, because too much Move Tool consumes all the memory
@@ -594,25 +594,25 @@ public class RandomGUITest {
     };
 
     private static void randomKey(Robot r) {
-        int randomIndex = rand.nextInt(keyEvents.length);
-        int keyEvent = keyEvents[randomIndex];
+        int randomIndex = rand.nextInt(keyCodes.length);
+        int keyCode = keyCodes[randomIndex];
 
-        log("random key: " + keyEvent);
-        pressKey(r, keyEvent);
+        log("random key: " + getKeyText(keyCode));
+        pressKey(r, keyCode);
     }
 
-    private static void pressKey(Robot r, int keyEvent) {
-        r.keyPress(keyEvent);
+    private static void pressKey(Robot r, int keyCode) {
+        r.keyPress(keyCode);
         r.delay(50);
-        r.keyRelease(keyEvent);
+        r.keyRelease(keyCode);
     }
 
-    private static void pressCtrlKey(Robot r, int keyEvent) {
+    private static void pressCtrlKey(Robot r, int keyCode) {
         r.keyPress(VK_CONTROL);
         r.delay(50);
-        r.keyPress(keyEvent);
+        r.keyPress(keyCode);
         r.delay(50);
-        r.keyRelease(keyEvent);
+        r.keyRelease(keyCode);
         r.delay(50);
         r.keyRelease(VK_CONTROL);
     }
@@ -622,8 +622,8 @@ public class RandomGUITest {
     }
 
     private static void setRandomZoom(View view) {
-        ZoomLevel randomZoomLevel = getRandomZoomLevel();
-        log("zoom zoomLevel = " + randomZoomLevel);
+        ZoomLevel randomZoomLevel = calcRandomZoomLevel();
+        log("zoom " + view.getName() + ", zoom level = " + randomZoomLevel);
 
         if (rand.nextBoolean()) {
             view.setZoom(randomZoomLevel);
@@ -633,7 +633,7 @@ public class RandomGUITest {
         }
     }
 
-    private static ZoomLevel getRandomZoomLevel() {
+    private static ZoomLevel calcRandomZoomLevel() {
         double percentValue = 0;
         ZoomLevel level = null;
         while (percentValue < 49) {
@@ -657,10 +657,9 @@ public class RandomGUITest {
     }
 
     private static void randomZoomOut() {
-        log("zoomOut");
-
         View view = OpenImages.getActiveView();
         if (view != null) {
+            log("zoom out " + view.getName());
             ZoomLevel newZoom = view.getZoomLevel().zoomOut();
             if (rand.nextBoolean()) {
                 view.setZoom(newZoom);
@@ -679,21 +678,20 @@ public class RandomGUITest {
 
     private static void randomUndoRedo() {
         if (History.canUndo()) {
-            log("undo");
+            log("undo " + History.getEditToBeUndoneName());
 
             History.undo();
 
             // for some reason, redo might not be available even if we are right
             // after an undo which didn't throw a CannotUndoException
-            // This is not a problem in Pixelitor, because the RedoMenuItem
+            // This is not a problem normally, because the RedoMenuItem
             // also checks History.canRedo() after an undo
             if (!History.canRedo()) {
                 return;
             }
 
-//            assert History.canRedo();
             if (rand.nextInt(10) > 3) {
-                log("redo");
+                log("redo " + History.getEditToBeRedoneName());
                 History.redo();
             }
         }
@@ -722,7 +720,7 @@ public class RandomGUITest {
     }
 
     private static void randomizeToolSettings() {
-        log("randomize tool settings");
+        log("randomize tool settings for " + Tools.getCurrent());
         ToolSettingsPanelContainer.get().randomizeToolSettings();
     }
 
@@ -741,7 +739,7 @@ public class RandomGUITest {
     }
 
     private static void changeImageArea() {
-        log("changeImageArea");
+        log("change image area from " + ImageArea.getMode());
         ImageArea.changeUI();
     }
 
@@ -806,8 +804,10 @@ public class RandomGUITest {
     }
 
     private static void activateRandomView() {
-        log("activate random view");
-        OpenImages.activateRandomView();
+        View view = OpenImages.activateRandomView();
+        if (view != null) {
+            log("activated random view " + view.getName());
+        }
     }
 
     private static void layerOrderChange() {
@@ -858,10 +858,13 @@ public class RandomGUITest {
         var comp = OpenImages.getActiveComp();
 
         if (rand.nextBoolean()) {
-            log("layer merge down");
-            comp.mergeActiveLayerDown();
+            Layer layer = comp.getActiveLayer();
+            if (comp.canMergeDown(layer)) {
+                log("merge down " + layer.getName() + " in " + comp.getName());
+                comp.mergeActiveLayerDown();
+            }
         } else {
-            log("layer flatten image");
+            log("flatten image " + comp.getName());
             comp.flattenImage();
         }
     }
@@ -937,14 +940,14 @@ public class RandomGUITest {
 
             if (f > opacity) {
                 // always increase
-                log("increase opacity");
+                log("increase opacity for " + layer.getName());
                 layer.setOpacity(f, true);
             } else if (rand.nextFloat() > 0.75) { // sometimes decrease
-                log("decrease opacity");
+                log("decrease opacity for " + layer.getName());
                 layer.setOpacity(f, true);
             }
         } else {
-            log("change layer blending mode");
+            log("change layer blending mode for " + layer.getName());
             BlendingMode randomBM = Rnd.chooseFrom(BlendingMode.values());
             layer.setBlendingMode(randomBM, true);
         }
@@ -992,10 +995,10 @@ public class RandomGUITest {
     }
 
     private static void randomNewTextLayer() {
-        log("new text layer");
         var comp = OpenImages.getActiveComp();
         TextLayer textLayer = new TextLayer(comp);
         textLayer.randomizeSettings();
+        log("new text layer: " + textLayer.getSettings().getText());
         new LayerAdder(comp)
             .withHistory("New Random Text Layer")
             .atPosition(ABOVE_ACTIVE)
@@ -1006,9 +1009,10 @@ public class RandomGUITest {
     private static void randomTextLayerRasterize() {
         Layer layer = OpenImages.getActiveLayer();
         if (layer instanceof TextLayer) {
-            log("text layer rasterize");
+            TextLayer textLayer = (TextLayer) layer;
+            log("rasterize text layer " + layer.getName());
 
-            ((TextLayer) layer).replaceWithRasterized();
+            textLayer.replaceWithRasterized();
         }
     }
 
@@ -1096,7 +1100,7 @@ public class RandomGUITest {
         int east = rand.nextInt(3);
         int south = rand.nextInt(3);
         int west = rand.nextInt(3);
-        log(format("enlargeCanvas north = %d, east = %d, south = %d, west = %d",
+        log(format("enlarge canvas north = %d, east = %d, south = %d, west = %d",
             north, east, south, west));
         var comp = OpenImages.getActiveComp();
         new EnlargeCanvas(north, east, south, west).process(comp);
@@ -1136,7 +1140,7 @@ public class RandomGUITest {
 
     // to prevent paths growing too large
     private static void setPathsToNull() {
-        log("setPathsToNull");
+        log("set paths to null");
         OpenImages.forEachView(view -> {
             // don't touch the active, as its path might be edited just now
             if (!view.isActive()) {
@@ -1156,19 +1160,19 @@ public class RandomGUITest {
     private static void setupWeightedCaller(Robot r) {
         // random move
         weightedCaller.registerCallback(10, () -> randomMove(r));
-        weightedCaller.registerCallback(70, () -> randomDrag(r));
+        weightedCaller.registerCallback(20, () -> randomDrag(r));
         weightedCaller.registerCallback(5, () -> randomClick(r));
         weightedCaller.registerCallback(2, RandomGUITest::repeat);
-        weightedCaller.registerCallback(1, RandomGUITest::randomUndoRedo);
+        weightedCaller.registerCallback(5, RandomGUITest::randomUndoRedo);
         weightedCaller.registerCallback(1, RandomGUITest::randomCrop);
         weightedCaller.registerCallback(1, RandomGUITest::randomFade);
         weightedCaller.registerCallback(2, RandomGUITest::randomizeToolSettings);
         weightedCaller.registerCallback(1, RandomGUITest::arrangeWindows);
         weightedCaller.registerCallback(3, RandomGUITest::changeImageArea);
         weightedCaller.registerCallback(1, RandomGUITest::randomColors);
-        weightedCaller.registerCallback(5, RandomGUITest::randomFilter);
-        weightedCaller.registerCallback(5, RandomGUITest::randomTween);
-        weightedCaller.registerCallback(10, RandomGUITest::randomFitTo);
+        weightedCaller.registerCallback(3, RandomGUITest::randomFilter);
+        weightedCaller.registerCallback(1, RandomGUITest::randomTween);
+        weightedCaller.registerCallback(1, RandomGUITest::randomFitTo);
         weightedCaller.registerCallback(3, () -> randomKey(r));
         weightedCaller.registerCallback(1, () -> reload(r));
         weightedCaller.registerCallback(1, RandomGUITest::randomZoom);
@@ -1192,7 +1196,7 @@ public class RandomGUITest {
         }
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerOpacityOrBlending);
         weightedCaller.registerCallback(1, RandomGUITest::randomChangeLayerVisibility);
-        weightedCaller.registerCallback(10, RandomGUITest::randomTool);
+        weightedCaller.registerCallback(5, RandomGUITest::randomTool);
         weightedCaller.registerCallback(1, RandomGUITest::randomEnlargeCanvas);
         weightedCaller.registerCallback(5, RandomGUITest::randomNewTextLayer);
         weightedCaller.registerCallback(5, RandomGUITest::randomTextLayerRasterize);
@@ -1204,7 +1208,7 @@ public class RandomGUITest {
         }
 
         weightedCaller.registerCallback(7, RandomGUITest::randomSetLayerMaskEditMode);
-        weightedCaller.registerCallback(20, RandomGUITest::randomLayerMaskAction);
+        weightedCaller.registerCallback(10, RandomGUITest::randomLayerMaskAction);
     }
 }
 

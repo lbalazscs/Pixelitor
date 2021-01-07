@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -58,7 +58,7 @@ public class GradientParam extends AbstractFilterParam {
         this(name, new float[]{0.0f, 0.5f, 1.0f},
             new Color[]{
                 firstColor,
-                Colors.calcRGBAverage(firstColor, secondColor),
+                Colors.rgbAverage(firstColor, secondColor),
                 secondColor});
     }
 
@@ -84,7 +84,8 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     private void createGradientSlider(float[] defaultThumbPositions, Color[] defaultColors) {
-        gradientSlider = new GradientSlider(HORIZONTAL, defaultThumbPositions, defaultColors);
+        gradientSlider = new GradientSlider(HORIZONTAL,
+            defaultThumbPositions, defaultColors);
         gradientSlider.addPropertyChangeListener(this::sliderPropertyChanged);
         gradientSlider.putClientProperty(USE_BEVEL, "true");
         gradientSlider.setPreferredSize(new Dimension(250, 30));
@@ -269,32 +270,28 @@ public class GradientParam extends AbstractFilterParam {
         @Override
         public GradientParamState interpolate(GradientParamState endState, double progress) {
             // This will not work if the number of thumbs changes
-
-            float[] interpolatedPositions = getInterpolatedPositions((float) progress, endState);
-
-            Color[] interpolatedColors = getInterpolatedColors((float) progress, endState);
+            float[] interpolatedPositions = interpolatePositions((float) progress, endState);
+            Color[] interpolatedColors = interpolateColors((float) progress, endState);
 
             return new GradientParamState(interpolatedPositions, interpolatedColors);
         }
 
-        private float[] getInterpolatedPositions(float progress, GradientParamState grEndState) {
+        private float[] interpolatePositions(float progress, GradientParamState grEndState) {
             float[] interpolatedPositions = new float[thumbPositions.length];
             for (int i = 0; i < thumbPositions.length; i++) {
                 float initial = thumbPositions[i];
                 float end = grEndState.thumbPositions[i];
-                float interpolated = ImageMath.lerp(progress, initial, end);
-                interpolatedPositions[i] = interpolated;
+                interpolatedPositions[i] = ImageMath.lerp(progress, initial, end);
             }
             return interpolatedPositions;
         }
 
-        private Color[] getInterpolatedColors(float progress, GradientParamState grEndState) {
+        private Color[] interpolateColors(float progress, GradientParamState grEndState) {
             Color[] interpolatedColors = new Color[colors.length];
             for (int i = 0; i < colors.length; i++) {
                 Color initial = colors[i];
                 Color end = grEndState.colors[i];
-                Color interpolated = Colors.interpolateInRGB(initial, end, progress);
-                interpolatedColors[i] = interpolated;
+                interpolatedColors[i] = Colors.rgbInterpolate(initial, end, progress);
             }
             return interpolatedColors;
         }

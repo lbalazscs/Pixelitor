@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -53,8 +53,8 @@ public abstract class OutlineBrush extends StrokeBrush {
             long timeNow = System.nanoTime();
             long timeDiff = timeNow - prevTime;
             if (timeDiff == 0) {
-                // unlikely to occur, but check it in order to
-                // make sure we dont't divide by zero
+                // unlikely to happen, but check it in order to
+                // make sure we don't divide by zero
                 return;
             }
 
@@ -88,7 +88,7 @@ public abstract class OutlineBrush extends StrokeBrush {
     }
 
     @Override
-    public double getEffectiveRadius() {
+    public double getMaxEffectiveRadius() {
         // use the maximum radius for the undo, even if the
         // speed-dependent drawing radius is smaller, see issue #57
         // A +1 safety is also necessary (rounding errors?)

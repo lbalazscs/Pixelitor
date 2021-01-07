@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.util.ArrowKey;
 import pixelitor.tools.util.DraggablePoint;
@@ -48,7 +49,7 @@ public interface ToolWidget {
      */
     void coCoordsChanged(View view);
 
-    void imCoordsChanged(AffineTransform at);
+    void imCoordsChanged(AffineTransform at, Composition comp);
 
-    void arrowKeyPressed(ArrowKey key);
+    void arrowKeyPressed(ArrowKey key, View view);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -20,11 +20,11 @@ package pixelitor.io;
 import pd.AnimatedGifEncoder;
 import pixelitor.Composition;
 import pixelitor.gui.utils.GUIUtils;
-import pixelitor.layers.ImageLayer;
+import pixelitor.layers.AdjustmentLayer;
 import pixelitor.layers.Layer;
-import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -56,21 +56,19 @@ public class LayerAnimation {
 
     private void addLayerToAnimation(Composition comp, int layerIndex) {
         Layer layer = comp.getLayer(layerIndex);
-        if (layer instanceof ImageLayer) {
-            ImageLayer imageLayer = (ImageLayer) layer;
-            BufferedImage image = imageLayer.getCanvasSizedSubImage();
+        if (layer instanceof AdjustmentLayer) {
+            return;
+        }
+        BufferedImage image = ImageUtils.createSysCompatibleImage(comp.getCanvas());
+        Graphics2D g = image.createGraphics();
 
-            if (layer.hasMask()) {
-                // TODO probably problems with translation
-                image = ImageUtils.copyImage(image);
-                layer.getMask().applyToImage(image);
-            }
+        // using this takes care of masks, translations
+        BufferedImage returned = layer.applyLayer(g, image, true);
 
-            images.add(image);
-        } else if (layer instanceof TextLayer) {
-            // TODO apply mask
-            TextLayer textLayer = (TextLayer) layer;
-            BufferedImage image = textLayer.createRasterizedImage();
+        g.dispose();
+        if (returned != null) {
+            images.add(returned);
+        } else {
             images.add(image);
         }
     }

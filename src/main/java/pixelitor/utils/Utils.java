@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,9 +24,7 @@ import javax.swing.*;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Point2D;
@@ -133,10 +131,9 @@ public final class Utils {
     }
 
     public static void copyStringToClipboard(String text) {
-        Transferable stringSelection = new StringSelection(text);
-
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(stringSelection, null);
+        Toolkit.getDefaultToolkit()
+            .getSystemClipboard()
+            .setContents(new StringSelection(text), null);
     }
 
     /**
@@ -238,6 +235,7 @@ public final class Utils {
         long s = seconds % 60;
         long m = (seconds / 60) % 60;
         long h = (seconds / (60 * 60)) % 24;
+
         return format("%d:%02d:%02d", h, m, s);
     }
 
@@ -267,7 +265,6 @@ public final class Utils {
             // the part after copy was not a number...
             return orig + ' ' + copyString;
         }
-
         copyNr++;
 
         return orig.substring(0, index + copyStringLength) + ' ' + copyNr;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -52,8 +52,8 @@ import static java.awt.Transparency.TRANSLUCENT;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
-import static pixelitor.colors.Colors.packedIntToString;
-import static pixelitor.colors.Colors.toPackedInt;
+import static pixelitor.colors.Colors.packedARGBToString;
+import static pixelitor.colors.Colors.toPackedARGB;
 import static pixelitor.utils.Threads.onPool;
 
 /**
@@ -80,8 +80,10 @@ public class ImageUtils {
         assert input != null;
 
         if (input.getColorModel().equals(defaultColorModel)) {
-            // already compatible
-            return input;
+            // RGB images have the right direct color model, but we need transparency
+            if (input.getType() != TYPE_INT_RGB) {
+                return input;
+            }
         }
 
         BufferedImage output = graphicsConfig.createCompatibleImage(
@@ -305,7 +307,7 @@ public class ImageUtils {
     /**
      * Returns the number of steps necessary for progress tracking
      */
-    public static int getNumStepsForEnlargeSmooth(double resizeFactor, double step) {
+    public static int calcNumStepsForEnlargeSmooth(double resizeFactor, double step) {
         double progress = 1.0;
         double lastStep = resizeFactor / step;
         int retVal = 1; // for the final step
@@ -320,7 +322,6 @@ public class ImageUtils {
         assert image != null;
 
         int type = image.getType();
-
         return (type == TYPE_INT_ARGB_PRE || type == TYPE_INT_RGB || type == TYPE_INT_ARGB);
     }
 
@@ -332,9 +333,7 @@ public class ImageUtils {
         assert src != null;
 
         int[] pixels;
-
-        boolean packedInt = hasPackedIntArray(src);
-        if (packedInt) {
+        if (hasPackedIntArray(src)) {
             assert src.getRaster().getTransferType() == TYPE_INT;
             assert src.getRaster().getNumDataElements() == 1;
 
@@ -357,6 +356,7 @@ public class ImageUtils {
                 Messages.showException(e);
             }
         }
+
         return pixels;
     }
 
@@ -380,10 +380,11 @@ public class ImageUtils {
         ColorModel cm = new ComponentColorModel(cs,
             false, false,
             Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+
         return new BufferedImage(cm, raster, false, null);
     }
 
-    public static URL resourcePathToURL(String fileName) {
+    public static URL imagePathToURL(String fileName) {
         assert fileName != null;
 
         String iconPath = "/images/" + fileName;
@@ -391,17 +392,18 @@ public class ImageUtils {
         if (imgURL == null) {
             Messages.showError("Error", iconPath + " not found");
         }
+
         return imgURL;
     }
 
-    public static BufferedImage loadImageFromImagesFolder(String fileName) {
+    public static BufferedImage loadJarImageFromImagesFolder(String fileName) {
         // consider caching
         // for image brushes this is not necessary because
         // the template brush always has the max size
 
         assert fileName != null;
 
-        URL imgURL = resourcePathToURL(fileName);
+        URL imgURL = imagePathToURL(fileName);
         BufferedImage image = null;
         try {
             image = ImageIO.read(imgURL);
@@ -571,6 +573,7 @@ public class ImageUtils {
         g.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         g.drawImage(src, 0, 0, thumbWidth, thumbHeight, null);
         g.dispose();
+
         return thumb;
     }
 
@@ -592,11 +595,14 @@ public class ImageUtils {
         BufferedImage img = createSysCompatibleImage(100, 100);
         copyImage(img);
         BufferedImage sub = img.getSubimage(20, 20, 50, 50);
-        copyImage(sub);
+        copyImage(sub); // throws exception
     }
 
-    // it seems that for images with an IndexColorModel this
-    // still returns an image with a shared raster (jdk bug?)
+    // There are two cases when this method can't be used to
+    // copy an image: (1) for images with an IndexColorModel
+    // this returns an image with a shared raster (jdk bug?)
+    // (2) for an image created with BufferedImage.getSubimage
+    // it throws an exception if the raster doesn't start at (0, 0).
     public static BufferedImage copyImage(BufferedImage src) {
         assert src != null;
 
@@ -610,10 +616,19 @@ public class ImageUtils {
         return copy;
     }
 
+    // Can copy an image which was created by BufferedImage.getSubimage
+    public static BufferedImage copySubImage(BufferedImage src) {
+        BufferedImage copy = new BufferedImage(src.getWidth(), src.getHeight(), src.getType());
+        Graphics2D g2 = copy.createGraphics();
+        g2.drawImage(src, 0, 0, null);
+        g2.dispose();
+        return copy;
+    }
+
     /**
      * Unlike BufferedImage.getSubimage, this method creates a copy of the data
      */
-    public static BufferedImage getCopyOfSubimage(BufferedImage src, Rectangle bounds) {
+    public static BufferedImage copySubImage(BufferedImage src, Rectangle bounds) {
         assert src != null;
         assert bounds != null;
 
@@ -634,6 +649,7 @@ public class ImageUtils {
             intersection.x, intersection.y,
             intersection.width, intersection.height,
             0, 0, null);
+
         return new BufferedImage(src.getColorModel(),
             (WritableRaster) startingFrom00,
             src.isAlphaPremultiplied(), null);
@@ -653,6 +669,7 @@ public class ImageUtils {
         Raster startingFrom00 = raster.createChild(minX, minY, width, height, 0, 0, null);
         BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
         image.setData(startingFrom00);
+
         return image;
     }
 
@@ -730,6 +747,7 @@ public class ImageUtils {
         g2.setComposite(new OverlayComposite(1.0f));
         g2.drawImage(original, 0, 0, null);
         g2.dispose();
+
         return blurred;
     }
 
@@ -768,18 +786,16 @@ public class ImageUtils {
 
     public static BufferedImage createSoftBWBrush(int size) {
         BufferedImage brushImage = new BufferedImage(size, size, TYPE_INT_ARGB);
-
         Graphics2D g = brushImage.createGraphics();
 
+        // fill a black circle over the white background
         Colors.fillWith(WHITE, g, size, size);
-
         g.setColor(BLACK);
-
         int softness = size / 4;
-
         g.fillOval(softness, softness, size - 2 * softness, size - 2 * softness);
         g.dispose();
 
+        // blur it
         var blur = new BoxBlurFilter(softness, softness, 1, "Blur");
         blur.setProgressTracker(ProgressTracker.NULL_TRACKER);
         brushImage = blur.filter(brushImage, brushImage);
@@ -922,6 +938,7 @@ public class ImageUtils {
         r = (int) (r * f);
         g = (int) (g * f);
         b = (int) (b * f);
+
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -948,6 +965,7 @@ public class ImageUtils {
         if (b > 255) {
             b = 255;
         }
+
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -1003,7 +1021,7 @@ public class ImageUtils {
                 int rgb2 = img2.getRGB(x, y);
                 if (rgb1 != rgb2) {
                     String msg = format("at (%d, %d) rgb1 is %s and rgb2 is %s",
-                        x, y, packedIntToString(rgb1), packedIntToString(rgb2));
+                        x, y, packedARGBToString(rgb1), packedARGBToString(rgb2));
                     System.out.println("ImageUtils::compareSmallImages: " + msg);
                     return false;
                 }
@@ -1020,7 +1038,7 @@ public class ImageUtils {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int rgb = im.getRGB(x, y);
-                String asString = packedIntToString(rgb);
+                String asString = packedARGBToString(rgb);
                 s.append(asString);
                 if (x == width - 1) {
                     s.append("\n");
@@ -1038,7 +1056,7 @@ public class ImageUtils {
 
     public static BufferedImage create1x1Image(int a, int r, int g, int b) {
         BufferedImage img = createSysCompatibleImage(1, 1);
-        img.setRGB(0, 0, toPackedInt(a, r, g, b));
+        img.setRGB(0, 0, toPackedARGB(a, r, g, b));
         return img;
     }
 
@@ -1074,7 +1092,7 @@ public class ImageUtils {
                 tx, ty, selection.getShapeBounds()));
         }
 
-        return getCopyOfSubimage(src, bounds);
+        return copySubImage(src, bounds);
     }
 
     /**

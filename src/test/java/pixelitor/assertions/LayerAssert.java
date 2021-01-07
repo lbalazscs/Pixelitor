@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,7 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
     public S opacityIs(float expected) {
         isNotNull();
         assertThat(actual.getOpacity())
-                .isCloseTo(expected, within(0.001f));
+            .isCloseTo(expected, within(0.001f));
         return myself;
     }
 
@@ -79,14 +79,14 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
     public S uiIsVisible() {
         isNotNull();
         LayerUI layerUI = actual.getUI();
-        assertThat(layerUI.isVisibilityChecked()).isTrue();
+        assertThat(layerUI.isEyeOpen()).isTrue();
         return myself;
     }
 
     public S uiIsNotVisible() {
         isNotNull();
         LayerUI layerUI = actual.getUI();
-        assertThat(layerUI.isVisibilityChecked()).isFalse();
+        assertThat(layerUI.isEyeOpen()).isFalse();
         return myself;
     }
 
@@ -99,6 +99,18 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
     public S isNotActive() {
         isNotNull();
         assertThat(actual.isActive()).isFalse();
+        return myself;
+    }
+
+    public S hasUI() {
+        isNotNull();
+        assertThat(actual.hasUI()).isTrue();
+        return myself;
+    }
+
+    public S hasNoUI() {
+        isNotNull();
+        assertThat(actual.hasUI()).isFalse();
         return myself;
     }
 

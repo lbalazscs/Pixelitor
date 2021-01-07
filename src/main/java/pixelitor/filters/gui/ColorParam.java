@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,7 +38,8 @@ public class ColorParam extends AbstractFilterParam {
 
     private final TransparencyPolicy transparencyPolicy;
 
-    public ColorParam(String name, Color defaultColor, TransparencyPolicy transparencyPolicy) {
+    public ColorParam(String name, Color defaultColor,
+                      TransparencyPolicy transparencyPolicy) {
         super(name, ALLOW_RANDOMIZE);
 
         this.defaultColor = defaultColor;
@@ -58,9 +59,10 @@ public class ColorParam extends AbstractFilterParam {
     }
 
     public ColorParam withRandomizeAction() {
+        String toolTip = "<html>Randomize the color of <b>" + getName() + "</b>";
         action = new FilterButtonModel("",
             this::randomize, Icons.getDiceIcon(),
-            "<html>Randomize the color of <b>" + getName() + "</b>", null);
+            toolTip, null);
 
         return this;
     }
@@ -163,7 +165,7 @@ public class ColorParam extends AbstractFilterParam {
 
         @Override
         public ColorParamState interpolate(ColorParamState endState, double progress) {
-            return new ColorParamState(Colors.interpolateInRGB(
+            return new ColorParamState(Colors.rgbInterpolate(
                 color, endState.color, (float) progress));
         }
 

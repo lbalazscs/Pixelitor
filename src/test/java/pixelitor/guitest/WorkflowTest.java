@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,12 +21,12 @@ import org.assertj.core.util.DoubleComparator;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.fixture.FrameFixture;
 import pixelitor.Composition;
-import pixelitor.colors.FgBgColorSelector;
-import pixelitor.colors.FgBgColors;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.GUIText;
 import pixelitor.guitest.AppRunner.Randomize;
 import pixelitor.guitest.AppRunner.Reseed;
+import pixelitor.layers.ImageLayer;
+import pixelitor.layers.TextLayer;
 import pixelitor.tools.BrushType;
 import pixelitor.tools.Tools;
 import pixelitor.tools.shapes.ShapeType;
@@ -79,6 +79,7 @@ public class WorkflowTest {
         renderWood();
         addTextLayer();
         setTextSize();
+        rasterizeThenUndo();
         selectionFromText();
         deleteTextLayer();
         rotate90();
@@ -104,6 +105,7 @@ public class WorkflowTest {
         pasteSelection();
         moveSelection(50);
         selectionToPath();
+        app.swapColors();
         tracePath(BrushType.SHAPE);
         flipHorizontal();
         clearGuides();
@@ -129,13 +131,13 @@ public class WorkflowTest {
         dialog.button("ok").click();
         dialog.requireNotVisible();
         assertThat(EDT.getGuides().getHorizontals())
-                .usingComparatorForType(new DoubleComparator(0.001), Double.class)
-                .containsExactly(0.6);
+            .usingComparatorForType(new DoubleComparator(0.001), Double.class)
+            .containsExactly(0.6);
         assertThat(EDT.getGuides().getVerticals()).isEmpty();
     }
 
     private void renderWood() {
-        app.runFilterWithDialog("Wood", Randomize.NO, Reseed.NO, ShowOriginal.NO);
+        app.runFilterWithDialog("Wood", Randomize.NO, Reseed.NO, ShowOriginal.NO, false);
         keyboard.undoRedo("Wood");
     }
 
@@ -144,9 +146,9 @@ public class WorkflowTest {
 
         var dialog = app.findDialogByTitle("Create Text Layer");
         dialog.textBox("textTF")
-                .requireText("Pixelitor")
-                .deleteText()
-                .enterText("Wood");
+            .requireText("Pixelitor")
+            .deleteText()
+            .enterText("Wood");
         dialog.button("ok").click();
 
         keyboard.undoRedo("Add Text Layer");
@@ -162,6 +164,21 @@ public class WorkflowTest {
         dialog.button("ok").click();
 
         keyboard.undoRedo("Edit Text Layer");
+    }
+
+    private void rasterizeThenUndo() {
+        EDT.assertActiveLayerTypeIs(TextLayer.class);
+        EDT.assertNumLayersIs(2);
+
+        app.runMenuCommand("Rasterize");
+
+        EDT.assertActiveLayerTypeIs(ImageLayer.class);
+        EDT.assertNumLayersIs(2);
+
+        keyboard.undoRedoUndo("Rasterize Text Layer");
+
+        EDT.assertActiveLayerTypeIs(TextLayer.class);
+        EDT.assertNumLayersIs(2);
     }
 
     private void selectionFromText() {
@@ -223,8 +240,8 @@ public class WorkflowTest {
         pw.button("convertToSelection").requireDisabled();
 
         findButtonByText(pw, "Stroke Settings...")
-                .requireEnabled()
-                .click();
+            .requireEnabled()
+            .click();
         var dialog = app.findDialogByTitle("Stroke Settings");
         dialog.slider().slideTo(10);
         dialog.comboBox("strokeType").selectItem(StrokeType.ZIGZAG.toString());
@@ -288,9 +305,9 @@ public class WorkflowTest {
     }
 
     private void addHeartShapedHoleToTheWoodLayer() {
+        app.setDefaultColors();
         pw.button("addLayerMask").requireEnabled().click();
         app.clickTool(Tools.SHAPES);
-        EDT.run(FgBgColors::setDefaultColors);
 
         pw.comboBox("shapeTypeCB").selectItem(ShapeType.HEART.toString());
         pw.comboBox("fillPaintCB").selectItem(TwoPointPaintType.FOREGROUND.toString());
@@ -308,7 +325,7 @@ public class WorkflowTest {
     }
 
     private void addDropShadowToTheWoodLayer() {
-        app.runFilterWithDialog("Drop Shadow", Randomize.NO, Reseed.NO, ShowOriginal.NO);
+        app.runFilterWithDialog("Drop Shadow", Randomize.NO, Reseed.NO, ShowOriginal.NO, false);
         keyboard.undoRedo("Drop Shadow");
     }
 
@@ -349,8 +366,8 @@ public class WorkflowTest {
     private void selectionToPath() {
         app.clickTool(Tools.SELECTION);
         pw.button("toPathButton")
-                .requireEnabled()
-                .click();
+            .requireEnabled()
+            .click();
         Utils.sleep(200, MILLISECONDS);
         EDT.assertActiveToolIs(Tools.PEN);
 
@@ -360,7 +377,6 @@ public class WorkflowTest {
     private void tracePath(BrushType brushType) {
         app.clickTool(Tools.BRUSH);
         pw.comboBox("typeCB").selectItem(brushType.toString());
-        pw.button(FgBgColorSelector.RESET_DEF_COLORS_BUTTON_NAME).click();
 
         app.clickTool(Tools.PEN);
         pw.button("toSelectionButton").requireEnabled();
@@ -373,8 +389,8 @@ public class WorkflowTest {
 
     private void pathToSelection() {
         pw.button("toSelectionButton")
-                .requireEnabled()
-                .click();
+            .requireEnabled()
+            .click();
         keyboard.undoRedo("Convert Path to Selection");
     }
 

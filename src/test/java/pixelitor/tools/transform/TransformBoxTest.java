@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,7 @@ class TransformBoxTest {
 
     @Test
     void moveNWFromInitialState() {
-        var box = new TransformBox(originalRect,
-                view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -86,10 +85,9 @@ class TransformBoxTest {
         assertThat(se).isAt(400, 200);
 
         // check that the transform behaves like the handles
-        checkTransform(
-                box.calcImTransform(),
-                new Rectangle(200, 100, 200, 100),
-                new Rectangle(240, 110, 160, 90));
+        checkTransform(box.calcImTransform(),
+            new Rectangle(200, 100, 200, 100),
+            new Rectangle(240, 110, 160, 90));
     }
 
     @Test
@@ -130,16 +128,14 @@ class TransformBoxTest {
         assertThat(nw).isAt(200, 100);
 
         // check that the transform behaves like the handles
-        checkTransform(
-                box.calcImTransform(),
-                new Rectangle(200, 100, 200, 100),
-                new Rectangle(200, 100, 160, 90));
+        checkTransform(box.calcImTransform(),
+            new Rectangle(200, 100, 200, 100),
+            new Rectangle(200, 100, 160, 90));
     }
 
     @Test
     void pureTranslation() {
-        var box = new TransformBox(originalRect,
-                view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -171,8 +167,7 @@ class TransformBoxTest {
 
     @Test
     void pureScaling() {
-        var box = new TransformBox(originalRect,
-                view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -204,8 +199,7 @@ class TransformBoxTest {
 
     @Test
     void pureRotation() {
-        var box = new TransformBox(originalRect,
-                view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -259,8 +253,7 @@ class TransformBoxTest {
 
     @Test
     void cursorAfterTurnedInsideOut() {
-        var box = new TransformBox(originalRect,
-                view, at -> {});
+        var box = new TransformBox(originalRect, view, at -> {});
         CornerHandle nw = box.getNW();
         CornerHandle sw = box.getSW();
         CornerHandle ne = box.getNE();
@@ -271,8 +264,8 @@ class TransformBoxTest {
         drag(box, 200, 200);
         release(box, 200, 300);
         assertThat(box)
-                .angleDegreesIs(180)
-                .rotSizeIs(200, -100);
+            .angleDegreesIs(180)
+            .rotSizeIs(200, -100);
 
         assertThat(nw).cursorNameIs("Southwest Resize Cursor");
         assertThat(sw).cursorNameIs("Northwest Resize Cursor");
@@ -284,8 +277,8 @@ class TransformBoxTest {
         drag(box, 200, 350);
         release(box, 200, 400);
         assertThat(box)
-                .angleDegreesIs(180)
-                .rotSizeIs(-200, 200);
+            .angleDegreesIs(180)
+            .rotSizeIs(-200, 200);
 
         // expect no change
         assertThat(nw).cursorNameIs("Southwest Resize Cursor");
@@ -298,16 +291,16 @@ class TransformBoxTest {
         drag(box, 200, 350);
         release(box, 200, 300);
         assertThat(box)
-                .angleDegreesIs(180)
-                .rotSizeIs(-200, 100);
+            .angleDegreesIs(180)
+            .rotSizeIs(-200, 100);
 
         // drag NE to the left
         press(box, 400, 300);
         drag(box, 200, 300);
         release(box, 100, 300);
         assertThat(box)
-                .angleDegreesIs(180)
-                .rotSizeIs(100, 100);
+            .angleDegreesIs(180)
+            .rotSizeIs(100, 100);
 
         assertThat(nw).cursorNameIs("Southeast Resize Cursor");
         assertThat(sw).cursorNameIs("Northeast Resize Cursor");
@@ -319,8 +312,8 @@ class TransformBoxTest {
         drag(box, 100, 200);
         release(box, 100, 100);
         assertThat(box)
-                .angleDegreesIs(0)
-                .rotSizeIs(-100, 100);
+            .angleDegreesIs(0)
+            .rotSizeIs(-100, 100);
 
         assertThat(nw).cursorNameIs("Northeast Resize Cursor");
         assertThat(sw).cursorNameIs("Southeast Resize Cursor");
@@ -343,20 +336,22 @@ class TransformBoxTest {
         assertThat(ne).isAt(400, 100).isAtIm(400, 100);
         assertThat(se).isAt(400, 200).isAtIm(400, 200);
         int rotOrigY = 100 - TransformBox.ROT_HANDLE_DISTANCE;
-        assertThat(rot).isAt(300, rotOrigY).isAtIm(300, rotOrigY);
+        assertThat(rot)
+            .isAt(300, rotOrigY)
+            .isAtIm(300, rotOrigY);
         assertThat(box).angleDegreesIs(0);
 
         // rotate around NW 90 degrees
         var at = AffineTransform.getQuadrantRotateInstance(1, 200, 100);
-        box.imCoordsChanged(at);
+        box.imCoordsChanged(at, view.getComp());
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
         assertThat(sw).isAt(100, 100).isAtIm(100, 100);
         assertThat(ne).isAt(200, 300).isAtIm(200, 300);
         assertThat(se).isAt(100, 300).isAtIm(100, 300);
         assertThat(rot)
-                .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 200)
-                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 200);
+            .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 200)
+            .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 200);
         assertThat(box).angleDegreesIs(270);
 
         // drag SE downwards
@@ -369,13 +364,13 @@ class TransformBoxTest {
         assertThat(ne).isAt(200, 400).isAtIm(200, 400);
         assertThat(se).isAt(100, 400).isAtIm(100, 400);
         assertThat(rot)
-                .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 250)
-                .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 250);
+            .isAt(200 + TransformBox.ROT_HANDLE_DISTANCE, 250)
+            .isAtIm(200 + TransformBox.ROT_HANDLE_DISTANCE, 250);
         assertThat(box).angleDegreesIs(270); // no change
 
         // rotate back
         at = at.createInverse();
-        box.imCoordsChanged(at);
+        box.imCoordsChanged(at, view.getComp());
 
         assertThat(nw).isAt(200, 100).isAtIm(200, 100); // no change
         assertThat(sw).isAt(200, 200).isAtIm(200, 200);
@@ -404,17 +399,16 @@ class TransformBoxTest {
     private static void checkTransform(AffineTransform at, double startX, double startY,
                                        double expectedX, double expectedY) {
         checkTransform(at,
-                new Point2D.Double(startX, startY),
-                new Point2D.Double(expectedX, expectedY));
+            new Point2D.Double(startX, startY),
+            new Point2D.Double(expectedX, expectedY));
     }
 
     private static void checkTransform(AffineTransform at, Point2D start, Point2D expected) {
         Point2D found = at.transform(start, null);
         if (!found.equals(expected)) {
             throw new AssertionError(String.format(
-                    "Expected (%.1f, %.1f), found (%.1f, %.1f)",
-                    expected.getX(), expected.getY(),
-                    found.getX(), found.getY()));
+                "Expected (%.1f, %.1f), found (%.1f, %.1f)",
+                expected.getX(), expected.getY(), found.getX(), found.getY()));
         }
     }
 
@@ -424,11 +418,11 @@ class TransformBoxTest {
         checkTransform(at, topLeftStart, topLeftExpected);
 
         Point2D bottomRightStart = new Point2D.Double(
-                start.x + start.width,
-                start.y + start.height);
+            start.x + start.width,
+            start.y + start.height);
         Point2D bottomRightExpected = new Point2D.Double(
-                end.x + end.width,
-                end.y + end.height);
+            end.x + end.width,
+            end.y + end.height);
         checkTransform(at, bottomRightStart, bottomRightExpected);
     }
 

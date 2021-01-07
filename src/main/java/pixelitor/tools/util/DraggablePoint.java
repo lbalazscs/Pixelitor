@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.history.HandleMovedEdit;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
+import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -200,9 +201,9 @@ public class DraggablePoint extends Point2D.Double {
 
     public boolean handleContains(double x, double y) {
         return x > this.x - HANDLE_RADIUS
-                && x < this.x + HANDLE_RADIUS
-                && y > this.y - HANDLE_RADIUS
-                && y < this.y + HANDLE_RADIUS;
+            && x < this.x + HANDLE_RADIUS
+            && y > this.y - HANDLE_RADIUS
+            && y < this.y + HANDLE_RADIUS;
     }
 
     public void paintHandle(Graphics2D g) {
@@ -267,9 +268,14 @@ public class DraggablePoint extends Point2D.Double {
      */
     public void restoreCoordsFromImSpace(View view) {
         if (this.view != view) {
-            // TODO what to do in the rare cases when the view changes?
+            // this shouldn't happen, but it does very rarely in random GUI tests
+            assert this.view != null;
             assert view != null;
-            this.view = view;
+            if (RandomGUITest.isRunning()) {
+                throw new AssertionError("this view = " + this.view
+                    + ", argument view = " + view);
+            }
+            this.view = view; // the new view must be correct
         }
 
         double newX = view.imageXToComponentSpace(imX);
@@ -316,13 +322,9 @@ public class DraggablePoint extends Point2D.Double {
         return x == that.x && y == that.y;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public boolean samePositionAs(DraggablePoint that, double epsilon) {
         return Math.abs(x - that.x) < epsilon
-                && Math.abs(y - that.y) < epsilon;
+            && Math.abs(y - that.y) < epsilon;
     }
 
     public void copyPositionFrom(DraggablePoint that) {
@@ -380,6 +382,10 @@ public class DraggablePoint extends Point2D.Double {
 
     public Cursor getCursor() {
         return cursor;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override

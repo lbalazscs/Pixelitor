@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -29,7 +29,10 @@ import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseAdapter;
@@ -50,13 +53,10 @@ public class Colors {
     private Colors() {
     }
 
-    public static Color interpolateInRGB(Color startColor, Color endColor, float progress) {
-        int initialRGB = startColor.getRGB();
-        int finalRGB = endColor.getRGB();
-
-        // linear interpolation in the RGB space
-        // possibly interpolating in HSB space would be better
-        int interpolatedRGB = ImageMath.mixColors(progress, initialRGB, finalRGB);
+    // linear interpolation in the RGB space
+    public static Color rgbInterpolate(Color startColor, Color endColor, float progress) {
+        int interpolatedRGB = ImageMath.mixColors(progress,
+            startColor.getRGB(), endColor.getRGB());
         return new Color(interpolatedRGB);
     }
 
@@ -64,7 +64,7 @@ public class Colors {
      * Calculates the average of two colors in the RGB space.
      * Full opacity is assumed.
      */
-    public static Color calcRGBAverage(Color c1, Color c2) {
+    public static Color rgbAverage(Color c1, Color c2) {
         assert c1 != null && c2 != null;
 
         int rgb1 = c1.getRGB();
@@ -89,7 +89,7 @@ public class Colors {
      * Calculates the average of two colors in the HSB space.
      * Full opacity is assumed.
      */
-    public static Color calcHSBAverage(Color c1, Color c2) {
+    public static Color hsbAverage(Color c1, Color c2) {
         assert c1 != null && c2 != null;
 
         int rgb1 = c1.getRGB();
@@ -106,12 +106,10 @@ public class Colors {
         float[] hsb1 = Color.RGBtoHSB(r1, g1, b1, null);
         float[] hsb2 = Color.RGBtoHSB(r2, g2, b2, null);
 
-        float hue1 = hsb1[0];
-        float hue2 = hsb2[0];
-        float hue = hueAverage(hue1, hue2);
-
+        float hue = hueAverage(hsb1[0], hsb2[0]);
         float sat = (hsb1[1] + hsb2[1]) / 2.0f;
         float bri = (hsb1[2] + hsb2[2]) / 2.0f;
+
         return Color.getHSBColor(hue, sat, bri);
     }
 
@@ -185,7 +183,7 @@ public class Colors {
         }
     }
 
-    public static String packedIntToString(int rgb) {
+    public static String packedARGBToString(int rgb) {
         int a = (rgb >>> 24) & 0xFF;
         int r = (rgb >>> 16) & 0xFF;
         int g = (rgb >>> 8) & 0xFF;
@@ -212,42 +210,8 @@ public class Colors {
         return sat;
     }
 
-    public static int toPackedInt(int a, int r, int g, int b) {
+    public static int toPackedARGB(int a, int r, int g, int b) {
         return a << 24 | r << 16 | g << 8 | b;
-    }
-
-    public static String debugPackedInt(int argb) {
-        int a = (argb >>> 24) & 0xFF;
-        int r = (argb >>> 16) & 0xFF;
-        int g = (argb >>> 8) & 0xFF;
-        int b = argb & 0xFF;
-
-        return "(a = " + a + ", r = " + r + ", g = " + g + ", b = " + b + ")";
-    }
-
-    public static void selectColorWithDialog(JComponent component, String title,
-                                             Color selectedColor, boolean allowTransparency,
-                                             Consumer<Color> colorChangeListener) {
-        Window owner = SwingUtilities.getWindowAncestor(component);
-        selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
-    }
-
-    public static void selectColorWithDialog(Window owner, String title,
-                                             Color selectedColor, boolean allowTransparency,
-                                             Consumer<Color> colorChangeListener) {
-        if (RandomGUITest.isRunning()) {
-            return;
-        }
-
-        Color prevColor = selectedColor;
-        GlobalEvents.dialogOpened(title);
-        Color color = ColorPicker.showDialog(owner, title, selectedColor,
-            allowTransparency, colorChangeListener);
-        GlobalEvents.dialogClosed(title);
-
-        if (color == null) {  // Cancel was pressed, reset the old color
-            colorChangeListener.accept(prevColor);
-        }
     }
 
     public static Color toGray(Color c) {
@@ -264,10 +228,6 @@ public class Colors {
 
     public static float[] toHSB(Color c) {
         return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
-    }
-
-    public static void copyColorToClipboard(Color c) {
-        Utils.copyStringToClipboard(toHTMLHex(c, false));
     }
 
     public static String toHTMLHex(Color c, boolean includeAlpha) {
@@ -296,6 +256,35 @@ public class Colors {
         } else {
             throw new IllegalArgumentException("text = " + text);
         }
+    }
+
+    public static void selectColorWithDialog(JComponent component, String title,
+                                             Color selectedColor, boolean allowTransparency,
+                                             Consumer<Color> colorChangeListener) {
+        Window owner = SwingUtilities.getWindowAncestor(component);
+        selectColorWithDialog(owner, title, selectedColor, allowTransparency, colorChangeListener);
+    }
+
+    public static void selectColorWithDialog(Window owner, String title,
+                                             Color selectedColor, boolean allowTransparency,
+                                             Consumer<Color> colorChangeListener) {
+        if (RandomGUITest.isRunning()) {
+            return;
+        }
+
+        Color prevColor = selectedColor;
+        GlobalEvents.dialogOpened(title);
+        Color color = ColorPicker.showDialog(owner, title, selectedColor,
+            allowTransparency, colorChangeListener);
+        GlobalEvents.dialogClosed(title);
+
+        if (color == null) {  // Cancel was pressed, reset the old color
+            colorChangeListener.accept(prevColor);
+        }
+    }
+
+    public static void copyColorToClipboard(Color c) {
+        Utils.copyStringToClipboard(toHTMLHex(c, false));
     }
 
     public static Color getColorFromClipboard() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,6 @@ import static javax.swing.SwingConstants.CENTER;
  * The "About" dialog of the app.
  */
 public class AboutDialog {
-    private static Box box;
     public static final String HOME_PAGE = "https://pixelitor.sourceforge.io";
 
     private AboutDialog() {
@@ -40,11 +39,9 @@ public class AboutDialog {
     }
 
     public static void showDialog(String aboutText) {
-        createAboutBox();
-
         var tabbedPane = new JTabbedPane();
 
-        tabbedPane.add("About", box);
+        tabbedPane.add("About", createAboutPanel());
         tabbedPane.add("Credits", createCreditsPanel());
         tabbedPane.add("System Info", new SystemInfoPanel());
 
@@ -75,47 +72,48 @@ public class AboutDialog {
         return p;
     }
 
-    private static void createAboutBox() {
-        box = Box.createVerticalBox();
+    private static JComponent createAboutPanel() {
+        JComponent p = Box.createVerticalBox();
 
-        addLabel(AboutDialog.class.getResource("/images/pixelitor_icon48.png"));
+        addLabel(p, AboutDialog.class.getResource("/images/pixelitor_icon48.png"));
 
-        addLabel("<html><b><font size=+1>Pixelitor</font></b></html>");
-        addLabel("Version " + Pixelitor.VERSION_NUMBER);
-        box.add(Box.createRigidArea(new Dimension(10, 20)));
-        addLabel("<html><center> Copyright \u00A9 2009-2020 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
+        addLabel(p, "<html><b><font size=+1>Pixelitor</font></b></html>");
+        addLabel(p, "Version " + Pixelitor.VERSION_NUMBER);
+        p.add(Box.createRigidArea(new Dimension(10, 20)));
+        addLabel(p, "<html><center> Copyright \u00A9 2009-2021 L\u00E1szl\u00F3 Bal\u00E1zs-Cs\u00EDki " +
             "<br>and Contributors<br><br>");
-        addLabel("lbalazscs\u0040gmail.com");
+        addLabel(p, "lbalazscs\u0040gmail.com");
 
-        box.add(createLinkButton());
-        box.add(Box.createGlue());
+        p.add(createLinkButton(p));
+        p.add(Box.createGlue());
+        return p;
     }
 
-    private static JButton createLinkButton() {
+    private static JButton createLinkButton(JComponent aboutPanel) {
         var linkButton = new JButton("<HTML><FONT color=\"#000099\"><U>" + HOME_PAGE + "</U></FONT></HTML>");
 
         linkButton.setHorizontalAlignment(CENTER);
         linkButton.setBorderPainted(false);
         linkButton.setFocusPainted(false);
         linkButton.setOpaque(false);
-        linkButton.setBackground(box.getBackground());
+        linkButton.setBackground(aboutPanel.getBackground());
         linkButton.setAlignmentX(CENTER_ALIGNMENT);
-
         linkButton.addActionListener(new OpenInBrowserAction(null, HOME_PAGE));
+
         return linkButton;
     }
 
-    private static void addLabel(URL url) {
+    private static void addLabel(JComponent p, URL url) {
         var imageIcon = new ImageIcon(url);
         var label = new JLabel(imageIcon, CENTER);
         label.setAlignmentX(CENTER_ALIGNMENT);
-        box.add(label);
+        p.add(label);
     }
 
-    private static void addLabel(String text) {
+    private static void addLabel(JComponent p, String text) {
         var label = new JLabel(text, CENTER);
         label.setAlignmentX(CENTER_ALIGNMENT);
-        box.add(label);
+        p.add(label);
     }
 }
 

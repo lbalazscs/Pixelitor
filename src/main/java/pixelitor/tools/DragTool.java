@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,6 @@ import pixelitor.tools.util.UserDrag;
 
 import java.awt.Cursor;
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 
 /**
  * A tool where where only the drag start and end positions
@@ -47,7 +46,7 @@ public abstract class DragTool extends Tool {
                        boolean constrainIfShiftDown, ClipStrategy clipStrategy) {
 
         super(name, activationKeyChar, iconFileName, toolMessage, cursor,
-                allowOnlyDrawables, handToolForwarding, clipStrategy);
+            allowOnlyDrawables, handToolForwarding, clipStrategy);
 
         this.constrainIfShiftDown = constrainIfShiftDown;
     }
@@ -105,11 +104,7 @@ public abstract class DragTool extends Tool {
     public abstract void dragFinished(PMouseEvent e);
 
     @Override
-    public void paintOverImage(Graphics2D g2, Composition comp,
-                               AffineTransform imageTransform) {
-        if (ended) {
-            return;
-        }
+    public void paintOverImage(Graphics2D g2, Composition comp) {
         if (userDrag == null || !userDrag.isDragging()) {
             return;
         }

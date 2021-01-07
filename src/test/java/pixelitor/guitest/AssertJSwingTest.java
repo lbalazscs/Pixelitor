@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -68,7 +68,8 @@ import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -378,11 +379,11 @@ public class AssertJSwingTest {
 
         // test change opacity
         pw.textBox("layerOpacity")
-                .requireText("100")
-                .deleteText()
-                .enterText("75")
-                .pressKey(VK_ENTER)
-                .releaseKey(VK_ENTER);
+            .requireText("100")
+            .deleteText()
+            .enterText("75")
+            .pressKey(VK_ENTER)
+            .releaseKey(VK_ENTER);
         keyboard.undo("Layer Opacity Change");
         pw.textBox("layerOpacity").requireText("100");
         keyboard.redo("Layer Opacity Change");
@@ -391,8 +392,8 @@ public class AssertJSwingTest {
 
         // test change blending mode
         pw.comboBox("layerBM")
-                .requireSelection(0)
-                .selectItem(2); // multiply
+            .requireSelection(0)
+            .selectItem(2); // multiply
         keyboard.undo("Blending Mode Change");
         pw.comboBox("layerBM").requireSelection(0);
         keyboard.redo("Blending Mode Change");
@@ -411,7 +412,7 @@ public class AssertJSwingTest {
 
         // delete layer 2
         pw.button("deleteLayer")
-                .requireEnabled()
+            .requireEnabled()
             .click();
         app.checkNumLayersIs(1);
         layer1Button.requireSelected();
@@ -1004,7 +1005,6 @@ public class AssertJSwingTest {
         testFileOpen();
         closeOneOfTwo();
         testExportOptimizedJPEG();
-        testExportOpenRaster();
         testExportLayerAnimation();
         testExportTweeningAnimation();
         testReload();
@@ -1151,41 +1151,6 @@ public class AssertJSwingTest {
         app.saveWithOverwrite(baseTestingDir, "saved.jpg");
 
         checkConsistency();
-    }
-
-    private void testExportOpenRaster() {
-        log(1, "testing export openraster");
-
-        app.checkNumLayersIs(1);
-
-        runMenuCommand("Export OpenRaster...");
-        app.findJOptionPane().noButton().click(); // don't save
-
-        runMenuCommand("Export OpenRaster...");
-        app.findJOptionPane().yesButton().click(); // save anyway
-        acceptOpenRasterExportDefaultSettings();
-        app.saveWithOverwrite(baseTestingDir, "saved.ora");
-
-        checkNumLayersAfterReOpening("saved.ora", 1);
-
-        // test it with two layers
-        pw.button("duplicateLayer").click();
-        app.checkNumLayersIs(2);
-
-        runMenuCommand("Export OpenRaster...");
-        acceptOpenRasterExportDefaultSettings();
-        app.saveWithOverwrite(baseTestingDir, "saved.ora");
-        checkNumLayersAfterReOpening("saved.ora", 2);
-
-        // leave the method with one layer
-        pw.button("deleteLayer").click();
-
-        maskMode.set(this);
-        checkConsistency();
-    }
-
-    private void acceptOpenRasterExportDefaultSettings() {
-        findDialogByTitle("Export OpenRaster").button("ok").click();
     }
 
     private void checkNumLayersAfterReOpening(String fileName, int expected) {
@@ -1925,7 +1890,8 @@ public class AssertJSwingTest {
         }
         log(1, "filter " + name);
 
-        app.runFilterWithDialog(name, randomize, reseed, checkShowOriginal, extraButtonsToClick);
+        boolean testPresets = !quick;
+        app.runFilterWithDialog(name, randomize, reseed, checkShowOriginal, testPresets, extraButtonsToClick);
 
         afterFilterRunActions(name);
     }
@@ -2744,8 +2710,8 @@ public class AssertJSwingTest {
         keyboard.undoRedoUndo(mode.getEditName());
 
         if (altDrag && mode != MoveMode.MOVE_SELECTION_ONLY) {
-            // TODO the alt-dragged movement creates two history edits:
-            // a duplicate and a layer move. Now also undo the duplication
+            // The alt-dragged movement creates two history edits:
+            // a duplicate and a layer move. Now also undo the duplication.
             keyboard.undo("Duplicate Layer");
         }
 
@@ -2906,9 +2872,9 @@ public class AssertJSwingTest {
     private void testColorSelector() {
         log(1, "color selector");
 
-        pw.button(FgBgColorSelector.RESET_DEF_COLORS_BUTTON_NAME).click();
-        pw.button(FgBgColorSelector.SWAP_BUTTON_NAME).click();
-        pw.button(FgBgColorSelector.RANDOMIZE_BUTTON_NAME).click();
+        app.setDefaultColors();
+        app.swapColors();
+        app.randomizeColors();
 
         var fgButton = pw.button(FgBgColorSelector.FG_BUTTON_NAME);
         fgButton.click();

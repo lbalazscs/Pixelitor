@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.tools.Tools;
 import pixelitor.tools.transform.TransformBox;
@@ -75,12 +76,12 @@ public class PathTransformer implements PenToolMode {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         // the path will be transformed by the box, which is unnecessary,
         // since it was already transformed in Composition, but not a
         // problem, because the box uses reference-point based transformations
         for (TransformBox box : boxes) {
-            box.imCoordsChanged(at);
+            box.imCoordsChanged(at, comp);
         }
     }
 
@@ -160,14 +161,13 @@ public class PathTransformer implements PenToolMode {
             }
             view.setCursor(contained ? MOVE : DEFAULT);
         }
-
         return false;
     }
 
     @Override
-    public boolean arrowKeyPressed(ArrowKey key) {
+    public boolean arrowKeyPressed(ArrowKey key, View view) {
         if (lastActiveBox != null) {
-            lastActiveBox.arrowKeyPressed(key);
+            lastActiveBox.arrowKeyPressed(key, view);
             return true;
         }
         return false;

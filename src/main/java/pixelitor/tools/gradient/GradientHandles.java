@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools.gradient;
 
+import pixelitor.Composition;
 import pixelitor.RunContext;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
@@ -34,8 +35,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 /**
- * The three handles that can be used to manipulate
- * a gradient by dragging
+ * The three handles that can be used to manipulate a gradient.
  */
 public class GradientHandles implements ToolWidget {
     private final GradientDefiningPoint start;
@@ -54,9 +54,9 @@ public class GradientHandles implements ToolWidget {
         Color activeColor = Color.RED;
 
         start = new GradientDefiningPoint("start", startX, startY, view,
-                defaultColor, activeColor, this);
+            defaultColor, activeColor, this);
         end = new GradientDefiningPoint("end", endX, endY, view,
-                defaultColor, activeColor, this);
+            defaultColor, activeColor, this);
         middle = new GradientCenterPoint(start, end, view, defaultColor, activeColor);
 
         end.setOther(start);
@@ -130,20 +130,20 @@ public class GradientHandles implements ToolWidget {
         } else { // in random tests they can be different
             if (RunContext.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
-                        + ImageArea.getMode());
+                    + ImageArea.getMode());
             }
         }
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         start.imTransformOnlyThis(at, false);
         end.imTransformOnlyThis(at, false);
         middle.imTransformOnlyThis(at, false);
     }
 
     @Override
-    public void arrowKeyPressed(ArrowKey key) {
+    public void arrowKeyPressed(ArrowKey key, View view) {
         middle.arrowKeyPressed(key);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -57,7 +58,6 @@ public class PathBuilder implements PenToolMode {
             "<b>Alt-drag</b> breaks handles, " +
             "<b>Shift-drag</b> constrains angles.";
 
-
     private PathBuilder() {
     }
 
@@ -85,7 +85,7 @@ public class PathBuilder implements PenToolMode {
 
         if (state == NO_INTERACTION) {
             if (controlDown) {
-                if (handleCtrlPressHitBeforeSubpath(x, y, altDown)) {
+                if (handleCtrlPressHitBeforeSubpath(altDown, x, y)) {
                     return;
                 }
             } else if (altDown) {
@@ -108,7 +108,7 @@ public class PathBuilder implements PenToolMode {
             }
 
             if (controlDown) {
-                handleCtrlPressInMovingState(e, x, y, altDown);
+                handleCtrlPressInMovingState(e, altDown, x, y);
                 return;
             }
 
@@ -117,10 +117,10 @@ public class PathBuilder implements PenToolMode {
                 DraggablePoint hit = path.handleWasHit(x, y, altDown);
                 if (hit != null) {
                     if (hit instanceof ControlPoint) {
-                        breakAndStartMoving(x, y, (ControlPoint) hit);
+                        breakAndStartMoving((ControlPoint) hit, x, y);
                         return;
                     } else if (hit instanceof AnchorPoint) {
-                        startDraggingOutNewHandles(x, y, (AnchorPoint) hit);
+                        startDraggingOutNewHandles((AnchorPoint) hit, x, y);
                         return;
                     }
                 } else {
@@ -144,49 +144,51 @@ public class PathBuilder implements PenToolMode {
         assert path.checkConsistency();
     }
 
-    private boolean handleCtrlPressHitBeforeSubpath(double x, double y, boolean altDown) {
+    private static boolean handleCtrlPressHitBeforeSubpath(boolean altDown,
+                                                           double x, double y) {
         // if we are over an old point, just move it
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
-            startMovingPrevious(x, y, hit);
+            startMovingPrevious(hit, x, y);
             return true;
         }
         return false;
     }
 
-    private boolean handleAltPressHitBeforeSubpath(double x, double y) {
+    private static boolean handleAltPressHitBeforeSubpath(double x, double y) {
         // if only alt is down, then break control points
         DraggablePoint hit = path.handleWasHit(x, y, true);
         if (hit != null) {
             if (hit instanceof ControlPoint) {
-                breakAndStartMoving(x, y, (ControlPoint) hit);
+                breakAndStartMoving((ControlPoint) hit, x, y);
                 return true;
             } else if (hit instanceof AnchorPoint) {
-                startDraggingOutNewHandles(x, y, (AnchorPoint) hit);
+                startDraggingOutNewHandles((AnchorPoint) hit, x, y);
                 return true;
             }
         }
         return false;
     }
 
-    private void handleCtrlPressInMovingState(PMouseEvent e, double x, double y, boolean altDown) {
+    private static void handleCtrlPressInMovingState(PMouseEvent e, boolean altDown,
+                                                     double x, double y) {
         DraggablePoint hit = path.handleWasHit(x, y, altDown);
         if (hit != null) {
-            startMovingPrevious(x, y, hit);
+            startMovingPrevious(hit, x, y);
         } else {
             // control is down, but nothing was hit
             path.finishByCtrlClick(e.getComp());
         }
     }
 
-    private void startDraggingOutNewHandles(double x, double y, AnchorPoint ap) {
+    private static void startDraggingOutNewHandles(AnchorPoint ap, double x, double y) {
         ap.retractHandles();
         // drag the retracted handles out
         ap.setType(SYMMETRIC);
-        startMovingPrevious(x, y, ap.ctrlOut);
+        startMovingPrevious(ap.ctrlOut, x, y);
     }
 
-    private void breakAndStartMoving(double x, double y, ControlPoint cp) {
+    private static void breakAndStartMoving(ControlPoint cp, double x, double y) {
         if (!cp.isRetracted()) {
             // alt-press on an anchor point should break the handle
             cp.getAnchor().setType(CUSP);
@@ -195,10 +197,10 @@ public class PathBuilder implements PenToolMode {
             cp.getAnchor().setType(SYMMETRIC);
         }
         // after breaking, move it as usual
-        startMovingPrevious(x, y, cp);
+        startMovingPrevious(cp, x, y);
     }
 
-    private void startMovingPrevious(double x, double y, DraggablePoint point) {
+    private static void startMovingPrevious(DraggablePoint point, double x, double y) {
         point.setActive(true);
         point.mousePressed(x, y);
         path.setBuildState(DRAG_EDITING_PREVIOUS);
@@ -242,8 +244,7 @@ public class PathBuilder implements PenToolMode {
         } else {
             last.setType(SYMMETRIC);
         }
-        ControlPoint ctrlOut = last.ctrlOut;
-        ctrlOut.mouseDragged(x, y, e.isShiftDown());
+        last.ctrlOut.mouseDragged(x, y, e.isShiftDown());
 
         path.setBuildState(DRAGGING_THE_CONTROL_OF_LAST);
     }
@@ -366,7 +367,7 @@ public class PathBuilder implements PenToolMode {
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
         if (RunContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
-                    "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         path.setBuildState(MOVING_TO_NEXT_ANCHOR);
@@ -378,7 +379,7 @@ public class PathBuilder implements PenToolMode {
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
         if (RunContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
-                    "where = '%s, active = %s'%n", where, view.isActive());
+                "where = '%s, active = %s'%n", where, view.isActive());
         }
 
         BuildState dragState = NO_INTERACTION;
@@ -402,12 +403,12 @@ public class PathBuilder implements PenToolMode {
     }
 
     @Override
-    public void imCoordsChanged(AffineTransform at) {
+    public void imCoordsChanged(AffineTransform at, Composition comp) {
         // do nothing
     }
 
     @Override
-    public boolean arrowKeyPressed(ArrowKey key) {
+    public boolean arrowKeyPressed(ArrowKey key, View view) {
         if (path == null) {
             // there's nothing to nudge
             return false;

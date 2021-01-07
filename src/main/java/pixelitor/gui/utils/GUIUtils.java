@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -358,5 +358,25 @@ public final class GUIUtils {
         button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
         button.addActionListener(action);
         return button;
+    }
+
+    public static <E> JComboBox<E> createComboBox(ComboBoxModel<E> model,
+                                                  ActionListener al) {
+        JComboBox<E> cb = new JComboBox<>(model);
+        cb.addActionListener(al);
+
+        // make sure all values are visible without a scrollbar
+        cb.setMaximumRowCount(model.getSize());
+
+        return cb;
+    }
+
+    public static <E> JComboBox<E> createComboBox(E[] values) {
+        JComboBox<E> cb = new JComboBox<>(values);
+
+        // make sure all values are visible without a scrollbar
+        cb.setMaximumRowCount(values.length);
+
+        return cb;
     }
 }

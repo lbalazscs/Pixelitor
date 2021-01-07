@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -41,8 +41,8 @@ public enum StrokeType {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new BasicStroke(width, cap, join, 1.5f,
-                    dashFloats,
-                    0.0f);
+                dashFloats,
+                0.0f);
         }
 
         @Override
@@ -68,26 +68,32 @@ public enum StrokeType {
             return specifiedWidth / 2;
         }
     }, WOBBLE("Wobble", true) {
+        private static final float SIZE_DIVIDING_FACTOR = 4.0f;
         private float lastWidth = 0.0f;
         private WobbleStroke wobbleStroke;
 
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             if (wobbleStroke == null) {
-                wobbleStroke = new WobbleStroke(0.5f, width, 10);
+                createStroke(width);
                 lastWidth = width;
                 return wobbleStroke;
             }
 
             if (width == lastWidth) {
-                // avoids calling new WobbleStroke objects, the main benefit is that
+                // avoids creating new WobbleStroke objects, the main benefit is that
                 // the seed is not changed when the mouse is released
                 return wobbleStroke;
             } else {
-                wobbleStroke = new WobbleStroke(0.5f, width, 10);
+                createStroke(width);
                 lastWidth = width;
                 return wobbleStroke;
             }
+        }
+
+        private void createStroke(float width) {
+            wobbleStroke = new WobbleStroke(0.5f,
+                width / SIZE_DIVIDING_FACTOR, 10);
         }
 
         @Override
@@ -118,8 +124,8 @@ public enum StrokeType {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashFloats) {
             return new CompositeStroke(
-                    new BasicStroke(width, cap, join),
-                    innerOutlineStroke);
+                new BasicStroke(width, cap, join),
+                innerOutlineStroke);
         }
 
         @Override

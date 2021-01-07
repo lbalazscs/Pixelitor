@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,7 +19,6 @@ package pixelitor.filters;
 
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
-import pixelitor.menus.RepeatMenuItem;
 
 import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.filters.util.FilterUtils.getLastFilter;
@@ -30,9 +29,10 @@ import static pixelitor.filters.util.FilterUtils.getLastFilter;
  */
 public class RepeatLast extends DrawableAction {
     public static final RepeatLast INSTANCE = new RepeatLast();
+    public static final String DEFAULT_NAME = "Repeat Last";
 
     private RepeatLast() {
-        super(RepeatMenuItem.DEFAULT_NAME);
+        super(DEFAULT_NAME);
         setEnabled(false);
     }
 

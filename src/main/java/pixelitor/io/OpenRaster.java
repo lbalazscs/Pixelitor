@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -44,7 +44,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * OpenRaster file format support.
- * Only image layers are saved as the format does not cover other layer types.
+ * Only image layers are saved as the format does not cover
+ * other layer types or layer masks.
  */
 public class OpenRaster {
     private static final String MERGED_IMAGE_NAME = "mergedimage.png";
@@ -52,15 +53,15 @@ public class OpenRaster {
     private OpenRaster() {
     }
 
-    public static void uncheckedWrite(Composition comp, File outFile, boolean addMergedImage) {
+    public static void uncheckedWrite(Composition comp, File outFile) {
         try {
-            write(comp, outFile, addMergedImage);
+            write(comp, outFile);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    public static void write(Composition comp, File outFile, boolean addMergedImage) throws IOException {
+    public static void write(Composition comp, File outFile) throws IOException {
         var mainTracker = new StatusBarProgressTracker("Writing " + outFile.getName(), 100);
 
         var fos = new FileOutputStream(outFile);
@@ -73,10 +74,7 @@ public class OpenRaster {
             """, comp.getCanvasWidth(), comp.getCanvasHeight());
 
         int numLayers = comp.getNumLayers();
-        int numImageLayers = comp.getNumImageLayers();
-        if (addMergedImage) {
-            numImageLayers++;
-        }
+        int numImageLayers = comp.getNumImageLayers() + 1; // +1 for the merged image
         double workRatio = 1.0 / numImageLayers;
 
         // Reverse iteration: in stack.xml the first element in a stack is the uppermost.
@@ -89,13 +87,12 @@ public class OpenRaster {
             }
         }
 
-        if (addMergedImage) {
-            zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
-            var subTaskTracker = new SubtaskProgressTracker(workRatio, mainTracker);
-            var img = comp.getCompositeImage();
-            TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
-            zos.closeEntry();
-        }
+        // add merged image
+        zos.putNextEntry(new ZipEntry(MERGED_IMAGE_NAME));
+        var subTaskTracker = new SubtaskProgressTracker(workRatio, mainTracker);
+        var img = comp.getCompositeImage();
+        TrackedIO.writeToStream(img, zos, "PNG", subTaskTracker);
+        zos.closeEntry();
 
         stackXML += "</stack>\n</image>";
 
@@ -210,7 +207,6 @@ public class OpenRaster {
 
             int tx = Utils.parseInt(layerX, 0);
             int ty = Utils.parseInt(layerY, 0);
-            // TODO assuming that there is no layer mask
             ImageLayer layer = new ImageLayer(comp, image, layerName,
                 null, tx, ty);
 

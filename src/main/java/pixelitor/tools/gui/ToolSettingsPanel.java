@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -42,8 +42,8 @@ public class ToolSettingsPanel extends JPanel {
     public void addSeparator() {
         JSeparator separator = new JSeparator(VERTICAL);
         separator.setPreferredSize(new Dimension(
-                separator.getPreferredSize().width,
-                26));
+            separator.getPreferredSize().width,
+            26));
         add(separator);
     }
 
@@ -59,31 +59,28 @@ public class ToolSettingsPanel extends JPanel {
         addWithLabel(text, box, name);
     }
 
-    public JButton addButton(Action action, String name, String toolTip) {
+    public void addButton(Action action, String name, String toolTip) {
         JButton button = new JButton(action);
         button.setName(name);
         button.setToolTipText(toolTip);
         add(button);
-        return button;
     }
 
-    public JButton addButton(String text, ActionListener listener,
-                             String name, String toolTip) {
+    public void addButton(String text, ActionListener listener,
+                          String name, String toolTip) {
         JButton button = new JButton(text);
         button.setName(name);
         button.setToolTipText(toolTip);
         button.addActionListener(listener);
         add(button);
-        return button;
     }
 
-    public JCheckBox addCheckBox(String text, boolean selected, String name,
-                                 Consumer<Boolean> consumer) {
+    public void addCheckBox(String text, boolean selected, String name,
+                            Consumer<Boolean> consumer) {
         JCheckBox checkBox = new JCheckBox(text, selected);
         checkBox.setName(name);
         checkBox.addActionListener(e -> consumer.accept(checkBox.isSelected()));
         add(checkBox);
-        return checkBox;
     }
 
     public JCheckBox addCheckBox(String text, boolean selected, String name,

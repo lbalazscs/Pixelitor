@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,7 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.RunContext;
 import pixelitor.gui.View;
@@ -47,7 +48,7 @@ public interface PenToolMode {
 
     void coCoordsChanged(View view);
 
-    void imCoordsChanged(AffineTransform at);
+    void imCoordsChanged(AffineTransform at, Composition comp);
 
     String getToolMessage();
 
@@ -74,8 +75,8 @@ public interface PenToolMode {
                 if (path.getComp() != comp) {
                     if (RunContext.isDevelopment()) {
                         throw new IllegalStateException(
-                                "path's comp is " + path.getComp().getName()
-                                + ", active comp is " + comp.getName());
+                            "path's comp is %s, active comp is %s".formatted(
+                                path.getComp().getName(), comp.getName()));
                     }
                     // the pen tools has a path but it does not belong to the
                     // active composition - happened in Mac random gui tests
@@ -98,7 +99,7 @@ public interface PenToolMode {
     /**
      * Returns true if the key event was used for something
      */
-    boolean arrowKeyPressed(ArrowKey key);
+    boolean arrowKeyPressed(ArrowKey key, View view);
 
     default DebugNode createDebugNode() {
         var node = new DebugNode("pen tool mode " + this, this);

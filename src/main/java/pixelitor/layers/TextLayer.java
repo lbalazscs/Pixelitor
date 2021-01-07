@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -72,6 +72,7 @@ public class TextLayer extends ContentLayer {
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+
         isAdjustment = settings.isWatermark();
 
         painter = new TransformedTextPainter();
@@ -155,9 +156,7 @@ public class TextLayer extends ContentLayer {
         d.translationX = translationX;
         d.translationY = translationY;
         d.painter.setTranslation(painter.getTx(), painter.getTy());
-
         d.setSettings(new TextSettings(settings));
-
         duplicateMask(d, compCopy);
 
         return d;
@@ -200,45 +199,30 @@ public class TextLayer extends ContentLayer {
     }
 
     public ImageLayer replaceWithRasterized() {
-        return replaceWithRasterized(true);
-    }
-
-    // TODO if a text layer has a mask, then this will apply the
-    // mask to the layer, resulting in an image layer without a mask.
-    // This probably should be considered a bug, and instead the mask
-    // should be kept, and the rasterized pixels should not be affected
-    // by the mask.
-    public ImageLayer replaceWithRasterized(boolean addHistory) {
-        BufferedImage rasterizedImage = createRasterizedImage();
-
+        var rasterizedImage = createRasterizedImage(false);
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getName());
-
-        if (addHistory) {
-            var edit = new TextLayerRasterizeEdit(comp, this, newImageLayer);
-            History.add(edit);
-        }
-
-        new LayerAdder(comp)
-            .noRefresh()
-            .atIndex(comp.getLayerIndex(this))
-            .add(newImageLayer);
-
-        comp.deleteLayer(this, false);
-        newImageLayer.updateIconImage();
-
+        newImageLayer.setBlendingMode(getBlendingMode(), false);
+        newImageLayer.setOpacity(getOpacity(), false);
+        History.add(new TextLayerRasterizeEdit(comp, this, newImageLayer));
+        comp.replaceLayer(this, newImageLayer);
         Messages.showInStatusBar(String.format(
             "The layer <b>\"%s\"</b> was rasterized.", getName()));
-
         return newImageLayer;
     }
 
     /**
-     * Returns a canvas-sized image corresponding to the contents if this layer
+     * Returns a canvas-sized image corresponding to the contents of this layer.
      */
-    public BufferedImage createRasterizedImage() {
+    public BufferedImage createRasterizedImage(boolean applyMask) {
         BufferedImage img = comp.getCanvas().createTmpImage();
         Graphics2D g = img.createGraphics();
-        applyLayer(g, img, true);
+        if (applyMask) {
+            // the layer's blending mode will be ignored
+            // because firstVisibleLayer is set to true
+            applyLayer(g, img, true);
+        } else {
+            paintLayerOnGraphics(g, true);
+        }
         g.dispose();
         return img;
     }
@@ -368,7 +352,7 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public BufferedImage getRepresentingImage() {
-        return createRasterizedImage();
+        return createRasterizedImage(true);
     }
 
     @Override

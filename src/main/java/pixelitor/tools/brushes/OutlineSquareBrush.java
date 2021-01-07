@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -49,8 +49,8 @@ public class OutlineSquareBrush extends OutlineBrush {
     }
 
     @Override
-    public double getEffectiveRadius() {
+    public double getMaxEffectiveRadius() {
         // multiply with sqrt 2
-        return super.getEffectiveRadius() * 1.42;
+        return super.getMaxEffectiveRadius() * 1.42;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -48,38 +48,38 @@ public class Tests3x3 {
     public static final int MAGENTA = Color.MAGENTA.getRGB();
     public static final int CYAN = Color.CYAN.getRGB();
 
-    public static final int SEMI_TRANSPARENT_WHITE = Colors.toPackedInt(128, 255, 0, 0);
-    public static final int SEMI_TRANSPARENT_GRAY = Colors.toPackedInt(128, 0, 255, 0);
-    public static final int SEMI_TRANSPARENT_BLACK = Colors.toPackedInt(128, 0, 0, 255);
+    public static final int SEMI_TRANSPARENT_WHITE = Colors.toPackedARGB(128, 255, 0, 0);
+    public static final int SEMI_TRANSPARENT_GRAY = Colors.toPackedARGB(128, 0, 255, 0);
+    public static final int SEMI_TRANSPARENT_BLACK = Colors.toPackedARGB(128, 0, 0, 255);
 
     private Tests3x3() {
     }
 
     public static BufferedImage getStandardImage1() {
         BufferedImage img = ImageUtils.createSysCompatibleImage(3, 3);
-        img.setRGB(0, 0, Colors.toPackedInt(255, 223, 235, 120));
-        img.setRGB(0, 1, Colors.toPackedInt(255, 35, 125, 43));
-        img.setRGB(0, 2, Colors.toPackedInt(255, 89, 28, 207));
-        img.setRGB(1, 0, Colors.toPackedInt(255, 101, 224, 114));
-        img.setRGB(1, 1, Colors.toPackedInt(255, 92, 49, 135));
-        img.setRGB(1, 2, Colors.toPackedInt(255, 27, 238, 72));
-        img.setRGB(2, 0, Colors.toPackedInt(255, 255, 91, 179));
-        img.setRGB(2, 1, Colors.toPackedInt(255, 88, 190, 199));
-        img.setRGB(2, 2, Colors.toPackedInt(255, 128, 128, 128));
+        img.setRGB(0, 0, Colors.toPackedARGB(255, 223, 235, 120));
+        img.setRGB(0, 1, Colors.toPackedARGB(255, 35, 125, 43));
+        img.setRGB(0, 2, Colors.toPackedARGB(255, 89, 28, 207));
+        img.setRGB(1, 0, Colors.toPackedARGB(255, 101, 224, 114));
+        img.setRGB(1, 1, Colors.toPackedARGB(255, 92, 49, 135));
+        img.setRGB(1, 2, Colors.toPackedARGB(255, 27, 238, 72));
+        img.setRGB(2, 0, Colors.toPackedARGB(255, 255, 91, 179));
+        img.setRGB(2, 1, Colors.toPackedARGB(255, 88, 190, 199));
+        img.setRGB(2, 2, Colors.toPackedARGB(255, 128, 128, 128));
         return img;
     }
 
     public static BufferedImage getStandardImage2() {
         BufferedImage img = ImageUtils.createSysCompatibleImage(3, 3);
-        img.setRGB(0, 0, Colors.toPackedInt(255, 190, 149, 66));
-        img.setRGB(0, 1, Colors.toPackedInt(255, 37, 159, 8));
-        img.setRGB(0, 2, Colors.toPackedInt(255, 63, 107, 198));
-        img.setRGB(1, 0, Colors.toPackedInt(255, 174, 25, 53));
-        img.setRGB(1, 1, Colors.toPackedInt(255, 146, 58, 135));
-        img.setRGB(1, 2, Colors.toPackedInt(255, 61, 71, 82));
-        img.setRGB(2, 0, Colors.toPackedInt(255, 143, 125, 211));
-        img.setRGB(2, 1, Colors.toPackedInt(255, 208, 84, 44));
-        img.setRGB(2, 2, Colors.toPackedInt(255, 209, 72, 111));
+        img.setRGB(0, 0, Colors.toPackedARGB(255, 190, 149, 66));
+        img.setRGB(0, 1, Colors.toPackedARGB(255, 37, 159, 8));
+        img.setRGB(0, 2, Colors.toPackedARGB(255, 63, 107, 198));
+        img.setRGB(1, 0, Colors.toPackedARGB(255, 174, 25, 53));
+        img.setRGB(1, 1, Colors.toPackedARGB(255, 146, 58, 135));
+        img.setRGB(1, 2, Colors.toPackedARGB(255, 61, 71, 82));
+        img.setRGB(2, 0, Colors.toPackedARGB(255, 143, 125, 211));
+        img.setRGB(2, 1, Colors.toPackedARGB(255, 208, 84, 44));
+        img.setRGB(2, 2, Colors.toPackedARGB(255, 209, 72, 111));
         return img;
     }
 
@@ -98,7 +98,7 @@ public class Tests3x3 {
                 int r = rand.nextInt(256);
                 int g = rand.nextInt(256);
                 int b = rand.nextInt(256);
-                img.setRGB(x, y, Colors.toPackedInt(a, r, g, b));
+                img.setRGB(x, y, Colors.toPackedARGB(a, r, g, b));
             }
         }
         return img;
@@ -126,7 +126,7 @@ public class Tests3x3 {
 //        BufferedImage img = getStandardImage(false);
         var comp = Composition.fromImage(img, null, "3x3 Test");
 
-        if(withMask) {
+        if (withMask) {
             BufferedImage maskImg = getStandardMaskImage();
             Layer layer = comp.getLayer(0);
             LayerMask mask = new LayerMask(comp, maskImg, layer, 0, 0);
@@ -142,7 +142,7 @@ public class Tests3x3 {
         int width = actual.getWidth();
         int height = actual.getHeight();
         s += format("BufferedImage img = ImageUtils.createCompatibleImage(%d, %d);\n",
-                width, height);
+            width, height);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -153,7 +153,7 @@ public class Tests3x3 {
                 int b = rgb & 0xFF;
 
                 s += format("    img.setRGB(%d, %d, toPackedInt(%d, %d, %d, %d));\n",
-                        x, y, a, r, g, b);
+                    x, y, a, r, g, b);
             }
         }
 

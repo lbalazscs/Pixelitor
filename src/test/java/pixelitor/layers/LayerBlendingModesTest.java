@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -35,7 +35,7 @@ import static pixelitor.utils.ImageUtils.create1x1Image;
 
 @DisplayName("Layer blending mode tests")
 @TestMethodOrder(MethodOrderer.Random.class)
-public class LayerBlendingModesTest {
+class LayerBlendingModesTest {
     private Composition comp;
 
     private ImageLayer lowerLayer;
@@ -58,7 +58,8 @@ public class LayerBlendingModesTest {
         comp = fromImage(create1x1Image(lowerColor), null, "test");
         TestHelper.setupMockViewFor(comp);
 
-        upperLayer = TestHelper.createImageLayer(comp, create1x1Image(upperColor), "Layer 2");
+        upperLayer = TestHelper.createImageLayer(
+            comp, create1x1Image(upperColor), "Layer 2");
         comp.addLayerInInitMode(upperLayer);
 
         lowerLayer = (ImageLayer) comp.getLayer(0);
@@ -68,8 +69,10 @@ public class LayerBlendingModesTest {
         assert lowerLayer.getComp() == upperLayer.getComp();
         assert upperLayer == comp.getActiveLayer();
 
-        invertAdjustment = TestHelper.createAdjustmentLayer(comp, "Invert", new Invert());
-        alwaysUpperColorAdjustment = TestHelper.createAdjustmentLayer(comp, "One Color", new OneColorFilter(upperColor));
+        invertAdjustment = TestHelper.createAdjustmentLayer(
+            comp, "Invert", new Invert());
+        alwaysUpperColorAdjustment = TestHelper.createAdjustmentLayer(
+            comp, "One Color", new OneColorFilter(upperColor));
         upperColorTextLayer = createTestTextLayerWithColor(upperColor);
     }
 
@@ -297,10 +300,10 @@ public class LayerBlendingModesTest {
 
     private static Color invert(Color in) {
         return new Color(
-                255 - in.getRed(),
-                255 - in.getGreen(),
-                255 - in.getBlue(),
-                in.getAlpha()
+            255 - in.getRed(),
+            255 - in.getGreen(),
+            255 - in.getBlue(),
+            in.getAlpha()
         );
     }
 }

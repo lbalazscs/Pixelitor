@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.tools.util;
 
-import pixelitor.Composition;
 import pixelitor.gui.View;
 import pixelitor.utils.Shapes;
 
@@ -108,36 +107,30 @@ public class PRectangle {
         coRect = view.imageToComponentSpace(imRect);
     }
 
-    public void imCoordsChanged(Composition comp, AffineTransform at) {
+    public void imCoordsChanged(View view, AffineTransform at) {
         Point2D upperLeft = new Point2D.Double(
-                imRect.getX(), imRect.getY());
+            imRect.getX(), imRect.getY());
         Point2D lowerRight = new Point2D.Double(
-                imRect.getX() + imRect.getWidth(),
-                imRect.getY() + imRect.getHeight());
+            imRect.getX() + imRect.getWidth(),
+            imRect.getY() + imRect.getHeight());
 
         Point2D newUpperLeft = at.transform(upperLeft, null);
         Point2D newLowerRight = at.transform(lowerRight, null);
 
         imRect = new Rectangle2D.Double(newUpperLeft.getX(), newUpperLeft.getY(),
-                newLowerRight.getX() - newUpperLeft.getX(),
-                newLowerRight.getY() - newUpperLeft.getY());
+            newLowerRight.getX() - newUpperLeft.getX(),
+            newLowerRight.getY() - newUpperLeft.getY());
         imRect = Shapes.toPositiveRect(imRect);
 
-        recalcCo(comp.getView());
+        recalcCo(view);
     }
 
     public void recalcIm(View view) {
         imRect = view.componentToImageSpace(coRect);
     }
 
-    public ImDrag toImDrag() {
-        return new ImDrag(imRect);
-    }
-
     @Override
     public String toString() {
-        return "PRectangle{coRect=" + coRect +
-                ", imRect=" + imRect +
-                '}';
+        return "PRectangle{coRect=" + coRect + ", imRect=" + imRect + '}';
     }
 }

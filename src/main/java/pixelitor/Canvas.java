@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,7 +21,9 @@ import pixelitor.gui.View;
 import pixelitor.tools.Symmetry;
 import pixelitor.utils.ImageUtils;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -105,6 +107,14 @@ public class Canvas implements Serializable {
     }
 
     /**
+     * Returns the (zoomed) bounds in component space
+     */
+    public Rectangle2D getCoBounds(View view) {
+        return new Rectangle2D.Double(
+            view.getCanvasStartX(), view.getCanvasStartY(), zoomedWidth, zoomedHeight);
+    }
+
+    /**
      * Returns the size in image space
      */
     public Dimension getSize() {
@@ -168,6 +178,7 @@ public class Canvas implements Serializable {
         Area canvasArea = new Area(canvasBounds);
         Area shapeArea = new Area(shape);
         shapeArea.intersect(canvasArea);
+
         return shapeArea;
     }
 
@@ -190,7 +201,6 @@ public class Canvas implements Serializable {
 
     @Override
     public String toString() {
-        return "Canvas{width=" + width
-            + ", height=" + height + '}';
+        return "Canvas{width=" + width + ", height=" + height + '}';
     }
 }

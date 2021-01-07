@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -171,7 +171,7 @@ public class Tools {
     }
 
     public static void imCoordsChanged(Composition comp, AffineTransform at) {
-        currentTool.imCoordsChanged(comp, at);
+        currentTool.imCoordsChanged(at, comp);
     }
 
     public static void editedObjectChanged(Layer layer) {
