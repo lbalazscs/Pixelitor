@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,10 +24,11 @@ import java.util.Locale;
  * The languages supported by Pixelitor
  */
 public enum Language {
+    DUTCH("Dutch", "nl") {},
     ENGLISH("English", "en") {},
+    FRENCH("French", "fr") {},
     GERMAN("German", "de") {},
-    SPANISH("Spanish", "es") {},
-    FRENCH("French", "fr") {};
+    SPANISH("Spanish", "es") {};
 
     private final String guiName;
     private final String code;
