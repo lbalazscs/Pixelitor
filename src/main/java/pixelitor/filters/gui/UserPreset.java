@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,10 +31,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a user-created preset for a filter.
+ * It is similar to but different from {@link FilterState} because
+ * its internal structure is more suitable for saving as a flat text file.
+ */
 public class UserPreset {
     private final String name;
     private File inFile;
-    private final String filterName;
+    private final String presetDirName;
     private boolean loaded = false;
     private final Map<String, String> map = new LinkedHashMap<>();
 
@@ -45,19 +50,19 @@ public class UserPreset {
     /**
      * Used when a new preset is created by the user
      */
-    public UserPreset(String name, String filterName) {
+    public UserPreset(String name, String presetDirName) {
         this.name = name;
-        this.filterName = filterName;
+        this.presetDirName = presetDirName;
         loaded = true;
     }
 
     /**
      * Used then the existence of a preset file is detected
      */
-    public UserPreset(File inFile, String filterName) {
+    public UserPreset(File inFile, String presetDirName) {
         this.name = FileUtils.stripExtension(inFile.getName());
         this.inFile = inFile;
-        this.filterName = filterName;
+        this.presetDirName = presetDirName;
         loaded = false;
     }
 
@@ -79,12 +84,28 @@ public class UserPreset {
         map.put(key, value);
     }
 
+    public int getInt(String key) {
+        return Integer.parseInt(get(key));
+    }
+
+    public void putInt(String key, int i) {
+        put(key, String.valueOf(i));
+    }
+
+    public boolean getBoolean(String key) {
+        return "yes".equalsIgnoreCase(get(key));
+    }
+
+    public void putBoolean(String key, boolean b) {
+        put(key, b ? "yes" : "no");
+    }
+
     public float getFloat(String key) {
         return Float.parseFloat(get(key));
     }
 
     public void putFloat(String key, float f) {
-        put(key, "%.2f".formatted(f));
+        put(key, "%.4f".formatted(f));
     }
 
     public Color getColor(String key) {
@@ -118,7 +139,7 @@ public class UserPreset {
         assert inFile == null;
         assert loaded;
 
-        File dir = new File(PRESETS_DIR + FILE_SEPARATOR + filterName);
+        File dir = new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
         if (!dir.exists()) {
             dir.mkdirs();
         }
@@ -135,7 +156,7 @@ public class UserPreset {
         Messages.showInStatusBar("Preset saved to <b>" + outFile.getAbsolutePath() + "</b>");
     }
 
-    public Action asAction(ParamSet paramSet) {
+    public Action asAction(DialogMenuOwner owner) {
         return new AbstractAction(name) {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,7 +167,7 @@ public class UserPreset {
                         throw new UncheckedIOException(ex);
                     }
                 }
-                paramSet.loadPreset(UserPreset.this);
+                owner.loadStateFrom(UserPreset.this);
             }
         };
     }
@@ -156,8 +177,8 @@ public class UserPreset {
         return name + " " + map.toString();
     }
 
-    public static List<UserPreset> loadPresets(String filterName) {
-        File filterDir = new File(PRESETS_DIR + FILE_SEPARATOR + filterName);
+    public static List<UserPreset> loadPresets(String presetDirName) {
+        File filterDir = new File(PRESETS_DIR + FILE_SEPARATOR + presetDirName);
         if (!filterDir.exists()) {
             return List.of();
         }
@@ -170,7 +191,7 @@ public class UserPreset {
         List<UserPreset> list = new ArrayList<>();
         for (String fileName : fileNames) {
             File presetFile = new File(filterDir, fileName);
-            list.add(new UserPreset(presetFile, filterName));
+            list.add(new UserPreset(presetFile, presetDirName));
         }
         return list;
     }

@@ -28,7 +28,7 @@ import org.assertj.swing.fixture.*;
 import org.assertj.swing.launcher.ApplicationLauncher;
 import pixelitor.Composition;
 import pixelitor.colors.FgBgColorSelector;
-import pixelitor.filters.gui.FilterMenuBar;
+import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.ShowOriginal;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.io.Dirs;
@@ -61,7 +61,7 @@ import static pixelitor.utils.Threads.threadInfo;
  */
 public class AppRunner {
     public static final int ROBOT_DELAY_DEFAULT = 50; // millis
-    public static final int ROBOT_DELAY_SLOW = 300; // millis
+    private static final int ROBOT_DELAY_SLOW = 300; // millis
 
     private static final DateTimeFormatter DATE_FORMAT_HM =
         DateTimeFormatter.ofPattern("HH:mm");
@@ -505,7 +505,7 @@ public class AppRunner {
         JDialog realDialog = (JDialog) filterDialog.target();
         JMenuBar menuBar = realDialog.getJMenuBar();
         if (menuBar != null) {
-            if (FilterMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
+            if (DialogMenuBar.PRESETS.equals(menuBar.getMenu(0).getText())) {
                 filterDialog.menuItem("savePreset").click();
                 var pane = findJOptionPane();
                 pane.textBox().enterText("test preset");

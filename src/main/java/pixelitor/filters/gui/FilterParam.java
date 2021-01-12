@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,11 +61,19 @@ public interface FilterParam extends FilterSetting, Resettable {
      */
     void setState(String savedValue);
 
+    /**
+     * Load the state from the given user preset.
+     */
     default void loadStateFrom(UserPreset preset) {
+        // overridden in the composite params
         setState(preset.get(getName()));
     }
 
+    /**
+     * Save the state from the given user preset.
+     */
     default void saveStateTo(UserPreset preset) {
+        // overridden in the composite params
         preset.put(getName(), copyState().toSaveString());
     }
 

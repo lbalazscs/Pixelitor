@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.filters.convolve;
 
+import pixelitor.filters.gui.DialogMenuBar;
 import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterMenuBar;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 import pixelitor.utils.NotANumberException;
@@ -93,7 +93,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         // this must come after adding the textFieldsP to the box
         var minimumSize = textFieldsP.getMinimumSize();
         textFieldsP.setPreferredSize(new Dimension(
-                size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
+            size * TEXTFIELD_PREFERRED_WIDTH, minimumSize.height));
     }
 
     private void addNormalizeButton(Box leftVerticalBox) {
@@ -125,7 +125,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void initPresetBox() {
         presetsBox = Box.createVerticalBox();
-        presetsBox.setBorder(createTitledBorder(FilterMenuBar.PRESETS));
+        presetsBox.setBorder(createTitledBorder(DialogMenuBar.PRESETS));
 
         if (size == 3) {
             init3x3Presets();
@@ -168,117 +168,117 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void init5x5Presets() {
         initPreset("Diamond Blur", new float[]{
-                0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
-                0.0f, 0.077f, 0.077f, 0.077f, 0.0f,
-                0.077f, 0.077f, 0.077f, 0.077f, 0.077f,
-                0.0f, 0.077f, 0.077f, 0.077f, 0.0f,
-                0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
+            0.0f, 0.077f, 0.077f, 0.077f, 0.0f,
+            0.077f, 0.077f, 0.077f, 0.077f, 0.077f,
+            0.0f, 0.077f, 0.077f, 0.077f, 0.0f,
+            0.0f, 0.0f, 0.077f, 0.0f, 0.0f,
         });
 
         initPreset("Motion Blur", new float[]{
-                0.0f, 0.0f, 0.0f, 0.0f, 0.2f,
-                0.0f, 0.0f, 0.0f, 0.2f, 0.0f,
-                0.0f, 0.0f, 0.2f, 0.0f, 0.0f,
-                0.0f, 0.2f, 0.0f, 0.0f, 0.0f,
-                0.2f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.2f,
+            0.0f, 0.0f, 0.0f, 0.2f, 0.0f,
+            0.0f, 0.0f, 0.2f, 0.0f, 0.0f,
+            0.0f, 0.2f, 0.0f, 0.0f, 0.0f,
+            0.2f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
         initPreset("Find Horizontal Edges", new float[]{
-                0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, -2.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, -2.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -2.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -2.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
         });
 
         initPreset("Find Vertical Edges", new float[]{
-                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                -1.0f, -2.0f, 6.0f, -2.0f, -1.0f,
-                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            -1.0f, -2.0f, 6.0f, -2.0f, -1.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
         initPreset("Find Diagonal Edges", new float[]{
-                0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                0.0f, 0.0f, 0.0f, -2.0f, 0.0f,
-                0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
-                0.0f, -2.0f, 0.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+            0.0f, 0.0f, 0.0f, -2.0f, 0.0f,
+            0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
+            0.0f, -2.0f, 0.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         });
 
         initPreset("Find Diagonal Edges 2", new float[]{
-                -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -2.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, -2.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 0.0f,  -1.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -2.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 6.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, -2.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
         });
 
         initPreset("Sharpen", new float[]{
-                -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,
-                -0.125f, 0.25f, 0.25f, 0.25f, -0.125f,
-                -0.125f, 0.25f, 1.0f, 0.25f, -0.125f,
-                -0.125f, 0.25f, 0.25f, 0.25f, -0.125f,
-                -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,
+            -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,
+            -0.125f, 0.25f, 0.25f, 0.25f, -0.125f,
+            -0.125f, 0.25f, 1.0f, 0.25f, -0.125f,
+            -0.125f, 0.25f, 0.25f, 0.25f, -0.125f,
+            -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,
         });
     }
 
     private void init3x3Presets() {
         initPreset("Corner Blur", new float[]{
-                0.25f, 0.0f, 0.25f,
-                0.0f, 0.0f, 0.0f,
+            0.25f, 0.0f, 0.25f,
+            0.0f, 0.0f, 0.0f,
             0.25f, 0.0f, 0.25f});
 
         initPreset("\"Gaussian\" Blur", new float[]{
-                1 / 16.0f, 2 / 16.0f, 1 / 16.0f,
-                2 / 16.0f, 4 / 16.0f, 2 / 16.0f,
-                1 / 16.0f, 2 / 16.0f, 1 / 16.0f});
+            1 / 16.0f, 2 / 16.0f, 1 / 16.0f,
+            2 / 16.0f, 4 / 16.0f, 2 / 16.0f,
+            1 / 16.0f, 2 / 16.0f, 1 / 16.0f});
 
         initPreset("Mean Blur", new float[]{
-                0.1115f, 0.1115f, 0.1115f,
-                0.1115f, 0.1115f, 0.1115f,
-                0.1115f, 0.1115f, 0.1115f});
+            0.1115f, 0.1115f, 0.1115f,
+            0.1115f, 0.1115f, 0.1115f,
+            0.1115f, 0.1115f, 0.1115f});
 
         initPreset("Sharpen", new float[]{
-                0, -1, 0,
-                -1, 5, -1,
-                0, -1, 0});
+            0, -1, 0,
+            -1, 5, -1,
+            0, -1, 0});
 
         initPreset("Edge Detection", new float[]{
-                0, -1, 0,
-                -1, 4, -1,
-                0, -1, 0});
+            0, -1, 0,
+            -1, 4, -1,
+            0, -1, 0});
 
         initPreset("Edge Detection 2", new float[]{
-                -1, -1, -1,
-                -1, 8, -1,
-                -1, -1, -1});
+            -1, -1, -1,
+            -1, 8, -1,
+            -1, -1, -1});
 
         initPreset("Horizontal Edge Detection", new float[]{
-                -1, -1, -1,
-                0,  0,  0,
-                1,  1,  1});
+            -1, -1, -1,
+            0, 0, 0,
+            1, 1, 1});
 
         initPreset("Vertical Edge Detection", new float[]{
-                -1,  0,  1,
-                -1,  0,  1,
-                -1,  0,  1});
+            -1, 0, 1,
+            -1, 0, 1,
+            -1, 0, 1});
 
         initPreset("Emboss", new float[]{
-                -2, -2, 0,
-                -2, 6, 0,
-                0, 0, 0});
+            -2, -2, 0,
+            -2, 6, 0,
+            0, 0, 0});
 
         initPreset("Emboss 2", new float[]{
-                -2, 0, 0,
-                0, 0, 0,
-                0, 0, 2});
+            -2, 0, 0,
+            0, 0, 0,
+            0, 0, 2});
 
         initPreset("Color Emboss", new float[]{
-                -1, -1, 0,
-                -1, 1, 1,
-                0, 1, 1});
+            -1, -1, 0,
+            -1, 1, 1,
+            0, 1, 1});
     }
 
     private void reset(int size) {

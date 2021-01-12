@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,8 @@ import org.jdesktop.swingx.painter.TextPainter;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.colors.Colors;
+import pixelitor.filters.gui.UserPreset;
+import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
@@ -34,6 +36,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
@@ -58,12 +61,17 @@ public class TextSettings implements Serializable {
     private boolean watermark;
     private double rotation;
 
+    private transient Consumer<TextSettings> guiUpdater;
+
     public TextSettings(String text, Font font, Color color,
-                        AreaEffects areaEffects,
+                        AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
                         VerticalAlignment verticalAlignment,
-                        boolean watermark, double rotation) {
-        this.areaEffects = areaEffects;
+                        boolean watermark, double rotation,
+                        Consumer<TextSettings> guiUpdater) {
+        assert effects != null;
+
+        this.areaEffects = effects;
         this.color = color;
         this.font = font;
         this.horizontalAlignment = horizontalAlignment;
@@ -71,13 +79,14 @@ public class TextSettings implements Serializable {
         this.verticalAlignment = verticalAlignment;
         this.watermark = watermark;
         this.rotation = rotation;
+        this.guiUpdater = guiUpdater;
     }
 
     /**
      * Default settings
      */
     public TextSettings() {
-        areaEffects = null;
+        areaEffects = new AreaEffects();
         color = WHITE;
         font = calcDefaultFont();
         horizontalAlignment = HorizontalAlignment.CENTER;
@@ -103,7 +112,7 @@ public class TextSettings implements Serializable {
         rotation = other.rotation;
     }
 
-    public AreaEffects getAreaEffects() {
+    public AreaEffects getEffects() {
         return areaEffects;
     }
 
@@ -141,7 +150,7 @@ public class TextSettings implements Serializable {
         return verticalAlignment;
     }
 
-    public boolean isWatermark() {
+    public boolean hasWatermark() {
         return watermark;
     }
 
@@ -174,7 +183,7 @@ public class TextSettings implements Serializable {
 
     public BufferedImage watermarkImage(BufferedImage src, TextPainter textPainter) {
         BufferedImage bumpImage = createBumpMapImage(
-                textPainter, src.getWidth(), src.getHeight());
+            textPainter, src.getWidth(), src.getHeight());
         return ImageUtils.bumpMap(src, bumpImage, "Watermarking");
     }
 
@@ -204,5 +213,45 @@ public class TextSettings implements Serializable {
         } else {
             return 100;
         }
+    }
+
+    public void setGuiUpdater(Consumer<TextSettings> guiUpdater) {
+        this.guiUpdater = guiUpdater;
+    }
+
+    public UserPreset createUserPreset(String presetName) {
+        UserPreset preset = new UserPreset(presetName, TextLayer.TEXT_PRESETS_DIR_NAME);
+        preset.put("text", text);
+        preset.putColor("color", color);
+        preset.putFloat("rotation", (float) rotation);
+        preset.putInt("hor_align", horizontalAlignment.ordinal());
+        preset.putInt("ver_align", verticalAlignment.ordinal());
+
+        FontInfo fontInfo = new FontInfo(font);
+        fontInfo.saveStateTo(preset);
+
+        areaEffects.saveStateTo(preset);
+
+        preset.putBoolean("watermark", watermark);
+
+        return preset;
+    }
+
+    public void loadStateFrom(UserPreset preset) {
+        text = preset.get("text");
+        color = preset.getColor("color");
+        rotation = preset.getFloat("rotation");
+        horizontalAlignment = HorizontalAlignment.values()[preset.getInt("hor_align")];
+        verticalAlignment = VerticalAlignment.values()[preset.getInt("ver_align")];
+
+        FontInfo fontInfo = new FontInfo(preset);
+        font = fontInfo.createFont();
+
+        areaEffects.loadStateFrom(preset);
+        watermark = preset.getBoolean("watermark");
+
+        // should be always non-null while loading a preset,
+        // because this happens only in the dialog
+        guiUpdater.accept(this);
     }
 }

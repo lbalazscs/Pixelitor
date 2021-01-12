@@ -24,6 +24,10 @@ import pixelitor.Composition.LayerAdder;
 import pixelitor.OpenImages;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
+import pixelitor.filters.gui.DialogMenuBar;
+import pixelitor.filters.gui.DialogMenuOwner;
+import pixelitor.filters.gui.FilterState;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.filters.painters.TextSettings;
 import pixelitor.filters.painters.TextSettingsPanel;
 import pixelitor.filters.painters.TransformedTextPainter;
@@ -51,9 +55,10 @@ import static pixelitor.utils.Keys.CTRL_T;
 /**
  * A text layer
  */
-public class TextLayer extends ContentLayer {
+public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Serial
     private static final long serialVersionUID = 2L;
+    public static final String TEXT_PRESETS_DIR_NAME = "text";
 
     private transient TransformedTextPainter painter;
     private TextSettings settings;
@@ -73,7 +78,7 @@ public class TextLayer extends ContentLayer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        isAdjustment = settings.isWatermark();
+        isAdjustment = settings.hasWatermark();
 
         painter = new TransformedTextPainter();
         settings.configurePainter(painter);
@@ -96,8 +101,9 @@ public class TextLayer extends ContentLayer {
 
         var settingsPanel = new TextSettingsPanel(textLayer);
         new DialogBuilder()
-            .content(settingsPanel)
             .title("Create Text Layer")
+            .menuBar(textLayer.getMenuBar())
+            .content(settingsPanel)
             .withScrollbars()
             .okAction(() ->
                 textLayer.finalizeCreation(comp, activeLayerBefore, oldViewMode))
@@ -120,9 +126,10 @@ public class TextLayer extends ContentLayer {
         var settingsPanel = new TextSettingsPanel(this);
 
         new DialogBuilder()
+            .title("Edit Text Layer")
+            .menuBar(getMenuBar())
             .content(settingsPanel)
             .owner(pw)
-            .title("Edit Text Layer")
             .withScrollbars()
             .okAction(() -> commitSettings(oldSettings))
             .cancelAction(() -> resetOldSettings(oldSettings))
@@ -246,7 +253,7 @@ public class TextLayer extends ContentLayer {
 
     @Override
     public BufferedImage actOnImageFromLayerBellow(BufferedImage src) {
-        assert settings.isWatermark(); // should be called only in this case
+        assert settings.hasWatermark(); // should be called only in this case
         return settings.watermarkImage(src, painter);
     }
 
@@ -270,7 +277,7 @@ public class TextLayer extends ContentLayer {
     public void setSettings(TextSettings settings) {
         this.settings = settings;
 
-        isAdjustment = settings.isWatermark();
+        isAdjustment = settings.hasWatermark();
         settings.configurePainter(painter);
     }
 
@@ -390,6 +397,50 @@ public class TextLayer extends ContentLayer {
         if (selectionEdit != null) {
             History.add(selectionEdit);
         }
+    }
+
+    private JMenuBar getMenuBar() {
+        return new DialogMenuBar(this, true);
+    }
+
+    @Override
+    public boolean hasBuiltinPresets() {
+        return false;
+    }
+
+    @Override
+    public FilterState[] getBuiltinPresets() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return TEXT_PRESETS_DIR_NAME;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        return settings.createUserPreset(presetName);
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        settings.loadStateFrom(preset);
+    }
+
+    @Override
+    public boolean hasHelp() {
+        return false;
+    }
+
+    @Override
+    public String getHelpURL() {
+        return null;
     }
 
     @Override

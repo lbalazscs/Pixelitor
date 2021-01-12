@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -230,51 +230,63 @@ public class AreaEffects implements Serializable, ParamState<AreaEffects> {
     }
 
     public void loadStateFrom(UserPreset preset) {
-        if (preset.get("Glow.Enabled").equals("yes")) {
+        loadGlowStateFrom(preset);
+        loadInnerGlowStateFrom(preset);
+        loadNeonBorderStateFrom(preset);
+        loadDropShadowStateFrom(preset);
+    }
+
+    private void loadGlowStateFrom(UserPreset preset) {
+        if (preset.getBoolean("Glow.Enabled")) {
             glowEffect = new GlowPathEffect();
             glowEffect.loadStateFrom(preset, "Glow.", false);
+        } else {
+            glowEffect = null;
         }
-        if (preset.get("InnerGlow.Enabled").equals("yes")) {
+    }
+
+    private void loadInnerGlowStateFrom(UserPreset preset) {
+        if (preset.getBoolean("InnerGlow.Enabled")) {
             innerGlowEffect = new InnerGlowPathEffect();
             innerGlowEffect.loadStateFrom(preset, "InnerGlow.", false);
+        } else {
+            innerGlowEffect = null;
         }
-        if (preset.get("NeonBorder.Enabled").equals("yes")) {
+    }
+
+    private void loadNeonBorderStateFrom(UserPreset preset) {
+        if (preset.getBoolean("NeonBorder.Enabled")) {
             neonBorderEffect = new NeonBorderEffect();
             neonBorderEffect.loadStateFrom(preset, "NeonBorder.", false);
+        } else {
+            neonBorderEffect = null;
         }
-        if (preset.get("DropShadow.Enabled").equals("yes")) {
+    }
+
+    private void loadDropShadowStateFrom(UserPreset preset) {
+        if (preset.getBoolean("DropShadow.Enabled")) {
             dropShadowEffect = new ShadowPathEffect();
             dropShadowEffect.loadStateFrom(preset, "DropShadow.", true);
+        } else {
+            dropShadowEffect = null;
         }
     }
 
     public void saveStateTo(UserPreset preset) {
-        if (glowEffect != null) {
-            preset.put("Glow.Enabled", "yes");
-            glowEffect.saveStateTo(preset, "Glow.", false);
-        } else {
-            preset.put("Glow.Enabled", "no");
-        }
+        saveEffectState(glowEffect, "Glow.", preset, false);
+        saveEffectState(innerGlowEffect, "InnerGlow.", preset, false);
+        saveEffectState(neonBorderEffect, "NeonBorder.", preset, false);
+        saveEffectState(dropShadowEffect, "DropShadow.", preset, true);
+    }
 
-        if (innerGlowEffect != null) {
-            preset.put("InnerGlow.Enabled", "yes");
-            innerGlowEffect.saveStateTo(preset, "InnerGlow.", false);
+    private static void saveEffectState(AbstractAreaEffect effect, String keyPrefix,
+                                        UserPreset preset, boolean includeOffset) {
+        String enabledKey = keyPrefix + "Enabled";
+        if (effect != null) {
+            preset.putBoolean(enabledKey, true);
+            effect.saveStateTo(preset, keyPrefix, includeOffset);
         } else {
-            preset.put("InnerGlow.Enabled", "no");
-        }
-
-        if (neonBorderEffect != null) {
-            preset.put("NeonBorder.Enabled", "yes");
-            neonBorderEffect.saveStateTo(preset, "NeonBorder.", false);
-        } else {
-            preset.put("NeonBorder.Enabled", "no");
-        }
-
-        if (dropShadowEffect != null) {
-            preset.put("DropShadow.Enabled", "yes");
-            dropShadowEffect.saveStateTo(preset, "DropShadow.", true);
-        } else {
-            preset.put("DropShadow.Enabled", "no");
+            preset.putBoolean(enabledKey, false);
         }
     }
 

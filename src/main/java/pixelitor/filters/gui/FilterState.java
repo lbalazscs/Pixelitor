@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,9 +30,9 @@ import java.util.stream.Stream;
  *
  * If it is used for animation interpolation,
  * then it contains only the animatable {@link FilterParam}s.
+ * It is also used for the built-in presets.
  */
 public class FilterState {
-    //    private final List<ParamState<?>> states;
     private final Map<String, ParamState> states;
     private String name; // used only for presets
 
@@ -67,15 +67,15 @@ public class FilterState {
 
         for (Map.Entry<String, ParamState> entry : states.entrySet()) {
             // each ParamState is interpolated independently
-            String name = entry.getKey();
+            String paramName = entry.getKey();
 
             @SuppressWarnings("rawtypes")
             ParamState state = entry.getValue();
-            ParamState<?> endParamState = endState.get(name);
+            ParamState<?> endParamState = endState.get(paramName);
 
             @SuppressWarnings("unchecked")
             ParamState<?> interpolated = state.interpolate(endParamState, progress);
-            interpolatedStates.put(name, interpolated);
+            interpolatedStates.put(paramName, interpolated);
         }
         return new FilterState(interpolatedStates);
     }

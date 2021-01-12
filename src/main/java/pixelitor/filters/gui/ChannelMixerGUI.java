@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -64,7 +64,7 @@ public class ChannelMixerGUI extends ParametrizedFilterGUI {
     private static JPanel createPresetsPanel(Action[] actions) {
         var rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, Y_AXIS));
-        rightPanel.setBorder(createTitledBorder(FilterMenuBar.PRESETS));
+        rightPanel.setBorder(createTitledBorder(DialogMenuBar.PRESETS));
         for (Action action : actions) {
             JComponent b = new JButton(action);
             b.setAlignmentX(LEFT_ALIGNMENT);

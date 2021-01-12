@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,8 +18,10 @@
 package pixelitor.filters.gui;
 
 import pixelitor.filters.ParametrizedFilter;
+import pixelitor.gui.utils.Dialogs;
 import pixelitor.utils.OpenInBrowserAction;
 import pixelitor.utils.Texts;
+import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.Desktop;
@@ -30,25 +32,29 @@ import java.util.List;
 
 import static pixelitor.filters.gui.UserPreset.*;
 
-public class FilterMenuBar extends JMenuBar {
+/**
+ * The menu bar of the filters that have one.
+ * It is also used for the text layer dialog.
+ */
+public class DialogMenuBar extends JMenuBar {
     public static final String PRESETS = Texts.i18n("presets");
 
-    private final FilterWithGUI filter;
+    private final DialogMenuOwner owner;
     private JMenu presetsMenu;
     private int numUserPresets = 0;
     private static final boolean CAN_USE_FILE_MANAGER = Desktop.isDesktopSupported()
         && Desktop.getDesktop().isSupported(Desktop.Action.OPEN);
 
-    public FilterMenuBar(FilterWithGUI filter, boolean addPresets) {
-        this.filter = filter;
+    public DialogMenuBar(DialogMenuOwner owner, boolean addPresets) {
+        this.owner = owner;
 
         if (addPresets) {
             addPresetsMenu();
         }
 
-        if (filter.hasHelp()) {
+        if (owner.hasHelp()) {
             JMenu helpMenu = new JMenu("Help");
-            helpMenu.add(new OpenInBrowserAction("Online Help", filter.getHelpURL()));
+            helpMenu.add(new OpenInBrowserAction("Online Help", owner.getHelpURL()));
             add(helpMenu);
         }
     }
@@ -56,11 +62,11 @@ public class FilterMenuBar extends JMenuBar {
     private void addPresetsMenu() {
         presetsMenu = new JMenu(PRESETS);
 
-        if (filter.hasBuiltinPresets()) {
+        if (owner.hasBuiltinPresets()) {
             JMenu builtinPresets = new JMenu("Built-in Presets");
-            FilterState[] presets = filter.getBuiltinPresets();
+            FilterState[] presets = owner.getBuiltinPresets();
 
-            ParametrizedFilter pf = (ParametrizedFilter) filter;
+            ParametrizedFilter pf = (ParametrizedFilter) owner;
             ParamSet paramSet = pf.getParamSet();
 
             for (FilterState preset : presets) {
@@ -69,28 +75,36 @@ public class FilterMenuBar extends JMenuBar {
             presetsMenu.add(builtinPresets);
         }
 
-        if (filter.canHaveUserPresets()) {
-            if (filter.hasBuiltinPresets()) {
+        if (owner.canHaveUserPresets()) {
+            if (owner.hasBuiltinPresets()) {
                 presetsMenu.addSeparator();
             }
             Action savePresetAction = new AbstractAction("Save Preset...") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    filter.saveAsPreset(FilterMenuBar.this);
+                    String presetName = Dialogs.getTextDialog(
+                        DialogMenuBar.this, "Preset Name", "Preset Name:");
+                    if (presetName == null || presetName.isBlank()) {
+                        return;
+                    }
+
+                    presetName = Utils.toFileName(presetName);
+
+                    UserPreset preset = owner.createUserPreset(presetName);
+                    addNewUserPreset(preset, owner);
                 }
             };
             JMenuItem savePresetMI = new JMenuItem(savePresetAction);
             savePresetMI.setName("savePreset");
             presetsMenu.add(savePresetMI);
-            List<UserPreset> userPresets = loadPresets(filter.getName());
+            List<UserPreset> userPresets = loadPresets(owner.getPresetDirName());
             numUserPresets = userPresets.size();
             if (numUserPresets > 0) {
                 addManagePresetsMenu();
                 presetsMenu.addSeparator();
             }
             for (UserPreset preset : userPresets) {
-                ParamSet paramSet = ((ParametrizedFilter) filter).getParamSet();
-                presetsMenu.add(preset.asAction(paramSet));
+                presetsMenu.add(preset.asAction(owner));
             }
 
             add(presetsMenu);
@@ -105,7 +119,7 @@ public class FilterMenuBar extends JMenuBar {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String dirPath = PRESETS_DIR + FILE_SEPARATOR + filter.getName();
+                    String dirPath = PRESETS_DIR + FILE_SEPARATOR + owner.getPresetDirName();
                     Desktop.getDesktop().open(new File(dirPath));
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -114,13 +128,13 @@ public class FilterMenuBar extends JMenuBar {
         });
     }
 
-    public void addNewUserPreset(UserPreset preset, ParamSet paramSet) {
+    public void addNewUserPreset(UserPreset preset, DialogMenuOwner owner) {
         if (numUserPresets == 0) {
             addManagePresetsMenu();
             presetsMenu.addSeparator();
             numUserPresets++;
         }
-        Action presetAction = preset.asAction(paramSet);
+        Action presetAction = preset.asAction(owner);
         JMenuItem presetMI = new JMenuItem(presetAction);
         presetMI.setName(preset.getName());
         presetsMenu.add(presetMI);

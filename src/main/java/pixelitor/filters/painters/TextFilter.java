@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.filters.painters;
 
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.gui.UserPreset;
 import pixelitor.layers.Drawable;
 import pixelitor.layers.TextLayer;
 import pixelitor.utils.ImageUtils;
@@ -47,7 +48,7 @@ public class TextFilter extends FilterWithGUI {
         var textPainter = new TransformedTextPainter();
         settings.configurePainter(textPainter);
 
-        if (settings.isWatermark()) {
+        if (settings.hasWatermark()) {
             dest = settings.watermarkImage(src, textPainter);
         } else {
             int width = dest.getWidth();
@@ -83,7 +84,27 @@ public class TextFilter extends FilterWithGUI {
     }
 
     @Override
+    public boolean canHaveUserPresets() {
+        return true;
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return TextLayer.TEXT_PRESETS_DIR_NAME;
+    }
+
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        return settings.createUserPreset(presetName);
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        settings.loadStateFrom(preset);
+    }
+
+    @Override
     public boolean supportsGray() {
-        return !settings.isWatermark();
+        return !settings.hasWatermark();
     }
 }

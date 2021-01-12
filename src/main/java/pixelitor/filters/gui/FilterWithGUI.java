@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,7 @@ import static pixelitor.gui.utils.Screens.Align.FRAME_RIGHT;
 /**
  * A filter that has a GUI for customization
  */
-public abstract class FilterWithGUI extends Filter {
+public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     protected String helpURL;
 
     protected FilterWithGUI() {
@@ -50,30 +50,48 @@ public abstract class FilterWithGUI extends Filter {
             return null;
         }
 
-        return new FilterMenuBar(this, addPresets);
+        return new DialogMenuBar(this, addPresets);
     }
 
-    protected void saveAsPreset(FilterMenuBar menu) {
-        // only subclasses know how to do it
-        throw new UnsupportedOperationException();
-    }
-
-    protected boolean hasBuiltinPresets() {
+    @Override
+    public boolean hasBuiltinPresets() {
         return false;
     }
 
-    protected FilterState[] getBuiltinPresets() {
+    @Override
+    public FilterState[] getBuiltinPresets() {
+        // the subclasses implement this if they have built-in presets
         throw new UnsupportedOperationException();
     }
 
-    protected boolean canHaveUserPresets() {
+    @Override
+    public boolean canHaveUserPresets() {
         return false;
     }
 
+    @Override
+    public UserPreset createUserPreset(String presetName) {
+        // the subclasses implement this if they can have user presets
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        // the subclasses implement this if they can have user presets
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getPresetDirName() {
+        return getName();
+    }
+
+    @Override
     public boolean hasHelp() {
         return helpURL != null;
     }
 
+    @Override
     public String getHelpURL() {
         return helpURL;
     }

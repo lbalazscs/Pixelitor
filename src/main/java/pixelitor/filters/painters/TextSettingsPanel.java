@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -37,9 +37,7 @@ import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.font.TextAttribute;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.Consumer;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
@@ -50,9 +48,9 @@ import static pixelitor.gui.GUIText.CLOSE_DIALOG;
  * Customization panel for the text filter and for text layers
  */
 public class TextSettingsPanel extends FilterGUI
-    implements ParamAdjustmentListener, ActionListener {
+    implements ParamAdjustmentListener, ActionListener, Consumer<TextSettings> {
     private TextLayer textLayer;
-    private Map<TextAttribute, Object> map;
+    private FontInfo fontInfo;
 
     private JTextField textTF;
     private JComboBox<String> fontFamilyChooserCB;
@@ -69,12 +67,15 @@ public class TextSettingsPanel extends FilterGUI
     private JDialog advancedSettingsDialog;
     private AdvancedTextSettingsPanel advancedSettingsPanel;
 
+    private boolean ignoreGUIChanges = false;
+
     /**
      * Used for the text filter on images
      */
     public TextSettingsPanel(TextFilter textFilter, Drawable dr) {
         super(textFilter, dr);
-        createGUI(textFilter.getSettings());
+        TextSettings settings = textFilter.getSettings();
+        init(settings);
 
         if (!textTF.getText().isEmpty()) {
             // a "last text" was set
@@ -88,11 +89,17 @@ public class TextSettingsPanel extends FilterGUI
     public TextSettingsPanel(TextLayer textLayer) {
         super(null, null);
         this.textLayer = textLayer;
-        createGUI(textLayer.getSettings());
+        TextSettings settings = textLayer.getSettings();
+        init(settings);
 
         if (textTF.getText().equals(TextSettings.DEFAULT_TEXT)) {
             textTF.selectAll();
         }
+    }
+
+    private void init(TextSettings settings) {
+        settings.setGuiUpdater(this);
+        createGUI(settings);
     }
 
     private void createGUI(TextSettings settings) {
@@ -120,7 +127,7 @@ public class TextSettingsPanel extends FilterGUI
 
         gbh.addLabel("Color:", 0, 1);
         color = new ColorParam("Color", settings.getColor(), USER_ONLY_TRANSPARENCY);
-        gbh.addControl(new ColorParamGUI(color, null, false));
+        gbh.addControl(color.createGUI());
         color.setAdjustmentListener(this);
 
         gbh.addLabel("Rotation:", 2, 1);
@@ -203,7 +210,7 @@ public class TextSettingsPanel extends FilterGUI
 
         boolean defaultBold = font.isBold();
         boolean defaultItalic = font.isItalic();
-        setAttributeMapFromFontSettings(font);
+        fontInfo = new FontInfo(font);
 
         gbh.addLabel("Bold:", 0, 2);
         boldCB = createCheckBox("boldCB", gbh, defaultBold);
@@ -220,17 +227,10 @@ public class TextSettingsPanel extends FilterGUI
         return fontPanel;
     }
 
-    @SuppressWarnings("unchecked")
-    private void setAttributeMapFromFontSettings(Font font) {
-        if (font.hasLayoutAttributes()) {
-            map = (Map<TextAttribute, Object>) font.getAttributes();
-        }
-    }
-
     private void onAdvancedSettingsClick() {
         if (advancedSettingsDialog == null) {
             advancedSettingsPanel = new AdvancedTextSettingsPanel(
-                this, map);
+                this, fontInfo);
             JDialog owner = GUIUtils.getDialogAncestor(this);
             advancedSettingsDialog = new DialogBuilder()
                 .owner(owner)
@@ -253,50 +253,27 @@ public class TextSettingsPanel extends FilterGUI
 
     private Font getSelectedFont() {
         String fontFamily = (String) fontFamilyChooserCB.getSelectedItem();
-        int style = Font.PLAIN;
-        if (boldCB.isSelected()) {
-            style |= Font.BOLD;
-        }
-        if (italicCB.isSelected()) {
-            style |= Font.ITALIC;
-        }
         int size = fontSizeSlider.getCurrentValue();
-        Font font = new Font(fontFamily, style, size);
-
-        // Create a new Map, because the old one stores old values in TextAttribute.SIZE
-        // and other fields which would override the current ones.
-        var oldMap = map;
-        map = new HashMap<>();
+        boolean bold = boldCB.isSelected();
+        boolean italic = italicCB.isSelected();
+        fontInfo.updateBasic(fontFamily, size, bold, italic);
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsPanel.updateFontAttributesMap(map);
-        } else if (oldMap != null) {
-            // no dialog, copy manually the advanced settings
-            TextAttribute[] advancedSettings = {
-                TextAttribute.STRIKETHROUGH,
-                TextAttribute.UNDERLINE,
-                TextAttribute.KERNING,
-                TextAttribute.LIGATURES,
-                TextAttribute.TRACKING
-            };
-
-            for (TextAttribute setting : advancedSettings) {
-                map.put(setting, oldMap.get(setting));
-            }
+            advancedSettingsPanel.saveStateTo(fontInfo);
         }
 
-        return font.deriveFont(map);
+        return fontInfo.createFont();
     }
 
     private void createEffectsPanel(TextSettings settings) {
-        AreaEffects areaEffects = settings.getAreaEffects();
-        effectsPanel = new EffectsPanel(this, areaEffects);
+        AreaEffects effects = settings.getEffects();
+        effectsPanel = new EffectsPanel(this, effects);
         effectsPanel.setBorder(createTitledBorder("Effects"));
     }
 
     private JPanel createWatermarkPanel(TextSettings settings) {
         watermarkCB = new JCheckBox("Use Text for Watermarking",
-            settings.isWatermark());
+            settings.hasWatermark());
         watermarkCB.addActionListener(this);
 
         var p = new JPanel(new FlowLayout(LEFT));
@@ -311,22 +288,31 @@ public class TextSettingsPanel extends FilterGUI
 
     @Override
     public void paramAdjusted() {
+        if (ignoreGUIChanges) {
+            return;
+        }
+        System.out.println("TextSettingsPanel::paramAdjusted: CALLED");
+
         String text = textTF.getText();
 
-        AreaEffects areaEffects = null;
+        AreaEffects effects = null;
         double textRotationAngle = rotationParam.getValueInRadians();
         if (effectsPanel != null) {
-            areaEffects = effectsPanel.getEffects();
+            effects = effectsPanel.getEffects();
         }
 
         Font selectedFont = getSelectedFont();
 
         var settings = new TextSettings(
-            text, selectedFont, color.getColor(), areaEffects,
+            text, selectedFont, color.getColor(), effects,
             (HorizontalAlignment) hAlignmentCB.getSelectedItem(),
             (VerticalAlignment) vAlignmentCB.getSelectedItem(),
-            watermarkCB.isSelected(), textRotationAngle);
+            watermarkCB.isSelected(), textRotationAngle, this);
 
+        updateApp(settings);
+    }
+
+    private void updateApp(TextSettings settings) {
         if (isInFilterMode()) {
             ((TextFilter) filter).setSettings(settings);
             runFilterPreview();
@@ -335,6 +321,45 @@ public class TextSettingsPanel extends FilterGUI
             textLayer.setSettings(settings);
             textLayer.getComp().imageChanged();
         }
+    }
+
+    /**
+     * If the settings change while being edited for external
+     * reasons (preset), then the GUI is updated via this method.
+     */
+    @Override
+    public void accept(TextSettings settings) {
+        try {
+            ignoreGUIChanges = true;
+            updateGUI(settings);
+        } finally {
+            ignoreGUIChanges = false;
+        }
+
+        updateApp(settings);
+    }
+
+    private void updateGUI(TextSettings settings) {
+        textTF.setText(settings.getText());
+        color.setColor(settings.getColor(), false);
+        rotationParam.setValue(settings.getRotation(), false);
+        hAlignmentCB.setSelectedItem(settings.getHorizontalAlignment());
+        vAlignmentCB.setSelectedItem(settings.getVerticalAlignment());
+
+        Font font = settings.getFont();
+        fontSizeSlider.setValue(font.getSize());
+        fontFamilyChooserCB.setSelectedItem(font.getName());
+        boldCB.setSelected(font.isBold());
+        italicCB.setSelected(font.isItalic());
+
+        // this stores the advanced settings
+        fontInfo = new FontInfo(font);
+        if (advancedSettingsPanel != null) {
+            advancedSettingsPanel.updateFrom(fontInfo);
+        }
+
+        effectsPanel.setEffects(settings.getEffects());
+        watermarkCB.setSelected(settings.hasWatermark());
     }
 
     private boolean isInFilterMode() {

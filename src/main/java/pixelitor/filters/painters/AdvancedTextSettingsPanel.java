@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,10 +23,6 @@ import pixelitor.gui.utils.GridBagHelper;
 import javax.swing.*;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
-import java.awt.font.TextAttribute;
-import java.util.Map;
-
-import static java.awt.font.TextAttribute.*;
 
 /**
  * GUI for the advanced font attribute settings
@@ -41,32 +37,24 @@ public class AdvancedTextSettingsPanel extends JPanel {
     private final ActionListener actionListener;
 
     public AdvancedTextSettingsPanel(ActionListener actionListener,
-                                     Map<TextAttribute, Object> map) {
+                                     FontInfo fontInfo) {
         super(new GridBagLayout());
         this.actionListener = actionListener;
         gbh = new GridBagHelper(this);
 
-        addCheckboxes(map);
-        addTrackingGUI(map);
+        addCheckboxes(fontInfo);
+        addTrackingGUI(fontInfo);
     }
 
-    private void addCheckboxes(Map<TextAttribute, Object> map) {
-        boolean strikethrough = false;
-        boolean kerning = false;
-        boolean underline = false;
-        boolean ligatures = false;
-
-        if (map != null) {
-            strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
-            kerning = KERNING_ON.equals(map.get(KERNING));
-            underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
-            ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
-        }
-
-        strikeThroughCB = addCheckBox("Strikethrough:", "strikeThroughCB", strikethrough);
-        underlineCB = addCheckBox("Underline:", "underlineCB", underline);
-        kerningCB = addCheckBox("Kerning:", "kerningCB", kerning);
-        ligaturesCB = addCheckBox("Ligatures:", "ligaturesCB", ligatures);
+    private void addCheckboxes(FontInfo font) {
+        strikeThroughCB = addCheckBox("Strikethrough:",
+            "strikeThroughCB", font.hasStrikeThrough());
+        underlineCB = addCheckBox("Underline:",
+            "underlineCB", font.hasUnderLine());
+        kerningCB = addCheckBox("Kerning:",
+            "kerningCB", font.hasKerning());
+        ligaturesCB = addCheckBox("Ligatures:",
+            "ligaturesCB", font.hasLigatures());
     }
 
     private JCheckBox addCheckBox(String labelText, String name, boolean selected) {
@@ -77,48 +65,29 @@ public class AdvancedTextSettingsPanel extends JPanel {
         return cb;
     }
 
-    private void addTrackingGUI(Map<TextAttribute, Object> map) {
-        int tracking = 0;
-        if (map != null) {
-            Float trackingSetting = (Float) map.get(TRACKING);
-            if (trackingSetting != null) {
-                tracking = (int) (100 * trackingSetting);
-            }
-        }
-
+    private void addTrackingGUI(FontInfo font) {
         trackingParam = new RangeParam("", -20, 0, 70);
-        trackingParam.setValue(tracking);
+        trackingParam.setValue(font.getTracking());
         trackingParam.addChangeListener(e -> actionListener.actionPerformed(null));
         var trackingGUI = trackingParam.createGUI("trackingGUI");
         gbh.addLabelAndControl("Tracking (Letter-spacing):", trackingGUI);
     }
 
-    public void updateFontAttributesMap(Map<TextAttribute, Object> map) {
-        Boolean strikeThroughSetting = Boolean.FALSE;
-        if (strikeThroughCB.isSelected()) {
-            strikeThroughSetting = STRIKETHROUGH_ON;
-        }
-        map.put(STRIKETHROUGH, strikeThroughSetting);
+    public void saveStateTo(FontInfo fontInfo) {
+        boolean strikeThrough = strikeThroughCB.isSelected();
+        boolean kerning = kerningCB.isSelected();
+        boolean ligatures = ligaturesCB.isSelected();
+        boolean underline = underlineCB.isSelected();
+        int tracking = trackingParam.getValue();
 
-        Integer kerningSetting = 0;
-        if (kerningCB.isSelected()) {
-            kerningSetting = KERNING_ON;
-        }
-        map.put(KERNING, kerningSetting);
+        fontInfo.updateAdvanced(strikeThrough, kerning, ligatures, underline, tracking);
+    }
 
-        Integer ligaturesSetting = 0;
-        if (ligaturesCB.isSelected()) {
-            ligaturesSetting = LIGATURES_ON;
-        }
-        map.put(LIGATURES, ligaturesSetting);
-
-        Integer underlineSetting = -1;
-        if (underlineCB.isSelected()) {
-            underlineSetting = UNDERLINE_ON;
-        }
-        map.put(UNDERLINE, underlineSetting);
-
-        Float tracking = trackingParam.getPercentageValF();
-        map.put(TRACKING, tracking);
+    public void updateFrom(FontInfo font) {
+        strikeThroughCB.setSelected(font.hasStrikeThrough());
+        kerningCB.setSelected(font.hasKerning());
+        ligaturesCB.setSelected(font.hasLigatures());
+        underlineCB.setSelected(font.hasUnderLine());
+        trackingParam.setValue(font.getTracking());
     }
 }

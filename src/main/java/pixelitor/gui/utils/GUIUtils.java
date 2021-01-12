@@ -379,4 +379,16 @@ public final class GUIUtils {
 
         return cb;
     }
+
+    public static Font createFont(String family, int size, boolean bold, boolean italic) {
+        int style = Font.PLAIN;
+        if (bold) {
+            style |= Font.BOLD;
+        }
+        if (italic) {
+            style |= Font.ITALIC;
+        }
+        Font font = new Font(family, style, size);
+        return font;
+    }
 }

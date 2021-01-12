@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,8 @@
 package pixelitor.filters;
 
 import pixelitor.filters.gui.*;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.Drawable;
 import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Utils;
 
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
@@ -123,29 +121,31 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    protected boolean hasBuiltinPresets() {
+    public boolean hasBuiltinPresets() {
         return paramSet.hasBuiltinPresets();
     }
 
     @Override
-    protected FilterState[] getBuiltinPresets() {
+    public FilterState[] getBuiltinPresets() {
         return paramSet.getBuiltinPresets();
     }
 
     @Override
-    protected boolean canHaveUserPresets() {
+    public boolean canHaveUserPresets() {
         return paramSet.isNonTrivialFilter();
     }
 
+    public void saveAsPreset(DialogMenuBar menu) {
+
+    }
+
     @Override
-    protected void saveAsPreset(FilterMenuBar menu) {
-        String presetName = Dialogs.getTextDialog(menu, "Preset Name", "Preset Name:");
-        if (presetName == null || presetName.isBlank()) {
-            return;
-        }
+    public UserPreset createUserPreset(String presetName) {
+        return paramSet.toUserPreset(getName(), presetName);
+    }
 
-        presetName = Utils.toFileName(presetName);
-
-        menu.addNewUserPreset(paramSet.toUserPreset(getName(), presetName), paramSet);
+    @Override
+    public void loadStateFrom(UserPreset preset) {
+        paramSet.loadPreset(preset);
     }
 }
