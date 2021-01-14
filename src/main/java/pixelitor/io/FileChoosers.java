@@ -122,26 +122,34 @@ public class FileChoosers {
     public static void openAsync() {
         initOpenChooser();
 
-        GlobalEvents.dialogOpened("Open");
-        int result = openChooser.showOpenDialog(PixelitorWindow.get());
-        GlobalEvents.dialogClosed("Open");
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = openChooser.getSelectedFile();
-
-            Dirs.setLastOpen(selectedFile.getParentFile());
-
+        File selectedFile = askUserForOpenFile();
+        if (selectedFile != null) {
             String fileName = selectedFile.getName();
             if (FileUtils.hasSupportedInputExt(fileName)) {
                 IO.openFileAsync(selectedFile);
             } else { // unsupported extension
                 handleUnsupportedExtensionWhileOpening(fileName);
             }
+        }
+    }
+
+    private static File askUserForOpenFile() {
+        GlobalEvents.dialogOpened("Open");
+        int result = openChooser.showOpenDialog(PixelitorWindow.get());
+        GlobalEvents.dialogClosed("Open");
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = openChooser.getSelectedFile();
+            Dirs.setLastOpen(selectedFile.getParentFile());
+            return selectedFile;
         } else if (result == JFileChooser.CANCEL_OPTION) {
             // cancelled
+            return null;
         } else if (result == JFileChooser.ERROR_OPTION) {
             // error or dismissed
+            return null;
         }
+        return null;
     }
 
     private static void handleUnsupportedExtensionWhileOpening(String fileName) {
@@ -157,6 +165,40 @@ public class FileChoosers {
 
     public static boolean showSaveChooserAndSaveComp(Composition comp,
                                                      Object extraInfo) {
+        File selectedFile = askUserForSaveFile(comp);
+        if (selectedFile != null) {
+            String extension = saveChooser.getExtension();
+            IO.saveToChosenFile(comp, selectedFile, extraInfo, extension);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static File getAnySaveFile(Composition comp) {
+        try {
+            initSaveChooser();
+            saveChooser.setAcceptAllFileFilterUsed(true);
+            setOnlyOneSaveExtension(saveChooser.getAcceptAllFileFilter()); // remove all custom file filters
+            return askUserForSaveFile(comp);
+        } finally {
+            setDefaultSaveExtensions();
+        }
+    }
+
+    public static File getAnyOpenFile() {
+        try {
+            initOpenChooser();
+            openChooser.setAcceptAllFileFilterUsed(true);
+            setOnlyOneOpenExtension(openChooser.getAcceptAllFileFilter()); // remove all custom file filters
+
+            return askUserForOpenFile();
+        } finally {
+            setDefaultOpenExtensions();
+        }
+    }
+
+    private static File askUserForSaveFile(Composition comp) {
         String defaultFileName = FileUtils.stripExtension(comp.getName());
         saveChooser.setSelectedFile(new File(defaultFileName));
 
@@ -173,16 +215,16 @@ public class FileChoosers {
 
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = saveChooser.getSelectedFile();
-            String extension = saveChooser.getExtension();
-            IO.saveToChosenFile(comp, selectedFile, extraInfo, extension);
-            return true;
+            Dirs.setLastSave(selectedFile.getParentFile());
+            return selectedFile;
         } else if (result == JFileChooser.CANCEL_OPTION) {
             // cancelled
+            return null;
         } else if (result == JFileChooser.ERROR_OPTION) {
             // error or dismissed
+            return null;
         }
-
-        return false;
+        return null;
     }
 
     /**

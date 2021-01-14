@@ -250,7 +250,7 @@ public class OpenImages {
         IO.loadCompAsync(file)
             .thenAcceptAsync(view::replaceJustReloadedComp, onEDT)
             .whenComplete((v, e) -> IOTasks.readingFinishedFor(path))
-            .whenComplete((v, e) -> IO.checkForIOProblems(e));
+            .whenComplete((v, e) -> IO.checkForReadingProblems(e));
     }
 
     public static void onActiveView(Consumer<View> action) {
@@ -450,7 +450,7 @@ public class OpenImages {
 
         File file = comp.getFile();
         RecentFilesMenu.getInstance().addFile(file);
-        Messages.showInStatusBar("<b>" + file.getName() + "</b> was opened.");
+        Messages.showFileOpenedMessage(file);
 
         return comp;
     }

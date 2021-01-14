@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.automate.SingleDirChooser;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -28,6 +29,8 @@ import pixelitor.layers.TextLayer;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
+import javax.imageio.ImageWriteParam;
+import javax.swing.*;
 import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -38,6 +41,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.isWritable;
@@ -53,7 +57,7 @@ public class IO {
     public static CompletableFuture<Composition> openFileAsync(File file) {
         return loadCompAsync(file)
             .thenApplyAsync(OpenImages::addJustLoadedComp, onEDT)
-            .whenComplete((comp, e) -> checkForIOProblems(e));
+            .whenComplete((comp, e) -> checkForReadingProblems(e));
     }
 
     public static CompletableFuture<Composition> loadCompAsync(File file) {
@@ -70,14 +74,14 @@ public class IO {
             .thenAcceptAsync(img -> comp.addExternalImageAsNewLayer(
                 img, file.getName(), "Dropped Layer"),
                 onEDT)
-            .whenComplete((v, e) -> checkForIOProblems(e));
+            .whenComplete((v, e) -> checkForReadingProblems(e));
     }
 
     /**
      * Utility method designed to be used with CompletableFuture.
      * Can be called on any thread.
      */
-    public static void checkForIOProblems(Throwable e) {
+    public static void checkForReadingProblems(Throwable e) {
         if (e == null) {
             // do nothing if the stage didn't complete exceptionally
             return;
@@ -85,27 +89,32 @@ public class IO {
         if (e instanceof CompletionException) {
             // if the exception was thrown in a previous
             // stage, handle it the same way
-            checkForIOProblems(e.getCause());
+            checkForReadingProblems(e.getCause());
             return;
         }
         if (e instanceof DecodingException) {
-            // decoding exceptions have an extra file field
-            // that can be used for better error reporting
             DecodingException de = (DecodingException) e;
-            File file = de.getFile();
             if (calledOnEDT()) {
-                showDecodingError(file);
+                showDecodingError(de);
             } else {
-                EventQueue.invokeLater(() -> showDecodingError(file));
+                EventQueue.invokeLater(() -> showDecodingError(de));
             }
         } else {
             Messages.showExceptionOnEDT(e);
         }
     }
 
-    private static void showDecodingError(File file) {
-        String msg = format("Could not load \"%s\" as an image file.", file.getName());
-        Messages.showError("Error", msg);
+    private static void showDecodingError(DecodingException de) {
+        String msg = de.getMessage();
+        if (de.wasMagick()) {
+            Messages.showError("Error", msg);
+        } else {
+            String[] options = {"Try with ImageMagick Import", "Close"};
+            boolean doMagick = Dialogs.showOKCancelDialog(msg, "Error", options, 0, JOptionPane.ERROR_MESSAGE);
+            if (doMagick) {
+                ImageMagick.importComposition(de.getFile());
+            }
+        }
     }
 
     public static void save(boolean saveAs) {
@@ -155,9 +164,10 @@ public class IO {
         try {
             if (format == FileFormat.JPG) {
                 JpegSettings settings = JpegSettings.from(saveSettings);
-                JpegOutput.write(image, selectedFile, settings.getJpegInfo());
+                Consumer<ImageWriteParam> customizer = settings.getJpegInfo().toCustomizer();
+                TrackedIO.write(image, "jpg", selectedFile, customizer);
             } else {
-                TrackedIO.write(image, format.toString(), selectedFile);
+                TrackedIO.write(image, format.toString(), selectedFile, null);
             }
         } catch (IOException e) {
             if (e.getMessage().contains("another process")) {
@@ -288,10 +298,7 @@ public class IO {
 
     static void saveToChosenFile(Composition comp, File file,
                                  Object extraInfo, String extension) {
-        Dirs.setLastSave(file.getParentFile());
-
         FileFormat format = FileFormat.fromExtension(extension).orElseThrow();
-
         SaveSettings settings;
         if (extraInfo != null) {
             // currently the only type of extra information

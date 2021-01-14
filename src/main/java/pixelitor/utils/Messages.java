@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,6 +62,10 @@ public class Messages {
 
     public static void showFileSavedMessage(File file) {
         showInStatusBar("<b>" + file.getAbsolutePath() + "</b> was saved.");
+    }
+
+    public static void showFileOpenedMessage(File file) {
+        showInStatusBar("<b>" + file.getName() + "</b> was opened.");
     }
 
     public static void showFilesSavedMessage(int numFiles, File dir) {

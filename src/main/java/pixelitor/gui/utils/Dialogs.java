@@ -133,7 +133,7 @@ public class Dialogs {
         return showOKCancelDialog(msg, title, options, initialOptionIndex, WARNING_MESSAGE);
     }
 
-    public static boolean showOKCancelDialog(String msg, String title,
+    public static boolean showOKCancelDialog(Object msg, String title,
                                              Object[] options,
                                              int initialOptionIndex,
                                              int messageType) {

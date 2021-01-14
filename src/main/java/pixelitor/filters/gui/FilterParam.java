@@ -70,7 +70,7 @@ public interface FilterParam extends FilterSetting, Resettable {
     }
 
     /**
-     * Save the state from the given user preset.
+     * Save the state to the given user preset.
      */
     default void saveStateTo(UserPreset preset) {
         // overridden in the composite params

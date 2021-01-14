@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -16,6 +16,8 @@
  */
 
 package pixelitor.gui.utils;
+
+import pixelitor.io.FileUtils;
 
 import javax.swing.*;
 import java.io.File;
@@ -43,8 +45,21 @@ public class ConfirmSaveFileChooser extends JFileChooser {
             return;
         }
 
+        if (!FileUtils.hasExtension(fileName)) {
+            // this can happen when exporting with an "all files"
+            // file filter, because then getSelectedFile() won't
+            // automatically add an extension based on the file filter.
+            String msg = """
+                The file name has no extension.
+                An extension (such as ".png") must be added at the end,
+                because the file format depends on it.""";
+            JOptionPane.showMessageDialog(this, msg, "No File Extension", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         if (f.exists()) {
-            String msg = fileName + " exists already. Overwrite?";
+            String msg = "<html><b>" + fileName + "</b> already exists." +
+                "<br>Do you want to replace it?";
             boolean overWrite = Dialogs.showYesNoQuestionDialog(this, "Confirmation", msg);
             if (!overWrite) {
                 return;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -94,13 +94,18 @@ public final class AppPreferences {
     private static final String CROP_GUIDE_COLOR_KEY = "crop_guide_color";
     private static final String CROP_GUIDE_STROKE_KEY = "crop_guide_stroke";
 
-    private static final int GUIDE_COLOR_DEFAULT = Color.BLACK.getRGB();
-    private static final int GUIDE_STROKE_DEFAULT = GuideStrokeType.DASHED.ordinal();
-    private static final int CROP_GUIDE_COLOR_DEFAULT = Color.BLACK.getRGB();
-    private static final int CROP_GUIDE_STROKE_DEFAULT = GuideStrokeType.SOLID.ordinal();
-
     private static GuideStyle guideStyle;
     private static GuideStyle cropGuideStyle;
+
+    private static final String MAGICK_DIR_KEY = "magick_dir";
+
+    // loaded and stored here to avoid initializing the ImageMagick class
+    // (which also searches for this directory), if ImageMagick is not needed
+    public static String magickDirName = "";
+
+    static {
+        loadMagickDir();
+    }
 
     private AppPreferences() {
     }
@@ -305,8 +310,8 @@ public final class AppPreferences {
 
     public static GuideStyle getGuideStyle() {
         if (guideStyle == null) {
-            int colorRGB = mainNode.getInt(GUIDE_COLOR_KEY, GUIDE_COLOR_DEFAULT);
-            int strokeId = mainNode.getInt(GUIDE_STROKE_KEY, GUIDE_STROKE_DEFAULT);
+            int colorRGB = mainNode.getInt(GUIDE_COLOR_KEY, Color.BLACK.getRGB());
+            int strokeId = mainNode.getInt(GUIDE_STROKE_KEY, GuideStrokeType.DASHED.ordinal());
             guideStyle = new GuideStyle();
             guideStyle.setColorA(new Color(colorRGB));
             guideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
@@ -317,8 +322,8 @@ public final class AppPreferences {
 
     public static GuideStyle getCropGuideStyle() {
         if (cropGuideStyle == null) {
-            int colorRGB = mainNode.getInt(CROP_GUIDE_COLOR_KEY, CROP_GUIDE_COLOR_DEFAULT);
-            int strokeId = mainNode.getInt(CROP_GUIDE_STROKE_KEY, CROP_GUIDE_STROKE_DEFAULT);
+            int colorRGB = mainNode.getInt(CROP_GUIDE_COLOR_KEY, Color.BLACK.getRGB());
+            int strokeId = mainNode.getInt(CROP_GUIDE_STROKE_KEY, GuideStrokeType.SOLID.ordinal());
             cropGuideStyle = new GuideStyle();
             cropGuideStyle.setColorA(new Color(colorRGB));
             cropGuideStyle.setStrokeType(GuideStrokeType.values()[strokeId]);
@@ -363,6 +368,7 @@ public final class AppPreferences {
         saveLanguage();
         saveMouseZoom();
         savePan();
+        saveMagickDir();
     }
 
     public static Color loadFgColor() {
@@ -483,5 +489,13 @@ public final class AppPreferences {
 
     private static void savePan() {
         mainNode.put(PAN_KEY, PanMethod.CURRENT.saveCode());
+    }
+
+    private static void loadMagickDir() {
+        magickDirName = mainNode.get(MAGICK_DIR_KEY, "");
+    }
+
+    private static void saveMagickDir() {
+        mainNode.put(MAGICK_DIR_KEY, magickDirName);
     }
 }

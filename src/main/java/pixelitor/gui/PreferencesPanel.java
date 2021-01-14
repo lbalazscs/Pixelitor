@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,10 @@ import pixelitor.utils.Language;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.GridBagLayout;
 
 import static java.lang.Integer.parseInt;
 import static javax.swing.SwingConstants.LEFT;
@@ -49,6 +52,7 @@ public class PreferencesPanel extends JPanel {
     private JComboBox<IntChoiceParam.Item> thumbSizeCB;
     private JComboBox<MouseZoomMethod> zoomMethodCB;
     private JComboBox<PanMethod> panMethodCB;
+    private JTextField magickDirTF;
 
     // the panel is re-created every time, but the last selected tab
     // should be selected automatically the next time
@@ -71,7 +75,7 @@ public class PreferencesPanel extends JPanel {
             tabbedPane.setSelectedIndex(lastSelectedTabIndex);
         }
         tabbedPane.addChangeListener(e ->
-                lastSelectedTabIndex = tabbedPane.getSelectedIndex());
+            lastSelectedTabIndex = tabbedPane.getSelectedIndex());
     }
 
     private JPanel createGeneralPanel() {
@@ -83,6 +87,7 @@ public class PreferencesPanel extends JPanel {
         addUIChooser(gbh);
         addUndoLevelsChooser(gbh);
         addThumbSizeChooser(gbh);
+        addMagickDirField(gbh);
 
         generalPanel.setBorder(EMPTY_BORDER);
         return generalPanel;
@@ -163,6 +168,13 @@ public class PreferencesPanel extends JPanel {
 
         gbh.addLabelAndControl("Layer/Mask Thumb Sizes: ", thumbSizeCB);
         thumbSizeCB.addActionListener(e -> updateThumbSize());
+    }
+
+    private void addMagickDirField(GridBagHelper gbh) {
+        magickDirTF = new JTextField(AppPreferences.magickDirName);
+        // don't let the textfield grow too large
+        magickDirTF.setPreferredSize(new Dimension(100, magickDirTF.getPreferredSize().height));
+        gbh.addLabelAndControl("ImageMagick 7 Folder: ", magickDirTF);
     }
 
     private static JPanel createGuidesPanel() {
@@ -264,9 +276,11 @@ public class PreferencesPanel extends JPanel {
             return false;
         }
 
-        // the mouse zoom and pan can't be set interactively => set it here
+        // these can't be set interactively => set it here
         MouseZoomMethod.changeTo((MouseZoomMethod) zoomMethodCB.getSelectedItem());
         PanMethod.changeTo((PanMethod) panMethodCB.getSelectedItem());
+        AppPreferences.magickDirName = magickDirTF.getText().trim();
+
         return true;
     }
 

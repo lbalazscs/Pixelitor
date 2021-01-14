@@ -27,8 +27,8 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
-import static javax.imageio.ImageWriteParam.*;
 import static pixelitor.utils.ImageUtils.createThumbnail;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
@@ -43,19 +43,28 @@ public class TrackedIO {
 
     public static void write(BufferedImage img,
                              String formatName,
-                             File file) throws IOException {
+                             File file,
+                             Consumer<ImageWriteParam> customizer) throws IOException {
+        System.out.printf("TrackedIO::write: writing %dx%d %s image to %s%n",
+            img.getWidth(), img.getHeight(), formatName, file.getAbsolutePath());
+
         var tracker = new StatusBarProgressTracker(
             "Writing " + file.getName(), 100);
-        try (ImageOutputStream ios = ImageIO.createImageOutputStream(file)) {
-            if (ios != null) {
-                writeToIOS(img, ios, formatName, tracker);
-            } else {
-                throwNoIOSErrorFor(file);
+        // the creation of FileOutputStream is necessary, because if the
+        // ImageOutputStream is created directly from the File, then existing files
+        // are not truncated, and small files don't completely overwrite bigger files.
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(fos)) {
+                if (ios != null) {
+                    writeToIOS(img, ios, formatName, tracker, customizer);
+                } else {
+                    throwNoIOSErrorFor(file);
+                }
             }
         }
     }
 
-    public static void throwNoIOSErrorFor(File file) throws IOException {
+    private static void throwNoIOSErrorFor(File file) throws IOException {
         // createImageOutputStream swallows the original IO exception
         // for IO errors like "Access is denied" and returns null,
         // therefore throw a generic exception
@@ -68,34 +77,38 @@ public class TrackedIO {
                                      ProgressTracker tracker) throws IOException {
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(os)) {
             if (ios != null) {
-                writeToIOS(img, ios, formatName, tracker);
+                writeToIOS(img, ios, formatName, tracker, null);
             } else {
                 throw new IOException("could not open ImageOutputStream");
             }
         }
     }
 
-    private static void writeToIOS(BufferedImage img,
-                                   ImageOutputStream ios,
-                                   String formatName,
-                                   ProgressTracker tracker) throws IOException {
+    public static void writeToIOS(BufferedImage img,
+                                  ImageOutputStream ios,
+                                  String formatName,
+                                  ProgressTracker tracker,
+                                  Consumer<ImageWriteParam> customizer) throws IOException {
         assert calledOutsideEDT() : "on EDT";
         assert ios != null;
 
-        ImageTypeSpecifier type =
-            ImageTypeSpecifier.createFromRenderedImage(img);
-        Iterator<ImageWriter> writers = ImageIO.getImageWriters(type, formatName);
-
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(formatName);
         if (!writers.hasNext()) {
             throw new IOException("No writer found for " + formatName);
         }
         ImageWriter writer = writers.next();
+
+        if (customizer != null) {
+            customizer.accept(writer.getDefaultWriteParam());
+        }
+
         try {
             writer.setOutput(ios);
             writer.addIIOWriteProgressListener(new TrackerWriteProgressListener(tracker));
             writer.write(img);
         } finally {
             writer.dispose();
+            ios.flush();
         }
     }
 
@@ -109,15 +122,6 @@ public class TrackedIO {
         ImageWriter writer = writers.next();
 
         ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();
-
-        if (progressive) {
-            imageWriteParam.setProgressiveMode(MODE_DEFAULT);
-        } else {
-            imageWriteParam.setProgressiveMode(MODE_DISABLED);
-        }
-
-        imageWriteParam.setCompressionMode(MODE_EXPLICIT);
-        imageWriteParam.setCompressionQuality(quality);
 
         IIOImage iioImage = new IIOImage(image, null, null);
 
@@ -141,11 +145,11 @@ public class TrackedIO {
             // exception here, for others we get a null image.
             // In both cases, throw a runtime exception
             if (image == null) {
-                throw new DecodingException(file);
+                throw DecodingException.normal(file, null);
             }
             return image;
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw DecodingException.normal(file, e);
         } catch (ArrayIndexOutOfBoundsException e) {
             boolean isGif = FileUtils.hasGIFExtension(file.getName());
             if (isGif) {
@@ -153,7 +157,7 @@ public class TrackedIO {
                 // also see https://stackoverflow.com/questions/22259714/arrayindexoutofboundsexception-4096-while-reading-gif-file
                 return alternativeGifRead(file);
             } else {
-                throw e;
+                throw DecodingException.normal(file, e);
             }
         }
     }
@@ -181,7 +185,12 @@ public class TrackedIO {
         BufferedImage image;
         try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             image = readFromIIS(iis, tracker);
+        } catch (Exception e) {
+            // an IIOException exception is thrown for example by
+            // Java's JPEG reader when reading a CMYK JPEG.
+            throw DecodingException.normal(file, e);
         }
+
         return image;
     }
 

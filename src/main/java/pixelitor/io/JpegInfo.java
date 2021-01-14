@@ -17,6 +17,11 @@
 
 package pixelitor.io;
 
+import javax.imageio.ImageWriteParam;
+import java.util.function.Consumer;
+
+import static javax.imageio.ImageWriteParam.*;
+
 /**
  * Custom configuration for JPEG images
  */
@@ -32,17 +37,22 @@ public class JpegInfo {
         this.progressive = progressive;
     }
 
-    public float getQuality() {
-        return quality;
-    }
+    public Consumer<ImageWriteParam> toCustomizer() {
+        return imageWriteParam -> {
+            if (progressive) {
+                imageWriteParam.setProgressiveMode(MODE_DEFAULT);
+            } else {
+                imageWriteParam.setProgressiveMode(MODE_DISABLED);
+            }
 
-    public boolean isProgressive() {
-        return progressive;
+            imageWriteParam.setCompressionMode(MODE_EXPLICIT);
+            imageWriteParam.setCompressionQuality(quality);
+        };
     }
 
     @Override
     public String toString() {
         return String.format("JpegInfo{quality=%.2f, progressive=%s}",
-                quality, progressive);
+            quality, progressive);
     }
 }

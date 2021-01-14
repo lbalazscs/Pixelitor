@@ -54,6 +54,8 @@ import pixelitor.history.History;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.IO;
 import pixelitor.io.OptimizedJpegSavePanel;
+import pixelitor.io.magick.ExportSettings;
+import pixelitor.io.magick.ImageMagick;
 import pixelitor.layers.*;
 import pixelitor.menus.edit.*;
 import pixelitor.menus.file.LayerAnimExport;
@@ -77,6 +79,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ResourceBundle;
 
 import static pixelitor.Composition.ImageChangeActions.FULL;
@@ -164,6 +167,8 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        fileMenu.add(createImageMagickSubmenu());
+
         fileMenu.addSeparator();
 
         fileMenu.addAction(new MenuAction(texts.getString("export_layer_animation") + "...") {
@@ -226,6 +231,26 @@ public class MenuBar extends JMenuBar {
         });
 
         return fileMenu;
+    }
+
+    private static JMenu createImageMagickSubmenu() {
+        PMenu imMenu = new PMenu("ImageMagick");
+
+        imMenu.addAction(new MenuAction("Export...") {
+            @Override
+            public void onClick() {
+                ImageMagick.exportActiveComp();
+            }
+        });
+
+        imMenu.add(new MenuAction("Import...") {
+            @Override
+            public void onClick() {
+                ImageMagick.importComposition();
+            }
+        });
+
+        return imMenu;
     }
 
     private static JMenu createAutomateSubmenu(PixelitorWindow pw, ResourceBundle texts) {
@@ -1276,6 +1301,14 @@ public class MenuBar extends JMenuBar {
                 PixelitorWindow.get().setSize(1366, 728);
             }
         });
+
+        developMenu.addActionWithKey(new MenuAction("Export with ImageMagick") {
+            @Override
+            public void onClick() {
+                BufferedImage img = getActiveCompositeImage();
+                ImageMagick.exportImage(img, new File("out.webp"), ExportSettings.DEFAULTS);
+            }
+        }, CTRL_ALT_E);
 
         return developMenu;
     }

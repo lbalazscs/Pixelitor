@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,6 +17,8 @@
 
 package pixelitor.utils;
 
+import java.awt.EventQueue;
+
 /**
  * An object that can be used to update and stop
  * the displayed progress value in a UI progress indicator.
@@ -25,6 +27,14 @@ public interface ProgressHandler {
     void updateProgress(int value);
 
     void stopProgress();
+
+    default void stopProgressOnEDT() {
+        if (Threads.calledOnEDT()) {
+            stopProgress();
+        } else {
+            EventQueue.invokeLater(this::stopProgress);
+        }
+    }
 
     ProgressHandler EMPTY = new ProgressHandler() {
         @Override

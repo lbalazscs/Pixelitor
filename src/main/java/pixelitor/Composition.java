@@ -1327,7 +1327,7 @@ public class Composition implements Serializable {
             }, onEDT);
     }
 
-    private void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
+    public void afterSuccessfulSaveActions(File file, boolean addToRecentMenus) {
         assert calledOnEDT() : threadInfo();
 
         setFile(file);

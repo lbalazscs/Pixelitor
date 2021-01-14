@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -47,18 +47,24 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
         if (foundExt.isEmpty()) {
             // the user has entered no extension
             // determine it from the active FileFilter
-            extension = getExtensionFromFileFilter();
-            f = new File(f.getAbsolutePath() + '.' + extension);
+            f = addExtension(f);
         } else {
             boolean supported = FileUtils.hasSupportedOutputExt(f.getName());
             if (!supported) {
-                extension = getExtensionFromFileFilter();
-                f = new File(f.getAbsolutePath() + '.' + extension);
+                f = addExtension(f);
             } else {
                 extension = foundExt.get();
             }
         }
 
+        return f;
+    }
+
+    private File addExtension(File f) {
+        extension = getExtensionFromFileFilter();
+        if (extension != null) {
+            f = new File(f.getAbsolutePath() + '.' + extension);
+        }
         return f;
     }
 
@@ -68,6 +74,9 @@ public class SaveFileChooser extends ConfirmSaveFileChooser {
 
     private String getExtensionFromFileFilter() {
         FileFilter currentFilter = getFileFilter();
-        return ((FileNameExtensionFilter) currentFilter).getExtensions()[0];
+        if (currentFilter instanceof FileNameExtensionFilter) { // not "Accept All"
+            return ((FileNameExtensionFilter) currentFilter).getExtensions()[0];
+        }
+        return null;
     }
 }

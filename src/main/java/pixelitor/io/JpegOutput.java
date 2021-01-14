@@ -19,7 +19,6 @@ package pixelitor.io;
 
 import pixelitor.utils.Messages;
 import pixelitor.utils.ProgressTracker;
-import pixelitor.utils.StatusBarProgressTracker;
 import pixelitor.utils.SubtaskProgressTracker;
 
 import javax.imageio.ImageIO;
@@ -28,7 +27,6 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -37,25 +35,6 @@ import java.io.IOException;
 public final class JpegOutput {
     private JpegOutput() {
     }
-
-    public static void write(BufferedImage image, File file, JpegInfo config) throws IOException {
-        ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-        if (ios == null) {
-            TrackedIO.throwNoIOSErrorFor(file);
-        }
-        var tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
-        writeJPGtoStream(image, ios, config, tracker);
-    }
-
-//    public static void writePNG(BufferedImage image, File file) throws IOException {
-//        ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-//        if (ios == null) {
-//            TrackedIO.throwNoIOSErrorFor(file);
-//        }
-//        var tracker = new StatusBarProgressTracker("Writing " + file.getName(), 100);
-//        TrackedIO.writeDetailedToStream(image, ios, tracker, "png",
-//            false, 0.0f);
-//    }
 
     public static ImageWithSize writeJPGtoPreviewImage(BufferedImage image, JpegInfo config, ProgressTracker pt) {
         var bos = new ByteArrayOutputStream(32768);
@@ -66,7 +45,7 @@ public final class JpegOutput {
             // approximately 70% of the total time is spent here
             ImageOutputStream ios = ImageIO.createImageOutputStream(bos);
             var pt1 = new SubtaskProgressTracker(0.7, pt);
-            writeJPGtoStream(image, ios, config, pt1);
+            TrackedIO.writeToIOS(image, ios, "jpg", pt1, config.toCustomizer());
 
             // ...then reads it back into an image
             // approximately 30% of the total time is spent here
@@ -85,14 +64,6 @@ public final class JpegOutput {
         int sizeInBytes = bytes.length;
 
         return new ImageWithSize(previewImage, sizeInBytes);
-    }
-
-    private static void writeJPGtoStream(BufferedImage image,
-                                         ImageOutputStream ios,
-                                         JpegInfo config,
-                                         ProgressTracker tracker) throws IOException {
-        TrackedIO.writeDetailedToStream(image, ios, tracker, "jpg",
-            config.isProgressive(), config.getQuality());
     }
 
     static class ImageWithSize {
