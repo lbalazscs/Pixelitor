@@ -14,4 +14,6 @@ jobs:
       with:
         java-version: 15
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: mvn -B package --file pom.xml
