@@ -1,0 +1,14 @@
+dialogCancelButton=Cancella
+dialogOKButton=OK
+dialogSaveButton=Salva
+dialogSaveButton.produceDialog=Salva\u2026
+dialogDontSaveButton=Non Salvare
+dialogYesButton=Si
+dialogNoButton=No
+dialogCancelMnemonic=C
+dialogOKMnemonic=O
+dialogSaveMnemonic=S
+dialogDontSaveMnemonic=D
+dialogYesMnemonic=Y
+dialogNoMnemonic=N
+dialogHelpLearnMore=Learn More
