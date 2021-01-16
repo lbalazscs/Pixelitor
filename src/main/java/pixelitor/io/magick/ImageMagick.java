@@ -173,8 +173,8 @@ public class ImageMagick {
             }
             p.waitFor();
 
-            System.out.println(String.format("ImageMagick::exportImage: estimatedSeconds = '%.2f'",
-                (System.nanoTime() - startTime) / 1_000_000_000.0));
+            System.out.printf("ImageMagick::exportImage: took %.2f seconds.%n",
+                (System.nanoTime() - startTime) / 1_000_000_000.0);
 
         } catch (IOException e) {
             throw new UncheckedIOException(e);

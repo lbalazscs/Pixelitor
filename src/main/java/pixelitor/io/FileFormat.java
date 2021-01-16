@@ -25,6 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static pixelitor.utils.Threads.onEDT;
 import static pixelitor.utils.Threads.onIOThread;
@@ -33,24 +34,10 @@ import static pixelitor.utils.Threads.onIOThread;
  * The input and output file formats
  */
 public enum FileFormat {
-    JPG(false, false, FileChoosers.jpegFilter) {
-    }, PNG(false, true, FileChoosers.pngFilter) {
-    }, TIFF(false, true, FileChoosers.tiffFilter) {
-    }, GIF(false, true, FileChoosers.gifFilter) {
-    }, BMP(false, false, FileChoosers.bmpFilter) {
-    }, TGA(false, true, FileChoosers.tgaFilter) {
-    }, PXC(true, true, FileChoosers.pxcFilter) {
-        @Override
-        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
-            return () -> PXCFormat.write(comp, settings.getFile());
-        }
-
-        @Override
-        public CompletableFuture<Composition> readFrom(File file) {
-            return CompletableFuture.supplyAsync(
-                Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
-        }
-    }, ORA(true, true, FileChoosers.oraFilter) {
+    BMP(false, ImageUtils::convertToRGB, FileChoosers.bmpFilter) {
+    }, GIF(false, ImageUtils::convertToIndexed, FileChoosers.gifFilter) {
+    }, JPG(false, ImageUtils::convertToRGB, FileChoosers.jpegFilter) {
+    }, ORA(true, null, FileChoosers.oraFilter) {
         @Override
         public Runnable getSaveTask(Composition comp, SaveSettings settings) {
             return () -> OpenRaster.uncheckedWrite(comp, settings.getFile());
@@ -61,15 +48,31 @@ public enum FileFormat {
             return CompletableFuture.supplyAsync(
                 Utils.toSupplier(() -> OpenRaster.read(file)), onIOThread);
         }
+    }, PAM(false, ImageUtils::convertToInterleavedRGBA, FileChoosers.pamFilter) {
+    }, PNG(false, null, FileChoosers.pngFilter) {
+    }, PPM(false, ImageUtils::convertToInterleavedRGB, FileChoosers.ppmFilter) {
+    }, PXC(true, null, FileChoosers.pxcFilter) {
+        @Override
+        public Runnable getSaveTask(Composition comp, SaveSettings settings) {
+            return () -> PXCFormat.write(comp, settings.getFile());
+        }
+
+        @Override
+        public CompletableFuture<Composition> readFrom(File file) {
+            return CompletableFuture.supplyAsync(
+                Utils.toSupplier(() -> PXCFormat.read(file)), onIOThread);
+        }
+    }, TGA(false, null, FileChoosers.tgaFilter) {
+    }, TIFF(false, null, FileChoosers.tiffFilter) {
     };
 
     private final boolean hasLayers;
-    private final boolean hasAlpha;
+    private final Function<BufferedImage, BufferedImage> converter;
     private final FileFilter fileFilter;
 
-    FileFormat(boolean hasLayers, boolean hasAlpha, FileFilter fileFilter) {
+    FileFormat(boolean hasLayers, Function<BufferedImage, BufferedImage> converter, FileFilter fileFilter) {
         this.hasLayers = hasLayers;
-        this.hasAlpha = hasAlpha;
+        this.converter = converter;
         this.fileFilter = fileFilter;
     }
 
@@ -94,12 +97,12 @@ public enum FileFormat {
 
     private void saveSingleLayered(Composition comp, SaveSettings settings) {
         BufferedImage img = comp.getCompositeImage();
-        if (!hasAlpha) {
-            // no alpha support, convert first to RGB
-            img = ImageUtils.convertToRGB(img, false);
-        } else if (this == GIF) {
-            img = ImageUtils.convertToIndexed(img, false);
+        if (converter != null) {
+            // do the final conversion, which might be
+            // necessary before writing the image
+            img = converter.apply(img);
         }
+
         IO.saveImageToFile(img, settings);
     }
 
@@ -121,12 +124,14 @@ public enum FileFormat {
     public static Optional<FileFormat> fromExtension(String extension) {
         String extLC = extension.toLowerCase();
         return switch (extLC) {
-            case "jpg", "jpeg" -> Optional.of(JPG);
-            case "png" -> Optional.of(PNG);
             case "bmp" -> Optional.of(BMP);
             case "gif" -> Optional.of(GIF);
-            case "pxc" -> Optional.of(PXC);
+            case "jpg", "jpeg" -> Optional.of(JPG);
             case "ora" -> Optional.of(ORA);
+            case "pam" -> Optional.of(PAM);
+            case "png" -> Optional.of(PNG);
+            case "ppm" -> Optional.of(PPM);
+            case "pxc" -> Optional.of(PXC);
             case "tga" -> Optional.of(TGA);
             case "tif", "tiff" -> Optional.of(TIFF);
             default -> Optional.empty();

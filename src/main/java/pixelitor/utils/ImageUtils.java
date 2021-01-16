@@ -416,10 +416,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB_PRE);
-        Graphics2D g = dest.createGraphics();
-        g.drawImage(src, 0, 0, null);
-        g.dispose();
+        BufferedImage dest = drawOn(TYPE_INT_ARGB_PRE, src);
 
         if (flushOld) {
             src.flush();
@@ -431,10 +428,7 @@ public class ImageUtils {
     public static BufferedImage convertToARGB(BufferedImage src, boolean flushOld) {
         assert src != null;
 
-        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_ARGB);
-        Graphics2D g = dest.createGraphics();
-        g.drawImage(src, 0, 0, null);
-        g.dispose();
+        BufferedImage dest = drawOn(TYPE_INT_ARGB, src);
 
         if (flushOld) {
             src.flush();
@@ -443,19 +437,56 @@ public class ImageUtils {
         return dest;
     }
 
-    public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
-        assert src != null;
-
-        var dest = new BufferedImage(src.getWidth(), src.getHeight(), TYPE_INT_RGB);
+    private static BufferedImage drawOn(int newType, BufferedImage src) {
+        var dest = new BufferedImage(src.getWidth(), src.getHeight(), newType);
         Graphics2D g = dest.createGraphics();
         g.drawImage(src, 0, 0, null);
         g.dispose();
+        return dest;
+    }
+
+    public static BufferedImage convertToInterleavedRGB(BufferedImage src) {
+        return convertToInterleaved(src, false);
+    }
+
+    public static BufferedImage convertToInterleavedRGBA(BufferedImage src) {
+        return convertToInterleaved(src, true);
+    }
+
+    private static BufferedImage convertToInterleaved(BufferedImage src, boolean addAlpha) {
+        int numChannels = addAlpha ? 4 : 3;
+        WritableRaster wr = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE,
+            src.getWidth(), src.getHeight(), numChannels, null);
+        ColorSpace sRGB = ColorSpace.getInstance(ColorSpace.CS_sRGB);
+        ComponentColorModel ccm = new ComponentColorModel(sRGB, addAlpha,
+            false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+
+        BufferedImage dest = new BufferedImage(ccm, wr, false, null);
+        Graphics2D g = dest.createGraphics();
+        g.drawImage(src, 0, 0, null);
+        g.dispose();
+
+        return dest;
+    }
+
+    public static BufferedImage convertToRGB(BufferedImage src) {
+        return convertToRGB(src, false);
+    }
+
+    public static BufferedImage convertToRGB(BufferedImage src, boolean flushOld) {
+        assert src != null;
+
+        BufferedImage dest = drawOn(TYPE_INT_RGB, src);
 
         if (flushOld) {
             src.flush();
         }
 
         return dest;
+    }
+
+    public static BufferedImage convertToIndexed(BufferedImage src) {
+        return convertToIndexed(src, false);
     }
 
     // based on http://gman.eichberger.de/2007/07/transparent-gifs-in-java.html

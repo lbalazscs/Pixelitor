@@ -63,6 +63,41 @@ class CompositionIOTest {
     }
 
     @Test
+    void readTiff() {
+        checkSingleLayerRead("tiff_test_input.tiff");
+    }
+
+    @Test
+    void readTGA() {
+        checkSingleLayerRead("tga_test_input.tga");
+    }
+
+    @Test
+    void readPAM() {
+        checkSingleLayerRead("pam_test_input.pam");
+    }
+
+    @Test
+    void readPBM() {
+        checkSingleLayerRead("pbm_test_input.pbm");
+    }
+
+    @Test
+    void readPGM() {
+        checkSingleLayerRead("pgm_test_input.pgm");
+    }
+
+    @Test
+    void readPPM() {
+        checkSingleLayerRead("ppm_test_input.ppm");
+    }
+
+    @Test
+    void readPFM() {
+        checkSingleLayerRead("pfm_test_input.pfm");
+    }
+
+    @Test
     void readWritePXC() {
         // read and test
         String[] fileNames = {

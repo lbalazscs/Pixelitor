@@ -164,6 +164,12 @@
             <version>3.6.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-pnm</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+
         <!--from here test dependencies-->
 
         <dependency>

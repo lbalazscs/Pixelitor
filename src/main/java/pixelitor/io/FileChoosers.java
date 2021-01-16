@@ -45,18 +45,37 @@ public class FileChoosers {
     private static JFileChooser openChooser;
     private static SaveFileChooser saveChooser;
 
-    public static final FileFilter jpegFilter = new FileNameExtensionFilter("JPEG files", "jpg", "jpeg");
-    public static final FileFilter pngFilter = new FileNameExtensionFilter("PNG files", "png");
-    public static final FileFilter bmpFilter = new FileNameExtensionFilter("BMP files", "bmp");
-    public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter("GIF files", "gif");
-    public static final FileFilter tiffFilter = new FileNameExtensionFilter("TIFF files", "tiff", "tif");
-    public static final FileFilter tgaFilter = new FileNameExtensionFilter("TGA files", "tga");
-    public static final FileFilter pxcFilter = new FileNameExtensionFilter("PXC files", "pxc");
-    public static final FileFilter oraFilter = new FileNameExtensionFilter("OpenRaster files", "ora");
+    public static final FileNameExtensionFilter bmpFilter = new FileNameExtensionFilter(
+        "BMP files", "bmp");
+    public static final FileNameExtensionFilter gifFilter = new FileNameExtensionFilter(
+        "GIF files", "gif");
+    public static final FileNameExtensionFilter jpegFilter = new FileNameExtensionFilter(
+        "JPEG files", "jpg", "jpeg");
+    public static final FileNameExtensionFilter oraFilter = new FileNameExtensionFilter(
+        "OpenRaster files", "ora");
+    public static final FileNameExtensionFilter pamFilter = new FileNameExtensionFilter(
+        "PAM files", "pam");
+    public static final FileNameExtensionFilter pngFilter = new FileNameExtensionFilter(
+        "PNG files", "png");
+    private static final FileNameExtensionFilter netPBMFilters = new FileNameExtensionFilter(
+        "NetPBM files", "pam", "pbm", "pgm", "ppm", "pfm");
+    public static final FileNameExtensionFilter ppmFilter = new FileNameExtensionFilter(
+        "PPM files", "ppm");
+    public static final FileNameExtensionFilter pxcFilter = new FileNameExtensionFilter(
+        "PXC files", "pxc");
+    public static final FileNameExtensionFilter tgaFilter = new FileNameExtensionFilter(
+        "TGA files", "tga");
+    public static final FileNameExtensionFilter tiffFilter = new FileNameExtensionFilter(
+        "TIFF files", "tiff", "tif");
 
-    private static final FileFilter[] OPEN_SAVE_FILTERS = {
-        bmpFilter, gifFilter, jpegFilter, oraFilter,
+    // the difference is that all NetPBM files can be opened,
+    // but only PAM and PPM can be saved
+    public static final FileNameExtensionFilter[] OPEN_FILTERS = {
+        bmpFilter, gifFilter, jpegFilter, netPBMFilters, oraFilter,
         pngFilter, pxcFilter, tiffFilter, tgaFilter};
+    public static final FileNameExtensionFilter[] SAVE_FILTERS = {
+        bmpFilter, gifFilter, jpegFilter, oraFilter, pamFilter,
+        pngFilter, ppmFilter, pxcFilter, tiffFilter, tgaFilter};
 
     private FileChoosers() {
     }
@@ -248,11 +267,15 @@ public class FileChoosers {
     }
 
     private static void setDefaultOpenExtensions() {
-        addDefaultFilters(openChooser);
+        for (FileFilter filter : OPEN_FILTERS) {
+            openChooser.addChoosableFileFilter(filter);
+        }
     }
 
     public static void setDefaultSaveExtensions() {
-        addDefaultFilters(saveChooser);
+        for (FileFilter filter : SAVE_FILTERS) {
+            saveChooser.addChoosableFileFilter(filter);
+        }
     }
 
     public static void setOnlyOneSaveExtension(FileFilter filter) {
@@ -263,15 +286,17 @@ public class FileChoosers {
         setupFilterToOnlyOneFormat(openChooser, filter);
     }
 
-    private static void addDefaultFilters(JFileChooser chooser) {
-        for (FileFilter filter : OPEN_SAVE_FILTERS) {
-            chooser.addChoosableFileFilter(filter);
-        }
-    }
-
     private static void setupFilterToOnlyOneFormat(JFileChooser chooser,
                                                    FileFilter chosenFilter) {
-        for (FileFilter filter : OPEN_SAVE_FILTERS) {
+        FileFilter[] allFilters;
+        if (chooser == openChooser) {
+            allFilters = OPEN_FILTERS;
+        } else if (chooser == saveChooser) {
+            allFilters = SAVE_FILTERS;
+        } else {
+            throw new IllegalArgumentException("chooser = " + chooser.getClass().getName());
+        }
+        for (FileFilter filter : allFilters) {
             if (filter != chosenFilter) {
                 chooser.removeChoosableFileFilter(filter);
             }

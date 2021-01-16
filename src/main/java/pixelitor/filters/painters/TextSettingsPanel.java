@@ -291,7 +291,6 @@ public class TextSettingsPanel extends FilterGUI
         if (ignoreGUIChanges) {
             return;
         }
-        System.out.println("TextSettingsPanel::paramAdjusted: CALLED");
 
         String text = textTF.getText();
 

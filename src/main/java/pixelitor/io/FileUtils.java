@@ -16,12 +16,10 @@
  */
 package pixelitor.io;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileFilter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -30,8 +28,11 @@ import static java.util.stream.Collectors.toList;
  * Utility class with static methods related to files
  */
 public class FileUtils {
-    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of(
-        "jpg", "jpeg", "png", "gif", "bmp", "pxc", "ora", "tif", "tiff", "tga");
+    // the extensions supported by the file open and save dialogs
+    private static final Set<String> SUPPORTED_OPEN_EXTENSIONS =
+        extensionSet(FileChoosers.OPEN_FILTERS);
+    private static final Set<String> SUPPORTED_SAVE_EXTENSIONS =
+        extensionSet(FileChoosers.SAVE_FILTERS);
 
     private FileUtils() {
     }
@@ -88,19 +89,16 @@ public class FileUtils {
     }
 
     public static boolean hasSupportedInputExt(String fileName) {
-        // currently the same extensions are supported for input and output
-        return hasSupportedExt(fileName);
+        return findExtension(fileName)
+            .map(String::toLowerCase)
+            .filter(SUPPORTED_OPEN_EXTENSIONS::contains)
+            .isPresent();
     }
 
     public static boolean hasSupportedOutputExt(String fileName) {
-        // currently the same extensions are supported for input and output
-        return hasSupportedExt(fileName);
-    }
-
-    private static boolean hasSupportedExt(String fileName) {
         return findExtension(fileName)
             .map(String::toLowerCase)
-            .filter(SUPPORTED_EXTENSIONS::contains)
+            .filter(SUPPORTED_SAVE_EXTENSIONS::contains)
             .isPresent();
     }
 
@@ -123,5 +121,13 @@ public class FileUtils {
         return Stream.of(files)
             .filter(File::isFile)
             .collect(toList());
+    }
+
+    private static Set<String> extensionSet(FileNameExtensionFilter[] filters) {
+        Set<String> set = new HashSet<>();
+        for (FileNameExtensionFilter filter : filters) {
+            Collections.addAll(set, filter.getExtensions());
+        }
+        return set;
     }
 }
