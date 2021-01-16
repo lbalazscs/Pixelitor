@@ -7,6 +7,10 @@
   of it (open an issue), and I will add it to the translation files
 - If you create a new file for a new language, make sure it is "UTF8 BOM" encoded (if you make a copy of an existing
   file, then it will be)
+- The text for the "Tip of the Day" is coming from tips.properties in the same directory, it could be translated
+  similarly.
+- The color chooser's translation files are in [com/bric/swing/resources](src/main/resources/com/bric/swing/resources),
+  they have the same structure.
 - Translating every text in the user interface is a big task. It's OK, if you contribute only a few translations.
  
  
