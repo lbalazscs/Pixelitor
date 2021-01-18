@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.utils.test;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.layers.Layer;
 import pixelitor.utils.Threads;
 
@@ -43,7 +43,7 @@ public class PixelitorEvent {
 
     public PixelitorEvent(String type, Composition comp, Layer layer) {
         assert type != null;
-        if (!RunContext.isDevelopment()) {
+        if (!AppContext.isDevelopment()) {
             throw new IllegalStateException("should be used only for development");
         }
 

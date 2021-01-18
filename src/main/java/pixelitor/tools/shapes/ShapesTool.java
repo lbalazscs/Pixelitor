@@ -266,6 +266,7 @@ public class ShapesTool extends DragTool {
         JPanel configPanel = settings.getConfigPanel();
         new DialogBuilder()
             .title("Settings for " + selectedType)
+            .notModal()
             .withScrollbars()
             .content(configPanel)
             .noCancelButton()
@@ -634,7 +635,7 @@ public class ShapesTool extends DragTool {
     protected void toolEnded() {
         super.toolEnded();
 
-        finalizeBoxIfExists(OpenImages.getActiveComp());
+        finalizeBoxIfExists();
 
         resetInitialState();
     }
@@ -648,6 +649,19 @@ public class ShapesTool extends DragTool {
         super.viewActivated(oldCV, newCV);
     }
 
+    @Override
+    public void firstModalDialogShown() {
+        // safe because the shape tool's own dialogs are not modal
+        finalizeBoxIfExists();
+    }
+
+    private void finalizeBoxIfExists() {
+        if (transformBox != null) {
+            Composition comp = OpenImages.getActiveComp();
+            finalizeBoxIfExists(comp);
+        }
+    }
+
     private void finalizeBoxIfExists(Composition comp) {
         if (transformBox != null) {
             assert styledShape != null;
@@ -659,6 +673,11 @@ public class ShapesTool extends DragTool {
     @VisibleForTesting
     public ShapesToolState getState() {
         return state;
+    }
+
+    @Override
+    public boolean isDirectDrawing() {
+        return false;
     }
 
     @Override

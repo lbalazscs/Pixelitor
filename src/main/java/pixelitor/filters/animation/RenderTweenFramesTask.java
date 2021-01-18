@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 
 import static java.lang.String.format;
-import static pixelitor.ChangeReason.TWEEN_PREVIEW;
+import static pixelitor.FilterContext.TWEEN_PREVIEW;
 import static pixelitor.utils.Threads.calledOutsideEDT;
 
 /**
@@ -148,7 +148,7 @@ class RenderTweenFramesTask extends SwingWorker<Void, Void> {
         // all sorts of problems can happen
         // if filters run outside of EDT
         var busyCursorParent = PixelitorWindow.get();
-        Runnable filterRunTask = () -> filter.run(dr, TWEEN_PREVIEW, busyCursorParent);
+        Runnable filterRunTask = () -> filter.startOn(dr, TWEEN_PREVIEW, busyCursorParent);
         GUIUtils.invokeAndWait(filterRunTask);
 
         long runCountAfter = Filter.runCount;

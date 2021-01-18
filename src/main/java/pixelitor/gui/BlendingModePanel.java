@@ -37,6 +37,10 @@ import static pixelitor.utils.Texts.i18n;
 public class BlendingModePanel extends JPanel {
     private static final String OPACITY = i18n("opacity") + ":";
 
+    // the value above which the opacity is considered fully opaque
+    // (in order to avoid exact float comparisons with 1.0f)
+    public static final float CRITICAL_OPACITY = 0.999f;
+
     protected final DropDownSlider opacityDDSlider;
     protected final JComboBox<BlendingMode> bmCombo;
     private final JLabel opacityLabel;
@@ -110,5 +114,10 @@ public class BlendingModePanel extends JPanel {
     public void addActionListener(ActionListener al) {
         opacityDDSlider.addActionListener(al);
         bmCombo.addActionListener(al);
+    }
+
+    public boolean isNormalAndOpaque() {
+        return getBlendingMode() == BlendingMode.NORMAL
+            && getOpacity() > CRITICAL_OPACITY;
     }
 }

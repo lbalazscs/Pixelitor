@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,23 +33,37 @@ import java.awt.Shape;
  */
 public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private BlendingModePanel blendingModePanel;
+    private boolean maskEditing;
 
     protected BlendingModeBrushTool(String name, char activationKeyChar,
                                     String iconFileName, String toolMessage,
                                     Cursor cursor, boolean canHaveSymmetry) {
         super(name, activationKeyChar, iconFileName, toolMessage, cursor, canHaveSymmetry);
-        drawDestination = DrawDestination.TMP_LAYER;
+        drawDestination = DrawDestination.DIRECT;
+        maskEditing = false;
     }
 
     @Override
     public void setupMaskEditing(boolean isMask) {
-        if (isMask) {
+        maskEditing = isMask;
+        updateDrawing();
+    }
+
+    private void updateDrawing() {
+        if (maskEditing) {
             drawDestination = DrawDestination.DIRECT;
             blendingModePanel.setEnabled(false);
         } else {
-            drawDestination = DrawDestination.TMP_LAYER;
+            drawDestination = blendingModePanel.isNormalAndOpaque() ?
+                DrawDestination.DIRECT :
+                DrawDestination.TMP_LAYER;
             blendingModePanel.setEnabled(true);
         }
+    }
+
+    @Override
+    public boolean isDirectDrawing() {
+        return drawDestination == DrawDestination.DIRECT;
     }
 
     @Override
@@ -57,7 +71,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
         super.toolStarted();
 
         var activeLayer = OpenImages.getActiveLayer();
-        if(activeLayer != null) {
+        if (activeLayer != null) {
             setupMaskEditing(activeLayer.isMaskEditing());
         }
     }
@@ -76,6 +90,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     protected void addBlendingModePanel() {
         blendingModePanel = new BlendingModePanel(true);
         settingsPanel.add(blendingModePanel);
+        blendingModePanel.addActionListener(e -> updateDrawing());
     }
 
     @Override
@@ -84,7 +99,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
 
         node.addFloat("opacity", blendingModePanel.getOpacity());
         node.addQuotedString("blending Mode",
-                blendingModePanel.getBlendingMode().toString());
+            blendingModePanel.getBlendingMode().toString());
 
         return node;
     }

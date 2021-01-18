@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor;
 
 /**
- * The reason for an image change
+ * The context in which a filter runs.
  */
-public enum ChangeReason {
+public enum FilterContext {
     FILTER_WITHOUT_DIALOG(true, false) {
     }, REPEAT_LAST(true, false) {
     },
@@ -29,9 +29,6 @@ public enum ChangeReason {
     // confused with the ImageLayer's PREVIEW state
     // after static imports...
     PREVIEWING(false, true) {
-
-    }, PERFORMANCE_TEST(false, false) {
-    }, NORMAL_TEST(true, true) { 
 
     }, TWEEN_PREVIEW(false, true) {
     }, BATCH_AUTOMATE(false, false) {
@@ -50,7 +47,7 @@ public enum ChangeReason {
         return preview;
     }
 
-    ChangeReason(boolean makeUndoBackup, boolean preview) {
+    FilterContext(boolean makeUndoBackup, boolean preview) {
         this.makeUndoBackup = makeUndoBackup;
         this.preview = preview;
     }

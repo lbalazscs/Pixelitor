@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.tools.pen;
 
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.pen.history.AnchorPointChangeEdit;
@@ -64,9 +64,9 @@ public class AnchorPoint extends DraggablePoint {
         this.subPath = subPath;
 
         ctrlIn = new ControlPoint("ctrlIn", x, y, view, this,
-                CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
+            CTRL_IN_COLOR, CTRL_IN_ACTIVE_COLOR);
         ctrlOut = new ControlPoint("ctrlOut", x, y, view, this,
-                CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
+            CTRL_OUT_COLOR, CTRL_OUT_ACTIVE_COLOR);
         ctrlIn.setSibling(ctrlOut);
         ctrlOut.setSibling(ctrlIn);
     }
@@ -212,7 +212,7 @@ public class AnchorPoint extends DraggablePoint {
 
         double symThreshold = 2.0;
         if (Math.abs(dOutX + dInX) < symThreshold
-                && Math.abs(dOutY + dInY) < symThreshold) {
+            && Math.abs(dOutY + dInY) < symThreshold) {
             return SYMMETRIC;
         }
 
@@ -240,7 +240,7 @@ public class AnchorPoint extends DraggablePoint {
 
         popup.addSeparator();
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             popup.add(new AbstractAction("Dump") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -295,7 +295,7 @@ public class AnchorPoint extends DraggablePoint {
         view.repaint();
 
         History.add(new AnchorPointChangeEdit("Retract Handles",
-                subPath.getComp(), backup, this));
+            subPath.getComp(), backup, this));
     }
 
     @Override
@@ -309,7 +309,7 @@ public class AnchorPoint extends DraggablePoint {
         SubPath backup = subPath.deepCopy(subPath.getPath(), view.getComp());
         subPath.deletePoint(this);
         History.add(new SubPathEdit(
-                "Delete Anchor Point", backup, subPath));
+            "Delete Anchor Point", backup, subPath));
         view.repaint();
     }
 

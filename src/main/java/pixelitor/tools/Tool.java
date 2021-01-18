@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.GUIUtils;
@@ -302,13 +302,17 @@ public abstract class Tool implements KeyListener {
         if (toolButton != null) {
             toolButton.doClick();
         } else {
-            assert RunContext.isUnitTesting();
+            assert AppContext.isUnitTesting();
             Tools.changeTo(this);
         }
     }
 
     public boolean isActive() {
         return Tools.currentIs(this);
+    }
+
+    public boolean isDirectDrawing() {
+        return true;
     }
 
     // used for debugging

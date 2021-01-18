@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,10 +17,10 @@
 
 package pixelitor.utils.test;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Layers;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.layers.ActiveCompositionListener;
 import pixelitor.layers.ActiveMaskListener;
@@ -37,7 +37,7 @@ public class PixelitorEventListener implements ActiveCompositionListener,
     ActiveMaskListener, ViewActivationListener {
 
     public PixelitorEventListener() {
-        if (RunContext.isFinal()) {
+        if (AppContext.isFinal()) {
             throw new IllegalStateException("should be used only for debugging");
         }
     }
@@ -77,13 +77,13 @@ public class PixelitorEventListener implements ActiveCompositionListener,
 
     @Override
     public void allViewsClosed() {
-        Events.postListenerEvent("allCompsClosed", null, null);
+        Events.postListenerEvent("allViewsClosed", null, null);
     }
 
     @Override
     public void viewActivated(View oldView, View newView) {
         String oldCVName = oldView == null ? "null" : oldView.getName();
-        String type = format("compActivated %s => %s", oldCVName, newView.getName());
+        String type = format("viewActivated %s => %s", oldCVName, newView.getName());
         Events.postListenerEvent(type, newView.getComp(), null);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -93,7 +93,7 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
         boolean isLogarithmicNow = newType.equals(TYPE_LOGARITHMIC);
         if (isLogarithmicNow != logarithmic) {
             logarithmic = isLogarithmicNow;
-            OpenImages.onActiveComp(this::instUpdateFrom);
+            OpenImages.onActiveComp(this::update);
         }
     }
 
@@ -107,18 +107,18 @@ public class HistogramsPanel extends JPanel implements ViewActivationListener {
 
     @Override
     public void viewActivated(View oldView, View newView) {
-        instUpdateFrom(newView.getComp());
+        update(newView.getComp());
     }
 
     public static void updateFromActiveComp() {
-        OpenImages.onActiveComp(INSTANCE::instUpdateFrom);
+        OpenImages.onActiveComp(INSTANCE::update);
     }
 
     public static void updateFrom(Composition comp) {
-        INSTANCE.instUpdateFrom(comp);
+        INSTANCE.update(comp);
     }
 
-    private void instUpdateFrom(Composition comp) {
+    private void update(Composition comp) {
         Objects.requireNonNull(comp);
         if (!isShown()) {
             return;

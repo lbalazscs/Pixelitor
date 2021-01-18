@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.tools;
 
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.selection.*;
@@ -233,7 +233,7 @@ public class SelectionTool extends DragTool {
 
         altMeansSubtract = false;
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             ConsistencyChecks.selectionActionsEnabledCheck(comp);
         }
     }

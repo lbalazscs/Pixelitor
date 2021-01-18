@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.layers.BlendingMode;
@@ -42,7 +42,7 @@ public class ParamTest extends ParametrizedFilter {
 
     @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
-        if (RunContext.isDevelopment() && !RandomGUITest.isRunning()) {
+        if (AppContext.isDevelopment() && !RandomGUITest.isRunning()) {
             System.out.println("ParamTest.doTransform CALLED");
         }
 

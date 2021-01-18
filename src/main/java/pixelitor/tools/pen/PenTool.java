@@ -17,9 +17,9 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.history.History;
@@ -130,7 +130,7 @@ public class PenTool extends Tool {
         settingsPanel.addButton(traceWithSmudge, "traceWithSmudge",
             "Stroke the path using the current settings of the Smudge Tool");
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             settingsPanel.addButton(dumpPathAction, "dumpPathAction", "");
         }
     }
@@ -171,7 +171,7 @@ public class PenTool extends Tool {
     // starts either the editing or the transforming mode
     public void startRestrictedMode(PenToolMode mode, boolean calledFromModeChooser) {
         if (path == null) {
-            if (RunContext.isUnitTesting()) {
+            if (AppContext.isUnitTesting()) {
                 throw new IllegalStateException("start restricted mode with null path");
             }
             if (RandomGUITest.isRunning()) {

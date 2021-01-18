@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -62,7 +62,7 @@ public class Pixelitor {
         // adding -Dpixelitor.development=true to the command line
         if ("true".equals(System.getProperty("pixelitor.development"))) {
             Utils.makeSureAssertionsAreEnabled();
-            RunContext.CURRENT = RunContext.DEVELOPMENT_GUI;
+            AppContext.CURRENT = AppContext.DEVELOPMENT_GUI;
         }
 
         // Force using English locale, because using the default system
@@ -218,7 +218,7 @@ public class Pixelitor {
      * A possibility for automatic debugging or testing
      */
     private static void afterStartTestActions() {
-        if (RunContext.isFinal()) {
+        if (AppContext.isFinal()) {
             // in the final builds nothing should run
             return;
         }

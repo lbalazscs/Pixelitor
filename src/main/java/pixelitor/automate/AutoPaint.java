@@ -85,7 +85,7 @@ public class AutoPaint {
         } finally {
             History.setIgnoreEdits(false);
             History.add(new ImageEdit("Auto Paint", dr.getComp(),
-                dr, backupImage, false, false));
+                dr, backupImage, false));
 
             progressHandler.stopProgress();
             Messages.showPlainInStatusBar(msg + "finished.");

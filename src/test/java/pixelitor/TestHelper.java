@@ -72,7 +72,7 @@ public class TestHelper {
     }
 
     public static Composition createEmptyComp(int width, int height) {
-        var comp = Composition.createEmpty(width, height);
+        var comp = Composition.createEmpty(width, height, ImageMode.RGB);
         comp.setName("Test");
         setupMockViewFor(comp);
 
@@ -110,25 +110,23 @@ public class TestHelper {
         return comp;
     }
 
-    public static Composition create2LayerComp(boolean addMasks) {
+    public static Composition createComp(int numLayers, boolean addMasks) {
         var comp = createEmptyComp();
 
-        var layer1 = createEmptyImageLayer(comp, "layer 1");
-        var layer2 = createEmptyImageLayer(comp, "layer 2");
-
-        comp.addLayerInInitMode(layer1);
-        comp.addLayerInInitMode(layer2);
-
-        if (addMasks) {
-            layer1.addMask(REVEAL_ALL);
-            layer2.addMask(REVEAL_ALL);
+        for (int i = 0; i < numLayers; i++) {
+            var layer = createEmptyImageLayer(comp, "layer " + (i + 1));
+            comp.addLayerInInitMode(layer);
+            if (addMasks) {
+                layer.addMask(REVEAL_ALL);
+            }
+            if (i == numLayers - 1) {
+                NORMAL.activate(layer);
+                assert layer == comp.getActiveLayer();
+            }
+            assert layer == comp.getLayer(i);
         }
-
-        NORMAL.activate(layer2);
-
-        assert layer2 == comp.getActiveLayer();
-        assert layer1 == comp.getLayer(0);
-        assert layer2 == comp.getLayer(1);
+        assert comp.getNumLayers() == numLayers;
+        assert comp.checkInvariant();
 
         comp.setDirty(false);
 
@@ -268,8 +266,8 @@ public class TestHelper {
         }
     }
 
-    public static void moveLayer(Composition comp,
-                                 boolean makeDuplicateLayer, int relX, int relY) {
+    public static void move(Composition comp,
+                            boolean makeDuplicateLayer, int relX, int relY) {
         comp.startMovement(MOVE_LAYER_ONLY, makeDuplicateLayer);
 //        if(makeDuplicateLayer) {
 //            comp.getActiveLayer().setUI(new TestLayerUI());
@@ -293,7 +291,7 @@ public class TestHelper {
         // should be used on layers without translation
         assertThat(layer).translationIs(0, 0);
 
-        translation.moveLayer(comp);
+        translation.move(comp);
 
         int expectedTX = translation.getExpectedTX();
         int expectedTY = translation.getExpectedTY();
@@ -389,13 +387,13 @@ public class TestHelper {
     }
 
     public static void setUnitTestingMode() {
-        if (RunContext.isUnitTesting()) {
+        if (AppContext.isUnitTesting()) {
             // unit testing mode is already set
             return;
         }
 
         Language.setCurrent(Language.ENGLISH);
-        RunContext.setUnitTestingMode();
+        AppContext.setUnitTestingMode();
         Messages.setMsgHandler(new TestMessageHandler());
 
         History.setUndoLevels(15);

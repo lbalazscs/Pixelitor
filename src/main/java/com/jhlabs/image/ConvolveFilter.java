@@ -51,11 +51,6 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     protected Kernel kernel = null;
 
     /**
-     * Whether to convolve alpha.
-     */
-    protected boolean alpha = true;
-
-    /**
      * Whether to promultiply the alpha before convolving.
      */
     protected boolean premultiplyAlpha = true;
@@ -143,26 +138,6 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
     }
 
     /**
-     * Set whether to convolve the alpha channel.
-     *
-     * @param useAlpha true to convolve the alpha
-     * @see #getUseAlpha
-     */
-    public void setUseAlpha(boolean useAlpha) {
-        alpha = useAlpha;
-    }
-
-    /**
-     * Get whether to convolve the alpha channel.
-     *
-     * @return true to convolve the alpha
-     * @see #setUseAlpha
-     */
-    public boolean getUseAlpha() {
-        return alpha;
-    }
-
-    /**
      * Set whether to premultiply the alpha channel.
      *
      * @param premultiplyAlpha true to premultiply the alpha
@@ -198,7 +173,7 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         if (premultiplyAlpha) {
             ImageMath.premultiply(inPixels, 0, inPixels.length);
         }
-        convolve(kernel, inPixels, outPixels, width, height, alpha, edgeAction);
+        convolve(kernel, inPixels, outPixels, width, height, edgeAction);
         if (premultiplyAlpha) {
             ImageMath.unpremultiply(outPixels, 0, outPixels.length);
         }
@@ -243,30 +218,16 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param outPixels  the output pixels
      * @param width      the width
      * @param height     the height
-     * @param edgeAction what to do at the edges
-     */
-    public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
-        convolve(kernel, inPixels, outPixels, width, height, true, edgeAction);
-    }
-
-    /**
-     * Convolve a block of pixels.
-     *
-     * @param kernel     the kernel
-     * @param inPixels   the input pixels
-     * @param outPixels  the output pixels
-     * @param width      the width
-     * @param height     the height
      * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public void convolve(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
         if (kernel.getHeight() == 1) {
-            convolveH(kernel, inPixels, outPixels, width, height, alpha, edgeAction);
+            convolveH(kernel, inPixels, outPixels, width, height, edgeAction);
         } else if (kernel.getWidth() == 1) {
-            convolveV(kernel, inPixels, outPixels, width, height, alpha, edgeAction);
+            convolveV(kernel, inPixels, outPixels, width, height, edgeAction);
         } else {
-            convolveHV(kernel, inPixels, outPixels, width, height, alpha, edgeAction);
+            convolveHV(kernel, inPixels, outPixels, width, height, edgeAction);
         }
     }
 
@@ -278,10 +239,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param outPixels  the output pixels
      * @param width      the width
      * @param height     the height
-     * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public void convolveHV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public void convolveHV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
         int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int rows = kernel.getHeight();
@@ -292,8 +252,11 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         pt = createProgressTracker(height);
 
         for (int y = 0; y < height; y++) {
+            int offset = y * width;
             for (int x = 0; x < width; x++) {
                 float r = 0, g = 0, b = 0, a = 0;
+                int origPacked = inPixels[offset + x];
+                int origAlpha = (origPacked >> 24) & 0xff;
 
                 for (int row = -rows2; row <= rows2; row++) {
                     int iy = y + row;
@@ -323,18 +286,16 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
                                 }
                             }
                             int rgb = inPixels[ioffset + ix];
-                            a += f * ((rgb >> 24) & 0xff);
                             r += f * ((rgb >> 16) & 0xff);
                             g += f * ((rgb >> 8) & 0xff);
                             b += f * (rgb & 0xff);
                         }
                     }
                 }
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
                 int ir = PixelUtils.clamp((int) (r + 0.5));
                 int ig = PixelUtils.clamp((int) (g + 0.5));
                 int ib = PixelUtils.clamp((int) (b + 0.5));
-                outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+                outPixels[index++] = (origAlpha << 24) | (ir << 16) | (ig << 8) | ib;
             }
             pt.unitDone();
         }
@@ -349,10 +310,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param outPixels  the output pixels
      * @param width      the width
      * @param height     the height
-     * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolveH(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public static void convolveH(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
         int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int cols = kernel.getWidth();
@@ -361,7 +321,9 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
         for (int y = 0; y < height; y++) {
             int ioffset = y * width;
             for (int x = 0; x < width; x++) {
-                float r = 0, g = 0, b = 0, a = 0;
+                int origPacked = inPixels[ioffset + x];
+                int origAlpha = (origPacked >> 24) & 0xff;
+                float r = 0, g = 0, b = 0;
                 int moffset = cols2;
                 for (int col = -cols2; col <= cols2; col++) {
                     float f = matrix[moffset + col];
@@ -382,17 +344,15 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
                             }
                         }
                         int rgb = inPixels[ioffset + ix];
-                        a += f * ((rgb >> 24) & 0xff);
                         r += f * ((rgb >> 16) & 0xff);
                         g += f * ((rgb >> 8) & 0xff);
                         b += f * (rgb & 0xff);
                     }
                 }
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
                 int ir = PixelUtils.clamp((int) (r + 0.5));
                 int ig = PixelUtils.clamp((int) (g + 0.5));
                 int ib = PixelUtils.clamp((int) (b + 0.5));
-                outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+                outPixels[index++] = (origAlpha << 24) | (ir << 16) | (ig << 8) | ib;
             }
         }
     }
@@ -405,18 +365,20 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
      * @param outPixels  the output pixels
      * @param width      the width
      * @param height     the height
-     * @param alpha      include alpha channel
      * @param edgeAction what to do at the edges
      */
-    public static void convolveV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha, int edgeAction) {
+    public static void convolveV(Kernel kernel, int[] inPixels, int[] outPixels, int width, int height, int edgeAction) {
         int index = 0;
         float[] matrix = kernel.getKernelData(null);
         int rows = kernel.getHeight();
         int rows2 = rows / 2;
 
         for (int y = 0; y < height; y++) {
+            int offset = y * width;
             for (int x = 0; x < width; x++) {
-                float r = 0, g = 0, b = 0, a = 0;
+                float r = 0, g = 0, b = 0;
+                int origPacked = inPixels[offset + x];
+                int origAlpha = (origPacked >> 24) & 0xff;
 
                 for (int row = -rows2; row <= rows2; row++) {
                     int iy = y + row;
@@ -445,17 +407,15 @@ public class ConvolveFilter extends AbstractBufferedImageOp {
 
                     if (f != 0) {
                         int rgb = inPixels[ioffset + x];
-                        a += f * ((rgb >> 24) & 0xff);
                         r += f * ((rgb >> 16) & 0xff);
                         g += f * ((rgb >> 8) & 0xff);
                         b += f * (rgb & 0xff);
                     }
                 }
-                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
                 int ir = PixelUtils.clamp((int) (r + 0.5));
                 int ig = PixelUtils.clamp((int) (g + 0.5));
                 int ib = PixelUtils.clamp((int) (b + 0.5));
-                outPixels[index++] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+                outPixels[index++] = (origAlpha << 24) | (ir << 16) | (ig << 8) | ib;
             }
         }
     }

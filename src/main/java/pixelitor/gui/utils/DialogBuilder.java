@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -51,7 +51,6 @@ public class DialogBuilder {
     private JFrame frameOwner;
     private JDialog dialogOwner;
     private String title;
-    private boolean notifyGlobalEvents = true;
     private boolean modal = true;
     private boolean disposeWhenClosing = true;
     private Screens.Align align = SCREEN_CENTER;
@@ -177,11 +176,6 @@ public class DialogBuilder {
         return this;
     }
 
-    public DialogBuilder noGlobalKeyChange() {
-        notifyGlobalEvents = false;
-        return this;
-    }
-
     public DialogBuilder okAction(Runnable r) {
         okAction = r;
         return this;
@@ -260,12 +254,12 @@ public class DialogBuilder {
     private JDialog createDialog() {
         JDialog d;
         if (frameOwner != null) {
-            d = new BuiltDialog(frameOwner, notifyGlobalEvents);
+            d = new BuiltDialog(frameOwner, modal);
         } else if (dialogOwner != null) {
-            d = new BuiltDialog(dialogOwner, notifyGlobalEvents);
+            d = new BuiltDialog(dialogOwner, modal);
         } else {
             var pw = PixelitorWindow.get();
-            d = new BuiltDialog(pw, notifyGlobalEvents);
+            d = new BuiltDialog(pw, modal);
         }
         return d;
     }
@@ -355,24 +349,25 @@ public class DialogBuilder {
     }
 
     static class BuiltDialog extends JDialog {
-        private final boolean notifyGlobalEvents;
+        private final boolean isModal;
         private final boolean rootDialog; // true if the owner is the main window
 
-        public BuiltDialog(Frame owner, boolean notifyGlobalEvents) {
+        public BuiltDialog(Frame owner, boolean isModal) {
             super(owner);
-            this.notifyGlobalEvents = notifyGlobalEvents;
+            this.isModal = isModal;
             rootDialog = true; // the main window is the only frame
         }
 
-        public BuiltDialog(Window owner, boolean notifyGlobalEvents) {
+        public BuiltDialog(Window owner, boolean isModal) {
             super(owner);
-            this.notifyGlobalEvents = notifyGlobalEvents;
+            this.isModal = isModal;
             rootDialog = false;
         }
 
         @Override
         public void setVisible(boolean b) {
-            if (notifyGlobalEvents) {
+            assert isModal == isModal();
+            if (isModal) {
                 if (b) {
                     GlobalEvents.dialogOpened(getTitle());
                     assert !rootDialog || GlobalEvents.getNumModalDialogs() == 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -31,29 +31,21 @@ import java.awt.image.BufferedImage;
  * as a replacement.
  */
 public class ImageAndMaskEdit extends ImageEdit {
-    private final boolean canRepeat;
     private final ImageEdit maskImageEdit;
 
     public ImageAndMaskEdit(String name, Composition comp, ImageLayer layer,
                             BufferedImage backupImage,
-                            BufferedImage maskBackupImage,
-                            boolean canRepeat) {
-        super(name, comp, layer, backupImage, true, canRepeat);
-        this.canRepeat = canRepeat;
+                            BufferedImage maskBackupImage) {
+        super(name, comp, layer, backupImage, true);
 
         assert layer.hasMask();
 
         maskImageEdit = new ImageEdit(name, comp,
-                layer.getMask(), maskBackupImage, true, canRepeat);
+            layer.getMask(), maskBackupImage, true);
 
         fadeable = false;
         embedded = true;
         maskImageEdit.setEmbedded(true);
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return canRepeat;
     }
 
     @Override

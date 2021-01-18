@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -32,7 +32,7 @@ public enum WithTranslation {
         }
 
         @Override
-        public void moveLayer(Composition comp) {
+        public void move(Composition comp) {
             // do nothing
         }
 
@@ -44,13 +44,13 @@ public enum WithTranslation {
         @Override
         public void setupFor(Composition comp) {
             comp.forEachContentLayer(contentLayer ->
-                    TestHelper.setTranslation(comp, contentLayer, this));
+                TestHelper.setTranslation(comp, contentLayer, this));
         }
 
         @Override
-        public void moveLayer(Composition comp) {
-            TestHelper.moveLayer(comp, false, 2, 2);
-            TestHelper.moveLayer(comp, false, -4, -4);
+        public void move(Composition comp) {
+            TestHelper.move(comp, false, 2, 2);
+            TestHelper.move(comp, false, -4, -4);
         }
 
         @Override
@@ -73,7 +73,7 @@ public enum WithTranslation {
 
     public abstract void setupFor(ContentLayer layer);
 
-    public abstract void moveLayer(Composition comp);
+    public abstract void move(Composition comp);
 
     public int getExpectedTX() {
         return expectedTX;

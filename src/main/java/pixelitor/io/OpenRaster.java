@@ -24,6 +24,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import pixelitor.Composition;
+import pixelitor.ImageMode;
 import pixelitor.layers.BlendingMode;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -179,7 +180,7 @@ public class OpenRaster {
         int compWidth = parseInt(doc.getAttribute("w").trim());
         int compHeight = parseInt(doc.getAttribute("h").trim());
 
-        var comp = Composition.createEmpty(compWidth, compHeight);
+        var comp = Composition.createEmpty(compWidth, compHeight, ImageMode.RGB);
         comp.setFile(file);
 
         NodeList layers = doc.getElementsByTagName("layer");

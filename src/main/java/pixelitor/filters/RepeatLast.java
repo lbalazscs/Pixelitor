@@ -20,7 +20,7 @@ package pixelitor.filters;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.DrawableAction;
 
-import static pixelitor.ChangeReason.REPEAT_LAST;
+import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.filters.util.FilterUtils.getLastFilter;
 
 /**
@@ -29,7 +29,7 @@ import static pixelitor.filters.util.FilterUtils.getLastFilter;
  */
 public class RepeatLast extends DrawableAction {
     public static final RepeatLast INSTANCE = new RepeatLast();
-    public static final String DEFAULT_NAME = "Repeat Last";
+    private static final String DEFAULT_NAME = "Repeat Last";
 
     private RepeatLast() {
         super(DEFAULT_NAME);
@@ -39,6 +39,6 @@ public class RepeatLast extends DrawableAction {
     @Override
     protected void process(Drawable dr) {
         getLastFilter()
-                .ifPresent(filter -> filter.startOn(dr, REPEAT_LAST));
+            .ifPresent(filter -> filter.startOn(dr, REPEAT_LAST));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -61,16 +61,16 @@ public class JHConvolutionEdge extends ParametrizedFilter {
     private static final int METHOD_NONE = 5;
 
     private static final float[] NONE_MATRIX = {
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
     };
 
     public JHConvolutionEdge() {
         super(ShowOriginal.YES);
 
         setParams(
-                horizontalMethod,
-                verticalMethod,
-                invertImage
+            horizontalMethod,
+            verticalMethod,
+            invertImage
         );
     }
 
@@ -103,7 +103,7 @@ public class JHConvolutionEdge extends ParametrizedFilter {
         dest = filter.filter(src, dest);
 
         if (invertImage.isChecked()) {
-            Invert.invertImage(dest, dest);
+            dest = Invert.invertImage(dest);
         }
 
         return dest;

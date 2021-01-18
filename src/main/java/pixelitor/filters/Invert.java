@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,11 @@
 package pixelitor.filters;
 
 import com.jhlabs.image.PixelUtils;
+import pixelitor.filters.util.FilterPalette;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
@@ -36,15 +38,40 @@ public class Invert extends Filter {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        invertImage(src, dest);
+        dest = invertImage(src);
 
         return dest;
     }
 
-    /**
-     * The two arguments can point to the same image to invert an image in-place
-     */
-    public static void invertImage(BufferedImage src, BufferedImage dest) {
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
+    }
+
+    public static BufferedImage invertImage(BufferedImage src) {
+        BufferedImage dest;
+        if (src.getColorModel() instanceof IndexColorModel) {
+            return new FilterPalette(src) {
+                @Override
+                protected int changeRed(int r) {
+                    return 255 - r;
+                }
+
+                @Override
+                protected int changeGreen(int g) {
+                    return 255 - g;
+                }
+
+                @Override
+                protected int changeBlue(int b) {
+                    return 255 - b;
+                }
+            }.filter();
+        }
+
+        // normal case
+        dest = ImageUtils.createImageWithSameCM(src);
+
         int[] srcData = ImageUtils.getPixelsAsArray(src);
         int[] destData = ImageUtils.getPixelsAsArray(dest);
 
@@ -98,6 +125,7 @@ public class Invert extends Filter {
                 destData[i] = a << 24 | r << 16 | g << 8 | b;
             }
         }
+        return dest;
     }
 
     public static void quickInvert(BufferedImage dest) {

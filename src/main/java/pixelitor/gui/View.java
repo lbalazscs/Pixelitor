@@ -81,7 +81,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
     private static boolean showPixelGrid = false;
 
     public View(Composition comp) {
-        assert !RunContext.isUnitTesting() : "Swing component in unit test";
+        assert !AppContext.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
         this.comp = comp;
@@ -138,7 +138,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         layersPanel = new LayersPanel();
         newComp.addAllLayersToGUI();
         LayersContainer.showLayersFor(this);
-        Layers.activeLayerChanged(newComp.getActiveLayer(), false);
+        Layers.activeCompChanged(newComp, false);
 
         oldComp.setView(null);
 

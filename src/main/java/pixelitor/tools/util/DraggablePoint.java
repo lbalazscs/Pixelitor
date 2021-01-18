@@ -23,7 +23,6 @@ import pixelitor.history.HandleMovedEdit;
 import pixelitor.utils.Shapes;
 import pixelitor.utils.Utils;
 import pixelitor.utils.debug.DebugNode;
-import pixelitor.utils.test.RandomGUITest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -271,10 +270,10 @@ public class DraggablePoint extends Point2D.Double {
             // this shouldn't happen, but it does very rarely in random GUI tests
             assert this.view != null;
             assert view != null;
-            if (RandomGUITest.isRunning()) {
-                throw new AssertionError("this view = " + this.view
-                    + ", argument view = " + view);
-            }
+//            if (RandomGUITest.isRunning()) {
+//                throw new AssertionError("this view = " + this.view.getName()
+//                    + ", argument view = " + view.getName());
+//            }
             this.view = view; // the new view must be correct
         }
 

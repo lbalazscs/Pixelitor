@@ -34,6 +34,7 @@ import pixelitor.filters.painters.TransformedTextPainter;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.utils.DialogBuilder;
 import pixelitor.history.*;
+import pixelitor.tools.Tools;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Utils;
 
@@ -92,6 +93,11 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             // because the T hotkey is always active, see issue #77
             return;
         }
+
+        // Call this explicitly before adding the text layer,
+        // because otherwise the shapes tool won't rasterize the shape
+        // because it sees a text layer as the active layer.
+        Tools.firstModalDialogShown();
 
         var textLayer = new TextLayer(comp);
         var activeLayerBefore = comp.getActiveLayer();
@@ -160,9 +166,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         String duplicateName = compCopy ? name : Utils.createCopyName(name);
         TextLayer d = new TextLayer(comp, duplicateName);
 
-        d.translationX = translationX;
-        d.translationY = translationY;
-        d.painter.setTranslation(painter.getTx(), painter.getTy());
+        d.setTranslation(getTx(), getTy());
         d.setSettings(new TextSettings(settings));
         duplicateMask(d, compCopy);
 
@@ -190,10 +194,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         // for small font sizes or thin font styles it can be helpful
         // for larger font sizes it could be more appropriate to use pixel perfect test
         if (painter.getBoundingShape().contains(p)) {
-            if (hasMask() && getMask().isMaskEnabled()) {
-                BufferedImage maskImage = getMask().getImage();
-                int ix = p.x - getMask().translationX;
-                int iy = p.y - getMask().translationY;
+            if (hasMask() && mask.isMaskEnabled()) {
+                BufferedImage maskImage = mask.getImage();
+                int ix = p.x - mask.getTx();
+                int iy = p.y - mask.getTy();
                 if (ix >= 0 && iy >= 0 && ix < maskImage.getWidth() && iy < maskImage.getHeight()) {
                     int maskPixel = maskImage.getRGB(ix, iy);
                     int maskAlpha = maskPixel & 0xff;
@@ -300,8 +304,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void enlargeCanvas(int north, int east, int south, int west) {
         VerticalAlignment verticalAlignment = painter.getVerticalAlignment();
         HorizontalAlignment horizontalAlignment = painter.getHorizontalAlignment();
-        int newTx = translationX;
-        int newTy = translationY;
+        int newTx = getTx();
+        int newTy = getTy();
 
         if (horizontalAlignment == LEFT) {
             newTx += west;

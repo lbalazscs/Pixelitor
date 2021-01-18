@@ -18,9 +18,7 @@
 package pixelitor.layers;
 
 import pixelitor.Canvas;
-import pixelitor.ChangeReason;
-import pixelitor.Composition;
-import pixelitor.ConsistencyChecks;
+import pixelitor.*;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
 import pixelitor.gui.utils.Dialogs;
@@ -46,10 +44,10 @@ import static java.awt.RenderingHints.KEY_INTERPOLATION;
 import static java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static pixelitor.ChangeReason.BATCH_AUTOMATE;
-import static pixelitor.ChangeReason.REPEAT_LAST;
 import static pixelitor.Composition.ImageChangeActions.INVALIDATE_CACHE;
 import static pixelitor.Composition.ImageChangeActions.REPAINT;
+import static pixelitor.FilterContext.BATCH_AUTOMATE;
+import static pixelitor.FilterContext.REPEAT_LAST;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.layers.ImageLayer.State.*;
 import static pixelitor.utils.ImageUtils.copyImage;
@@ -282,7 +280,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         String duplicateName = compCopy ? name : Utils.createCopyName(name);
 
         ImageLayer d = new ImageLayer(comp, imageCopy, duplicateName,
-            null, translationX, translationY);
+            null, getTx(), getTy());
         d.setOpacity(getOpacity(), false);
         d.setBlendingMode(getBlendingMode(), false);
 
@@ -397,9 +395,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
 //    }
 
     /**
-     * Returns the image that should be shown by this layer.
+     * Returns the image that should be shown by this layer
+     * without considering the canvas or the translation.
      */
-    protected BufferedImage getVisibleImage() {
+    public BufferedImage getVisibleImage() {
         BufferedImage visibleImage = switch (state) {
             case NORMAL, SHOW_ORIGINAL -> image;
             case PREVIEW -> previewImage;
@@ -458,7 +457,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             // selection shape should not be considered because of AA effects
             Graphics2D g = src.createGraphics();
             Rectangle selBounds = selection.getShapeBounds();
-            g.drawImage(newImg, selBounds.x, selBounds.y, null);
+            g.drawImage(newImg, selBounds.x - getTx(), selBounds.y - getTy(), null);
             g.dispose();
             return src;
         } else if (selection.isRectangular()) {
@@ -516,7 +515,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         BufferedImage oldImage = image;
         setImage(newImage);
 
-        History.add(new ImageEdit(editName, comp, this, oldImage, true, false));
+        History.add(new ImageEdit(editName, comp, this, oldImage, true));
         updateIconImage();
     }
 
@@ -565,7 +564,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         if (imageContentChanged) {
             var edit = new ImageEdit(filterName, comp, this,
                 getSelectedSubImage(true),
-                false, true);
+                false);
             History.add(edit);
         }
 
@@ -605,19 +604,19 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void changePreviewImage(BufferedImage img, String filterName, ChangeReason cr) {
+    public void changePreviewImage(BufferedImage img, String filterName, FilterContext context) {
         // typically we should be in PREVIEW mode
         if (state == SHOW_ORIGINAL) {
             // this is OK, something was adjusted while in show original mode
         } else if (state == NORMAL) {
             throw new IllegalStateException(format(
-                "change preview in normal state, filter = %s, changeReason = %s, class = %s)",
-                filterName, cr, getClass().getSimpleName()));
+                "change preview in normal state, filter = %s, context = %s, class = %s)",
+                filterName, context, getClass().getSimpleName()));
         }
 
         assert previewImage != null :
-            format("previewImage was null with %s, changeReason = %s, class = %s",
-                filterName, cr, getClass().getSimpleName());
+            format("previewImage was null with %s, context = %s, class = %s",
+                filterName, context, getClass().getSimpleName());
         assert img != null;
 
         if (img == image) {
@@ -644,18 +643,18 @@ public class ImageLayer extends ContentLayer implements Drawable {
     }
 
     @Override
-    public void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason cr, String filterName) {
-        requireNonNull(transformedImage);
+    public void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName) {
+        requireNonNull(filteredImage);
 
         comp.setDirty(true);
 
         // A filter without dialog should never return the original image...
-        if (transformedImage == image) {
+        if (filteredImage == image) {
             // ...unless "Repeat Last" or "Batch Filter" starts a filter
             // with settings without its dialog
-            if (cr != REPEAT_LAST && cr != BATCH_AUTOMATE) {
+            if (context != REPEAT_LAST && context != BATCH_AUTOMATE) {
                 throw new IllegalStateException(filterName
-                    + " returned the original image, changeReason = " + cr);
+                    + " returned the original image, context = " + context);
             } else {
                 return;
             }
@@ -665,9 +664,9 @@ public class ImageLayer extends ContentLayer implements Drawable {
         assert state == NORMAL;
 
         BufferedImage imageForUndo = getFilterSourceImage();
-        setImageWithSelection(transformedImage, false);
+        setImageWithSelection(filteredImage, false);
 
-        if (!cr.needsUndo()) {
+        if (!context.needsUndo()) {
             return;
         }
 
@@ -678,7 +677,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
         assert imageForUndo != null;
         var edit = new ImageEdit(filterName, comp, this,
-            imageForUndo, false, true);
+            imageForUndo, false);
         History.add(edit);
 
         // otherwise the next filter run will take the old image source,
@@ -715,8 +714,8 @@ public class ImageLayer extends ContentLayer implements Drawable {
         }
 
         return new Rectangle(
-            translationX + trimmedBoundingBox.x,
-            translationY + trimmedBoundingBox.y,
+            getTx() + trimmedBoundingBox.x,
+            getTy() + trimmedBoundingBox.y,
             trimmedBoundingBox.width,
             trimmedBoundingBox.height
         );
@@ -733,14 +732,14 @@ public class ImageLayer extends ContentLayer implements Drawable {
     @Override
     public Rectangle getContentBounds() {
         return new Rectangle(
-            translationX, translationY,
+            getTx(), getTy(),
             image.getWidth(), image.getHeight());
     }
 
     @Override
     public int getMouseHitPixelAtPoint(Point p) {
-        int x = p.x - translationX;
-        int y = p.y - translationY;
+        int x = p.x - getTx();
+        int y = p.y - getTy();
         if (x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
             if (hasMask() && isMaskEnabled()) {
                 int maskPixel = getMask().getMouseHitPixelAtPoint(p);
@@ -781,8 +780,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
             g.drawImage(image, drawX, drawY, null);
             g.dispose();
 
-            translationX = target.x - canvasBounds.x;
-            translationY = target.y - canvasBounds.y;
+            setTranslation(target.x - canvasBounds.x, target.y - canvasBounds.y);
 
             setImage(bi);
         } catch (OutOfMemoryError e) {
@@ -986,10 +984,10 @@ public class ImageLayer extends ContentLayer implements Drawable {
         ImageEdit imageEdit;
         String editName = "Layer to Canvas Size";
         if (maskChanged) {
-            imageEdit = new ImageAndMaskEdit(editName, comp, this, backupImage, maskBackupImage, false);
+            imageEdit = new ImageAndMaskEdit(editName, comp, this, backupImage, maskBackupImage);
         } else {
             // no mask or no mask change, a simple ImageEdit will do
-            imageEdit = new ImageEdit(editName, comp, this, backupImage, true, false);
+            imageEdit = new ImageEdit(editName, comp, this, backupImage, true);
             imageEdit.setFadeable(false);
         }
         History.add(new MultiEdit(editName, comp, translationEdit, imageEdit));
@@ -1010,8 +1008,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
 
         if (imageBounds.contains(newCanvasBounds)) {
             // even after the canvas enlargement, the image does not need to be enlarged
-            translationX += west;
-            translationY += north;
+            setTranslation(getTx() + west, getTy() + north);
         } else {
             enlargeImage(newCanvasBounds);
         }
@@ -1110,7 +1107,7 @@ public class ImageLayer extends ContentLayer implements Drawable {
     /**
      * Returns true if the layer image is bigger than the canvas
      */
-    private boolean isBigLayer() {
+    public boolean isBigLayer() {
         Rectangle canvasBounds = comp.getCanvasBounds();
         Rectangle layerBounds = getContentBounds();
         return !canvasBounds.contains(layerBounds);
@@ -1241,11 +1238,15 @@ public class ImageLayer extends ContentLayer implements Drawable {
         return previewImage;
     }
 
+    public void changeMode(ImageMode mode) {
+        image = mode.convert(image);
+    }
+
     public String toDebugCanvasString() {
         return "{canvasWidth=" + comp.getCanvasWidth()
             + ", canvasHeight=" + comp.getCanvasHeight()
-            + ", tx=" + translationX
-            + ", ty=" + translationY
+            + ", tx=" + getTx()
+            + ", ty=" + getTy()
             + ", imgWidth=" + image.getWidth()
             + ", imgHeight=" + image.getHeight()
             + '}';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,17 +18,13 @@
 package pixelitor.filters.lookup;
 
 import com.jhlabs.image.PixelUtils;
+import pixelitor.filters.util.FilterPalette;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBufferInt;
-import java.awt.image.LookupOp;
-import java.awt.image.ShortLookupTable;
+import java.awt.image.*;
 
 /**
  * Performs 4-5 times faster than {@link LookupOp} if
@@ -45,13 +41,14 @@ public class FastLookupOp implements BufferedImageOp {
     public BufferedImage filter(BufferedImage src, BufferedImage dst) {
         boolean packedInt = ImageUtils.hasPackedIntArray(src);
         if (packedInt) {
+            dst = ImageUtils.createImageWithSameCM(src);
             boolean notPremultiplied = !src.isAlphaPremultiplied();
 
             int[] srcData = ((DataBufferInt) src.getRaster()
-                    .getDataBuffer()).getData();
+                .getDataBuffer()).getData();
 
             int[] destData = ((DataBufferInt) dst.getRaster()
-                    .getDataBuffer()).getData();
+                .getDataBuffer()).getData();
 
             int length = srcData.length;
             assert length == destData.length;
@@ -107,7 +104,26 @@ public class FastLookupOp implements BufferedImageOp {
                 }
                 destData[i] = a << 24 | r << 16 | g << 8 | b;
             }
+        } else if (src.getColorModel() instanceof IndexColorModel) {
+            short[][] table = lut.getTable();
+            return new FilterPalette(src) {
+                @Override
+                protected int changeRed(int r) {
+                    return table[0][r];
+                }
+
+                @Override
+                protected int changeGreen(int g) {
+                    return table[1][g];
+                }
+
+                @Override
+                protected int changeBlue(int b) {
+                    return table[2][b];
+                }
+            }.filter();
         } else { // fall back to a normal LookupOp
+            dst = ImageUtils.createImageWithSameCM(src);
             BufferedImageOp lookupOp = new LookupOp(lut, null);
             lookupOp.filter(src, dst);
         }

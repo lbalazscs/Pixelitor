@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppContext;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.io.DropListener;
 import pixelitor.utils.ViewActivationListener;
@@ -74,7 +74,7 @@ public class LayersContainer extends JPanel implements ViewActivationListener {
         southPanel.add(new SouthButton(AddLayerMaskAction.INSTANCE, "addLayerMask"));
         southPanel.add(new SouthButton(AddTextLayerAction.INSTANCE, "addTextLayer"));
 
-        if (RunContext.enableAdjLayers) {
+        if (AppContext.enableAdjLayers) {
             southPanel.add(new SouthButton(AddAdjLayerAction.INSTANCE, "addAdjLayer"));
         }
 

@@ -19,7 +19,7 @@ package pixelitor.layers;
 
 import com.bric.util.JVM;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 import pixelitor.ThreadPool;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.gui.View;
@@ -157,7 +157,7 @@ public class LayerButton extends JToggleButton implements LayerUI {
 
     public LayerButton(Layer layer) {
         assert calledOnEDT() : threadInfo();
-        assert !RunContext.isUnitTesting() : "Swing component in unit test";
+        assert !AppContext.isUnitTesting() : "Swing component in unit test";
 
         this.layer = layer;
 

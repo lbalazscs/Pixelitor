@@ -28,10 +28,10 @@ import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import org.assertj.swing.fixture.JSliderFixture;
 import org.fest.util.Files;
+import pixelitor.AppContext;
 import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.automate.AutoPaint;
 import pixelitor.colors.FgBgColorSelector;
 import pixelitor.filters.gui.ShowOriginal;
@@ -338,7 +338,7 @@ public class AssertJSwingTest {
         testTextLayers();
         testMaskFromColorRange();
 
-        if (RunContext.enableAdjLayers) {
+        if (AppContext.enableAdjLayers) {
             testAdjLayers();
         }
 
@@ -1629,6 +1629,7 @@ public class AssertJSwingTest {
 
     void testFilters() {
         log(0, "filters");
+//        app.setIndexedMode();
 
         EDT.assertNumOpenImagesIs(1);
         app.checkNumLayersIs(1);

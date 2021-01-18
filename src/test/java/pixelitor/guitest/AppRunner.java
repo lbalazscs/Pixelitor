@@ -214,6 +214,10 @@ public class AppRunner {
         dialog.button("ok").click();
     }
 
+    void setIndexedMode() {
+        runMenuCommand("Indexed");
+    }
+
     void clickTool(Tool tool) {
         pw.toggleButton(tool.getName() + " Tool Button").click();
         //EDT.run(() -> Tools.changeTo(tool));

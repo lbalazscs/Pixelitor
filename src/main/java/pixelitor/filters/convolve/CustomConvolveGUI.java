@@ -28,16 +28,14 @@ import javax.swing.*;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import static javax.swing.BorderFactory.createTitledBorder;
 import static javax.swing.BoxLayout.X_AXIS;
-import static javax.swing.SwingConstants.LEFT;
 
 /**
  * An adjustment panel for customizable convolutions
  */
-public class CustomConvolveGUI extends FilterGUI implements ActionListener {
+public class CustomConvolveGUI extends FilterGUI {
     private static final int TEXTFIELD_PREFERRED_WIDTH = 70;
 
     private JTextField[] textFields;
@@ -68,8 +66,6 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
         box.add(Box.createVerticalStrut(20));
 
-        addConvolveMethodSelector(filter, box);
-
         box.setMaximumSize(box.getPreferredSize());
         box.setAlignmentY(TOP_ALIGNMENT);
 
@@ -98,29 +94,15 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void addNormalizeButton(Box leftVerticalBox) {
         normalizeButton = new JButton("Normalize (preserve brightness)");
-        normalizeButton.addActionListener(this);
+        normalizeButton.addActionListener(this::collectValuesAndRun);
         normalizeButton.setAlignmentX(LEFT_ALIGNMENT);
         leftVerticalBox.add(normalizeButton);
     }
 
     private void addTryButton(Box leftVerticalBox) {
         JButton tryButton = new JButton("Try");
-        tryButton.addActionListener(this);
+        tryButton.addActionListener(this::collectValuesAndRun);
         leftVerticalBox.add(tryButton);
-    }
-
-    private void addConvolveMethodSelector(Convolve filter, Box leftVerticalBox) {
-        JLabel cmLabel = new JLabel("Convolution method:", LEFT);
-        cmLabel.setAlignmentX(LEFT_ALIGNMENT);
-        leftVerticalBox.add(cmLabel);
-        var convolveMethodModel = filter.getConvolveMethodModel();
-
-        @SuppressWarnings("unchecked")
-        var convolveMethodCB = new JComboBox<ConvolveMethod>(convolveMethodModel);
-
-        convolveMethodCB.setAlignmentX(LEFT_ALIGNMENT);
-        leftVerticalBox.add(convolveMethodCB);
-        convolveMethodCB.addActionListener(this);
     }
 
     private void initPresetBox() {
@@ -140,14 +122,14 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         JButton randomizeButton = new JButton("Randomize");
         randomizeButton.addActionListener(e -> {
             setValues(Convolve.getRandomKernelMatrix(size));
-            actionPerformed(e);
+            collectValuesAndRun(e);
         });
         presetsBox.add(randomizeButton);
 
         JButton doNothingButton = new JButton("Do Nothing");
         doNothingButton.addActionListener(e -> {
             reset(size);
-            actionPerformed(e);
+            collectValuesAndRun(e);
         });
         presetsBox.add(doNothingButton);
 
@@ -161,7 +143,7 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
         JButton button = new JButton(name);
         button.addActionListener(e -> {
             setValues(kernel);
-            actionPerformed(e);
+            collectValuesAndRun(e);
         });
         presetsBox.add(button);
     }
@@ -290,11 +272,10 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
 
     private void setupTextField(JTextField textField) {
         textFieldsP.add(textField);
-        textField.addActionListener(this);
+        textField.addActionListener(this::collectValuesAndRun);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+    private void collectValuesAndRun(ActionEvent e) {
         float sum = 0;
         float[] values = new float[size * size];
         for (int i = 0; i < values.length; i++) {
@@ -316,7 +297,8 @@ public class CustomConvolveGUI extends FilterGUI implements ActionListener {
             setValues(values);
         }
 
-        ((Convolve) filter).setKernelMatrix(values);
+        Convolve convolve = (Convolve) this.filter;
+        convolve.setKernelMatrix(values);
         runFilterPreview();
     }
 

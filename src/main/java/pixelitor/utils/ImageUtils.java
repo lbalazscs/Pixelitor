@@ -21,6 +21,7 @@ import com.jhlabs.composite.OverlayComposite;
 import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
+import com.twelvemonkeys.image.ImageUtil;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
@@ -489,11 +490,14 @@ public class ImageUtils {
         return convertToIndexed(src, false);
     }
 
-    // based on http://gman.eichberger.de/2007/07/transparent-gifs-in-java.html
-    // TODO an optimized palette should be created based on the image content
     public static BufferedImage convertToIndexed(BufferedImage src, boolean flushOld) {
         assert src != null;
 
+        if (src.getColorModel() instanceof IndexColorModel) {
+            return src;
+        }
+
+        // is this still necessary?
         if (src.isAlphaPremultiplied()) {
             // otherwise transparent parts will be black when
             // this is drawn on the transparent image
@@ -501,19 +505,24 @@ public class ImageUtils {
             flushOld = true;
         }
 
-        var dest = new BufferedImage(
-            src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
+        BufferedImage dest = ImageUtil.createIndexed(src, 256,
+            BLACK,
+            ImageUtil.COLOR_SELECTION_QUALITY + ImageUtil.TRANSPARENCY_BITMASK);
 
-        Graphics2D g = dest.createGraphics();
-        // this hideous color will be transparent
-        Colors.fillWith(new Color(231, 20, 189), g, src.getWidth(), src.getHeight());
-        g.dispose();
-
-        dest = makeIndexedTransparent(dest, 0, 0);
-
-        g = dest.createGraphics();
-        g.drawImage(src, 0, 0, null);
-        g.dispose();
+// the old solution was based on http://gman.eichberger.de/2007/07/transparent-gifs-in-java.html
+//        var dest = new BufferedImage(
+//            src.getWidth(), src.getHeight(), TYPE_BYTE_INDEXED);
+//
+//        Graphics2D g = dest.createGraphics();
+//        // this hideous color will be transparent
+//        Colors.fillWith(new Color(231, 20, 189), g, src.getWidth(), src.getHeight());
+//        g.dispose();
+//
+//        dest = makeIndexedTransparent(dest, 0, 0);
+//
+//        g = dest.createGraphics();
+//        g.drawImage(src, 0, 0, null);
+//        g.dispose();
 
         if (flushOld) {
             src.flush();
@@ -717,7 +726,8 @@ public class ImageUtils {
         if (height <= 0) {
             throw new IllegalArgumentException("height = " + height);
         }
-        BufferedImage output = new BufferedImage(width, height, input.getType());
+
+        BufferedImage output = createImageWithSameCM(input, width, height);
         Graphics2D g = output.createGraphics();
         g.transform(AffineTransform.getTranslateInstance(-x, -y));
         g.drawImage(input, null, 0, 0);
@@ -766,7 +776,7 @@ public class ImageUtils {
 
         // the blurred image is the low-pass filtered version of the image
         // so we subtract it form the original by inverting it...
-        Invert.invertImage(blurred, blurred);
+        blurred = Invert.invertImage(blurred);
         // ... and blending it at 50% with the original
         Graphics2D g = blurred.createGraphics();
         g.setComposite(AlphaComposite.getInstance(SRC_OVER, 0.5f));

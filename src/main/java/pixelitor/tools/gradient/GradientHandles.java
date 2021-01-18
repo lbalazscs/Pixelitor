@@ -17,8 +17,8 @@
 
 package pixelitor.tools.gradient;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.RunContext;
 import pixelitor.gui.ImageArea;
 import pixelitor.gui.View;
 import pixelitor.tools.ToolWidget;
@@ -128,7 +128,7 @@ public class GradientHandles implements ToolWidget {
             end.restoreCoordsFromImSpace(view);
             middle.restoreCoordsFromImSpace(view);
         } else { // in random tests they can be different
-            if (RunContext.isDevelopment()) {
+            if (AppContext.isDevelopment()) {
                 System.out.println("GradientHandles::viewSizeChanged: different views, ui = "
                     + ImageArea.getMode());
             }

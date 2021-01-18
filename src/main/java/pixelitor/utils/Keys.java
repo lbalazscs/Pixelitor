@@ -65,6 +65,7 @@ public class Keys {
     public static final KeyStroke CTRL_ALT_I = getKeyStroke('I', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_L = getKeyStroke('L', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_R = getKeyStroke('R', CTRL | ALT);
+    public static final KeyStroke CTRL_ALT_T = getKeyStroke('T', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_V = getKeyStroke('V', CTRL | ALT);
     public static final KeyStroke CTRL_ALT_W = getKeyStroke('W', CTRL | ALT);
 

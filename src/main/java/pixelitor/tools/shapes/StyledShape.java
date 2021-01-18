@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,9 +18,9 @@
 package pixelitor.tools.shapes;
 
 import com.jhlabs.awt.WobbleStroke;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.filters.gui.StrokeSettings;
 import pixelitor.filters.painters.AreaEffects;
@@ -118,7 +118,7 @@ public class StyledShape implements Cloneable, Transformable {
             return;
         }
         if (shape == null) { // should not happen
-            if (RunContext.isDevelopment()) {
+            if (AppContext.isDevelopment()) {
                 throw new IllegalStateException();
             }
             return;
@@ -294,7 +294,7 @@ public class StyledShape implements Cloneable, Transformable {
         shapeTypeSettings = settings;
         if (settings != null) {
             settings.setAdjustmentListener(() ->
-                    regenerate(Tools.SHAPES.getTransformBox(), Tools.SHAPES, ShapesTool.CHANGE_SHAPE_TYPE));
+                regenerate(Tools.SHAPES.getTransformBox(), Tools.SHAPES, ShapesTool.CHANGE_SHAPE_TYPE));
         }
     }
 
@@ -331,19 +331,19 @@ public class StyledShape implements Cloneable, Transformable {
         double imDragDist = imDrag.getDistance();
         double halfImHeight = imDragDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0;
         origImDrag = new ImDrag(
-                imDrag.getStartX(),
-                imDrag.getStartY() - halfImHeight,
-                imDrag.getStartX() + imDragDist,
-                imDrag.getStartY() + halfImHeight);
+            imDrag.getStartX(),
+            imDrag.getStartY() - halfImHeight,
+            imDrag.getStartX() + imDragDist,
+            imDrag.getStartY() + halfImHeight);
 //            transformedImDrag = origImDrag;
 
         // create the horizontal box
         double coDist = userDrag.calcCoDist();
         Rectangle2D horizontalBoxBounds = new Rectangle.Double(
-                userDrag.getCoStartX(),
-                userDrag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
-                coDist,
-                coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
+            userDrag.getCoStartX(),
+            userDrag.getCoStartY() - coDist * Shapes.UNIT_ARROW_HEAD_WIDTH / 2.0,
+            coDist,
+            coDist * Shapes.UNIT_ARROW_HEAD_WIDTH);
         assert !horizontalBoxBounds.isEmpty();
         TransformBox box = new TransformBox(horizontalBoxBounds, view, this);
 
@@ -354,7 +354,7 @@ public class StyledShape implements Cloneable, Transformable {
         box.saveState(); // so that transform works
         box.setAngle(angle);
         box.transform(AffineTransform.getRotateInstance(
-                angle, rotCenterCoX, rotCenterCoY));
+            angle, rotCenterCoX, rotCenterCoY));
         return box;
     }
 
@@ -371,14 +371,14 @@ public class StyledShape implements Cloneable, Transformable {
             if (!shapeBounds.isEmpty()) {
                 BufferedImage originalImage = dr.getImage();
                 imageEdit = History.createPartialImageEdit(
-                        shapeBounds, originalImage, dr, false, "Shape");
+                    shapeBounds, originalImage, dr, false, "Shape");
             }
         }
 
         // must be added even if there is no image edit
         // to manage the shapes tool state changes
         History.add(new FinalizeShapeEdit(comp,
-                imageEdit, transformBox, this));
+            imageEdit, transformBox, this));
 
         if (imageEdit != null) {
             paintOnDrawable(dr);

@@ -17,9 +17,10 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Layers;
-import pixelitor.RunContext;
+import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.View;
 import pixelitor.gui.utils.NamedAction;
@@ -137,7 +138,7 @@ public abstract class Layer implements Serializable {
     }
 
     public void activateUI() {
-        assert RunContext.isUnitTesting() || calledOnEDT();
+        assert AppContext.isUnitTesting() || calledOnEDT();
         ui.setSelected(true);
     }
 
@@ -440,8 +441,8 @@ public abstract class Layer implements Serializable {
         mask.updateFromBWImage();
 
         if (createEdit) {
-            return new ImageEdit("Modify Mask", comp, mask, maskImageBackup,
-                true, false);
+            return new ImageEdit("Modify Mask",
+                comp, mask, maskImageBackup, true);
         } else {
             return null;
         }
@@ -591,8 +592,9 @@ public abstract class Layer implements Serializable {
     /**
      * Returns true if the layer is in normal mode and the opacity is 100%
      */
-    protected boolean isNormalAndOpaque() {
-        return blendingMode == BlendingMode.NORMAL && opacity > 0.999f;
+    public boolean isNormalAndOpaque() {
+        return blendingMode == BlendingMode.NORMAL
+            && opacity > BlendingModePanel.CRITICAL_OPACITY;
     }
 
     /**

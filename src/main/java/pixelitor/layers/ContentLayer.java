@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,8 @@ import pixelitor.history.ContentLayerMoveEdit;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.io.Serial;
 
@@ -46,8 +47,8 @@ public abstract class ContentLayer extends Layer {
      * because the layer image is automatically enlarged
      * if the layer is moved inward.
      */
-    int translationX = 0;
-    int translationY = 0;
+    private int translationX = 0;
+    private int translationY = 0;
 
     protected ContentLayer(Composition comp, String name, Layer owner) {
         super(comp, name, owner);
@@ -148,8 +149,8 @@ public abstract class ContentLayer extends Layer {
             int cropY = (int) cropRect.getY();
 
             setTranslation(
-                    translationX - cropX,
-                    translationY - cropY);
+                translationX - cropX,
+                translationY - cropY);
         }
     }
 
@@ -162,7 +163,7 @@ public abstract class ContentLayer extends Layer {
     @Override
     public String toString() {
         return "{tx=" + translationX
-                + ", ty=" + translationY
-                + ", super=" + super.toString() + '}';
+            + ", ty=" + translationY
+            + ", super=" + super.toString() + '}';
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters;
 
-import pixelitor.ChangeReason;
+import pixelitor.FilterContext;
 import pixelitor.filters.util.FilterAction;
 import pixelitor.filters.util.FilterUtils;
 import pixelitor.gui.PixelitorWindow;
@@ -30,13 +30,13 @@ import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.test.RandomGUITest;
 
-import java.awt.*;
+import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
-import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
+import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
 
 /**
  * The superclass of all Pixelitor filters and color adjustments
@@ -78,14 +78,14 @@ public abstract class Filter implements Serializable {
         startOn(dr, FILTER_WITHOUT_DIALOG);
     }
 
-    public void startOn(Drawable dr, ChangeReason cr) {
-        run(dr, cr, PixelitorWindow.get());
+    public void startOn(Drawable dr, FilterContext context) {
+        startOn(dr, context, PixelitorWindow.get());
     }
 
-    public void run(Drawable dr, ChangeReason cr, Component busyCursorParent) {
+    public void startOn(Drawable dr, FilterContext context, Component busyCursorParent) {
         long startTime = System.nanoTime();
 
-        Runnable task = () -> transformAndHandleExceptions(dr, cr);
+        Runnable task = () -> runFilter(dr, context);
         GUIUtils.runWithBusyCursor(busyCursorParent, task);
 
         long totalTime = (System.nanoTime() - startTime) / 1_000_000;
@@ -94,7 +94,7 @@ public abstract class Filter implements Serializable {
         FilterUtils.setLastFilter(this);
     }
 
-    private void transformAndHandleExceptions(Drawable dr, ChangeReason cr) {
+    private void runFilter(Drawable dr, FilterContext context) {
         try {
             if (dr == null) {
                 throw new IllegalStateException("not image layer or mask");
@@ -105,10 +105,10 @@ public abstract class Filter implements Serializable {
 
             assert dest != null;
 
-            if (cr.isPreview()) {
-                dr.changePreviewImage(dest, getName(), cr);
+            if (context.isPreview()) {
+                dr.changePreviewImage(dest, getName(), context);
             } else {
-                dr.filterWithoutDialogFinished(dest, cr, getName());
+                dr.filterWithoutDialogFinished(dest, context, getName());
             }
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryDialog(e);

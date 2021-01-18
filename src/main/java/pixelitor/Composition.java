@@ -48,6 +48,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.IndexColorModel;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,7 @@ public class Composition implements Serializable {
     private final Canvas canvas;
     private Paths paths;
     private Guides guides;
+    private ImageMode mode;
 
     //
     // transient variables from here
@@ -105,9 +107,10 @@ public class Composition implements Serializable {
      * can be created either with one of the static factory
      * methods or through deserialization of pxc files
      */
-    private Composition(Canvas canvas) {
+    private Composition(Canvas canvas, ImageMode mode) {
         assert canvas != null;
         this.canvas = canvas;
+        this.mode = mode;
     }
 
     /**
@@ -115,10 +118,17 @@ public class Composition implements Serializable {
      */
     public static Composition fromImage(BufferedImage img, File file, String name) {
         assert img != null;
-
-        img = ImageUtils.toSysCompatibleImage(img);
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
-        var comp = new Composition(canvas);
+
+        ImageMode mode;
+        if (AppContext.enableImageMode && img.getColorModel() instanceof IndexColorModel) {
+            mode = ImageMode.Indexed;
+        } else {
+            mode = ImageMode.RGB;
+            img = ImageUtils.toSysCompatibleImage(img);
+        }
+
+        var comp = new Composition(canvas, mode);
         comp.addBaseLayer(img);
 
         if (file != null) {
@@ -136,9 +146,9 @@ public class Composition implements Serializable {
     /**
      * Creates an empty composition (no layers, no name)
      */
-    public static Composition createEmpty(int width, int height) {
+    public static Composition createEmpty(int width, int height, ImageMode mode) {
         Canvas canvas = new Canvas(width, height);
-        return new Composition(canvas);
+        return new Composition(canvas, mode);
     }
 
     /**
@@ -146,7 +156,7 @@ public class Composition implements Serializable {
      */
     public Composition copy(boolean forUndo, boolean copySelection) {
         var canvasCopy = new Canvas(canvas);
-        var compCopy = new Composition(canvasCopy);
+        var compCopy = new Composition(canvasCopy, mode);
 
         // copy layers
         for (Layer layer : layerList) {
@@ -160,6 +170,7 @@ public class Composition implements Serializable {
         }
 
         compCopy.newLayerCount = newLayerCount;
+        compCopy.mode = mode;
 
         if (copySelection && selection != null) {
             compCopy.setSelectionRef(new Selection(selection, forUndo));
@@ -323,7 +334,6 @@ public class Composition implements Serializable {
             .noRefresh()
             .add(newLayer);
 
-//        newLayer.updateIconImage();
         return newLayer;
     }
 
@@ -788,17 +798,21 @@ public class Composition implements Serializable {
     }
 
     public BufferedImage calculateCompositeImage() {
-        // TODO why is this not working
-//        if(layerList.size() == 1) {
-//            Layer firstLayer = layerList.get(0);
-//            if(firstLayer instanceof ImageLayer) {
-//                ImageLayer layer = (ImageLayer) firstLayer;
-//                if(!layer.isBigLayer()) {
-//                    return layer.getImage();
-//                }
-//                return layer.getCanvasSizedSubImage();
-//            }
-//        }
+        if (layerList.size() == 1) { // shortcut
+            Layer firstLayer = layerList.get(0);
+            if (firstLayer instanceof ImageLayer) {
+                ImageLayer layer = (ImageLayer) firstLayer;
+                if (Tools.currentTool.isDirectDrawing()) {
+                    if (layer.getState() != ImageLayer.State.PREVIEW) {
+                        return layer.getCanvasSizedSubImage();
+                    } else if (!layer.isBigLayer()) {
+                        // the shortcut can work even for preview images
+                        // it it isn't a big layer
+                        return layer.getVisibleImage();
+                    }
+                }
+            }
+        }
 
 //        BufferedImage imageSoFar = ImageUtils.createCompatibleImage(getCanvasWidth(), getCanvasHeight());
 
@@ -922,7 +936,7 @@ public class Composition implements Serializable {
                 // we can get here from a DeselectEdit.redo on a non-active composition
             }
         }
-        if (RunContext.isDevelopment() && isActive()) {
+        if (AppContext.isDevelopment() && isActive()) {
             ConsistencyChecks.selectionActionsEnabledCheck(this);
         }
         return edit;
@@ -1251,7 +1265,7 @@ public class Composition implements Serializable {
     @SuppressWarnings("SameReturnValue")
     public boolean checkInvariant() {
         if (layerList.isEmpty()) {
-            if (RunContext.isUnitTesting()) {
+            if (AppContext.isUnitTesting()) {
                 return true;
             }
             throw new IllegalStateException("no layer in " + getName());
@@ -1285,7 +1299,7 @@ public class Composition implements Serializable {
         FileFormat format = saveSettings.getFormat();
         File f = saveSettings.getFile();
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             System.out.println("Composition::saveAsync: saving " + f.getAbsolutePath());
         }
 
@@ -1387,6 +1401,24 @@ public class Composition implements Serializable {
             return;
         }
         guides.draw(g);
+    }
+
+    public void changeMode(ImageMode newMode) {
+        if (newMode == mode) {
+            return;
+        }
+        mode = newMode;
+        for (Layer layer : layerList) {
+            if (layer instanceof ImageLayer) {
+                ImageLayer imageLayer = (ImageLayer) layer;
+                imageLayer.changeMode(newMode);
+            }
+        }
+        imageChanged();
+    }
+
+    public ImageMode getMode() {
+        return mode;
     }
 
     public enum ImageChangeActions {
@@ -1516,7 +1548,7 @@ public class Composition implements Serializable {
                 comp.view.addLayerToGUI(newLayer, newLayerIndex);
 
                 // mocked views will not set a UI
-                assert RunContext.isUnitTesting() || newLayer.hasUI();
+                assert AppContext.isUnitTesting() || newLayer.hasUI();
             }
 
             comp.setActiveLayer(newLayer);

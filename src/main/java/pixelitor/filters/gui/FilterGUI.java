@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,10 +22,11 @@ import pixelitor.layers.Drawable;
 
 import javax.swing.*;
 
-import static pixelitor.ChangeReason.PREVIEWING;
+import static pixelitor.FilterContext.PREVIEWING;
 
 /**
- * The superclass of all filter configuration panels
+ * The superclass of all filter configuration panels.
+ * Instances must not be cached (since they store a Drawable reference).
  */
 public abstract class FilterGUI extends JPanel implements PreviewExecutor {
     protected Filter filter;
@@ -38,6 +39,6 @@ public abstract class FilterGUI extends JPanel implements PreviewExecutor {
 
     @Override
     public void runFilterPreview() {
-        filter.run(dr, PREVIEWING, this);
+        filter.startOn(dr, PREVIEWING, this);
     }
 }

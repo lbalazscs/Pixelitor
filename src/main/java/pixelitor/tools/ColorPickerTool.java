@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.tools;
 
 import pixelitor.gui.View;
 import pixelitor.layers.Drawable;
+import pixelitor.layers.Layer;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
 import pixelitor.utils.Messages;
@@ -124,6 +125,14 @@ public class ColorPickerTool extends Tool {
         }
 
         Messages.showPlainInStatusBar(msg);
+    }
+
+    @Override
+    public void editedObjectChanged(Layer layer) {
+        if (sampleLayerOnly.isSelected()) {
+            // don't show the values for the old layer
+            Messages.showPlainInStatusBar("");
+        }
     }
 
     @Override

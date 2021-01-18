@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -115,10 +115,6 @@ public abstract class PixelitorEdit extends AbstractUndoableEdit {
 
     public String getDebugName() {
         return getClass().getSimpleName() + "/" + name;
-    }
-
-    public boolean canRepeat() {
-        return false;
     }
 
     @Override

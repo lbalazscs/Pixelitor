@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,6 +27,12 @@ import javax.swing.*;
  * A JRadioButtonMenuItem that becomes enabled only if there is an open image
  */
 public class OpenImageAwareRadioButtonMenuItem extends JRadioButtonMenuItem implements ViewActivationListener {
+    public OpenImageAwareRadioButtonMenuItem(Action a) {
+        super(a);
+        setEnabled(false);
+        OpenImages.addActivationListener(this);
+    }
+
     public OpenImageAwareRadioButtonMenuItem(String name) {
         super(name);
         setName(name);

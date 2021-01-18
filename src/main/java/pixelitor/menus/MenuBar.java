@@ -18,10 +18,7 @@
 package pixelitor.menus;
 
 import com.bric.util.JVM;
-import pixelitor.NewImage;
-import pixelitor.Pixelitor;
-import pixelitor.RunContext;
-import pixelitor.TipsOfTheDay;
+import pixelitor.*;
 import pixelitor.automate.AutoPaint;
 import pixelitor.automate.BatchFilterWizard;
 import pixelitor.automate.BatchResize;
@@ -115,7 +112,7 @@ public class MenuBar extends JMenuBar {
         add(createFilterMenu(texts));
         add(createViewMenu(pw, texts));
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             add(createDevelopMenu(pw));
         }
 
@@ -387,7 +384,7 @@ public class MenuBar extends JMenuBar {
         layersMenu.add(createLayerMaskSubmenu(texts));
         layersMenu.add(createTextLayerSubmenu(pw, texts));
 
-        if (RunContext.enableAdjLayers) {
+        if (AppContext.enableAdjLayers) {
             layersMenu.add(createAdjustmentLayersSubmenu());
         }
 
@@ -628,6 +625,10 @@ public class MenuBar extends JMenuBar {
             }
         });
 
+        if (AppContext.enableImageMode) {
+            imageMenu.add(createModeSubmenu());
+        }
+
         imageMenu.addSeparator();
 
         imageMenu.addAction(EnlargeCanvas.getAction());
@@ -662,6 +663,31 @@ public class MenuBar extends JMenuBar {
         imageMenu.addAction(new Flip(VERTICAL));
 
         return imageMenu;
+    }
+
+    private static JMenu createModeSubmenu() {
+        PMenu sub = new PMenu("Mode");
+
+        ImageMode[] modes = ImageMode.values();
+        var radioGroup = new ButtonGroup();
+        for (ImageMode mode : modes) {
+            var menuItem = mode.getMenuItem();
+            sub.add(menuItem);
+            radioGroup.add(menuItem);
+        }
+
+        addActivationListener(new ViewActivationListener() {
+            @Override
+            public void viewActivated(View oldView, View newView) {
+                newView.getComp().getMode().getMenuItem().setSelected(true);
+            }
+
+            @Override
+            public void allViewsClosed() {
+            }
+        });
+
+        return sub;
     }
 
     private static JMenu createColorMenu(ResourceBundle texts) {

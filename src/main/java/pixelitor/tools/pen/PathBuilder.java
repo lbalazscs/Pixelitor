@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -365,7 +365,7 @@ public class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedDragState(String where, View view) {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedDragState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
         }
@@ -377,7 +377,7 @@ public class PathBuilder implements PenToolMode {
     // Getting here shouldn't happen, but it did happen somehow
     // (only in Mac random gui tests)
     private static BuildState recoverFromUnexpectedMoveState(String where, View view, BuildState state) {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             System.out.printf("PathBuilder::recoverFromUnexpectedMoveState: " +
                 "where = '%s, active = %s'%n", where, view.isActive());
         }

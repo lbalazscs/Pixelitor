@@ -17,7 +17,7 @@
 
 package pixelitor.layers;
 
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 
 /**
  * The {@link LayerUI} implementation used in unit tests
@@ -33,7 +33,7 @@ public class TestLayerUI implements LayerUI {
 
     public TestLayerUI(Layer layer) {
         this.layer = layer;
-        assert RunContext.isUnitTesting();
+        assert AppContext.isUnitTesting();
     }
 
     @Override

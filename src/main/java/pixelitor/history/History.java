@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,9 +17,9 @@
 
 package pixelitor.history;
 
+import pixelitor.AppContext;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.layers.Drawable;
 import pixelitor.menus.MenuAction;
 import pixelitor.utils.AppPreferences;
@@ -102,7 +102,7 @@ public class History {
         numUndoneEdits = 0;
         undoableEditSupport.postEdit(edit);
 
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             Events.postAddToHistoryEvent(edit);
 
             ConsistencyChecks.checkAll(comp, false);
@@ -153,7 +153,7 @@ public class History {
     }
 
     public static void undo() {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeUndone();
             Events.postUndoEvent(edit);
 //            Debug.call(edit.getDebugName());
@@ -175,7 +175,7 @@ public class History {
     }
 
     public static void redo() {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             PixelitorEdit edit = undoManager.getEditToBeRedone();
             Events.postRedoEvent(edit);
 //            Debug.call(edit.getDebugName());
@@ -207,18 +207,6 @@ public class History {
 
     public static int getUndoLevels() {
         return undoManager.getLimit();
-    }
-
-    public static boolean canRepeatFilter() {
-        if (numUndoneEdits > 0) {
-            return false;
-        }
-
-        PixelitorEdit lastEdit = undoManager.getLastEdit();
-        if (lastEdit != null) {
-            return lastEdit.canRepeat();
-        }
-        return false;
     }
 
     /**
@@ -369,7 +357,6 @@ public class History {
         node.addBoolean("can undo", canUndo());
         node.addBoolean("can redo", canRedo());
         node.addBoolean("can fade", canFade());
-        node.addBoolean("can repeat", canRepeatFilter());
 
         return node;
     }

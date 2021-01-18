@@ -99,7 +99,7 @@ public class ToolTest {
     @Before
     public void beforeEachTest() {
         PenTool.path = null;
-        Composition comp = TestHelper.create2LayerComp(true);
+        Composition comp = TestHelper.createComp(2, true);
         view = comp.getView();
         Tools.setCurrentTool(tool);
         tool.toolStarted();

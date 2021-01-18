@@ -36,6 +36,11 @@ public class GaussianFilter extends ConvolveFilter {
     protected float radius;
 
     /**
+     * Whether to convolve alpha.
+     */
+    protected boolean alpha = true;
+
+    /**
      * Construct a Gaussian filter.
      */
     public GaussianFilter(String filterName) {
@@ -50,6 +55,26 @@ public class GaussianFilter extends ConvolveFilter {
     public GaussianFilter(float radius, String filterName) {
         super(filterName);
         setRadius(radius);
+    }
+
+    /**
+     * Set whether to convolve the alpha channel.
+     *
+     * @param useAlpha true to convolve the alpha
+     * @see #getUseAlpha
+     */
+    public void setUseAlpha(boolean useAlpha) {
+        alpha = useAlpha;
+    }
+
+    /**
+     * Get whether to convolve the alpha channel.
+     *
+     * @return true to convolve the alpha
+     * @see #setUseAlpha
+     */
+    public boolean getUseAlpha() {
+        return alpha;
     }
 
     /**
@@ -137,6 +162,9 @@ public class GaussianFilter extends ConvolveFilter {
         int index = y;
         int ioffset = y * width;
         for (int x = 0; x < width; x++) {
+            int origPacked = inPixels[ioffset + x];
+            int origAlpha = (origPacked >> 24) & 0xff;
+
             float r = 0, g = 0, b = 0, a = 0;
             int moffset = cols2;
             for (int col = -cols2; col <= cols2; col++) {
@@ -180,12 +208,17 @@ public class GaussianFilter extends ConvolveFilter {
                 g *= f;
                 b *= f;
             }
-            int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
 
             int ir = PixelUtils.clamp((int) (r + 0.5));
             int ig = PixelUtils.clamp((int) (g + 0.5));
             int ib = PixelUtils.clamp((int) (b + 0.5));
-            outPixels[index] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+            if (alpha) {
+                int ia = alpha ? PixelUtils.clamp((int) (a + 0.5)) : 0xff;
+                outPixels[index] = (ia << 24) | (ir << 16) | (ig << 8) | ib;
+            } else {
+                outPixels[index] = (origAlpha << 24) | (ir << 16) | (ig << 8) | ib;
+            }
+
             index += height;
         }
     }

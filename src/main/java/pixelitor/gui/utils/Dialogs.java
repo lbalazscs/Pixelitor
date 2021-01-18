@@ -19,7 +19,7 @@ package pixelitor.gui.utils;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.PixelitorWindow;
 import pixelitor.layers.Layer;
@@ -49,7 +49,6 @@ import static pixelitor.utils.Threads.threadName;
  * Static utility methods related to dialogs
  */
 public class Dialogs {
-
     private static boolean mainWindowInitialized = false;
 
     private Dialogs() { // should not be instantiated
@@ -261,7 +260,7 @@ public class Dialogs {
     }
 
     private static void showMoreDevelopmentInfo(Throwable e) {
-        if (RunContext.isFinal()) {
+        if (AppContext.isFinal()) {
             return;
         }
 
@@ -317,7 +316,7 @@ public class Dialogs {
     }
 
     public static void showOutOfMemoryDialog(OutOfMemoryError e) {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             e.printStackTrace();
         }
         String msg = "<html><b>Out of memory error.</b> You can try <ul>" +

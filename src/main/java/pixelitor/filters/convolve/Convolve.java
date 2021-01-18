@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,7 @@
 
 package pixelitor.filters.convolve;
 
-import org.jdesktop.swingx.combobox.EnumComboBoxModel;
+import com.jhlabs.image.ConvolveFilter;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.util.FilterAction;
@@ -25,6 +25,7 @@ import pixelitor.layers.Drawable;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
 import java.awt.image.Kernel;
 import java.util.Random;
@@ -34,8 +35,6 @@ import java.util.Random;
  */
 public class Convolve extends FilterWithGUI {
     private final String filterName;
-
-    private final EnumComboBoxModel<ConvolveMethod> convolveMethodModel = new EnumComboBoxModel<>(ConvolveMethod.class);
 
     private float[] kernelMatrix;
     private final int size;
@@ -54,9 +53,8 @@ public class Convolve extends FilterWithGUI {
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        var kernel = new Kernel(size, size, kernelMatrix);
-        var convolveMethod = convolveMethodModel.getSelectedItem();
-        var convolveOp = convolveMethod.createConvolveOp(kernel, filterName);
+        Kernel kernel = new Kernel(size, size, kernelMatrix);
+        BufferedImageOp convolveOp = createConvolveOp(kernel);
         try {
             convolveOp.filter(src, dest);
         } catch (ImagingOpException e) {
@@ -71,13 +69,16 @@ public class Convolve extends FilterWithGUI {
         return new CustomConvolveGUI(this, dr);
     }
 
-    public EnumComboBoxModel<ConvolveMethod> getConvolveMethodModel() {
-        return convolveMethodModel;
-    }
-
     @Override
     public void randomizeSettings() {
         kernelMatrix = getRandomKernelMatrix(size);
+    }
+
+    private BufferedImageOp createConvolveOp(Kernel kernel) {
+        var filter = new ConvolveFilter(kernel, filterName);
+        filter.setEdgeAction(ConvolveFilter.CLAMP_EDGES);
+        filter.setPremultiplyAlpha(false);
+        return filter;
     }
 
     /**

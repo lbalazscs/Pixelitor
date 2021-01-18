@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,10 @@
 package pixelitor.gui;
 
 import com.bric.util.JVM;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
 import pixelitor.Pixelitor;
-import pixelitor.RunContext;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.Screens;
 import pixelitor.layers.LayersContainer;
@@ -59,7 +59,7 @@ public class PixelitorWindow extends JFrame {
     private Rectangle savedNormalBounds; // the saved one
 
     private PixelitorWindow() {
-        super(RunContext.getPixelitorWindowFixTitle());
+        super(AppContext.getPixelitorWindowFixTitle());
 
         Dimension screenSize = Screens.getMaxWindowSize();
 
@@ -271,9 +271,9 @@ public class PixelitorWindow extends JFrame {
     public void updateTitle(Composition comp) {
         String title;
         if (comp != null) {
-            title = comp.getName() + " - " + RunContext.getPixelitorWindowFixTitle();
+            title = comp.getName() + " - " + AppContext.getPixelitorWindowFixTitle();
         } else {
-            title = RunContext.getPixelitorWindowFixTitle();
+            title = AppContext.getPixelitorWindowFixTitle();
         }
         setTitle(title);
     }

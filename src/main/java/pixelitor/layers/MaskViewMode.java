@@ -17,10 +17,10 @@
 
 package pixelitor.layers;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.colors.FgBgColors;
 import pixelitor.gui.View;
 import pixelitor.history.History;
@@ -107,7 +107,7 @@ public enum MaskViewMode {
 
     public void activate(View view, Layer layer) {
         assert view != null;
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             Events.postMaskViewActivate(this, view, layer);
         }
 
@@ -132,7 +132,7 @@ public enum MaskViewMode {
             }
             FadeMenuItem.INSTANCE.refresh(canFade);
 
-            if (RunContext.isDevelopment()) {
+            if (AppContext.isDevelopment()) {
                 assert ConsistencyChecks.fadeWouldWorkOn(layer.getComp());
             }
         }

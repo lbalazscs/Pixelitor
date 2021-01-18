@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,15 +30,15 @@ import java.lang.ref.SoftReference;
  * A PixelitorEdit that represents the changes made to an image.
  */
 public class ImageEdit extends FadeableEdit {
+    // selections are ignored for example when the image is enlarged by the move tool
     private final boolean ignoreSelection;
+
     private SoftReference<BufferedImage> imgRef;
     protected Drawable dr;
 
-    private final boolean canRepeat;
-
     public ImageEdit(String name, Composition comp, Drawable dr,
                      BufferedImage backupImage,
-                     boolean ignoreSelection, boolean canRepeat) {
+                     boolean ignoreSelection) {
         super(name, comp, dr);
         this.ignoreSelection = ignoreSelection;
 
@@ -46,26 +46,12 @@ public class ImageEdit extends FadeableEdit {
         assert backupImage != null;
 
 //        Utils.debugImage(backupImage, "Backup for " + name);
-        
+
         // the backup image is stored in an SoftReference
         imgRef = new SoftReference<>(backupImage);
         this.dr = dr;
-        this.canRepeat = canRepeat;
 
         checkBackupDifferentFromActive();
-    }
-
-    public static ImageEdit createEmbedded(Drawable dr) {
-        // If there is a selection, only the bounds of the selected area is saved.
-        BufferedImage backup = dr.getSelectedSubImage(true);
-
-        ImageEdit edit = new ImageEdit("", dr.getComp(),
-                dr, backup,
-                false, false);
-
-        edit.setEmbedded(true);
-
-        return edit;
     }
 
     // the backup should never be identical to the active image
@@ -75,6 +61,18 @@ public class ImageEdit extends FadeableEdit {
         if (layerImage == imgRef.get()) {
             throw new IllegalStateException("backup image is identical to the active one");
         }
+    }
+
+    public static ImageEdit createEmbedded(Drawable dr) {
+        // If there is a selection, only the bounds of the selected area is saved.
+        BufferedImage backup = dr.getSelectedSubImage(true);
+
+        ImageEdit edit = new ImageEdit("", dr.getComp(),
+            dr, backup, false);
+
+        edit.setEmbedded(true);
+
+        return edit;
     }
 
     @Override
@@ -98,9 +96,9 @@ public class ImageEdit extends FadeableEdit {
     /**
      * Returns true if successful
      */
-    private boolean swapImages()  {
+    private boolean swapImages() {
         BufferedImage backupImage = imgRef.get();
-        if(backupImage == null) {
+        if (backupImage == null) {
             return false;
         }
 
@@ -115,7 +113,7 @@ public class ImageEdit extends FadeableEdit {
         // create new backup image from tmp
         imgRef = new SoftReference<>(tmp);
 
-        if(!embedded) {
+        if (!embedded) {
             comp.imageChanged();
             dr.updateIconImage();
         }
@@ -129,7 +127,7 @@ public class ImageEdit extends FadeableEdit {
         super.die();
 
         BufferedImage backupImage = imgRef.get();
-        if(backupImage != null) {
+        if (backupImage != null) {
             backupImage.flush();
         }
 
@@ -139,16 +137,11 @@ public class ImageEdit extends FadeableEdit {
 
     @Override
     public BufferedImage getBackupImage() {
-        if(imgRef != null) {
+        if (imgRef != null) {
             // this still could be null
             return imgRef.get();
         }
         return null;
-    }
-
-    @Override
-    public boolean canRepeat() {
-        return canRepeat;
     }
 
     @Override
@@ -160,6 +153,8 @@ public class ImageEdit extends FadeableEdit {
             node.addInt("backup image width", img.getWidth());
             node.addInt("backup image height", img.getHeight());
         }
+
+        node.addBoolean("ignoreSelection", ignoreSelection);
 
         return node;
     }

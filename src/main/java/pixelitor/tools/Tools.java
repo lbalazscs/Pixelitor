@@ -17,9 +17,9 @@
 
 package pixelitor.tools;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.layers.Layer;
 import pixelitor.tools.crop.CropTool;
@@ -175,7 +175,7 @@ public class Tools {
     }
 
     public static void editedObjectChanged(Layer layer) {
-        assert currentTool != null || RunContext.isUnitTesting();
+        assert currentTool != null || AppContext.isUnitTesting();
         if (currentTool != null) {
             currentTool.editedObjectChanged(layer);
         }

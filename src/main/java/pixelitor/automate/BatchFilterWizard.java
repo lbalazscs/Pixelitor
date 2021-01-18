@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -24,7 +24,7 @@ import pixelitor.layers.Drawable;
 
 import java.util.concurrent.CompletableFuture;
 
-import static pixelitor.ChangeReason.BATCH_AUTOMATE;
+import static pixelitor.FilterContext.BATCH_AUTOMATE;
 import static pixelitor.automate.BatchFilterWizardPage.SELECT_FILTER_AND_DIRS;
 
 /**
@@ -44,7 +44,7 @@ public class BatchFilterWizard extends Wizard {
         var dialogTitle = "Batch Filter Progress";
 
         CompAction batchFilterAction = comp -> {
-            filter.run(comp.getActiveDrawableOrThrow(), BATCH_AUTOMATE, busyCursorParent);
+            filter.startOn(comp.getActiveDrawableOrThrow(), BATCH_AUTOMATE, busyCursorParent);
             return CompletableFuture.completedFuture(comp);
         };
         Automate.processFiles(batchFilterAction, dialogTitle);

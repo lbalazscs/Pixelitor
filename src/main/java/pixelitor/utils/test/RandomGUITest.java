@@ -18,11 +18,11 @@
 package pixelitor.utils.test;
 
 import com.bric.util.JVM;
+import pixelitor.AppContext;
 import pixelitor.Composition;
 import pixelitor.Composition.LayerAdder;
 import pixelitor.ConsistencyChecks;
 import pixelitor.OpenImages;
-import pixelitor.RunContext;
 import pixelitor.compactions.EnlargeCanvas;
 import pixelitor.compactions.Flip;
 import pixelitor.compactions.Rotate;
@@ -67,9 +67,9 @@ import java.util.concurrent.TimeUnit;
 
 import static java.awt.event.KeyEvent.*;
 import static java.lang.String.format;
-import static pixelitor.ChangeReason.FILTER_WITHOUT_DIALOG;
-import static pixelitor.ChangeReason.PREVIEWING;
 import static pixelitor.Composition.LayerAdder.Position.ABOVE_ACTIVE;
+import static pixelitor.FilterContext.FILTER_WITHOUT_DIALOG;
+import static pixelitor.FilterContext.PREVIEWING;
 import static pixelitor.colors.FgBgColors.randomizeColors;
 import static pixelitor.compactions.Flip.Direction.HORIZONTAL;
 import static pixelitor.compactions.Flip.Direction.VERTICAL;
@@ -122,7 +122,7 @@ public class RandomGUITest {
     }
 
     public static void start() {
-        if (RunContext.isFinal()) {
+        if (AppContext.isFinal()) {
             Messages.showError("Error", "Build is FINAL");
             return;
         }
@@ -531,7 +531,7 @@ public class RandomGUITest {
         PixelitorWindow busyCursorParent = PixelitorWindow.get();
 
         try {
-            filter.run(dr, PREVIEWING, busyCursorParent);
+            filter.startOn(dr, PREVIEWING, busyCursorParent);
         } catch (Throwable e) {
             BufferedImage src = dr.getFilterSourceImage();
             String msg = format(
@@ -1203,7 +1203,7 @@ public class RandomGUITest {
         weightedCaller.registerCallback(4, RandomGUITest::randomGuides);
         weightedCaller.registerCallback(4, RandomGUITest::setPathsToNull);
 
-        if (RunContext.enableAdjLayers) {
+        if (AppContext.enableAdjLayers) {
             weightedCaller.registerCallback(2, RandomGUITest::randomNewAdjustmentLayer);
         }
 

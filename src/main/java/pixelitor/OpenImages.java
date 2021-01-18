@@ -178,9 +178,8 @@ public class OpenImages {
             listener.viewActivated(oldView, view);
         }
 
-        Layer layer = comp.getActiveLayer();
-        Layers.activeLayerChanged(layer, true);
-        Tools.setupMaskEditing(layer.isMaskEditing());
+        Layers.activeCompChanged(comp, true);
+        Tools.setupMaskEditing(comp.getActiveLayer().isMaskEditing());
 
         ZoomMenu.zoomChanged(view.getZoomLevel());
 

@@ -18,7 +18,7 @@
 package pixelitor.utils;
 
 import net.jafama.FastMath;
-import pixelitor.RunContext;
+import pixelitor.AppContext;
 
 import javax.swing.*;
 import java.awt.GraphicsEnvironment;
@@ -91,19 +91,19 @@ public final class Utils {
     }
 
     public static void throwTestException() {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             throw new IllegalStateException("Test");
         }
     }
 
     public static void throwTestIOException() throws IOException {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             throw new IOException("Test");
         }
     }
 
     public static void throwTestError() {
-        if (RunContext.isDevelopment()) {
+        if (AppContext.isDevelopment()) {
             throw new AssertionError("Test");
         }
     }

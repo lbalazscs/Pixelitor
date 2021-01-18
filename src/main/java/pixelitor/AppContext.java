@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -25,7 +25,7 @@ import static pixelitor.utils.Threads.threadInfo;
 /**
  * The context in which Pixelitor code is running.
  */
-public enum RunContext {
+public enum AppContext {
     /**
      * The mode used by end-users.
      */
@@ -42,12 +42,14 @@ public enum RunContext {
     UNIT_TESTS() {
     };
 
+    // feature flags to avoid diverging branches
     public static final boolean enableAdjLayers = false;
+    public static final boolean enableImageMode = false;
 
-    public static RunContext CURRENT = FINAL_GUI;
+    public static AppContext CURRENT = FINAL_GUI;
 
     // Lazy because it should be calculated after the CURRENT is set.
-    private static final Lazy<String> fixTitle = Lazy.of(RunContext::calcFixTitle);
+    private static final Lazy<String> fixTitle = Lazy.of(AppContext::calcFixTitle);
 
     public static boolean isDevelopment() {
         return CURRENT == DEVELOPMENT_GUI;

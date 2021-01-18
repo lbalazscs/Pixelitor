@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -69,7 +69,14 @@ public class ColorBalance extends ParametrizedFilter {
     }
 
     @Override
+    protected boolean createDefaultDestImg() {
+        return false;
+    }
+
+    @Override
     public BufferedImage doTransform(BufferedImage src, BufferedImage dest) {
+        assert dest == null;
+
         float cr = cyanRed.getValueAsFloat();
         float mg = magentaGreen.getValueAsFloat();
         float yb = yellowBlue.getValueAsFloat();
@@ -79,12 +86,12 @@ public class ColorBalance extends ParametrizedFilter {
         }
 
         var rgbLookup = new LookupHelper(cr, mg, yb, affect.getValue())
-                .getLookup();
+            .getLookup();
 
         var filterOp = new FastLookupOp(
-                (ShortLookupTable) rgbLookup.getLookupOp());
+            (ShortLookupTable) rgbLookup.getLookupOp());
 
-        filterOp.filter(src, dest);
+        dest = filterOp.filter(src, null);
 
         return dest;
     }

@@ -45,7 +45,7 @@ class CompositionTest {
 
     @BeforeEach
     void beforeEachTest() {
-        comp = TestHelper.create2LayerComp(true);
+        comp = TestHelper.createComp(2, true);
         assertThat(comp)
             .isNotDirty()
             .isNotEmpty()
@@ -672,7 +672,7 @@ class CompositionTest {
         History.assertNumEditsIs(1);
 
         // 1. direction south-east
-        TestHelper.moveLayer(comp, makeDuplicateLayer, 2, 2);
+        TestHelper.move(comp, makeDuplicateLayer, 2, 2);
 
         String[] expectedLayers = {"layer 1"};
         if (makeDuplicateLayer) {
@@ -690,7 +690,7 @@ class CompositionTest {
         History.assertLastEditNameIs("Move Layer");
 
         // 2. direction north-west
-        TestHelper.moveLayer(comp, makeDuplicateLayer, -2, -2);
+        TestHelper.move(comp, makeDuplicateLayer, -2, -2);
 
         assertThat(comp)
             // this time we have a non-zero translation
@@ -702,7 +702,7 @@ class CompositionTest {
         }
 
         // 3. direction north-west again
-        TestHelper.moveLayer(comp, makeDuplicateLayer, -2, -2);
+        TestHelper.move(comp, makeDuplicateLayer, -2, -2);
 
         assertThat(comp)
             // the translation increases
@@ -714,7 +714,7 @@ class CompositionTest {
         }
 
         // 4. direction north-east
-        TestHelper.moveLayer(comp, makeDuplicateLayer, 2, -2);
+        TestHelper.move(comp, makeDuplicateLayer, 2, -2);
         assertThat(comp)
             // the translation increases
             .activeLayerTranslationIs(-2, -6)
@@ -725,7 +725,7 @@ class CompositionTest {
         }
 
         // 5. opposite movement: direction south-west
-        TestHelper.moveLayer(comp, makeDuplicateLayer, -2, 2);
+        TestHelper.move(comp, makeDuplicateLayer, -2, 2);
 
         if (makeDuplicateLayer) {
             expectedLayers = new String[]{"layer 1", "layer 1 copy",

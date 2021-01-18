@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -46,7 +46,7 @@ public class Contours extends ParametrizedFilter {
         edgeFilter.setVEdgeMatrix(EdgeFilter.SOBEL_V);
 
         dest = edgeFilter.filter(src, dest);
-        Invert.invertImage(dest, dest);
+        dest = Invert.invertImage(dest);
 
         var luminosity = new Luminosity();
         dest = luminosity.transform(dest, dest);

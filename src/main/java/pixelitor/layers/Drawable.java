@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2021 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,8 +17,8 @@
 
 package pixelitor.layers;
 
-import pixelitor.ChangeReason;
 import pixelitor.Composition;
+import pixelitor.FilterContext;
 
 import java.awt.Composite;
 import java.awt.image.BufferedImage;
@@ -45,9 +45,9 @@ public interface Drawable {
 
     void tweenCalculatingEnded();
 
-    void changePreviewImage(BufferedImage img, String filterName, ChangeReason cr);
+    void changePreviewImage(BufferedImage img, String filterName, FilterContext context);
 
-    void filterWithoutDialogFinished(BufferedImage transformedImage, ChangeReason cr, String filterName);
+    void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName);
 
     void changeImageForUndoRedo(BufferedImage img, boolean ignoreSelection);
 
@@ -76,4 +76,6 @@ public interface Drawable {
     int getTy();
 
     boolean isMaskEditing();
+
+    String getName();
 }

@@ -17,8 +17,8 @@
 
 package pixelitor.tools.pen;
 
+import pixelitor.AppContext;
 import pixelitor.Composition;
-import pixelitor.RunContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.tools.Tools;
@@ -148,7 +148,7 @@ public class PathEditor implements PenToolMode {
         if (path == null) {
             // shouldn't happen, but it is very annoying for the user
             // if an exception dialog is shown whenever the mouse moves
-            if (RunContext.isDevelopment()) {
+            if (AppContext.isDevelopment()) {
                 throw new IllegalStateException("null path in path edit mode");
             }
             return false;
